@@ -4,7 +4,8 @@ Dependency: [G4](backend-acceptance.md). Define shared Block and API contracts e
 
 ## Remaining experiences
 
-- Book/general creation: authoring, chapters/series, history, reading/progress, export, comments and private/public states.
+- Native Work/release: common creative identity across domains, domain-applicable fields, virtual/actual issuing and independent selected content. Book is the first authoring/consumption journey; music, audiovisual, visual, game/software and mixed-media states must preserve the same contract.
+- Composition authoring: distinguish reference-only attachment from explicit structure import; expose source-version selection, destination scope, preview, progress, cancellation/retry and refresh conflicts without requiring users to edit operation IDs or cursors.
 - AO3-derived authoring: original/source works, fandoms, characters, contextual relationships, warnings, co-creators and collections through native contracts.
 - Wiki/Catalog: names/authority, evidence/conflicts, native structures, multi-cover galleries and representative selection; wiki corpora organized as one or more Collections, including separate mod/project Collections.
 - Relationship Graph Block: configuration, subgraph, accessible list/table fallback, relation/evidence details, truncation and expansion.
@@ -12,6 +13,8 @@ Dependency: [G4](backend-acceptance.md). Define shared Block and API contracts e
 - Community: Realm grouping/membership/governance, Collection curation and Zone page/subsite infrastructure; compose Zones with one or more Collections for wiki subsites, preserving publication relationships, native content identity, notifications and theme controls. Member administration must consume roster cursors through empty filtered pages and render nullable native Entity presentation. Private merge reviews must supply explicit source/target read-grant selections and handle revocation/expiry. A superseded request requires a new proposal and fresh reviews; retry remains available only for actionable execution failures.
 
 Follow [Realm, Collection and Zone composition](../architecture/realm-collection-zone.md). Dynamic Collection interfaces are optional and require their separately qualified backend; the current frontend gate requires ordinary Collection-based composition only.
+
+Apply the [API/UI design skill](../../.agents/skills/api-ui-design/SKILL.md). Keep all permitted alternatives, repeated occurrences, local labels/order and cross-page selections inspectable. An import result marked staged, partial, conflicted or failed cannot be displayed as a completed publication. Preserve user input on recoverable failures. History and reading controls name the relevant selected version; word count, duration, unknown and inapplicable properties follow the [native Work contract](../architecture/database/native-work.md). Backend completion and search/statistic freshness are separate states.
 
 Use existing feature ownership, @rezics/ui and typed locales. Follow [Storybook workflow](../architecture/storybook-workflow.md) and affected TypeScript/deterministic checks. Inspect affected screenshots where authorized. Full-application QA remains a distinct activity under AGENTS.md, not a hidden requirement of documentation work.
 

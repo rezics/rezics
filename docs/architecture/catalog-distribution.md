@@ -27,13 +27,19 @@ manifest ID and occurrence ID. Package/content is never a uniqueness key.
 
 Each occurrence has exactly one concrete FK to publication, text version,
 software content, software release, music release, recording, program version or
-episode. A bare REZICS Work, musical composition, franchise or package identity
-is not one of these eligible targets. The [Work's virtual-publication role](database/catalog-model.md#rezics-work-and-primary-version)
+episode. A Work role, musical composition, franchise or package identity alone
+does not establish one of these eligible concrete targets. The [native Work/release contract](database/native-work.md)
 does not itself provide a pinned distributable selection; its eligible content
 or publication must be identified explicitly. The absence of package targets
 proves acyclicity without recursive corpus scans.
 All target FKs restrict deletion; removing or revising a package cannot delete
 its independently owned content.
+
+This concrete target inventory describes the current package implementation.
+The selected [composition protocol](database/content-composition.md) also requires
+exact published inputs, local import correspondence and refresh behavior. Apply
+those requirements through qualified domain adapters rather than interpreting
+every Work identity as a distributable content version.
 
 Authoring creates a source-free private draft and stages 1–128 occurrences per
 append. An expected prefix rejects stale retries. A database statement trigger

@@ -4,12 +4,12 @@ This is the native catalog contract. [The database design](README.md) owns share
 
 ## Provider-independent model
 
-Identify referents by the objects and operations the product supports. A new provider describing an existing object adds observations, mappings and evidence, not another native copy. An owner is a physical/domain boundary; semantic class, structural capability, contextual role, lifecycle, presentation and authorization are separate dimensions.
+Identify referents by the objects and operations the product supports. A new provider describing an existing object adds observations, mappings and evidence, not another native copy. An owner is a stable logical responsibility domain with its own physical representation; semantic class, structural capability, contextual role, lifecycle, presentation and authorization are separate dimensions.
 
 | Distinction | Native rule |
 | --- | --- |
 | REZICS Work and contributed content | The platform's maintained virtual publication has its own identity; Documents and text versions are independently maintained content adopted into it. |
-| REZICS Work and external publication | The primary REZICS object is independent of any publisher's edition, ISBN, territory or official language list. |
+| Work and release | Independent identities using shared domain composition contracts; release-specific identifiers and scope do not define the native Work. |
 | Text version and publication | A particular text/translation differs from both its REZICS adoption and a publisher's issued specification/events. |
 | Recording and track | A recording is reusable; a track is an occurrence with local number/title/credit in a medium. |
 | Version and distribution | Software functional variants/builds differ from releases, registry coordinates, files and installations. |
@@ -24,53 +24,36 @@ Known external publications and other concrete objects can exist without fabrica
 
 ## REZICS Work and primary version
 
-A REZICS Work is the platform's independently maintained virtual publication unit. For Book, its owning identity is `publishing_work`. "Primary version" names this native object, not an abstract equivalence class of creations or a preferred external edition. Treat it as what REZICS publishes, even when it contains only metadata. It need not correspond to any actual publisher-issued object and can evolve through community contributions. Its identity is independent of its current metadata, content selection and public/draft lifecycle.
+[Native Work and release](native-work.md) is the common product contract for all creative domains. Its definition is not derived from `publishing_work` or any other engineering owner. Literature, musical compositions, independently maintained recordings/albums, films, games, software, visual and mixed-media creations use the same identity/continuity rules, with domain-specific structures and applicable properties.
 
-A Work may adopt original content, official translations and community translations into one multilingual publication. Multiple contributions in the same language are legal; source, contributor, method, officialness, coverage and current adoption belong to the particular contribution or use. Adding a language does not require a matching publisher release or ISBN and does not create another Work automatically. An all-language contribution policy is a bounded policy declaration, not a requirement to preallocate every possible language or claim that each has readable content. Metadata languages, admitted contribution languages, declared consumption support and actual content availability remain separate.
-
-The Work uses the shared content-slot, adoption and structure-manifest contracts to select exact content revisions; it does not own a copy of every Document. A metadata-only Work needs neither a dummy Document nor an external publication. Publishing its metadata does not assert that an original author or external publisher issued the REZICS object. A social Publication may announce or distribute a selection, but its utterance identity is separate from the Work. [Creation](creation.md) owns the authoring, adoption and reading journey.
-
-Each independently maintained anthology and each constituent or split book can have its own Work. There is no rule choosing exactly one primary Work for an entire family, no exclusive parent determining all identity, and no ISBN-derived split/merge. Editorial aggregation, part/coverage relationships, ordered content occurrences, publisher packaging and user Collections have different meanings. A physical split alone does not force new Works; an explicit native decision may identify those parts independently. Work membership does not transfer content control, grants, votes or reading progress.
-
-| Example | Native interpretation |
-| --- | --- |
-| Metadata-only book A | REZICS Work A, without a required text or external publication. |
-| English original plus community Chinese and Japanese texts | Independently identified contributions/adoptions under A; no matching trilingual publisher edition required. |
-| Two Chinese translations | Separate content identities and uses; language alone is not a unique content key. |
-| Hardcover, paperback and ebook carrying publisher identifiers | External catalog publications linked by evidenced text/coverage relationships; none is the primary REZICS Work. |
-| Anthology C and independently maintained books A and B | Three Works with explicit aggregation/part relationships and independent selected contents. |
-| Metadata correction or replacing a selected translation | New metadata/adoption revision; stable Work identity and retained exact earlier references. |
-
-This product definition does not redefine domain-specific referents merely named "work", such as a musical composition in `music_work`. A provider's conceptual work record is source evidence with a reviewed mapping, not automatic proof of a one-to-one REZICS Work identity. No mandatory abstract Work parent is introduced for Book.
+A primary native Work can be metadata-only or organize official/community multilingual content. Work and release identities remain distinct while reusing composition, revision and capability protocols. Virtual and actual releases share the same release contract with applicable identifiers, scope and provenance. Domain adapters determine which concrete structures implement the contract; no mandatory universal Work or Edition parent is introduced.
 
 ## External editions and composition
 
-There is no mandatory universal Edition layer. A translation has a text identity; hardcover/paperback is a catalog publication specification; a deluxe game with a soundtrack/book is a distribution composition; a professional software edition may be a functional variant. Book editions are issued versions, analogous to music releases. Publisher identifiers and release events stay on the referents they identify rather than becoming requirements on the REZICS Work. A provider's staff-grouping key is a source-qualified contribution context until evidence establishes another referent.
+Publisher identifiers, languages, territories and dates belong to the release/content scope they actually describe. They do not constrain the native Work's community contributions. Source records may have unknown Work or text correspondence and remain valid without fabricated parents. Provider names such as Work, Edition and Release require reviewed mappings rather than one-to-one native promotion.
 
-Mixed distribution packages have optional identities, sealed manifests and repeated typed members. Quantity, coverage, local credit, printed number and order belong to each occurrence. Grouping membership grants no ownership, access, ratings or progress. A Work page may select representative release artwork while preserving the actual release use.
+A translation has independent content and revision identity; hardcover/paperback is a catalog publication specification; a deluxe game with soundtrack/book is a distribution composition; a professional software edition may be a functional variant. Preserve those distinctions within the common model. An external staff-grouping key is a contribution context until evidence establishes another referent.
 
-Publication contents use parent/manifest/occurrence keys, not a unique parent/target pair: the same Work or text may appear twice, or with different coverage, in one manifest. Source correspondence and exact citations include that occurrence identity. Text-to-Work correspondence alone is not the Work's adopted contents; changes to either require their own authority and revision.
+All selected contents follow the [composition protocol](content-composition.md). Each Work/release owns its explicit occurrences and exact published selection. Repeated target uses have different occurrence identities, order and coverage; a parent/target pair is not their unique key. Importing a child structure creates local occurrences without copying its independently owned content. Family/series/derivation relations support discovery and do not dynamically supply a publication's missing contents or transfer grants, ratings or progress.
 
 ## Bibliographic evidence and mapping limits
 
-[IFLA LRM (July 2024), sections 5.6-5.7](https://repository.ifla.org/bitstreams/7d23aa55-1f85-490f-b500-6170285585a6/download) distinguish expressions, manifestations and editorial aggregation. They support preserving those distinctions, but LRM's abstract Work is not the REZICS virtual-publication definition. Export must map actual content, editions and aggregation explicitly rather than relabeling every REZICS Work as an LRM Work. LRM's single Expression realizes one Work; a native multi-work text container therefore needs component mappings, not a claim of one-to-one conformance. An aggregating work's editorial selection also differs from a multipart work's whole/part relationship.
-
-[O'Neill's Humphry Clinker study (2002)](https://www.oclc.org/content/dam/research/publications/library/2002/oneill_frbr22.pdf) found that reliable expression identification could require examining the books themselves. Preserve unknown text correspondence when only metadata is available; do not manufacture intermediate text identities or equate texts from similar records. These sources inform distinctions and uncertainty, not the product's definition of its primary object.
+The [evidence matrix](design-evidence.md#native-work-and-classification) records current conceptual models, primary papers and their limits. Native Work is not automatically LRMoo Work, BIBFRAME Work or a source-provider Work. Bibliographic export maps content, realization, publication, aggregation and uncertainty explicitly; a native multi-work content container may require several mapped components. The absence of sufficient metadata to identify a text remains unknown, not a fabricated intermediate identity.
 
 ## Fixed structure and dynamic semantics
 
 Use typed tables/FKs for domain invariants and frequently queried fields: track-to-recording, release contents, episode occurrences, dependencies and technical TOCs. Use versioned definitions and typed assertions for extensible classifications, properties and contextual relations. An n-ary relation has its own identity/revision and role-bearing participants. Do not use untyped JSON or an arbitrary triple table to bypass structural guarantees.
 
-Dynamic here means extending logical definitions and values. It does not require a physical SQL table for each class, property, Work or user. A new physical owner is an explicit schema/adapter change; generic features use the [Unit capability contract](README.md#34-unit-capabilities-across-owner-tables). Queryable properties additionally need the [selected index contract](README.md#13-search-recommendation-export-and-derived-state); storing a typed value does not qualify arbitrary filtering or sorting.
+Dynamic here means extending logical definitions and values. It does not require a physical SQL table for each class, property, Work or user. Registering a logical owner or changing its physical mapping is an explicit schema/adapter change; generic features use the [Unit capability contract](README.md#34-unit-capabilities-across-owner-tables). Queryable properties additionally need the [selected index contract](README.md#13-search-recommendation-export-and-derived-state); storing a typed value does not qualify arbitrary filtering or sorting.
 
 Each field has one writer. Source-managed fixed fields record the decision and update the effective native column atomically. Structural revisions own their own values and evidence. Shared semantic export projects these authorities; it does not create a competing editable truth.
 
 ## Current selected domain scope
 
-- Publishing: Work, text expression, catalog publication, release event, serialization, installment, translation and Book creation/reading.
-- Music: Work, recording, release group/release, media/tracks, artist credits, release labels/events, TOC/identifiers, candidates/alternative presentations and artwork uses.
-- Program: work, season, cut/version, episode, occurrence and distribution/broadcast context.
-- Software: project/content, functional variant/build, release, platforms/language/media, patch/dependency targets and contribution contexts.
+- Publishing: native textual Works, text/translation identities, virtual/actual catalog publications, release events, serialization, installments and Book creation/reading.
+- Music: native Work scopes over compositions, independently maintained recordings and albums where established; distinct recording, release-group/release, media/track, credit, event, TOC and artwork structures.
+- Program: native audiovisual Work scopes, seasons, cuts/versions, episodes, occurrences and distribution/broadcast context.
+- Software: native project/game Work scopes, functional variants/builds, releases, platforms/language/media, exact patch/dependency targets and contribution contexts.
 - Entity/reference: people, organizations, characters, software agents, areas/places/events/instruments, concepts and web resources required by elected sources.
 - Grouping: universe/world, canon/continuity, franchise, series, membership and order.
 - Distribution/media: cross-domain packages; assets/representations/locations/uses and scoped selection.

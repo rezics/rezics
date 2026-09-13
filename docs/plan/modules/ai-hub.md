@@ -5,6 +5,7 @@ Dependencies: M01-M04. Owners: [Hub catalog](../../architecture/database/ai-hub.
 ## Remaining work
 
 - Qualify versioned Skill content/packages/files, Prompt parameters/examples, MCP software identity, distributions, endpoints and observed capabilities.
+- Apply common native Work/release and composition contracts to independently maintained Skill/Prompt/software creations; keep endpoint observations and execution distinct.
 - Reuse native software/content/assets/relations/authority. Distinguish coordinates, releases, files, installations and runs.
 - Test source-free authoring, imports, exact versions, dependencies, attribution, private resources, search and export.
 - Use controllable fixtures for tools/resources/prompts, pagination, errors, capability changes and authorization; reachability alone is insufficient.

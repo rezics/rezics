@@ -4,6 +4,14 @@ The [database target](database/README.md) owns identity invariants; the [communi
 
 ## Authority and meaning
 
+Apply the [logical owner contract](database/README.md#31-identity-rules). Moving
+tables or database placement within the same logical owner preserves identity
+and does not itself create a merge/relocation case. A change of referent or logical
+owner requires explicit historical resolution. Common Work scope rules apply
+across domains; source identifiers and matching classifications do not prove
+equality. Exact occurrence and content-version references retain their original
+meaning while current navigation can expose a reviewed resolution.
+
 A merge is a reviewed identity-resolution decision, not a rewrite of every incoming reference. Preserve original native identities, source correspondence, exact revisions, requested target and operation provenance. Ordinary catalog merge excludes account/participation-controlled identities; those require their dedicated recovery/control workflow. A metadata match never transfers authority.
 
 Pin source/target heads, visibility/capability state and the reconciliation policy. Independent reviewers must have actual read/review authority over the exact material. Revalidate the proposer, reviewers, roots and epochs at application. A rejection cannot be ignored by replaying an older approval.

@@ -1,5 +1,12 @@
 # Search architecture
 
+This guide describes the current executable search path. The selected
+[system read-model contract](../../../../../docs/architecture/database/README.md#13-search-recommendation-export-and-derived-state)
+adds exact published-composition context, coalesced downstream work and explicit
+freshness across native adoption/publication. Any replacement must qualify these
+contracts without widening current authorization or query budgets; the current
+transactional projection below is not evidence that those target flows already pass.
+
 REZICS v1 keeps authoritative content in PostgreSQL and transactionally projects one
 `unit_search_document` row per immutable Unit ID. PGroonga indexes the localized title, summary,
 semantically visible description text, published body text, and eligible aliases in that single

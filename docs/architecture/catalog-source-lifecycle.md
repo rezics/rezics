@@ -5,6 +5,16 @@ and records reversible correspondence with independently owned catalog objects.
 Provider adapters write native domain structures. An archive or a generic JSON
 tree is not evidence that a field has native semantics.
 
+The [system flow](database/README.md#21-system-flow-and-consistency) separates a
+new observation, native adoption and publication of a selected version. A source
+record can inform several native scopes; neither source class names nor IDs
+establish automatic Work equality. Source updates do not overwrite independently
+adopted community content or refresh every importing composition. The selected
+[refresh protocol](database/content-composition.md#import-and-refresh-commands)
+uses exact base/source/destination correspondence and current authority. These
+cross-domain flows require qualification beyond the current bounded application
+slices documented below.
+
 ## Identity and authority
 
 `source-record-key.ts` fixes the source identity protocol: SHA-256 over UTF-8

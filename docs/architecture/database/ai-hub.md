@@ -2,6 +2,8 @@
 
 Selected scope is native cataloging, versioned content/packages, discovery and controlled protocol conformance. [Execution questions](../../research/ai-hub-execution.md) must be decided before hosted or delegated execution is implemented. Use native software, Document, asset, relation, provenance and access mechanisms.
 
+Independently maintained Skill, Prompt and software creations use the [common native Work definition](native-work.md); their package releases use the shared release/composition protocol with domain path, dependency and parameter constraints. Content identity, endpoint observation and runtime execution remain distinct. Importing a package's structure records exact local uses without executing it or importing credentials.
+
 ## Identity and versions
 
 | Object | Meaning |

@@ -2,6 +2,8 @@
 
 Owner: M05. Use [native creation contracts](../architecture/database/creation.md). The following are required behavior cases, not passed tests. Book is the first complete backend journey; original and transformative works use the same native system.
 
+The [cross-domain Work matrix](native-work.md) and [composition operation matrix](content-composition.md) also apply. Passing this Book journey does not define Work for music, audiovisual, game/software or mixed-media content.
+
 | Case | Required behavior |
 | --- | --- |
 | BOOK01 | Create an original work with no fabricated source Work/fandom; edit metadata and publish content through produced IDs. |
@@ -32,6 +34,8 @@ Owner: M05. Use [native creation contracts](../architecture/database/creation.md
 | BOOK26 | Repeat the same text/Work target in one publication manifest with different occurrence IDs, order and coverage; preserve exact citations and source correspondence through reorder/removal/restore. |
 | BOOK27 | Correct Work metadata, revise a contributed Document and change an adoption independently; historical reading/export pins the earlier exact selection and progress maps or becomes unknown after changed structure. |
 | BOOK28 | Export a virtual Work with unknown text correspondence and a multi-work text container; preserve native identity and explicitly map bibliographic components without claiming the Work itself is an LRM abstract Work. |
+| BOOK29 | Build a complete anthology outline by importing a volume's exact structure into local occurrences; adding a volume reference alone does not expand it. Reuse chapter bodies and keep source correspondence. |
+| BOOK30 | Refresh the imported outline after source and local edits, retaining stable nodes or explicit conflicts; published contents, progress, tags/comments and metric counting retain their separate identities. |
 
 ## AO3 functional coverage
 

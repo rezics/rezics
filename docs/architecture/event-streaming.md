@@ -71,6 +71,14 @@ from becoming an unconditional feedback loop.
 
 ## Events, tasks and consumers
 
+Observation, native adoption and publication-selection events have distinct
+meanings. Source observation can create mapping/proposal work; only an accepted
+native change updates its corresponding native read models. A newly published
+selection updates its publication/composition context. Staging rows do not emit
+public completion notifications. Composition import/refresh, source application,
+export, correction and projection rebuild use the [shared operation protocol](database/README.md#14-transaction-event-and-job-protocols)
+with domain-specific inputs, authority, receipts and recovery.
+
 | Contract | Event stream | Task stream |
 | --- | --- | --- |
 | Meaning | An identified fact that has happened, such as source-record change or canonical Unit change. | An identified request to fetch, map or apply bounded work. |

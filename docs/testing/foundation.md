@@ -15,6 +15,8 @@ These additional cases specify the [logical Unit boundary](../architecture/datab
 | UNIT05 | Change an owner's internal table layout in an isolated conformance fixture, retaining its logical reference and adapter contract; generic targets, histories and feature queries retain their meaning. No second database or live migration is implied. |
 | UNIT06 | Resolve a bounded mixed-owner candidate page by owner batches; private/missing/stale targets follow disclosure rules without a full owner scan or per-item hydration loop. |
 | UNIT07 | Preserve exact revision/occurrence citations when Work selections change; owner withdrawal, deletion restrictions, capability retirement and revocation follow their distinct contracts. |
+| UNIT08 | Preserve the logical owner and ID across physical table/placement changes; a logical-owner correction follows explicit historical resolution rather than changing the meaning of an existing REF. |
+| UNIT09 | Test cross-feature compositions under revocation, deletion and retry, not only individual reference allocators; separate structural eligibility, feature applicability, actor authorization and backend query support. |
 
 Include global, Realm and private Tag scopes, feature-specific duplicate rules, follow/discussion targets, grants and progress. Do not infer completion for a feature from another feature's successful REF conversion. Record schema and behavior evidence separately from these specifications.
 

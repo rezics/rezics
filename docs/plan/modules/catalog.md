@@ -5,7 +5,8 @@ Dependencies: M01-M03 contracts. Owner: [catalog model](../../architecture/datab
 ## Remaining work
 
 - Qualify publishing, music, program, software, entity, grouping, reference and distribution objects without source records.
-- Implement the catalog model's REZICS Work as the primary virtual publication, including metadata-only creation without an ISBN, external edition or abstract Work parent. Keep contributed text identities, publisher editions/events, musical compositions, occurrences and hosted content distinct.
+- Implement the [common native Work/release contract](../../architecture/database/native-work.md) across textual, composition/recording/album, audiovisual, visual, game/software and mixed-media scopes. Use domain-owned tables, shared protocols and applicable properties; qualify virtual and actual release forms without a universal Work parent.
+- Qualify [WORK01-WORK18](../../testing/native-work.md) before treating Book-only cases or a provider model as evidence for the whole target.
 - Support independently maintained anthology and split-book Works with explicit aggregation/part/coverage semantics; neither external identifiers nor membership determine one family-wide primary identity.
 - Complete supporting source-required families, names/authority, identifiers, uncertain dates, scoped credits and language channels.
 - Qualify Book text/publication/serialization, VN contribution contexts, music alternative/candidate/TOC structures, seasons/cuts/episodes and mixed bundles.

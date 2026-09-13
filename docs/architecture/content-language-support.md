@@ -6,8 +6,9 @@ Owner: Units
 
 ## Decision
 
-`contentLanguageSupport` is the only authoritative content-consumption language
-field. It is a user-maintained Unit value and one atomic Unit-history field. An
+`contentLanguageSupport` records declared content-consumption languages. It is a
+user-maintained Unit value and one atomic Unit-history field. Actual compatible
+content and published selection are separate contracts. An
 entry has one canonical BCP 47 `languageTag` and may optionally name one or more
 of the fixed channels `text`, `audio`, `subtitle`, and `interface`. Omitted
 `channels` means that the declaration is known only at the language level; an
@@ -15,7 +16,7 @@ empty channel array is invalid. Input is normalized into code-point-sorted
 language order and registry-sorted channel order before storage, revision
 hashing, or response caching.
 
-For a [REZICS Work](database/catalog-model.md#rezics-work-and-primary-version),
+For every [native Work](database/native-work.md),
 the declared languages may include community-contributed content absent from
 publisher editions. Publisher ISBNs and official release languages do not define
 the Work's language set. Its all-language contribution policy is separate from
@@ -24,6 +25,13 @@ preallocated support rows. [Creation](database/creation.md#work-authoring-and-mu
 defines contribution adoption and actual readable coverage. The target Work
 policy and adoption behavior still require implementation qualification; they
 are not inferred from the existing field's storage or editor choices below.
+
+Apply this distinction to literary translations, music/lyrics, audiovisual
+subtitles/dubbing, game/software language packs and mixed-media content. A
+language declaration alone does not prove a subtitle fits a cut or a patch fits
+a build. Same-language alternatives, nonlinguistic content, unknown coverage
+and currently inaccessible content retain their meanings. Work and release
+declarations have separate scope even when they use the same value contract.
 
 The first-party web editor does not expose a free-form language-tag input. It
 offers a bounded Select whose nine canonical choices are derived from the

@@ -2,6 +2,12 @@
 
 Owner: M07. Native meaning is defined by [catalog architecture](../architecture/database/catalog-model.md), not by the union of providers. Converter tests target the intended model without preserving old wire/storage contracts.
 
+Use [native Work/release acceptance](native-work.md) for all creative domains and
+[composition acceptance](content-composition.md) for imported local uses. A
+provider's musical Work, recording, film cut, software release or book edition
+requires an explicit native scope mapping; preserving source distinctions does
+not exempt that domain from the common Work contract.
+
 ## Required provider surfaces
 
 | Provider | Native coverage and difficult cases |
@@ -47,6 +53,9 @@ Preserve source-specific vocabulary before applying standards normalization. Dis
 - Publisher ISBN/format/territory/language changes affect the mapped external publication, not the Work's identity or independently adopted community translations.
 - Metadata-only sources do not manufacture identical-text assertions or dummy content; multiple same-language contributions and unknown correspondence survive roundtrip.
 - Repeated book-content targets retain manifest-qualified occurrence identities through import/update/export; native virtual Work and multi-work text containers use explicit bibliographic export mappings.
+- Observation alone does not advance a published native selection. Test native adoption and publication as separate transitions, including policy-authorized automatic proposals and revoked subscriptions.
+- Source structure refresh preserves base/source/local correspondence and destination occurrence identity; source edits cannot silently replace local labels/order or published child versions.
+- Repeat these flows for album tracks, audiovisual cuts/subtitles and game/software builds/localization, not only Book; community contributions and unrelated uses survive withdrawal.
 
 ## Data acquisition
 

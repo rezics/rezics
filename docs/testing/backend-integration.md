@@ -18,6 +18,21 @@ This specification closes [G4](../plan/backend-acceptance.md). Run cases increme
 | Correction | Merge/split/reclassify identities with conflicting source/structure/permission state; retain original evidence and explicit ambiguity. |
 | Projection recovery | Fail second recommendation/search generation; continue serving last valid generation while repairing and reconciling current authority. |
 
+## System operation sequences
+
+These sequences are pending target acceptance, not claims that the existing module fixtures already compose correctly.
+
+| Case | Sequence and required outcome |
+| --- | --- |
+| SYS01 | Observe an external update, adopt a native change and publish a new selection as separate operations; only their corresponding events/projections change. Repeat across textual, musical, audiovisual and software scopes. |
+| SYS02 | Build a mixed composition with repeated content, stage an import, make a local edit, propose a source refresh and resolve its conflict; retained occurrence identities, published history and user progress stay meaningful. |
+| SYS03 | Revoke source/target authority during planning, activation, search or export; no stale grant, cached snippet, label or count exposes private content. An authorized exact disclosure grant is checked independently of container visibility. |
+| SYS04 | Crash after a chunk or activation commit before acknowledgement, expire the worker lease and redeliver; durable receipts prevent duplicate effects and old workers cannot activate a generation. |
+| SYS05 | Correct identity or change physical layout while shared features reference it; historical refs, grants, votes and source correspondence retain explicit meaning. Restore with erasure/revocation frontiers before reads resume. |
+| SYS06 | Mix large imports, native edits, source ingest, queries, votes and notification delivery under skew; measure query/metric work, WAL, locks, queues and freshness rather than infer system capacity from one microbenchmark. |
+
+Run [WORK01-WORK18](native-work.md), [COMP01-COMP24](content-composition.md) and [Unit capability cases](foundation.md#unit-capability-contract-acceptance) within these sequences. The generated cross-domain TSV remains a separate reproducible inventory; these authored matrices add qualification obligations without pretending to be executed scenarios.
+
 ## Verification methods
 
 For [wiki composition](../architecture/realm-collection-zone.md), test one Collection in multiple Zones, multiple Collections in one Zone, Realm wiki-page grouping, explicit "published in" relationships, different adopted revisions, private members in public presentations and removing a Collection placement without deleting content or withdrawing publication elsewhere. Dynamic Collection runtime is optional; if activated, its query changes, computed membership, captures, stale cursors, revocation and cache/job recovery use the separate guide's cases. Stored Collection tests must pass without it.

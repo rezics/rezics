@@ -21,6 +21,7 @@ Owner: M02. Contract: [Relationship Graph API and Block](../architecture/databas
 | GRAPH15 | Relate permitted catalog and platform targets through the same participant contract; reject a valid REF whose structural capability is incompatible with the role, independently of caller permission. |
 | GRAPH16 | Represent a REZICS Work, exact original/translated content and contributor in one translation relation; replacing the Work's selected translation does not retarget the historical participants. |
 | GRAPH17 | Query anthology aggregation, part coverage, external-edition correspondence and contextual Tag evidence without treating them as identity equality, implicit content adoption or permission inheritance. |
+| GRAPH18 | Family discovery returns bounded related identities while a published composition reads only its explicit selected occurrences; graph updates do not expand or rewrite that publication. |
 
 Use multi-principal native fixtures, including canon facts and contradictory fanwork-specific declarations. Build expected nodes/relations from known fixture semantics, not by calling the same query implementation twice. Mutation/API tests must create IDs before querying them.
 

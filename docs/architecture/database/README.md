@@ -4,7 +4,7 @@ Status: selected target architecture; implementation and qualification follow th
 
 This is the whole-database design authority, including private and operational state. There are no compatibility requirements for old schema, API, SDK, stored data, IDs/URLs, formats or implementation behavior. Use the intended native model and update consumers together. New-system integrity, source conversion, installation, history and recovery remain required capabilities. The plan owns autonomous research, full development/test environment control, module sequence and commits.
 
-Read [the dictionary](data-dictionary.md), [catalog model](catalog-model.md), [creation](creation.md), [Graph API](relationship-graph.md), [Hub](ai-hub.md), [schema coverage](../../testing/database/current-schema-map.tsv), [API coverage](../../testing/database/api-coverage.tsv), [scenarios](../../testing/database/scenarios.tsv), and [capacity](capacity.md). The [design checker](../../testing/database/check_design.py) verifies coverage and arithmetic, not SQL behavior or source conformance.
+Read [the dictionary](data-dictionary.md), [native Work](native-work.md), [catalog model](catalog-model.md), [composition](content-composition.md), [creation](creation.md), [Graph API](relationship-graph.md), [Hub](ai-hub.md), [design evidence](design-evidence.md), [schema coverage](../../testing/database/current-schema-map.tsv), [API coverage](../../testing/database/api-coverage.tsv), [scenarios](../../testing/database/scenarios.tsv), and [capacity](capacity.md). The [design checker](../../testing/database/check_design.py) verifies coverage and arithmetic, not SQL behavior or source conformance.
 
 Dependency policy: a clean Git checkout contains every local design/reproduction input. Temporary directories and machine-local attachments are not dependencies. Public HTTPS references support research; inventory/calculation reproduction needs no network. The [dependency manifest](../../testing/database/dependency-manifest.json) lists local documents, schema inputs, API-owner directories and public sources.
 
@@ -13,6 +13,8 @@ Dependency policy: a clean Git checkout contains every local design/reproduction
 Use one PostgreSQL write authority initially, in the public schema, with owner-local identity tables and typed domain structures. Separate authored content, publication, content selection, discussion, knowledge assertions, moderation, identity control, and personal activity. Preserve real foreign keys. Keep searchable/current projections rebuildable. Keep large binary payloads in object storage and durable transport in the existing NATS JetStream direction. There is no mandatory graph database, universal Edition, global content table, or all-purpose event-sourced aggregate.
 
 The current separation requirement is logical: owners can evolve their tables behind stable reference and capability contracts, preparing for a later database split. Cross-database deployment, distributed transactions and online relocation are not current implementation deliverables. Existing local partitions remain implementation choices; neither adding partitions nor removing a shared parent table alone proves this separation.
+
+Use a modular application with shared protocols and implementations for references, capabilities, commands, revisions, composition and operations, specialized by domain validation. Existing tables, API routes and module sequencing are revisable implementation choices. The selected product semantics, integrity requirements and measured operating envelope determine those choices. A common abstraction is not a mandate for one parent table, universal event sourcing or application microservices.
 
 “Complete” here means that every existing schema/API owner has a disposition; every selected domain has identity, cardinality, lifecycle, authority and query contracts; and interactions across domains have defined outcomes. It does not mean arbitrary future businesses require no new schema, nor that all upstream fields have already been qualified. Product, commerce, education and compute extensions are specified at their boundaries without creating unused runtime tables.
 
@@ -23,7 +25,7 @@ Selected defaults:
 | Native ownership | Publishing, music, program, software, entity, grouping, reference and distribution remain meaningful owners; content/social/platform owners are explicit. |
 | User-facing kinds | Mutable classifications, presentation choices, contextual roles and workflow choices; never a single exclusive enum controlling every capability. |
 | Authored text | Document identity and immutable revisions for short comments, articles, chapters, rules and other content requiring content-level history. |
-| REZICS Work | The platform's maintained virtual publication; Book semantics and external-edition distinctions belong to the catalog model. |
+| REZICS Work | Common native creative identity and continuity across domains; Work/release similarities and differences belong to the native Work contract. |
 | Publication | A persistent social utterance/distribution item with an exact published manifest and its own history. |
 | Content selection | A canonical slot, versioned adoption decisions, and an explicit current selection. |
 | Facts | Claim, evidence, scope-specific acceptance and effective read model are separate. |
@@ -54,15 +56,40 @@ Implement the selected contracts through the plan's design/test/API gates. Use e
 
 The inventory includes helper/factory schema modules and PostgreSQL guard files, not only literal table declarations. Existing source inventories and current code are not treated as evidence of fully tested coverage.
 
+### 2.1 System flow and consistency
+
+```mermaid
+flowchart TD
+    A[Native authoring and community contributions] --> C[Shared command protocol and domain validation]
+    B[External observations] --> P[Mapping and adoption proposals]
+    P --> C
+    C --> T[Transaction: authority and versions, canonical state, history, receipt, outbox]
+    T --> R[Native reads]
+    T --> J[Bounded background operations]
+    J --> V[Search, statistics, recommendations and delivery]
+    R --> Q[Read API and current disclosure]
+    V --> Q
+```
+
+Observation, native adoption and publication of a selected version are distinct events. A source update does not directly rewrite every parent composition, published selection, count and notification. A policy-authorized automatic adoption uses the same command and authority boundaries as explicit authoring; it is not a bypass.
+
+| Must hold when a command succeeds | May complete through bounded derived work |
+| --- | --- |
+| Identity/reference integrity, uniqueness, current authority, expected versions, valid domain transitions and complete activation | Search/ranking refresh, non-security statistics, notification delivery, reverse discovery and eligible cleanup |
+
+Small authoritative edits and their history/receipt/outbox commit together. Large operations stage invisible pages and atomically activate a validated generation. A successful response distinguishes committed state from pending projection freshness; direct reads can show the committed result while search catches up. Authorization, audience-sensitive counts and snippets cannot depend on a stale permissive projection. Simple bounded projections may remain synchronous when measured; per-row unbounded fan-out and repeated full recomputation are not the default.
+
 ## 3. Identity, references and classification
 
 ### 3.1 Identity rules
 
 An owner identity identifies one referent or one independently maintained platform object. A revision identifies a state of that object. An occurrence identifies a use of something in a particular structure. A source key identifies an upstream record under a particular namespace. Equal bytes, equal titles and equal identifiers claimed by sources do not establish native identity equality.
 
+Owner means a stable logical responsibility domain. Public logical references identify that domain and native ID, not an SQL table name, database or shard. Physical placement is an adapter/routing concern. Splitting or moving storage within the same logical owner preserves reference meaning; changing the referent or its logical owner is an explicit correction/relocation decision with historical resolution, not a physical-layout shortcut. Current registries named physical owners are implementation mappings to reconcile with this contract.
+
 An owner table keeps identity and lifecycle. Large editable structures have their own heads and versions; editing a name must not update the root or every other facet. A typed structural anchor remains when historical references depend on it; retirement changes its active capability state, not the meaning of its past revisions. Type-sensitive accepted links pin a capability witness and epoch. Current reads compare that witness with the live capability epoch and return pending/invalid when it no longer applies; they do not wait for an unbounded reverse-edge rewrite to stop treating stale links as verified. A paginated job then revalidates affected links.
 
-Unknown classification is allowed. An unknown referent can be represented under the reference owner without fabricated Work/Release parents. Reclassification within supported capabilities preserves identity. If evidence requires a different physical owner, use an explicit correction/relocation case: preserve the original typed identity and history, establish the new owner representation, and append resolution with field-level assignments. Old IDs remain resolvable. This is not an unchecked update of a discriminator, and references or grants are not silently retargeted.
+Unknown classification is allowed. An unknown referent can be represented under the reference owner without fabricated Work/Release parents. Reclassification within supported capabilities preserves identity. If evidence requires a different logical owner, use an explicit correction/relocation case: preserve the original typed identity and history, establish the new owner representation, and append resolution with field-level assignments. Old IDs remain resolvable. This is not an unchecked update of a discriminator, and references or grants are not silently retargeted.
 
 ### 3.2 Generic references without a universal entity parent
 
@@ -70,7 +97,7 @@ Select a reference_value bridge for endpoints whose valid target set spans many 
 
 A bridge value is allocated on first generic use, reused by unique target lookup, and never retargeted. Generic links reference its PK. Direct music-track-to-recording, message-to-conversation and revision-to-document relations retain direct composite FKs. Exact version references use a separate revision_reference bridge whose alternatives reference complete owner-local revision keys. A citation discriminates identity, exact revision, occurrence, fragment and unresolved external target; only the selected alternative is present.
 
-Adding a semantic class changes data, not the bridge. Adding a physical owner adds one bridge alternative and its validation/index plus resolver and capability registration; it does not add columns or owner-specific business implementations to every generic tag, favorite, grant or association endpoint. Current inline alternatives prove concrete targets but still spread owner dependencies into consumer schemas. Replacing those generic alternatives is remaining module work, not a compatibility requirement. Domain-specific structural FKs remain explicit.
+Adding a semantic class changes data, not the bridge. Adding a registered logical owner adds its concrete bridge alternative and validation/index plus resolver and capability registration; it does not add columns or owner-specific business implementations to every generic tag, favorite, grant or association endpoint. Changing an existing owner's physical layout changes its mapping and qualified constraints. Current inline alternatives prove concrete targets but still spread owner dependencies into consumer schemas. Replacing those generic alternatives is remaining module work, not a compatibility requirement. Domain-specific structural FKs remain explicit.
 
 Costs are explicit: one extra lookup, a shared reference table, and an index/row per generically referenced identity. Batch hydration by owner. No global update is required when content changes. Start the bridge unpartitioned to retain per-target uniqueness; do not hash it by reference id and pretend that per-target unique constraints remain global. A future owner-routed layout must specify consumer routing keys, target uniqueness and reference resolution before activation. Cross-database FKs are not promised. A live relocation protocol is required only if that deployment scope is later elected; this program can rebuild its development/test state without dual-read or legacy transfer work.
 
@@ -104,7 +131,9 @@ Unit remains the shared logical identity/reference/capability contract. Removing
 
 For example, global Tag applications key subject REF/Tag, Realm applications add Realm scope, and private applications add the account. Their subject-first and Tag-first indexes support both directions without knowing how a Book or music record stores its body. Relation participants use the same reference contract with role and exact-revision validation. Following a Work does not follow every referenced edition automatically; discussing a Work does not give control of its adopted Documents. Repeated, inferred and contextual relationships retain their feature-specific semantics.
 
-Owner admission must declare supported capabilities and their rejected cases; an unknown classification can still use capabilities backed by its actual structure. New semantic classes do not change the physical registry. A new physical owner requires registry/adapter and applicability tests, but must not require adding its nullable FK to every generic feature. This is the current logical separation acceptance criterion, independent of any future database split. [Foundation acceptance](../../testing/foundation.md#unit-capability-contract-acceptance) owns the remaining cross-feature cases; existing point-reference tests alone do not qualify all capabilities.
+Owner admission must declare supported capabilities and their rejected cases; an unknown classification can still use capabilities backed by its actual structure. New semantic classes do not change the owner registry. A new registered owner requires bridge/adapter and applicability tests, but must not require adding its nullable FK to every generic feature. This is the current logical separation acceptance criterion, independent of any future database split. [Foundation acceptance](../../testing/foundation.md#unit-capability-contract-acceptance) owns the remaining cross-feature cases; existing point-reference tests alone do not qualify all capabilities.
+
+Distinguish structural eligibility, domain-feature applicability, actor authorization and a query backend's supported operators. Engine composability is not proof that these meanings are interchangeable. Shared interfaces reduce duplicated integration code but do not establish an O(owners + features) bound on semantic exceptions, tests or query cost. The [evidence contract](design-evidence.md#identity-and-composability) records these limits.
 
 ## 4. Common relational contracts
 
@@ -122,15 +151,15 @@ JSONB is appropriate for bounded versioned rich-content payloads, external raw r
 
 The native model exists without any provider. Keep an explicit owner for each domain with shared protocols for names, assertions, revisions and references. Do not force all domains into Work -> Edition -> Release -> File, and do not promote every scalar into a social identity.
 
-The [catalog model](catalog-model.md#rezics-work-and-primary-version) defines REZICS Work as the platform's virtual publication, including metadata-only and community multilingual forms. It is not an abstract bibliographic Work or an external edition selected as primary. Domain-specific referents such as musical compositions retain their own meaning.
+The [native Work contract](native-work.md) defines the common creative object, its platform-maintained virtual form and release distinctions for every domain. Domain-specific structures supply compatible attributes and operations under that contract; the name of a current table does not exempt music, audiovisual or software Works from it.
 
 | Owner | Selected objects and structures | Boundary |
 | --- | --- | --- |
 | Entity | Person, organization, fictional character, software agent; public descriptions, existence dates and contextual identity assertions | An indexed person is not an account; fictional dates are not real-world lifespan. Control/participation is separately admitted. |
-| Publishing | REZICS Work, text/translation identities, external catalog publications, publication contents, release events, serialization and installment | Work adopts independently maintained content; publisher editions and their identifiers are separate. Social Publication owns the utterance rather than Work identity. |
-| Music | Work, recording, release group, release, medium, track occurrence, artist credit, release label/event, TOC, candidates and alternative presentations | Track is an occurrence; recording is reusable; one recording can realize several works. Printed credits stay local. |
-| Program | Program work, season, cut/version, episode, broadcast/distribution event, ordered episode occurrence | Episode identity differs from its position and displayed numbering in a release/season. |
-| Software | Content/project, functional variant, version/build, release, platforms/languages/media, contribution contexts, patch targets | Version labels are not unique globally; a source staff grouping is not automatically a software version. |
+| Publishing | Textual Work scopes, text/translation identities, virtual/actual catalog publications, contents, events, serialization and installments | Shared Work/release contract with independent content; ISBN identifies its applicable issued specification. |
+| Music | Composition, recording and album Work scopes where independently maintained; release groups/releases, media/tracks, credits, events, TOCs and alternatives | Work eligibility preserves these distinct referents; track occurrences and printed credits stay contextual. |
+| Program | Audiovisual Work scopes, seasons, cuts/versions, episodes, events and ordered occurrences | Episode identity differs from release position; cut/subtitle compatibility is explicit. |
+| Software | Project/game Work scopes, functional variants, builds, releases, platforms/languages/media, contribution contexts and patch targets | Exact program compatibility and independent fork continuity; no identity from version labels or upstream staff groups alone. |
 | Grouping | Universe/world setting, canon context, franchise, series, membership and selected order | Grouping is not containment, joint distribution, identity equality or authorization inheritance. |
 | Reference | Concepts, web resources, areas/codes, places, instruments, events and unresolved referents | External URL existence does not prove a native claim or executable safety. |
 | Distribution | Optional mixed-domain package, sealed manifest, repeated members, quantity/coverage | A box set may combine a game, book and soundtrack; no mandatory bundle for standalone releases. |
@@ -159,6 +188,8 @@ Separate three time axes: valid time in the described world, source observation 
 An effective slot is keyed by subject, property contract, semantic context, governance scope and any declared language/variant dimensions. Current decision membership is sealed. New compatible contract versions preserve interpretation; changed meaning gets a new definition identity or explicit migration. Unknown fields retain source evidence and unresolved disposition, not unchecked executable schemas. Provenance links distinguish agents, activities and derived entities; provenance itself does not determine truth. [W3C PROV-DM](https://www.w3.org/TR/prov-dm/)
 
 ## 7. Source acquisition, mapping and adoption
+
+Source observation, native adoption and publication of a selected version follow section 2.1's separate transitions. An accepted metadata or content update does not implicitly refresh every importing composition. Structure refresh uses its captured source revision and destination-local changes through the [import protocol](content-composition.md#import-and-refresh-commands). Automatic subscriptions require explicit policy and current authority; source withdrawal cannot remove independent content or silently rewrite published snapshots.
 
 The protocol is provider -> source record -> immutable observation -> mapping proposal -> authorized application -> native assertions/structures and application receipt. Subscription state schedules work; it does not determine truth. A source record can map to multiple native objects, and multiple sources can support one native object. Bindings are versioned, reviewed relationships rather than columns that move silently.
 
@@ -231,6 +262,8 @@ PostgreSQL stores identities, relations, versioned descriptors and bounded techn
 
 ## 9. Structure, curation, tags and presentation
 
+The [composition contract](content-composition.md) owns local membership, navigation/consumption distinctions, explicit subtree import/refresh, exact publication, progress and measurement. Work and release use the same protocol with domain-specific constraints. Complete logical contents are not a requirement for one request to load/write the whole tree. Family discovery never supplies unrecorded descendants during reading.
+
 Ordered structure uses owner -> immutable manifest -> occurrences. Repeated targets are legal. Occurrence identity, ordering, printed numbering, coverage, local title and local credit belong to the occurrence. A chapter text is not identical to its appearance in a book. Different structures may reuse one content revision. Snapshot completeness is declared; an unknown contents list is not an empty complete list.
 
 Retain domain-specific structural tables for music TOCs, software participation contexts and mixed distribution members. Use the shared manifest protocol, not one permissive table for every invariant. Fractional positions have a storage byte ceiling; renumbering/rebalancing is staged and atomically activates a generation. Deep and large structures remain representable with bounded traversal budgets and continuation jobs.
@@ -281,6 +314,8 @@ Personal favorites, progress, visits, preferences, blocks, notification preferen
 
 ## 13. Search, recommendation, export and derived state
 
+Published-content projections pin their content/adoption/structure revisions and generation. A source or draft update is not automatically a new public search document. Content indexing retains its native/version identity; occurrence membership supplies container context. Do not copy every descendant's full text into all ancestors by default. Any elected aggregation index accounts for duplication, refresh and authorized hit/snippet/count semantics.
+
 Search candidates are generated from dedicated indexed projections carrying owner reference, scope/visibility generation, content revision, language, classification and semantic-document version. Current authority is checked before disclosure. A stale index may omit a newly allowed item but cannot expose a newly forbidden one. Counts/facets/snippets that cannot be safely filtered synchronously must use an audience-safe index generation or report pending/unavailable rather than leaking hidden data.
 
 Keep provider-neutral query semantics and bounded native execution. Ordinary lookup uses owner/PK indexes. Lists use keysets with a stable tie-breaker. Relation queries bind participant roles to one association revision. Filtered full-text queries use indexed candidate plans with a work budget and continuation; they cannot scan indefinitely to fill a page. Filter-before-top-k and approximate retrieval have different recall contracts. Exact total counts are background aggregates or explicitly expensive operations.
@@ -288,6 +323,8 @@ Keep provider-neutral query semantics and bounded native execution. Ordinary loo
 Dynamic schema acceptance and query acceptance are separate. A new property can be stored before it is elected for global equality, range, sort or full-text operations. Each supported operation names its typed authoritative field or effective-fact projection, scope/contract, index, continuation and work bound. A typical numeric projection orders property contract/scope/value/subject with a stable tie-breaker; text, dates and references need their own typed semantics. Index only elected predicates, preserve pending/conflicted/no-selection states and pin the source decision/revision. Do not index every raw claim as accepted truth or promise arbitrary unindexed combinations.
 
 Generic feature indexes use their own read direction: subject REF/Tag and Tag/subject REF; participant target/role/relation revision; parent/manifest/order/occurrence for contents. A reverse index is an access path, not another owner of the relationship. These logical query contracts survive a table-layout change even if a later database split needs a new physical read projection.
+
+Metrics declare exact inputs, language/channel, coverage, algorithm and occurrence-versus-distinct-content counting. Coalesce dirty work per operation/owner/generation, use validated deltas where possible, and page any required recomputation. Node insertion must not trigger a complete container rebuild for every row. Source changes affect only selected current uses or explicit subscriptions; pinned older publications keep their selected versions, while current disclosure can still suppress delivery. Read-your-writes uses the committed native result or an explicit freshness response rather than pretending asynchronous indexes are already current.
 
 The [current PGroonga/PostgreSQL failure evidence](../../testing/known-failures.md) is not closed by this schema design. Search index selection and extension activation require reproduction of those failures and measured recovery/stability. Keep semantic writes independent from a search extension so a disabled/rebuilding index does not corrupt canonical content. Derived ranking stores algorithm, inputs/watermark, generation and exclusion policy. Activate a recommendation snapshot only after all partitions validate; retain the previous snapshot on failure.
 
@@ -303,6 +340,8 @@ Durable outbox rows are committed with business state. Broker delivery is at lea
 
 Large operations use plan -> staged chunks -> validated complete manifest -> activation -> cleanup. The previous valid view remains available; API responses distinguish partial staging from accepted state. Cancellation and retry preserve receipts. Compensation undoes this operation's still-owned changes only; intervening human edits trigger a conflict item. Queue admission, source-provider budgets, retry count, payload bytes and pending age are bounded. Quota reservations count concurrent admission and are settled/released idempotently; tokens store hashed secrets and revoked state, not plaintext lookup keys.
 
+Structure import/refresh, source application, export, correction and projection rebuild share this operational lifecycle while keeping domain-specific transitions. Persist input versions, destination preconditions, source-to-result correspondence, progress and terminal receipt. A retry reuses operation identity; a new intentional repeated use is a different operation. One completed import emits its semantic completion event rather than publishing every staging page. Cancellation and crash recovery cannot expose a half-built composition or adopt a source's later head by accident.
+
 Outbox and consumer checkpoints are transport coordination, not an authority for domain truth. A consumer behind the retained event frontier must perform a checkpointed rebuild/reconciliation. Local replay includes broker-redelivery and external-provider uncertain outcomes. The existing event-streaming owner remains responsible for NATS/Debezium integration and deployment qualification.
 
 ## 15. Physical layout, access paths and capacity
@@ -311,11 +350,13 @@ Design table families around their owning aggregate and transactions now; keep p
 
 Use owner-local roots and narrow mutable heads. Partition large histories/children by the owning aggregate key so normal reads prune and every unique/FK key includes that routing key. Use time partitions for bounded-retention telemetry/outbox/delivery attempts only when the key/retention contract permits it. Do not create hundreds of partitions for every small table on day one. Target reverse lookups use selective reverse indexes or separately maintained target-routed projections.
 
-The [study by Aulbach et al., SIGMOD 2008](https://db.cs.uni-tuebingen.de/publications/2008/multi-tenant-databases-for-software-as-a-service-schema-mapping-techniques/mtdb.pdf) examines mappings from extensible logical schemas to shared physical structures, including the cost of reconstruction and many tables. It supports evaluating the chosen hybrid, not creating a SQL table for every logical class. [Schism, VLDB 2010](https://www.vldb.org/pvldb/vol3/R04.pdf) motivates grouping data by observed transactional access and balancing load. The [study by Bailis et al., PVLDB 2014](https://www.vldb.org/pvldb/vol8/p185-bailis.pdf) motivates analyzing each invariant before deciding whether coordination can be avoided. These results guide future placement decisions; they neither require distributed infrastructure now nor certify REZICS throughput.
+The [design evidence](design-evidence.md) distinguishes schema/identity independence, reusable query-engine components, workload-local placement and invariant-based coordination. These are supporting precedents with explicit limits, not a proof of the composed REZICS system or a requirement to add distributed infrastructure now.
 
 PostgreSQL partitioned primary/unique constraints must include the partition key. This constrains reference bridges, global slug uniqueness, token hashes and ballot duplicate keys. Keep small/global directories unpartitioned until a deliberately designed routing conversion; hash partitioning alone does not preserve a missing global uniqueness guarantee. Partitioning improves pruning/maintenance and does not add another machine's write capacity. [PostgreSQL partitioning](https://www.postgresql.org/docs/18/ddl-partitioning.html)
 
 The capacity workbook is executable arithmetic with four independent scenarios: catalog-heavy, social-publication-heavy, private-message-heavy and supplementary media-bearing subjects. It includes reference amplification, retained revisions, assertions/support, relation participants, structures, social interactions, asset uses/representations and read projections. It also prices every listed corpus family at 500,000,000 and 3,000,000,000 rows independently. Scenario totals are not additive without de-duplicating shared identities/references and setting the actual domain mix. Object payloads, hosting fractions, replication, backups, free-space reserve and WAL are reported separately.
+
+Those scenario assumptions are not a qualification of revised occurrence keys, import correspondence, shared-body reuse or per-release snapshots. Budget their widths, indexes, retained generations and update fan-out before physical acceptance. Replace total-tree/reuse limits only after paged/staged APIs, coalesced statistics and recovery are qualified together; finite request budgets remain required. A bounded adapter can still have unacceptable constant costs. [External scale reports](design-evidence.md#scale-reports-and-their-denominators) retain their operation mix, topology and denominator and do not establish REZICS's capacity.
 
 Initial performance qualification input: 100 mixed reads/s, 20 foreground writes/s, 50 source-object applications/s, 32 concurrent clients and a fivefold burst; additionally exercise measured worst-case relation/structure fan-out and one hot owner/recipient/target. This is an initial test profile, not a forecast or capacity claim. Suggested service goals are p95 <= 100 ms for a 50-item indexed read, <= 250 ms for a small edit, and <= 500 ms for a bounded governance transaction; search and ingestion have separate budgeted classes. Record p99, errors and admission rejection, not only medians.
 

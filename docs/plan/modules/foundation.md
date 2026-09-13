@@ -5,6 +5,7 @@ Dependencies: none. Contract owner: [database architecture](../../architecture/d
 ## Remaining work
 
 - Move remaining generic consumers onto qualified identity and catalog metadata revision values. Extend the bridges for other revision owners and add occurrence references using complete concrete FK keys and sealed targets; qualify scoped addresses without a universal Unit parent or unchecked polymorphic ID.
+- Define stable logical owner versus physical table/database placement, and qualify same-owner layout changes separately from logical-owner corrections. Reference shape alone does not prove independence.
 - Complete the shared Unit contract across owner adapters: bounded resolution/state/summary, supported structural capabilities, exact targets and current authorization. Remove per-owner target alternatives from generic consumers without duplicating Tag, favorite, follow, relation or access behavior by resource kind; retain domain-specific structural FKs.
 - Implement canonical definitions, operation receipts, narrow heads and immutable revisions. Preserve unknown/absent/conflict and sensitive-value availability states.
 - Integrate qualified participation controls with remaining Realm disclosure, ownership and cross-module account-enforcement transitions, resource grants/restrictions and exact disclosure fences; prove ordered locks and current-snapshot rechecks across those paths.

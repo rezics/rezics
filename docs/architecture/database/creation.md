@@ -1,13 +1,13 @@
-# Book and general creation contract
+# Native creation and adoption contract
 
-Book is the first end-to-end creation/reading acceptance journey. The model supports original and transformative creation through native owners, with no AO3-specific persistence namespace and no compatibility requirement with old Book/post structures.
+The [native Work contract](native-work.md) applies to every creative domain. This document owns native authoring, contribution, adoption and publication flows; [composition](content-composition.md) owns assembly and import. Book is the first end-to-end implementation journey, not the definition of all Works. Cross-domain acceptance includes music, audiovisual, visual, interactive and software content. No AO3-specific namespace or old Book/post compatibility is required.
 
 ## Objects and relationships
 
 | Product concept | Native representation |
 | --- | --- |
-| Primary Book / REZICS Work | `publishing_work`, the maintained virtual publication defined by the catalog model; metadata-only authoring is valid. |
-| Authored body | Document, language/representation variants, immutable revisions and explicit derivation. |
+| Native Work | Independently maintained creative scope under the common Work contract; domain-owned representation and metadata-only authoring. |
+| Contributed content | Document, audio/visual media, program or other domain content with exact revisions, independent attribution and derivation. |
 | Publishing and distribution | Work selects content through slots/structures; a social Publication has its own exact utterance manifest; external catalog publications retain publisher specifications. |
 | Chapters/installments | Text identities and ordered, versioned structure occurrences with declared completion/coverage. |
 | Anthology and constituent books | Independently maintained Works with explicit aggregation/part relationships and separate selected contents. |
@@ -24,15 +24,15 @@ A story's relationship declaration applies in that story's context. It cannot si
 
 ## Work authoring and multilingual adoption
 
-Use the [REZICS Work definition](catalog-model.md#rezics-work-and-primary-version) as the primary Book entry point. Create its metadata independently of any publisher edition, ISBN, source record or hosted Document. The metadata-only state can be published; it does not manufacture a publisher release event. A later content contribution keeps the Work identity and adds independently authorized content/adoption state.
+Use the [native Work definition](native-work.md) for every creative entry point. Create metadata independently of a publisher edition, source record or hosted body. Metadata-only publication does not manufacture an external release event. A later contribution keeps the Work identity and adds independently authorized content/adoption state.
 
-A contributor maintains a Document/text identity and its revisions. A Work editor adopts an eligible exact revision into a canonical content slot with language and variant dimensions, and arranges occurrences in a versioned contents structure. Unadopted contributions, private drafts and the contributor's latest head are not implicitly published by appearing in a Work's context. Several same-language contributions can coexist; an explicit selection decides the current reading presentation without deleting alternatives or their credits. Adopting content does not transfer the contributor's editing rights.
+A contributor maintains a content identity and its revisions. An editor adopts an eligible exact revision into a canonical slot with the relevant language, media, variant and compatibility dimensions, and arranges domain-validated occurrences. Subtitles bind a cut, language packs a compatible build, and textual translations their source/coverage. Unadopted contributions, private drafts and the latest editor head are not implicitly published. Same-language alternatives coexist; explicit reading/listening/viewing/usage selections preserve their credits and independent editing rights.
 
 The Work's language-admission policy may accept any language, including community translations absent from official publisher releases. Store that policy without preallocating a language-by-Work matrix. Language slots and contributions are sparse and created when needed. Particular declared consumption languages, metadata languages, actual readable coverage and the all-language policy are separate values. Officialness and method belong to the exact contribution/use; adoption by REZICS does not turn a community translation into a publisher-authorized one.
 
 Publish an exact reading selection by sealing its structure manifest and pinning the relevant adoption/content revisions. Empty known contents, unknown contents and metadata-only publication are explicit states. Changes append the owning metadata, adoption or structure revisions; a metadata edit does not copy all chapters, and restoring metadata does not implicitly restore independently governed content. Reading progress and export pin the selected content and structure, rather than an unqualified current Work head.
 
-An anthology Work can select contributions associated with constituent Works, and each split book can be independently maintained. Membership alone does not select all future child revisions. Repeated targets, partial coverage, alternate ordering and removal from one anthology preserve the independently maintained Work and its other uses. Work-level tags, discussion and favorites target the Work's logical Unit; content-specific annotations or translation feedback use their own precise targets through the same reference contracts.
+An anthology, album or other composite Work can select contributions associated with constituent Works, and each part can be independently maintained. Membership alone does not select future child revisions. [Structure import/refresh](content-composition.md#import-and-refresh-commands) creates explicit local occurrences with retained source correspondence; it neither clones the content nor expands a family graph during consumption. Local labels/order and existing progress mappings survive qualified refresh. Work-level tags, discussion and favorites target the logical Work; content-specific feedback uses precise identity/revision/occurrence targets through the shared feature contracts.
 
 ## Publication and privacy
 

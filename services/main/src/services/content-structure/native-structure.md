@@ -1,5 +1,11 @@
 # Native content structure boundary
 
+This describes the current implementation, not full qualification of the selected
+[cross-domain composition protocol](../../../../../docs/architecture/database/content-composition.md).
+That target adds staged import/refresh, exact published content, local occurrence
+overrides, paged reads and coalesced metrics. Keep existing guards until those
+paths and their recovery behavior are qualified together.
+
 `book.contents` belongs to a Publishing TextVersion. Its explicit occurrences may
 reference another TextVersion, a Post whose kind is `chapter`, or a Label. Nested
 TextVersion references do not import the other structure or its progress.
@@ -45,9 +51,10 @@ of at most 500 characters each (at most 4 MiB UTF-8 label data). Private read
 checks use batches of at most 500 IDs. No query scans all owner tables or the
 corpus. History replay retains its existing 32-delta/256 KiB checkpoint policy.
 
-The 64 reverse-placement bound limits a content change's direct fan-out. Existing
-counter maintenance can still recompute up to 2,048 nodes for each affected tree;
-bulk writes can therefore multiply that work. This packet proves boundedness and
-integrity, not corpus throughput. Deferred per-owner dirty queues and revision-
-bound lazy child pagination are future optimization work, with the current hard
-limits remaining in force until that replacement is qualified.
+The 64-placement bound limits live uses, not all historical or soft-deleted
+placements. Current metric reverse probes can still visit those retained uses,
+and row-triggered counter maintenance can recompute a whole affected tree for
+each change. Bulk writes therefore multiply work; these guards alone do not
+qualify throughput or historical fan-out. The selected replacement combines
+paged impact planning, coalesced/delta metrics, staged operations and revision-
+bound child reads. Current hard limits remain until that replacement is qualified.

@@ -8,11 +8,13 @@ Dependencies: M01 and module event contracts. Owners: database architecture sect
 - Elect dynamic property operations individually and qualify their typed effective-value indexes/projections, scope, source revision, stable ordering and rejected/unavailable states; storage flexibility is not arbitrary-query support.
 - Preserve Work versus external-edition search targets, declared languages versus adopted readable content, and generic Tag/participant reverse queries across owner hydration. Test selective and dense predicates without requiring cross-database infrastructure.
 - Qualify recommendation online disclosure, counters/metrics and source statistics without giving projections canonical authority; extend retention evidence to large backlogs and process/restore boundaries.
-- Complete outbox/relay/consumer flows, receipts, permission/source/lease fences, bounded fan-out, quotas and reconciliation.
+- Complete outbox/relay/consumer flows, receipts, permission/source/lease fences, bounded fan-out, quotas and reconciliation for source application, composition import/refresh, correction, export and read-model rebuild. Publish semantic completion only after activation.
+- Qualify occurrence-context search, exact-version metric inputs, coalesced dirty queues and paged reverse impact, including soft-deleted/historical uses. Avoid descendant-text duplication in all ancestors and per-node full-owner recomputation; expose freshness while enforcing current disclosure.
 - Reproduce and resolve native facet-search crashes; a successful small or JIT-off run is not stability evidence.
 - Complete merge/recommendation recovery, checkpointed export, backup/WAL/object reconciliation and erasure-frontier replay.
 - Add native Zone selector/composition capacity scenarios using current identities and private follow preferences.
 - Qualify Studio all/owned/direct/delegated and mixed-source query plans, disclosure, hot-account writes and source-candidate skew.
+- Replace current total-tree/live-reuse guards only with the qualified paged/staged/metric/recovery path; keep finite request and queue budgets.
 - Measure skew, hot keys, graph budgets, row/index/WAL amplification, queue age, storage, plans and recovery at the 500M/3B planning scales.
 
 ## Acceptance

@@ -8,7 +8,7 @@ Notation: PK is primary key, UQ is unique key, FK is concrete foreign key, REV m
 
 | Relation | Key and critical fields | Cardinality / integrity | Main access path |
 | --- | --- | --- | --- |
-| <owner>_identity | PK id; lifecycle, visibility, moderation, created operation, local lifecycle version | One per native object under its owner; typed capabilities have concrete owner FKs; no global identity parent | PK; selected owner lifecycle/discovery indexes |
+| <owner>_identity | PK id; lifecycle, visibility, moderation, created operation, local lifecycle version | Native identity under a stable logical owner; concrete table placement is mapped; no global identity parent | PK; selected owner lifecycle/discovery indexes |
 | catalog_unit_locator | PK logical id; owner, routing generation | Rebuildable directory; global UUID admission collision detection is a command concern; never a target FK | PK; generation reconciliation cursor |
 | reference_value | PK id; one concrete nullable owner-target FK | CHECK exactly one target; partial UQ for each non-null owner target; immutable mapping; allocate/reuse by unique-conflict retry | PK, derived native-ID expression index and selected target UQ; no separate generic target string |
 | revision_reference | PK id; exactly one complete owner-local REV alternative | Each alternative has a composite FK to its owner revision; exactly one complete alternative; partial UQ per exact target; selected revision must be sealed | PK and target revision reverse UQ |
@@ -23,7 +23,7 @@ Notation: PK is primary key, UQ is unique key, FK is concrete foreign key, REV m
 
 reference_value is a normalized version of the current validated alternative reference, not a renamed Unit parent. Every selected target is backed by its concrete FK. There is no root-row totality requirement: an unreferenced Document exists without a bridge value. Hard deletion of a referenced native anchor is restricted; payload erasure and tombstone visibility remain separate. Arbitrary bridge creation is not an API bypass for private object existence.
 
-The [logical Unit capability contract](README.md#34-unit-capabilities-across-owner-tables) separates owner identity, generic targeting, feature eligibility and actor authorization. REF consumers do not retain a separately writable native ID/owner or duplicate owner alternatives. A physical owner addition is confined to registry/bridge/adapters and capability applicability; semantic classes remain data. D03, D09 and D11 reuse these contracts without moving their feature state into a universal parent. The present implementation still has inline alternatives in some generic consumers; their conversion and qualification remain plan work.
+The [logical Unit capability contract](README.md#34-unit-capabilities-across-owner-tables) separates owner identity, generic targeting, feature eligibility and actor authorization. REF consumers do not retain a separately writable native ID/owner or duplicate owner alternatives. A logical owner addition requires registry/bridge/adapters and capability applicability, while a physical layout change preserves its logical reference; semantic classes remain data. D03, D09 and D11 reuse these contracts without moving their feature state into a universal parent. The present implementation still has inline alternatives in some generic consumers; their conversion and qualification remain plan work.
 
 For revision_reference, do not store an independently writable parent REF alongside the typed revision keys. The parent is derived from the selected exact revision. If a cached parent is necessary, a generated bounded guard proves equality; the cache is not a second identity authority. Partition conversion must preserve target uniqueness, which is why the first bridge layout is unpartitioned.
 
@@ -101,14 +101,16 @@ Participant targets may span registered catalog and platform owners when the pre
 
 ## D05. Publishing, program and distribution catalog
 
+The following are domain implementation families, not competing definitions of Work. Each eligible identity implements the common Work/release protocol with its domain attributes. Work and release stay distinct, and virtual versus actual issuing adds applicable metadata rather than a separate feature system.
+
 | Relations | Keys / crucial fields | Grain, cardinality and constraints |
 | --- | --- | --- |
-| publishing_work | Owner identity FK; native metadata and language-admission policy; Work-owned slots/structures use D09-D10 | REZICS virtual publication/primary version as defined in the catalog model; metadata-only valid; no required ISBN, external edition or abstract Work parent |
+| publishing_work | Publishing identity FK; domain metadata; Work slots/structures use D09-D10 | Textual specialization of the common native Work contract; metadata-only valid; not the definition or mandatory parent of every Work |
 | publishing_text_version, publishing_text_work | Text identity; language, derivation and Work correspondence/coverage | Independent official/community contributions, including same-language alternatives and multi-work text containers; correspondence is not adoption or text equality |
-| publishing_publication, publication_text, publication_work, publication_facet | External catalog publication identity; distribution specification; content PK publication/manifest/occurrence, target text/Work, order, coverage; format/pagination/identifiers | Many editions can use the same text; repeated target occurrences allowed; an external edition is not the primary REZICS Work |
+| publishing_publication, publication_text, publication_work, publication_facet | Virtual/actual publication identity; distribution specification; content PK publication/manifest/occurrence, target text/Work, order, coverage; applicable identifiers | Shares domain composition rules with Work, but owns its selection and issuing scope; repeated targets permitted |
 | publishing_release_event | Publication/event id; area, date value, channel/status | Multiple releases across countries/dates; announced/cancelled is not occurred |
 | publishing_serialization, publishing_installment | Serialization identity; installment occurrence, issue/order/original number, text/coverage | Installment appearance differs from chapter text; order and progress pin exact manifest |
-| program_work, program_season | Program identity; season identity and contextual membership | Season identity/order can differ across catalogs; membership is not ownership inheritance |
+| program_work, program_season | Audiovisual Work/season identities and contextual membership | Common native Work eligibility with distinct season scope/order; membership is not ownership inheritance |
 | program_version, program_episode, program_episode_occurrence | Cut/version identity; episode identity; manifest occurrence, displayed number, coverage | A cut can have a different episode structure; repeated appearances and specials remain representable |
 | program_release_event | Program/cut/episode exact target; channel/area/date/time precision | Broadcast event differs from content revision |
 | distribution_package, distribution_manifest, distribution_revision | Package owner; sealed manifest; current selection | Optional mixed-domain bundle; independent native authoring |
@@ -116,16 +118,16 @@ Participant targets may span registered catalog and platform owners when the pre
 
 All child lists use parent/manifest/ordinal/occurrence keysets and target reverse indexes. History and source correspondence include original owner and child revision; replacing a manifest does not destroy the old correspondence. A complete manifest can be staged in bounded chunks and restored by pointer selection without copying all members.
 
-The [Work contract](catalog-model.md#rezics-work-and-primary-version) owns native identity and external-edition mapping. Publisher language/ISBN metadata cannot narrow the Work's community content policy. A Work's selected contents use D09 adoption revisions and D10 structure manifests; known-empty, metadata-only and unknown contents remain distinguishable. Aggregation or part links can connect several independently maintained Works without an exclusive primary parent. The current publication/target primary keys cannot represent repeated occurrences; persistence qualification must replace those keys together with histories, source correspondence and consumers.
+The [native Work contract](native-work.md) owns cross-domain identity and release meaning; [composition](content-composition.md) owns explicit assembly and import. Publisher language/ISBN metadata cannot narrow the Work's community content policy. A Work's selected contents use D09 adoption revisions and D10 structure manifests; known-empty, metadata-only and unknown contents remain distinguishable. Aggregation or part links can connect several independently maintained Works without an exclusive primary parent. The current publication/target primary keys cannot represent repeated occurrences; persistence qualification must replace those keys together with histories, source correspondence and consumers.
 
 ## D06. Music catalog
 
 | Relations | Critical content | Cardinality / authority |
 | --- | --- | --- |
-| music_work, music_work_language | Composition identity, languages, typed properties | Optional; recording-to-work realization uses contextual n-ary association |
-| music_recording | Recording identity, duration/precision, artist credit, identifier claims | Recording reused across releases; no global unique title/hash/ISRC assumption |
-| music_release_group, secondary_type | Release-family identity and classification | Does not own a universal tracklist |
-| music_release, release_event, release_label | Issued specification, events/territories, label occurrence and catalog number | Multiple events/labels; catalog number belongs to label/release use |
+| music_work, music_work_language | Composition identity, languages, typed properties under native Work scope rules | Optional realization links use contextual n-ary associations; shared Work meaning does not equate compositions and recordings |
+| music_recording | Recording identity, duration/precision, credit and identifier claims; native Work role when independently maintained | Reused content across releases; distinct from composition; no title/hash/ISRC-based identity equality |
+| music_release_group, secondary_type | Release-family identity/classification; independently maintained album Work requires its explicit scope and composition | Family grouping alone owns no universal tracklist and does not supply publication contents |
+| music_release, release_event, release_label | Virtual/actual issuing specification, events/territories, label occurrence and catalog number | Shared domain composition protocol; applicable catalog number belongs to label/release use |
 | music_medium, music_track_occurrence | Sealed release structure; medium identity, format/order; track recording/title/printed number/local credit/order | Same recording can occur repeatedly; changes to printed title do not overwrite recording title |
 | music_artist_credit, artist_credit_name | Sealed ordered credit expression; artist REF, exact name, join phrase, ordinal | Credit expression is not a person/group; reuse only under compatible retention domain |
 | music_disc_toc, toc_offset, medium_toc | Medium-qualified TOC, offsets, disc identifier, declared format | Format-specific constraints; unknown tracklist separate from zero tracks |
@@ -141,9 +143,9 @@ Specialized indexes remain parent-local and on elected reverse targets. Technica
 
 | Relations | Critical content | Contract |
 | --- | --- | --- |
-| software_content, software_visual_novel | Content/project identity and typed VN facet | Semantic classifications can change without creating another content identity |
+| software_content, software_visual_novel | Native project/game Work identity and typed VN facet | Common Work continuity, including explicit independent forks; semantic reclassification alone preserves identity |
 | software_variant, software_version | Functional variant; version/build identity, scoped label, exact build/resource provenance | Labels may be reused; uniqueness depends on ecosystem/publisher namespace, not string alone |
-| software_release / content / platform / language / medium / event | Selected contents, platform, language channels, media and distribution occurrences | Release aggregates derive from complete/current native inputs; partial coverage stays partial |
+| software_release / content / platform / language / medium / event | Selected exact contents, platform, language channels, media and distribution occurrences | Virtual/actual release contract with build/patch compatibility; published selections do not follow mutable inputs implicitly |
 | software_participation_context / revision | Native contribution scope, name/language/officialness claims, relevant content identity | Observation-local upstream edition ids are correspondence, not native version proof |
 | software_participation / revision / credit occurrences | Person/character/organization, role, alias, release/context, language and evidence | Voice actor-character-work/release is one scoped relation; no uncorrelated binary reconstruction |
 | software_patch_target, software_release_animation | Typed patch/dependency target, compatibility/version selector; animation attributes | Patch is not full replacement by default; range claim differs from resolved dependency |
@@ -229,13 +231,16 @@ Editing a comment into an article keeps document/publication identities. Selecti
 | realm, realm_member, realm_unit, realm_pin | Community grouping identity; participant membership and local publication/curation; stable placement | Realm grouping, Collection membership, accepted content and pinned display are separate; uniqueness scoped to role |
 | realm_rule_revision, realm_rule, rule_acceptance | Realm/exact rule revision/rule; account acknowledgement of exact version | New rules do not rewrite past decisions or imply retroactive acceptance |
 | zone, zone_page, unit_dock | Zone identity; page/subsite infrastructure, Collection presentations, chosen rule Realm, dock composition/contract | One Zone can compose several Collections; one Collection can appear in several Zones; display does not transfer identity or authority |
-| content_structure, structure_manifest, node/occurrence | Owner/structure/head; immutable manifest; parent, target, rank, coverage | Manifest-qualified targets, declared tree/DAG/cycle policy; large edits staged |
+| content_structure, structure_manifest, node/occurrence | Owner/structure/head; manifest; occurrence id, same-manifest parent, target REV/citation, rank, coverage, local label/number/credit | Explicit local contents; identity-only references are navigation/unknown content, not exact body promises; validated navigation is acyclic; no implicit nested expansion |
 | structure_revision/head, dock_revision/head, collection_structure_revision/head | Exact owner/subaggregate revision, generation, operation | Unrelated root edits do not copy all children; restore selects sealed generation |
+| composition_import / import_correspondence | Operation, exact source structure REV/path, destination structure/expected head, staged manifest, source-to-destination occurrence map | Durable phased operation; retry reuses mappings; refresh compares base/source/local edits and retains established occurrence identities |
 | collection, collection_item | Curated grouping identity; explicit stored item occurrence,target,rank,local note/credit | Can organize a wiki corpus; public/private access and repeated-target policy explicit; distinct from private favorites and computed Dynamic Collection results |
 | vocabulary_node, guide_node/localization, label | Vocabulary/guide identity; typed definitions, selected localized copy | Control vocabulary and authored guides retain ownership/history; guides can reference Documents |
 | custom_theme, revision, review_event, file, external_resource | Theme identity, immutable submitted package, exact host/target contract, observed external evidence | Existing full-trust external-live preview retained; observed dependencies do not imply complete sealing |
 | unit_custom_theme_installation, execution_control | Host/target contract UQ; exact approved theme revision; kill epoch | Every activation checks current eligibility/approval/emergency state; no follow-latest |
 | unit_presentation_document/revision/head, entity_presentation/revision | Host or entity, presentation purpose, exact revision | Content and platform chrome ownership stay separate; no hidden execution grant |
+
+The [composition protocol](content-composition.md) defines planning, staged writes, completeness validation, activation and refresh. Published selection pins exact adoption/content/structure revisions. Child-list cursors bind structure/manifest/parent/order/occurrence; whole export is resumable. Existing 2,048-node and 64-placement guards remain implementation protections until the bounded replacement is qualified, not permanent target cardinalities.
 
 ## D11. Tags, votes, ratings, follow, favorites and progress
 
@@ -321,7 +326,7 @@ Global, Realm and account applications share the logical Unit target contract, n
 | recommendation_event/exclusion/metric | Account/REF/time event; private exclusions; aggregate inputs | Request/REF/type event dedupe; private event erasure preserves references and aggregate inputs; source scores kept identifiable |
 | unit_best_score / ranking | Target/scope/algorithm generation; deterministic tie breaker | Display ranking does not change native score history |
 | score/tag/reaction/reply/collection/Realm/notification/poll/conversation stats | Scope/target/metric generation and value | Recomputable, striped when hot; observed/approximate/exact meanings explicit |
-| content metrics / engagement hourly | Exact content REV and algorithm; time bucket/target | Not authored data; content changes invalidate incrementally |
+| content metrics / engagement hourly | Exact content/selection REV, language/channel, coverage, algorithm/counting basis; time bucket/target | Applicable measurements, occurrence versus distinct-content semantics and coalesced generation-bound refresh; not authored state |
 | studio candidates | Actor/account, concrete target, eligibility generation | Rebuildable private projection; current access required; indexed erasure |
 | studio_resource_visit | PK Auth,target REF; last visited time | Private account fact; restrictive REF, monotonic completion time, current Self/account/read authority; no editor eligibility or source-order effect; indexed erasure |
 | shared_search_query | Owner, query contract/AST revision, presentation | Saved query is authored data; results and counts are projections |
@@ -347,6 +352,7 @@ These are target contracts and activation criteria, not instructions to install 
 | EditDocument | Document authority fence, branch expected head, bounded validated payload | New sealed REV, branch head, operation/outbox | Stale edit conflicts; published/adopted heads unchanged |
 | PublishOrUpdate | Publisher/scope/disclosure fences, expected publication/channel head, exact dependencies | Publication REV/head plus chosen channel event | Unreadable/ungranted asset rejects; no draft-head following |
 | AdoptContent | Slot/scope authority, role contract, current slot version, exact disclosure | Adoption REV/head with complete member set | Concurrent adoption cannot produce two single-slot heads |
+| ImportOrRefreshComposition | Exact source revision/path, destination base head, source/base/local correspondence, current authority and operation receipt | Bounded staged pages, then sealed local occurrence manifest/head plus history/outbox | Retry reuses mappings; local edits conflict explicitly; partial results and stale workers cannot activate |
 | ConvertPresentationOrWorkflow | Publication/document authority, explicit policy delta | New configuration/revision, original identities/credits | No grant from classification; historical replies retained |
 | ReparentOrTransfer | Thread structure generation, relevant scopes, expected placement; staged cycle witness | New valid generation or explicit governed scope transfer | Origin unchanged; incomplete move not visible |
 | ApplySource | Observation/binding/subscription/mapping versions, target local heads, human epoch, lease token | Claims/support or structural generation, journal/receipt/outbox | Same-value human change fences stale source; partial coverage cannot delete |
@@ -388,13 +394,13 @@ Arrows show semantic dependence, not a universal physical FK direction. The refe
 
 ## D19. Creation and Book functional contracts
 
-Reuse existing native table families for these specializations. Do not add AO3-shaped tables or duplicate an effective field under a new name. [Creation architecture](creation.md) and [Book acceptance](../../testing/book-and-creation.md) own the product semantics.
+Apply the [native Work](native-work.md) and [composition](content-composition.md) contracts across creative domains using qualified domain table families. [Creation](creation.md) owns authoring/adoption flows; [native Work acceptance](../../testing/native-work.md) covers cross-domain meaning and [Book acceptance](../../testing/book-and-creation.md) covers the first product journey. No AO3-shaped namespace or duplicated effective field is required.
 
 | Contract | Native keys and values | Required invariant |
 | --- | --- | --- |
-| Work metadata | Publishing Work REF; form/classification, language-admission policy, completion state, optional planned part count | Metadata-only virtual publication is valid without source/fandom/ISBN; planned, published and known-complete counts differ. |
+| Work metadata | Domain-native Work REF; scope/continuity, form/facets, language policy and completion | Common contract across all creative domains; metadata-only valid without fabricated source/body/release; applicable identifiers stay on their referents |
 | Multilingual Work contents | Work-subject slot, language/variant dimensions, adoption REV/XREV, structure/manifest/occurrence | Multiple official/community and same-language contributions; exact selections preserve provenance, current disclosure and historical reading interpretation. |
-| Anthology, parts and external editions | Independent Work/publication refs; typed aggregation/part/correspondence roles and coverage | Each maintained Work is primary for itself; no family-wide primary flag, implied identity merge or grant/progress inheritance. |
+| Composite Works, parts and releases | Independent Work/release refs; aggregation/part/correspondence roles and explicit selected occurrence coverage | Virtual/actual releases share domain contracts; each Work remains primary within its scope; no automatic identity/grant/progress inheritance |
 | Source work/fandom/crossover | Association REV with created-work/source-work/grouping roles and evidence | Multiple sources allowed; membership differs from derivation and from actual ownership. |
 | Character appearance and pairing | Exact relation REV, participants, Work/expression/canon and coverage | Story-specific relationships do not become global character facts; n-ary meaning preserved. |
 | Co-creator and pseudonym | Native credits/name REV plus independently authorized operator/editor | Attribution is not control; privacy changes do not erase allowed contribution history. |

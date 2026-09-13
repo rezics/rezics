@@ -6,6 +6,8 @@ Testing follows [the implementation plan](../plan/README.md): shared schema desi
 | --- | --- |
 | [Database scenarios](database/scenarios.tsv) | Cross-domain invariant cases; specifications until executed against the target. |
 | [Foundation persistence](foundation.md) | Concrete reference constraints, immutable allocation, concurrency and selective lookup evidence. |
+| [Native Work and release](native-work.md) | Cross-domain identity/continuity, virtual/actual releases, applicable properties and source mappings. |
+| [Content composition](content-composition.md) | Explicit local occurrences, exact selections, staged import/refresh, metrics, progress and recovery. |
 | [Source conformance](source-conformance.md) | Provider data -> converter -> native writes -> API/export -> update/withdraw/replay. |
 | [Book and creation](book-and-creation.md) | Complete Book, original and AO3-derived native workflows. |
 | [Relationship Graph](relationship-graph.md) | Subgraph semantics, permissions, budgets and Block descriptor contracts. |
