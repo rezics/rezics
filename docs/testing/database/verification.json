@@ -30,7 +30,7 @@
     "scenarios.tsv": "07738e2923baef54d4e4baebedc79b5b5dc25e2196685b51cd170c40f34c7cda",
     "capacity.json": "00565a116367dbdaee7cbddd4e1e0c8ace7be142546c0b46b436f1a32c8b23d4",
     "capacity.md": "7117a8893f40bcfd09a116d974ad2ef3d06b2e6f7d47d725a80c2f1e54e13f84",
-    "dependency-manifest.json": "6b427c728fb92f4f080b694f253c06e3708da8883ba1fcb2b28dd50495f3cbea"
+    "dependency-manifest.json": "7529ad8ace5af101f34abc51dfe20d390f4b13b59a4eb41bd55637e3987dc107"
   },
   "artifact_paths": {
     "current-schema-map.tsv": "docs/testing/database/current-schema-map.tsv",
@@ -61,6 +61,7 @@
     "docs/plan/modules/sources-and-converters.md": "b8f9bc9b3d18844379b6b8ac15ab550584d9d31037909c35d213394fb8af954d",
     "docs/research/README.md": "991ca40ef4aba9186ce3ff8255b4bf410a05f8d82a225f5aed7c92facf8bacc1",
     "docs/research/ai-hub-execution.md": "6ea6b14e84b98a34a697370b14f0b6c50234a16d5214f67c451311ec16ceb081",
+    "docs/research/native-work-concept-proposal.md": "19dc783d1c8d42dbae4dc1a57f76b85e959509ce9f64643d8f1333fe5f9c8ab3",
     "docs/testing/README.md": "d040d33b841d9a96a8f4c1fecdadfa393e5994757164e151eedb822d1091f322",
     "docs/testing/ai-hub.md": "e26dbe58f28fe78b51a81bd54bfe47a7d267d97f6e18a15f46239bbb58f0c971",
     "docs/testing/backend-integration.md": "cf4119de6aa25e4c75de8e5439850353982c89416f4fdd318d6d7fa23b608d0f",
