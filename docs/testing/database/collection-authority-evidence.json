@@ -1,24 +1,28 @@
 {
-  "checks": 29,
-  "httpChecks": 22,
+  "checks": 34,
+  "httpChecks": 24,
   "expiredGrantRace": true,
   "reciprocalReferenceRace": true,
   "statusLockOrderRace": true,
+  "targetReadExpiryRace": true,
   "sourceDigests": {
-    "services/main/scripts/check-collection-authority.ts": "c1a5246376a632f1fd69050a650c1c41529e67314814a9b2f45e2ffc1c51c547",
+    "services/main/scripts/check-collection-authority.ts": "00c4db7c183b4d4849adfcf90f19002ce41eaea836b2952d83250ecb59632080",
     "services/main/src/services/collection-structure/authority.ts": "28165b01e1bbff572fbbbd683d93d84e9096f48f66b17c8a554aa4d529e18cfc",
+    "services/main/src/services/collection-structure/batch.ts": "830be96dd45d911b629c33bf977aa224ed90f6061825e7cecd0a06967dd53b5e",
     "services/main/src/services/api/collections/index.ts": "e2852bcb09ca73939072ecb1ceab3310b1daed8dcf957a6d178ef0de9c0039a1",
     "services/main/src/services/api/collections/service.ts": "4f9ce1aa850380e7bbfcd57b20a114f9980c4c765a8ab322d9d8f202604089a7",
     "services/main/src/services/units/status.ts": "05aea3a170fc9248ef063dbd178f18fe110518ca9224149b4529dc8dbed76bdd",
     "services/main/src/services/units/query.ts": "38ad289ce9bd8725a2ea13a3dc003abd8adc2f618befb0a97ebe331ffd5903af",
     "services/main/src/services/database/migrations/atlas.sum": "cdbfad41cb05a6890c2e2cf0fe9993b55afcf0aa32d2281f90a1e8a624ec8de6"
   },
-  "baseCommit": "5e5f44cf1df944c2b92b62b16664dce8b746834d",
+  "baseCommit": "a75a6a675b0f2b4090c01703a1707c085f246708",
   "beforeRepair": {
     "publicHistoryStatus": 200,
     "privateMemberIdDisclosed": true,
     "expiredEditGrantStatus": 200,
-    "rowsAdded": 1
+    "rowsAdded": 1,
+    "targetReadExpiryStatus": 200,
+    "targetRowsAdded": 1
   },
   "verification": {
     "backendTests": {
@@ -26,8 +30,8 @@
       "tests": 1796
     },
     "focusedTests": {
-      "files": 8,
-      "tests": 45
+      "files": 7,
+      "tests": 37
     },
     "wikiRegression": {
       "checks": 35,
@@ -35,9 +39,7 @@
       "targetRaces": 2
     },
     "backendTypeScript": "passed",
-    "sdkTypeScript": "3 passed",
-    "webTypeScript": "passed",
-    "openApiGeneration": "passed",
+    "publicContractChange": false,
     "schemaChange": false
   }
 }

@@ -32,6 +32,9 @@ import {
 	unitOwnership,
 	unitAccessGrant,
 	collectionItem,
+	collectionStat,
+	collectionStructureRevision,
+	collectionStructureRevisionHead,
 } from "../src/services/database/schema";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import { Authorization } from "../src/services/authorization";
@@ -784,10 +787,129 @@ try {
 }
 await metadataWrite;
 checks++;
+// Target readability is independent of the editor's Collection permission.
+const [lateTarget] = await database
+	.insert(post)
+	.values({
+		visibility: "private",
+		status: "published",
+		publishedAt: new Date(),
+		createdByAuthUserId: fixture.owner.account.id,
+	})
+	.returning();
+assert.ok(lateTarget);
+const targetBase = await call("GET", root, 200, undefined, cookie);
+async function targetCollectionState() {
+	const stats = await database
+		.select()
+		.from(collectionStat)
+		.where(eq(collectionStat.collectionId, fixture.collection.id));
+	const heads = await database
+		.select()
+		.from(collectionStructureRevisionHead)
+		.where(eq(collectionStructureRevisionHead.collectionId, fixture.collection.id));
+	const revisions = await database
+		.select({ id: collectionStructureRevision.id })
+		.from(collectionStructureRevision)
+		.where(eq(collectionStructureRevision.collectionId, fixture.collection.id))
+		.orderBy(collectionStructureRevision.id);
+	return { stats, heads, revisions };
+}
+const targetStateBefore = await targetCollectionState();
+const lateGrantExpiry = new Date(Date.now() + 3000);
+await database.insert(unitAccessGrant).values({
+	unitId: lateTarget.id,
+	subjectKind: "auth",
+	authUserId: fixture.editor.account.id,
+	permission: "unit.read",
+	scope: [],
+	expiresAt: lateGrantExpiry,
+	grantedByAuthUserId: fixture.owner.account.id,
+});
+const targetReady = Promise.withResolvers<number>(),
+	targetRelease = Promise.withResolvers<void>();
+const targetHolder = database.transaction(async (tx) => {
+	await tx
+		.select()
+		.from(collectionStat)
+		.where(eq(collectionStat.collectionId, fixture.collection.id))
+		.for("update");
+	targetReady.resolve(
+		(await tx.execute<{ pid: number }>(sql`select pg_backend_pid() as pid`)).rows[0]!.pid,
+	);
+	await targetRelease.promise;
+	await tx.execute(
+		sql`select pg_sleep(greatest(0,extract(epoch from ${lateGrantExpiry}::timestamptz-clock_timestamp()))+0.1)`,
+	);
+});
+void targetHolder.catch(targetReady.reject);
+const targetPid = await targetReady.promise;
+const targetWrite = Promise.resolve(
+	api.fetch(
+		new Request(`http://localhost:3001/api/v1/collections${root}/items/${lateTarget.id}`, {
+			method: "PUT",
+			headers: { Cookie: cookie!, "Content-Type": "application/json" },
+			body: JSON.stringify({ baseItemsRevisionId: targetBase.latestItemsRevisionId }),
+		}),
+	),
+);
+void targetWrite.catch(() => {});
+let targetObserved = false;
+try {
+	for (let attempt = 0; attempt < 300; attempt++) {
+		if (
+			(
+				await database.execute(
+					sql`select pid from pg_stat_activity where ${targetPid}=any(pg_blocking_pids(pid))`,
+				)
+			).rows.length === 1
+		) {
+			targetObserved = true;
+			break;
+		}
+		await setTimeout(10);
+	}
+	assert.ok(targetObserved);
+} finally {
+	targetRelease.resolve();
+	await targetHolder;
+}
+const targetResponse = await targetWrite;
+const targetBody = await targetResponse.text();
+const targetRows = await database
+	.select()
+	.from(collectionItem)
+	.where(
+		and(
+			eq(collectionItem.collectionId, fixture.collection.id),
+			eq(collectionItem.unitId, lateTarget.id),
+		),
+	);
+console.info(
+	JSON.stringify({
+		targetWriteStatus: targetResponse.status,
+		targetBody,
+		targetRows: targetRows.length,
+		targetObserved,
+	}),
+);
+assert.equal(
+	targetResponse.status,
+	404,
+	"A target grant expiring during the membership write must roll back the batch",
+);
+assert.equal(targetRows.length, 0);
+const targetStateAfter = await targetCollectionState();
+assert.deepEqual(targetStateAfter.stats, targetStateBefore.stats);
+assert.deepEqual(targetStateAfter.heads, targetStateBefore.heads);
+assert.deepEqual(targetStateAfter.revisions, targetStateBefore.revisions);
+checks += 5;
+httpChecks++;
 const sourceDigests: Record<string, string> = {};
 for (const path of [
 	"services/main/scripts/check-collection-authority.ts",
 	"services/main/src/services/collection-structure/authority.ts",
+	"services/main/src/services/collection-structure/batch.ts",
 	"services/main/src/services/api/collections/index.ts",
 	"services/main/src/services/api/collections/service.ts",
 	"services/main/src/services/units/status.ts",
@@ -804,6 +926,7 @@ console.info(
 		expiredGrantRace: true,
 		reciprocalReferenceRace: true,
 		statusLockOrderRace: true,
+		targetReadExpiryRace: true,
 		sourceDigests,
 	}),
 );

@@ -47,7 +47,7 @@
     "docs/architecture/database/creation.md": "7cd97242eb39b099a445934a6d345edfc4b45206f72a8f4bd626453e1af24cbd",
     "docs/architecture/database/data-dictionary.md": "8047904e622ff6a18c164c6481f169a1c9f300f141977916d7712a8a7764f3f1",
     "docs/architecture/database/relationship-graph.md": "f849ff42ecba6c161cb25c392cfc8ef65c51d5be1eacc718ee6b3aa06d3245ef",
-    "docs/plan/README.md": "e4b37d28e096f449996d20b31399ae9a8121389fd1c0aed09df7f0662682a068",
+    "docs/plan/README.md": "e73e9702e88a6b53cd007e0b7e9fdfc1d432e6e996fb44b2156571c30d1cde17",
     "docs/plan/backend-acceptance.md": "13b3b8e23f05cf3d433dd1383a8f1f59f2a5d5586c2ea5413c0caa8ee7059199",
     "docs/plan/frontend.md": "60a94396354064d4de457964276c721e817bc9b7190ccae2678cb3f83284fabc",
     "docs/plan/modules/ai-hub.md": "b95b2996692fcef54d168477b80278214157257762b4fb7839b5918435aa677b",
@@ -70,7 +70,7 @@
     "docs/testing/recommendations.md": "09640bf8c9269bff7cd7ffa341d0f99a76e4ba056d801f4af99204d6d08af15a",
     "docs/testing/relationship-graph.md": "7f3aaa37d76e80a9d2a5e54c9e2fa52102ba5830594121275ebefb278a5e2b91",
     "docs/testing/source-conformance.md": "36473ecd59994220f4bf3273631c84e5042e4a5abe81ba3666a047624b82beda",
-    "docs/testing/wiki-composition.md": "c7d95e27e5fc37995025af596f90d5a50334f0defa9c51aca4abb8e9b37befe2",
+    "docs/testing/wiki-composition.md": "951d79cdc5040f703b7712fae630e5c00c64719c1705cb59ddb6edbeb7237a30",
     "docs/testing/database/check_design.py": "72cf4386cc4ff3d9f076054b7de6d6099d1bbb124a0f66d6e93bdd6f0e86d5e2"
   }
 }

@@ -47,8 +47,8 @@ seconds. No schema migration or frontend visual change is required.
 
 `task services-main:db:collection-authority:check` runs the
 [authority fixture](../../services/main/scripts/check-collection-authority.ts).
-The [pinned run](database/collection-authority-evidence.json) passes 29 checks and
-22 HTTP requests. Public and ordinary authenticated readers cannot inspect private
+The [pinned run](database/collection-authority-evidence.json) passes 34 checks and
+24 HTTP requests. Public and ordinary authenticated readers cannot inspect private
 curation history; owners and current editors can, consistently with the existing
 `canViewHistory` capability. This authority does not disclose private member bodies.
 
@@ -62,11 +62,15 @@ Stateful HTTP cases preserve produced revision IDs through additions, stale CAS,
 restoration and metadata/status changes. An editor can repeat the existing status
 while editing metadata but cannot change it without the status permission. The
 concurrency cases verify expiry rollback, reciprocal references between two
-Collections and lifecycle-lock ordering during metadata edits.
+Collections and lifecycle-lock ordering during metadata edits. A separate target
+read grant expires while the member insert waits on the Collection aggregate row.
+The original request returned 200 and inserted the member; it now returns 404 and
+preserves membership, aggregate state, the revision head and the revision set.
 
-Backend tests pass 333 files/1,796 tests; 45 focused tests and backend TypeScript
+Backend tests pass 333 files/1,796 tests; 37 focused tests and backend TypeScript
 pass. The wiki composition regression retains 35 checks/12 requests/two races.
-OpenAPI/SDKs were regenerated; all three SDK and web TypeScript checks pass.
-No schema migration is required. The API/UI design guidance is applied by sharing
+The preceding curation-authority change regenerated OpenAPI/SDKs and passed all
+three SDK and web TypeScript checks; this target-read fix changes no generated
+contracts. No schema migration is required. The API/UI design guidance is applied by sharing
 the existing history-capability policy with server enforcement; no UI capability
 or cardinality is reduced to fit a control.

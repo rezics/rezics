@@ -88,5 +88,20 @@ Collection references and a status-lock holder to prevent regressions.
 A status change still requires `unit.status.update` independently from ordinary
 editing. Repeating the locked status does not manufacture a new permission
 requirement. Mutation CAS and membership ordering retain their existing owners.
-These constant-size authority checks add no persisted rows or indexes; long
+These constant-size parent authority checks add no persisted rows or indexes; long
 history callbacks still extend lock lifetime and need the remaining capacity work.
+
+Item additions check current readability of each distinct requested target and
+implicit Review subject both before mutation and after membership, aggregate and
+history writes. Expiry during those writes rejects the request and rolls back the
+member, count and revision/head changes together. Moves and removals introduce no
+new targets and do not add target-read checks.
+
+For `B` addition commands, the final pass adds at most `2B` authorization decisions
+and retains at most `2B` native IDs in memory. The 10,000-command API limit therefore
+bounds each pass at 20,000 distinct targets; it does not establish acceptable
+latency at that limit. No rows, indexes or corpus scans are added by this fix at
+either the 500,000,000-row baseline or 3,000,000,000-row estimate. Sequential target
+decisions and whole-Collection snapshot/history work remain capacity risks: qualify
+batched current-authority evaluation, bounded history work, request deadlines and
+hot-Collection contention before claiming scale acceptance.

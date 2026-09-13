@@ -52,7 +52,8 @@ export async function applyCollectionBatch(
 		readonly errors: CollectionBatchErrorFactory;
 	},
 ) {
-	return mutateCollectionStructureWithPlannedHistory(
+	const readableTargetIds = new Set<string>();
+	const result = await mutateCollectionStructureWithPlannedHistory(
 		tx,
 		{
 			collectionId: input.collectionId,
@@ -67,10 +68,8 @@ export async function applyCollectionBatch(
 			if (requestedTargetIds.includes(input.collectionId))
 				throw input.errors.invalid("a Collection cannot contain itself");
 			const reviewSubjectByTargetId = await reviewSubjectsForTargets(tx, requestedTargetIds);
-			const readableTargetIds = new Set([
-				...requestedTargetIds,
-				...reviewSubjectByTargetId.values(),
-			]);
+			for (const targetId of [...requestedTargetIds, ...reviewSubjectByTargetId.values()])
+				readableTargetIds.add(targetId);
 			if (readableTargetIds.has(input.collectionId))
 				throw input.errors.invalid("a Collection cannot contain itself as a Review subject");
 			for (const targetId of readableTargetIds) await input.ensureTargetReadable(targetId);
@@ -149,4 +148,7 @@ export async function applyCollectionBatch(
 			};
 		},
 	);
+	// Grants may expire while membership, aggregate or history writes wait.
+	for (const targetId of readableTargetIds) await input.ensureTargetReadable(targetId);
+	return result;
 }
