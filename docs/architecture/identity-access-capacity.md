@@ -567,3 +567,14 @@ primary-key pages by preference and account/client head indexes, child before pa
 in at most 500-row batches. Whole history scans and per-resource default copies are
 not part of this protocol. Native capture/change/erasure races and plans remain
 unqualified until verification.
+
+## Private recipient selectors
+
+Selectors add no persisted relation. Each token has at most 512 encoded characters
+and at most five minutes of validity, with associated context capped at 8 KiB.
+Each mint performs per-token HKDF and authenticated encryption; each resolution
+authenticates before parsing the private payload. A 100-row page can add up to
+50 KiB of encoded handles before presentation data. Bound endpoint admission and
+measure mint/resolve cost at the declared roster rate before capacity acceptance.
+The shared opaque-value owner also serves Collection continuations, whose own
+4 KiB token cap and disclosure checks remain separate.

@@ -743,6 +743,23 @@ not submit an internal principal ID to choose their authentication identity.
 Recipient selectors for private grants return purpose-scoped opaque handles with
 authorized presentation; resolve them privately and revalidate at mutation.
 
+The private selector codec encrypts the subject value and a lifetime of at most five
+minutes. Authenticated associated data binds the viewer principal, verified
+credential/client audience, canonical authority selection, scope and purpose.
+Representation references are normalized as a set for that binding. A selector
+from another viewer, context or purpose is invalid; malformed and expired tokens
+share one non-disclosing error. Decryption is not current permission or recipient
+eligibility, and callers must admit both selection disclosure and later mutation.
+
+Selectors reuse the Collection cursor's per-token HKDF/AES-256-GCM envelope through
+one opaque-value owner, with distinct purpose labels. A fresh 16-byte salt, 12-byte
+nonce and 16-byte authentication tag avoid a shared deployment nonce counter.
+The existing Collection prefix and context remain its own contract. Node's
+[HKDF and authenticated encryption APIs](https://nodejs.org/api/crypto.html),
+reviewed September 15, 2026, supply the primitives; this does not qualify the new
+recipient codec on Bun or its future API disclosure integration. A signed plaintext
+handle was rejected because it would expose its stable private subject value.
+
 | Capability family | Required interface behavior |
 | --- | --- |
 | Usable identities/defaults | List only identities the actor can currently use, with eligible operations and bounded continuation; separately set account/app defaults by revision. No controller-graph enumeration. |
