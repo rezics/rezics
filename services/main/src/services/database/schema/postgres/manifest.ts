@@ -11,6 +11,7 @@ export const PostgreSqlSchemaFileNames = [
 	"reference-value.sql",
 	"access-identity.sql",
 	"access-role.sql",
+	"access-membership.sql",
 	"account-tag-reference.sql",
 	"revision-reference.sql",
 	"association-proposal-authority.sql",
@@ -88,6 +89,10 @@ export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly 
 };
 
 export const PostgreSqlSchemaFunctionNames = [
+	"guard_access_membership_head",
+	"guard_access_membership_event",
+	"guard_access_membership_admission",
+	"validate_access_membership_history",
 	"guard_access_role_head",
 	"guard_access_role_event",
 	"guard_access_role_revision",
@@ -385,6 +390,14 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "access_membership", name: "access_membership_head_guard" },
+	{ table: "access_membership_event", name: "access_membership_event_guard" },
+	{ table: "access_membership_event", name: "access_membership_event_immutable" },
+	{ table: "access_membership_admission", name: "access_membership_admission_guard" },
+	{ table: "access_membership_admission", name: "access_membership_admission_immutable" },
+	{ table: "access_membership", name: "access_membership_head_complete" },
+	{ table: "access_membership_event", name: "access_membership_event_complete" },
+
 	{ table: "access_role", name: "access_role_head_guard" },
 	{ table: "access_role_event", name: "access_role_event_guard" },
 	{ table: "access_role_event", name: "access_role_event_immutable" },

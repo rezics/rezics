@@ -1,0 +1,231 @@
+{
+  "baseCommit": "30d992dff56971b31afaaa94c7469c4667b3a19c",
+  "sourceDigests": {
+    "services/main/scripts/check-access-memberships.ts": "6059c7c69143eb8d03da9789c70f3ad4f8131bf4831b32c89b0efdd76268537d",
+    "services/main/src/services/authorization/memberships.ts": "2486bb7b035a82cdeb23589f2749f4e5e83ee04b9e1f5fbd507bf12d88d398ad",
+    "services/main/src/services/database/schema/access-membership.ts": "2c320ed47efc6c9d3adb4e4f311f1fecf21ce68d04726af8c808de14b061bd23",
+    "services/main/src/services/database/schema/postgres/access-membership.sql": "9ecd4d89dc5a115703d9c1569335cc81cb6bef1660c4d9ed0f62557edd4f3fbd",
+    "services/main/src/services/database/migrations/atlas.sum": "b07253bf082db9a84a2a000f38a7796a5a6d22feb0a36fd0836076bbc43a8291"
+  },
+  "node": "v26.8.2",
+  "runtime": {
+    "postgres": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit"
+  },
+  "assertions": 51,
+  "sampleSeed": "857731ef-b2a5-4edf-9c24-799072f436b9",
+  "measured": [
+    {
+      "table": "access_membership",
+      "plan": [
+        {
+          "Plan": {
+            "Node Type": "Index Scan",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "access_membership_subject_scope_idx",
+            "Relation Name": "access_membership",
+            "Alias": "access_membership",
+            "Startup Cost": 0.28,
+            "Total Cost": 8.29,
+            "Plan Rows": 1,
+            "Plan Width": 72,
+            "Actual Startup Time": 0.037,
+            "Actual Total Time": 0.037,
+            "Actual Rows": 1,
+            "Actual Loops": 1,
+            "Disabled": false,
+            "Index Cond": "((subject_id = 'c014dce0-d5f2-81c7-8ba4-934768bd2a66'::uuid) AND (scope_id = '01a0a069-6dba-7e7a-9bac-16c116b392f8'::uuid))",
+            "Rows Removed by Index Recheck": 0,
+            "Index Searches": 1,
+            "Shared Hit Blocks": 3,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Shared I/O Read Time": 0,
+            "Shared I/O Write Time": 0,
+            "Local I/O Read Time": 0,
+            "Local I/O Write Time": 0,
+            "Temp I/O Read Time": 0,
+            "Temp I/O Write Time": 0
+          },
+          "Planning": {
+            "Shared Hit Blocks": 55,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Shared I/O Read Time": 0,
+            "Shared I/O Write Time": 0,
+            "Local I/O Read Time": 0,
+            "Local I/O Write Time": 0,
+            "Temp I/O Read Time": 0,
+            "Temp I/O Write Time": 0
+          },
+          "Planning Time": 0.178,
+          "Triggers": [],
+          "Execution Time": 0.051
+        }
+      ],
+      "bytes": {
+        "rows": 1003,
+        "tuple_bytes": 95.98105682951146,
+        "table_bytes": 229376,
+        "index_bytes": 360448
+      }
+    },
+    {
+      "table": "access_membership_admission",
+      "plan": [
+        {
+          "Plan": {
+            "Node Type": "Index Scan",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "access_membership_admission_pkey",
+            "Relation Name": "access_membership_admission",
+            "Alias": "access_membership_admission",
+            "Startup Cost": 0.28,
+            "Total Cost": 8.3,
+            "Plan Rows": 1,
+            "Plan Width": 32,
+            "Actual Startup Time": 0.007,
+            "Actual Total Time": 0.007,
+            "Actual Rows": 1,
+            "Actual Loops": 1,
+            "Disabled": false,
+            "Index Cond": "((membership_id = '01a0a069-6dd4-717d-91ac-e990c7d2970e'::uuid) AND (generation = 26))",
+            "Rows Removed by Index Recheck": 0,
+            "Index Searches": 1,
+            "Shared Hit Blocks": 3,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Shared I/O Read Time": 0,
+            "Shared I/O Write Time": 0,
+            "Local I/O Read Time": 0,
+            "Local I/O Write Time": 0,
+            "Temp I/O Read Time": 0,
+            "Temp I/O Write Time": 0
+          },
+          "Planning": {
+            "Shared Hit Blocks": 22,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Shared I/O Read Time": 0,
+            "Shared I/O Write Time": 0,
+            "Local I/O Read Time": 0,
+            "Local I/O Write Time": 0,
+            "Temp I/O Read Time": 0,
+            "Temp I/O Write Time": 0
+          },
+          "Planning Time": 0.066,
+          "Triggers": [],
+          "Execution Time": 0.013
+        }
+      ],
+      "bytes": {
+        "rows": 1054,
+        "tuple_bytes": 55.997153700189756,
+        "table_bytes": 90112,
+        "index_bytes": 73728
+      }
+    },
+    {
+      "table": "access_membership_event",
+      "plan": [
+        {
+          "Plan": {
+            "Node Type": "Index Scan",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "access_membership_event_pkey",
+            "Relation Name": "access_membership_event",
+            "Alias": "access_membership_event",
+            "Startup Cost": 0.28,
+            "Total Cost": 8.3,
+            "Plan Rows": 1,
+            "Plan Width": 167,
+            "Actual Startup Time": 0.006,
+            "Actual Total Time": 0.006,
+            "Actual Rows": 1,
+            "Actual Loops": 1,
+            "Disabled": false,
+            "Index Cond": "((membership_id = '01a0a069-6dd4-717d-91ac-e990c7d2970e'::uuid) AND (version = 51))",
+            "Rows Removed by Index Recheck": 0,
+            "Index Searches": 1,
+            "Shared Hit Blocks": 3,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Shared I/O Read Time": 0,
+            "Shared I/O Write Time": 0,
+            "Local I/O Read Time": 0,
+            "Local I/O Write Time": 0,
+            "Temp I/O Read Time": 0,
+            "Temp I/O Write Time": 0
+          },
+          "Planning": {
+            "Shared Hit Blocks": 53,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Shared I/O Read Time": 0,
+            "Shared I/O Write Time": 0,
+            "Local I/O Read Time": 0,
+            "Local I/O Write Time": 0,
+            "Temp I/O Read Time": 0,
+            "Temp I/O Write Time": 0
+          },
+          "Planning Time": 0.116,
+          "Triggers": [],
+          "Execution Time": 0.013
+        }
+      ],
+      "bytes": {
+        "rows": 1107,
+        "tuple_bytes": 192,
+        "table_bytes": 262144,
+        "index_bytes": 172032
+      }
+    }
+  ]
+}

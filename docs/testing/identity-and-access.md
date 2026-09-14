@@ -235,3 +235,30 @@ The [role contract](../architecture/identity-and-access.md#scoped-role-definitio
 and [capacity envelope](../architecture/identity-access-capacity.md#role-definition-storage)
 define the selected behavior and remaining qualification. The existing IAM matrices
 remain the authority for actual mixed-user, ceiling, delegation and management flows.
+
+## Shared membership generation cases
+
+`task services-main:db:access-memberships:check` owns
+[check-access-memberships.ts](../../services/main/scripts/check-access-memberships.ts)
+on the disposable native target. It specifies one identity per scope/typed subject,
+immutable admissions, exact private actor/subject attribution, monotonically advancing
+control versions, stable command receipts and no revival of an old generation after
+leave/rejoin. A non-member or wrong selected subject cannot use the leave transition;
+owner-managed removal remains a separate command.
+
+Cases include Entity/principal UUID collisions, missing initial admission, immutable
+history, stale commands, replay, owner-policy denial, savepoint rollback, competing
+first admission, denial/unavailability on receipt reuse, changed receipt intent and
+expiry after demonstrated head and later audit-FK lock waits. Final-mutation
+unavailability and caught failures leave no provisional generation or receipt. A 1,000-membership
+sample and one identity with 100 further transitions record unforced exact-key
+plans and separate head/admission/event storage.
+These storage fixtures deliberately use SQL-admin policy predicates. They do not
+qualify actual invitation/rule consent, bans, Entity participation admission,
+representation, public/private rosters or current management authority. Those owners
+must supply their complete policy and fence closure before runtime integration.
+
+The [pinned native evidence](database/access-memberships-evidence.json) records 51
+passing assertions on PostgreSQL 18.6. The full schema gate separately verifies
+fresh replay, canonical SQL, constraints, PGroonga health and Drizzle drift. These
+results qualify the shared storage protocol, not the full IAM07 admission flow.

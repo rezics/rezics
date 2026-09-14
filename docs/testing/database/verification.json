@@ -1,6 +1,6 @@
 {
   "source_baseline_commit": "74079abd73d5fc43ac87ac7cae8a2074ca72d13d",
-  "schema_modules_and_sql_files_mapped": 162,
+  "schema_modules_and_sql_files_mapped": 164,
   "api_owner_directories_mapped": 39,
   "specified_cross_domain_scenarios": 124,
   "invariant_families": 14,
@@ -25,12 +25,12 @@
     "backup/restore drill"
   ],
   "sha256": {
-    "current-schema-map.tsv": "7de2cbca727945c8ddfe10e8a4d8d42610bf3eaf46b8a42fd0ad383429a617ea",
+    "current-schema-map.tsv": "9b46d6530fd9cf864b33c48204944d27cf7e5227c0cc394ff905d83e43047a54",
     "api-coverage.tsv": "58c2695b7e36c5ba5cd30c04728e1326c567cd19a2e51ae7b0f32c04ada7d999",
     "scenarios.tsv": "07738e2923baef54d4e4baebedc79b5b5dc25e2196685b51cd170c40f34c7cda",
     "capacity.json": "00565a116367dbdaee7cbddd4e1e0c8ace7be142546c0b46b436f1a32c8b23d4",
     "capacity.md": "7117a8893f40bcfd09a116d974ad2ef3d06b2e6f7d47d725a80c2f1e54e13f84",
-    "dependency-manifest.json": "8b63197452dfe4eccac2b4594f271a8e493bfa4de678fb0a3e98b69de4612f99"
+    "dependency-manifest.json": "64da95357e07e73d4f3ccc87606c0cde97e405f73b92df400fabb24ecabe1fc6"
   },
   "artifact_paths": {
     "current-schema-map.tsv": "docs/testing/database/current-schema-map.tsv",
@@ -51,11 +51,11 @@
     "docs/architecture/database/design-evidence.md": "a1474388ff5e568b85f8ca021c5114ee796b7675f1227555ec65ea4593b8e811",
     "docs/architecture/database/native-work.md": "9c26c9330ca030b10bb92d1d4595acba6f0dbceffc9538749849820faa1e5e39",
     "docs/architecture/database/relationship-graph.md": "434e3605f60744bc4325193bdc3dab3f4effa95933ab54d5b2acb805fc1bf123",
-    "docs/architecture/identity-access-capacity.md": "4bc28178a060a315edde51b2ee3d29a40342d5f390bba156761aff43823840fa",
+    "docs/architecture/identity-access-capacity.md": "f2ffc4c4923acda759b9fb94c8da3c900d8a6f8b8622c7c048972f74120582bc",
     "docs/architecture/identity-and-access-experience.md": "b76f3949bba7ade8b2584aac2ca640ac77c270b1a21f605df2339b0a2e955f9b",
-    "docs/architecture/identity-and-access.md": "d94457ede5ce1e3862e27eaa6505b82e23bf0087f1dc7f4f53631e213bf5aea2",
+    "docs/architecture/identity-and-access.md": "9333a69e56dc0fc18f39fd47a85c1782e157a03806594414c2ba90efb77e24aa",
     "docs/architecture/product-design-principles.md": "56ef4508dd3fa0dde7410147d33826e94917dc95550f46da7330ed055db63824",
-    "docs/plan/README.md": "1e2f0093ef616d8cd7b1af75920fe95d115893fc3816d3f7e58fb6a82e8afa45",
+    "docs/plan/README.md": "adcb9bef9f5b6e4c766b60f01aea72ec0cd95daa50c1544d2985c8ea6f76dc3c",
     "docs/plan/backend-acceptance.md": "492c34a8b124fdf0acf70fe2b1cb8033d60b24c66fc62afd995c909637a7285e",
     "docs/plan/frontend.md": "cb943560fe058c27ab2ec235a216096ac4c51d5520561960521d50aabab3b1c6",
     "docs/plan/modules/ai-hub.md": "c92ed55823ffa90e46a2ad9ba39ee71c12e08013d1a4408c91df625ce0c856cd",
@@ -63,7 +63,7 @@
     "docs/plan/modules/community-and-governance.md": "b035fb75b24e8d232d96849f26a6e69021834da483f40ee433f59f7e610e7963",
     "docs/plan/modules/content-and-media.md": "60f16af72ef3e4fe293457c3d4a254504747746a4cea6bfded46226363cb80e5",
     "docs/plan/modules/creation-and-reading.md": "80781783b1c5e9311ae303908f9db493c927715c97ef6ddbee80d61bf8983073",
-    "docs/plan/modules/foundation.md": "284aa2821f28aa6e6bb6dde5d12dc010edd1f79bac2d78fba70f6d38b270a633",
+    "docs/plan/modules/foundation.md": "facad486ce32a0fa22fe33560a7637633ccbe257c0bd9847e4481aa2b8a259e6",
     "docs/plan/modules/knowledge-and-graph.md": "41eb1c4ef1b750416fe99f2b5ef98f5fadc0e34840918467a487e1c2e682f322",
     "docs/plan/modules/search-and-operations.md": "2562baca3f45ee8424b68f96ed7ae7a96e866e27ecec1b949ad1dc2867bcecf5",
     "docs/plan/modules/sources-and-converters.md": "459d30487d3bab4c0708c402a175d6ec6d45d02105a04d436a01ac30b2d627ef",
@@ -75,13 +75,13 @@
     "docs/testing/book-and-creation.md": "7c8d509dfb59717b44bd1a376dbe16eefe45c9e779139e9028ce3c8da42d9823",
     "docs/testing/content-composition.md": "1428b6eafb6408599bd252d6648ca4bc69a2d6bc9e77bc5a69f702d2f07af131",
     "docs/testing/foundation.md": "41c924c79549d537fe8f2091a402a6ac0463672c4940dcb28f88f7a5da50d43e",
-    "docs/testing/identity-and-access.md": "11a3fb0f2b42764e7361cbc0f212b59cfa59580b8bd9946d9da5d6aaf0e05f16",
+    "docs/testing/identity-and-access.md": "c7eec0034682c5ab467596b997915f53b820a3503c12904b0bdde2e0f90e7556",
     "docs/testing/known-failures.md": "8597f8212e03d70488fc2fb9568d89823f4515e1409918f26ede9c3fd80114f8",
     "docs/testing/native-work.md": "534947fd5b77a2788dfc57287b308a4c975372956445cac2c88529f367fe08e5",
     "docs/testing/recommendations.md": "09640bf8c9269bff7cd7ffa341d0f99a76e4ba056d801f4af99204d6d08af15a",
     "docs/testing/relationship-graph.md": "894859fa72a616701d161d81dee4aed8411938b77916bc35b996289619e5a961",
     "docs/testing/source-conformance.md": "4ea670aa289cf080a1d6838a275b0b662fd3d4ced595a2e35e35d4cd12d27e5c",
     "docs/testing/wiki-composition.md": "951d79cdc5040f703b7712fae630e5c00c64719c1705cb59ddb6edbeb7237a30",
-    "docs/testing/database/check_design.py": "c7fba66ddaa08d5dcf34b9f3c393a766697920cd59da7c88592c9de7484fa3fc"
+    "docs/testing/database/check_design.py": "aaeba138d88d560e9ad0ea6478518c38d30a703c46a37e56f9d9f1e89ee14d20"
   }
 }

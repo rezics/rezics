@@ -27,7 +27,7 @@ SOURCE_BASELINE_COMMIT = "74079abd73d5fc43ac87ac7cae8a2074ca72d13d"
 
 GROUPS = {
     "D01": "base columns contract-values index platform-identity slug unit-reference-columns unit-reference-consumers unit-merge catalog-identity reference-value revision-reference",
-    "D02": "access access-identity access-role auth participation organization-membership account-control",
+    "D02": "access access-identity access-role access-membership auth participation organization-membership account-control",
     "D03": "catalog-facts catalog-definition-governance catalog-definition-terms entity",
     "D04": "catalog-names content-language unit",
     "D05": "catalog-distribution catalog-publishing catalog-program catalog-structure-history",
@@ -46,7 +46,7 @@ FILE_GROUP = {name: group for group, names in GROUPS.items() for name in names.s
 
 SQL_GROUPS = {
     "D01": "merge-integrity native-bootstrap unit-reference-integrity reference-value revision-reference",
-    "D02": "access-identity access-role organization-membership participation-integrity participation-private-state unit-license-grant",
+    "D02": "access-identity access-role access-membership organization-membership participation-integrity participation-private-state unit-license-grant",
     "D03": "association-proposal-authority catalog-definition-governance catalog-definition-terms catalog-semantics-integrity realm-tag-authority",
     "D04": "catalog-name-integrity catalog-name-search catalog-editorial content-language-search",
     "D05": "catalog-distribution-integrity catalog-structure-history",

@@ -240,3 +240,40 @@ approximately 130, 64 and 192 bytes respectively. Table/index bytes are
 344,064/98,304, 196,608/196,608 and 262,144/172,032. The long-history probes use their
 complete revision, permission and event primary keys. The sample has short labels
 and null descriptions; it is not evidence for maximum payloads or sustained load.
+
+## Membership generation storage
+
+Shared membership identity is unique by scope and typed subject. Each new admission
+adds one immutable generation; departure preserves it and clears only the head's
+active selection. Rejoin creates a different generation, so generation-bound groups
+and grants cannot revive by matching the membership identity alone.
+
+| Relation | Planning bytes/row including indexes | 500M, GB | 3B, GB |
+| --- | --- | --- | --- |
+| Membership head and scope/subject indexes | 640 | 320 | 1,920 |
+| Retained admission generation | 192 | 96 | 576 |
+| Private transition event/receipt | 448 | 224 | 1,344 |
+
+Counts are independent: M identities with G admissions each create M*G admission
+rows, plus their separate departure/control events. These estimates exclude bloat,
+WAL, replicas, backups and reserve. Both global planning scales apply even when an
+individual scope has few members. Head lookup uses the scope/subject unique index;
+reverse subject/scope and exact admission/event keys avoid roster expansion.
+
+An admission writes a receipt, an admission key and one head update; departure
+writes a receipt and a head update. Neither scans or rewrites old group assignments.
+Permission and disclosure owners must compare the recorded admission key against the
+current active generation and enforce actor/subject eligibility and independent
+restrictions. They must not treat an active head as a complete access decision.
+Current policy predicates run before writes, after head-lock waits and in the final
+update. The native sample measures 1,000 memberships plus a member with 100 further
+transitions, checking exact history keys and separate generation/event rows;
+full policy, hot-scope throughput, cleanup and restore remain separate qualification.
+
+The [pinned native sample](../testing/database/access-memberships-evidence.json)
+contains 1,003 heads, 1,054 admission generations and 1,107 events. Mean tuple widths
+are approximately 96, 56 and 192 bytes; table/index bytes are 229,376/360,448,
+90,112/73,728 and 262,144/172,032. Head sizing includes reserve above the observed
+fresh insert/update footprint; sustained churn and vacuum still require measurement.
+The two history probes use their complete primary keys, while the head probe uses
+the equivalent subject/scope index. These small samples are not capacity acceptance.

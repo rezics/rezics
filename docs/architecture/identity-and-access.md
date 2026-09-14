@@ -152,6 +152,40 @@ Inherited members are not copied into direct membership. Reject cycles and
 validate reparenting as an authority change. Resource ancestry and role composition
 are separate relationships, never inferred from Org/Realm/Team names.
 
+### Shared membership generations
+
+Use one scope/subject membership identity for both admitted Entity participation
+and private principal operations. Its current head carries a control version and
+last admission generation; an active-generation pointer is separate from that
+identity. An inactive or merely reserved identity grants nothing. Invitations,
+applications and rule acknowledgement remain owning-policy inputs rather than
+alternative interpretations of an active membership row.
+
+Each admission generation has a retained concrete key. Joining after departure
+creates a new generation; ending membership clears its active selection without
+rewriting previous admission identity. Group assignments and any membership-dependent
+bindings reference the exact admission key and are effective only while the head
+still selects that generation. This permits retained evidence while preventing
+old privileged assignments from reviving on rejoin. An independent institutional
+assignment still ignores its issuer's departure, but any declared recipient
+eligibility dependency remains live.
+
+Group membership and parent relations keep the owning scope in their concrete keys.
+A parent belongs to the same scope, and one Group has at most one current parent.
+Current child membership can use parent grants without copying rows into a second
+roster. Parent changes serialize on their scope's tree fence and reject cycles and
+excess depth before becoming visible. Assignment impact and recovery continuity are
+additional authorization requirements, not consequences of a valid FK or acyclic
+shape. Private operational membership never becomes a public Entity roster entry
+merely because a presentation can be shown for its subject.
+
+Admission commands require current owner policy, actor eligibility and the correct
+subject's consent/representation basis where applicable. Mute/ban/enforcement state
+is independent from admission generations: leave, rejoin and Group changes neither
+clear it nor bypass its current effect. Those owner policies, disclosure, invitation
+and erasure flows must pass native tests before the old Org/Realm consumers are
+replaced; the shared storage primitives alone do not qualify them.
+
 ## Roles and grants
 
 Permissions are the canonical atomic operations in [@rezics/access](../../libraries/access/README.md).
