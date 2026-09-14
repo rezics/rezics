@@ -120,3 +120,33 @@ sharding, specify routing keys, cross-owner references, uniqueness, fencing,
 revocation and restore frontiers. Hash partitioning alone provides no additional
 machine capacity or global uniqueness. A 3B-row layout may require a different
 topology; no local fixture or published vendor result waives that qualification.
+
+## Opaque protocol cost
+
+The [selected external profile](connected-apps.md#qualified-external-token-profile)
+stores one opaque access-token row for each issuance, including client credentials.
+User offline issuance also creates a refresh-token row; rotation creates new access
+and refresh rows and retains/revokes prior records under the provider lifecycle.
+Count these rows separately from consent, installation and live dependency records.
+The existing 256-512 bytes per active credential estimate remains 128-256 GB at
+500M rows and 768-1536 GB at 3B rows, before retained revoked tokens, payloads, WAL,
+replicas and reserve. The adapter fixture does not measure or accept that width.
+
+The September 14, 2026 Bun/Drizzle fixture counted nine SQL statements for each of
+two successful opaque MCP verifications through authenticated HTTP introspection.
+These are small warm protocol-only samples, including provider client/token/user/
+session and resource-link probes, with no REZICS domain authorization. At 10,000
+verifications/s this observed path alone implies 90,000 statements/s; at the
+fivefold burst it implies 450,000/s. This arithmetic is not measured throughput.
+It would consume nine of the proposed twelve combined statements per decision,
+leaving only three for domain policy; do not accept that combined budget without
+measuring the actual composition.
+
+The next capacity qualification must measure complete domain decisions, cold/warm
+plans, unique token-digest and reverse dependency indexes, hot clients, repeated
+introspection, expiry/rotation cleanup and retained families. Profile activation
+requires bounded credential admission/retention and indexed cleanup of at most
+500 small rows per batch. Optimize private in-process verification or bounded
+shared reads if the remote protocol overhead prevents the combined target, while
+preserving exact live revocation and the external privacy presentation boundary.
+No offline allow cache or larger unchecked query budget is elected by this fixture.

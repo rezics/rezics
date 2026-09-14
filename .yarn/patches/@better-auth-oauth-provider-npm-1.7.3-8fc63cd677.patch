@@ -1,0 +1,44 @@
+diff --git a/dist/introspect-CbhhXT0E.mjs b/dist/introspect-CbhhXT0E.mjs
+index e5829d8e200dbb7fe3f451b62d085b0f29856b05..8a0f93009a30072b6a350f16ab4b5ad2b1d6defe 100644
+--- a/dist/introspect-CbhhXT0E.mjs
++++ b/dist/introspect-CbhhXT0E.mjs
+@@ -1797,7 +1797,7 @@ async function createUserTokens(ctx, opts, params) {
+ 	const exp = grantIssuance.accessTokenExpiresAtSeconds;
+ 	const refreshTokenExp = grantIssuance.refreshTokenExpiresAtSeconds;
+ 	const isRefreshToken = user && clientAllowsGrant(client, "refresh_token") && (existingRefreshToken?.scopes?.includes("offline_access") || scopes.includes("offline_access"));
+-	const isJwtAccessToken = audienceClaim && !opts.disableJwtPlugin;
++	const isJwtAccessToken = audienceClaim && !opts.disableJwtPlugin && !opts.forceOpaqueAccessTokens;
+ 	const isIdToken = user && effectiveScopes.includes("openid");
+ 	const metadata = parseClientMetadata(client.metadata);
+ 	const additionalIdTokenClaims = isIdToken && user ? {
+@@ -2494,8 +2494,10 @@ async function resolveIntrospectionSub(ctx, opts, payload, introspectingClient)
+ 	const issuingClient = issuerClientId === introspectingClient.clientId ? introspectingClient : await getClient(ctx, opts, issuerClientId);
+ 	if (!issuingClient) return payload;
+ 	const resolvedSub = await resolveSubjectIdentifier(payload.sub, issuingClient, opts);
++	// A shared session key would undo pairwise subject privacy across clients.
++	const { sid: privateSessionId, ...pairwisePayload } = payload;
+ 	return {
+-		...payload,
++		...issuingClient.subjectType === "pairwise" && opts.pairwiseSecret ? pairwisePayload : payload,
+ 		sub: resolvedSub
+ 	};
+ }
+diff --git a/dist/oauth-1Ud-hvZY.d.mts b/dist/oauth-1Ud-hvZY.d.mts
+index 130fd5d8f3ddd36d1b776338367af5b8cb7f0e79..241250642b217d9057abdfb99e5fea55fc2906ae 100644
+--- a/dist/oauth-1Ud-hvZY.d.mts
++++ b/dist/oauth-1Ud-hvZY.d.mts
+@@ -1833,6 +1833,14 @@ interface OAuthOptions<Scopes extends readonly Scope[] = InternallySupportedScop
+    * @default false
+    */
+   disableJwtPlugin?: boolean;
++  /**
++   * Issue opaque access tokens even for resource-bound grants, independently
++   * of JWT signing for OIDC ID tokens. Internal validation retains the private
++   * user identity; pairwise clients receive scoped subjects through UserInfo
++   * and authenticated introspection. Requires online token validation.
++   * @default false
++   */
++  forceOpaqueAccessTokens?: boolean;
+   /**
+    * Rate limit configuration for OAuth endpoints.
+    *

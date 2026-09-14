@@ -1903,6 +1903,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@better-auth/core@patch:@better-auth/core@npm%3A1.7.3#~/.yarn/patches/@better-auth-core-npm-1.7.3-79aeed22f4.patch":
+  version: 1.7.3
+  resolution: "@better-auth/core@patch:@better-auth/core@npm%3A1.7.3#~/.yarn/patches/@better-auth-core-npm-1.7.3-79aeed22f4.patch::version=1.7.3&hash=de6e5d"
+  dependencies:
+    "@opentelemetry/semantic-conventions": "npm:^1.41.1"
+    "@standard-schema/spec": "npm:^1.1.0"
+    zod: "npm:^4.5.4"
+  peerDependencies:
+    "@better-auth/utils": 0.4.2
+    "@better-fetch/fetch": 1.3.1
+    "@cloudflare/workers-types": ">=4"
+    "@opentelemetry/api": ^1.9.0
+    better-call: 1.4.0
+    jose: ^6.1.0
+    kysely: ^0.28.5 || ^0.29.0
+    nanostores: ^1.0.1
+  peerDependenciesMeta:
+    "@cloudflare/workers-types":
+      optional: true
+    "@opentelemetry/api":
+      optional: true
+  checksum: 10c0/23052c22c42be93a5555b19ebefdc215d1c6ceba66457d882d2ef1f1330233197f87efab0d3fbb234443c8e53a327b640723297c6aeb588dee35593c945e4b54
+  languageName: node
+  linkType: hard
+
 "@better-auth/drizzle-adapter@npm:1.7.3":
   version: 1.7.3
   resolution: "@better-auth/drizzle-adapter@npm:1.7.3"
@@ -1931,6 +1956,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@better-auth/mcp@npm:1.7.3":
+  version: 1.7.3
+  resolution: "@better-auth/mcp@npm:1.7.3"
+  dependencies:
+    "@better-auth/oauth-provider": "npm:^1.7.3"
+    jose: "npm:^6.1.3"
+  peerDependencies:
+    "@better-auth/core": ^1.7.3
+    better-auth: ^1.7.3
+    better-call: 1.4.0
+  checksum: 10c0/001afb1fff6cd061cab350a2f0c3ddb8a01568924654ac3c8df05a83352873beadac3e1bea490425b1b310c112f41235ad91374b52d7028b0c805700e286ffe0
+  languageName: node
+  linkType: hard
+
 "@better-auth/memory-adapter@npm:1.7.3":
   version: 1.7.3
   resolution: "@better-auth/memory-adapter@npm:1.7.3"
@@ -1952,6 +1991,38 @@ __metadata:
     mongodb:
       optional: true
   checksum: 10c0/3d919a737f8eca0c45be00a92f6c31918d89c038d16c1e61acff8579e3ed73208e427881c44abf86642661947a549392c55d89379ff99a18c3ca3de703b0fcfa
+  languageName: node
+  linkType: hard
+
+"@better-auth/oauth-provider@npm:1.7.3":
+  version: 1.7.3
+  resolution: "@better-auth/oauth-provider@npm:1.7.3"
+  dependencies:
+    jose: "npm:^6.2.3"
+    zod: "npm:^4.5.4"
+  peerDependencies:
+    "@better-auth/core": ^1.7.3
+    "@better-auth/utils": 0.4.2
+    "@better-fetch/fetch": 1.3.1
+    better-auth: ^1.7.3
+    better-call: 1.4.0
+  checksum: 10c0/613d4ae3705ce8022f45c8a1943f2e2f1e00875a32d7d6ed4bf8aff72852e522dd00e6921aab8fd3d3f9e3ada74ccb6f61a14ecdf37c5ddc60e49aa72be10829
+  languageName: node
+  linkType: hard
+
+"@better-auth/oauth-provider@patch:@better-auth/oauth-provider@npm%3A1.7.3#~/.yarn/patches/@better-auth-oauth-provider-npm-1.7.3-8fc63cd677.patch":
+  version: 1.7.3
+  resolution: "@better-auth/oauth-provider@patch:@better-auth/oauth-provider@npm%3A1.7.3#~/.yarn/patches/@better-auth-oauth-provider-npm-1.7.3-8fc63cd677.patch::version=1.7.3&hash=27ab31"
+  dependencies:
+    jose: "npm:^6.2.3"
+    zod: "npm:^4.5.4"
+  peerDependencies:
+    "@better-auth/core": ^1.7.3
+    "@better-auth/utils": 0.4.2
+    "@better-fetch/fetch": 1.3.1
+    better-auth: ^1.7.3
+    better-call: 1.4.0
+  checksum: 10c0/c79e84c721eea927027472401d8d504d1713c7db1d1fd5ecdd7a7fc056726df78da0854b5231847128dc674599f66d6aaa07811287679fb3a5a04dd7e018d84b
   languageName: node
   linkType: hard
 
@@ -5763,6 +5834,8 @@ __metadata:
     "@better-auth/api-key": "npm:1.7.3"
     "@better-auth/core": "npm:1.7.3"
     "@better-auth/drizzle-adapter": "npm:1.7.3"
+    "@better-auth/mcp": "npm:1.7.3"
+    "@better-auth/oauth-provider": "npm:1.7.3"
     "@better-auth/utils": "npm:0.4.2"
     "@better-fetch/fetch": "npm:1.3.1"
     "@biomejs/biome": "npm:2.5.12"
@@ -13343,7 +13416,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jose@npm:^6.2.12, jose@npm:^6.2.3":
+"jose@npm:^6.1.3, jose@npm:^6.2.12, jose@npm:^6.2.3":
   version: 6.2.12
   resolution: "jose@npm:6.2.12"
   checksum: 10c0/e8582b946fabcae228819982dda4849908c353e9cb098f02f773635aa0d2f4917f17484c7441b8d526e564013b4cf96951455c94f81d0a39ee765bad44ce293d

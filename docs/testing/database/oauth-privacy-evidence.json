@@ -1,0 +1,95 @@
+{
+  "baseCommit": "0367d1308ac9c387136def28b068c40a0cce0edb",
+  "sourceDigests": {
+    "services/main/scripts/check-oauth-privacy.ts": "734b87d955ed1b59376d077a80b8c7114c606fef2659b7c788b9ad6d4b59a7d0",
+    "services/main/src/services/auth/oauth-resource-verification.test.ts": "4a8b39c9de9ccf3b2499af9ad3d5c44c9cc8b52cdbde16d7e7232a824365c7c7",
+    "services/main/package.json": "2ef928bec2877d3eb430a8c244fbcba6204a9ddc3f530e26464a779bca01ec2d",
+    "package.json": "a35bbb8da40d6553129168752d16fae5f36589ab9f55b8acbe089230a0ff6076",
+    "yarn.lock": "19c408a35e8726476cfd0303693e34c5b68aad02fa373710f11eea7e4f51b237",
+    ".yarn/patches/@better-auth-oauth-provider-npm-1.7.3-8fc63cd677.patch": "29ae498d508cdd987dfdd06ff6b8eb590afb77ce2b12c0ae6bba8a0ec153048f",
+    ".yarn/patches/@better-auth-core-npm-1.7.3-79aeed22f4.patch": "715595a8e02e130326ac3274413c4606b41f36d9a047d6759c5821cffffc9051"
+  },
+  "runtime": {
+    "node": "26.3.0",
+    "bun": "1.4.2",
+    "platform": "linux",
+    "architecture": "x64"
+  },
+  "postgres": {
+    "version": "PostgreSQL 18.6 on x86_64-redhat-linux-gnu, compiled by gcc (GCC) 16.1.1 20260515 (Red Hat 16.1.1-2), 64-bit"
+  },
+  "evidence": [
+    {
+      "disableJwtPlugin": false,
+      "forceOpaqueAccessTokens": false,
+      "clients": [
+        {
+          "confidential": false,
+          "rawPrincipalInAccessToken": true,
+          "idTokenIssued": true,
+          "pairwiseUserInfo": true
+        },
+        {
+          "confidential": true,
+          "rawPrincipalInAccessToken": true,
+          "idTokenIssued": true,
+          "pairwiseUserInfo": true
+        }
+      ]
+    },
+    {
+      "disableJwtPlugin": true,
+      "forceOpaqueAccessTokens": false,
+      "clients": [
+        {
+          "confidential": false,
+          "rawPrincipalInAccessToken": false,
+          "idTokenIssued": false,
+          "pairwiseUserInfo": true
+        },
+        {
+          "confidential": true,
+          "rawPrincipalInAccessToken": false,
+          "idTokenIssued": true,
+          "pairwiseUserInfo": true
+        }
+      ]
+    },
+    {
+      "disableJwtPlugin": false,
+      "forceOpaqueAccessTokens": true,
+      "clients": [
+        {
+          "confidential": false,
+          "signedOidcAndHashVerified": true,
+          "authenticatedIntrospectionPrivate": true,
+          "mcpAudienceAndScopeChecked": true,
+          "invalidBearerCannotUseCookie": true,
+          "refreshRotationAndReplayRevocation": true,
+          "wrongClientAndScopeWideningRejected": true,
+          "rawPrincipalInAccessToken": false,
+          "idTokenIssued": true,
+          "pairwiseUserInfo": true
+        },
+        {
+          "confidential": true,
+          "signedOidcAndHashVerified": true,
+          "authenticatedIntrospectionPrivate": true,
+          "mcpAudienceAndScopeChecked": true,
+          "invalidBearerCannotUseCookie": true,
+          "refreshRotationAndReplayRevocation": true,
+          "wrongClientAndScopeWideningRejected": true,
+          "rawPrincipalInAccessToken": false,
+          "idTokenIssued": true,
+          "pairwiseUserInfo": true
+        }
+      ],
+      "protocolReadSamples": [
+        9,
+        9
+      ],
+      "protectedResourceDiscovery": true,
+      "distinctMachineClientsAndRevocation": true
+    }
+  ]
+}

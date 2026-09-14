@@ -145,13 +145,10 @@ compatible declared Better Auth peer dependencies.
 This is dependency evidence, not tested Bun/Drizzle integration. Resolve these
 adapter questions before G2/G3 claims:
 
-- Preserve the external Principal-privacy contract. Better Auth documents pairwise
-  subjects for ID tokens/UserInfo/introspection but real user IDs in JWT access
-  tokens. Its reserved identity claims cannot simply be overwritten in callbacks.
-  Qualify opaque or otherwise privacy-preserving external issuance and authorized
-  introspection together with OIDC and MCP; do not expose the default JWT as a
-  supposedly private account abstraction. Disabling JWT has separate public-client
-  OIDC/MCP consequences and is not a pre-approved universal fix.
+- Use the [qualified external token profile](#qualified-external-token-profile)
+  for dependent schema/API work. Its Bun/Drizzle protocol fixture resolves the
+  token-format/public-client conflict; application policy and all external
+  response surfaces still require their owning tests.
 - Prove current consent/installation/representation checks on issuance, refresh,
   exchange and resource use. Provider revocation behavior alone does not implement
   the selected live-domain revocation contract, especially for machine JWTs.
@@ -181,6 +178,60 @@ Connecting REZICS outward to third-party MCP/services requires separate consent 
 secret ownership; never pass a REZICS-audience token through as another service's
 credential. Executing uploaded agents or hosting third-party MCP processes remains
 within the unresolved [Hub execution decisions](../research/ai-hub-execution.md).
+
+## Qualified external token profile
+
+The September 14, 2026 [executable qualification](../testing/identity-and-access.md#oauth-adapter-qualification)
+selects opaque access tokens, ordinary opaque refresh tokens and separately signed
+RS256 OIDC ID tokens. Keep JWT signing enabled and set the locally patched
+`forceOpaqueAccessTokens: true`. Admit user clients with server-owned
+`subject_type: "pairwise"` and a stable private `pairwiseSecret`; use authenticated
+online introspection with exact issuer/resource validation for API/MCP access.
+The public Entity claim remains a separately authorized domain claim, not the
+account subject. Never use the presented pairwise subject as a raw database user ID.
+
+Two reproducible Yarn patches against Better Auth 1.7.3 own the adapter delta:
+
+- [OAuth Provider patch](../../.yarn/patches/@better-auth-oauth-provider-npm-1.7.3-8fc63cd677.patch)
+  separates access-token format from OIDC signing and removes the global session
+  key from pairwise access/refresh introspection. Internal token validation retains
+  the real user/session keys needed for lookup and revocation.
+- [Core verification patch](../../.yarn/patches/@better-auth-core-npm-1.7.3-79aeed22f4.patch)
+  turns invalid remote token claims into authentication failures, allowing MCP to
+  return discovery challenges. Infrastructure failures remain operational errors.
+
+Default JWT access issuance remains disallowed for this external profile: its
+subject exposes the raw principal even when the ID token is pairwise. Disabling
+JWT globally was rejected because public clients then receive no ID token.
+Rewriting identity claims in custom claim callbacks was rejected because reserved
+claims belong to the provider; replacing the underlying credential user with an
+Entity or synthetic per-client account would conflate identity ownership. The
+selected patch reuses the existing opaque storage, rotation and revocation paths
+without changing account identity or adding a second credential store.
+
+`forceOpaqueAccessTokens` alone does not establish privacy. The admitted client
+must be pairwise; the provider's ordinary user-created client route does not retain
+that administrator-owned setting and returns private owner metadata. Before
+production activation, wrap/disable raw client management, registration and claim
+extension surfaces under the REZICS contracts. Keep session/back-channel logout
+extensions disabled for this profile until separately scoped session identifiers
+and logout behavior are qualified. CIMD/DCR clients need the same server-enforced
+privacy admission; arbitrary metadata must not opt out. No CIMD network transport
+or dynamic registration is activated by this qualification.
+
+Machine tokens remain distinct: opaque issuance/introspection identifies the
+issuing confidential client without a human subject, ID token or refresh token.
+The server must resolve that client to exactly one admitted installation/service
+principal and validate its live scope; two clients producing distinct protocol
+identities is not proof of installation authority or isolation.
+
+This profile adds a stored row per access token, including machine issuance, and
+requires online token verification. Preserve the 500M/3B credential envelope and
+[combined query-budget qualification](identity-access-capacity.md#opaque-protocol-cost)
+before production activation. Provider revocation, protocol scopes and pairwise
+identifiers do not implement live consent, representation, installation checks or
+private accountability. Upgrades must replay the fixture and deterministic auth
+regressions; remove either patch only after the pinned replacement passes its cases.
 
 ## Sources and limits
 

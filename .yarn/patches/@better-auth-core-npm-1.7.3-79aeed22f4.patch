@@ -1,0 +1,14 @@
+diff --git a/dist/oauth2/verify.mjs b/dist/oauth2/verify.mjs
+index 92f1427507697375657ba4fd5994ac965f234c6d..60061f202ac423f588a3d06b6ae1b1566548c4ad 100644
+--- a/dist/oauth2/verify.mjs
++++ b/dist/oauth2/verify.mjs
+@@ -203,7 +203,8 @@ async function verifyAccessTokenPayload(token, opts) {
+ 			const skipAudience = !introspect.aud && opts.remoteVerify.allowMissingAudience === true;
+ 			payload = UnsecuredJWT.decode(unsecuredJwt, skipAudience ? verifyOptionsNoAudience : opts.verifyOptions).payload;
+ 		} catch (error) {
+-			throw new Error(error);
++			if (error instanceof errors.JOSEError && !isJoseInfrastructureError(error)) throw new APIError("UNAUTHORIZED", { message: "invalid access token" });
++			throw error;
+ 		}
+ 	}
+ 	if (!payload) throw new APIError("UNAUTHORIZED", { message: `no token payload` });

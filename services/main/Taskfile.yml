@@ -343,6 +343,12 @@ tasks:
             - test -n "${DATABASE_ADMIN_URL:-}"
             - yarn exec tsx scripts/check-postgres-schema.ts
 
+    db:oauth-privacy:check:
+        desc: Qualify opaque OAuth, public-client OIDC and MCP through Bun/Drizzle on a dedicated disposable PostgreSQL database.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 bun scripts/check-oauth-privacy.ts
+
     db:references:check:
         desc: Verify identity and exact catalog revision values and races on an installed disposable Atlas database.
         cmds:

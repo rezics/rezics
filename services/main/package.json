@@ -69,6 +69,8 @@
 		"@img/sharp-linux-x64": "0.35.4"
 	},
 	"devDependencies": {
+		"@better-auth/mcp": "1.7.3",
+		"@better-auth/oauth-provider": "1.7.3",
 		"@biomejs/biome": "2.5.12",
 		"@faker-js/faker": "^10.6.0",
 		"@rezics/atlas": "workspace:*",

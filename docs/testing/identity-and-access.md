@@ -1,6 +1,8 @@
 # Identity, mixed authority and connected-app acceptance
 
-These are selected target test specifications, not passing executable results.
+The matrices below are selected target test specifications. The separately scoped
+[OAuth adapter qualification](#oauth-adapter-qualification) records executable
+evidence; it does not mark whole IAM/APP cases complete.
 They cover [identity/access](../architecture/identity-and-access.md),
 [connected applications](../architecture/connected-apps.md),
 [GUI layering](../architecture/identity-and-access-experience.md) and
@@ -104,3 +106,48 @@ Run these scenarios together with [backend integration](backend-integration.md),
 including content publishing, membership, private account state and queued effects.
 Do not disable unrelated required policy to obtain a passing result. Frontend work
 follows the existing G4/G5 and Storybook/full-application verification boundaries.
+
+## OAuth adapter qualification
+
+`task services-main:db:oauth-privacy:check` runs
+[check-oauth-privacy.ts](../../services/main/scripts/check-oauth-privacy.ts) under
+Bun against an explicitly supplied loopback `DATABASE_ADMIN_URL` whose database
+name is exactly `rezics_oauth_qualification`. Create that disposable database with
+the owning PostgreSQL tools before invoking the task. It does not reset an
+application database or use the native migration fixture lane.
+
+The script generates uniquely prefixed public tables from the pinned provider's
+schema metadata, including required fields, concrete foreign keys and declared
+indexes. It runs the actual Drizzle relations-v2 adapter and HTTP token endpoints
+on OS-assigned loopback ports, then removes only its tables and closes the listener.
+These generated tables qualify the protocol adapter; they are not production IAM
+DDL, domain constraints, application auth configuration or a schema migration.
+Fixture-only admission permits client administration to isolate protocol behavior;
+it does not qualify any administrative authorization policy.
+
+The [pinned run](database/oauth-privacy-evidence.json) records Bun 1.4.2, PostgreSQL
+18.6/Linux, Better Auth/provider/MCP 1.7.3 and Drizzle 1.0.0-rc.4 through package,
+lockfile, patch and fixture digests. No raw credentials, principal IDs or session
+keys are retained in its output.
+
+| Executed scope | Result |
+| --- | --- |
+| Default provider, public/confidential clients | Resource JWT access tokens contain the private account ID even with pairwise ID tokens/UserInfo. This profile is rejected. |
+| JWT disabled, public/confidential clients | Access tokens are opaque, but public clients receive no OIDC ID token. This profile is rejected. |
+| Selected opaque profile | Both client types receive opaque access and refresh tokens plus signed RS256 ID tokens; JWKS verification checks issuer/audience, nonce, pairwise subject and the access-token hash. |
+| External identity | UserInfo and authenticated access introspection agree with each client's pairwise ID subject, exclude the raw principal and omit the shared session key; different sectors have different subjects. Confidential refresh introspection has the same privacy properties. |
+| Discovery and MCP | Protected-resource metadata identifies the exact resource/issuer and resource scopes. Authenticated online verification allows the valid bearer and rejects wrong audience, insufficient scope and an invalid bearer despite a valid cookie. |
+| Refresh | Wrong-client use and scope widening are rejected. Rotation preserves the selected subject, produces opaque access tokens, and old-refresh replay fails and invalidates the rotated access token. |
+| Machine protocol identity | Two confidential clients issue distinct client-bound opaque tokens without a human ID token/refresh token; explicit revocation makes introspection inactive. Installation mapping and authority are not exercised. |
+
+The deterministic [resource verification tests](../../services/main/src/services/auth/oauth-resource-verification.test.ts)
+cover wrong/missing audience, wrong issuer, expiry, future activation, invalid
+expiry shape, valid claims, insufficient scope and introspection outage. Bad claims
+produce a 401 MCP discovery challenge; outages remain operational failures.
+
+The selected configuration and rejected alternatives live in
+[connected apps](../architecture/connected-apps.md#qualified-external-token-profile).
+APP03 protocol surfaces and selected APP08/APP11 mechanics now have adapter evidence;
+the complete cases remain pending live-domain checks, production endpoint privacy,
+CIMD egress, concurrency, erasure/recovery, external-client interoperability and
+[capacity](../architecture/identity-access-capacity.md#opaque-protocol-cost).
