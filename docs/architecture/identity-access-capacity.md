@@ -578,3 +578,21 @@ authenticates before parsing the private payload. A 100-row page can add up to
 measure mint/resolve cost at the declared roster rate before capacity acceptance.
 The shared opaque-value owner also serves Collection continuations, whose own
 4 KiB token cap and disclosure checks remain separate.
+
+## Assignment ceilings
+
+Each approval names one manager binding/terms revision and one assignable role,
+with a bounded path and recipient policy. Plan 768 bytes for an approval head,
+224 for each explicit permission member and 384 for each private control receipt,
+including indexes. These families require 384/112/192 GB at 500M rows and
+2,304/672/1,152 GB at 3B rows before bloat, WAL, replicas, backups and reserve.
+Maximum target paths need separate payload provisioning. Replacements create new
+approval identities; permission and control-event counts are not head counts.
+
+The target binding fence protects negative approval reads and serializes creation/
+revocation. A confer evaluation reads at most 256 approval candidates and bounded
+permission members, with up to 64 recipient enrollment scopes. Scope-member probes
+hold pair-local negative fences and exact membership rows without expanding rosters.
+Actor/client/representation and assignment-impact work remain additional costs.
+Native allowed/denied, source-revision, expiry, rejoin, activation and workload
+qualification is deferred to the active scope's verification phase.

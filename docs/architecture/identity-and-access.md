@@ -404,6 +404,30 @@ counts permission members and events separately from definition headers.
 
 ### Explicit permission approval snapshots
 
+The assignment-ceiling store records an immutable institutional approval at one
+resource authority root, naming an exact manager RoleBinding/terms revision and
+one role. It bounds target paths, recipients and explicit approved permissions.
+Recipients can be one subject, one Group, an all-members set, or admitted subjects
+of one specified kind in one scope. The latter requires resulting subject bindings
+to retain their exact admission key; an enrollment-only preflight cannot create an
+independent grant that survives departure.
+
+Approval validity determines when the manager may act. Optional maximum grant
+duration and absolute grant-end limits separately constrain resulting assignments;
+temporary management authority need not automatically terminate durable assignments.
+Changing an approval creates a replacement identity and explicitly revokes the old
+one. Revoking/amending the manager source prevents future use of that approval,
+without retrospectively revoking institutional assignments already admitted.
+
+Confer matching requires a current native management grant for the selected subject
+and one complete matching ceiling. It does not require the manager to hold the
+role's data permissions and does not union partial approval constraints into a new
+approval. Binding management is evaluated at the assignment's target path; role
+activation uses the role-control path `roles/<role-id>` while separately reviewing
+each affected binding's data target and recipient. Approval management, resource
+grantability, independent approval, continuity and complete mutation impact remain
+owning-policy requirements; this matcher alone is not command authorization.
+
 A permission approval records an explicit, family-qualified closure at its
 admission time. Ordinary role definitions keep authored permissions. When the
 resource authority approves a cross-authority binding or external delegation,

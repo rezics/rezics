@@ -14,6 +14,7 @@ export const PostgreSqlSchemaFileNames = [
 	"access-subject-policy.sql",
 	"access-role.sql",
 	"access-role-binding.sql",
+	"access-assignment-ceiling.sql",
 	"access-representation.sql",
 	"access-membership.sql",
 	"access-group.sql",
@@ -96,6 +97,10 @@ export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly 
 };
 
 export const PostgreSqlSchemaFunctionNames = [
+	"guard_access_assignment_ceiling",
+	"guard_access_assignment_ceiling_permission",
+	"guard_access_assignment_ceiling_event",
+	"complete_access_assignment_ceiling",
 	"guard_identity_preference",
 	"guard_identity_preference_event",
 	"complete_identity_preference",
@@ -440,6 +445,12 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "access_assignment_ceiling", name: "access_assignment_ceiling_guard" },
+	{ table: "access_assignment_ceiling_permission", name: "access_assignment_ceiling_permission_guard" },
+	{ table: "access_assignment_ceiling_event", name: "access_assignment_ceiling_event_guard" },
+	{ table: "access_assignment_ceiling_event", name: "access_assignment_ceiling_event_immutable" },
+	{ table: "access_assignment_ceiling", name: "access_assignment_ceiling_complete" },
+	{ table: "access_assignment_ceiling_event", name: "access_assignment_ceiling_event_complete" },
 	{ table: "identity_preference", name: "identity_preference_guard" },
 	{ table: "identity_preference_event", name: "identity_preference_event_guard" },
 	{ table: "identity_preference", name: "identity_preference_complete" },

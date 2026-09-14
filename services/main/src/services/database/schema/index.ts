@@ -4,6 +4,7 @@ export * from "./identity-preference";
 export * from "./access-identity";
 export * from "./access-role";
 export * from "./access-role-binding";
+export * from "./access-assignment-ceiling";
 export * from "./access-representation";
 export * from "./access-membership";
 export * from "./access-group";
