@@ -87,6 +87,43 @@ delegation records before admitting execution or issuing a narrowed credential.
 
 ## Lifecycle, grants and delivery
 
+### Native App declaration and control
+
+An App has one immutable private account or Entity controller root. Controllers
+can delegate scoped App administration through the mixed permission model; App
+ownership is not a login principal or a resource grant. Its publisher API uses
+credential-bound scope locators, `app:read`/`app:manage` entry scopes and explicit
+`app.read/create/update/disable/retire` domain actions. Resolving a locator through
+the shared access API additionally requires `access:read`. Read responses omit
+private controller-root and operator identifiers and paginate at 100 records.
+
+Each create/revise command seals a complete declaration: public label/description,
+literal API-entry/domain capability references, and separate offline-access and
+Entity-disclosure flags. Registered families remain distinct. A count and digest
+cover all capability rows; committed declarations and their receipts are immutable.
+Publishing a declaration is prospective, not consent or installation approval.
+Existing approvals retain their exact declaration revision when a publisher
+announces different capabilities. Native consent/installation admission must still
+enforce the recorded ceiling, selected resources and all current live dependencies.
+
+App states are active, disabled and terminally retired after atomic initial
+admission. Publisher disablement is separate from enabling; possessing only
+`app.disable` cannot enable an App. Trust is unreviewed, trusted or blocked and
+requires the separate platform-root `app.trust.manage` operation. Trust review and
+retirement require a fresh interactive session. A publisher cannot mark itself
+trusted or enable a blocked App. Unblocking leaves the App disabled until an
+explicit authorized enable command.
+
+Disablement, blocking and retirement advance a separate authority epoch. Declaration
+edits, enabling and non-blocking trust review do not advance it. Native token
+contexts must retain their issuance epoch and match the current active App before
+use or refresh; re-enabling therefore cannot revive a prior invalidated context.
+This state is a required input to the pending token/consent/installation bridge,
+not proof that protocol issuance already enforces it. Operation receipts bind
+expected versions and original intent; replay never repeats a lifecycle effect.
+
+### Approval and delivery
+
 An installation has pending approval, active, suspended and revoked outcomes.
 Accepted scope changes create a new approved revision. Broader App manifests,
 role changes or new resource selection require new approval where they exceed the

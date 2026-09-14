@@ -3302,6 +3302,12 @@ export const ResolveAccessManagementScopeRequestPermissionEnum = {
 	"access.role.retire": "access.role.retire",
 	"access.role-binding.manage": "access.role-binding.manage",
 	"access.assignment-ceiling.manage": "access.assignment-ceiling.manage",
+	"app.read": "app.read",
+	"app.create": "app.create",
+	"app.update": "app.update",
+	"app.disable": "app.disable",
+	"app.retire": "app.retire",
+	"app.trust.manage": "app.trust.manage",
 } as const;
 
 export type ResolveAccessManagementScopeRequestPermissionEnum =
@@ -3505,6 +3511,12 @@ export const GetAccessRoleStatus200DefinitionPermissionsKeyEnum = {
 	"access.role.retire": "access.role.retire",
 	"access.role-binding.manage": "access.role-binding.manage",
 	"access.assignment-ceiling.manage": "access.assignment-ceiling.manage",
+	"app.read": "app.read",
+	"app.create": "app.create",
+	"app.update": "app.update",
+	"app.disable": "app.disable",
+	"app.retire": "app.retire",
+	"app.trust.manage": "app.trust.manage",
 } as const;
 
 export type GetAccessRoleStatus200DefinitionPermissionsKeyEnum =
@@ -3690,6 +3702,12 @@ export const CreateAccessRoleRequestDefinitionPermissionsKeyEnum = {
 	"access.role.retire": "access.role.retire",
 	"access.role-binding.manage": "access.role-binding.manage",
 	"access.assignment-ceiling.manage": "access.assignment-ceiling.manage",
+	"app.read": "app.read",
+	"app.create": "app.create",
+	"app.update": "app.update",
+	"app.disable": "app.disable",
+	"app.retire": "app.retire",
+	"app.trust.manage": "app.trust.manage",
 } as const;
 
 export type CreateAccessRoleRequestDefinitionPermissionsKeyEnum =
@@ -3962,6 +3980,12 @@ export const ReviseAccessRoleRequestDefinitionPermissionsKeyEnum = {
 	"access.role.retire": "access.role.retire",
 	"access.role-binding.manage": "access.role-binding.manage",
 	"access.assignment-ceiling.manage": "access.assignment-ceiling.manage",
+	"app.read": "app.read",
+	"app.create": "app.create",
+	"app.update": "app.update",
+	"app.disable": "app.disable",
+	"app.retire": "app.retire",
+	"app.trust.manage": "app.trust.manage",
 } as const;
 
 export type ReviseAccessRoleRequestDefinitionPermissionsKeyEnum =
@@ -4405,6 +4429,1237 @@ export type ResolveMainIdentityPreferenceResponse =
 	| ResolveMainIdentityPreferenceStatus200
 	| ResolveMainIdentityPreferenceStatus429
 	| ResolveMainIdentityPreferenceStatus500;
+
+export type ListConnectedAppsPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+};
+
+export type ListConnectedAppsQuery = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	afterId?: string;
+};
+
+export const ListConnectedAppsStatus200ItemsStateEnum = {
+	active: "active",
+	disabled: "disabled",
+	retired: "retired",
+} as const;
+
+export type ListConnectedAppsStatus200ItemsStateEnum =
+	(typeof ListConnectedAppsStatus200ItemsStateEnum)[keyof typeof ListConnectedAppsStatus200ItemsStateEnum];
+
+export const ListConnectedAppsStatus200ItemsTrustEnum = {
+	unreviewed: "unreviewed",
+	trusted: "trusted",
+	blocked: "blocked",
+} as const;
+
+export type ListConnectedAppsStatus200ItemsTrustEnum =
+	(typeof ListConnectedAppsStatus200ItemsTrustEnum)[keyof typeof ListConnectedAppsStatus200ItemsTrustEnum];
+
+export type ListConnectedAppsStatus200 = {
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		version: number;
+		/**
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		declaredRevision: number;
+		state: ListConnectedAppsStatus200ItemsStateEnum;
+		trust: ListConnectedAppsStatus200ItemsTrustEnum;
+		label: string;
+	}[];
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	nextCursor: string | null;
+};
+
+export type ListConnectedAppsStatus422 = ValidationError;
+
+export const ListConnectedAppsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ListConnectedAppsStatus429ErrorCodeEnum =
+	(typeof ListConnectedAppsStatus429ErrorCodeEnum)[keyof typeof ListConnectedAppsStatus429ErrorCodeEnum];
+
+export type ListConnectedAppsStatus429 = {
+	error: {
+		code: ListConnectedAppsStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type ListConnectedAppsStatus500 = InternalError;
+
+export type ListConnectedAppsOptions = {
+	body?: never;
+	path: ListConnectedAppsPath;
+	query?: ListConnectedAppsQuery;
+	headers?: never;
+};
+
+export type ListConnectedAppsResponses = {
+	"200": ListConnectedAppsStatus200;
+	"422": ListConnectedAppsStatus422;
+	"429": ListConnectedAppsStatus429;
+	"500": ListConnectedAppsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ListConnectedAppsResponse =
+	| ListConnectedAppsStatus200
+	| ListConnectedAppsStatus422
+	| ListConnectedAppsStatus429
+	| ListConnectedAppsStatus500;
+
+export type GetConnectedAppPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	appId: string;
+};
+
+export type GetConnectedAppQuery = {
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer | undefined
+	 */
+	revision?: number;
+};
+
+export const GetConnectedAppStatus200StateEnum = {
+	active: "active",
+	disabled: "disabled",
+	retired: "retired",
+} as const;
+
+export type GetConnectedAppStatus200StateEnum =
+	(typeof GetConnectedAppStatus200StateEnum)[keyof typeof GetConnectedAppStatus200StateEnum];
+
+export const GetConnectedAppStatus200TrustEnum = {
+	unreviewed: "unreviewed",
+	trusted: "trusted",
+	blocked: "blocked",
+} as const;
+
+export type GetConnectedAppStatus200TrustEnum =
+	(typeof GetConnectedAppStatus200TrustEnum)[keyof typeof GetConnectedAppStatus200TrustEnum];
+
+export const GetConnectedAppStatus200DefinitionCapabilitiesKeyEnum = {
+	"unit:read": "unit:read",
+	"unit:create": "unit:create",
+	"unit:update": "unit:update",
+	"account:read": "account:read",
+	"account:update": "account:update",
+	"access:read": "access:read",
+	"access:manage": "access:manage",
+	"app:read": "app:read",
+	"app:manage": "app:manage",
+	"interaction:read": "interaction:read",
+	"interaction:write": "interaction:write",
+	"realm:read": "realm:read",
+	"realm:manage": "realm:manage",
+	"message:read": "message:read",
+	"message:write": "message:write",
+	"notification:read": "notification:read",
+	"notification:write": "notification:write",
+	"recommendation:read": "recommendation:read",
+	"recommendation:write": "recommendation:write",
+	"upload:read": "upload:read",
+	"upload:write": "upload:write",
+	"report:write": "report:write",
+} as const;
+
+export type GetConnectedAppStatus200DefinitionCapabilitiesKeyEnum =
+	(typeof GetConnectedAppStatus200DefinitionCapabilitiesKeyEnum)[keyof typeof GetConnectedAppStatus200DefinitionCapabilitiesKeyEnum];
+
+export type GetConnectedAppStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	version: number;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	declaredRevision: number;
+	state: GetConnectedAppStatus200StateEnum;
+	trust: GetConnectedAppStatus200TrustEnum;
+	definition: {
+		/**
+		 * @minLength 1
+		 * @maxLength 512
+		 * @type string
+		 */
+		label: string;
+		/**
+		 * @maxLength 4096
+		 * @type string
+		 */
+		description: string | null;
+		capabilities: (
+			| {
+					family: "unit";
+					key: GetConnectedAppStatus200DefinitionCapabilitiesKeyEnum;
+			  }
+			| {
+					family: "platform";
+					key: GetConnectedAppStatus200DefinitionCapabilitiesKeyEnum;
+			  }
+			| {
+					family: "management";
+					key: GetConnectedAppStatus200DefinitionCapabilitiesKeyEnum;
+			  }
+			| {
+					family: "api";
+					key: GetConnectedAppStatus200DefinitionCapabilitiesKeyEnum;
+			  }
+		)[];
+		offlineAccess: boolean;
+		entityDisclosure: boolean;
+		/**
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		revision: number;
+	};
+};
+
+export type GetConnectedAppStatus422 = ValidationError;
+
+export const GetConnectedAppStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetConnectedAppStatus429ErrorCodeEnum =
+	(typeof GetConnectedAppStatus429ErrorCodeEnum)[keyof typeof GetConnectedAppStatus429ErrorCodeEnum];
+
+export type GetConnectedAppStatus429 = {
+	error: {
+		code: GetConnectedAppStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type GetConnectedAppStatus500 = InternalError;
+
+export type GetConnectedAppOptions = {
+	body?: never;
+	path: GetConnectedAppPath;
+	query?: GetConnectedAppQuery;
+	headers?: never;
+};
+
+export type GetConnectedAppResponses = {
+	"200": GetConnectedAppStatus200;
+	"422": GetConnectedAppStatus422;
+	"429": GetConnectedAppStatus429;
+	"500": GetConnectedAppStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetConnectedAppResponse =
+	| GetConnectedAppStatus200
+	| GetConnectedAppStatus422
+	| GetConnectedAppStatus429
+	| GetConnectedAppStatus500;
+
+export type CreateConnectedAppPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	appId: string;
+};
+
+export const CreateConnectedAppStatus200StateEnum = {
+	active: "active",
+	disabled: "disabled",
+	retired: "retired",
+} as const;
+
+export type CreateConnectedAppStatus200StateEnum =
+	(typeof CreateConnectedAppStatus200StateEnum)[keyof typeof CreateConnectedAppStatus200StateEnum];
+
+export const CreateConnectedAppStatus200TrustEnum = {
+	unreviewed: "unreviewed",
+	trusted: "trusted",
+	blocked: "blocked",
+} as const;
+
+export type CreateConnectedAppStatus200TrustEnum =
+	(typeof CreateConnectedAppStatus200TrustEnum)[keyof typeof CreateConnectedAppStatus200TrustEnum];
+
+export type CreateConnectedAppStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	appId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	version: number;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	declaredRevision: number;
+	state: CreateConnectedAppStatus200StateEnum;
+	trust: CreateConnectedAppStatus200TrustEnum;
+};
+
+export type CreateConnectedAppStatus400 = MalformedRequestBody;
+
+export type CreateConnectedAppStatus422 = ValidationError;
+
+export const CreateConnectedAppStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type CreateConnectedAppStatus429ErrorCodeEnum =
+	(typeof CreateConnectedAppStatus429ErrorCodeEnum)[keyof typeof CreateConnectedAppStatus429ErrorCodeEnum];
+
+export type CreateConnectedAppStatus429 = {
+	error: {
+		code: CreateConnectedAppStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type CreateConnectedAppStatus500 = InternalError;
+
+export const CreateConnectedAppRequestDefinitionCapabilitiesKeyEnum = {
+	"unit:read": "unit:read",
+	"unit:create": "unit:create",
+	"unit:update": "unit:update",
+	"account:read": "account:read",
+	"account:update": "account:update",
+	"access:read": "access:read",
+	"access:manage": "access:manage",
+	"app:read": "app:read",
+	"app:manage": "app:manage",
+	"interaction:read": "interaction:read",
+	"interaction:write": "interaction:write",
+	"realm:read": "realm:read",
+	"realm:manage": "realm:manage",
+	"message:read": "message:read",
+	"message:write": "message:write",
+	"notification:read": "notification:read",
+	"notification:write": "notification:write",
+	"recommendation:read": "recommendation:read",
+	"recommendation:write": "recommendation:write",
+	"upload:read": "upload:read",
+	"upload:write": "upload:write",
+	"report:write": "report:write",
+} as const;
+
+export type CreateConnectedAppRequestDefinitionCapabilitiesKeyEnum =
+	(typeof CreateConnectedAppRequestDefinitionCapabilitiesKeyEnum)[keyof typeof CreateConnectedAppRequestDefinitionCapabilitiesKeyEnum];
+
+export type CreateConnectedAppBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	expectedVersion: 0;
+	definition: {
+		/**
+		 * @minLength 1
+		 * @maxLength 512
+		 * @type string
+		 */
+		label: string;
+		/**
+		 * @maxLength 4096
+		 * @type string
+		 */
+		description: string | null;
+		capabilities: (
+			| {
+					family: "unit";
+					key: CreateConnectedAppRequestDefinitionCapabilitiesKeyEnum;
+			  }
+			| {
+					family: "platform";
+					key: CreateConnectedAppRequestDefinitionCapabilitiesKeyEnum;
+			  }
+			| {
+					family: "management";
+					key: CreateConnectedAppRequestDefinitionCapabilitiesKeyEnum;
+			  }
+			| {
+					family: "api";
+					key: CreateConnectedAppRequestDefinitionCapabilitiesKeyEnum;
+			  }
+		)[];
+		offlineAccess: boolean;
+		entityDisclosure: boolean;
+	};
+};
+
+export type CreateConnectedAppOptions = {
+	body: CreateConnectedAppBody;
+	path: CreateConnectedAppPath;
+	query?: never;
+	headers?: never;
+};
+
+export type CreateConnectedAppResponses = {
+	"200": CreateConnectedAppStatus200;
+	"400": CreateConnectedAppStatus400;
+	"422": CreateConnectedAppStatus422;
+	"429": CreateConnectedAppStatus429;
+	"500": CreateConnectedAppStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type CreateConnectedAppResponse =
+	| CreateConnectedAppStatus200
+	| CreateConnectedAppStatus400
+	| CreateConnectedAppStatus422
+	| CreateConnectedAppStatus429
+	| CreateConnectedAppStatus500;
+
+export type ListConnectedAppHistoryPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	appId: string;
+};
+
+export type ListConnectedAppHistoryQuery = {
+	/**
+	 * @minLength -9007199254740991
+	 * @maxLength 9007199254740991
+	 * @type integer | undefined
+	 */
+	afterVersion?: number;
+};
+
+export const ListConnectedAppHistoryStatus200ItemsOperationEnum = {
+	create: "create",
+	revise: "revise",
+	disable: "disable",
+	enable: "enable",
+	retire: "retire",
+	"set-trust": "set-trust",
+} as const;
+
+export type ListConnectedAppHistoryStatus200ItemsOperationEnum =
+	(typeof ListConnectedAppHistoryStatus200ItemsOperationEnum)[keyof typeof ListConnectedAppHistoryStatus200ItemsOperationEnum];
+
+export const ListConnectedAppHistoryStatus200ItemsStateEnum = {
+	active: "active",
+	disabled: "disabled",
+	retired: "retired",
+} as const;
+
+export type ListConnectedAppHistoryStatus200ItemsStateEnum =
+	(typeof ListConnectedAppHistoryStatus200ItemsStateEnum)[keyof typeof ListConnectedAppHistoryStatus200ItemsStateEnum];
+
+export const ListConnectedAppHistoryStatus200ItemsTrustEnum = {
+	unreviewed: "unreviewed",
+	trusted: "trusted",
+	blocked: "blocked",
+} as const;
+
+export type ListConnectedAppHistoryStatus200ItemsTrustEnum =
+	(typeof ListConnectedAppHistoryStatus200ItemsTrustEnum)[keyof typeof ListConnectedAppHistoryStatus200ItemsTrustEnum];
+
+export type ListConnectedAppHistoryStatus200 = {
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		operationId: string;
+		/**
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		version: number;
+		/**
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		declaredRevision: number;
+		operation: ListConnectedAppHistoryStatus200ItemsOperationEnum;
+		state: ListConnectedAppHistoryStatus200ItemsStateEnum;
+		trust: ListConnectedAppHistoryStatus200ItemsTrustEnum;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+	}[];
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	nextCursor: number | null;
+};
+
+export type ListConnectedAppHistoryStatus422 = ValidationError;
+
+export const ListConnectedAppHistoryStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ListConnectedAppHistoryStatus429ErrorCodeEnum =
+	(typeof ListConnectedAppHistoryStatus429ErrorCodeEnum)[keyof typeof ListConnectedAppHistoryStatus429ErrorCodeEnum];
+
+export type ListConnectedAppHistoryStatus429 = {
+	error: {
+		code: ListConnectedAppHistoryStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type ListConnectedAppHistoryStatus500 = InternalError;
+
+export type ListConnectedAppHistoryOptions = {
+	body?: never;
+	path: ListConnectedAppHistoryPath;
+	query?: ListConnectedAppHistoryQuery;
+	headers?: never;
+};
+
+export type ListConnectedAppHistoryResponses = {
+	"200": ListConnectedAppHistoryStatus200;
+	"422": ListConnectedAppHistoryStatus422;
+	"429": ListConnectedAppHistoryStatus429;
+	"500": ListConnectedAppHistoryStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ListConnectedAppHistoryResponse =
+	| ListConnectedAppHistoryStatus200
+	| ListConnectedAppHistoryStatus422
+	| ListConnectedAppHistoryStatus429
+	| ListConnectedAppHistoryStatus500;
+
+export type ReviseConnectedAppPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	appId: string;
+};
+
+export const ReviseConnectedAppStatus200StateEnum = {
+	active: "active",
+	disabled: "disabled",
+	retired: "retired",
+} as const;
+
+export type ReviseConnectedAppStatus200StateEnum =
+	(typeof ReviseConnectedAppStatus200StateEnum)[keyof typeof ReviseConnectedAppStatus200StateEnum];
+
+export const ReviseConnectedAppStatus200TrustEnum = {
+	unreviewed: "unreviewed",
+	trusted: "trusted",
+	blocked: "blocked",
+} as const;
+
+export type ReviseConnectedAppStatus200TrustEnum =
+	(typeof ReviseConnectedAppStatus200TrustEnum)[keyof typeof ReviseConnectedAppStatus200TrustEnum];
+
+export type ReviseConnectedAppStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	appId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	version: number;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	declaredRevision: number;
+	state: ReviseConnectedAppStatus200StateEnum;
+	trust: ReviseConnectedAppStatus200TrustEnum;
+};
+
+export type ReviseConnectedAppStatus400 = MalformedRequestBody;
+
+export type ReviseConnectedAppStatus422 = ValidationError;
+
+export const ReviseConnectedAppStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ReviseConnectedAppStatus429ErrorCodeEnum =
+	(typeof ReviseConnectedAppStatus429ErrorCodeEnum)[keyof typeof ReviseConnectedAppStatus429ErrorCodeEnum];
+
+export type ReviseConnectedAppStatus429 = {
+	error: {
+		code: ReviseConnectedAppStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type ReviseConnectedAppStatus500 = InternalError;
+
+export const ReviseConnectedAppRequestDefinitionCapabilitiesKeyEnum = {
+	"unit:read": "unit:read",
+	"unit:create": "unit:create",
+	"unit:update": "unit:update",
+	"account:read": "account:read",
+	"account:update": "account:update",
+	"access:read": "access:read",
+	"access:manage": "access:manage",
+	"app:read": "app:read",
+	"app:manage": "app:manage",
+	"interaction:read": "interaction:read",
+	"interaction:write": "interaction:write",
+	"realm:read": "realm:read",
+	"realm:manage": "realm:manage",
+	"message:read": "message:read",
+	"message:write": "message:write",
+	"notification:read": "notification:read",
+	"notification:write": "notification:write",
+	"recommendation:read": "recommendation:read",
+	"recommendation:write": "recommendation:write",
+	"upload:read": "upload:read",
+	"upload:write": "upload:write",
+	"report:write": "report:write",
+} as const;
+
+export type ReviseConnectedAppRequestDefinitionCapabilitiesKeyEnum =
+	(typeof ReviseConnectedAppRequestDefinitionCapabilitiesKeyEnum)[keyof typeof ReviseConnectedAppRequestDefinitionCapabilitiesKeyEnum];
+
+export type ReviseConnectedAppBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	expectedVersion: number;
+	definition: {
+		/**
+		 * @minLength 1
+		 * @maxLength 512
+		 * @type string
+		 */
+		label: string;
+		/**
+		 * @maxLength 4096
+		 * @type string
+		 */
+		description: string | null;
+		capabilities: (
+			| {
+					family: "unit";
+					key: ReviseConnectedAppRequestDefinitionCapabilitiesKeyEnum;
+			  }
+			| {
+					family: "platform";
+					key: ReviseConnectedAppRequestDefinitionCapabilitiesKeyEnum;
+			  }
+			| {
+					family: "management";
+					key: ReviseConnectedAppRequestDefinitionCapabilitiesKeyEnum;
+			  }
+			| {
+					family: "api";
+					key: ReviseConnectedAppRequestDefinitionCapabilitiesKeyEnum;
+			  }
+		)[];
+		offlineAccess: boolean;
+		entityDisclosure: boolean;
+	};
+};
+
+export type ReviseConnectedAppOptions = {
+	body: ReviseConnectedAppBody;
+	path: ReviseConnectedAppPath;
+	query?: never;
+	headers?: never;
+};
+
+export type ReviseConnectedAppResponses = {
+	"200": ReviseConnectedAppStatus200;
+	"400": ReviseConnectedAppStatus400;
+	"422": ReviseConnectedAppStatus422;
+	"429": ReviseConnectedAppStatus429;
+	"500": ReviseConnectedAppStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ReviseConnectedAppResponse =
+	| ReviseConnectedAppStatus200
+	| ReviseConnectedAppStatus400
+	| ReviseConnectedAppStatus422
+	| ReviseConnectedAppStatus429
+	| ReviseConnectedAppStatus500;
+
+export type DisableConnectedAppPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	appId: string;
+};
+
+export const DisableConnectedAppStatus200StateEnum = {
+	active: "active",
+	disabled: "disabled",
+	retired: "retired",
+} as const;
+
+export type DisableConnectedAppStatus200StateEnum =
+	(typeof DisableConnectedAppStatus200StateEnum)[keyof typeof DisableConnectedAppStatus200StateEnum];
+
+export const DisableConnectedAppStatus200TrustEnum = {
+	unreviewed: "unreviewed",
+	trusted: "trusted",
+	blocked: "blocked",
+} as const;
+
+export type DisableConnectedAppStatus200TrustEnum =
+	(typeof DisableConnectedAppStatus200TrustEnum)[keyof typeof DisableConnectedAppStatus200TrustEnum];
+
+export type DisableConnectedAppStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	appId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	version: number;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	declaredRevision: number;
+	state: DisableConnectedAppStatus200StateEnum;
+	trust: DisableConnectedAppStatus200TrustEnum;
+};
+
+export type DisableConnectedAppStatus400 = MalformedRequestBody;
+
+export type DisableConnectedAppStatus422 = ValidationError;
+
+export const DisableConnectedAppStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DisableConnectedAppStatus429ErrorCodeEnum =
+	(typeof DisableConnectedAppStatus429ErrorCodeEnum)[keyof typeof DisableConnectedAppStatus429ErrorCodeEnum];
+
+export type DisableConnectedAppStatus429 = {
+	error: {
+		code: DisableConnectedAppStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type DisableConnectedAppStatus500 = InternalError;
+
+export type DisableConnectedAppBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	expectedVersion: number;
+};
+
+export type DisableConnectedAppOptions = {
+	body: DisableConnectedAppBody;
+	path: DisableConnectedAppPath;
+	query?: never;
+	headers?: never;
+};
+
+export type DisableConnectedAppResponses = {
+	"200": DisableConnectedAppStatus200;
+	"400": DisableConnectedAppStatus400;
+	"422": DisableConnectedAppStatus422;
+	"429": DisableConnectedAppStatus429;
+	"500": DisableConnectedAppStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DisableConnectedAppResponse =
+	| DisableConnectedAppStatus200
+	| DisableConnectedAppStatus400
+	| DisableConnectedAppStatus422
+	| DisableConnectedAppStatus429
+	| DisableConnectedAppStatus500;
+
+export type EnableConnectedAppPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	appId: string;
+};
+
+export const EnableConnectedAppStatus200StateEnum = {
+	active: "active",
+	disabled: "disabled",
+	retired: "retired",
+} as const;
+
+export type EnableConnectedAppStatus200StateEnum =
+	(typeof EnableConnectedAppStatus200StateEnum)[keyof typeof EnableConnectedAppStatus200StateEnum];
+
+export const EnableConnectedAppStatus200TrustEnum = {
+	unreviewed: "unreviewed",
+	trusted: "trusted",
+	blocked: "blocked",
+} as const;
+
+export type EnableConnectedAppStatus200TrustEnum =
+	(typeof EnableConnectedAppStatus200TrustEnum)[keyof typeof EnableConnectedAppStatus200TrustEnum];
+
+export type EnableConnectedAppStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	appId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	version: number;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	declaredRevision: number;
+	state: EnableConnectedAppStatus200StateEnum;
+	trust: EnableConnectedAppStatus200TrustEnum;
+};
+
+export type EnableConnectedAppStatus400 = MalformedRequestBody;
+
+export type EnableConnectedAppStatus422 = ValidationError;
+
+export const EnableConnectedAppStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type EnableConnectedAppStatus429ErrorCodeEnum =
+	(typeof EnableConnectedAppStatus429ErrorCodeEnum)[keyof typeof EnableConnectedAppStatus429ErrorCodeEnum];
+
+export type EnableConnectedAppStatus429 = {
+	error: {
+		code: EnableConnectedAppStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type EnableConnectedAppStatus500 = InternalError;
+
+export type EnableConnectedAppBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	expectedVersion: number;
+};
+
+export type EnableConnectedAppOptions = {
+	body: EnableConnectedAppBody;
+	path: EnableConnectedAppPath;
+	query?: never;
+	headers?: never;
+};
+
+export type EnableConnectedAppResponses = {
+	"200": EnableConnectedAppStatus200;
+	"400": EnableConnectedAppStatus400;
+	"422": EnableConnectedAppStatus422;
+	"429": EnableConnectedAppStatus429;
+	"500": EnableConnectedAppStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type EnableConnectedAppResponse =
+	| EnableConnectedAppStatus200
+	| EnableConnectedAppStatus400
+	| EnableConnectedAppStatus422
+	| EnableConnectedAppStatus429
+	| EnableConnectedAppStatus500;
+
+export type RetireConnectedAppPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	appId: string;
+};
+
+export const RetireConnectedAppStatus200StateEnum = {
+	active: "active",
+	disabled: "disabled",
+	retired: "retired",
+} as const;
+
+export type RetireConnectedAppStatus200StateEnum =
+	(typeof RetireConnectedAppStatus200StateEnum)[keyof typeof RetireConnectedAppStatus200StateEnum];
+
+export const RetireConnectedAppStatus200TrustEnum = {
+	unreviewed: "unreviewed",
+	trusted: "trusted",
+	blocked: "blocked",
+} as const;
+
+export type RetireConnectedAppStatus200TrustEnum =
+	(typeof RetireConnectedAppStatus200TrustEnum)[keyof typeof RetireConnectedAppStatus200TrustEnum];
+
+export type RetireConnectedAppStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	appId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	version: number;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	declaredRevision: number;
+	state: RetireConnectedAppStatus200StateEnum;
+	trust: RetireConnectedAppStatus200TrustEnum;
+};
+
+export type RetireConnectedAppStatus400 = MalformedRequestBody;
+
+export type RetireConnectedAppStatus422 = ValidationError;
+
+export type RetireConnectedAppStatus500 = InternalError;
+
+export type RetireConnectedAppBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	expectedVersion: number;
+};
+
+export type RetireConnectedAppOptions = {
+	body: RetireConnectedAppBody;
+	path: RetireConnectedAppPath;
+	query?: never;
+	headers?: never;
+};
+
+export type RetireConnectedAppResponses = {
+	"200": RetireConnectedAppStatus200;
+	"400": RetireConnectedAppStatus400;
+	"422": RetireConnectedAppStatus422;
+	"500": RetireConnectedAppStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type RetireConnectedAppResponse =
+	| RetireConnectedAppStatus200
+	| RetireConnectedAppStatus400
+	| RetireConnectedAppStatus422
+	| RetireConnectedAppStatus500;
+
+export type SetConnectedAppTrustPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	appId: string;
+};
+
+export const SetConnectedAppTrustStatus200StateEnum = {
+	active: "active",
+	disabled: "disabled",
+	retired: "retired",
+} as const;
+
+export type SetConnectedAppTrustStatus200StateEnum =
+	(typeof SetConnectedAppTrustStatus200StateEnum)[keyof typeof SetConnectedAppTrustStatus200StateEnum];
+
+export const SetConnectedAppTrustStatus200TrustEnum = {
+	unreviewed: "unreviewed",
+	trusted: "trusted",
+	blocked: "blocked",
+} as const;
+
+export type SetConnectedAppTrustStatus200TrustEnum =
+	(typeof SetConnectedAppTrustStatus200TrustEnum)[keyof typeof SetConnectedAppTrustStatus200TrustEnum];
+
+export type SetConnectedAppTrustStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	appId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	version: number;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	declaredRevision: number;
+	state: SetConnectedAppTrustStatus200StateEnum;
+	trust: SetConnectedAppTrustStatus200TrustEnum;
+};
+
+export type SetConnectedAppTrustStatus400 = MalformedRequestBody;
+
+export type SetConnectedAppTrustStatus422 = ValidationError;
+
+export type SetConnectedAppTrustStatus500 = InternalError;
+
+export const SetConnectedAppTrustRequestTrustEnum = {
+	unreviewed: "unreviewed",
+	trusted: "trusted",
+	blocked: "blocked",
+} as const;
+
+export type SetConnectedAppTrustRequestTrustEnum =
+	(typeof SetConnectedAppTrustRequestTrustEnum)[keyof typeof SetConnectedAppTrustRequestTrustEnum];
+
+export type SetConnectedAppTrustBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	expectedVersion: number;
+	trust: SetConnectedAppTrustRequestTrustEnum;
+};
+
+export type SetConnectedAppTrustOptions = {
+	body: SetConnectedAppTrustBody;
+	path: SetConnectedAppTrustPath;
+	query?: never;
+	headers?: never;
+};
+
+export type SetConnectedAppTrustResponses = {
+	"200": SetConnectedAppTrustStatus200;
+	"400": SetConnectedAppTrustStatus400;
+	"422": SetConnectedAppTrustStatus422;
+	"500": SetConnectedAppTrustStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type SetConnectedAppTrustResponse =
+	| SetConnectedAppTrustStatus200
+	| SetConnectedAppTrustStatus400
+	| SetConnectedAppTrustStatus422
+	| SetConnectedAppTrustStatus500;
 
 export type GetApiUnitByUnitIdAssociationProposalsPath = {
 	/**

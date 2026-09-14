@@ -9,6 +9,7 @@ import { env } from "../config";
 import agentGuide from "./agent-guide";
 import accessManagement from "./access";
 import account from "./account";
+import apps from "./apps";
 import associationProposals from "./association-proposals";
 import audit from "./audit";
 import collections from "./collections";
@@ -86,6 +87,7 @@ export default new Elysia()
 			api
 				.use(accessManagement)
 				.use(account)
+				.use(apps)
 				.use(associationProposals)
 				.use(health)
 				.use(notifications)

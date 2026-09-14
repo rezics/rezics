@@ -15,12 +15,24 @@ export const AccessManagementPermissionValues = [
 	"access.role.retire",
 	"access.role-binding.manage",
 	"access.assignment-ceiling.manage",
+	"app.read",
+	"app.create",
+	"app.update",
+	"app.disable",
+	"app.retire",
+	"app.trust.manage",
 ] as const;
 /** A management action remains distinct from the data permissions it can assign. @alpha */
 export type AccessManagementPermission = (typeof AccessManagementPermissionValues)[number];
 
 /** Semantic boundaries used by scope policy and future API metadata. @alpha */
 export const AccessManagementPermissionDefinitions = {
+	"app.read": { resource: "app", action: "read" },
+	"app.create": { resource: "app", action: "create" },
+	"app.update": { resource: "app", action: "update", rationale: "App declarations and enabling remain separate from consent and installation approval." },
+	"app.disable": { resource: "app", action: "disable", rationale: "Stopping App credential use does not confer the ability to enable or expand the App." },
+	"app.retire": { resource: "app", action: "retire", rationale: "Terminal App retirement retains history and does not delete installed content." },
+	"app.trust.manage": { resource: "app.trust", action: "manage", rationale: "Platform trust review is independent from publisher control or a user's installation approval." },
 	"access.identity.select": {
 		resource: "access.identity",
 		action: "select",

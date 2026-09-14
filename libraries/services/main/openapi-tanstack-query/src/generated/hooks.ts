@@ -27,6 +27,7 @@ import {
 	createAccountIdentity,
 	createCatalogDefinition,
 	createCatalogResource,
+	createConnectedApp,
 	createGroupingOrderProfile,
 	createManagedOrganization,
 	createServicePrincipal,
@@ -87,6 +88,8 @@ import {
 	deleteApiUsersMeTagRealmSubscriptionsByRealmId,
 	deleteApiZonesByZoneIdNavigationByNavigationId,
 	deleteApiZonesByZoneIdPagesByPageIdPlacement,
+	disableConnectedApp,
+	enableConnectedApp,
 	eraseOwnAccount,
 	findSoftwareReleases,
 	getAccessRole,
@@ -238,6 +241,7 @@ import {
 	getCatalogSourceJob,
 	getCatalogSourceProposalPreview,
 	getCatalogSourceProposalPreviewValue,
+	getConnectedApp,
 	getCurrentApiToken,
 	getCurrentParticipation,
 	getImageAssetsByIdContent,
@@ -277,6 +281,8 @@ import {
 	listCatalogResourceSourceBindings,
 	listCatalogSemanticHistory,
 	listCatalogSourceProposals,
+	listConnectedAppHistory,
+	listConnectedApps,
 	listContentReviewCaseNotes,
 	listControlledServicePrincipals,
 	listCurrentUserContributionResources,
@@ -557,6 +563,7 @@ import {
 	restoreSoftwareCredit,
 	restoreSoftwareDetails,
 	restoreSoftwareParticipationContext,
+	retireConnectedApp,
 	retryNativeMerge,
 	reviewNativeMerge,
 	reviseAccessRole,
@@ -564,6 +571,7 @@ import {
 	reviseCatalogIdentifier,
 	reviseCatalogName,
 	reviseCatalogSourceBinding,
+	reviseConnectedApp,
 	reviseProgramDetails,
 	revisePublishingDetails,
 	reviseSoftwareCredit,
@@ -574,6 +582,7 @@ import {
 	saveProgramContentDraft,
 	saveTextVersionContentDraft,
 	selectParticipation,
+	setConnectedAppTrust,
 	setMainIdentityPreference,
 	transitionCatalogSemanticState,
 	updateActingEntityPresentation,
@@ -669,6 +678,12 @@ import type {
 	CreateCatalogResourceStatus422,
 	CreateCatalogResourceStatus429,
 	CreateCatalogResourceStatus500,
+	CreateConnectedAppOptions,
+	CreateConnectedAppStatus200,
+	CreateConnectedAppStatus400,
+	CreateConnectedAppStatus422,
+	CreateConnectedAppStatus429,
+	CreateConnectedAppStatus500,
 	CreateGroupingOrderProfileOptions,
 	CreateGroupingOrderProfileStatus200,
 	CreateGroupingOrderProfileStatus400,
@@ -1086,6 +1101,18 @@ import type {
 	DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus422,
 	DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus429,
 	DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus500,
+	DisableConnectedAppOptions,
+	DisableConnectedAppStatus200,
+	DisableConnectedAppStatus400,
+	DisableConnectedAppStatus422,
+	DisableConnectedAppStatus429,
+	DisableConnectedAppStatus500,
+	EnableConnectedAppOptions,
+	EnableConnectedAppStatus200,
+	EnableConnectedAppStatus400,
+	EnableConnectedAppStatus422,
+	EnableConnectedAppStatus429,
+	EnableConnectedAppStatus500,
 	EraseOwnAccountStatus200,
 	EraseOwnAccountStatus500,
 	FindSoftwareReleasesOptions,
@@ -1889,6 +1916,11 @@ import type {
 	GetCatalogSourceProposalPreviewValueStatus200,
 	GetCatalogSourceProposalPreviewValueStatus422,
 	GetCatalogSourceProposalPreviewValueStatus500,
+	GetConnectedAppOptions,
+	GetConnectedAppStatus200,
+	GetConnectedAppStatus422,
+	GetConnectedAppStatus429,
+	GetConnectedAppStatus500,
 	GetCurrentApiTokenStatus200,
 	GetCurrentApiTokenStatus401,
 	GetCurrentApiTokenStatus429,
@@ -2066,6 +2098,16 @@ import type {
 	ListCatalogSourceProposalsStatus200,
 	ListCatalogSourceProposalsStatus422,
 	ListCatalogSourceProposalsStatus500,
+	ListConnectedAppHistoryOptions,
+	ListConnectedAppHistoryStatus200,
+	ListConnectedAppHistoryStatus422,
+	ListConnectedAppHistoryStatus429,
+	ListConnectedAppHistoryStatus500,
+	ListConnectedAppsOptions,
+	ListConnectedAppsStatus200,
+	ListConnectedAppsStatus422,
+	ListConnectedAppsStatus429,
+	ListConnectedAppsStatus500,
 	ListContentReviewCaseNotesOptions,
 	ListContentReviewCaseNotesStatus200,
 	ListContentReviewCaseNotesStatus403,
@@ -4011,6 +4053,11 @@ import type {
 	RestoreSoftwareParticipationContextStatus422,
 	RestoreSoftwareParticipationContextStatus429,
 	RestoreSoftwareParticipationContextStatus500,
+	RetireConnectedAppOptions,
+	RetireConnectedAppStatus200,
+	RetireConnectedAppStatus400,
+	RetireConnectedAppStatus422,
+	RetireConnectedAppStatus500,
 	RetryNativeMergeOptions,
 	RetryNativeMergeStatus200,
 	RetryNativeMergeStatus422,
@@ -4049,6 +4096,12 @@ import type {
 	ReviseCatalogSourceBindingStatus422,
 	ReviseCatalogSourceBindingStatus429,
 	ReviseCatalogSourceBindingStatus500,
+	ReviseConnectedAppOptions,
+	ReviseConnectedAppStatus200,
+	ReviseConnectedAppStatus400,
+	ReviseConnectedAppStatus422,
+	ReviseConnectedAppStatus429,
+	ReviseConnectedAppStatus500,
 	ReviseProgramDetailsOptions,
 	ReviseProgramDetailsStatus200,
 	ReviseProgramDetailsStatus400,
@@ -4112,6 +4165,11 @@ import type {
 	SelectParticipationStatus400,
 	SelectParticipationStatus422,
 	SelectParticipationStatus500,
+	SetConnectedAppTrustOptions,
+	SetConnectedAppTrustStatus200,
+	SetConnectedAppTrustStatus400,
+	SetConnectedAppTrustStatus422,
+	SetConnectedAppTrustStatus500,
 	SetMainIdentityPreferenceOptions,
 	SetMainIdentityPreferenceStatus200,
 	SetMainIdentityPreferenceStatus400,
@@ -5249,6 +5307,804 @@ export function useResolveMainIdentityPreference<
 	queryResult.queryKey = queryKey as TQueryKey;
 
 	return queryResult;
+}
+
+export const listConnectedAppsQueryKey = ({
+	path,
+	query,
+}: Omit<ListConnectedAppsOptions, "headers">) =>
+	[{ url: "/api/v1/apps/scopes/:scope", params: path }, ...(query ? [query] : [])] as const;
+
+type ListConnectedAppsQueryKey = ReturnType<typeof listConnectedAppsQueryKey>;
+
+export function listConnectedAppsQueryOptions(
+	{ path, query }: ListConnectedAppsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listConnectedAppsQueryKey({ path, query });
+	return queryOptions<
+		ListConnectedAppsStatus200,
+		ResponseErrorConfig<
+			ListConnectedAppsStatus422 | ListConnectedAppsStatus429 | ListConnectedAppsStatus500
+		>,
+		ListConnectedAppsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return listConnectedApps({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/apps/scopes/:scope}
+ */
+export function useListConnectedApps<
+	TData = ListConnectedAppsStatus200,
+	TQueryData = ListConnectedAppsStatus200,
+	TQueryKey extends QueryKey = ListConnectedAppsQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path: ListConnectedAppsOptions["path"] | (() => ListConnectedAppsOptions["path"]);
+		query?: ListConnectedAppsOptions["query"] | (() => ListConnectedAppsOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListConnectedAppsStatus200,
+				ResponseErrorConfig<
+					ListConnectedAppsStatus422 | ListConnectedAppsStatus429 | ListConnectedAppsStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey = resolvedOptions?.queryKey ?? listConnectedAppsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listConnectedAppsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			ListConnectedAppsStatus422 | ListConnectedAppsStatus429 | ListConnectedAppsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getConnectedAppQueryKey = ({ path, query }: Omit<GetConnectedAppOptions, "headers">) =>
+	[{ url: "/api/v1/apps/scopes/:scope/:appId", params: path }, ...(query ? [query] : [])] as const;
+
+type GetConnectedAppQueryKey = ReturnType<typeof getConnectedAppQueryKey>;
+
+export function getConnectedAppQueryOptions(
+	{ path, query }: GetConnectedAppOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getConnectedAppQueryKey({ path, query });
+	return queryOptions<
+		GetConnectedAppStatus200,
+		ResponseErrorConfig<
+			GetConnectedAppStatus422 | GetConnectedAppStatus429 | GetConnectedAppStatus500
+		>,
+		GetConnectedAppStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return getConnectedApp({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/apps/scopes/:scope/:appId}
+ */
+export function useGetConnectedApp<
+	TData = GetConnectedAppStatus200,
+	TQueryData = GetConnectedAppStatus200,
+	TQueryKey extends QueryKey = GetConnectedAppQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path: GetConnectedAppOptions["path"] | (() => GetConnectedAppOptions["path"]);
+		query?: GetConnectedAppOptions["query"] | (() => GetConnectedAppOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetConnectedAppStatus200,
+				ResponseErrorConfig<
+					GetConnectedAppStatus422 | GetConnectedAppStatus429 | GetConnectedAppStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey = resolvedOptions?.queryKey ?? getConnectedAppQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getConnectedAppQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			GetConnectedAppStatus422 | GetConnectedAppStatus429 | GetConnectedAppStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const createConnectedAppMutationKey = () =>
+	[{ url: "/api/v1/apps/scopes/:scope/:appId" }] as const;
+
+export function createConnectedAppMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = createConnectedAppMutationKey();
+	return mutationOptions<
+		CreateConnectedAppStatus200,
+		ResponseErrorConfig<
+			| CreateConnectedAppStatus400
+			| CreateConnectedAppStatus422
+			| CreateConnectedAppStatus429
+			| CreateConnectedAppStatus500
+		>,
+		CreateConnectedAppOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return createConnectedApp({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * @description Register an unreviewed App declaration. Registration grants no user consent, installation permission or machine authority.
+ * {@link /api/v1/apps/scopes/:scope/:appId}
+ */
+export function useCreateConnectedApp<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			CreateConnectedAppStatus200,
+			ResponseErrorConfig<
+				| CreateConnectedAppStatus400
+				| CreateConnectedAppStatus422
+				| CreateConnectedAppStatus429
+				| CreateConnectedAppStatus500
+			>,
+			CreateConnectedAppOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? createConnectedAppMutationKey();
+
+	const baseOptions = createConnectedAppMutationOptions(config) as UseMutationOptions<
+		CreateConnectedAppStatus200,
+		ResponseErrorConfig<
+			| CreateConnectedAppStatus400
+			| CreateConnectedAppStatus422
+			| CreateConnectedAppStatus429
+			| CreateConnectedAppStatus500
+		>,
+		CreateConnectedAppOptions,
+		TContext
+	>;
+
+	return useMutation<
+		CreateConnectedAppStatus200,
+		ResponseErrorConfig<
+			| CreateConnectedAppStatus400
+			| CreateConnectedAppStatus422
+			| CreateConnectedAppStatus429
+			| CreateConnectedAppStatus500
+		>,
+		CreateConnectedAppOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		CreateConnectedAppStatus200,
+		ResponseErrorConfig<
+			| CreateConnectedAppStatus400
+			| CreateConnectedAppStatus422
+			| CreateConnectedAppStatus429
+			| CreateConnectedAppStatus500
+		>,
+		CreateConnectedAppOptions,
+		TContext
+	>;
+}
+
+export const listConnectedAppHistoryQueryKey = ({
+	path,
+	query,
+}: Omit<ListConnectedAppHistoryOptions, "headers">) =>
+	[
+		{ url: "/api/v1/apps/scopes/:scope/:appId/history", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type ListConnectedAppHistoryQueryKey = ReturnType<typeof listConnectedAppHistoryQueryKey>;
+
+export function listConnectedAppHistoryQueryOptions(
+	{ path, query }: ListConnectedAppHistoryOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listConnectedAppHistoryQueryKey({ path, query });
+	return queryOptions<
+		ListConnectedAppHistoryStatus200,
+		ResponseErrorConfig<
+			| ListConnectedAppHistoryStatus422
+			| ListConnectedAppHistoryStatus429
+			| ListConnectedAppHistoryStatus500
+		>,
+		ListConnectedAppHistoryStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return listConnectedAppHistory({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/apps/scopes/:scope/:appId/history}
+ */
+export function useListConnectedAppHistory<
+	TData = ListConnectedAppHistoryStatus200,
+	TQueryData = ListConnectedAppHistoryStatus200,
+	TQueryKey extends QueryKey = ListConnectedAppHistoryQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path: ListConnectedAppHistoryOptions["path"] | (() => ListConnectedAppHistoryOptions["path"]);
+		query?:
+			| ListConnectedAppHistoryOptions["query"]
+			| (() => ListConnectedAppHistoryOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListConnectedAppHistoryStatus200,
+				ResponseErrorConfig<
+					| ListConnectedAppHistoryStatus422
+					| ListConnectedAppHistoryStatus429
+					| ListConnectedAppHistoryStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey = resolvedOptions?.queryKey ?? listConnectedAppHistoryQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listConnectedAppHistoryQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| ListConnectedAppHistoryStatus422
+			| ListConnectedAppHistoryStatus429
+			| ListConnectedAppHistoryStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const reviseConnectedAppMutationKey = () =>
+	[{ url: "/api/v1/apps/scopes/:scope/:appId/declarations" }] as const;
+
+export function reviseConnectedAppMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = reviseConnectedAppMutationKey();
+	return mutationOptions<
+		ReviseConnectedAppStatus200,
+		ResponseErrorConfig<
+			| ReviseConnectedAppStatus400
+			| ReviseConnectedAppStatus422
+			| ReviseConnectedAppStatus429
+			| ReviseConnectedAppStatus500
+		>,
+		ReviseConnectedAppOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return reviseConnectedApp({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * @description Publish a new declaration; existing consent and installation approvals keep their selected revision.
+ * {@link /api/v1/apps/scopes/:scope/:appId/declarations}
+ */
+export function useReviseConnectedApp<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			ReviseConnectedAppStatus200,
+			ResponseErrorConfig<
+				| ReviseConnectedAppStatus400
+				| ReviseConnectedAppStatus422
+				| ReviseConnectedAppStatus429
+				| ReviseConnectedAppStatus500
+			>,
+			ReviseConnectedAppOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? reviseConnectedAppMutationKey();
+
+	const baseOptions = reviseConnectedAppMutationOptions(config) as UseMutationOptions<
+		ReviseConnectedAppStatus200,
+		ResponseErrorConfig<
+			| ReviseConnectedAppStatus400
+			| ReviseConnectedAppStatus422
+			| ReviseConnectedAppStatus429
+			| ReviseConnectedAppStatus500
+		>,
+		ReviseConnectedAppOptions,
+		TContext
+	>;
+
+	return useMutation<
+		ReviseConnectedAppStatus200,
+		ResponseErrorConfig<
+			| ReviseConnectedAppStatus400
+			| ReviseConnectedAppStatus422
+			| ReviseConnectedAppStatus429
+			| ReviseConnectedAppStatus500
+		>,
+		ReviseConnectedAppOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		ReviseConnectedAppStatus200,
+		ResponseErrorConfig<
+			| ReviseConnectedAppStatus400
+			| ReviseConnectedAppStatus422
+			| ReviseConnectedAppStatus429
+			| ReviseConnectedAppStatus500
+		>,
+		ReviseConnectedAppOptions,
+		TContext
+	>;
+}
+
+export const disableConnectedAppMutationKey = () =>
+	[{ url: "/api/v1/apps/scopes/:scope/:appId/disable" }] as const;
+
+export function disableConnectedAppMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = disableConnectedAppMutationKey();
+	return mutationOptions<
+		DisableConnectedAppStatus200,
+		ResponseErrorConfig<
+			| DisableConnectedAppStatus400
+			| DisableConnectedAppStatus422
+			| DisableConnectedAppStatus429
+			| DisableConnectedAppStatus500
+		>,
+		DisableConnectedAppOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return disableConnectedApp({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/apps/scopes/:scope/:appId/disable}
+ */
+export function useDisableConnectedApp<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DisableConnectedAppStatus200,
+			ResponseErrorConfig<
+				| DisableConnectedAppStatus400
+				| DisableConnectedAppStatus422
+				| DisableConnectedAppStatus429
+				| DisableConnectedAppStatus500
+			>,
+			DisableConnectedAppOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? disableConnectedAppMutationKey();
+
+	const baseOptions = disableConnectedAppMutationOptions(config) as UseMutationOptions<
+		DisableConnectedAppStatus200,
+		ResponseErrorConfig<
+			| DisableConnectedAppStatus400
+			| DisableConnectedAppStatus422
+			| DisableConnectedAppStatus429
+			| DisableConnectedAppStatus500
+		>,
+		DisableConnectedAppOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DisableConnectedAppStatus200,
+		ResponseErrorConfig<
+			| DisableConnectedAppStatus400
+			| DisableConnectedAppStatus422
+			| DisableConnectedAppStatus429
+			| DisableConnectedAppStatus500
+		>,
+		DisableConnectedAppOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DisableConnectedAppStatus200,
+		ResponseErrorConfig<
+			| DisableConnectedAppStatus400
+			| DisableConnectedAppStatus422
+			| DisableConnectedAppStatus429
+			| DisableConnectedAppStatus500
+		>,
+		DisableConnectedAppOptions,
+		TContext
+	>;
+}
+
+export const enableConnectedAppMutationKey = () =>
+	[{ url: "/api/v1/apps/scopes/:scope/:appId/enable" }] as const;
+
+export function enableConnectedAppMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = enableConnectedAppMutationKey();
+	return mutationOptions<
+		EnableConnectedAppStatus200,
+		ResponseErrorConfig<
+			| EnableConnectedAppStatus400
+			| EnableConnectedAppStatus422
+			| EnableConnectedAppStatus429
+			| EnableConnectedAppStatus500
+		>,
+		EnableConnectedAppOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return enableConnectedApp({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * @description Enable an App without reviving credentials invalidated by an earlier disablement or block.
+ * {@link /api/v1/apps/scopes/:scope/:appId/enable}
+ */
+export function useEnableConnectedApp<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			EnableConnectedAppStatus200,
+			ResponseErrorConfig<
+				| EnableConnectedAppStatus400
+				| EnableConnectedAppStatus422
+				| EnableConnectedAppStatus429
+				| EnableConnectedAppStatus500
+			>,
+			EnableConnectedAppOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? enableConnectedAppMutationKey();
+
+	const baseOptions = enableConnectedAppMutationOptions(config) as UseMutationOptions<
+		EnableConnectedAppStatus200,
+		ResponseErrorConfig<
+			| EnableConnectedAppStatus400
+			| EnableConnectedAppStatus422
+			| EnableConnectedAppStatus429
+			| EnableConnectedAppStatus500
+		>,
+		EnableConnectedAppOptions,
+		TContext
+	>;
+
+	return useMutation<
+		EnableConnectedAppStatus200,
+		ResponseErrorConfig<
+			| EnableConnectedAppStatus400
+			| EnableConnectedAppStatus422
+			| EnableConnectedAppStatus429
+			| EnableConnectedAppStatus500
+		>,
+		EnableConnectedAppOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		EnableConnectedAppStatus200,
+		ResponseErrorConfig<
+			| EnableConnectedAppStatus400
+			| EnableConnectedAppStatus422
+			| EnableConnectedAppStatus429
+			| EnableConnectedAppStatus500
+		>,
+		EnableConnectedAppOptions,
+		TContext
+	>;
+}
+
+export const retireConnectedAppMutationKey = () =>
+	[{ url: "/api/v1/apps/scopes/:scope/:appId/retire" }] as const;
+
+export function retireConnectedAppMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = retireConnectedAppMutationKey();
+	return mutationOptions<
+		RetireConnectedAppStatus200,
+		ResponseErrorConfig<
+			RetireConnectedAppStatus400 | RetireConnectedAppStatus422 | RetireConnectedAppStatus500
+		>,
+		RetireConnectedAppOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return retireConnectedApp({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * @description Permanently retire the App. Its history and legitimately created content remain.
+ * {@link /api/v1/apps/scopes/:scope/:appId/retire}
+ */
+export function useRetireConnectedApp<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			RetireConnectedAppStatus200,
+			ResponseErrorConfig<
+				RetireConnectedAppStatus400 | RetireConnectedAppStatus422 | RetireConnectedAppStatus500
+			>,
+			RetireConnectedAppOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? retireConnectedAppMutationKey();
+
+	const baseOptions = retireConnectedAppMutationOptions(config) as UseMutationOptions<
+		RetireConnectedAppStatus200,
+		ResponseErrorConfig<
+			RetireConnectedAppStatus400 | RetireConnectedAppStatus422 | RetireConnectedAppStatus500
+		>,
+		RetireConnectedAppOptions,
+		TContext
+	>;
+
+	return useMutation<
+		RetireConnectedAppStatus200,
+		ResponseErrorConfig<
+			RetireConnectedAppStatus400 | RetireConnectedAppStatus422 | RetireConnectedAppStatus500
+		>,
+		RetireConnectedAppOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		RetireConnectedAppStatus200,
+		ResponseErrorConfig<
+			RetireConnectedAppStatus400 | RetireConnectedAppStatus422 | RetireConnectedAppStatus500
+		>,
+		RetireConnectedAppOptions,
+		TContext
+	>;
+}
+
+export const setConnectedAppTrustMutationKey = () =>
+	[{ url: "/api/v1/apps/:appId/trust" }] as const;
+
+export function setConnectedAppTrustMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = setConnectedAppTrustMutationKey();
+	return mutationOptions<
+		SetConnectedAppTrustStatus200,
+		ResponseErrorConfig<
+			SetConnectedAppTrustStatus400 | SetConnectedAppTrustStatus422 | SetConnectedAppTrustStatus500
+		>,
+		SetConnectedAppTrustOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return setConnectedAppTrust({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * @description Apply a platform trust decision. Publisher control alone cannot change trust.
+ * {@link /api/v1/apps/:appId/trust}
+ */
+export function useSetConnectedAppTrust<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			SetConnectedAppTrustStatus200,
+			ResponseErrorConfig<
+				| SetConnectedAppTrustStatus400
+				| SetConnectedAppTrustStatus422
+				| SetConnectedAppTrustStatus500
+			>,
+			SetConnectedAppTrustOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? setConnectedAppTrustMutationKey();
+
+	const baseOptions = setConnectedAppTrustMutationOptions(config) as UseMutationOptions<
+		SetConnectedAppTrustStatus200,
+		ResponseErrorConfig<
+			SetConnectedAppTrustStatus400 | SetConnectedAppTrustStatus422 | SetConnectedAppTrustStatus500
+		>,
+		SetConnectedAppTrustOptions,
+		TContext
+	>;
+
+	return useMutation<
+		SetConnectedAppTrustStatus200,
+		ResponseErrorConfig<
+			SetConnectedAppTrustStatus400 | SetConnectedAppTrustStatus422 | SetConnectedAppTrustStatus500
+		>,
+		SetConnectedAppTrustOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		SetConnectedAppTrustStatus200,
+		ResponseErrorConfig<
+			SetConnectedAppTrustStatus400 | SetConnectedAppTrustStatus422 | SetConnectedAppTrustStatus500
+		>,
+		SetConnectedAppTrustOptions,
+		TContext
+	>;
 }
 
 export const getApiUnitByUnitIdAssociationProposalsQueryKey = ({

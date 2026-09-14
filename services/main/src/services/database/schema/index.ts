@@ -94,3 +94,4 @@ export * from "./organization-membership";
 
 export * from "./realm-values";
 export * from "./account-identity-admission";
+export * from "./connected-app";

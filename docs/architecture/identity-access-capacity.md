@@ -50,6 +50,15 @@ replication/WAL. These are hint-row populations, not one-to-one preference count
 Resolution uses the exact preference revision and at most nine rows to detect an
 overflow, then revalidates the bounded context. It never scans a controller roster.
 
+App declarations add separate App heads, control receipts, declaration headers and
+literal capability rows. Count revisions rather than only App identities. A header
+allows at most 512 label bytes and 4,096 description bytes; capability cardinality
+is bounded by the API/domain registries and is not an embedded roster. Until measured,
+use the 224-384 indexed-byte binding estimate for each capability row: 112-192 GB
+for 500,000,000 rows or 672-1152 GB for 3,000,000,000 rows. Account/Entity inventories
+use scope/App keysets; declaration and capability reads use exact composite keys.
+App disablement changes one head/epoch and does not rewrite every installed grant.
+
 Role definitions and permission dictionaries may be scope-bounded, but the total
 scope count is not globally bounded. Inventory scope heads, definition revisions,
 role-permission entries and retirement history separately using measured width

@@ -13,6 +13,7 @@ export const PostgreSqlSchemaFileNames = [
 	"api-key-authority.sql",
 	"identity-preference.sql",
 	"account-identity-admission.sql",
+	"connected-app.sql",
 	"access-subject-policy.sql",
 	"access-role.sql",
 	"access-role-binding.sql",
@@ -101,6 +102,11 @@ export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly 
 };
 
 export const PostgreSqlSchemaFunctionNames = [
+	"guard_connected_app_head",
+	"guard_connected_app_event",
+	"guard_connected_app_revision",
+	"guard_connected_app_capability",
+	"complete_connected_app",
 	"guard_account_identity_admission",
 	"access_subject_is_eligible",
 	"access_subject_matches_recipient",
@@ -457,6 +463,14 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "connected_app", name: "connected_app_head_guard" },
+	{ table: "connected_app_event", name: "connected_app_event_guard" },
+	{ table: "connected_app_event", name: "connected_app_event_immutable" },
+	{ table: "connected_app_revision", name: "connected_app_revision_guard" },
+	{ table: "connected_app_capability", name: "connected_app_capability_guard" },
+	{ table: "connected_app", name: "connected_app_head_complete" },
+	{ table: "connected_app_event", name: "connected_app_event_complete" },
+	{ table: "connected_app_revision", name: "connected_app_revision_complete" },
 	{ table: "account_identity_admission", name: "account_identity_admission_guard" },
 	{ table: "api_key_authority", name: "api_key_authority_guard" },
 	{ table: "apikeys", name: "apikey_authority_fence" },

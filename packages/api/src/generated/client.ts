@@ -37,6 +37,24 @@ import type {
 	SetMainIdentityPreferenceResponses,
 	ResolveMainIdentityPreferenceOptions,
 	ResolveMainIdentityPreferenceResponses,
+	ListConnectedAppsOptions,
+	ListConnectedAppsResponses,
+	GetConnectedAppOptions,
+	GetConnectedAppResponses,
+	CreateConnectedAppOptions,
+	CreateConnectedAppResponses,
+	ListConnectedAppHistoryOptions,
+	ListConnectedAppHistoryResponses,
+	ReviseConnectedAppOptions,
+	ReviseConnectedAppResponses,
+	DisableConnectedAppOptions,
+	DisableConnectedAppResponses,
+	EnableConnectedAppOptions,
+	EnableConnectedAppResponses,
+	RetireConnectedAppOptions,
+	RetireConnectedAppResponses,
+	SetConnectedAppTrustOptions,
+	SetConnectedAppTrustResponses,
 	GetApiUnitByUnitIdAssociationProposalsOptions,
 	GetApiUnitByUnitIdAssociationProposalsResponses,
 	PostApiUnitByUnitIdAssociationProposalsRequestsOptions,
@@ -1399,6 +1417,194 @@ export function resolveMainIdentityPreference<ThrowOnError extends boolean = tru
 			],
 			...config,
 		}) as Promise<RequestResult<ResolveMainIdentityPreferenceResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/apps/scopes/:scope}
+ */
+export function listConnectedApps<ThrowOnError extends boolean = true>(
+	options: Options<ListConnectedAppsOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ListConnectedAppsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/apps/scopes/{scope}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ListConnectedAppsResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/apps/scopes/:scope/:appId}
+ */
+export function getConnectedApp<ThrowOnError extends boolean = true>(
+	options: Options<GetConnectedAppOptions, ThrowOnError>,
+): Unwrappable<RequestResult<GetConnectedAppResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/apps/scopes/{scope}/{appId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetConnectedAppResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * @description Register an unreviewed App declaration. Registration grants no user consent, installation permission or machine authority.
+ * {@link /api/v1/apps/scopes/:scope/:appId}
+ */
+export function createConnectedApp<ThrowOnError extends boolean = true>(
+	options: Options<CreateConnectedAppOptions, ThrowOnError>,
+): Unwrappable<RequestResult<CreateConnectedAppResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/apps/scopes/{scope}/{appId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<CreateConnectedAppResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/apps/scopes/:scope/:appId/history}
+ */
+export function listConnectedAppHistory<ThrowOnError extends boolean = true>(
+	options: Options<ListConnectedAppHistoryOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ListConnectedAppHistoryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/apps/scopes/{scope}/{appId}/history",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ListConnectedAppHistoryResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * @description Publish a new declaration; existing consent and installation approvals keep their selected revision.
+ * {@link /api/v1/apps/scopes/:scope/:appId/declarations}
+ */
+export function reviseConnectedApp<ThrowOnError extends boolean = true>(
+	options: Options<ReviseConnectedAppOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ReviseConnectedAppResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/apps/scopes/{scope}/{appId}/declarations",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ReviseConnectedAppResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/apps/scopes/:scope/:appId/disable}
+ */
+export function disableConnectedApp<ThrowOnError extends boolean = true>(
+	options: Options<DisableConnectedAppOptions, ThrowOnError>,
+): Unwrappable<RequestResult<DisableConnectedAppResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/apps/scopes/{scope}/{appId}/disable",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<DisableConnectedAppResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * @description Enable an App without reviving credentials invalidated by an earlier disablement or block.
+ * {@link /api/v1/apps/scopes/:scope/:appId/enable}
+ */
+export function enableConnectedApp<ThrowOnError extends boolean = true>(
+	options: Options<EnableConnectedAppOptions, ThrowOnError>,
+): Unwrappable<RequestResult<EnableConnectedAppResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/apps/scopes/{scope}/{appId}/enable",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<EnableConnectedAppResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * @description Permanently retire the App. Its history and legitimately created content remain.
+ * {@link /api/v1/apps/scopes/:scope/:appId/retire}
+ */
+export function retireConnectedApp<ThrowOnError extends boolean = true>(
+	options: Options<RetireConnectedAppOptions, ThrowOnError>,
+): Unwrappable<RequestResult<RetireConnectedAppResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/apps/scopes/{scope}/{appId}/retire",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<RetireConnectedAppResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * @description Apply a platform trust decision. Publisher control alone cannot change trust.
+ * {@link /api/v1/apps/:appId/trust}
+ */
+export function setConnectedAppTrust<ThrowOnError extends boolean = true>(
+	options: Options<SetConnectedAppTrustOptions, ThrowOnError>,
+): Unwrappable<RequestResult<SetConnectedAppTrustResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/apps/{appId}/trust",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<SetConnectedAppTrustResponses, ThrowOnError>>,
 	);
 }
 
