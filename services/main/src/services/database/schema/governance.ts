@@ -830,6 +830,9 @@ export const accountEnforcement = pgTable(
 			table.kind,
 			table.expiresAt,
 		),
+		index("account_enforcement_current_subject_idx")
+			.on(table.authUserId, table.kind, table.id)
+			.where(sql`${table.revocationActionId} is null`),
 		check(
 			"account_enforcement_time_check",
 			sql`${table.expiresAt} is null or ${table.expiresAt} > ${table.startsAt}`,

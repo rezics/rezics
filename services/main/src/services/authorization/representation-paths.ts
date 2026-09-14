@@ -4,7 +4,7 @@ import {
 } from "@rezics/access";
 import { z } from "zod";
 import { AccessPermissionSchema } from "./permission";
-import { RequestedAuthoritySelectionSchema, type AuthorityOperation, type AuthorityOutcome } from "./authority-context";
+import { RequestedAuthoritySelectionSchema, AuthorityOperationSchema, type AuthorityOperation, type AuthorityOutcome } from "./authority-context";
 import type { AccessMemberSetRecipient } from "./member-set-recipients";
 
 const pathSchema = z.array(z.string().regex(/^[a-z0-9][a-z0-9-]{0,255}$/)).max(8);
@@ -27,7 +27,7 @@ const grantSchema = z.strictObject({
 const inputSchema = z.strictObject({
 	principalId: z.uuid(),
 	selection: RequestedAuthoritySelectionSchema,
-	operation: z.strictObject({ permission: AccessPermissionSchema, scopeId: z.uuid(), path: pathSchema }),
+	operation: AuthorityOperationSchema,
 	now: z.number().finite(), freshSession: z.boolean(),
 	grants: z.array(grantSchema).max(64),
 	subjects: z.array(z.strictObject({

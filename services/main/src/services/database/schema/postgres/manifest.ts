@@ -10,6 +10,7 @@ export const PostgreSqlSchemaFileNames = [
 	"history-integrity.sql",
 	"reference-value.sql",
 	"access-identity.sql",
+	"access-subject-policy.sql",
 	"access-role.sql",
 	"access-role-binding.sql",
 	"access-representation.sql",
@@ -94,6 +95,7 @@ export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly 
 };
 
 export const PostgreSqlSchemaFunctionNames = [
+	"fence_access_subject_policy",
 	"access_representation_recipient_is_current",
 	"access_representation_parent_basis_is_current",
 	"access_representation_terms_narrower",
@@ -434,6 +436,9 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "user_account_state", name: "user_account_state_authority_fence" },
+	{ table: "account_enforcement", name: "account_enforcement_authority_fence" },
+	{ table: "entity_participation", name: "entity_participation_authority_fence" },
 	{ table: "access_subject", name: "access_representation_entity_initialize" },
 	{ table: "access_representation_entity", name: "access_representation_entity_guard" },
 	{ table: "access_representation", name: "access_representation_head_guard" },

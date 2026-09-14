@@ -1,15 +1,20 @@
 import {
 	accessPermissionKey,
-	isAccessPermission,
-	unitScope,
 	type AccessSubjectTarget,
 	type AccessPermission,
 	type RequestedAuthoritySelection,
 	type RepresentationReference,
 } from "@rezics/access";
 import { z } from "zod";
+import { AccessPermissionSchema } from "./permission";
 
 const uuidSchema = z.uuid();
+/** Registry-qualified operation at one exact authority root and bounded canonical path. @internal */
+export const AuthorityOperationSchema = z.strictObject({
+	permission: AccessPermissionSchema,
+	scopeId: uuidSchema,
+	path: z.array(z.string().regex(/^[a-z0-9][a-z0-9-]{0,255}$/)).max(8),
+});
 const referenceSchema = z.strictObject({
 	id: uuidSchema,
 	revision: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
@@ -85,20 +90,7 @@ function sameReference(first: RepresentationReference, second: RepresentationRef
 	return first?.id === second.id && first.revision === second.revision;
 }
 function operationKey(operation: AuthorityOperation): string | undefined {
-	if (
-		!operation ||
-		!isAccessPermission(operation.permission) ||
-		!uuidSchema.safeParse(operation.scopeId).success ||
-		!Array.isArray(operation.path) ||
-		operation.path.length > 8 ||
-		operation.path.some((segment) => typeof segment !== "string" || segment.length > 256)
-	)
-		return undefined;
-	try {
-		unitScope(...operation.path);
-	} catch {
-		return undefined;
-	}
+	if (!AuthorityOperationSchema.safeParse(operation).success) return undefined;
 	return JSON.stringify([
 		accessPermissionKey(operation.permission),
 		operation.scopeId,

@@ -23,6 +23,8 @@ export interface CurrentAccessRepresentation {
 	head: typeof accessRepresentation.$inferSelect;
 	terms: typeof accessRepresentationRevision.$inferSelect;
 	permissions: AccessPermission[];
+	/** Live authority subjects used by this grant's retained parent lineage. */
+	parentSubjectIds: string[];
 	liveness: AuthorityOutcome;
 	evaluatedAt: Date;
 }
@@ -51,13 +53,15 @@ export async function readCurrentAccessRepresentations(
 	if (fences.length !== entityIds.length) throw new AccessRepresentationUnavailable();
 	const known = new Set(heads.map(head => head.id));
 	const selected = references.filter(ref => known.has(ref.id));
-	const lineage = (await tx.execute<{ grant_id: string; revision: string }>(sql`
-		select distinct l.grant_id,l.revision::text from
+	const lineage = (await tx.execute<{ base_id: string; grant_id: string; revision: string }>(sql`
+		select selected.id as base_id,l.grant_id,l.revision::text from
 		(values ${sql.join(selected.map(ref => sql`(${ref.id}::uuid,${ref.revision}::bigint)`), sql`, `)}) selected(id,revision)
 		cross join lateral public.access_representation_lineage(selected.id,selected.revision) l
-		order by l.grant_id,l.revision::text limit 257`)).rows;
-	if (lineage.length > 256) throw new AccessRepresentationBudgetExceeded();
-	const revisions = lineage.map(row => ({ id: row.grant_id, revision: z.number().int().positive().max(Number.MAX_SAFE_INTEGER).parse(Number(row.revision)) }));
+		order by selected.id,l.depth limit 577`)).rows;
+	if (lineage.length > 576) throw new AccessRepresentationBudgetExceeded();
+	const distinctLineage = new Map(lineage.map(row => [`${row.grant_id}:${row.revision}`, row]));
+	if (distinctLineage.size > 256) throw new AccessRepresentationBudgetExceeded();
+	const revisions = [...distinctLineage.values()].map(row => ({ id: row.grant_id, revision: z.number().int().positive().max(Number.MAX_SAFE_INTEGER).parse(Number(row.revision)) }));
 	const snapshots = await tx.select({ head: accessRepresentation, terms: accessRepresentationRevision })
 		.from(accessRepresentation).innerJoin(accessRepresentationRevision, eq(accessRepresentationRevision.grantId, accessRepresentation.id))
 		.where(or(...revisions.map(ref => and(eq(accessRepresentation.id, ref.id), eq(accessRepresentationRevision.revision, ref.revision)))))
@@ -109,6 +113,15 @@ export async function readCurrentAccessRepresentations(
 		clock_timestamp()::text as now from
 		(values ${sql.join(selected.map(ref => sql`(${ref.id}::uuid,${ref.revision}::bigint)`), sql`, `)}) selected(id,revision)`)).rows;
 	const byId = new Map(states.map(state => [state.id, state]));
+	const parentSubjects = new Map<string, Set<string>>();
+	const byRevision = new Map(snapshots.map(row => [`${row.head.id}:${row.terms.revision}`, row]));
+	for (const row of lineage) {
+		const parentSubjectId = byRevision.get(`${row.grant_id}:${row.revision}`)?.head.parentSubjectId;
+		if (parentSubjectId) {
+			const ids = parentSubjects.get(row.base_id) ?? new Set<string>();
+			ids.add(parentSubjectId); parentSubjects.set(row.base_id, ids);
+		}
+	}
 	const grants: CurrentAccessRepresentation[] = [];
 	for (const { head, terms } of snapshots) {
 		const key = `${head.id}:${terms.revision}`;
@@ -118,7 +131,7 @@ export async function readCurrentAccessRepresentations(
 		if (!state) throw new AccessRepresentationUnavailable();
 		const evaluatedAt = new Date(state.now);
 		if (!Number.isFinite(evaluatedAt.getTime())) throw new AccessRepresentationUnavailable();
-		grants.push({ head, terms, evaluatedAt,
+		grants.push({ head, terms, evaluatedAt, parentSubjectIds: [...(parentSubjects.get(head.id) ?? [])].sort(),
 			permissions: decodeAccessPermissionSnapshot(members.get(key) ?? [], terms.permissionCount, terms.permissionDigest),
 			liveness: state.liveness === true ? "allow" : state.liveness === false ? "deny" : "unavailable" });
 	}

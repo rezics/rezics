@@ -22,7 +22,9 @@
     {"name":"20260914180839_access_role_binding.sql","digest":"79a37ace2e8f7cd941456a889d1b3f860a54c46abbf0d9dc70724be015e9e20d"},
     {"name":"20260914181715_access_role_binding_readers.sql","digest":"7c4fdf8efc5c0eeda870c8993c0ad57df8a0d31c16ca33c150a6a59cd9b34ce1"},
     {"name":"20260914182614_access_representation.sql","digest":"d2e98afb0c500c91d644404ac5c426c1295b978d156814cf2e579c3b5a16a54d"},
-    {"name":"20260914182945_access_representation.sql","digest":"adcaeb7ba253ed2f8a6e6cc6013a3c5d7adb00eb82de21dcd7ce041c43f875d1"}
+    {"name":"20260914182945_access_representation.sql","digest":"adcaeb7ba253ed2f8a6e6cc6013a3c5d7adb00eb82de21dcd7ce041c43f875d1"},
+    {"name":"20260914184703_access_subject_policy.sql","digest":"4fe458218d622d237c6f4578a510ed6c9098f2d6d67534d7707f0bc579b007a7"},
+    {"name":"20260914185524_access_subject_policy.sql","digest":"46c9b08461b9723cc6abcbb236c1f584ca0d6ecc064c82c3aa18f89a40d987e0"}
   ],
   "partitions": {
     "operational_outbox": "range:routing_bucket:16:64",
@@ -147,7 +149,7 @@
   },
   "snapshot": {
     "dialect": "postgres",
-    "id": "1b235888-2ec4-4b37-98df-d016e68131eb",
+    "id": "f65118a2-541a-4efb-b86d-70b4e83d9966",
     "prevIds": ["00000000-0000-0000-0000-000000000000"],
     "version": "8",
     "renames": [],
@@ -7964,6 +7966,7 @@
       {"nameExplicit":true,"columns":[{"value":"entity_id","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null}],"isUnique":true,"where":"\"entity_id\" is not null","with":"","method":"btree","concurrently":false,"name":"access_subject_entity_key","entityType":"indexes","schema":"public","table":"access_subject"},
       {"nameExplicit":true,"columns":[{"value":"revocation_action_id","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null}],"isUnique":true,"where":"\"revocation_action_id\" is not null","with":"","method":"btree","concurrently":false,"name":"account_enforcement_revocation_action_key","entityType":"indexes","schema":"public","table":"account_enforcement"},
       {"nameExplicit":true,"columns":[{"value":"auth_user_id","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null},{"value":"kind","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null},{"value":"expires_at","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null}],"isUnique":false,"where":null,"with":"","method":"btree","concurrently":false,"name":"account_enforcement_auth_user_kind_expiry_idx","entityType":"indexes","schema":"public","table":"account_enforcement"},
+      {"nameExplicit":true,"columns":[{"value":"auth_user_id","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null},{"value":"kind","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null},{"value":"id","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null}],"isUnique":false,"where":"\"revocation_action_id\" is null","with":"","method":"btree","concurrently":false,"name":"account_enforcement_current_subject_idx","entityType":"indexes","schema":"public","table":"account_enforcement"},
       {"nameExplicit":true,"columns":[{"value":"reverses_action_id","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null}],"isUnique":true,"where":"\"reverses_action_id\" is not null","with":"","method":"btree","concurrently":false,"name":"account_enforcement_action_reverses_key","entityType":"indexes","schema":"public","table":"account_enforcement_action"},
       {"nameExplicit":true,"columns":[{"value":"decision_id","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null}],"isUnique":true,"where":"\"decision_id\" is not null","with":"","method":"btree","concurrently":false,"name":"account_enforcement_action_decision_key","entityType":"indexes","schema":"public","table":"account_enforcement_action"},
       {"nameExplicit":true,"columns":[{"value":"target_auth_user_id","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null},{"value":"created_at","isExpression":false,"asc":false,"nullsFirst":false,"opclass":null},{"value":"id","isExpression":false,"asc":false,"nullsFirst":false,"opclass":null}],"isUnique":false,"where":null,"with":"","method":"btree","concurrently":false,"name":"account_enforcement_action_target_created_idx","entityType":"indexes","schema":"public","table":"account_enforcement_action"},

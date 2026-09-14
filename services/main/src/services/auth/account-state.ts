@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 import { database, type DatabaseExecutor } from "../database";
 import { userAccountState, users } from "../database/schema";
@@ -60,11 +60,17 @@ export async function loadEffectiveAccountState(
 			revision: userAccountState.revision,
 			updatedAt: userAccountState.updatedAt,
 			updatedByAuthUserId: userAccountState.updatedByAuthUserId,
+			evaluatedAt: sql<string>`statement_timestamp()::text`,
 		})
 		.from(userAccountState)
 		.where(eq(userAccountState.userId, userId))
 		.limit(1);
-	return effectiveAccountState(record);
+	if (!record) return effectiveAccountState(undefined);
+	const { evaluatedAt, ...state } = record;
+	const now = new Date(evaluatedAt);
+	if (!Number.isFinite(now.getTime()) || (state.expiresAt !== null && !Number.isFinite(state.expiresAt.getTime())))
+		throw new Error("Account state time is unavailable");
+	return effectiveAccountState(state, now);
 }
 
 export async function ensureAccountAuthenticationAllowed(

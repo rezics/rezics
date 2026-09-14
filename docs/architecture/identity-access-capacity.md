@@ -507,3 +507,25 @@ recipient branch visits. Shortest certain/uncertain visits avoid exponential pat
 enumeration; each path uses at most eight edges. These bounds do not include native
 subject-policy loading or qualify the combined SQL, latency or credential budget.
 Independent path outcomes and post-wait dependency changes need native acceptance.
+
+## Native subject policy
+
+The subject-policy reader admits 256 registry subjects, at most 256 nonrevoked
+action-relevant enforcement candidates per principal and 512 total. It rejects
+overflow before making a positive decision. An account/kind/nonrevoked-row index adds an
+estimated 112 bytes per indexed enforcement: 56 GB at 500M rows and 336 GB at 3B
+rows before overheads. Expired but retained nonrevoked rows still consume the
+candidate budget; retention/reconciliation and long-history plans must be qualified.
+
+Account/Entity identity rows supply the negative policy fence without another
+stored relation. Policy writes acquire those rows exclusively; request reads share
+them and use new READ COMMITTED statements. The actual lock footprint, hot-account
+contention and index scan buffers remain native verification obligations. Time
+boundaries include future enforcement starts and suspension/enforcement expiry.
+
+Current representation composition permits at most 65 graph subjects and 256
+subject/recipient-scope probes across the selected graph, plus bounded parent
+subject lifecycle reads. It refreshes time-sensitive subject and lineage state
+after member-set waits. The current per-subject composition adds SQL statements
+beyond the isolated readers; its twelve-statement/latency target remains unqualified
+and must be measured and repaired before applicable capacity acceptance.

@@ -111,6 +111,27 @@ other valid controllers and permitted Entity contributions. Loss of every valid
 control path suspends sensitive participation until governed recovery; recovery
 does not revive erased accounts or old grants.
 
+### Native subject eligibility
+
+Current subject policy reads the private registry, then concrete account/Entity
+owner rows under shared locks. Account lifecycle and enforcement writes take the
+exclusive side of the account row fence; Entity participation writes take the
+exclusive side of the Entity identity fence. Native triggers cover direct SQL
+writers as well as application commands. A missing account-state row means active
+by the account owner's contract; a missing Entity participation row means no
+admitted participation. These negative selections are read after the owner fence.
+The composed reader requires READ COMMITTED; merely locking an unchanged parent
+row would not refresh an older repeatable snapshot of its policy children.
+
+Erased/closed/currently suspended accounts are ineligible. Existing write versus
+contribution enforcement semantics remain explicit, independently of the authority
+subject; read eligibility does not invent a new enforcement-wide ban. Entity
+eligibility requires an undeleted identity and active participation, without
+requiring public publication. Database time after waits controls expiry and the
+first known future policy boundary; nonfinite time and exhausted candidate reads
+are unavailable. Resource/scope restrictions, credentials and independent-approval
+conditions remain additional owner decisions.
+
 ## Membership, groups and teams
 
 Both Org and Realm own membership capabilities and can independently own many
@@ -625,6 +646,14 @@ in batches, and evaluates current lineage after waits. Its lifecycle outcome is
 not yet the full subject/credential/representation decision: native subject policy,
 management admission, complete mutation fence promotion, erasure/recovery and API
 integration remain pending. Neither source implementation qualifies these paths.
+
+The current representation evaluator now composes those native grant, subject and
+membership owners for one operation. It retains parent-subject policy per selected
+basis, so an institutional issuer is not imported as a live dependency and an
+unrelated failed path does not become a global subject denial. It refreshes subject
+policy and lineage liveness after membership waits before evaluating the explicit
+subgraph. Authentication supplies the principal and fresh-session facts; resource
+permissions and complete command admission still belong to the request owner.
 
 ### Assignment lifetime and revocation
 
