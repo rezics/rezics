@@ -107,7 +107,8 @@ export async function evaluateCurrentRepresentationAuthority(
 				.filter((deadline): deadline is number => deadline !== undefined)
 			: [];
 		return { grant: { id: head.id, revision: terms.revision }, entityId: head.entityId,
-			targetScopeId: head.targetScopeId, targetPath: terms.targetPath, recipient, permissions,
+			target: terms.targetKind === "all-scopes" ? { kind: "all-scopes" }
+				: { kind: "scope", scopeId: z.uuid().parse(terms.targetScopeId), path: terms.targetPath }, recipient, permissions,
 			canRedelegate: terms.canRedelegate, requireFreshSession: terms.requireFreshSession,
 			current: combined([row.liveness === true ? "allow" : row.liveness === false ? "deny" : "unavailable",
 				...parents.map(parent => parent?.outcome ?? "unavailable")]),

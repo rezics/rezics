@@ -572,22 +572,22 @@ persona switching does not multiply ballots, quota or independent approvals.
 
 ### Representation persistence protocol
 
-A representation identity fixes the represented Entity, one typed delegate, one
-target authority root and optional exact parent grant/terms revision. Separate
-grants cover independent roots or delegates. Its private control receipt advances
-sealed terms containing a descendant path, half-open validity, literal approved
-permissions, redelegation and fresh-session conditions, and optional exact delegate
+A representation identity fixes the represented Entity, one typed delegate and
+optional exact parent grant/terms revision. Its private control receipt advances
+sealed terms containing an explicit all-scopes or concrete-root/path target,
+half-open validity, literal approved permissions, redelegation and fresh-session conditions, and optional exact delegate
 admission/Group eligibility. The head supports create, narrow and terminal revoke.
 Broader replacement uses a new identity under current assignment admission.
 
-Narrowing cannot add approved permissions, move above the approved path, extend
-validity, restore redelegation, remove a fresh-session requirement or remove/change
-an existing exact eligibility dependency. A previously independent grant may gain
+Narrowing can restrict all-scopes to one concrete root/path, but cannot move a
+concrete root to another root or all-scopes. It cannot add approved permissions,
+move above the approved path, extend validity, restore redelegation, remove a
+fresh-session requirement or remove/change an existing exact eligibility dependency. A previously independent grant may gain
 a recipient dependency. Explicit permission membership remains family-qualified;
 loading must remove permissions whose prerequisites are not also approved.
 
 A null parent is an institutional assignment. A dependent grant retains its
-parent's exact terms for the same represented Entity and target root. Its effect
+parent's exact terms for the same represented Entity. Its effect
 requires that parent to be current and redelegable, and all child limits to fit
 the parent's ceiling. Parent lineage is bounded to eight edges including the child.
 Changing the selected parent revision invalidates dependent use rather than making
@@ -604,6 +604,26 @@ use checks the admission, assignment revision and bounded current ancestry, so
 departure, reassignment or reparenting can invalidate the dependent path. These
 issuer-basis dependencies are separate from the child delegate's own eligibility.
 The historical operator is not substituted for the selected parent subject.
+
+All-scopes is an explicit representation target alternative for ordinary full
+Entity control. It permits only the sealed action set and still requires the
+Entity's current permission on each actual resource. It creates no resource grant,
+imports no operator rights and does not approve future permission keys. Exact
+scopes retain concrete private scope FKs; all-scopes has no scope ID or relative
+path. The narrow head's target projection must match its selected sealed terms.
+An all-scopes parent may issue a narrower concrete-scope child, subject to all
+other admission and attenuation rules. RoleBinding targets remain concrete roots.
+
+Allocating a separate representation grant for every resource was rejected because
+ordinary Entity use must cover independently authorized resources without per-object
+control fan-out. Treating the platform scope UUID as an implicit wildcard was
+rejected because it would conflate one authority root with all roots. Google IAM's
+[service-account impersonation](https://docs.cloud.google.com/iam/docs/service-account-impersonation)
+and [delegation chains](https://docs.cloud.google.com/iam/docs/create-short-lived-credentials-delegated),
+reviewed September 15, 2026, separately authorize acting as an identity and accessing
+its resources, without importing intermediate account powers. REZICS's explicit
+target union and immutable permission approvals are its own additional constraints;
+that precedent does not qualify native scope narrowing or revocation here.
 
 This lineage is distinct from a request's path through Entity delegates. The native
 store checks structural limits and parent/admission liveness; the management owner

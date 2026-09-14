@@ -9,6 +9,11 @@ export type AccessScopeTarget =
 	| { kind: "account"; id: string }
 	| { kind: "resource"; referenceValueId: string };
 
+/** Explicit representation target limit; all-scopes never adds permissions or resource grants. @internal */
+export type RepresentationTarget =
+	| { kind: "all-scopes" }
+	| { kind: "scope"; scopeId: string; path: string[] };
+
 /** An exact representation basis selected by a caller; it is not proof of current authority. @alpha */
 export interface RepresentationReference {
 	id: string;

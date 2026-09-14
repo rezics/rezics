@@ -46,13 +46,14 @@ export const accessRepresentationEntity = pgTable(
 	],
 );
 
-/** Immutable represented Entity, delegate, target and parent lineage; terms only narrow. @internal */
+/** Immutable represented Entity, delegate and parent lineage; current target mirrors sealed narrowing terms. @internal */
 export const accessRepresentation = pgTable(
 	"access_representation",
 	{
 		id: createUuidv7PrimaryKey(),
 		entityId: uuid().notNull().references(() => accessRepresentationEntity.entityId, { onDelete: "restrict" }),
-		targetScopeId: uuid().notNull().references(() => accessScope.id, { onDelete: "restrict" }),
+		targetKind: text().$type<"all-scopes" | "scope">().notNull().default("scope"),
+		targetScopeId: uuid().references(() => accessScope.id, { onDelete: "restrict" }),
 		parentGrantId: uuid(),
 		parentRevision: bigint({ mode: "number" }),
 		parentSubjectId: uuid().references(() => accessSubject.id, { onDelete: "restrict" }),
@@ -69,6 +70,7 @@ export const accessRepresentation = pgTable(
 		state: text().$type<"draft" | "active" | "revoked">().notNull().default("draft"),
 	},
 	(table): PgTableExtraConfigValue[] => [
+		check("access_representation_target_check", sql`(${table.targetKind}='all-scopes' and ${table.targetScopeId} is null) or (${table.targetKind}='scope' and ${table.targetScopeId} is not null)`),
 		foreignKey({
 			name: "access_representation_group_scope_fk",
 			columns: [table.recipientGroupId, table.recipientScopeId],
@@ -179,6 +181,8 @@ export const accessRepresentationRevision = pgTable(
 	{
 		grantId: uuid().notNull(),
 		revision: bigint({ mode: "number" }).notNull(),
+		targetKind: text().$type<"all-scopes" | "scope">().notNull().default("scope"),
+		targetScopeId: uuid().references(() => accessScope.id, { onDelete: "restrict" }),
 		targetPath: text().array().notNull(),
 		validFrom: timestamp({ withTimezone: true, precision: 3, mode: "date" }).notNull(),
 		validUntil: timestamp({ withTimezone: true, precision: 3, mode: "date" }),
@@ -194,6 +198,7 @@ export const accessRepresentationRevision = pgTable(
 	},
 	(table) => [
 		primaryKey({ columns: [table.grantId, table.revision] }),
+		check("access_representation_revision_target_check", sql`(${table.targetKind}='all-scopes' and ${table.targetScopeId} is null and cardinality(${table.targetPath})=0) or (${table.targetKind}='scope' and ${table.targetScopeId} is not null)`),
 		foreignKey({
 			name: "access_representation_revision_admission_fk",
 			columns: [table.membershipId, table.membershipGeneration],

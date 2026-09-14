@@ -10,6 +10,7 @@ import {
 import { accessGroupTree } from "../database/schema/access-group";
 import { AccessPermissionSchema, decodeAccessPermissionSnapshot } from "./permission";
 import { allocateAccessSubject } from "./identities";
+import { RepresentationTargetSchema } from "./authority-context";
 
 const versionSchema = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
 const recipientSchema = z.discriminatedUnion("kind", [
@@ -18,7 +19,7 @@ const recipientSchema = z.discriminatedUnion("kind", [
 	z.strictObject({ kind: z.literal("all-members"), scopeId: z.uuid() }),
 ]);
 const termsSchema = z.strictObject({
-	targetPath: z.array(z.string().regex(/^[a-z0-9][a-z0-9-]{0,255}$/)).max(8),
+	target: RepresentationTargetSchema,
 	validFrom: z.date(), validUntil: z.date().nullable(),
 	canRedelegate: z.boolean(), requireFreshSession: z.boolean(),
 	permissions: z.array(AccessPermissionSchema).max(AccessPermissionValues.length),
@@ -33,7 +34,7 @@ const base = {
 	operationId: z.uuid(), operatorAuthUserId: z.uuid(), authoritySubjectId: z.uuid(),
 };
 const schema = z.discriminatedUnion("operation", [
-	z.strictObject({ ...base, operation: z.literal("create"), targetScopeId: z.uuid(),
+	z.strictObject({ ...base, operation: z.literal("create"),
 		recipient: recipientSchema,
 		parent: z.strictObject({ id: z.uuid(), revision: versionSchema.min(1), subjectId: z.uuid(),
 			membership: z.strictObject({ id: z.uuid(), generation: versionSchema.min(1),
@@ -113,8 +114,7 @@ export async function applyAccessRepresentationCommand(
 		if (command.operation !== "revoke" && parent) {
 			if (parent.revision === null || parent.id === command.grantId) throw new AccessRepresentationConflict();
 			const [parentHead] = await work.select().from(accessRepresentation).where(eq(accessRepresentation.id, parent.id)).limit(1);
-			const targetScopeId = existing?.targetScopeId ?? (command.operation === "create" ? command.targetScopeId : null);
-			if (parentHead?.entityId !== command.entityId || parentHead.targetScopeId !== targetScopeId) throw new AccessRepresentationConflict();
+			if (parentHead?.entityId !== command.entityId) throw new AccessRepresentationConflict();
 			await work.execute(sql`select public.lock_access_representation_lineage(${parent.id}::uuid,${parent.revision}::bigint)`);
 			await authorize();
 		}
@@ -143,7 +143,9 @@ export async function applyAccessRepresentationCommand(
 			await authorize();
 		}
 		if (command.operation === "create") await work.insert(accessRepresentation).values({
-			id: command.grantId, entityId: command.entityId, targetScopeId: command.targetScopeId,
+			id: command.grantId, entityId: command.entityId,
+			targetKind: command.terms.target.kind,
+			targetScopeId: command.terms.target.kind === "scope" ? command.terms.target.scopeId : null,
 			parentGrantId: command.parent?.id ?? null, parentRevision: command.parent?.revision ?? null,
 			parentSubjectId: command.parent?.subjectId ?? null,
 			parentMembershipId: command.parent?.membership?.id ?? null,
@@ -159,8 +161,7 @@ export async function applyAccessRepresentationCommand(
 			.where(and(eq(accessRepresentation.id, command.grantId), eq(accessRepresentation.entityId, command.entityId))).for("update");
 		if (!head) throw new AccessRepresentationConflict();
 		await authorize();
-		if (command.operation === "create" && (head.targetScopeId !== command.targetScopeId ||
-			head.parentGrantId !== (command.parent?.id ?? null) || head.parentRevision !== (command.parent?.revision ?? null) ||
+		if (command.operation === "create" && (head.parentGrantId !== (command.parent?.id ?? null) || head.parentRevision !== (command.parent?.revision ?? null) ||
 			head.parentSubjectId !== (command.parent?.subjectId ?? null) ||
 			head.parentMembershipId !== (command.parent?.membership?.id ?? null) ||
 			head.parentMembershipGeneration !== (command.parent?.membership?.generation ?? null) ||
@@ -189,7 +190,8 @@ export async function applyAccessRepresentationCommand(
 		if (command.operation !== "revoke") {
 			const terms = command.terms;
 			await work.insert(accessRepresentationRevision).values({ grantId: head.id, revision: version,
-				targetPath: terms.targetPath, validFrom: terms.validFrom, validUntil: terms.validUntil,
+				targetKind: terms.target.kind, targetScopeId: terms.target.kind === "scope" ? terms.target.scopeId : null,
+				targetPath: terms.target.kind === "scope" ? terms.target.path : [], validFrom: terms.validFrom, validUntil: terms.validUntil,
 				canRedelegate: terms.canRedelegate, requireFreshSession: terms.requireFreshSession,
 				membershipId: terms.recipientEligibility?.membershipId ?? null,
 				membershipGeneration: terms.recipientEligibility?.generation ?? null,
@@ -204,9 +206,12 @@ export async function applyAccessRepresentationCommand(
 				.where(and(eq(accessRepresentationRevision.grantId, head.id), eq(accessRepresentationRevision.revision, version)));
 		}
 		const resultReceipt = receipt(event);
+		const targetKind = command.operation === "revoke" ? head.targetKind : command.terms.target.kind;
+		const targetScopeId = command.operation === "revoke" ? head.targetScopeId
+			: command.terms.target.kind === "scope" ? command.terms.target.scopeId : null;
 		const result = await work.execute<{ admitted: boolean | null; changed: string | null }>(sql`
 			with admission as materialized(select (${admission}) as admitted),changed as (
-				update public.access_representation set version=${version},terms_revision=${resultReceipt.termsRevision},state=${resultReceipt.state}
+				update public.access_representation set version=${version},terms_revision=${resultReceipt.termsRevision},state=${resultReceipt.state},target_kind=${targetKind},target_scope_id=${targetScopeId}::uuid
 				where id=${head.id}::uuid and version=${head.version} and (select admitted from admission) is true returning id
 			) select(select admitted from admission) as admitted,(select id from changed) as changed`);
 		requireAdmission(result.rows[0]?.admitted);
@@ -245,5 +250,6 @@ export async function readAccessRepresentationSnapshot(
 		.where(and(eq(accessRepresentationPermission.grantId, head.id), eq(accessRepresentationPermission.revision, terms.revision)))
 		.orderBy(accessRepresentationPermission.family, accessRepresentationPermission.permission).limit(AccessPermissionValues.length + 1);
 	const permissions = decodeAccessPermissionSnapshot(rows, terms.permissionCount, terms.permissionDigest);
-	return { ...head, version: result.version, state: result.state, termsRevision: result.termsRevision, terms, permissions };
+	return { ...head, targetKind: terms.targetKind, targetScopeId: terms.targetScopeId,
+		version: result.version, state: result.state, termsRevision: result.termsRevision, terms, permissions };
 }

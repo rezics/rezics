@@ -469,8 +469,8 @@ revocation and combined workload measurements remain required in verification.
 
 Inventory Entity control fences, grant heads, sealed terms, permission members and
 control receipts separately. Planning bytes per row including indexes are 192,
-1,216, 544, 224 and 384 respectively. At 500M rows those relations require 96, 608,
-272, 112 and 192 GB; at 3B rows, 576, 3,648, 1,632, 672 and 1,152 GB, before bloat,
+1,216, 608, 224 and 384 respectively. At 500M rows those relations require 96, 608,
+304, 112 and 192 GB; at 3B rows, 576, 3,648, 1,824, 672 and 1,152 GB, before bloat,
 WAL, replicas, backups and reserve. Typical terms use two short path segments;
 the maximum eight 256-byte segments require separate payload provisioning.
 
@@ -484,6 +484,12 @@ Entity subject initializes one control fence, including before its first grant.
 Public catalog Entities without subject admission do not allocate these fences.
 Writes use an Entity-local exclusive fence, one control event, sealed terms for
 create/narrow and a head advance. Revocation writes no descendant fan-out.
+
+Terms retain their explicit target kind and optional concrete scope FK; the head
+mirrors the selected target for current indexes. The terms estimate reserves
+64 bytes for this target snapshot and alignment. All-scopes stores no per-resource
+rows, while narrowing to a concrete scope updates only that grant's head/index
+projection and terms. It never materializes the Entity's resource permission set.
 
 Parent traversal reads at most nine identities to detect the eight-edge limit,
 checks exact current revisions and probes declared admission/selection dependencies.

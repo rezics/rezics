@@ -9,11 +9,17 @@ import { z } from "zod";
 import { AccessPermissionSchema } from "./permission";
 
 const uuidSchema = z.uuid();
+const authorityPathSchema = z.array(z.string().regex(/^[a-z0-9][a-z0-9-]{0,255}$/)).max(8);
+/** An explicit all-scope or concrete-root representation ceiling; permissions remain separate. @internal */
+export const RepresentationTargetSchema = z.discriminatedUnion("kind", [
+	z.strictObject({ kind: z.literal("all-scopes") }),
+	z.strictObject({ kind: z.literal("scope"), scopeId: uuidSchema, path: authorityPathSchema }),
+]);
 /** Registry-qualified operation at one exact authority root and bounded canonical path. @internal */
 export const AuthorityOperationSchema = z.strictObject({
 	permission: AccessPermissionSchema,
 	scopeId: uuidSchema,
-	path: z.array(z.string().regex(/^[a-z0-9][a-z0-9-]{0,255}$/)).max(8),
+	path: authorityPathSchema,
 });
 const referenceSchema = z.strictObject({
 	id: uuidSchema,

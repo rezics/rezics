@@ -1,3 +1,13 @@
+SET search_path TO public;
+
+ALTER TABLE "access_representation" ADD COLUMN "target_kind" text DEFAULT 'scope' NOT NULL;
+ALTER TABLE "access_representation_revision" ADD COLUMN "target_kind" text DEFAULT 'scope' NOT NULL;
+ALTER TABLE "access_representation_revision" ADD COLUMN "target_scope_id" uuid;
+ALTER TABLE "access_representation" ALTER COLUMN "target_scope_id" DROP NOT NULL;
+ALTER TABLE "access_representation_revision" ADD CONSTRAINT "access_representation_revision_LBFXzLcaANOl_fkey" FOREIGN KEY ("target_scope_id") REFERENCES "access_scope"("id") ON DELETE RESTRICT;
+ALTER TABLE "access_representation" ADD CONSTRAINT "access_representation_target_check" CHECK (("target_kind"='all-scopes' and "target_scope_id" is null) or ("target_kind"='scope' and "target_scope_id" is not null));
+ALTER TABLE "access_representation_revision" ADD CONSTRAINT "access_representation_revision_target_check" CHECK (("target_kind"='all-scopes' and "target_scope_id" is null and cardinality("target_path")=0) or ("target_kind"='scope' and "target_scope_id" is not null));
+
 -- Exact admission/selection dependencies never follow a later rejoin or reassignment.
 CREATE OR REPLACE FUNCTION public.access_representation_recipient_is_current(p_grant uuid,p_revision bigint)
 RETURNS boolean LANGUAGE sql VOLATILE SET search_path=pg_catalog,public AS $$

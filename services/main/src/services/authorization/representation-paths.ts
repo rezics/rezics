@@ -1,13 +1,12 @@
 import {
 	AccessPermissionValues, accessPermissionKey, constrainAccessPermissions,
-	type AccessPermission, type AccessSubjectTarget, type RepresentationReference,
+	type AccessPermission, type AccessSubjectTarget, type RepresentationReference, type RepresentationTarget,
 } from "@rezics/access";
 import { z } from "zod";
 import { AccessPermissionSchema } from "./permission";
-import { RequestedAuthoritySelectionSchema, AuthorityOperationSchema, type AuthorityOperation, type AuthorityOutcome } from "./authority-context";
+import { RequestedAuthoritySelectionSchema, AuthorityOperationSchema, RepresentationTargetSchema, type AuthorityOperation, type AuthorityOutcome } from "./authority-context";
 import type { AccessMemberSetRecipient } from "./member-set-recipients";
 
-const pathSchema = z.array(z.string().regex(/^[a-z0-9][a-z0-9-]{0,255}$/)).max(8);
 const subjectSchema = z.discriminatedUnion("kind", [
 	z.strictObject({ kind: z.literal("principal"), id: z.uuid() }),
 	z.strictObject({ kind: z.literal("entity"), id: z.uuid() }),
@@ -19,7 +18,7 @@ const memberSetSchema = z.discriminatedUnion("kind", [
 const decisionFields = { current: z.enum(["allow", "deny", "unavailable"]), validUntil: z.number().finite().optional() };
 const grantSchema = z.strictObject({
 	grant: z.strictObject({ id: z.uuid(), revision: z.number().int().positive().max(Number.MAX_SAFE_INTEGER) }),
-	entityId: z.uuid(), targetScopeId: z.uuid(), targetPath: pathSchema,
+	entityId: z.uuid(), target: RepresentationTargetSchema,
 	recipient: z.union([subjectSchema, memberSetSchema]),
 	permissions: z.array(AccessPermissionSchema).max(AccessPermissionValues.length),
 	canRedelegate: z.boolean(), requireFreshSession: z.boolean(), ...decisionFields,
@@ -41,8 +40,7 @@ const inputSchema = z.strictObject({
 export interface RepresentationPathGrant {
 	grant: RepresentationReference;
 	entityId: string;
-	targetScopeId: string;
-	targetPath: string[];
+	target: RepresentationTarget;
 	recipient: AccessSubjectTarget | AccessMemberSetRecipient;
 	/** Literal sealed permission approval; prerequisites outside it are not imported. */
 	permissions: AccessPermission[];
@@ -128,9 +126,9 @@ export function evaluateRepresentationPath(input: RepresentationPathEvaluationIn
 		if (!fact || fact.grant.revision !== reference.revision) continue;
 		selected.set(reference.id, fact);
 		const permissions = constrainAccessPermissions(fact.permissions, fact.permissions);
-		const fits = fact.targetScopeId === request.operation.scopeId &&
-			fact.targetPath.length <= request.operation.path.length &&
-			fact.targetPath.every((segment, index) => segment === request.operation.path[index]) &&
+		const fits = (fact.target.kind === "all-scopes" || (fact.target.scopeId === request.operation.scopeId &&
+			fact.target.path.length <= request.operation.path.length &&
+			fact.target.path.every((segment, index) => segment === request.operation.path[index]))) &&
 			permissions.some(value => accessPermissionKey(value) === permission) &&
 			(!fact.requireFreshSession || request.freshSession);
 		eligible.set(reference.id, fits ? current(fact, request.now) : "deny");

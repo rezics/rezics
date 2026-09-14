@@ -191,9 +191,14 @@ external-client interoperability and fleet capacity/recovery.
 ## Authority context model
 
 [authority-context.test.ts](../../services/main/src/services/authorization/authority-context.test.ts)
-runs through the backend Vitest owner and currently passes 26 model cases. These
+runs through the backend Vitest owner and previously qualified 26 model cases. These
 use explicitly constructed trusted facts; they are not PostgreSQL, authentication,
 grant-loading, delegation-chain or API acceptance.
+
+That evidence predates the active implementation's shared operation validator,
+representation target selector and native policy composition. Their verification
+is deferred by the execution workflow; the prior count does not qualify the current
+source revision or the new representation path evaluator.
 
 Cases cover direct versus represented selection, private-actor field rejection,
 exact representation revisions, operator/Entity UUID collisions, private-rights
