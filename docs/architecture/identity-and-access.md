@@ -598,6 +598,36 @@ selected over following a mutable parent head to keep approved lineage explicit;
 the cost is deliberate reissuance after a parent's terms change. Neither this
 choice nor the storage implementation qualifies the target race/recovery cases.
 
+### Selected representation paths
+
+The selected references form a bounded request subgraph, including any intermediate
+Entity grants used by a path. A base starts at the request's represented Entity;
+an Entity delegate continues through a separately selected grant for that Entity.
+Each nonterminal edge must permit redelegation and every edge must independently
+cover the requested action/root/path and fresh-session condition. A Group/member-set
+edge can terminate at the authenticated principal or continue through a represented
+Entity whose own current membership matches it. The operator's membership is not
+substituted for that Entity's membership.
+
+The path evaluator uses trusted native grant and subject facts, with explicit
+loaded recipient scopes to distinguish nonmembership from unavailable evidence.
+It strips permissions with missing approved prerequisites, preserves denied versus
+unavailable outcomes and can select an independent valid basis when another path
+is unavailable. Breadth-first traversal retains the shortest certain/uncertain
+visit per Entity, excludes cyclic authority and bounds paths to eight edges.
+The returned basis covers one operation; it is not an independent resource grant
+or a reusable authorization receipt. Credential selection must approve every
+selected reference, including intermediate ones, before path evaluation.
+
+The native selection reader locks Entity controls and exact declared membership/
+Group dependencies, hydrates selected terms and their literal permission members
+in batches, and evaluates current lineage after waits. Its lifecycle outcome is
+not yet the full subject/credential/representation decision: native subject policy,
+management admission, complete mutation fence promotion, erasure/recovery and API
+integration remain pending. Neither source implementation qualifies these paths.
+
+### Assignment lifetime and revocation
+
 A durable institutional assignment is authorized at creation and owned by its
 declared institution/resource authority. The operator who issued it is audit
 provenance, not a permanent liveness dependency. Their departure does not revoke

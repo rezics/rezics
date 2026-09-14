@@ -13,7 +13,7 @@ import {
 	accessRoleBindingRevision,
 	accessRoleBindingPermission,
 } from "../database/schema/access-role-binding";
-import { AccessPermissionSchema } from "./permission";
+import { AccessPermissionSchema, decodeAccessPermissionSnapshot } from "./permission";
 const versionSchema = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
 const recipientSchema = z.discriminatedUnion("kind", [
 	z.strictObject({ kind: z.literal("subject"), subjectId: z.uuid() }),
@@ -468,9 +468,7 @@ export async function readAccessRoleBindingSnapshot(
 		.limit(AccessPermissionValues.length + 1);
 	if (rows.length !== terms.permissionCount || rows.length > AccessPermissionValues.length)
 		throw new AccessRoleBindingUnavailable();
-	const permissions = rows.map((row) =>
-		AccessPermissionSchema.parse({ family: row.family, key: row.permission }),
-	);
+	const permissions = decodeAccessPermissionSnapshot(rows, terms.permissionCount, terms.permissionDigest);
 	return {
 		bindingId: head.id,
 		targetScopeId: head.targetScopeId,

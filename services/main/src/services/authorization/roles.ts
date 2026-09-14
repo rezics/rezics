@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { and, eq, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import { AccessPermissionValues, accessPermissionKey, type AccessPermission } from "@rezics/access";
-import { AccessPermissionSchema } from "./permission";
+import { AccessPermissionSchema, decodeAccessPermissionSnapshot } from "./permission";
 import type { DatabaseTransaction } from "../database";
 import {
 	accessRole,
@@ -289,11 +289,9 @@ export async function readAccessRoleSnapshot(
 		.orderBy(
 			sql`${accessRolePermission.family} collate "C"`,
 			sql`${accessRolePermission.permission} collate "C"`,
-		);
+		).limit(AccessPermissionValues.length + 1);
 	return {
 		...snapshot,
-		permissions: permissions.map((row) =>
-			AccessPermissionSchema.parse({ family: row.family, key: row.permission }),
-		),
+		permissions: decodeAccessPermissionSnapshot(permissions, snapshot.permissionCount, snapshot.permissionDigest),
 	};
 }

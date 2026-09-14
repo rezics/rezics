@@ -8,7 +8,7 @@ import {
 	accessRepresentationRevision, accessRepresentationPermission,
 } from "../database/schema/access-representation";
 import { accessGroupTree } from "../database/schema/access-group";
-import { AccessPermissionSchema } from "./permission";
+import { AccessPermissionSchema, decodeAccessPermissionSnapshot } from "./permission";
 import { allocateAccessSubject } from "./identities";
 
 const versionSchema = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
@@ -244,9 +244,6 @@ export async function readAccessRepresentationSnapshot(
 	const rows = await tx.select().from(accessRepresentationPermission)
 		.where(and(eq(accessRepresentationPermission.grantId, head.id), eq(accessRepresentationPermission.revision, terms.revision)))
 		.orderBy(accessRepresentationPermission.family, accessRepresentationPermission.permission).limit(AccessPermissionValues.length + 1);
-	if (rows.length !== terms.permissionCount || rows.length > AccessPermissionValues.length) throw new AccessRepresentationUnavailable();
-	const permissions = rows.map(row => AccessPermissionSchema.parse({ family: row.family, key: row.permission }));
-	if (createHash("sha256").update(permissions.map(accessPermissionKey).sort().join("\n")).digest("hex") !== terms.permissionDigest)
-		throw new AccessRepresentationUnavailable();
+	const permissions = decodeAccessPermissionSnapshot(rows, terms.permissionCount, terms.permissionDigest);
 	return { ...head, version: result.version, state: result.state, termsRevision: result.termsRevision, terms, permissions };
 }

@@ -493,3 +493,17 @@ snapshots point-read exact terms and at most the registered permission count.
 These are implementation bounds and storage estimates, not native performance or
 recovery acceptance. Hot Entity controls, long retained revisions, erasure reverse
 pages, expiry after waits and complete represented request paths remain to qualify.
+
+Selected request loading admits 64 exact grant references and at most 256 distinct
+grant/revision lineage entries. Traversal first visits at most nine parent rows per
+selected grant, then rejects a union exceeding 256. Up to two concrete membership
+bases per retained entry need tree/enrollment/selection fences. Selected permission
+hydration is bounded by 64 times the registered vocabulary plus one sentinel.
+
+The pure one-operation path evaluator admits 64 grant facts, 65 subject facts and
+4,096 total member-set entries, with at most 64 loaded scopes per subject. After
+bounded validation and permission clipping, graph traversal permits 32,768 edge/
+recipient branch visits. Shortest certain/uncertain visits avoid exponential path
+enumeration; each path uses at most eight edges. These bounds do not include native
+subject-policy loading or qualify the combined SQL, latency or credential budget.
+Independent path outcomes and post-wait dependency changes need native acceptance.

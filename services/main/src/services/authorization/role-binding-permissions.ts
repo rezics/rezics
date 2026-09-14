@@ -1,9 +1,7 @@
-import { createHash } from "node:crypto";
 import { and, eq, inArray, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
 	AccessPermissionValues,
-	accessPermissionKey,
 	constrainAccessPermissions,
 	snapshotAccessPermissionCeiling,
 	type AccessPermission,
@@ -19,7 +17,7 @@ import {
 import { accessMembership } from "../database/schema/access-membership";
 import { accessGroupTree } from "../database/schema/access-group";
 import { accessGroupMembershipSet } from "../database/schema/access-group-membership";
-import { AccessPermissionSchema } from "./permission";
+import { decodeAccessPermissionSnapshot } from "./permission";
 import { AccessRoleBindingUnavailable } from "./role-bindings";
 import { readAccessMemberSetRecipients } from "./member-set-recipients";
 
@@ -143,18 +141,6 @@ export interface CurrentAccessRoleBindingPermissions {
 	evaluatedAt: Date;
 }
 
-function permissionMembers(
-	rows: { family: string; permission: string }[], count: number, digest: string,
-): AccessPermission[] {
-	if (rows.length !== count || rows.length > AccessPermissionValues.length)
-		throw new AccessRoleBindingUnavailable();
-	const members = rows.map(row => AccessPermissionSchema.parse({ family: row.family, key: row.permission }));
-	const keys = members.map(accessPermissionKey).sort();
-	if (new Set(keys).size !== keys.length || createHash("sha256").update(keys.join("\n")).digest("hex") !== digest)
-		throw new AccessRoleBindingUnavailable();
-	return members;
-}
-
 /**
  * Hydrate at most 256 discovered binding versions in batches, retaining current owner fences.
  * @internal
@@ -241,7 +227,7 @@ export async function readCurrentAccessRoleBindingPermissions(
 	for (const role of activeRoles) {
 		const definition = definitionRows.get(role.id);
 		if (!definition?.sealed || definition.revision !== role.activeRevision) throw new AccessRoleBindingUnavailable();
-		authoredByRole.set(role.id, permissionMembers(roleMembersById.get(role.id) ?? [], definition.permissionCount, definition.permissionDigest));
+		authoredByRole.set(role.id, decodeAccessPermissionSnapshot(roleMembersById.get(role.id) ?? [], definition.permissionCount, definition.permissionDigest));
 	}
 	const approvedByBinding = new Map<string, typeof bindingMembers>();
 	for (const row of bindingMembers) {
@@ -258,7 +244,7 @@ export async function readCurrentAccessRoleBindingPermissions(
 		if (!role || !current || current.eligible === null) throw new AccessRoleBindingUnavailable();
 		const evaluatedAt = new Date(current.now);
 		if (!Number.isFinite(evaluatedAt.getTime())) throw new AccessRoleBindingUnavailable();
-		const approved = permissionMembers(approvedByBinding.get(binding.id) ?? [], terms.permissionCount, terms.permissionDigest);
+		const approved = decodeAccessPermissionSnapshot(approvedByBinding.get(binding.id) ?? [], terms.permissionCount, terms.permissionDigest);
 		if (terms.permissionPolicy === "local-role" && (approved.length || role.scopeId !== binding.targetScopeId ||
 			(binding.recipientScopeId !== null && binding.recipientScopeId !== binding.targetScopeId)))
 			throw new AccessRoleBindingUnavailable();
