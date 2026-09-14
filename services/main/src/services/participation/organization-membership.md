@@ -1,5 +1,14 @@
 # Controlled organization membership
 
+This is the implemented human-account invitation/roster contract and its recorded
+evidence. The selected [membership and mixed-authority target](../../../../../docs/architecture/identity-and-access.md#membership-groups-and-teams)
+adds typed Entity/private operational enrollments, admission generations, multiple
+Groups/Teams and custom role bindings. It retains explicit consent and no authority
+from sourced affiliations. Current Self-addressing and exact direct manager grants
+below are not a restriction on the new grantee model; target work is in
+[M01](../../../../../docs/plan/modules/foundation.md) and
+[M06](../../../../../docs/plan/modules/community-and-governance.md).
+
 This owner is operational participation, separate from sourced catalog
 affiliations. A roster entry records a human account's explicitly accepted
 membership in a controlled organization. It grants no publication, security,

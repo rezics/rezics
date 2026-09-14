@@ -1,0 +1,106 @@
+# Identity, mixed authority and connected-app acceptance
+
+These are selected target test specifications, not passing executable results.
+They cover [identity/access](../architecture/identity-and-access.md),
+[connected applications](../architecture/connected-apps.md),
+[GUI layering](../architecture/identity-and-access-experience.md) and
+[capacity](../architecture/identity-access-capacity.md).
+Existing [foundation evidence](foundation.md) remains scoped to its recorded
+Auth/Self, direct-grant and membership implementation. G2-G5 status lives only in
+[the plan](../plan/README.md).
+
+## Identity and membership
+
+| Case | Required sequence and outcome |
+| --- | --- |
+| IAM01 | Anonymous public reads require no fabricated account/Entity and disclose only public state. Create an ordinary account, admit a usable Entity and save its main preference atomically; repeated/competing admission creates no duplicate binding or leaked private provider name. |
+| IAM02 | One AuthPrincipal represents several Entities; several principals represent one Entity with different scopes. Credential linking, controller linking and public identity are not equated. |
+| IAM03 | Import a cataloged person/organization and submit matching names/email or arbitrary Entity IDs. No control, account linking or participation is admitted from those values alone. |
+| IAM04 | Exercise public detail/list/search/error/audit/webhook and external-token surfaces. Raw principal IDs, private emails, controller sets and unrelated Entity links remain undisclosed. |
+| IAM05 | Change main/per-app defaults during two-tab editing and an OAuth refresh. Prepared attribution and consent retain their original Entity; an invalid default requires explicit selection before effect. |
+| IAM06 | Admit Entity participation and private AuthPrincipal operational membership under their separate policies. Typed roster disclosure and group eligibility remain correct without a universal public account roster. |
+| IAM07 | Exercise invitation/application, rule consent, active membership, mute, ban, leave and rejoin. Pending grants do nothing; rejoin creates a new generation and revives neither bans nor prior privileged group assignments. |
+| IAM08 | Admit an Org as a Realm participant without enrolling all Org members or allowing every controller to represent it. Source affiliations and following create no operational membership. |
+| IAM09 | Place a member in multiple groups and bind several roles to one group. Direct/inherited membership, root/sibling resource scopes and all-members derived sets remain distinct. |
+| IAM10 | Reparent groups concurrently; reject cycles and unauthorized expansion. Child membership receives parent grants without copying direct membership or leaking private inherited roster labels. |
+
+## Mixed authorization and governance
+
+| Case | Required sequence and outcome |
+| --- | --- |
+| IAM11 | A principal lacking direct target rights uses a valid scoped representation of an authorized Entity: allow. The same request with missing/stale/wrong-action/wrong-target representation is denied. |
+| IAM12 | A principal holds unrelated private rights while representing an Entity without those rights: deny. An App approved only for that Entity cannot harvest the principal's other grants. |
+| IAM13 | Grant account administration, Entity-controller management and security-role assignment to an Entity, AuthPrincipal and eligible mixed member set. Enforce each action's conditions, not a blanket recipient-type prohibition. |
+| IAM14 | Grant only publishing representation of an Entity that holds security powers. Reject account administration, controller changes and onward delegation. |
+| IAM15 | Exercise the operator's group membership while representing a different Entity. It does not automatically become the Entity's membership; explicit combined policies are checked separately. |
+| IAM16 | A compound command has different incomplete rights under two identities. Reject implicit stitching; separately specified multi-party authorization can succeed only with every required proof. |
+| IAM17 | A manager can assign a named role without using its data permissions. Reject self-escalation through role edits, group enrollment, reparenting, ceiling changes or a change authorizing itself. |
+| IAM18 | Activate a new role revision. Local bindings observe the approved head; external/cross-authority ceilings do not expand. Role retirement cannot fall back to a broader default. |
+| IAM19 | Validate multi-hop representation with expiry, target/action narrowing and explicit redelegation. Reject widening, wrong edge order, cycles, unrooted mutual control and work-budget overflow. |
+| IAM20 | Revoke an issuer/operator. Durable institutional assignments survive under their owning authority; dependent execution delegations fail; pending invitations revalidate before acceptance. |
+| IAM21 | Attempt to remove the last valid recovery path, including two concurrent removals. Reject lockout; a cycle alone is not continuity. Recovery changes no historical authorship and revives no erased principal. |
+| IAM22 | The same operator uses two Entities as purported independent approvers or duplicate voters. Enforce the feature's private accountability key; distinct account IDs are not claimed as proof of distinct humans. |
+
+## OAuth, applications and cross-platform identity
+
+| Case | Required sequence and outcome |
+| --- | --- |
+| APP01 | Connect a verified third-party local account to a selected Entity through a state-bound flow. Reject wrong issuer/audience/state, account substitution and name/email-based control claims. |
+| APP02 | Two local accounts connect the same Entity with different grants; one account connects two Entities. No account merge, private-setting transfer or unauthorized sibling disclosure occurs. |
+| APP03 | Inspect actual OIDC, JWT/opaque access tokens, UserInfo, introspection and errors for private global IDs. Pairwise OIDC alone is insufficient; public-client OIDC and MCP must still work under the elected privacy profile. |
+| APP04 | User delegation checks the selected direct/represented context, consent, client scopes, selected resources and applicable installation policy. Either identity's unrelated privileges stay excluded. |
+| APP05 | Issue installation credentials for two scopes of one App. Reject cross-installation use and client-controlled installation substitution; installer departure preserves scope-owned autonomous authority. |
+| APP06 | Public registration/CIMD claims request machine privileges. Reject unauthorized machine-scope assignment; discovery is not verified publisher status or installation approval. |
+| APP07 | Increase an App manifest/role/resource selection. Old consent and installation ceilings do not expand. New approval is version-bound and races with role/installation changes safely. |
+| APP08 | Exercise PKCE, redirect matching, issuer/resource audience, expired tokens, refresh replay, rotation and revocation through actual HTTP endpoints, including invalid-bearer no-cookie-fallback behavior. |
+| APP09 | If token exchange is elected, narrow audience and action scope, preserve private actor accountability and validate live dependencies. Nested act history alone cannot authorize; upstream revocation propagation is explicitly tested. |
+| APP10 | Revoke consent, connection, token, client, installation and App separately. Old access/refresh/machine tokens cannot bypass the required live dependency. Uninstall does not delete existing content. |
+| APP11 | Discover and authorize an MCP client using the elected 2026-07-28 profile. API/MCP object checks match; resource audience is not mistaken for the selected Realm/content set. |
+| APP12 | Test CIMD/JWKS egress on Bun: private/special-use IPs, mixed DNS answers, rebinding, redirects, TLS identity, timeout and bounded fetch concurrency. Verify the actual connected address. |
+| APP13 | Queue a webhook, revoke its installation, then attempt delivery. No newly unauthorized payload is disclosed. Test signed duplicate deliveries, retries, unknown outcomes, forbidden destinations and bounded backlog. |
+| APP14 | Rotate/create credentials and clients under one account/installation. Shared quota ceilings remain effective; autonomous installation quota ownership is explicit. |
+
+## Concurrency, erasure and capacity
+
+Use independent connections and controlled barriers, not only timing-based sleeps.
+For each relevant relation change, test both lock acquisition orders, waits that
+outlive expiry, missing-row admission races, and changes to the discovered proof
+dependencies while a command is waiting.
+
+| Case | Required sequence and outcome |
+| --- | --- |
+| IAM23 | Revoke membership, parent group, role, representation or installation while a protected write waits. It commits before the conflicting revocation or observes the new authority. |
+| IAM24 | After acknowledged revocation, read through detail/list/search/count/export/cache and every service replica. No new request succeeds through that path; authority outages never produce stale allows. |
+| IAM25 | Revoke during a long job or stream. Subsequent protected effects follow the declared checkpoint; already delivered bytes are not claimed to be recalled. |
+| IAM26 | Erase one controller's account and private bindings/tokens. Other valid controllers, permitted Entity contributions and independent institutional assignments survive. Cleanup remains bounded. |
+| IAM27 | Restore an older database/object snapshot. Replay erasure and revocation frontiers before exposing data; stale roles/consents/delegation receipts cannot reactivate access. |
+| IAM28 | Exercise 500M/3B relation arithmetic plus representative depth, degree, hot keys, wide metadata and cold/warm plans. Measure indexes, query count/buffers, latency, unavailable decisions, WAL, queues and restore cost. |
+
+## Experience acceptance
+
+These cases require implemented interfaces and the appropriate authorized rendered
+or human-study workflow. The documentation refactor executes none of them.
+
+| Case | Required experience |
+| --- | --- |
+| UX01 | Ordinary onboarding/login enters the valid main Entity without a role/delegation wizard. Users can read, post and join without knowing account-principal terminology. |
+| UX02 | Switching identity makes attribution clear and preserves draft identity across tabs; lost authority preserves input and requires an explicit replacement before effect. |
+| UX03 | Invite a collaborator, select a role preset and finish from collaboration controls; advanced mixed-recipient and scope choices remain discoverable when needed. |
+| UX04 | Load an advanced API-created configuration, edit an ordinary field and save. Multiple roles, conditions, expiry, ceilings and recipient types survive; unsupported edits route to a capable editor. |
+| UX05 | Approve an App with clear identity, activities, selected resources and offline implications. Material authorization consequences are not hidden in advanced controls. |
+| UX06 | Revoke one member/connection/installation and understand affected access, including another surviving grant path, without reading a raw authorization graph. |
+| UX07 | Inspect management lists through filtered empty pages, unavailable public labels and cross-page selections; keyboard/accessibility and typed locale behavior remain usable. |
+| UX08 | Observe representative ordinary users and administrators on their actual tasks. Record completion, errors, navigation and attribution mistakes; the 90% audience priority is not an already measured success rate. |
+
+## Evidence requirements
+
+Use pure model tests for path composition and counterexamples, real PostgreSQL for
+constraints/races, and stateful HTTP clients for produced IDs and protocol flows.
+Pin dependency versions, policy revisions, fixture inputs, runtime, exact commands
+and failures. Publish only secret-free evidence. A model check does not qualify
+SQL or distributed consistency; a document/link check executes no case above.
+
+Run these scenarios together with [backend integration](backend-integration.md),
+including content publishing, membership, private account state and queued effects.
+Do not disable unrelated required policy to obtain a passing result. Frontend work
+follows the existing G4/G5 and Storybook/full-application verification boundaries.

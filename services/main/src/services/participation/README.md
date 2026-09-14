@@ -1,5 +1,14 @@
 # Participation and authority
 
+The protocols and evidence below describe the current implementation. The selected
+[identity/access contract](../../../../../docs/architecture/identity-and-access.md)
+replaces the unique Self binding as the general model with private AuthPrincipals,
+many-to-many scoped Entity representation and private main/app defaults. Mixed
+Entity/account/member-set administration and institutional versus dependent grant
+lifecycles must be qualified through [M01](../../../../../docs/plan/modules/foundation.md).
+Existing private-data ownership remains separate from public identity switching;
+older tests do not qualify the new relationship graph.
+
 This owner defines private account control, public acting identities and scoped
 delegation. The [current plan](../../../../../docs/plan/README.md) owns remaining
 qualification; no legacy database or compatibility route is a dependency.

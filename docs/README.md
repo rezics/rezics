@@ -1,6 +1,9 @@
 # Documentation
 
 - [Implementation plan](plan/README.md): autonomous policy, module dependencies and remaining work.
+- [Identity and access](architecture/identity-and-access.md): private AuthPrincipals, shared public Entities, membership, mixed grantees and scoped representation.
+- [Connected applications](architecture/connected-apps.md): third-party Entity connections, OAuth, installations and REZICS MCP access.
+- [Identity and access experience](architecture/identity-and-access-experience.md): ordinary-user defaults and progressively disclosed collaboration/administration.
 - [Database architecture](architecture/database/README.md): target schema, meaning and capacity.
 - [Native Work and release](architecture/database/native-work.md): shared product meaning across creative domains and applicable properties.
 - [Content composition](architecture/database/content-composition.md): explicit occurrences, import/refresh, published selections and read models.

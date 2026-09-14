@@ -14,6 +14,8 @@ G4 is the entry condition for frontend implementation. See [the plan](README.md)
 | Graph | Scoped subgraphs, n-ary semantics, privacy/spoilers, cycles, cursors/budgets and Block descriptors. |
 | Hub | Catalog/package/Prompt/MCP conformance; execution scope separately decided and tested. |
 | Authority | Revocation/ownership/erasure across content, relations, media, search, messages, exports and jobs. |
+| Mixed identity and membership | [IAM01-IAM28](../testing/identity-and-access.md): private principals, many-to-many representation, mixed grantees, Groups/custom Roles, admission generations, assignment ceilings, complete request proofs, institutional/dependent lifecycle and recovery. |
+| Connected applications | [APP01-APP14](../testing/identity-and-access.md): actual private token profile, Entity connections, consent/installation isolation, credential lifecycle, REST/MCP parity, Bun CIMD egress, bounded webhooks and quota ownership. |
 | Reliability | Replay, fencing, cancellation, interrupted large operations, merge/split and recommendation recovery. |
 | Capacity | EXPLAIN/load/skew evidence, explicit limits, no ignored crashes, storage/WAL/recovery at 500M/3B. |
 | Recovery | Restorable database/objects, erasure frontier, reconciled projections/checkpoints and observed RPO/RTO. |

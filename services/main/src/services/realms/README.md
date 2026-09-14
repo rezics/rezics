@@ -1,5 +1,14 @@
 # Realm membership
 
+The behavior below is the current Self-Entity roster implementation. The selected
+[identity/access contract](../../../../../docs/architecture/identity-and-access.md)
+owns typed Realm participation, private operational membership, multiple groups,
+custom roles and restricted representation. The
+[layered experience](../../../../../docs/architecture/identity-and-access-experience.md)
+keeps ordinary joining separate from collaboration/advanced administration.
+Existing state and owner guards remain implementation evidence until the
+[target tests](../../../../../docs/testing/identity-and-access.md) qualify replacement.
+
 Realm membership uses the authenticated account's current Self Entity. Selecting
 an organization as an acting identity does not enroll that organization or confer
 its control permissions. Realm grouping/governance and the Collection/Zone subsite

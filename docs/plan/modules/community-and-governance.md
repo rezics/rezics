@@ -4,6 +4,9 @@ Dependencies: M01-M03. Owners: dictionary D09-D13 and existing access, rule and 
 
 ## Remaining work
 
+- Implement Org and Realm membership policies over the [shared identity/access model](../../architecture/identity-and-access.md), including Entity participation versus private operational membership, admission generations, all-members sets, multiple Groups/Teams and custom role bindings. Preserve mute/ban history independently from rejoin and do not infer Org-wide enrollment into a Realm.
+- Qualify Entity-held and directly assigned administration, privileged group changes, role edits, constrained representation and private independent-approval/accountability rules through the [target cases](../../testing/identity-and-access.md). Scope App installation management through M01's shared protocol owner.
+
 - Qualify Realm community grouping/membership/rules, local selections and explicit publication relationships independently from Collection membership and Zone placement. Add member-revision preconditions and rule-backed moderation history; make departure acknowledgement cleanup bounded before scale acceptance.
 - Complete [Collection-based wiki composition](../../architecture/realm-collection-zone.md) through Dock paths, target content/adopted-revision selection, public metadata/count policy and current-authority/history tests across Realm, Collection and Zone.
 - Implement Thread topics/origins/response targets, closed states, staged topology and concurrent-leaf catch-up.

@@ -4,6 +4,13 @@ This document records the research basis for the selected [system architecture](
 
 External results establish precedents and tradeoffs. They do not prove that REZICS's combination preserves its invariants, meets its SLOs or fits the 500M/3B workload. Qualification includes semantic and relational integrity, concurrency, revocation, retries, recovery and capacity; it is not limited to constants and query plans.
 
+The selected [identity/access research basis](../identity-and-access.md#research-basis-and-qualification-limits)
+owns mixed grantees, representation and membership evidence; [connected-app sources](../connected-apps.md#sources-and-limits)
+own OAuth/MCP and external identity privacy, and [experience design](../identity-and-access-experience.md)
+owns progressive disclosure. These owners distinguish adopted semantics from
+adapter, SQL, workload and human-usability qualification without copying a second
+evidence matrix here.
+
 ## Native Work and classification
 
 | Primary source | Evidence and selected use | Limit / REZICS obligation |

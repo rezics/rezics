@@ -2,6 +2,12 @@
 
 This is the semantic owner for grouping and subsite composition. The [implementation plan](../plan/README.md) owns activation and progress. These concepts compose through explicit relationships; they are not interchangeable identities or an exclusive classification hierarchy.
 
+[Identity and access](identity-and-access.md) owns Realm participant admission,
+multiple Groups/Teams, custom Roles, mixed AuthPrincipal/Entity recipients and
+representation. A Realm can govern its own members without an Org parent.
+The [experience contract](identity-and-access-experience.md) separates ordinary
+participation from collaboration and advanced administration.
+
 ## Responsibilities
 
 | Concept | Responsibility | Relationship meaning |
@@ -23,7 +29,7 @@ The relationship must identify its subject, publication/grouping context, state 
 
 Collection items reference the native content, Publication or other eligible resource. Document history, author release and scope adoption keep their existing owners. A Zone Page is a presentation/page resource and can display that content; it does not replace the article's identity or editorial history. An item removed from a Collection may remain published in a Realm, and an item withdrawn from a Realm may remain in a Collection's retained history while current disclosure follows policy. A Collection whose meaning is exactly "currently published in this Realm" should be an explicit query-based selection when supported, rather than an independently edited mirror.
 
-Membership grants no edit, ownership, publication, read or execution authority. Public Collection and Zone pages disclose only authorized members, bodies, media and history. Realm governance scope, semantic/canon context, Collection membership and Zone placement remain separately queryable.
+Content membership in a Collection or Zone placement grants no edit, ownership, publication, read or execution authority. Realm participant membership can select an explicitly configured authorization audience under the identity/access contract; admission alone does not imply every management or content right. Public Collection and Zone pages disclose only authorized members, bodies, media and history. Realm governance scope, semantic/canon context, Collection membership and Zone placement remain separately queryable.
 
 ## Examples
 

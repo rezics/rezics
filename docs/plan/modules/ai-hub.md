@@ -2,6 +2,10 @@
 
 Dependencies: M01-M04. Owners: [Hub catalog](../../architecture/database/ai-hub.md), [Hub tests](../../testing/ai-hub.md), [open execution decisions](../../research/ai-hub-execution.md).
 
+M01 separately owns the selected [REZICS API/MCP connection and delegation capability](../../architecture/connected-apps.md).
+This module's execution gate concerns uploaded artifacts, outbound connections
+and hosted third-party runtimes, not clients using REZICS's own protected tools.
+
 ## Remaining work
 
 - Qualify versioned Skill content/packages/files, Prompt parameters/examples, MCP software identity, distributions, endpoints and observed capabilities.

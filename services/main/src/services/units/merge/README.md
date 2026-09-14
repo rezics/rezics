@@ -1,5 +1,11 @@
 # Native merge qualification
 
+The authority shapes and Self bindings below are implemented merge evidence.
+The selected [mixed identity contract](../../../../../../docs/architecture/identity-and-access.md)
+requires request-selected authority, scoped representation and private independent
+reviewer accountability; switching Entity does not create a second independent
+reviewer. Existing fixtures do not qualify those replacement shapes.
+
 Merge manifests read the native pair, participation/self bindings, existing
 redirects and operation locks inside their transaction. Request snapshots batch
 reviews, operations and rule references for the requested IDs. Queries sharing

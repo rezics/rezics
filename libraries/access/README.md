@@ -4,6 +4,13 @@
 Persistence, backend authorization, API schemas, localization, bootstrap data, and tests consume
 this package; none of those consumers may define a second permission registry.
 
+The selected [identity and mixed-authorization contract](../../docs/architecture/identity-and-access.md)
+defines private AuthPrincipals, public Entities, mixed grantees, scoped representation
+and persistent custom roles. [Connected applications](../../docs/architecture/connected-apps.md)
+defines credential/consent ceilings. Existing exported tuples and owner-specific
+checks are implemented contracts to reconcile through [M01](../../docs/plan/modules/foundation.md),
+not proof that the new recipient types or role/representation lifecycle already exist.
+
 The package deliberately does not authenticate callers, query grants, resolve ownership or Realm
 membership, evaluate request-bound decisions, or expose user-interface copy. Those responsibilities
 belong to the backend authorization engine and the owning product surfaces.
@@ -12,6 +19,8 @@ belong to the backend authorization engine and the owning product surfaces.
 
 - A **permission** is one independently grantable operation on a logical resource.
 - A **role** is a named collection of permissions. A role is not itself a permission.
+- A **grantee** is a typed AuthPrincipal, Entity or eligible member set. A Group collects recipients; a Role collects permissions, and a Binding fixes the target scope and conditions.
+- **Representation** permits an authenticated actor to exercise an Entity's authority within explicit limits. The actor need not personally hold the Entity's target rights, and unrelated direct rights are not pooled into that request.
 - A **scope** narrows a permission to a Unit root or descendant path.
 - A **policy** combines identity, ownership, grants, restrictions, membership, and resource state
   into a decision.
@@ -115,6 +124,20 @@ visibility changes do not silently recreate grants that a Realm owner deliberate
 
 New resource kinds and new permission keys require an explicit access review. Do not use wildcard
 or fallback classification that grants future resources authority merely because they compile.
+
+Mixed account/Entity administration uses the same independent-grant test. Define
+using, assigning and editing authority separately, including representation and
+redelegation. Account management and security-role assignment are not restricted
+to AuthPrincipal recipients merely because their targets are private. Keep
+operation-specific authentication, accountability and recovery requirements.
+
+Persistent role revisions, mixed bindings, assignment ceilings, typed membership
+and representation are target work. Policy evaluates the selected authority
+context plus hard actor/resource and credential restrictions. A public author
+label or current main Entity cannot grant access. The following specialized
+sections describe existing permission behavior until their target replacements
+pass the corresponding acceptance cases; they are not universal limits on the
+new grantee model.
 
 ## Development preview release gate
 

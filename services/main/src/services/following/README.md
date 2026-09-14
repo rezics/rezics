@@ -1,5 +1,11 @@
 # Following
 
+The current Auth/Self admission described below is an implemented boundary.
+The [selected identity contract](../../../../../docs/architecture/identity-and-access.md)
+requires explicit represented attribution while retaining account-owned private
+preferences; persona switching cannot transfer that state. Its replacement and
+cross-feature validation remain in M01/M06.
+
 `unit_follow` records an Entity's interest in a target. Personal ordering, favorites
 and delivery choices belong to its Auth account in `account_follow_preference`.
 Following grants neither access nor membership; downstream delivery rules remain

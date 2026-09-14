@@ -1,5 +1,12 @@
 # Authentication
 
+This file documents the current session/API-key implementation. The selected
+[identity contract](../../../../../docs/architecture/identity-and-access.md) and
+[connected-app contract](../../../../../docs/architecture/connected-apps.md) own the
+target AuthPrincipal privacy, many-to-many representation and OAuth/MCP profile.
+The existing Self/session bridge and token checks below do not establish that
+replacement; [M01](../../../../../docs/plan/modules/foundation.md) owns its work.
+
 Better Auth is the sole owner of credentials, password verification, cookies,
 sessions, and API keys. Backend code never accepts a client-provided profile ID
 as identity.

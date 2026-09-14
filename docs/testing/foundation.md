@@ -1,5 +1,12 @@
 # Foundation persistence qualification
 
+The [selected identity/access and connected-app cases](identity-and-access.md)
+are a separate target matrix. The existing Self-Entity, direct-grant, organization
+roster and Realm membership evidence recorded here qualifies its tested code only;
+it does not establish mixed grantees, many-to-many representation, OAuth/MCP or
+layered GUI acceptance. Preserve these regression records while replacing their
+superseded assumptions through the current plan.
+
 The [plan](../plan/README.md) owns module progress. These fixtures qualify individual foundation contracts on a fresh disposable PostgreSQL target; they do not establish all of M01 or the backend acceptance gate.
 
 ## Unit capability contract acceptance

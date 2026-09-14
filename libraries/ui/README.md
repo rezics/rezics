@@ -13,6 +13,18 @@ need an isolated client bundle:
 import { PortableTextEditor } from "@rezics/ui/custom/portable-text-editor";
 ```
 
+## Capability presentation
+
+API complexity does not require equivalent GUI complexity. Prioritize the
+maintainer's approximately 90% ordinary-user audience with useful defaults and
+task-focused initial controls; this is a product priority, not measured adoption.
+Expose collaboration and advanced administration through clear contextual entry
+points, preserving all authorized API alternatives and advanced saved state.
+Presets use the same backend capabilities, not a second simplified permission model.
+Do not hide material consent, attribution or destructive consequences in advanced
+settings. The [identity/access experience](../../docs/architecture/identity-and-access-experience.md)
+applies this policy to defaults, members, roles and connected Apps.
+
 ## Surface policy
 
 REZICS uses a ghost-first surface system. Static cards and ordinary controls are transparent and

@@ -1,6 +1,9 @@
 # Studio workspace and contribution history
 
-Status: Accepted
+Status: accepted product distinction. The selected [mixed-identity contract](identity-and-access.md)
+replaces the Profile/Self-specific authorization assumptions in the current
+projection implementation described below; existing fixtures do not qualify that
+replacement. [M01](../plan/modules/foundation.md) owns its integration.
 
 Owners: Main Service, History, Authorization, and Web
 
@@ -8,10 +11,11 @@ Owners: Main Service, History, Authorization, and Web
 
 Studio has two user-facing lists, selected explicitly in the Web UI:
 
-- **Your workspace** lists resources the current Profile can edit now through
-  current ownership, a direct Profile grant, or a current Realm-subject grant.
+- **Your workspace** lists resources editable in the explicitly selected direct
+  or represented authority context, including applicable ownership, mixed grants,
+  Groups/Roles and representation limits. Unrelated identities' rights are not pooled.
 - **Your contributions** lists currently public and approved resources that the
-  Profile created or edited in the past. Current editor access is irrelevant to
+  selected public Entity created or edited in the past. Current editor access is irrelevant to
   this list.
 
 These lists do not share a relationship table or a query. Studio owns only the

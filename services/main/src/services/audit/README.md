@@ -1,5 +1,14 @@
 # Security audit
 
+The current event fields below describe implemented logging. The selected
+[identity/access contract](../../../../../docs/architecture/identity-and-access.md)
+requires private actual-operator identity, selected authority subject, represented
+Entity, credential/client/installation context and authority basis to remain
+separately traceable where applicable. Public/scoped presentation redacts raw
+principals, controllers and unrelated identities; existing Profile labels are not
+proof of the new privacy contract. Add role/group/representation, connection and
+installation transitions through the same domain-owned audit protocol in M01.
+
 The audit ledger records security-relevant facts that need a durable, global explanation. It is
 not a request log, analytics stream, content revision history, or a history of visits to the
 management console.

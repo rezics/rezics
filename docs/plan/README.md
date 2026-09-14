@@ -16,7 +16,7 @@ Complete the shared schema design first. Develop each backend module through tes
 
 | Location | Authority |
 | --- | --- |
-| [Database architecture](../architecture/database/README.md) | Target meaning, relational dictionary, invariants and capacity assumptions. |
+| [Database architecture](../architecture/database/README.md) and owning architecture contracts | Target meaning, relational dictionary, invariants and capacity assumptions; [identity/access](../architecture/identity-and-access.md), [connected apps](../architecture/connected-apps.md) and [layered GUI](../architecture/identity-and-access-experience.md) own their selected contracts. |
 | This plan and [modules](modules/) | Remaining work, dependencies and activation gates. |
 | [Testing](../testing/README.md) | Scenarios, source conformance, evidence and verification. |
 | [Research](../research/README.md) | Unresolved questions that can change design; decided results move to their owner. |
@@ -41,7 +41,7 @@ The selected [native Work](../architecture/database/native-work.md), [logical Un
 ## Contract-first implementation sequence
 
 1. Reconcile logical identity/owner/placement, cross-domain Work/release scope and property applicability with the dictionary; run the authored semantic matrices before selecting domain schema changes.
-2. Qualify shared identity/revision/occurrence references, capability adapters and current authority together with the affected consumers. Keep concrete domain invariants rather than replace them with untyped references.
+2. Qualify shared identity/revision/occurrence references, capability adapters and mixed AuthPrincipal/Entity authority together with affected consumers. Reconcile membership/group/role/representation state and assignment ceilings; resolve the external token privacy/adapter profile before its dependent DDL/APIs. Keep concrete domain invariants rather than replacing them with untyped references.
 3. Implement exact content/adoption/published selections and staged composition import/refresh, including source correspondence, local-edit conflicts and recovery; ordinary node attachment remains reference-only.
 4. Introduce revision-bound child pagination, coalesced metrics and bounded reverse impact/read models as one replacement path. Keep current 2,048/64 protections until that path passes its tests; do not solve large structures by raising in-memory limits.
 5. Run end-to-end source -> adoption -> composition -> publication -> discovery/use -> revocation/recovery scenarios across domains. Qualify declared freshness, measured workload limits and known failures before frontend acceptance.
@@ -54,17 +54,17 @@ Existing code provides foundations. The revised target has not passed G2-G4 mere
 
 | ID | Module | Dependencies | Design | Target persistence/API/integration |
 | --- | --- | --- | --- | --- |
-| M01 | [Foundation](modules/foundation.md) | None | Shared identity/capability contract selected; logical-owner mapping reconciliation required | G2 in progress: [canonical reference storage, selected private/event consumers, canonical Following/Studio and Progress parent authority qualified](../testing/foundation.md); native private review/disclosure, reconciliation and selected worker recovery/current-executor fences qualified; reviewer authority and canonicalization/catalog-effect process recovery qualified; remaining recovery, consumers, revision/occurrence families, ownership/disclosure and other contracts pending |
+| M01 | [Foundation](modules/foundation.md) | None | Shared identity/capability and mixed-grantee representation contracts selected; OAuth/MCP privacy and adapter qualification required | G2 in progress: [canonical reference storage, selected private/event consumers, canonical Following/Studio and Progress parent authority qualified](../testing/foundation.md); native private review/disclosure, reconciliation and selected worker recovery/current-executor fences qualified; reviewer authority and canonicalization/catalog-effect process recovery qualified; remaining recovery, consumers, revision/occurrence families, ownership/disclosure and other contracts pending; [IAM/APP target matrices](../testing/identity-and-access.md) pending; older Self/direct-grant evidence does not qualify this replacement |
 | M02 | [Knowledge and graph](modules/knowledge-and-graph.md) | M01 | Defined; graph query contract specified | Pending |
 | M03 | [Content and media](modules/content-and-media.md) | M01, M02 contracts | Defined | Pending |
 | M04 | [Catalog](modules/catalog.md) | M01, M02, M03 contracts | Cross-domain Work/release selected; domain mappings and source-free cases required | Pending |
 | M05 | [Creation and reading](modules/creation-and-reading.md) | M02-M04 | Cross-domain creation/composition contract selected; Book is the first journey | Pending |
-| M06 | [Community and governance](modules/community-and-governance.md) | M01-M03 | Defined; Realm/Collection/Zone wiki composition specified; Dynamic Collections optional | G2 in progress: [stored wiki grouping, Zone pages and selected Collection read/curation authority, including target-read expiry rollback, qualified](../testing/wiki-composition.md); target content/adopted revisions, metadata/history/authority, batch/history capacity and remaining community contracts pending |
+| M06 | [Community and governance](modules/community-and-governance.md) | M01-M03 | Mixed membership/Groups/custom Roles and layered management selected; Realm/Collection/Zone composition specified; Dynamic Collections optional | G2 in progress: [stored wiki grouping, Zone pages and selected Collection read/curation authority, including target-read expiry rollback, qualified](../testing/wiki-composition.md); target content/adopted revisions, metadata/history/authority, batch/history capacity and remaining community contracts pending |
 | M07 | [Sources and converters](modules/sources-and-converters.md) | M01-M04 native commands | Defined; full field conformance pending | Pending |
 | M08 | [Skill, Prompt and MCP Hub](modules/ai-hub.md) | M01-M04 | Catalog scope defined; execution/hosting questions open | Pending |
 | M09 | [Search and operations](modules/search-and-operations.md) | M01 and participating module events | Defined; known runtime failures open | G2 in progress: [snapshot generations, lifecycle, catalog/related-post reads and canonical event intake qualified](../testing/recommendations.md); [native failure diagnostics verified](../../services/main/performance/README.md#native-failure-artifacts); [Linux facet comparison passes, original crash unresolved](../testing/known-failures.md#native-facet-search-abort); remaining online disclosure, event delivery, capacity and restoration work pending |
 
-G1 reconciles the dictionary with cross-domain Work/release, explicit composition/import, shared Unit features, Graph API and Hub catalog requirements. Foundational harness work can proceed while independent Hub execution questions remain open. Do not declare an execution-enabled Hub complete without deciding and testing that scope.
+G1 reconciles the dictionary with cross-domain Work/release, explicit composition/import, shared Unit features, mixed identity/representation, Groups/custom Roles, connected-app privacy, Graph API and Hub catalog requirements. The [identity/access capacity envelope](../architecture/identity-access-capacity.md) and [GUI layering](../architecture/identity-and-access-experience.md) are selected design obligations, not measured acceptance. Foundational harness work can proceed while independent Hub execution questions remain open. Do not declare an execution-enabled Hub complete without deciding and testing that scope.
 
 ## Per-module workflow
 

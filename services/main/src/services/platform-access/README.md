@@ -1,5 +1,13 @@
 # Platform access
 
+This owner describes implemented Profile capability grants. The selected
+[mixed-authority contract](../../../../../docs/architecture/identity-and-access.md)
+permits platform/account/Entity administration through typed AuthPrincipal, Entity
+or eligible member-set bindings, with operation-specific assurance, delegation
+ceilings and recovery continuity. The current direct-grant endpoint and final-grant
+rules below do not define the target's only allowed recipient or recovery shape.
+Replacement is tracked in [M01](../../../../../docs/plan/modules/foundation.md).
+
 Platform access is an explicit set of capabilities granted to a Profile. It is not a role, account
 status, employment relationship, or derived “administrator” identity.
 

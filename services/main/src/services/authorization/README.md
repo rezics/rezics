@@ -1,5 +1,15 @@
 # Authorization
 
+This file records the implemented authorizers and their current qualification.
+The selected [mixed-authorization contract](../../../../../docs/architecture/identity-and-access.md)
+replaces account-only grantees, implicit Self selection and actor-holds-all-rights
+as universal design assumptions. Target account/Entity/security administration can
+use AuthPrincipal, Entity or member-set grants with restricted representation and
+explicit assignment ceilings. Existing precedence, owner cardinality and direct
+Realm usersets below describe current code, not the complete target policy.
+[M01](../../../../../docs/plan/modules/foundation.md) and the
+[target cases](../../../../../docs/testing/identity-and-access.md) govern replacement.
+
 The backend is authoritative. Every request owns one `Authorization`, including
 anonymous requests. Authenticated decisions carry the account and self Entity;
 native catalog decisions also require the current participation context. The

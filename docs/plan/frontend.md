@@ -4,6 +4,9 @@ Dependency: [G4](backend-acceptance.md). Define shared Block and API contracts e
 
 ## Remaining experiences
 
+- Identity and access: follow the [layered GUI contract](../architecture/identity-and-access-experience.md). Ordinary users enter a valid main Entity and complete reading/posting/joining/App connection without learning Principal, Binding or delegation internals. Collaboration controls provide named members/teams and role presets; dedicated advanced workspaces expose mixed recipients, multiple custom roles, scopes, representation, client/installation management and restricted diagnostics.
+- Preserve advanced API-created configuration through ordinary edits, explicit identity selection across drafts/tabs and materially complete consent. The approximately 90% ordinary-user audience is a design priority, not measured success or permission to discard advanced API capabilities. Qualify [UX01-UX08](../testing/identity-and-access.md#experience-acceptance) after backend acceptance under the authorized rendered/human-study workflow.
+
 - Native Work/release: common creative identity across domains, domain-applicable fields, virtual/actual issuing and independent selected content. Book is the first authoring/consumption journey; music, audiovisual, visual, game/software and mixed-media states must preserve the same contract.
 - Composition authoring: distinguish reference-only attachment from explicit structure import; expose source-version selection, destination scope, preview, progress, cancellation/retry and refresh conflicts without requiring users to edit operation IDs or cursors.
 - AO3-derived authoring: original/source works, fandoms, characters, contextual relationships, warnings, co-creators and collections through native contracts.

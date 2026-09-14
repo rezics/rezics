@@ -38,6 +38,11 @@ For either a 500-million or 3-billion-row history relation, request memory and n
 
 ## Association consent authority
 
+The following snapshots and fixture widths describe the implemented Auth/Self
+protocol. The selected [mixed-authority contract](identity-and-access.md) requires
+explicit selected subject, scoped representation and private operator provenance;
+an old Self receipt is not qualification of that replacement.
+
 Association proposals retain the initiating private ParticipationAuthority, with generated concrete Auth, grant and service-principal foreign keys. Public responses explicitly select consent fields and omit that authority and routing columns. Creation proves the initiating public self identity belongs to the stored authenticated account. Acceptance restores the exact admitted authority and rechecks its current grant/account/source permissions; an imported Entity ID alone can never reconstruct authorization. The accepting party's independent authority is checked against the requested side. Native materialization records the native owner's change ledger, while platform materialization uses platform history.
 
 Proposal lists inspect at most 256 indexed source/target candidates and emit at most 100 items, preserving sparse-page cursors. New all-state source/time and target/time indexes complement unresolved indexes. At 500 million rows, two estimated 56-byte page indexes add about 56 GB; at 3 billion, about 336 GB, before replicas/WAL/free space. The private admitted JSON has a 4096-byte hard maximum; an expected 250-byte record adds roughly 125 GB/750 GB of payload at those cardinalities, with the 2 TB/12 TB theoretical maximum defining a storage rather than in-memory ceiling. At 20 list requests/second, bounded candidate work is at most 5120 rows/second. Current-authority validation remains point/indexed control-plane work per acceptance. Exact principal/grant snapshots and grants can be partitioned independently; no full-user or full-corpus authorization scan is introduced.
