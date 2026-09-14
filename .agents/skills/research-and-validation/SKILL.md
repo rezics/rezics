@@ -5,13 +5,10 @@ description: Research and evaluate substantive designs, technical proposals and 
 
 # Research and validation
 
-Produce a defensible decision with room for original ideas. Apply the current
-request and [scope rules](../../../AGENTS.md#task-scope-and-evidence); research
-does not authorize implementation or expand verification permissions.
-During the current implementation program, the
-[execution workflow](../../../docs/plan/execution-workflow.md) also governs
-experiments and representative instruction evaluations. Reuse evidence and state
-deferred validation; research must not become a workaround for the testing pause.
+For substantive decisions, proactively read applicable primary research, standards
+and engineering implementations. Follow [task scope](../../../AGENTS.md#task-scope-and-evidence)
+and the current program's [execution timing](../../../docs/plan/execution-workflow.md),
+including for experiments and instruction evaluations.
 
 ## Frame the decision
 
@@ -54,7 +51,7 @@ in this system. A planning estimate is not a measurement. In research-only work,
 state the remaining validation and its decision criteria when experiments are
 outside scope; hypotheses can remain proposals without being presented as facts.
 
-When changing instructions or skills, use representative tasks to assess actual
+When changing agent behavior or adapting models, use representative tasks to assess actual
 decisions, unnecessary work and context cost. Include a relevant substantive
 task and an ordinary task that should not activate the workflow. Structural
 validation alone does not establish behavioral improvement.
@@ -71,6 +68,6 @@ Continue while missing or contradictory evidence could materially change the
 outcome. Otherwise deliver the recommendation and explicit remaining uncertainty.
 
 The repository's [design evidence](../../../docs/architecture/database/design-evidence.md)
-illustrates source applicability and qualification limits. The instruction design
-uses [OpenAI's guidance on scoped skills and progressive disclosure](https://developers.openai.com/blog/rethinking-skills-and-prompts-for-gpt-6-astra);
-consult it when maintaining this workflow, not on every research task.
+illustrates source applicability and qualification limits. Instruction design also
+uses [OpenAI's scoped-skills guidance](https://developers.openai.com/blog/rethinking-skills-and-prompts-for-gpt-6-astra);
+consult it for relevant behavior changes, not routine maintenance.

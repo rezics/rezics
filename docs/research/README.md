@@ -1,6 +1,6 @@
 # Open research
 
-This directory holds unresolved questions that can change the design. Conduct autonomous web research and experiments under [the program's environment authorization](../plan/README.md). Prefer primary evidence and record the decision it supports, uncertainty and the owning module.
+This directory holds unresolved design questions. Follow the [research method](../../.agents/skills/research-and-validation/SKILL.md) and [program execution policy](../plan/execution-workflow.md).
 
 Current open scope: [Skill, Prompt and MCP execution/hosting](ai-hub-execution.md).
 

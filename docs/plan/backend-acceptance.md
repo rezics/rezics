@@ -1,6 +1,6 @@
 # Backend acceptance gate
 
-G4 qualifies the combined backend and is required for whole-program frontend acceptance. Frontend implementation may begin against its available backend contracts before G4. See [the plan](README.md) for scope/progress and the [execution workflow](execution-workflow.md) for when to author and run verification. Existing test totals, implementation completion and the design checker do not close these gates.
+This matrix defines G4 evidence. See the [plan's gates](README.md#acceptance-gates) for dependencies and the [execution workflow](execution-workflow.md) for verification timing.
 
 | Gate | Required evidence |
 | --- | --- |

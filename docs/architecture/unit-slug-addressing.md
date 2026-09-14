@@ -4,10 +4,8 @@ Status: Accepted
 
 Owners: Main Service and Web
 
-The [current program](../plan/README.md) has no compatibility requirements for
-old URLs, APIs, IDs or stored address rows. Implement this identity/address
-contract for the intended model and rebuild development/test state as needed.
-Legacy address conversion is not a prerequisite or deliverable of this program.
+Apply the [program's compatibility policy](../plan/execution-workflow.md#program-authority)
+to old URLs, APIs, IDs and stored address rows; legacy address conversion is outside scope.
 
 ## Decision
 

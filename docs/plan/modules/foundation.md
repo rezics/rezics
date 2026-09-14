@@ -18,7 +18,7 @@ Dependencies: none. Contract owners: [database architecture](../../architecture/
 - Extend the fresh native fixture workflow for remaining lifecycle contracts and finish account-erasure workers and restoration-frontier cases without online migration steps.
 - Test added revision/occurrence families, slug collisions, stale writes, revoked authority, private evidence and account erasure; qualify consumer disclosure independently from reference integrity.
 - Qualify the [Unit capability cases](../../testing/foundation.md#unit-capability-contract-acceptance), including logical owner-layout changes and independent metadata-only Work references, on the single-database target. Distributed deployment and live relocation are outside this gate.
-- Implement lookup/access/history APIs with their required persistence owners; regenerate affected consumers together. Follow the [execution workflow](../execution-workflow.md) for concentrated test authoring and verification; G3 acceptance still requires the affected G2 contracts.
+- Implement lookup/access/history APIs with their persistence owners and regenerate affected consumers. Follow the [plan's gates](../README.md#acceptance-gates).
 
 ## Acceptance
 

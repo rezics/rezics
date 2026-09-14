@@ -6,29 +6,27 @@
 - Maintainer-facing repository language is English; locale content, fixtures and native-language names retain their target language.
 - Abstractions should capture an invariant, protocol, lifecycle or reusable semantics. Within the affected code, inline wrappers that only rename or forward when equally clear. Framework/public entry points and generated/upstream boundaries are not judged by call count.
 
-## Contracts and verification
+## Contracts
 
 - A type or assertion must not claim more than its source or validation proves. Use existing schemas and runtime checks at the narrowest trust boundary.
 - Preserve meaning, missing values and failure states through transformations to their consumers. Same-shaped values need not have the same semantics; do not hide lost guarantees with casts.
-- For the current implementation program, the [execution workflow](docs/plan/execution-workflow.md) owns test/check timing and the [plan](docs/plan/README.md#active-execution) records the active phase. During verification, run the nearest checks that cover changed contracts, including important rejected states. Start from the [Taskfile](Taskfile.yml); expand testing only for affected dependencies, failures or unresolved risk. Once required checks pass, stop unless new changes invalidate them. Outside this program, run the nearest required checks before completion.
 - Report evidence and limitations for the changed scope. Do not imply whole-system proof from focused checks. Frontend work also follows [the agent verification boundary](AGENTS.md#data-and-verification-boundaries).
 
-## Versioning
+## Commits and verification
 
-The current implementation program has no compatibility requirements for old
-schemas, APIs, SDKs, data, IDs/URLs, formats or implementation behavior. Design for
-the intended model, remove obsolete compatibility layers within scope and update
-retained consumers together. The current plan authorizes autonomous research,
-full development/test environment operation and local commits under the
-execution workflow's phase-specific policy. Deferred checks must be reported;
-implementation checkpoints do not establish acceptance.
+- Make each commit a coherent logical change with its required consumers and generated artifacts. Review the exact staged diff, exclude unrelated changes and avoid dependencies on uncommitted work.
+- Use `type(scope): summary`, with scope when useful; describe resulting behavior and explain non-obvious motivation in the body.
+- During the current program, follow the [execution workflow](docs/plan/execution-workflow.md) for test/check timing and implementation checkpoints. Otherwise include required tests and pass owning checks before completion.
+- Preserve existing tests, deterministic checks and CI. Passing static checks is code-integrity evidence, not rendered, production or capacity acceptance.
+- When verifying, start from the [Taskfile](Taskfile.yml) and run the nearest meaningful checks, including rejected states. Expand or repeat only for affected dependencies, failures, new changes or unresolved risk; stop after required checks pass.
+
+## Versioning
 
 REZICS uses Romantic Versioning: `PROJECT.MAJOR.MINOR`. PROJECT changes for a
 separate product generation; MAJOR for significant or breaking product, public
 API or persisted-contract changes; MINOR for smaller additions and fixes.
 Packages have independent release lines. Document breaking target contracts and
-their reproducible installation/rebuild procedure; compatibility migration is not
-a deliverable of the current program. A breaking change is not a PROJECT bump.
+their reproducible installation/rebuild procedure. A breaking change is not a PROJECT bump.
 
 Root `vPROJECT.MAJOR.MINOR` tags define the server/database release boundary;
 prefixed product tags do not. Released SQL is append-only: add forward
@@ -59,5 +57,4 @@ server enforcement and allowed/denied tests.
 The GitHub `Check` workflow is advisory, not a merge, tag, release or deployment
 gate. Keep failures visible and fix them when practical. Do not make release
 workflows depend on its conclusion or configure it as a required status check.
-This does not waive the checks required for acceptance; the execution workflow
-owns their timing during the current program.
+Advisory CI does not replace owning acceptance requirements.

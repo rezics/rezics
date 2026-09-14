@@ -1,6 +1,6 @@
 # Frontend implementation and acceptance
 
-Implementation dependency: selected shared Block/API contracts and their required backend implementations are available, and frontend work is included in the active scope. Follow the [execution workflow](execution-workflow.md) for phase timing. Scoped acceptance requires its qualified backend contracts; whole-program frontend acceptance requires [G4](backend-acceptance.md).
+Follow the [plan's scope and gates](README.md#acceptance-gates) and [execution timing](execution-workflow.md). Select shared Block/API contracts before dependent interfaces.
 
 Apply the [product design principles](../architecture/product-design-principles.md)
 across features. The API/UI skill supplies the relevant GUI or combined workflow;
@@ -25,6 +25,6 @@ Follow [Realm, Collection and Zone composition](../architecture/realm-collection
 
 Apply the [API/UI design skill](../../.agents/skills/api-ui-design/SKILL.md). Keep all permitted alternatives, repeated occurrences, local labels/order and cross-page selections inspectable. An import result marked staged, partial, conflicted or failed cannot be displayed as a completed publication. Preserve user input on recoverable failures. History and reading controls name the relevant selected version; word count, duration, unknown and inapplicable properties follow the [native Work contract](../architecture/database/native-work.md). Backend completion and search/statistic freshness are separate states.
 
-Use existing feature ownership, @rezics/ui and typed locales. Author affected stories/tests in test-authoring; execute affected TypeScript/deterministic checks and [Storybook review](../architecture/storybook-workflow.md) in verification. Inspect affected screenshots where authorized. Full-application QA remains a distinct activity under AGENTS.md, not a hidden requirement of documentation work.
+Use existing feature ownership, @rezics/ui and typed locales. Apply [Storybook review](../../.agents/skills/storybook-ui-review/SKILL.md) and the [browser authorization boundary](../../AGENTS.md#data-and-verification-boundaries).
 
 Keep stories with their actual render owner: shared UI/editor consumers in Web, isolated Text/About providers, server email in render tests. Do not restore automatic all-story capture, committed pixel baselines or a second screenshot scheduler. Add stateful interactions/accessibility, then exercise full user journeys through the qualified backend.

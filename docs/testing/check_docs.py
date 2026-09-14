@@ -15,6 +15,15 @@ from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parents[2]
 RETIRED = ("docs/report/", "docs/plan/pending-review/", "docs/plan/operational-refactor-20260906/", "docs/plan/database-schema-design-20260910/")
+POLICY_SECTIONS = {
+    "docs/plan/README.md": ("active-execution", "acceptance-gates", "modules-and-current-target-qualification"),
+    "docs/plan/execution-workflow.md": ("program-authority", "phases-and-transitions", "verification-timing-and-permitted-operations", "progress-commits-and-completion"),
+}
+POLICY_LINKS = {
+    "AGENTS.md": ("docs/plan/README.md", "docs/plan/execution-workflow.md"),
+    "CONTRIBUTING.md": ("docs/plan/execution-workflow.md",),
+    "docs/plan/README.md": ("docs/plan/execution-workflow.md",),
+}
 
 
 def visible_lines(text):
@@ -54,6 +63,7 @@ def main():
     problems = []
     checked_links = 0
     anchor_cache = {}
+    local_targets = {}
     for path in docs:
         name = path.relative_to(ROOT).as_posix()
         text = path.read_text(encoding="utf-8")
@@ -84,18 +94,28 @@ def main():
                     problems.append(f"{name}:{line_no}: missing local target: {link}")
                     continue
                 checked_links += 1
+                local_targets.setdefault(name, set()).add(target.relative_to(ROOT).as_posix())
                 if parsed.fragment and target.suffix == ".md":
                     allowed = anchor_cache.setdefault(target, anchors(target))
                     if unquote(parsed.fragment) not in allowed:
                         problems.append(f"{name}:{line_no}: missing heading: {link}")
-    plan = (ROOT / "docs/plan/README.md").read_text(encoding="utf-8")
-    for required in ("Conduct autonomous web research", "full control of the development and test environment", "There are no compatibility requirements", "create a local commit"):
-        if required not in plan:
-            problems.append(f"docs/plan/README.md: missing standing policy: {required}")
+    for name, required_sections in POLICY_SECTIONS.items():
+        path = ROOT / name
+        if not path.is_file():
+            problems.append(f"{name}: missing policy owner")
+            continue
+        available = anchor_cache.setdefault(path, anchors(path))
+        for section in required_sections:
+            if section not in available:
+                problems.append(f"{name}: missing policy section: {section}")
+    for name, required_links in POLICY_LINKS.items():
+        for target in required_links:
+            if target not in local_targets.get(name, set()):
+                problems.append(f"{name}: missing policy reference: {target}")
     if problems:
         print("\n".join(problems))
         raise SystemExit(1)
-    print(f"Documentation integrity PASS: {len(docs)} Markdown files, {checked_links} local links; current owners, English prose and execution policy checked.")
+    print(f"Documentation integrity PASS: {len(docs)} Markdown files, {checked_links} local links; current owners, English prose and policy structure checked.")
 
 
 if __name__ == "__main__":

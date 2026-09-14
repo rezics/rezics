@@ -4,11 +4,8 @@ Status: Accepted. The [AI review skill](../../.agents/skills/storybook-ui-review
 owns evidence and completion policy. Screenshots support inspection of new and
 changed UI; persistent pixel baselines are not part of the default workflow.
 
-For the current implementation program, the
-[execution workflow](../plan/execution-workflow.md) owns timing: defer story/test
-authoring, runtime startup solely for QA, typechecks, builds, browser checks and
-screenshots to their assigned phases. This document defines how to perform the
-authorized Storybook work when that phase begins; it does not trigger early QA.
+During the current program, [execution timing](../plan/execution-workflow.md)
+governs story/test authoring and all QA operations described here.
 
 ## Runtime owners
 

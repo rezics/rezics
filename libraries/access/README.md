@@ -113,11 +113,8 @@ visibility changes do not silently recreate grants that a Realm owner deliberate
 
 ## Adding or changing a permission
 
-During the current implementation program, follow the
-[execution workflow](../../docs/plan/execution-workflow.md): implement definitions,
-consumers and generated artifacts in implementation, author tests in test-authoring,
-and run checks in verification. The requirements below retain their acceptance
-meaning without requiring a phase switch for each permission.
+The current program's [execution timing](../../docs/plan/execution-workflow.md)
+applies to the requirements below.
 
 1. State the logical resource, action, security boundary, and explicit non-effects.
 2. Prefer a standard action; document the rationale for a domain action.

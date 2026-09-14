@@ -59,6 +59,6 @@ Preserve source-specific vocabulary before applying standards normalization. Dis
 
 ## Data acquisition
 
-Autonomously investigate primary schemas, official dumps, public APIs and native source code. Pin chosen artifacts, retrieval parameters, checksums, source contracts and normalization versions. Download and regenerate development/test data as needed under the plan's environment authorization. Public large datasets remain reproducible network inputs; deterministic CI uses committed compact fixtures. Record live-site failure separately from native deterministic behavior.
+Investigate primary schemas, official dumps, public APIs and native source code. Pin artifacts, retrieval parameters, checksums, source contracts and normalization versions. Acquisition and data regeneration follow the [execution policy](../plan/execution-workflow.md). Public large datasets remain reproducible network inputs; deterministic CI uses committed compact fixtures. Record live-site failure separately from native deterministic behavior.
 
 Primary source entry points: [MusicBrainz schema](https://musicbrainz.org/doc/MusicBrainz_Database/Schema), [CAA](https://musicbrainz.org/doc/Cover_Art_Archive/API), [VNDB Kana](https://api.vndb.org/kana), [Bangumi archive](https://github.com/bangumi/Archive), [Open Library](https://openlibrary.org/developers/api). These support source distinctions, not automatic acceptance of our converters.

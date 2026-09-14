@@ -2,7 +2,7 @@
 
 Status: selected target architecture; implementation and qualification follow the [current plan](../../plan/README.md).
 
-This is the whole-database design authority, including private and operational state. There are no compatibility requirements for old schema, API, SDK, stored data, IDs/URLs, formats or implementation behavior. Use the intended native model and update consumers together. New-system integrity, source conversion, installation, history and recovery remain required capabilities. The plan owns autonomous research, full development/test environment control, module sequence and commits.
+This is the whole-database design authority, including private and operational state. The [execution workflow](../../plan/execution-workflow.md) owns program authority and compatibility policy; the plan owns module sequence and progress. New-system integrity, source conversion, installation, history and recovery remain required capabilities.
 
 Read [the dictionary](data-dictionary.md), [native Work](native-work.md), [catalog model](catalog-model.md), [composition](content-composition.md), [creation](creation.md), [Graph API](relationship-graph.md), [ratings](ratings.md), [event-time discovery](event-time.md), [Hub](ai-hub.md), [design evidence](design-evidence.md), [schema coverage](../../testing/database/current-schema-map.tsv), [API coverage](../../testing/database/api-coverage.tsv), [scenarios](../../testing/database/scenarios.tsv), and [capacity](capacity.md). The [design checker](../../testing/database/check_design.py) verifies coverage and arithmetic, not SQL behavior or source conformance.
 

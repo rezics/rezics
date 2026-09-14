@@ -8,8 +8,7 @@ Use NATS JetStream for durable event/task transport, qualify Debezium Server as 
 committed-outbox relay and keep Bun workers as business consumers. The
 [source lifecycle](catalog-source-lifecycle.md) owns binding/subscription/adoption;
 [backend acceptance](../plan/backend-acceptance.md) owns workload and recovery.
-The [current plan](../plan/README.md) authorizes autonomous research and full
-development/test environment control with no compatibility requirements.
+Apply the [program's execution policy](../plan/execution-workflow.md).
 
 ## Decision and alternatives
 

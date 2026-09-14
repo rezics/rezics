@@ -13,7 +13,7 @@ Dependencies: M01-M03 contracts. Owner: [catalog model](../../architecture/datab
 - Qualify Book text/publication/serialization, VN contribution contexts, music alternative/candidate/TOC structures, seasons/cuts/episodes and mixed bundles.
 - Test repeated targets, incomplete contents, large staged structures, foreign-owner reuse and world/canon/series memberships.
 - Replace publication/target-pair content keys with parent/manifest/occurrence keys and update histories, source correspondence, exact references and consumers together. Account for changed key widths and repeated-use amplification using the existing 500M/3B capacity model before persistence acceptance.
-- Build APIs and semantic exports with their native commands; source adapters use the same commands. Author and execute their tests under the [execution workflow](../execution-workflow.md).
+- Build APIs and semantic exports with their native commands; source adapters use the same commands.
 
 ## Acceptance
 
