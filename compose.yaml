@@ -128,7 +128,7 @@ services:
         volumes:
             - ./services/main/docker/postgres/migration-test-init:/docker-entrypoint-initdb.d:ro
         healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U postgres -d rezics_atlas"]
+            test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d rezics_atlas"]
             interval: 2s
             timeout: 5s
             retries: 15
