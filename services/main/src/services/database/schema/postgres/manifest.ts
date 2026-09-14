@@ -10,6 +10,7 @@ export const PostgreSqlSchemaFileNames = [
 	"history-integrity.sql",
 	"reference-value.sql",
 	"access-identity.sql",
+	"access-role.sql",
 	"account-tag-reference.sql",
 	"revision-reference.sql",
 	"association-proposal-authority.sql",
@@ -87,6 +88,11 @@ export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly 
 };
 
 export const PostgreSqlSchemaFunctionNames = [
+	"guard_access_role_head",
+	"guard_access_role_event",
+	"guard_access_role_revision",
+	"guard_access_role_permission",
+	"validate_access_role_history",
 	"reference_value_native_id",
 	"guard_follow_reference",
 	"guard_account_tag_reference",
@@ -379,6 +385,15 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "access_role", name: "access_role_head_guard" },
+	{ table: "access_role_event", name: "access_role_event_guard" },
+	{ table: "access_role_event", name: "access_role_event_immutable" },
+	{ table: "access_role_revision", name: "access_role_revision_guard" },
+	{ table: "access_role_permission", name: "access_role_permission_guard" },
+	{ table: "access_role", name: "access_role_head_complete" },
+	{ table: "access_role_event", name: "access_role_event_complete" },
+	{ table: "access_role_revision", name: "access_role_revision_complete" },
+
 	{ table: "reference_value", name: "reference_value_immutable" },
 	{ table: "access_subject", name: "access_subject_immutable" },
 	{ table: "access_scope", name: "access_scope_immutable" },

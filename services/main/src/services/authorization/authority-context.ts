@@ -1,10 +1,9 @@
 import {
-	PlatformCapabilityValues,
-	UnitPermissionValues,
+	accessPermissionKey,
+	isAccessPermission,
 	unitScope,
 	type AccessSubjectTarget,
-	type PlatformCapability,
-	type UnitPermission,
+	type AccessPermission,
 	type RequestedAuthoritySelection,
 	type RepresentationReference,
 } from "@rezics/access";
@@ -34,7 +33,7 @@ export const RequestedAuthoritySelectionSchema = z.discriminatedUnion("mode", [
 
 /** A registered operation at one exact private authority root and normalized descendant path. @internal */
 export interface AuthorityOperation {
-	permission: UnitPermission | PlatformCapability;
+	permission: AccessPermission;
 	scopeId: string;
 	path: readonly string[];
 }
@@ -79,7 +78,6 @@ export interface AuthorityEvaluationInput {
 	}[];
 }
 
-const permissions = new Set<string>([...UnitPermissionValues, ...PlatformCapabilityValues]);
 function sameSubject(first: AccessSubjectTarget, second: AccessSubjectTarget) {
 	return first?.kind === second.kind && first.id === second.id;
 }
@@ -89,7 +87,7 @@ function sameReference(first: RepresentationReference, second: RepresentationRef
 function operationKey(operation: AuthorityOperation): string | undefined {
 	if (
 		!operation ||
-		!permissions.has(operation.permission) ||
+		!isAccessPermission(operation.permission) ||
 		!uuidSchema.safeParse(operation.scopeId).success ||
 		!Array.isArray(operation.path) ||
 		operation.path.length > 8 ||
@@ -101,7 +99,11 @@ function operationKey(operation: AuthorityOperation): string | undefined {
 	} catch {
 		return undefined;
 	}
-	return JSON.stringify([operation.permission, operation.scopeId, operation.path]);
+	return JSON.stringify([
+		accessPermissionKey(operation.permission),
+		operation.scopeId,
+		operation.path,
+	]);
 }
 function outcome(decision: Decision, now: number): AuthorityOutcome {
 	if (

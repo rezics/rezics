@@ -189,3 +189,54 @@ measured approximately 56 tuple bytes for both families. Its 10,004 subjects use
 and 794,624 index bytes. Both point reads selected their partial unique index and
 three shared buffer hits. This fresh, small distribution supports the conservative
 224-byte planning input; it does not establish sustained load or provisioning.
+
+## Role definition storage
+
+Role definitions are not assumed globally bounded by their owner scopes. Inventory
+heads, definition revisions, permission members and control events separately at
+500M and 3B rows. A definition contains at most the number of registered permission
+references, with at most 512 UTF-8 label bytes and 4,096 description bytes. Permission
+families remain explicit even for identical key strings.
+
+| Relation | Planning bytes/row including indexes | 500M, GB | 3B, GB |
+| --- | --- | --- | --- |
+| Role head | 224 | 112 | 672 |
+| Sealed definition header | 640 | 320 | 1,920 |
+| Permission member | 224 | 112 | 672 |
+| Private control event/receipt | 384 | 192 | 1,152 |
+
+These estimates precede reserve, bloat, WAL, replicas and backups. The definition
+estimate assumes an 80-byte label and 256-byte description; maximum payloads add
+up to 4,608 bytes before structural/TOAST costs and must be provisioned separately.
+With R definitions and P authored permissions per definition, membership adds R*P
+rows. Revision count and activation/retirement event count are independent; a role
+with ten revisions of eight permissions has eighty permission rows, not ten.
+
+A complete revision writes an event, a small staged header, P immutable permission
+members, a seal and a head update in one bounded owner transaction. Activation and
+retirement write one event and one head update, with no synchronous fan-out over
+bindings or members. Current readers must check active role state; token/binding
+ceilings remain independent and must not expand merely because a head changes.
+
+Role history and scope lists use keysets. Exact snapshot reads use the head and
+composite definition/permission keys and return at most the registered permission
+count; they are management reads, not the hot effective-access query. Effective
+permission evaluation must batch role/binding membership probes instead of invoking
+one snapshot hydration per candidate. Same-role writes serialize on the narrow
+head; different roles share only compatible scope FK locks. Active reads use head
+share locks, and mutation owners must promote overlapping authority locks upfront.
+
+The native fixture adds 1,000 roles plus a role with 100 further revisions and
+measures their events/permission members,
+checks unforced exact-key plans, and exercises state, admission, receipt and
+concurrency behavior. This does not measure sustained traffic, 500M/3B operation,
+retirement/erasure cleanup, wide-payload load or restoration. Permission retirement
+needs its own retained-history vocabulary and intake/effective-use policy; role
+retirement alone does not qualify that separate lifecycle.
+
+The [pinned native sample](../testing/database/access-roles-evidence.json) has 1,110
+definition headers, 2,213 permission members and 1,115 events. Mean tuple sizes are
+approximately 130, 64 and 192 bytes respectively. Table/index bytes are
+344,064/98,304, 196,608/196,608 and 262,144/172,032. The long-history probes use their
+complete revision, permission and event primary keys. The sample has short labels
+and null descriptions; it is not evidence for maximum payloads or sustained load.

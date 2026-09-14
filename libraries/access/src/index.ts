@@ -13,3 +13,4 @@
 export * from "./permissions";
 export * from "./scope";
 export * from "./identity";
+export * from "./management";

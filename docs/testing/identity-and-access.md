@@ -191,14 +191,14 @@ external-client interoperability and fleet capacity/recovery.
 ## Authority context model
 
 [authority-context.test.ts](../../services/main/src/services/authorization/authority-context.test.ts)
-runs through the backend Vitest owner and currently passes 24 model cases. These
+runs through the backend Vitest owner and currently passes 26 model cases. These
 use explicitly constructed trusted facts; they are not PostgreSQL, authentication,
 grant-loading, delegation-chain or API acceptance.
 
 Cases cover direct versus represented selection, private-actor field rejection,
 exact representation revisions, operator/Entity UUID collisions, private-rights
 exclusion, incomplete composite proofs, credential subject/basis limits, exact
-actor/action/root/path binding, expiry, unavailable outcomes, hard denial and
+actor/permission-family/action/root/path binding, expiry, unavailable outcomes, hard denial and
 independent valid paths within one selected Entity. Conflicting duplicate basis
 facts were found to admit a stale allow and now fail closed. The boundary fixture
 accepts 64 operations/bases and 256 operation facts, then rejects the next fact.
@@ -209,3 +209,29 @@ still requires current database facts, mixed membership/group/role and represent
 loaders, assignment ceilings, complete fences, expiry/revocation races and actual
 protected effects. The existing request authorizers are not switched to this model
 until those dependencies pass their persistence gates.
+
+## Role definition persistence cases
+
+`task services-main:db:access-roles:check` owns
+[check-access-roles.ts](../../services/main/scripts/check-access-roles.ts) and is also
+included in the full database gate. It uses the disposable native fixture workflow.
+The [pinned run](database/access-roles-evidence.json) passes 77 native assertions.
+The full fresh database gate also passes canonical SQL, integrity and schema-drift checks.
+Its SQL-admin admission isolates storage behavior; it does not qualify actual
+management authorization, assignment ceilings, role bindings or API access.
+
+The fixture exercises complete draft creation, immutable definition snapshots,
+explicit activation, unchanged active permissions while a proposal is pending,
+terminal retirement, exact historical reads, scoped identity isolation, stable
+receipts and changed-intent rejection. It rejects unknown/wildcard or late permission
+writes, unsealed commits and immutable-history edits. Same-operation races reuse
+one receipt; competing stale commands fail. Admission is tested before changes,
+after a role-lock wait and after a later FK wait crosses its deadline; rejected
+commands leave no provisional records even if the surrounding caller catches them.
+Active reads serialize retirement. A 1,000-role sample plus a long-lived role with 100 further revisions records exact-key plans and
+separate table/index widths.
+
+The [role contract](../architecture/identity-and-access.md#scoped-role-definition-protocol)
+and [capacity envelope](../architecture/identity-access-capacity.md#role-definition-storage)
+define the selected behavior and remaining qualification. The existing IAM matrices
+remain the authority for actual mixed-user, ceiling, delegation and management flows.

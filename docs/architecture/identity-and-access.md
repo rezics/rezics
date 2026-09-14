@@ -189,6 +189,58 @@ recovery path. Credential replacement, recovery and high-impact role changes can
 require fresh authentication or independent approval without making Entity
 recipients categorically ineligible.
 
+## Scoped role definition protocol
+
+The [role store](../../services/main/src/services/authorization/roles.ts) separates
+role identity/control version, sealed definition revisions, explicit permission
+members and private command receipts. A proposed revision does not replace the
+active definition. Activation explicitly selects one sealed revision; retirement
+is terminal for that role identity and keeps its definitions and last selection.
+Recovery can create a new role and admit new bindings rather than reviving retired
+assignments implicitly. Labels such as “Owner” confer no permissions.
+
+A permission reference contains its registry family (`unit`, `platform` or
+`management`) and key. The family is part of the key in storage, digests, ceilings
+and operation-bound decisions. It cannot be inferred from text alone: the existing
+Unit `realm.members.manage` implies Unit read, while the identically spelled
+platform capability has a different implication closure. Flattening those values
+would lose meaning. The [canonical management vocabulary](../../libraries/access/src/management.ts)
+keeps role definition, activation, assignment and assignment-ceiling management
+separate from using the role's data permissions. Existing registries retain their
+own implications; a role stores authored references, not a rewritten inferred set.
+
+Each definition has a bounded label/description and exact permission count/digest.
+Permission rows use `(role_id, revision, family, permission)` keys. Sealing verifies
+the complete set and prevents later insertion, deletion or rewriting. Unsealed
+construction state and an empty initial role head cannot commit. The private event
+for each control version retains authenticated operator and selected subject;
+a direct principal subject must match that operator. Those audit references do
+not themselves prove permission or representation.
+
+Control versions advance for creation, proposed revisions, activation and retirement.
+Definition revisions use the control version that created them, so activation events
+can leave gaps between definition numbers. Every head transition has an exact
+immutable event. Stable operation IDs are unique within a role; an exact retry
+returns the original receipt, while changed intent/context is rejected. A receipt
+reports its original outcome, not the current role state or continuing authority.
+
+The command primitive requires a caller-owned, side-effect-free SQL admission
+predicate. The owner first discovers and locks the complete authority dependency
+set, promoting locks needed by the mutation before taking shared read locks. The
+primitive checks admission before provisional writes, after its role-lock waits and
+inside the final head update. Unknown admission stays unavailable. Its savepoint
+removes provisional records even when a surrounding transaction catches the error.
+Current authorization remains required when replaying a stored receipt. These
+placement guarantees do not implement membership/representation loading or an
+assignment ceiling: the owner must supply their complete current policy.
+
+An active snapshot read holds the role head's shared lock for its owning transaction,
+serializing activation/retirement. Exact historical reads remain distinct. No reader
+substitutes the latest proposal or a broad preset when the role has no active head.
+Role assignment, impact admission, effective-grant queries and APIs require their
+own native tests before runtime activation. The [role storage envelope](identity-access-capacity.md#role-definition-storage)
+counts permission members and events separately from definition headers.
+
 ## Representation and request evaluation
 
 RepresentationGrant records represented Entity, typed delegate, allowed actions
@@ -314,7 +366,7 @@ An empty set, repeated reference IDs or unsafe revision numbers is invalid.
 
 The [decision model](../../services/main/src/services/authorization/authority-context.ts)
 combines trusted owner outcomes bound to the authenticated principal, selected
-subject, registered operation, exact authority-root value and normalized path.
+subject, registry-qualified operation, exact authority-root value and normalized path.
 It requires actor eligibility, credential permission and the selected subject's
 resource permission for every requested operation. Represented mode additionally
 needs a valid selected representation basis for each operation. The operator's

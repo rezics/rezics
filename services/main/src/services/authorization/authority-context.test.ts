@@ -10,8 +10,16 @@ const actor = "018f2daa-62d9-7b41-8d20-29d221e63f52";
 const entity = "018f2daa-62d9-7b41-8d20-29d221e63f53";
 const scopeId = "018f2daa-62d9-7b41-8d20-29d221e63f54";
 const grant = { id: "018f2daa-62d9-7b41-8d20-29d221e63f55", revision: 1 };
-const read: AuthorityOperation = { permission: "unit.read", scopeId, path: [] };
-const update: AuthorityOperation = { permission: "unit.update", scopeId, path: [] };
+const read: AuthorityOperation = {
+	permission: { family: "unit", key: "unit.read" },
+	scopeId,
+	path: [],
+};
+const update: AuthorityOperation = {
+	permission: { family: "unit", key: "unit.update" },
+	scopeId,
+	path: [],
+};
 function fixture(): AuthorityEvaluationInput {
 	return {
 		principalId: actor,
@@ -125,7 +133,7 @@ describe("explicit authority selection", () => {
 	});
 	it("binds decisions to the exact action, root and path", () => {
 		for (const change of [
-			{ permission: "unit.update" as const },
+			{ permission: { family: "unit", key: "unit.update" } as const },
 			{ scopeId: actor },
 			{ path: ["child"] },
 		]) {
@@ -221,7 +229,7 @@ describe("explicit authority selection", () => {
 	it("admits a complete boundary-sized request and rejects the next fact", () => {
 		const input = fixture();
 		const operations: AuthorityOperation[] = Array.from({ length: 64 }, (_, index) => ({
-			permission: "unit.read",
+			permission: { family: "unit", key: "unit.read" },
 			scopeId,
 			path: [`item-${index}`],
 		}));
@@ -272,5 +280,36 @@ describe("explicit authority selection", () => {
 		expect(evaluateAuthorityContext(input)).toBe("allow");
 		input.resourceDecisions[0]!.outcome = "deny";
 		expect(evaluateAuthorityContext(input)).toBe("deny");
+	});
+	it("does not exchange identically spelled Unit and platform permissions", () => {
+		const input = fixture();
+		const operation: AuthorityOperation = {
+			permission: { family: "unit", key: "realm.members.manage" },
+			scopeId,
+			path: [],
+		};
+		input.operations = [operation];
+		input.credential.decisions = [{ operation, outcome: "allow" }];
+		input.representations[0]!.decisions = [{ operation, outcome: "allow" }];
+		input.resourceDecisions[0]!.operation = {
+			...operation,
+			permission: { family: "platform", key: "realm.members.manage" },
+		};
+		expect(evaluateAuthorityContext(input)).toBe("unavailable");
+	});
+	it("does not turn assignment authority into the role's data permissions", () => {
+		const input = fixture();
+		const management: AuthorityOperation = {
+			permission: { family: "management", key: "access.role-binding.manage" },
+			scopeId,
+			path: [],
+		};
+		input.operations = [management];
+		input.credential.decisions = [{ operation: management, outcome: "allow" }];
+		input.resourceDecisions[0]!.operation = management;
+		input.representations[0]!.decisions = [{ operation: management, outcome: "allow" }];
+		expect(evaluateAuthorityContext(input)).toBe("allow");
+		input.operations.push(read);
+		expect(evaluateAuthorityContext(input)).not.toBe("allow");
 	});
 });
