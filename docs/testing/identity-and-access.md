@@ -187,3 +187,25 @@ The [network owner](../architecture/connected-apps.md#cimd-network-boundary) rec
 bounds and limitations. These qualify selected APP06/APP12 mechanics; full target
 cases still require production client admission, persistence, live authority,
 external-client interoperability and fleet capacity/recovery.
+
+## Authority context model
+
+[authority-context.test.ts](../../services/main/src/services/authorization/authority-context.test.ts)
+runs through the backend Vitest owner and currently passes 24 model cases. These
+use explicitly constructed trusted facts; they are not PostgreSQL, authentication,
+grant-loading, delegation-chain or API acceptance.
+
+Cases cover direct versus represented selection, private-actor field rejection,
+exact representation revisions, operator/Entity UUID collisions, private-rights
+exclusion, incomplete composite proofs, credential subject/basis limits, exact
+actor/action/root/path binding, expiry, unavailable outcomes, hard denial and
+independent valid paths within one selected Entity. Conflicting duplicate basis
+facts were found to admit a stale allow and now fail closed. The boundary fixture
+accepts 64 operations/bases and 256 operation facts, then rejects the next fact.
+
+The [context owner](../architecture/identity-and-access.md#request-selection-and-decision-composition)
+defines these semantics and computational bounds. Native IAM11-IAM25 qualification
+still requires current database facts, mixed membership/group/role and representation
+loaders, assignment ceilings, complete fences, expiry/revocation races and actual
+protected effects. The existing request authorizers are not switched to this model
+until those dependencies pass their persistence gates.

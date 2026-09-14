@@ -30,7 +30,7 @@
     "scenarios.tsv": "07738e2923baef54d4e4baebedc79b5b5dc25e2196685b51cd170c40f34c7cda",
     "capacity.json": "00565a116367dbdaee7cbddd4e1e0c8ace7be142546c0b46b436f1a32c8b23d4",
     "capacity.md": "7117a8893f40bcfd09a116d974ad2ef3d06b2e6f7d47d725a80c2f1e54e13f84",
-    "dependency-manifest.json": "2238ce0e4c2aaa5a10d992aa36891eca81acd377a5b4fdae58359a55a6f16452"
+    "dependency-manifest.json": "236e89fe2b54b50734cf020fbb0a23a1e978490ba0967acd72d378f708c8f647"
   },
   "artifact_paths": {
     "current-schema-map.tsv": "docs/testing/database/current-schema-map.tsv",
@@ -53,9 +53,9 @@
     "docs/architecture/database/relationship-graph.md": "434e3605f60744bc4325193bdc3dab3f4effa95933ab54d5b2acb805fc1bf123",
     "docs/architecture/identity-access-capacity.md": "d1d67bb40312c28b8f1e97fed2d72777c5ba5aea7754c28bfc25ee85bc86d21e",
     "docs/architecture/identity-and-access-experience.md": "b76f3949bba7ade8b2584aac2ca640ac77c270b1a21f605df2339b0a2e955f9b",
-    "docs/architecture/identity-and-access.md": "489ab2390eef446207401ebc496be00a5daa131b4e9fd78eb44387adcd27b6eb",
+    "docs/architecture/identity-and-access.md": "2c73ec313e3b17aceaccec86875edec5ae8e5f71ec9db53bf3d80b28b8de1dd1",
     "docs/architecture/product-design-principles.md": "56ef4508dd3fa0dde7410147d33826e94917dc95550f46da7330ed055db63824",
-    "docs/plan/README.md": "40ac75463775dae283f2ebaf5d2c63b2a3d5f70993b9294ab8763c60cbc2334b",
+    "docs/plan/README.md": "80f0e03180b7412c77b94916a82179a0f289b309a63c959b69d2a5909060f592",
     "docs/plan/backend-acceptance.md": "492c34a8b124fdf0acf70fe2b1cb8033d60b24c66fc62afd995c909637a7285e",
     "docs/plan/frontend.md": "cb943560fe058c27ab2ec235a216096ac4c51d5520561960521d50aabab3b1c6",
     "docs/plan/modules/ai-hub.md": "c92ed55823ffa90e46a2ad9ba39ee71c12e08013d1a4408c91df625ce0c856cd",
@@ -75,7 +75,7 @@
     "docs/testing/book-and-creation.md": "7c8d509dfb59717b44bd1a376dbe16eefe45c9e779139e9028ce3c8da42d9823",
     "docs/testing/content-composition.md": "1428b6eafb6408599bd252d6648ca4bc69a2d6bc9e77bc5a69f702d2f07af131",
     "docs/testing/foundation.md": "41c924c79549d537fe8f2091a402a6ac0463672c4940dcb28f88f7a5da50d43e",
-    "docs/testing/identity-and-access.md": "9a40aff1f06dcc36d432feadc299db2d054604805b2406df1ad5f1d9d8b8de49",
+    "docs/testing/identity-and-access.md": "47175d1c28b5767f2d77f5fbcdc2e09715f65bcd2f901e3a78e406649e7cc9ee",
     "docs/testing/known-failures.md": "8597f8212e03d70488fc2fb9568d89823f4515e1409918f26ede9c3fd80114f8",
     "docs/testing/native-work.md": "534947fd5b77a2788dfc57287b308a4c975372956445cac2c88529f367fe08e5",
     "docs/testing/recommendations.md": "09640bf8c9269bff7cd7ffa341d0f99a76e4ba056d801f4af99204d6d08af15a",

@@ -273,7 +273,7 @@ never a stale allow. Recovery replays revocation/erasure frontiers before exposu
 API capabilities remain complete independently of GUI disclosure level. Keep one
 verified request authority context across owner adapters: direct mode derives its
 AuthPrincipal from authentication, and represented mode selects an Entity and
-representation reference/revision which the server validates. Public clients do
+an explicit bounded set of representation references/revisions which the server validates. Public clients do
 not submit an internal principal ID to choose their authentication identity.
 Recipient selectors for private grants return purpose-scoped opaque handles with
 authorized presentation; resolve them privately and revalidate at mutation.
@@ -300,6 +300,59 @@ API entry scopes, domain permissions and audience disclosure remain independent.
 Possession of an effective-access response is not later write authority; every
 effect rechecks the appropriate live context. Fresh-session requirements cannot
 be satisfied by API-key or OAuth session emulation.
+
+## Request selection and decision composition
+
+The [requested selection contract](../../libraries/access/src/identity.ts) has two
+forms: direct mode contains no private principal selector; represented mode fixes
+one public Entity and one to 64 unique exact representation references/revisions.
+References are selection bases, not proof of current authority, and public selectors
+must preserve their owning privacy boundary. Several independent bases can cover
+different operations for the same Entity. A single mandatory basis was rejected
+because it would discard legitimate combinations of grants within that context.
+An empty set, repeated reference IDs or unsafe revision numbers is invalid.
+
+The [decision model](../../services/main/src/services/authorization/authority-context.ts)
+combines trusted owner outcomes bound to the authenticated principal, selected
+subject, registered operation, exact authority-root value and normalized path.
+It requires actor eligibility, credential permission and the selected subject's
+resource permission for every requested operation. Represented mode additionally
+needs a valid selected representation basis for each operation. The operator's
+private rights and group membership cannot fill missing Entity decisions.
+
+Credential authority is explicitly operator-wide or bound to a direct/represented
+selection. A bound credential cannot switch to private direct rights, another
+Entity or an unapproved representation basis. The server constructs this constraint
+from the verified credential and its current domain context; a client cannot request
+operator-wide credential authority in the selection payload.
+
+Owner evaluators resolve group/role/deny precedence and action-specific conditions
+before supplying one final resource/credential decision per operation. Resource
+facts retain the operator binding even where authority belongs to an Entity, since
+conditions can depend on that operator. A decision for a different actor, subject,
+action, root or descendant path is not interchangeable. Conflicting duplicate facts
+are unavailable, not a choice of whichever answer allows access. Representation
+facts likewise have one current result per basis; duplicate or conflicting revisions
+cannot resurrect an old allow. An independent current basis can still authorize an
+operation when another selected path is denied or unavailable, subject to the shared
+actor, credential and resource checks.
+
+Expired decision validity, missing final decisions and exhausted work budgets fail
+closed with an unavailable result. The model indexes at most 256 operation facts
+plus one actor fact, admits at most 64 operations and representation bases, and
+uses paths of at most eight ASCII segments of 256 characters each. After bounded
+validation/indexing, representation selection requires at most 4,096 map probes.
+These are local computation bounds, not SQL, latency or whole-system capacity
+qualification. Larger mutation impact must use an explicitly staged owner workflow.
+
+The [model tests](../testing/identity-and-access.md#authority-context-model)
+qualify selection and composition only. API clients never submit decision facts.
+The model does not authenticate, discover delegation paths, establish membership
+or assignment ceilings, lock authority rows or certify freshness. Owners must
+produce current facts after complete fence/revision closure and re-evaluate before
+later effects. Neither its input nor its result is a reusable authorization receipt.
+Native loaders, multi-hop/redelegation, mutation admission, erasure/recovery and
+stateful API integration remain required before activating this in the runtime.
 
 ## Research basis and qualification limits
 
