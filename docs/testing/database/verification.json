@@ -1,6 +1,6 @@
 {
   "source_baseline_commit": "74079abd73d5fc43ac87ac7cae8a2074ca72d13d",
-  "schema_modules_and_sql_files_mapped": 166,
+  "schema_modules_and_sql_files_mapped": 168,
   "api_owner_directories_mapped": 39,
   "specified_cross_domain_scenarios": 132,
   "invariant_families": 14,
@@ -25,12 +25,12 @@
     "backup/restore drill"
   ],
   "sha256": {
-    "current-schema-map.tsv": "07d4be408192433dbd3ee35701f8f67928d8620495d611bcfabc8bf9addbcf8c",
+    "current-schema-map.tsv": "b1e4255f97a0366d2c2d2d3e64f67b685cbcab8afd4ac9dbdb306cf402212268",
     "api-coverage.tsv": "58c2695b7e36c5ba5cd30c04728e1326c567cd19a2e51ae7b0f32c04ada7d999",
     "scenarios.tsv": "4165424a131e11e59837fa93353dca0f3fb37912b59874e673bf84724731fa8b",
     "capacity.json": "16e9149a672cd46034d7daf8ff824e3e98019088203e84a68c9bc88eb0539efc",
     "capacity.md": "aac974b6d7a532c5f66752795b61e47bc117cdfb95b011e6893761e119459a1d",
-    "dependency-manifest.json": "c892b35c5f7f359e065dee262a917b2276728f662aa6ed00fa4cb2ca2e5afcad"
+    "dependency-manifest.json": "c8b5364dd3a65ff14aed7dfd39711d120534a51bb518ce1e087789494d31319b"
   },
   "artifact_paths": {
     "current-schema-map.tsv": "docs/testing/database/current-schema-map.tsv",
@@ -54,11 +54,11 @@
     "docs/architecture/database/ratings.md": "4340b216dd7962113d7843183f09ffc07c6820b0067176dede7b0ec3dd2271a0",
     "docs/architecture/database/relationship-graph.md": "434e3605f60744bc4325193bdc3dab3f4effa95933ab54d5b2acb805fc1bf123",
     "docs/architecture/database/temporal-capacity.md": "c655a39f7dd106b19511b564a63c301a2c7f7909b8d18574b62ab2de04022855",
-    "docs/architecture/identity-access-capacity.md": "13a763b99e1e684459350de770d61b051865636445c6e1bc255ab948dcb188ed",
+    "docs/architecture/identity-access-capacity.md": "46bb40d2299718b7b34b0b96e34a8f077a068144c903df8eb751a600b4906300",
     "docs/architecture/identity-and-access-experience.md": "b76f3949bba7ade8b2584aac2ca640ac77c270b1a21f605df2339b0a2e955f9b",
-    "docs/architecture/identity-and-access.md": "a242c8bd8c67d837cb523a610afe8d3ed41157ce6f7999e85e742c56ce6d7d0e",
+    "docs/architecture/identity-and-access.md": "1744a96d12ca7697f59da8f9e837922798dce3071715785eccf6f81dacf5c31f",
     "docs/architecture/product-design-principles.md": "56ef4508dd3fa0dde7410147d33826e94917dc95550f46da7330ed055db63824",
-    "docs/plan/README.md": "aa7f008156937f9fb52f9e1186bd1885b414367afa5bf8e08b9f02e2a709697d",
+    "docs/plan/README.md": "6993bf78ab0ab44177a92a3ead7318614eacf588234ed5b6a4bfc7ef7e9574d1",
     "docs/plan/backend-acceptance.md": "e18be8adb2b29322283d1fb9b2d6cd275dec2f546e0c1c7a34ee0aed835a9348",
     "docs/plan/frontend.md": "2e5448283d98e950b530b058795dfa8e7b4761a202cbe1995bc8b3c06798ba61",
     "docs/plan/modules/ai-hub.md": "c92ed55823ffa90e46a2ad9ba39ee71c12e08013d1a4408c91df625ce0c856cd",
@@ -66,7 +66,7 @@
     "docs/plan/modules/community-and-governance.md": "c441a745e6f879d69c4bf75bd025fb84c5e532f0bbc967172235e9bbdab958de",
     "docs/plan/modules/content-and-media.md": "60f16af72ef3e4fe293457c3d4a254504747746a4cea6bfded46226363cb80e5",
     "docs/plan/modules/creation-and-reading.md": "80781783b1c5e9311ae303908f9db493c927715c97ef6ddbee80d61bf8983073",
-    "docs/plan/modules/foundation.md": "8081f3de21474b01d76a101ba2136401a1d41048edecdf9b7b35bde53ee23d63",
+    "docs/plan/modules/foundation.md": "6c0039a55ebb1097816fa558bb477b8d8a2254f339ce77ea0db58fa9fc5f9aa2",
     "docs/plan/modules/knowledge-and-graph.md": "36c3402eb290d1403da6bf8fe576c3915b19aee46e31421bf928b4515a7fe146",
     "docs/plan/modules/search-and-operations.md": "c9cb5389ec88a59639eae59a7a7573a455c29d9ee2d380ea303e43ac91aa6c34",
     "docs/plan/modules/sources-and-converters.md": "459d30487d3bab4c0708c402a175d6ec6d45d02105a04d436a01ac30b2d627ef",
@@ -78,7 +78,7 @@
     "docs/testing/book-and-creation.md": "7c8d509dfb59717b44bd1a376dbe16eefe45c9e779139e9028ce3c8da42d9823",
     "docs/testing/content-composition.md": "1428b6eafb6408599bd252d6648ca4bc69a2d6bc9e77bc5a69f702d2f07af131",
     "docs/testing/foundation.md": "41c924c79549d537fe8f2091a402a6ac0463672c4940dcb28f88f7a5da50d43e",
-    "docs/testing/identity-and-access.md": "bb70f06901b0d4d4f0d28742ca7453e9ce7548c31f1bd0e144236fe6898a0639",
+    "docs/testing/identity-and-access.md": "e0025c907e24a60fd55981c7eeb468623a6f3ff70aacf4ad472cba89479774b1",
     "docs/testing/known-failures.md": "8597f8212e03d70488fc2fb9568d89823f4515e1409918f26ede9c3fd80114f8",
     "docs/testing/native-work.md": "534947fd5b77a2788dfc57287b308a4c975372956445cac2c88529f367fe08e5",
     "docs/testing/ratings-and-event-time.md": "5dbe5a8ff0115e03ba4fbb5266022d6525043bb05a6d664afe1a8dce7670c715",
@@ -86,6 +86,6 @@
     "docs/testing/relationship-graph.md": "894859fa72a616701d161d81dee4aed8411938b77916bc35b996289619e5a961",
     "docs/testing/source-conformance.md": "4ea670aa289cf080a1d6838a275b0b662fd3d4ced595a2e35e35d4cd12d27e5c",
     "docs/testing/wiki-composition.md": "951d79cdc5040f703b7712fae630e5c00c64719c1705cb59ddb6edbeb7237a30",
-    "docs/testing/database/check_design.py": "3158bd9151fd70dfddc1c2993038131cd59916f5fc2a662270ad7a1f4055e7e8"
+    "docs/testing/database/check_design.py": "a6379902af47d92649a81b8ccd946b0da36c296c607521d7687c4c6b6ba7c08c"
   }
 }

@@ -331,3 +331,56 @@ history query seeks its exact Group/version primary key. The two repeatedly
 updated tree fences occupy 81,920 table and 16,384 index bytes at this sample cut;
 that churn footprint is not a per-live-row provisioning estimate. Hot-scope
 vacuum, WAL and sustained contention remain separate capacity obligations.
+
+## Direct Group membership storage
+
+Every admission now creates an empty selection-set fence, including admissions that
+never select a Group. Count these alongside immutable admission keys rather than
+estimating them only from nonempty Group memberships. A scope tree is initialized
+on first membership admission or Group creation; it is not copied per admission.
+Membership commands acquire that tree before the enrollment lock. This is an
+additional admission write and fence read, not a free change to the earlier
+membership-only workload estimate.
+
+| Relation | Planning bytes/row including indexes | 500M, GB | 3B, GB |
+| --- | --- | --- | --- |
+| Per-admission selection-set fence | 384 | 192 | 1,152 |
+| Direct selection head and lookup/roster indexes | 640 | 320 | 1,920 |
+| Private selection event/receipt | 512 | 256 | 1,536 |
+
+These are planning inputs before bloat, WAL, replicas, backups and reserve. With M
+admissions and G Groups ever selected per admission, there are M set fences and
+up to M*G retained selection identities, plus one event per assign/remove/prune.
+The 64 selected-slot budget bounds current probes, not historical G or revision
+counts. A transition writes one event, one selection head and one set version;
+it does not copy every other selected Group into a new snapshot.
+
+The selected-slot partial index reads at most 65 candidates to detect exhaustion.
+Current use evaluates at most 64 roots and eight ancestors per root (512 path
+rows), under shared tree/enrollment/set fences. It checks the budget before
+filtering retired Groups. A missing set or incomplete path is unavailable. Group
+roster candidates have a separate group/member/generation keyset index; public
+roster disclosure and filtered-page budgets still require their owner policy.
+
+Prune commands close only permanently ineffective selections. Bounded maintenance
+can reclaim at most 64 obsolete slots in one admission; ordinary assignment has
+no hidden multi-selection effect. Admission expiry or denial rolls back the one
+command even if its caller catches the failure. Higher-level cleanup orchestration
+must recheck current authority and cannot count partial work as an assignment.
+
+Qualification includes mixed subjects, rejoin, removal/reassignment, terminal
+retirement, concurrent slot admission, stronger-isolation stale reads, expiry after
+lock waits, the full 64-by-eight path budget, a 1,000-member roster and long
+selection history. Small warm plans do not establish the combined 10,000-decision/s budget, hot-scope throughput, cleanup
+service rate, erasure or recovery at either corpus-scale baseline.
+
+The [pinned native sample](../testing/database/access-group-memberships-evidence.json)
+contains 3,062 set fences, 2,146 direct selection heads and 2,364 selection events
+after the final focused rerun on the full-gate fixture.
+Mean tuple widths are approximately 72, 89 and 208 bytes; table/index footprints
+are 352,256/475,136, 368,640/589,824 and 548,864/507,904 bytes. The estimates above
+include headroom over this insert/update footprint, not a measured provisioning
+promise. Set lookups use their complete membership/generation key through either
+the primary or same-prefix scope index. Selected-slot and roster probes use their
+partial indexes; long history uses the complete event primary key. The 512-path
+functional case validates the read bound, not sustained authorization capacity.

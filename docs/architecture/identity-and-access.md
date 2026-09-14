@@ -233,6 +233,39 @@ support the maximum-child access path without scanning every sibling. Native
 cycle/depth/shrink/width and two-connection tests qualify this mechanism; they do
 not establish live role assignment impact, inherited roster privacy or throughput.
 
+### Direct and inherited Group membership
+
+A direct Group selection belongs to one exact membership admission and one Group
+in that same scope. Each selection keeps its own control version and immutable
+assign/remove/prune receipts. Its selected flag is distinct from effectiveness:
+current use additionally requires the same active admission, an active Group and
+the owner's current eligibility/restriction policy. Remove/reassign advances the
+selection version; dependent grants must check that exact version before use so
+that an old assignment cannot revive.
+
+An admission initializes an empty selection-set fence and its scope tree if absent.
+Every selection effect advances the set version after final pre-change admission.
+A current read locks the tree, enrollment and selection set; missing set state is
+unavailable, not an empty authorization result. This protects existing admissions
+against future selections and stale stronger-isolation snapshots. The broader
+missing-enrollment/scope-subject negative fence remains a separate requirement of
+complete authorization loading; this primitive does not establish that closure.
+
+Keep at most 64 physically selected direct Groups per admission generation. Query
+that bounded set before filtering retired Groups or computing at most eight
+ancestor levels. Direct and inherited paths remain distinct, including when a
+Group is reached both ways; permission use deduplicates matching Group grants.
+An incomplete path or exceeded work budget is unavailable, never a partial allow.
+
+Pruning is an explicit bounded maintenance operation that closes a selection only
+when its Group is terminally retired or its admission can never become current
+again. Temporary restrictions or unavailable evidence cannot justify pruning.
+Single-selection commands preserve their own pre-change admission and operation
+receipt; an owner can orchestrate bounded cleanup before retrying a full selection
+budget. Ending enrollment or retiring a Group invalidates effectiveness immediately
+without synchronously rewriting a whole roster. History and private attribution
+remain retained after cleanup.
+
 ## Roles and grants
 
 Permissions are the canonical atomic operations in [@rezics/access](../../libraries/access/README.md).

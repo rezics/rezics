@@ -287,3 +287,34 @@ passing assertions on PostgreSQL 18.6. It includes raw-SQL rejection of unapplie
 history and cross-scope reparenting, exact receipt replay after retirement,
 UTF-8 payload bounds and the reviewed-tree precondition. SQL-admin predicates
 isolate this topology qualification from the pending management/ceiling policy.
+
+## Generation-bound Group assignment cases
+
+`task services-main:db:access-group-memberships:check` runs
+[check-access-group-memberships.ts](../../services/main/scripts/check-access-group-memberships.ts)
+on the disposable native target. It covers:
+
+- Enroll a principal and an Entity in the same scope, then assign each to two Groups; preserve their typed subject identities and direct versus inherited results.
+- Reject a Group from another scope, an invented admission generation and assignment to an inactive enrollment or retired Group.
+- Leave and rejoin: retained selections for the old generation stay ineffective; a new generation needs a new explicit assignment.
+- Remove one direct selection while preserving another and inherited grants through its separate parent chain. Root and sibling Groups do not become implicit direct memberships.
+- Retire a Group with direct selections: it stops matching immediately without rewriting its whole roster. Old selections never revive.
+- Assign while leave, Group retirement or a parent change waits on an observed two-connection fence. The outcome must serialize, not combine old eligibility with new topology.
+- Keep direct active selection probes bounded to 64 per enrollment generation. Retained histories and retired Group selections must neither cause an unbounded scan nor prevent bounded cleanup from reclaiming slots.
+- Exercise the 64th/65th concurrent assignment and cleanup, plus all 512 paths from 64 depth-eight selections; no partial candidate union or partial allow is returned on exhaustion.
+- Preserve stable command receipts, exact private attribution, immutable transition history and rollback on stale, denied, unavailable or expired admission.
+- Probe a long selection history and a wide roster with unforced exact keys, cursor bounds and separate storage estimates at both 500M and 3B rows.
+
+These cases do not independently qualify roster disclosure, custom Role bindings,
+assignment ceilings or representation. Their real policy loaders and complete
+revocation fences remain composed acceptance requirements.
+
+The [pinned native evidence](database/access-group-memberships-evidence.json)
+records 95 passing assertions on PostgreSQL 18.6, including the complete 64-root,
+depth-eight path envelope and rejected operator substitution. The final two
+attribution cases ran in a focused follow-up on the same disposable target; the
+full gate ran the preceding 93 cases. The earlier membership and Group fixtures also run
+against the new admission-set initialization. The full gate separately checks
+fresh replay, canonical SQL, constraints, PGroonga health and Drizzle schema drift.
+Owner admission/disclosure and complete role/representation authority remain
+outside these administrator-predicate storage cases.

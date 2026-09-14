@@ -67,6 +67,7 @@
     "docs/testing/check_docs.py",
     "docs/testing/content-composition.md",
     "docs/testing/database/access-expiry-evidence.json",
+    "docs/testing/database/access-group-memberships-evidence.json",
     "docs/testing/database/access-groups-evidence.json",
     "docs/testing/database/access-identities-evidence.json",
     "docs/testing/database/access-memberships-evidence.json",
@@ -127,6 +128,7 @@
     "services/main/Taskfile.yml",
     "services/main/performance/README.md",
     "services/main/scripts/check-access-expiry.ts",
+    "services/main/scripts/check-access-group-memberships.ts",
     "services/main/scripts/check-access-groups.ts",
     "services/main/scripts/check-access-identities.ts",
     "services/main/scripts/check-access-memberships.ts",
@@ -193,6 +195,7 @@
     "services/main/src/services/units/merge/README.md"
   ],
   "schema_inputs": [
+    "services/main/src/services/database/schema/access-group-membership.ts",
     "services/main/src/services/database/schema/access-group.ts",
     "services/main/src/services/database/schema/access-identity.ts",
     "services/main/src/services/database/schema/access-membership.ts",
@@ -266,6 +269,7 @@
     "services/main/src/services/database/schema/platform-identity.ts",
     "services/main/src/services/database/schema/poll.ts",
     "services/main/src/services/database/schema/post.ts",
+    "services/main/src/services/database/schema/postgres/access-group-membership.sql",
     "services/main/src/services/database/schema/postgres/access-group.sql",
     "services/main/src/services/database/schema/postgres/access-identity.sql",
     "services/main/src/services/database/schema/postgres/access-membership.sql",

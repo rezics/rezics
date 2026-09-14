@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { and, eq, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
+import { accessGroupTree } from "../database/schema/access-group";
 import {
 	accessMembership,
 	accessMembershipAdmission,
@@ -89,6 +90,16 @@ export async function applyAccessMembershipCommand(
 				(await work.execute<{ admitted: boolean | null }>(sql`select (${admission}) as admitted`))
 					.rows[0]?.admitted,
 			);
+		await authorize();
+		if (command.operation === "admit")
+			await work.insert(accessGroupTree).values({ scopeId: command.scopeId }).onConflictDoNothing();
+		const [tree] = await work
+			.select({ scopeId: accessGroupTree.scopeId })
+			.from(accessGroupTree)
+			.where(eq(accessGroupTree.scopeId, command.scopeId))
+			.for("share");
+		if (!tree) throw new AccessMembershipAdmissionUnavailable();
+		await authorize();
 		const load = async () =>
 			(
 				await work
