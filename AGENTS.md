@@ -6,7 +6,10 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) before changing files.
 
 - Complete the requested outcome within its owner boundary. A research-only or plan-only request permits read-only investigation, not implementation.
 - Apply the user's current instructions and existing authorization before skill defaults. Historical plans and approvals do not expand a new task. Continue independent authorized work while a material question is unresolved; do not ask again for approval already given.
-- Inspect relevant code first. Research official sources when an API is unfamiliar, behavior is version-sensitive, or a design decision needs external evidence. Stop researching when the evidence supports the current decision.
+- For substantive design and technical decisions, proactively study relevant primary research, standards and engineering implementations. Read the sources and assess their applicability to the task.
+- Develop original alternatives. Distinguish sourced findings, inferences and hypotheses; evaluate both borrowed and original ideas against requirements, counterexamples and proportionate validation. State what remains unverified.
+- Keep decision-relevant sources, versions/dates, tradeoffs and validation limits with the owning design. Reuse applicable evidence, resolve material gaps and contradictions, and stop when further investigation is unlikely to change the decision.
+- When maintaining agent instructions or adapting to a different model, consult current [official model guidance](https://developers.openai.com/api/docs/guides/latest-model). Apply relevant changes and validate them on representative tasks.
 - If a repository rule or skill blocks completion, identify the exact file and instruction, explain the concrete conflict, and report the remaining work.
 - Put task-created temporary files in `.temp/`. Remove only those files before finishing unless retention was requested. Durable requested deliverables belong in their owning location; preserve pre-existing and user-provided files.
 
@@ -38,6 +41,7 @@ Follow only the owners relevant to the requested change:
 
 | Change | Owner and constraints |
 | --- | --- |
+| Substantive design, research or proposal evaluation | [Research and validation](.agents/skills/research-and-validation/SKILL.md). Study alternatives, assess evidence and validate the claims that matter to the decision. |
 | Web routes, screens or feature organization | [Web feature organization](docs/architecture/web-feature-organization.md). `apps/web/app` contains framework boundary adapters; implementation belongs to features or existing infrastructure owners. |
 | UI information organization, interactions or API-to-UI capability changes | [API and UI design](.agents/skills/api-ui-design/SKILL.md). Preserve API capabilities and semantics while designing information and actions around the user's task. |
 | Shared UI or controls | [UI conventions](libraries/ui/README.md). Use `@rezics/ui` and SharkUI; do not introduce another UI library. Preserve `src/ui` as the upstream mirror; project components belong in `src/custom`. |
