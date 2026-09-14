@@ -150,3 +150,42 @@ requires bounded credential admission/retention and indexed cleanup of at most
 shared reads if the remote protocol overhead prevents the combined target, while
 preserving exact live revocation and the external privacy presentation boundary.
 No offline allow cache or larger unchecked query budget is elected by this fixture.
+
+## Private registry cost
+
+The subject and scope registries have independent allocation density: one subject
+value per participating AuthPrincipal or Entity and one authority root per admitted
+private account, public resource or platform. They are allocated on first authorized
+use, not for every catalog object automatically. Each membership, role binding,
+representation edge and token dependency remains a separate relation. Public scopes
+reuse existing REF values; count a newly needed REF under the Unit bridge inventory
+once, not once per access feature.
+
+Budget each registry at 96 heap bytes plus 128 index bytes per row (224 total):
+112 GB at 500M rows and 672 GB at 3B rows, before reserve, bloat, WAL, replicas,
+backups and retained dependent records. Together, equal 500M/3B populations add
+224 GB/1,344 GB. These conservative estimates include headroom above the small native sample;
+maintenance and target-scale qualification remain pending. The single platform root is bounded, but the containing scope
+relation is potentially corpus-scale and uses both planning baselines.
+
+Each row enters its UUID primary key and exactly one partial unique target index.
+A hit performs one indexed read and no update; first allocation performs a read
+and insert, with one additional point read after a READ COMMITTED conflict. Only
+competing first admissions for the same target serialize. Reads resolve one narrow
+row without hydrating groups, role graphs, resources or private presentation.
+The immutable registry is not an authorization cache; live-policy reads and fences
+remain additional work under the combined decision budget.
+
+The native fixture adds 10,000 principal subjects and private account scopes and
+checks unforced point-read plans, tuple width and heap/index bytes. It also exercises
+commit/rollback allocation, owner deletion and stronger-isolation races. This small
+warm sample is not sustained throughput, hot-owner contention, vacuum/WAL, erasure
+or restoration acceptance. Keep target uniqueness intact; partitioning solely by
+value UUID would lose it and requires a separately qualified design.
+
+The [initial native registry run](../testing/database/access-identities-evidence.json)
+measured approximately 56 tuple bytes for both families. Its 10,004 subjects used
+606,208 heap bytes and 778,240 index bytes; 10,006 scopes used 606,208 heap bytes
+and 794,624 index bytes. Both point reads selected their partial unique index and
+three shared buffer hits. This fresh, small distribution supports the conservative
+224-byte planning input; it does not establish sustained load or provisioning.

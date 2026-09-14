@@ -1,0 +1,166 @@
+{
+  "baseCommit": "aa3a41a12f7ddb1e7d0167f5f76c3df491b75d6d",
+  "sourceDigests": {
+    "services/main/scripts/check-access-identities.ts": "626cf14c1f6ebb680a776abb9e7c1e71dd845b5a3f89ac7f267a66b83500138c",
+    "libraries/access/src/identity.ts": "9e39dfa8fa24af11cbe72ab8ffd6bde8af417028c4c83e26256953419ddcdc25",
+    "services/main/src/services/units/immutable-reference.ts": "81e871a52b3b0aa8cdc931c84f86869523590a152bc3f798cc94bec730bc6d78",
+    "services/main/src/services/authorization/identities.ts": "b7df1ccfb213dfd93cd88a32860403e90bc730198e037afac4082bdbec0d32ec",
+    "services/main/src/services/database/schema/access-identity.ts": "e61a8dc247ef7abf6297a3a3ac60b7d2fa4d073bf6dc81a1c6b17dbcc01718e2",
+    "services/main/src/services/database/schema/postgres/access-identity.sql": "ae38d59c0c7c4b3bf9d824f34417de19b20cf2a62b90da29d05e57b3e46af053",
+    "services/main/src/services/database/migrations/atlas.sum": "f94bbcff6267b21a6f5955ccd690a7710974ec7098a0799490b79d8dc5cc709e"
+  },
+  "node": "v26.8.2",
+  "runtime": {
+    "postgres": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+    "default_isolation": "read committed",
+    "fsync": "on",
+    "full_page_writes": "on"
+  },
+  "fixtureStorage": "container-default",
+  "sampleSeed": "4f211bd1-3fb6-4a64-9a67-aae0e8ad3bac",
+  "assertions": 62,
+  "measured": [
+    {
+      "table": "access_subject",
+      "plan": [
+        {
+          "Plan": {
+            "Node Type": "Index Scan",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "access_subject_principal_key",
+            "Relation Name": "access_subject",
+            "Alias": "access_subject",
+            "Startup Cost": 0.29,
+            "Total Cost": 8.3,
+            "Plan Rows": 1,
+            "Plan Width": 16,
+            "Actual Startup Time": 0.005,
+            "Actual Total Time": 0.005,
+            "Actual Rows": 1,
+            "Actual Loops": 1,
+            "Disabled": false,
+            "Index Cond": "(auth_user_id = '901cfc94-97ca-8141-8184-26426d91b1d6'::uuid)",
+            "Rows Removed by Index Recheck": 0,
+            "Index Searches": 1,
+            "Shared Hit Blocks": 3,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Shared I/O Read Time": 0,
+            "Shared I/O Write Time": 0,
+            "Local I/O Read Time": 0,
+            "Local I/O Write Time": 0,
+            "Temp I/O Read Time": 0,
+            "Temp I/O Write Time": 0
+          },
+          "Planning": {
+            "Shared Hit Blocks": 36,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Shared I/O Read Time": 0,
+            "Shared I/O Write Time": 0,
+            "Local I/O Read Time": 0,
+            "Local I/O Write Time": 0,
+            "Temp I/O Read Time": 0,
+            "Temp I/O Write Time": 0
+          },
+          "Planning Time": 0.099,
+          "Triggers": [],
+          "Execution Time": 0.011
+        }
+      ],
+      "bytes": {
+        "rows": 10004,
+        "tuple_bytes": 55.99970011995202,
+        "heap_bytes": 606208,
+        "index_bytes": 778240
+      }
+    },
+    {
+      "table": "access_scope",
+      "plan": [
+        {
+          "Plan": {
+            "Node Type": "Index Scan",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "access_scope_account_key",
+            "Relation Name": "access_scope",
+            "Alias": "access_scope",
+            "Startup Cost": 0.29,
+            "Total Cost": 8.3,
+            "Plan Rows": 1,
+            "Plan Width": 16,
+            "Actual Startup Time": 0.005,
+            "Actual Total Time": 0.006,
+            "Actual Rows": 1,
+            "Actual Loops": 1,
+            "Disabled": false,
+            "Index Cond": "(auth_user_id = '901cfc94-97ca-8141-8184-26426d91b1d6'::uuid)",
+            "Rows Removed by Index Recheck": 0,
+            "Index Searches": 1,
+            "Shared Hit Blocks": 3,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Shared I/O Read Time": 0,
+            "Shared I/O Write Time": 0,
+            "Local I/O Read Time": 0,
+            "Local I/O Write Time": 0,
+            "Temp I/O Read Time": 0,
+            "Temp I/O Write Time": 0
+          },
+          "Planning": {
+            "Shared Hit Blocks": 43,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Shared I/O Read Time": 0,
+            "Shared I/O Write Time": 0,
+            "Local I/O Read Time": 0,
+            "Local I/O Write Time": 0,
+            "Temp I/O Read Time": 0,
+            "Temp I/O Write Time": 0
+          },
+          "Planning Time": 0.095,
+          "Triggers": [],
+          "Execution Time": 0.012
+        }
+      ],
+      "bytes": {
+        "rows": 10006,
+        "tuple_bytes": 55.99900059964022,
+        "heap_bytes": 606208,
+        "index_bytes": 794624
+      }
+    }
+  ]
+}

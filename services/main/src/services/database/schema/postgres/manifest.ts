@@ -9,6 +9,7 @@ export const PostgreSqlSchemaFileNames = [
 	"governance-delivery.sql",
 	"history-integrity.sql",
 	"reference-value.sql",
+	"access-identity.sql",
 	"account-tag-reference.sql",
 	"revision-reference.sql",
 	"association-proposal-authority.sql",
@@ -379,6 +380,8 @@ export const PostgreSqlSchemaFunctionNames = [
 
 export const PostgreSqlSchemaTriggers = [
 	{ table: "reference_value", name: "reference_value_immutable" },
+	{ table: "access_subject", name: "access_subject_immutable" },
+	{ table: "access_scope", name: "access_scope_immutable" },
 	{ table: "revision_reference", name: "revision_reference_immutable" },
 	{ table: "unit_association_proposal", name: "association_proposal_authority_guard" },
 	{ table: "music_release_source_job", name: "music_release_source_job_guard_trigger" },

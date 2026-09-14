@@ -42,6 +42,50 @@ actor reference can support authorized audit correlation without publishing the
 global account graph. A publicly shared Entity intentionally permits correlation
 of that Entity across platforms, not discovery of its other controllers/personas.
 
+## Private subject and scope values
+
+The first D02 persistence layer gives a private `access_subject` value to exactly
+one AuthPrincipal or Entity through concrete restrictive foreign keys. The same
+UUID in those two identity namespaces denotes two different subjects. Member sets
+remain separate grant-recipient relations and never become authenticated callers.
+Allocation neither activates Entity participation nor links a controller, creates
+a grant, chooses a default or proves current eligibility.
+
+An `access_scope` is one immutable authority root: the registered platform root,
+a private AuthPrincipal account, or an existing canonical Unit REF. Org/Entity,
+Realm and other public roots all reuse REF rather than adding nullable domain
+columns or parallel direct-owner aliases. This avoids two scope/fence identities
+for the same public target. Org membership and Entity control can share that
+native root while retaining independent actions, bindings and admission policy.
+Structural capability and owner eligibility belong to the consuming command;
+creating a root for a cataloged organization does not admit operational membership.
+Subtree/resource selection narrows a binding or grant, not the identity of its root.
+
+The concrete `users`/Entity owner and `reference_value` foreign keys establish
+identity integrity. Exactly-one-target checks and per-alternative unique indexes
+prevent malformed or duplicate values. Updates, retargeting, rekeying and deletion
+are rejected so later history/dependency rows cannot change meaning. Revocation,
+retirement and erasure change their owning lifecycle records; resolving a retained
+value is never a current authorization decision. Principal tombstones may retain
+private identity while credentials and personal fields are erased.
+
+Internal allocators accept validated closed alternatives in the caller's bounded,
+already authorized transaction. They reuse an existing mapping without updating
+it. A losing READ COMMITTED insert reads the concurrent winner in a new statement;
+stronger isolation propagates serialization failure for whole-command retry.
+This reuses the qualified immutable-reference protocol. These behaviors follow
+[PostgreSQL constraints](https://www.postgresql.org/docs/18/ddl-constraints.html)
+and [statement snapshots](https://www.postgresql.org/docs/18/transaction-iso.html);
+the native fixture must qualify their actual composition. No public lookup endpoint,
+recipient handle, mixed grant or representation path is provided by these tables.
+
+The [capacity owner](identity-access-capacity.md#private-registry-cost) counts these
+registries separately from memberships, bindings and token contexts. Direct domain
+columns in every scope were rejected because they duplicate the Unit bridge and
+permit conflicting aliases; a discriminator plus unchecked ID was rejected because
+it cannot enforce concrete references. Keeping private accounts in the public Unit
+registry was rejected because it would conflate private authority and public identity.
+
 ## Main Entity and private account state
 
 Ordinary interactive onboarding creates or selects at least one usable Entity and

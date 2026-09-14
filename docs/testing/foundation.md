@@ -746,3 +746,33 @@ layout remain separate target work; no schema migration is required here.
 Backend tests pass 332 files/1,789 tests. The final boundary also passes 22 focused
 tests and backend TypeScript. OpenAPI and all three SDKs were regenerated; all
 three SDK TypeScript checks and web TypeScript pass.
+
+## Mixed authority registry qualification
+
+`task services-main:db:access-identities:check` runs
+[check-access-identities.ts](../../services/main/scripts/check-access-identities.ts)
+on an explicitly supplied disposable `DATABASE_ADMIN_URL`. It also runs inside
+`db:check` after canonical reference qualification. The [pinned run](database/access-identities-evidence.json) passes 62 assertions.
+The full fresh `db:check` also passes, including canonical SQL, integrity fixtures
+and Drizzle drift. These registry cases do not qualify membership, mixed grants
+or representation paths.
+
+| Registry case | Qualified native behavior |
+| --- | --- |
+| Typed subject identity | A principal and Entity with the same UUID allocate different immutable values; repeated allocation and exact decoding preserve their types. |
+| Canonical scopes | Platform, private account and public resource scopes each reuse one value. Public roots store one REF FK and no per-domain aliases. |
+| Invalid storage | Zero/multiple alternatives, unregistered platform roots, missing concrete targets and duplicate mappings fail. |
+| Historical meaning | Retarget, rekey and deletion fail. A referenced account cannot be physically removed; a retained erased-principal tombstone keeps its exact private subject identity. |
+| No authority side effects | Subject/scope allocation creates no self binding, Entity participation or representation. Consumer authority and disclosure remain separate checks. |
+| Concurrent first use | Independent connections demonstrably block; commit reuses the winning subject/scope value and rollback permits a new value. |
+| Deletion race | An owner deletion holding the concrete FK lock wins; later subject admission fails without a dangling row. |
+| Stronger isolation | An established REPEATABLE READ snapshot loses concurrent scope allocation with `40001`; a fresh transaction reuses the winner. |
+| Bounded reads | A 10,000-owner sample selects the subject/account-scope uniqueness indexes without planner hints and reports tuple, heap and index bytes. |
+
+The fixture records source/migration digests, runtime/isolation/durability settings,
+storage context and the generated sample seed. `REZICS_ACCESS_IDENTITY_SAMPLE_SEED`
+repeats that sample on a fresh target. The [scope owner](../architecture/identity-and-access.md#private-subject-and-scope-values)
+records selected semantics; the [capacity owner](../architecture/identity-access-capacity.md#private-registry-cost)
+retains the independent 500M/3B estimates and validation limits. Registry integrity
+never substitutes for current actor eligibility, structural capability, scoped
+authorization, privacy, erasure/recovery or workload acceptance.

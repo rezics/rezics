@@ -64,6 +64,7 @@
     "docs/testing/check_docs.py",
     "docs/testing/content-composition.md",
     "docs/testing/database/access-expiry-evidence.json",
+    "docs/testing/database/access-identities-evidence.json",
     "docs/testing/database/access-snapshot-evidence.json",
     "docs/testing/database/account-participation-evidence.json",
     "docs/testing/database/account-tags-evidence.json",
@@ -117,6 +118,7 @@
     "services/main/Taskfile.yml",
     "services/main/performance/README.md",
     "services/main/scripts/check-access-expiry.ts",
+    "services/main/scripts/check-access-identities.ts",
     "services/main/scripts/check-account-participation.ts",
     "services/main/scripts/check-account-tag-references.ts",
     "services/main/scripts/check-catalog-resource-api.ts",
@@ -176,6 +178,7 @@
     "services/main/src/services/units/merge/README.md"
   ],
   "schema_inputs": [
+    "services/main/src/services/database/schema/access-identity.ts",
     "services/main/src/services/database/schema/access.ts",
     "services/main/src/services/database/schema/account-block.ts",
     "services/main/src/services/database/schema/account-control.ts",
@@ -245,6 +248,7 @@
     "services/main/src/services/database/schema/platform-identity.ts",
     "services/main/src/services/database/schema/poll.ts",
     "services/main/src/services/database/schema/post.ts",
+    "services/main/src/services/database/schema/postgres/access-identity.sql",
     "services/main/src/services/database/schema/postgres/account-tag-reference.sql",
     "services/main/src/services/database/schema/postgres/association-proposal-authority.sql",
     "services/main/src/services/database/schema/postgres/catalog-child-source.sql",

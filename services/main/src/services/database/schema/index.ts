@@ -1,4 +1,5 @@
 export * from "./access";
+export * from "./access-identity";
 export * from "./account-block";
 export * from "./account-control";
 export * from "./account-preference";
