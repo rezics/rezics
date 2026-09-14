@@ -549,6 +549,55 @@ persona switching does not multiply ballots, quota or independent approvals.
 
 ## Durable assignments, dependent delegation and revocation
 
+### Representation persistence protocol
+
+A representation identity fixes the represented Entity, one typed delegate, one
+target authority root and optional exact parent grant/terms revision. Separate
+grants cover independent roots or delegates. Its private control receipt advances
+sealed terms containing a descendant path, half-open validity, literal approved
+permissions, redelegation and fresh-session conditions, and optional exact delegate
+admission/Group eligibility. The head supports create, narrow and terminal revoke.
+Broader replacement uses a new identity under current assignment admission.
+
+Narrowing cannot add approved permissions, move above the approved path, extend
+validity, restore redelegation, remove a fresh-session requirement or remove/change
+an existing exact eligibility dependency. A previously independent grant may gain
+a recipient dependency. Explicit permission membership remains family-qualified;
+loading must remove permissions whose prerequisites are not also approved.
+
+A null parent is an institutional assignment. A dependent grant retains its
+parent's exact terms for the same represented Entity and target root. Its effect
+requires that parent to be current and redelegable, and all child limits to fit
+the parent's ceiling. Parent lineage is bounded to eight edges including the child.
+Changing the selected parent revision invalidates dependent use rather than making
+old descendants follow new authority. Immutable parent choices and current-parent
+admission prevent lineage cycles. The Entity control fence serializes all grant
+effects and parent revocation without synchronously updating descendants.
+
+Each dependent grant also fixes the private subject whose parent authority it uses.
+Creation's selected authority subject must match that value. A subject-held parent
+must name the same subject. A Group/all-members parent additionally requires that
+subject's exact admission in the parent's recipient scope; a Group parent fixes
+the exact direct selection through which the subject reaches that Group. Current
+use checks the admission, assignment revision and bounded current ancestry, so
+departure, reassignment or reparenting can invalidate the dependent path. These
+issuer-basis dependencies are separate from the child delegate's own eligibility.
+The historical operator is not substituted for the selected parent subject.
+
+This lineage is distinct from a request's path through Entity delegates. The native
+store checks structural limits and parent/admission liveness; the management owner
+must also prove that the operator may exercise/delegate the selected parent, admit
+the recipient and preserve recovery. A SQL admission expression remains mandatory
+before work, after waits and at the effect. Private actor attribution alone is not
+admission. Request path evaluation, account/Entity eligibility, private disclosure,
+independent approval, live role-binding dependencies and erasure/recovery integration
+remain required before activating represented APIs.
+
+Sealed terms reuse the RoleBinding snapshot protocol. Exact parent revision was
+selected over following a mutable parent head to keep approved lineage explicit;
+the cost is deliberate reissuance after a parent's terms change. Neither this
+choice nor the storage implementation qualifies the target race/recovery cases.
+
 A durable institutional assignment is authorized at creation and owned by its
 declared institution/resource authority. The operator who issued it is audit
 provenance, not a permanent liveness dependency. Their departure does not revoke

@@ -12,6 +12,7 @@ export const PostgreSqlSchemaFileNames = [
 	"access-identity.sql",
 	"access-role.sql",
 	"access-role-binding.sql",
+	"access-representation.sql",
 	"access-membership.sql",
 	"access-group.sql",
 	"access-group-membership.sql",
@@ -93,6 +94,20 @@ export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly 
 };
 
 export const PostgreSqlSchemaFunctionNames = [
+	"access_representation_recipient_is_current",
+	"access_representation_parent_basis_is_current",
+	"access_representation_terms_narrower",
+	"access_representation_lineage",
+	"lock_access_representation_lineage",
+	"access_representation_is_current",
+	"initialize_access_representation_entity",
+	"guard_access_representation_entity",
+	"guard_access_representation_head",
+	"guard_access_representation_event",
+	"guard_access_representation_revision",
+	"guard_access_representation_permission",
+	"validate_access_representation_history",
+
 	"access_role_binding_recipient_is_current",
 	"lock_access_role_binding_eligibility",
 	"initialize_access_role_binding_scope",
@@ -419,6 +434,16 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "access_subject", name: "access_representation_entity_initialize" },
+	{ table: "access_representation_entity", name: "access_representation_entity_guard" },
+	{ table: "access_representation", name: "access_representation_head_guard" },
+	{ table: "access_representation_event", name: "access_representation_event_guard" },
+	{ table: "access_representation_event", name: "access_representation_event_immutable" },
+	{ table: "access_representation_revision", name: "access_representation_revision_guard" },
+	{ table: "access_representation_permission", name: "access_representation_permission_guard" },
+	{ table: "access_representation", name: "access_representation_head_complete" },
+	{ table: "access_representation_event", name: "access_representation_event_complete" },
+	{ table: "access_representation_revision", name: "access_representation_revision_complete" },
 	{ table: "access_scope", name: "access_role_binding_scope_initialize" },
 	{ table: "access_role_binding_scope", name: "access_role_binding_scope_guard" },
 	{ table: "access_role_binding", name: "access_role_binding_head_guard" },

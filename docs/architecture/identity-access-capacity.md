@@ -464,3 +464,32 @@ reader has additional statement/lock costs beyond the prior component samples;
 the proposed twelve-statement and latency envelope is not qualified by its source
 implementation. Native query plans, cold/warm and hot-root contention, wait/expiry,
 revocation and combined workload measurements remain required in verification.
+
+## Representation persistence
+
+Inventory Entity control fences, grant heads, sealed terms, permission members and
+control receipts separately. Planning bytes per row including indexes are 192,
+1,216, 544, 224 and 384 respectively. At 500M rows those relations require 96, 608,
+272, 112 and 192 GB; at 3B rows, 576, 3,648, 1,632, 672 and 1,152 GB, before bloat,
+WAL, replicas, backups and reserve. Typical terms use two short path segments;
+the maximum eight 256-byte segments require separate payload provisioning.
+
+One grant retains one concrete optional parent revision in its head and reverse
+index, plus the exact parent subject/admission/selection basis when dependent.
+The head estimate includes 320 bytes for this basis and its subject/admission
+reverse indexes; independent heads have no entries in these partial indexes.
+It does not copy all ancestors. Each terms revision adds its own approved
+permission rows; multiply by authored revision and permission counts. An admitted
+Entity subject initializes one control fence, including before its first grant.
+Public catalog Entities without subject admission do not allocate these fences.
+Writes use an Entity-local exclusive fence, one control event, sealed terms for
+create/narrow and a head advance. Revocation writes no descendant fan-out.
+
+Parent traversal reads at most nine identities to detect the eight-edge limit,
+checks exact current revisions and probes declared admission/selection dependencies.
+Parent locks include Group trees, enrollments and selection sets. Institutionally
+independent grants do not query their historical issuer for liveness. Management
+snapshots point-read exact terms and at most the registered permission count.
+These are implementation bounds and storage estimates, not native performance or
+recovery acceptance. Hot Entity controls, long retained revisions, erasure reverse
+pages, expiry after waits and complete represented request paths remain to qualify.
