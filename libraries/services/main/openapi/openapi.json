@@ -6949,7 +6949,7 @@
 													},
 													"representations": {
 														"minItems": 1,
-														"maxItems": 64,
+														"maxItems": 8,
 														"type": "array",
 														"items": {
 															"type": "object",
@@ -7062,6 +7062,153 @@
 					}
 				},
 				"x-rezics-quota-route-operation-id": "putApiAccountMain-identity",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/account/main-identity/context": {
+			"get": {
+				"operationId": "resolveMainIdentityPreference",
+				"tags": ["Account"],
+				"description": "Capture and revalidate the stored main context. Unusable context requires an explicit selection; ready does not authorize a later resource operation.",
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"oneOf": [
+										{
+											"type": "object",
+											"properties": {
+												"status": { "type": "string", "const": "unset" },
+												"version": {
+													"type": "integer",
+													"minimum": -9007199254740991,
+													"maximum": 9007199254740991
+												}
+											},
+											"required": ["status", "version"],
+											"additionalProperties": false
+										},
+										{
+											"type": "object",
+											"properties": {
+												"status": { "type": "string", "const": "selection-required" },
+												"version": {
+													"type": "integer",
+													"minimum": -9007199254740991,
+													"maximum": 9007199254740991
+												},
+												"entityId": {
+													"type": "string",
+													"format": "uuid",
+													"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+												}
+											},
+											"required": ["status", "version", "entityId"],
+											"additionalProperties": false
+										},
+										{
+											"type": "object",
+											"properties": {
+												"status": { "type": "string", "const": "ready" },
+												"version": {
+													"type": "integer",
+													"minimum": -9007199254740991,
+													"maximum": 9007199254740991
+												},
+												"selection": {
+													"type": "object",
+													"properties": {
+														"mode": { "type": "string", "const": "represented" },
+														"entityId": {
+															"type": "string",
+															"format": "uuid",
+															"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+														},
+														"representations": {
+															"minItems": 1,
+															"maxItems": 8,
+															"type": "array",
+															"items": {
+																"type": "object",
+																"properties": {
+																	"id": {
+																		"type": "string",
+																		"format": "uuid",
+																		"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+																	},
+																	"revision": {
+																		"type": "integer",
+																		"exclusiveMinimum": 0,
+																		"maximum": 9007199254740991
+																	}
+																},
+																"required": ["id", "revision"],
+																"additionalProperties": false
+															}
+														}
+													},
+													"required": ["mode", "entityId", "representations"],
+													"additionalProperties": false
+												},
+												"validUntil": {
+													"type": ["string", "null"],
+													"format": "date-time",
+													"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+												}
+											},
+											"required": ["status", "version", "selection", "validUntil"],
+											"additionalProperties": false
+										}
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until this request can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "getApiAccountMain-identityContext",
 				"x-rezics-quota-operation-id": "*",
 				"x-rezics-quota-cost-units": 1
 			}

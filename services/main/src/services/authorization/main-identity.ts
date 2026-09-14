@@ -21,6 +21,37 @@ export async function getMainIdentityPreference(context: PrincipalRequestContext
 	});
 }
 
+/** Capture and revalidate the preferred context once; stale hints never retarget it to another Entity. @internal */
+export async function resolveMainIdentityPreference(context: PrincipalRequestContext) {
+	return runAccessTransaction(async tx => {
+		const owner = await readPrivateAccountAuthority(tx, context, false);
+		const choice = await captureIdentityPreference(tx, { authUserId: owner.principalId, clientId: null });
+		if (!choice.entityId) {
+			await requireAccessAdmission(tx, owner.admission);
+			return { status: "unset" as const, version: choice.mainVersion };
+		}
+		const selection = { mode: "represented" as const, entityId: choice.entityId, representations: choice.representations };
+		const credential = await readFirstPartyCredentialAuthority(tx, { proof: context.credentialProof(), selection,
+			apiPermission: "account:read", requireFreshSession: false, requireVerifiedEmail: false });
+		const scopeId = await allocateAccessScope(tx, { kind: "resource", referenceValueId: await allocateReferenceValue(tx, { owner: "entity", id: choice.entityId }) });
+		const represented = await evaluateCurrentRepresentationAuthority(tx, { principalId: owner.principalId, selection,
+			operation: { scopeId, path: ["identity"], permission: { family: "management", key: "access.identity.select" } },
+			action: "read", freshSession: credential.freshSession, freshSessionValidUntil: credential.freshSessionValidUntil });
+		await requireAccessAdmission(tx, owner.admission);
+		if (represented.outcome === "unavailable") throw new AccessUnavailable();
+		if (represented.outcome === "deny") return { status: "selection-required" as const, version: choice.mainVersion, entityId: choice.entityId };
+		const limits = [credential.validUntil, owner.credential.validUntil, represented.validUntil].filter((value): value is number => typeof value === "number");
+		const validUntil = limits.length ? Math.min(...limits) : null;
+		await requireAccessAdmission(tx, sql<boolean>`(${owner.admission}) and (${credential.admission}) and public.access_representation_path_is_current(
+			array[${sql.join(represented.path.map(ref => sql`${ref.id}::uuid`), sql`, `)}],
+			array[${sql.join(represented.path.map(ref => sql`${ref.revision}::bigint`), sql`, `)}],
+			${owner.subjectId}::uuid,${choice.entityId}::uuid,'read') is true
+			and (${validUntil === null ? sql`true` : sql`clock_timestamp()<${new Date(validUntil)}::timestamptz`})`);
+		return { status: "ready" as const, version: choice.mainVersion, selection,
+			validUntil: validUntil === null ? null : new Date(validUntil).toISOString() };
+	});
+}
+
 /** Select or explicitly clear the main identity without changing a grant, consent or prepared request. @internal */
 export async function setMainIdentityPreference(context: PrincipalRequestContext, input: {
 	operationId: string; expectedVersion: number;
@@ -51,7 +82,8 @@ export async function setMainIdentityPreference(context: PrincipalRequestContext
 		const result = await applyIdentityPreferenceCommand(tx, { authUserId: owner.principalId, clientId: null,
 			operationId: input.operationId, expectedVersion: input.expectedVersion,
 			operatorAuthUserId: owner.principalId, authoritySubjectId: owner.subjectId,
-			selection: input.selection.mode === "none" ? { kind: "none" } : { kind: "entity", entityId: input.selection.entityId } }, admission);
+			selection: input.selection.mode === "none" ? { kind: "none" } : { kind: "entity", entityId: input.selection.entityId,
+				representations: input.selection.representations } }, admission);
 		return { operationId: result.operationId, version: result.version };
 	});
 }

@@ -1,3 +1,20 @@
+SET search_path TO public;
+
+CREATE TABLE "identity_preference_representation" (
+	"preference_id" uuid,
+	"version" bigint,
+	"grant_id" uuid,
+	"terms_revision" bigint NOT NULL,
+	CONSTRAINT "identity_preference_representation_pkey" PRIMARY KEY("preference_id","version","grant_id")
+);
+
+ALTER TABLE "identity_preference_event" ADD COLUMN "representation_count" integer NOT NULL;
+ALTER TABLE "identity_preference_event" ADD COLUMN "representation_digest" text NOT NULL;
+CREATE INDEX "identity_preference_representation_grant_idx" ON "identity_preference_representation" ("grant_id","terms_revision","preference_id","version");
+ALTER TABLE "identity_preference_representation" ADD CONSTRAINT "identity_preference_representation_event_fk" FOREIGN KEY ("preference_id","version") REFERENCES "identity_preference_event"("preference_id","version") ON DELETE RESTRICT;
+ALTER TABLE "identity_preference_representation" ADD CONSTRAINT "identity_preference_representation_terms_fk" FOREIGN KEY ("grant_id","terms_revision") REFERENCES "access_representation_revision"("grant_id","revision") ON DELETE RESTRICT;
+ALTER TABLE "identity_preference_event" ADD CONSTRAINT "identity_preference_event_representation_check" CHECK ("representation_digest" ~ '^[0-9a-f]{64}$' and (("selection_kind"='entity' and "representation_count" between 1 and 8) or ("selection_kind"<>'entity' and "representation_count"=0)));
+
 CREATE OR REPLACE FUNCTION public.identity_preference_representations_match(preference uuid, selected_version bigint)
 RETURNS boolean LANGUAGE sql STABLE SET search_path=pg_catalog,public AS $$
  SELECT e.representation_count=h.amount AND e.representation_digest=h.digest

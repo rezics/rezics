@@ -35,6 +35,8 @@ import type {
 	GetMainIdentityPreferenceResponses,
 	SetMainIdentityPreferenceOptions,
 	SetMainIdentityPreferenceResponses,
+	ResolveMainIdentityPreferenceOptions,
+	ResolveMainIdentityPreferenceResponses,
 	GetApiUnitByUnitIdAssociationProposalsOptions,
 	GetApiUnitByUnitIdAssociationProposalsResponses,
 	PostApiUnitByUnitIdAssociationProposalsRequestsOptions,
@@ -1375,6 +1377,28 @@ export function setMainIdentityPreference<ThrowOnError extends boolean = true>(
 			],
 			...config,
 		}) as Promise<RequestResult<SetMainIdentityPreferenceResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * @description Capture and revalidate the stored main context. Unusable context requires an explicit selection; ready does not authorize a later resource operation.
+ * {@link /api/v1/account/main-identity/context}
+ */
+export function resolveMainIdentityPreference<ThrowOnError extends boolean = true>(
+	options: Options<ResolveMainIdentityPreferenceOptions, ThrowOnError> = {},
+): Unwrappable<RequestResult<ResolveMainIdentityPreferenceResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/account/main-identity/context",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ResolveMainIdentityPreferenceResponses, ThrowOnError>>,
 	);
 }
 

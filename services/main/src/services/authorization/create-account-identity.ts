@@ -59,7 +59,8 @@ export async function createAccountIdentity(context: PrincipalRequestContext, in
 		const admission = sql<boolean>`(${owner.admission}) and public.access_representation_is_current(${grantId}::uuid,${grant.termsRevision}::bigint) is true`;
 		const selected = command.main ? await applyIdentityPreferenceCommand(tx, { authUserId: owner.principalId, clientId: null,
 			operationId: command.operationId, expectedVersion: command.main.expectedVersion,
-			operatorAuthUserId: owner.principalId, authoritySubjectId: owner.subjectId, selection: { kind: "entity", entityId: entity.id } }, admission) : null;
+			operatorAuthUserId: owner.principalId, authoritySubjectId: owner.subjectId, selection: { kind: "entity", entityId: entity.id,
+				representations: [{ id: grantId, revision: grant.termsRevision }] } }, admission) : null;
 		const result = (await tx.execute<{ admitted: boolean | null; changed: string | null }>(sql`
 			with admission as materialized(select (${admission}) as admitted),changed as (
 			 insert into public.account_identity_admission(auth_user_id,operation_id,request_digest,entity_id,representation_id,main_preference_version)

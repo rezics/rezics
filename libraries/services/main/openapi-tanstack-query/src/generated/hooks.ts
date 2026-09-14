@@ -538,6 +538,7 @@ import {
 	replaceZoneSlugAddress,
 	resolveAccessManagementScope,
 	resolveCatalogEntityShape,
+	resolveMainIdentityPreference,
 	resolveNamespaceSlugAddress,
 	resolveNativeMergeReconciliation,
 	resolveScopedUnitSlugAddress,
@@ -3901,6 +3902,9 @@ import type {
 	ResolveCatalogEntityShapeStatus422,
 	ResolveCatalogEntityShapeStatus429,
 	ResolveCatalogEntityShapeStatus500,
+	ResolveMainIdentityPreferenceStatus200,
+	ResolveMainIdentityPreferenceStatus429,
+	ResolveMainIdentityPreferenceStatus500,
 	ResolveNamespaceSlugAddressOptions,
 	ResolveNamespaceSlugAddressStatus200,
 	ResolveNamespaceSlugAddressStatus400,
@@ -5168,6 +5172,83 @@ export function useSetMainIdentityPreference<TContext>(
 		SetMainIdentityPreferenceOptions,
 		TContext
 	>;
+}
+
+export const resolveMainIdentityPreferenceQueryKey = () =>
+	[{ url: "/api/v1/account/main-identity/context" }] as const;
+
+type ResolveMainIdentityPreferenceQueryKey = ReturnType<
+	typeof resolveMainIdentityPreferenceQueryKey
+>;
+
+export function resolveMainIdentityPreferenceQueryOptions(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = resolveMainIdentityPreferenceQueryKey();
+	return queryOptions<
+		ResolveMainIdentityPreferenceStatus200,
+		ResponseErrorConfig<
+			ResolveMainIdentityPreferenceStatus429 | ResolveMainIdentityPreferenceStatus500
+		>,
+		ResolveMainIdentityPreferenceStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return resolveMainIdentityPreference({
+				...config,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * @description Capture and revalidate the stored main context. Unusable context requires an explicit selection; ready does not authorize a later resource operation.
+ * {@link /api/v1/account/main-identity/context}
+ */
+export function useResolveMainIdentityPreference<
+	TData = ResolveMainIdentityPreferenceStatus200,
+	TQueryData = ResolveMainIdentityPreferenceStatus200,
+	TQueryKey extends QueryKey = ResolveMainIdentityPreferenceQueryKey,
+>(
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ResolveMainIdentityPreferenceStatus200,
+				ResponseErrorConfig<
+					ResolveMainIdentityPreferenceStatus429 | ResolveMainIdentityPreferenceStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const queryKey = resolvedOptions?.queryKey ?? resolveMainIdentityPreferenceQueryKey();
+
+	const queryResult = useQuery(
+		{
+			...resolveMainIdentityPreferenceQueryOptions(config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			ResolveMainIdentityPreferenceStatus429 | ResolveMainIdentityPreferenceStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
 }
 
 export const getApiUnitByUnitIdAssociationProposalsQueryKey = ({

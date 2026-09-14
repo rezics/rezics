@@ -42,6 +42,14 @@ indexed bytes per receipt until measured: 112-192 GB at 500,000,000 rows and
 retry use account/operation point reads; erasure uses that account key in batches
 of at most 500. This receipt does not materialize every future controller pair.
 
+An Entity preference revision retains 1-8 private representation-reference hints;
+none/inherit-main revisions retain zero. Count these indexed reference rows
+separately from the preference head/event: using the 224-384-byte binding estimate,
+500,000,000 hint rows add 112-192 GB and 3,000,000,000 add 672-1152 GB before
+replication/WAL. These are hint-row populations, not one-to-one preference counts.
+Resolution uses the exact preference revision and at most nine rows to detect an
+overflow, then revalidates the bounded context. It never scans a controller roster.
+
 Role definitions and permission dictionaries may be scope-bounded, but the total
 scope count is not globally bounded. Inventory scope heads, definition revisions,
 role-permission entries and retirement history separately using measured width

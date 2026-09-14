@@ -206,6 +206,22 @@ grants. Clearing the preference needs no replacement representation. Both forms
 retain operation receipts, expected versions and live authority at the effect.
 Client-specific selection remains subject to its separate admitted-client policy.
 
+Each explicit Entity preference retains up to eight user-selected representation
+references as private context hints. They have concrete immutable grant-revision
+FKs and a count/digest sealed by the preference receipt; later additions or edits
+are forbidden. No hint is authority. Resolution rechecks the credential, current
+subject/Entity policy and the same selected context, returning unset, ready or
+selection-required. Infrastructure/integrity unavailability stays an error. A ready
+context still requires operation-specific authorization at every later effect.
+
+Keeping the selected references supports ordinary default entry without exploring
+an unbounded controller graph or enumerating Group rosters. It also preserves the
+chosen grant context across tabs and requests. When hints become unusable, the
+user can select a new context for the same Entity or explicitly choose another;
+resolution never substitutes a new grant or identity. The preference remains a
+private convenience value and cannot retarget consent. Erasure removes context
+hints before their receipts, in batches of at most 500.
+
 Private account identity creation accepts explicit public names and never accepts
 an existing Entity ID or copies a private provider name. One transaction creates
 the native Entity, its direct institutional representation grant and the optional

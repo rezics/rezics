@@ -4303,6 +4303,109 @@ export type SetMainIdentityPreferenceResponse =
 	| SetMainIdentityPreferenceStatus429
 	| SetMainIdentityPreferenceStatus500;
 
+export type ResolveMainIdentityPreferenceStatus200 =
+	| {
+			status: "unset";
+			/**
+			 * @minLength -9007199254740991
+			 * @maxLength 9007199254740991
+			 * @type integer
+			 */
+			version: number;
+	  }
+	| {
+			status: "selection-required";
+			/**
+			 * @minLength -9007199254740991
+			 * @maxLength 9007199254740991
+			 * @type integer
+			 */
+			version: number;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			entityId: string;
+	  }
+	| {
+			status: "ready";
+			/**
+			 * @minLength -9007199254740991
+			 * @maxLength 9007199254740991
+			 * @type integer
+			 */
+			version: number;
+			selection: {
+				mode: "represented";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				entityId: string;
+				representations: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @maxLength 9007199254740991
+					 * @type integer
+					 */
+					revision: number;
+				}[];
+			};
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			validUntil: string | null;
+	  };
+
+export const ResolveMainIdentityPreferenceStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ResolveMainIdentityPreferenceStatus429ErrorCodeEnum =
+	(typeof ResolveMainIdentityPreferenceStatus429ErrorCodeEnum)[keyof typeof ResolveMainIdentityPreferenceStatus429ErrorCodeEnum];
+
+export type ResolveMainIdentityPreferenceStatus429 = {
+	error: {
+		code: ResolveMainIdentityPreferenceStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type ResolveMainIdentityPreferenceStatus500 = InternalError;
+
+export type ResolveMainIdentityPreferenceOptions = {
+	body?: never;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+export type ResolveMainIdentityPreferenceResponses = {
+	"200": ResolveMainIdentityPreferenceStatus200;
+	"429": ResolveMainIdentityPreferenceStatus429;
+	"500": ResolveMainIdentityPreferenceStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ResolveMainIdentityPreferenceResponse =
+	| ResolveMainIdentityPreferenceStatus200
+	| ResolveMainIdentityPreferenceStatus429
+	| ResolveMainIdentityPreferenceStatus500;
+
 export type GetApiUnitByUnitIdAssociationProposalsPath = {
 	/**
 	 * @description
