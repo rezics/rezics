@@ -343,6 +343,11 @@ tasks:
             - test -n "${DATABASE_ADMIN_URL:-}"
             - yarn exec tsx scripts/check-postgres-schema.ts
 
+    auth:cimd-transport:check:
+        desc: Verify Bun CIMD DNS/TLS pinning and bounded metadata/JWKS retrieval in an isolated Linux network namespace.
+        cmds:
+            - REZICS_CIMD_NETWORK_NAMESPACE=1 unshare --user --map-root-user --net bash scripts/check-cimd-transport.sh
+
     db:oauth-privacy:check:
         desc: Qualify opaque OAuth, public-client OIDC and MCP through Bun/Drizzle on a dedicated disposable PostgreSQL database.
         cmds:

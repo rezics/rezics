@@ -1,0 +1,28 @@
+{
+  "baseCommit": "9fd5221e4aba45555140f0457894e2341ac964ed",
+  "sourceDigests": {
+    "services/main/src/services/auth/cimd-transport.ts": "99441f1a77328cb97c0b50275b87d0fa95251ba29c62fba530f25feb181a3e8b",
+    "services/main/src/services/auth/cimd-transport.test.ts": "fc062cd12dd29f54661049bf5014a4ae6c9027062688a349efed25515fbfd5e6",
+    "services/main/scripts/check-cimd-transport.ts": "6f47c599b1e7fd651b0f61199d4e9d02e4917fab548c5cbe9449aeef57b4c8af",
+    "services/main/scripts/check-cimd-transport.sh": "eef00d10b082a7054cd555ad5e1cabb6c06f4c07d838a51354b957b0c423fa6d",
+    "services/main/scripts/cimd-tls-peer.ts": "dcd834b1c4194bb18e88d22068669441b25c345cff2577c8b1028945bebeaee5",
+    "services/main/package.json": "29d2b7bb27d0b33acb25540123012f45ce32b8ae6595cbb7f6e537f988676b2a",
+    "yarn.lock": "f024ec6f062a29072385d8ee1317df3f3d8a0155e138133b0dc5b883738c3e1e"
+  },
+  "platform": "linux",
+  "architecture": "x64",
+  "bun": "1.4.2",
+  "conditionalAndHeadResponses": true,
+  "bodyAbortRejected": true,
+  "originalSniVerified": true,
+  "tlsPeerNodeVersion": "26.8.2",
+  "discoveryAndJwksUsePinnedTransport": true,
+  "discoveredClientCannotMintMachineToken": true,
+  "ipv6PinnedPeer": "2606:4700::1111",
+  "pinnedPeer": "8.8.8.8",
+  "originalTlsAndHostIdentity": true,
+  "mixedAndPrivateDnsRejected": true,
+  "rebindingRejected": true,
+  "redirectsAndOversizeRejected": true,
+  "timeoutAndCapacityRejected": true
+}

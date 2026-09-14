@@ -30,7 +30,7 @@
     "scenarios.tsv": "07738e2923baef54d4e4baebedc79b5b5dc25e2196685b51cd170c40f34c7cda",
     "capacity.json": "00565a116367dbdaee7cbddd4e1e0c8ace7be142546c0b46b436f1a32c8b23d4",
     "capacity.md": "7117a8893f40bcfd09a116d974ad2ef3d06b2e6f7d47d725a80c2f1e54e13f84",
-    "dependency-manifest.json": "eabf6fc4a425f3b8e30351ea185668d845aca7b73defe6f99f1c8256055ee358"
+    "dependency-manifest.json": "dc2a3ba884eedfcae5db892dcd0615ee5643a2eeb6a1dfc5e262e0ce9eb657a8"
   },
   "artifact_paths": {
     "current-schema-map.tsv": "docs/testing/database/current-schema-map.tsv",
@@ -41,7 +41,7 @@
     "dependency-manifest.json": "docs/testing/database/dependency-manifest.json"
   },
   "authored_document_sha256": {
-    "docs/architecture/connected-apps.md": "72e433d05e2ca14136d715808abc762bf49a7b2b65f3f8f69e3833acc8c883ed",
+    "docs/architecture/connected-apps.md": "53a0d8d06ebe6960243f0326f48c66f94a0d250a4913c190871888e44eced5fc",
     "docs/architecture/database/README.md": "cd1d23c9dbad04f59d4771c8eb4725f91862302e5cbcac5dc1a13cecddb1a020",
     "docs/architecture/database/ai-hub.md": "709097f505c31dc7cf9b4978975476aa8618e861266fa01415ffb6022d7dd670",
     "docs/architecture/database/catalog-model.md": "1287e8028cb82b6778582875dcd1c6e63c712435b8f9fee27c3e1117ffc71b69",
@@ -55,7 +55,7 @@
     "docs/architecture/identity-and-access-experience.md": "b76f3949bba7ade8b2584aac2ca640ac77c270b1a21f605df2339b0a2e955f9b",
     "docs/architecture/identity-and-access.md": "b1c7c362b54d70a833b29994083cf92d07ae8d411d70ad1eb0f23fc1739b574e",
     "docs/architecture/product-design-principles.md": "56ef4508dd3fa0dde7410147d33826e94917dc95550f46da7330ed055db63824",
-    "docs/plan/README.md": "d93328f214fb8d554ad61f590a9ae87d2c9e33ef9e7c9a54602505798520eaf7",
+    "docs/plan/README.md": "0c0a5f71942f03ae9d11347d8e11cff51b785f08c4943123b087610437b464db",
     "docs/plan/backend-acceptance.md": "492c34a8b124fdf0acf70fe2b1cb8033d60b24c66fc62afd995c909637a7285e",
     "docs/plan/frontend.md": "cb943560fe058c27ab2ec235a216096ac4c51d5520561960521d50aabab3b1c6",
     "docs/plan/modules/ai-hub.md": "c92ed55823ffa90e46a2ad9ba39ee71c12e08013d1a4408c91df625ce0c856cd",
@@ -63,7 +63,7 @@
     "docs/plan/modules/community-and-governance.md": "b035fb75b24e8d232d96849f26a6e69021834da483f40ee433f59f7e610e7963",
     "docs/plan/modules/content-and-media.md": "60f16af72ef3e4fe293457c3d4a254504747746a4cea6bfded46226363cb80e5",
     "docs/plan/modules/creation-and-reading.md": "80781783b1c5e9311ae303908f9db493c927715c97ef6ddbee80d61bf8983073",
-    "docs/plan/modules/foundation.md": "91426980a08fcb127f1707ae81ac327ee9f6926e65109a909b8372a4175255c2",
+    "docs/plan/modules/foundation.md": "8d82367dd4643ac6aa2920891dc14417a6332460a12539777f4c1759971be120",
     "docs/plan/modules/knowledge-and-graph.md": "41eb1c4ef1b750416fe99f2b5ef98f5fadc0e34840918467a487e1c2e682f322",
     "docs/plan/modules/search-and-operations.md": "2562baca3f45ee8424b68f96ed7ae7a96e866e27ecec1b949ad1dc2867bcecf5",
     "docs/plan/modules/sources-and-converters.md": "459d30487d3bab4c0708c402a175d6ec6d45d02105a04d436a01ac30b2d627ef",
@@ -75,7 +75,7 @@
     "docs/testing/book-and-creation.md": "7c8d509dfb59717b44bd1a376dbe16eefe45c9e779139e9028ce3c8da42d9823",
     "docs/testing/content-composition.md": "1428b6eafb6408599bd252d6648ca4bc69a2d6bc9e77bc5a69f702d2f07af131",
     "docs/testing/foundation.md": "46d0cd36715d0f01fe9b5d43c6a913a4ed6645d505286298321b3b83ebb1f420",
-    "docs/testing/identity-and-access.md": "80ba17d61d99461a452f97c76f78142c4ddc9c23d12192a63727bfa0b873156b",
+    "docs/testing/identity-and-access.md": "9a40aff1f06dcc36d432feadc299db2d054604805b2406df1ad5f1d9d8b8de49",
     "docs/testing/known-failures.md": "8597f8212e03d70488fc2fb9568d89823f4515e1409918f26ede9c3fd80114f8",
     "docs/testing/native-work.md": "534947fd5b77a2788dfc57287b308a4c975372956445cac2c88529f367fe08e5",
     "docs/testing/recommendations.md": "09640bf8c9269bff7cd7ffa341d0f99a76e4ba056d801f4af99204d6d08af15a",

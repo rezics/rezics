@@ -1878,6 +1878,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@better-auth/cimd@npm:1.7.3":
+  version: 1.7.3
+  resolution: "@better-auth/cimd@npm:1.7.3"
+  peerDependencies:
+    "@better-auth/core": ^1.7.3
+    "@better-auth/oauth-provider": ^1.7.3
+    better-auth: ^1.7.3
+    better-call: 1.4.0
+  checksum: 10c0/dc675bbfb0ea89e83a4566a358b96e7333496a58af8c0f1aa6f5baaf83ece2d72cc91c07198d10f87e9412ea21158c2e67fcb0c09d4b39052a0262d4338052a3
+  languageName: node
+  linkType: hard
+
 "@better-auth/core@npm:1.7.3":
   version: 1.7.3
   resolution: "@better-auth/core@npm:1.7.3"
@@ -5832,6 +5844,7 @@ __metadata:
     "@aws-sdk/client-s3": "npm:^3.1127.0"
     "@aws-sdk/s3-request-presigner": "npm:^3.1127.0"
     "@better-auth/api-key": "npm:1.7.3"
+    "@better-auth/cimd": "npm:1.7.3"
     "@better-auth/core": "npm:1.7.3"
     "@better-auth/drizzle-adapter": "npm:1.7.3"
     "@better-auth/mcp": "npm:1.7.3"

@@ -151,3 +151,39 @@ APP03 protocol surfaces and selected APP08/APP11 mechanics now have adapter evid
 the complete cases remain pending live-domain checks, production endpoint privacy,
 CIMD egress, concurrency, erasure/recovery, external-client interoperability and
 [capacity](../architecture/identity-access-capacity.md#opaque-protocol-cost).
+
+## CIMD network qualification
+
+`task services-main:auth:cimd-transport:check` invokes the
+[network fixture](../../services/main/scripts/check-cimd-transport.sh), which requires
+Linux user/network namespaces, `ip`, OpenSSL, Node and Bun. It creates an isolated
+network namespace, assigns synthetic public-class IPv4/IPv6 addresses to its
+loopback device and generates a temporary private test certificate beneath
+`.temp/`. It never assigns those addresses in the host namespace. The fixture
+removes its certificates and the namespace disappears when the process exits.
+
+[check-cimd-transport.ts](../../services/main/scripts/check-cimd-transport.ts)
+uses actual TLS connections from the selected Bun transport. It verifies the
+connected peer and original Host, private/mixed/malformed DNS rejection, a
+resolve-once rebinding counterexample, wrong certificate name/untrusted certificate,
+redirect refusal, streamed oversize rejection, HEAD/304 preservation, timeout,
+pre-abort, body abort and request admission. An
+[independent Node TLS peer](../../services/main/scripts/cimd-tls-peer.ts) observes
+Bun's actual SNI; the Bun server's unsupported SNI callback is not used as evidence.
+
+The fixture additionally composes the real CIMD and MCP provider plugins with an
+in-memory protocol store. Metadata and discovery-owned JWKS both use the transport;
+rebinding before JWKS retrieval fails closed. A valid signed assertion for a
+newly discovered client still cannot issue a machine token without server-assigned
+scopes. This is network/protocol evidence, not PostgreSQL or live-domain authority
+acceptance.
+
+The [pinned run](database/cimd-transport-evidence.json) records Bun 1.4.2/Linux x64,
+its independent Node TLS peer, source and dependency digests and secret-free
+outcomes. [Deterministic admission tests](../../services/main/src/services/auth/cimd-transport.test.ts)
+also verify that aborted but unresolved DNS retains its slot, capacity recovers
+when it settles, and invalid methods/configuration/answer counts are rejected.
+The [network owner](../architecture/connected-apps.md#cimd-network-boundary) records
+bounds and limitations. These qualify selected APP06/APP12 mechanics; full target
+cases still require production client admission, persistence, live authority,
+external-client interoperability and fleet capacity/recovery.

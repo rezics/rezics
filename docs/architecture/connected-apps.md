@@ -216,8 +216,8 @@ production activation, wrap/disable raw client management, registration and clai
 extension surfaces under the REZICS contracts. Keep session/back-channel logout
 extensions disabled for this profile until separately scoped session identifiers
 and logout behavior are qualified. CIMD/DCR clients need the same server-enforced
-privacy admission; arbitrary metadata must not opt out. No CIMD network transport
-or dynamic registration is activated by this qualification.
+privacy admission; arbitrary metadata must not opt out. The [Bun transport](#cimd-network-boundary) is qualified separately; dynamic
+registration remains unactivated until server-enforced privacy admission passes.
 
 Machine tokens remain distinct: opaque issuance/introspection identifies the
 issuing confidential client without a human subject, ID token or refresh token.
@@ -232,6 +232,52 @@ before production activation. Provider revocation, protocol scopes and pairwise
 identifiers do not implement live consent, representation, installation checks or
 private accountability. Upgrades must replay the fixture and deterministic auth
 regressions; remove either patch only after the pinned replacement passes its cases.
+
+## CIMD network boundary
+
+[createCimdResourceFetch](../../services/main/src/services/auth/cimd-transport.ts)
+is the selected Bun network boundary for metadata and discovery-owned JWKS.
+The [isolated Linux/Bun qualification](../testing/identity-and-access.md#cimd-network-qualification)
+uses public-class IPv4/IPv6 addresses assigned only inside an isolated network
+namespace; it does not contact those addresses on the Internet. An independent
+Node TLS peer verifies the original hostname in Bun's ClientHello.
+
+Resolve a hostname once, reject an empty, excessive, malformed or mixed
+public/special-use answer set, and connect directly to one approved IP. Preserve
+the original Host, SNI and certificate-verification identity, require a valid
+certificate, disable connection pooling and verify the connected peer before
+accepting the response. Literal IPs pass the same special-use classification.
+A second DNS lookup cannot substitute a private destination. Every 3xx response
+except conditional 304 is rejected without following its Location. This implements
+the [CIMD transport requirements](https://better-auth.com/docs/plugins/cimd#security-boundary)
+using the [HTTPS connection controls](https://nodejs.org/api/https.html#httpsrequestoptions-callback)
+verified on Bun 1.4.2; API type compatibility alone was not treated as evidence.
+
+One shared transport instance admits at most sixteen unresolved DNS/network/body
+operations, with no waiting queue. It accepts at most 64 DNS answers and buffers
+at most 64 KiB of response chunks before returning a body. The default absolute
+deadline is five seconds, including DNS and body retrieval; caller abort applies
+throughout. A timed-out OS DNS operation retains its admission slot until it
+settles, so retries cannot accumulate unbounded resolver work. A stuck resolver
+can exhaust availability and must be observable/recovered operationally; it cannot
+turn into an unbounded queue. Settings can narrow these limits, not raise them.
+
+The transport body cap accommodates JWKS; the plugin retains its stricter 5 KB
+metadata-document limit and its cache, pacing and origin/global budgets. Accepted
+response chunks across active requests have a 1 MiB ceiling before concatenation,
+Response copies and runtime socket/TLS buffers, whose memory/throughput still need
+measurement. These are bounded process-local structures, not new corpus-scale
+relations. Multiple instances/replicas multiply this envelope; production integration
+must share the instance across metadata/JWKS and retain fleet admission/observability.
+This does not change the 500M/3B persisted-client/credential inventory.
+
+The plugin-level network fixture uses an in-memory protocol store to isolate
+metadata discovery, private-key JWT verification and denial of unassigned machine
+scopes. It does not qualify production client persistence, pairwise admission,
+metadata-refresh authority, delegated requests, cache capacity or external-client
+interoperability. Raw CIMD registration therefore remains disabled in the product
+until those contracts pass. Supplying the transport is not App trust or installation
+approval.
 
 ## Sources and limits
 
