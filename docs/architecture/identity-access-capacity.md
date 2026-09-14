@@ -277,3 +277,57 @@ are approximately 96, 56 and 192 bytes; table/index bytes are 229,376/360,448,
 fresh insert/update footprint; sustained churn and vacuum still require measurement.
 The two history probes use their complete primary keys, while the head probe uses
 the equivalent subject/scope index. These small samples are not capacity acceptance.
+
+## Group topology storage
+
+Inventory tree fences, Group heads and immutable snapshots separately at 500M and
+3B rows. One scope may own many Groups; Group count is not globally bounded by the
+maximum ancestry depth. Snapshots contain at most 512 label bytes and 4,096 optional
+description bytes. Current heads contain no presentation payload or roster.
+
+| Relation | Planning bytes/row including indexes | 500M, GB | 3B, GB |
+| --- | --- | --- | --- |
+| Scope tree fence | 160 | 80 | 480 |
+| Group head and parent indexes | 640 | 320 | 1,920 |
+| Private snapshot/receipt with typical presentation | 768 | 384 | 2,304 |
+
+Snapshot sizing assumes an 80-byte label and 256-byte description; maximum payloads
+require up to 4,608 bytes plus structural/TOAST costs. All estimates exclude bloat,
+WAL, replicas, backups and reserve. Tree fences have one row per participating scope,
+not per member; event count follows control changes rather than membership size.
+
+A parent change writes one snapshot, one Group head and one tree version. Height
+maintenance updates at most the old/new ancestor chains (up to fourteen ancestor
+steps at the depth-eight envelope), each using the ordered active-child maximum.
+It does not synchronously write descendants. Current readers share a scope tree
+fence; any topology or metadata control mutation serializes there. This conservative
+initial boundary makes future roster and impact snapshots explicit, but a hot scope
+can limit throughput. It must be measured against the combined authorization and
+100/2,000 changes/s scenarios before acceptance; the small fixture is not that test.
+
+The fixture uses 1,000 siblings, a depth-eight chain and 100 repeated metadata
+transitions. It checks unforced maximum-child and exact historical event plans,
+records separate table/index footprints and tests lock waits in different scopes.
+It does not qualify sustained traffic, maximum payloads, vacuum/WAL, recovery,
+large assignment-impact review or a distributed topology.
+
+The snapshot helper is a management read: a shared tree fence and an exact
+head/event join. Effective access must batch selected-subject Group and binding
+probes under the combined decision budget; invoking this helper separately for
+every Group candidate does not qualify the proposed hot authorization path.
+
+The maximum-child query spells `DESC NULLS LAST` to match Drizzle's emitted index
+ordering. A PostgreSQL 18.6 probe over 1,000 non-null heights planned a sequential
+scan and sort for plain `DESC`, while the matching null ordering used an index-only
+scan. The scoped Group fixture rejects a sort/sequential scan and requires its
+maximum-child index scan to return one row. Nullability alone does not establish
+that the planner treats these orderings as interchangeable.
+
+The [pinned native Group sample](../testing/database/access-groups-evidence.json)
+contains 1,023 heads and 1,134 control snapshots, with mean tuple widths of about
+90 and 223 bytes. Table/index bytes are 221,184/417,792 and 303,104/188,416.
+The maximum-child plan reads one indexed row using three shared buffer hits; the
+history query seeks its exact Group/version primary key. The two repeatedly
+updated tree fences occupy 81,920 table and 16,384 index bytes at this sample cut;
+that churn footprint is not a per-live-row provisioning estimate. Hot-scope
+vacuum, WAL and sustained contention remain separate capacity obligations.

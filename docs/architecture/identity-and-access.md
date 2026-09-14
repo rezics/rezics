@@ -186,6 +186,53 @@ clear it nor bypass its current effect. Those owner policies, disclosure, invita
 and erasure flows must pass native tests before the old Org/Realm consumers are
 replaced; the shared storage primitives alone do not qualify them.
 
+### Scoped Group topology protocol
+
+Each Group has one immutable scope and identity, a current parent and lifecycle,
+and immutable control snapshots. Creation completes a reserved identity in one
+transaction; metadata updates, parent changes and terminal retirement are separate
+commands with exact versions and stable operation receipts. Retirement detaches a
+leaf; administrators move or retire children explicitly before retiring a parent.
+Historical snapshots retain their selected parent without treating it as live.
+
+The admitted topology is a forest with at most eight Groups from root to leaf.
+Keep parent links in same-scope concrete keys. A scope-local tree row serializes
+mutations; each control head transition advances that row after final pre-change
+admission, so stale REPEATABLE READ snapshots
+fail rather than combining independently valid parent moves into a cycle. Current
+snapshot and authorization readers use a shared fence, promoted before writes when
+the same tree is also an authority dependency. Unrelated scopes have separate rows.
+
+Store each Group's derived subtree height. A move checks the new ancestor chain
+plus the existing subtree height, then maintains heights only along the old/new
+ancestor paths. The maximum active child comes from an ordered partial index,
+including when the tallest child departs. No descendant roster or transitive
+subject/resource matrix is rewritten. Prelock the bounded old/new ancestor closure
+before final admission, so parent FKs and height maintenance cannot introduce a
+later row-lock wait after the authority clock check. Changes still require current
+management authority, assignment ceilings, reviewed impact and recovery continuity;
+structural validity does not establish those policies.
+
+This selected combination is a REZICS implementation choice. An adjacency-only
+alternative needs a descendant scan to validate a moved subtree's maximum depth;
+a closure/path materialization adds descendant writes on reparenting. Cached height
+instead adds bounded ancestor maintenance and a shared scope mutation bottleneck.
+The latter must be measured for hot scopes before capacity acceptance. An advisory
+lock alone was rejected because it does not invalidate an already-fixed MVCC
+snapshot; the common tree row write supplies a real serialization conflict.
+
+Primary evidence reviewed September 14, 2026: GitHub's
+[nested teams](https://docs.github.com/en/organizations/organizing-members-into-teams/about-teams#nested-teams)
+illustrate single-parent inheritance with direct and inherited membership kept
+separate; their visibility rules are not adopted as REZICS policy. PostgreSQL 18
+[isolation](https://www.postgresql.org/docs/18/transaction-iso.html) and
+[locking](https://www.postgresql.org/docs/18/explicit-locking.html) explain the row
+conflicts and stale-snapshot rejection; REZICS must still test their composition.
+PostgreSQL's [ordered B-tree limits](https://www.postgresql.org/docs/18/indexes-ordering.html)
+support the maximum-child access path without scanning every sibling. Native
+cycle/depth/shrink/width and two-connection tests qualify this mechanism; they do
+not establish live role assignment impact, inherited roster privacy or throughput.
+
 ## Roles and grants
 
 Permissions are the canonical atomic operations in [@rezics/access](../../libraries/access/README.md).

@@ -262,3 +262,28 @@ The [pinned native evidence](database/access-memberships-evidence.json) records 
 passing assertions on PostgreSQL 18.6. The full schema gate separately verifies
 fresh replay, canonical SQL, constraints, PGroonga health and Drizzle drift. These
 results qualify the shared storage protocol, not the full IAM07 admission flow.
+
+## Group topology persistence cases
+
+`task services-main:db:access-groups:check` runs
+[check-access-groups.ts](../../services/main/scripts/check-access-groups.ts) on the
+disposable native target. It creates Groups in two independent scopes and covers:
+
+- exact-scope parent keys, retained identities, immutable control snapshots and command receipts;
+- explicit create/update/reparent/retire, stale versions, changed receipt intent and terminal retirement;
+- single-parent ancestry, self/cyclic reparent rejection and eight-level depth enforcement including the moved subtree's deepest existing child;
+- parent height growth and shrink, sibling maximum replacement, moving a wide subtree without descendant rewrites, and leaf-only retirement;
+- competing opposite parent moves under READ COMMITTED and a stale REPEATABLE READ view, with observed lock contention and no committed cycle;
+- independent scope mutation while one topology is locked, and current read fencing against reparent/retirement;
+- denied/unavailable admission before receipt reuse and before mutation, including expiry after tree/head/audit-FK waits and savepoint rollback;
+- long-history exact-key and wide-parent maximum-child plans without forced indexes, with separate head/tree/event storage evidence.
+
+These tests qualify topology and admission placement only. Group membership,
+roster disclosure, Role bindings, ceilings, representation, impact review and real
+management authority require their own composed native cases before API activation.
+
+The [pinned native evidence](database/access-groups-evidence.json) records 76
+passing assertions on PostgreSQL 18.6. It includes raw-SQL rejection of unapplied
+history and cross-scope reparenting, exact receipt replay after retirement,
+UTF-8 payload bounds and the reviewed-tree precondition. SQL-admin predicates
+isolate this topology qualification from the pending management/ceiling policy.

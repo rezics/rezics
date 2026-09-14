@@ -12,6 +12,7 @@ export const PostgreSqlSchemaFileNames = [
 	"access-identity.sql",
 	"access-role.sql",
 	"access-membership.sql",
+	"access-group.sql",
 	"account-tag-reference.sql",
 	"revision-reference.sql",
 	"association-proposal-authority.sql",
@@ -89,6 +90,13 @@ export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly 
 };
 
 export const PostgreSqlSchemaFunctionNames = [
+	"guard_access_group_tree",
+	"access_group_required_height",
+	"guard_access_group_head",
+	"guard_access_group_event",
+	"refresh_access_group_ancestor_height",
+	"validate_access_group_history",
+
 	"guard_access_membership_head",
 	"guard_access_membership_event",
 	"guard_access_membership_admission",
@@ -390,6 +398,14 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "access_group_tree", name: "access_group_tree_guard" },
+	{ table: "access_group", name: "access_group_head_guard" },
+	{ table: "access_group", name: "access_group_height_refresh" },
+	{ table: "access_group_event", name: "access_group_event_guard" },
+	{ table: "access_group_event", name: "access_group_event_immutable" },
+	{ table: "access_group", name: "access_group_head_complete" },
+	{ table: "access_group_event", name: "access_group_event_complete" },
+
 	{ table: "access_membership", name: "access_membership_head_guard" },
 	{ table: "access_membership_event", name: "access_membership_event_guard" },
 	{ table: "access_membership_event", name: "access_membership_event_immutable" },
