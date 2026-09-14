@@ -400,6 +400,64 @@ frozen references and does not import AWS resource/session-policy exceptions.
 The prerequisite-preserving intersection above is REZICS's selected rule; neither
 external system establishes its correctness or performance here.
 
+### Scoped RoleBinding storage protocol
+
+A binding's role, target root and typed recipient are immutable identity choices.
+Changing one creates a new binding. Recipient alternatives are a private subject
+value, a same-scope Group key, or the owning scope's derived all-members set. The
+latter has no copied roster. Principal and Entity recipients remain distinguishable
+through the subject registry. A Group recipient is not an authenticated operator.
+
+Target paths, validity and permission policy live in sealed immutable terms
+revisions. Create/amend events introduce terms at their own control version;
+revocation names retained earlier terms. The narrow head selects its exact sealed
+terms. Revocation is terminal; regrant creates a new identity instead of reviving
+old dependent references. A receipt preserves its original outcome and private
+operator/authority-subject context while retry still requires current admission.
+
+Validity is a half-open interval with an inclusive start and exclusive optional
+end. A future start does not activate authority early. Target paths retain at most
+eight bounded segments; root/sibling/path comparisons use the canonical scope
+semantics. A role in another root does not change the binding's target root.
+
+Local-role policy requires the role, binding target and any recipient Group/member
+set to share a root, and still needs authorized role-activation impact checks.
+A cross-authority binding uses a
+sealed, explicit resource-authority permission approval. Loading it constrains the
+current role closure using the qualified ceiling contract. Empty frozen approval
+grants nothing; local following and empty frozen approval are distinct states.
+
+Target-root binding fences serialize binding writes and protect negative candidate
+reads. A missing fence yields unavailable, not an empty proof. Initialize empty
+fences when a root is admitted so ordinary reads need not create mutable state.
+These fences cover binding candidates at that exact root only; complete policy
+must include inherited resource roots, restrictions, memberships and representation
+dependencies. A current role reader locks the role head as well as the relevant
+binding scope, with overlapping mutation modes promoted by the owning command.
+
+Membership-dependent subject bindings require exact admission and optional exact
+Group-selection revision keys. Institutional issuer attribution is historical
+accountability; dependent delegation carries explicit live authority sources.
+Conditions, dependency lineage, assignment ceilings and recovery continuity must
+be reconciled with the representation owner before dependent bindings or APIs
+activate. Initial table shape and administrator-predicate fixtures alone do not
+qualify the full binding contract or any current management decision.
+
+The immutable role/recipient/target choice makes assignment identity and revision
+lineage explicit. An alternative permits all three to change inside one versioned
+object, but every dependent proof would then need to distinguish a terms edit from
+replacement of the grant's subject and authority root. New binding identities keep
+that distinction in concrete references at the cost of an additional retained
+identity on replacement. Batch assignment remains orchestration over individual
+bindings, not a mutable recipient array on one grant.
+
+Kubernetes [RoleBinding semantics](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding),
+reviewed September 15, 2026, independently preserve the referenced role and keep
+binding scope separate from reusable role scope. REZICS also fixes each binding's
+recipient and target root, and adds revision-bound terms, explicit permission
+ceilings, mixed subjects and live delegation lineage. The external precedent does
+not qualify these additions; the native binding cases remain required.
+
 ## Representation and request evaluation
 
 RepresentationGrant records represented Entity, typed delegate, allowed actions

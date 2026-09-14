@@ -397,3 +397,41 @@ O(P*(P+E)), with O(P) result/working-set storage apart from temporary closure ar
 measured end-to-end authorization decision or a substitute for bounded binding
 candidates. Persisted approval rows and their amplification belong to the binding
 and delegation capacity inventories; the pure helper introduces no stored rows.
+
+## RoleBinding storage inventory
+
+Count target-root fences, binding identities, terms revisions, private control
+events and explicit approved-permission members separately at 500M and 3B rows.
+Root fences follow admitted scope count, including roots with no bindings, so
+negative candidate reads have a concrete version to lock. A binding is one
+recipient/role/target combination; overlapping bindings do not copy rosters.
+
+Candidate planning inputs (before bloat, WAL, replicas, backups and reserve):
+
+| Relation | Bytes/row including indexes | 500M, GB | 3B, GB |
+| --- | --- | --- | --- |
+| Target-root binding fence | 192 | 96 | 576 |
+| Binding identity/head with recipient and role reverse indexes | 640 | 320 | 1,920 |
+| Sealed terms revision with typical path | 384 | 192 | 1,152 |
+| Private control event/receipt | 384 | 192 | 1,152 |
+| Approved permission member | 224 | 112 | 672 |
+
+Terms sizing assumes two short path segments. Eight 256-byte segments require
+2,048 payload bytes plus array/tuple overhead; provision the maximum separately.
+With B bindings, R term revisions per binding and P approved permissions per
+revision, permission rows add B*R*P. Local following stores no frozen permission
+members; terminal control events remain independently counted.
+
+Selected paths require target/recipient candidate keysets, role-impact reverse
+pages and exact terms/event/permission keys. Current grants must be bounded to
+256 relevant binding candidates and use batched role/recipient probes; a broad
+role snapshot per candidate would violate the intended hot-path query budget.
+Historical list cursors and filtered rosters are separate from effective access.
+Scope fences can serialize a hot root; cold/warm plans, hot roles, long histories,
+lock hold time, WAL, sustained throughput and recovery remain native obligations.
+
+Every newly admitted `access_scope` initializes its empty binding fence, adding one
+row and its primary-key entry to the private registry allocation path. Include that
+cost even when no binding is ever written. The earlier registry-only tuple/index
+sample does not measure this additional relation. A failed scope allocation rolls
+back its fence with the same transaction; immutable scope identities retain theirs.

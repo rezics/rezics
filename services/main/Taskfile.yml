@@ -372,6 +372,12 @@ tasks:
             - test -n "${DATABASE_ADMIN_URL:-}"
             - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 yarn exec tsx scripts/check-access-memberships.ts
 
+    db:access-role-bindings:check:
+        desc: Verify concrete RoleBinding recipients, sealed terms, permission approvals and current admission placement.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 yarn exec tsx scripts/check-access-role-bindings.ts
+
     db:access-roles:check:
         desc: Verify sealed role definitions, activation, retirement, receipts and current admission placement.
         cmds:
@@ -624,6 +630,10 @@ tasks:
                 REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
                 DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
                 yarn exec tsx scripts/check-access-group-memberships.ts
+            - >-
+                REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
+                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
+                yarn exec tsx scripts/check-access-role-bindings.ts
             - >-
                 REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log
                 DATABASE_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"

@@ -330,3 +330,47 @@ The registry-wide case checks every registered permission against empty, exact,
 closed and full approval sets. The complete access suite passes 31 tests; access
 and backend TypeScript checks pass. These are pure set-algebra results, not native
 assignment authority or permission to change a role/binding.
+
+## Scoped RoleBinding persistence cases
+
+`task services-main:db:access-role-bindings:check` runs
+[check-access-role-bindings.ts](../../services/main/scripts/check-access-role-bindings.ts)
+for the storage slice below. Full current-candidate, lineage and management cases
+remain integration requirements:
+
+- Bind a role to a principal, an Entity, a Group and the derived all-members set under explicit recipient scope keys. A Group/MemberSet is a recipient set, never an authenticated caller.
+- Preserve target root and descendant path independently from the role-definition root and recipient scope. Cross-scope role reuse does not widen the target and requires frozen resource-authority approval.
+- Local activated role revisions affect local bindings only under current activation-impact admission. Cross-authority bindings remain inside their exact approved permission references, including prerequisites.
+- Retire role or binding; no fallback to a draft/latest role or broad preset. Stable operation receipts remain historical while runtime use requires current authority.
+- Assign several roles to the same recipient and several bindings to one subject. Deduplicate effective permission keys without negating another valid grant; hard restrictions remain conjunctive.
+- Validate inclusive start/exclusive end, invalid ranges, pending/not-yet-valid states and expiry after role/binding/recipient lock waits.
+- Match exact selected subject rather than borrowing the operator's Group membership while representing an Entity.
+- Direct membership-dependent bindings carry exact admission generations; exact assignment dependencies carry selection versions. Leave/rejoin and remove/reassign cannot revive them.
+- Durable institutional assignment does not depend on its creator's continuing eligibility; dependent delegation validates its declared live source chain. Private audit attribution alone creates neither dependency nor authority.
+- Serialize current reads with activation/retirement and assignment/revocation. Protect negative candidates so a newly inserted restriction or binding cannot invalidate an already accepted write.
+- Compare proposed permissions, scope, recipient and condition impact against explicit assignment ceilings from the pre-change state; assignment authority does not imply using the assigned data permissions.
+- Test cycle/recovery continuity, missing or budget-exhausted dependency closure, atomic rollback, stale commands, receipt identity and direct-SQL invariant rejection.
+- Probe hot roles, many bindings and long histories with index-backed scoped candidates, reverse keysets and separate 500M/3B estimates. No per-member ACL fan-out on activation or retirement.
+
+Storage-only administrator predicates do not qualify full management authority,
+representation, live assignment ceilings, disclosure or domain API activation.
+
+The initial fixture covers concrete recipient keys, immutable binding identity,
+sealed terms and literal approval members, raw-SQL incomplete-history rejection,
+local/cross-authority policy, historical snapshots, changed receipt intent,
+operator substitution, scope/role/binding/audit-FK expiry waits, stable race retries,
+current read fencing and stale stronger-isolation snapshots. A role-growth case
+reads native role and binding snapshots together and applies the shared frozen
+ceiling helper. These checks do not implement complete candidate matching, current
+assignment ceilings, recipient eligibility, validity-time decisions or delegation
+lineage. Exact snapshot reads are management hydration, not proof of access.
+
+Before the September 15 execution-workflow change, an isolated RoleBinding run
+passed 85 assertions. The subsequent `task services-main:db:check` failed when
+another fixture had already created the foreign Group namespace: a wrong-scope
+Group reference reached its FK before the expected typed creation conflict.
+The implementation now validates new recipient references before insertion and
+checks that a reserved binding identity matches its create command. Related
+assertions were authored before the workflow change but have not been executed.
+The next fixture replay was stopped when validation was paused. These additions
+remain unqualified; resume their checks under the plan's verification phase.

@@ -11,6 +11,7 @@ export const PostgreSqlSchemaFileNames = [
 	"reference-value.sql",
 	"access-identity.sql",
 	"access-role.sql",
+	"access-role-binding.sql",
 	"access-membership.sql",
 	"access-group.sql",
 	"access-group-membership.sql",
@@ -91,6 +92,14 @@ export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly 
 };
 
 export const PostgreSqlSchemaFunctionNames = [
+	"initialize_access_role_binding_scope",
+	"guard_access_role_binding_scope",
+	"guard_access_role_binding_head",
+	"guard_access_role_binding_event",
+	"guard_access_role_binding_revision",
+	"guard_access_role_binding_permission",
+	"validate_access_role_binding_history",
+
 	"initialize_access_group_membership_set",
 	"guard_access_group_membership_set",
 	"guard_access_group_membership_event",
@@ -405,6 +414,17 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "access_scope", name: "access_role_binding_scope_initialize" },
+	{ table: "access_role_binding_scope", name: "access_role_binding_scope_guard" },
+	{ table: "access_role_binding", name: "access_role_binding_head_guard" },
+	{ table: "access_role_binding_event", name: "access_role_binding_event_guard" },
+	{ table: "access_role_binding_event", name: "access_role_binding_event_immutable" },
+	{ table: "access_role_binding_revision", name: "access_role_binding_revision_guard" },
+	{ table: "access_role_binding_permission", name: "access_role_binding_permission_guard" },
+	{ table: "access_role_binding", name: "access_role_binding_head_complete" },
+	{ table: "access_role_binding_event", name: "access_role_binding_event_complete" },
+	{ table: "access_role_binding_revision", name: "access_role_binding_revision_complete" },
+
 	{ table: "access_membership_admission", name: "access_group_membership_set_initialize" },
 	{ table: "access_group_membership_set", name: "access_group_membership_set_guard" },
 	{ table: "access_group_membership", name: "access_group_membership_head_guard" },

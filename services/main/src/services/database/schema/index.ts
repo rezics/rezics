@@ -1,6 +1,7 @@
 export * from "./access";
 export * from "./access-identity";
 export * from "./access-role";
+export * from "./access-role-binding";
 export * from "./access-membership";
 export * from "./access-group";
 export * from "./access-group-membership";
