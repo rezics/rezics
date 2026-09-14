@@ -10,7 +10,7 @@
 
 - A type or assertion must not claim more than its source or validation proves. Use existing schemas and runtime checks at the narrowest trust boundary.
 - Preserve meaning, missing values and failure states through transformations to their consumers. Same-shaped values need not have the same semantics; do not hide lost guarantees with casts.
-- Run the nearest checks that cover changed contracts, including important rejected states. Start from the [Taskfile](Taskfile.yml); expand testing only for affected dependencies, failures or unresolved risk. Once required checks pass, stop unless new changes invalidate them.
+- For the current implementation program, the [execution workflow](docs/plan/execution-workflow.md) owns test/check timing and the [plan](docs/plan/README.md#active-execution) records the active phase. During verification, run the nearest checks that cover changed contracts, including important rejected states. Start from the [Taskfile](Taskfile.yml); expand testing only for affected dependencies, failures or unresolved risk. Once required checks pass, stop unless new changes invalidate them. Outside this program, run the nearest required checks before completion.
 - Report evidence and limitations for the changed scope. Do not imply whole-system proof from focused checks. Frontend work also follows [the agent verification boundary](AGENTS.md#data-and-verification-boundaries).
 
 ## Versioning
@@ -19,7 +19,9 @@ The current implementation program has no compatibility requirements for old
 schemas, APIs, SDKs, data, IDs/URLs, formats or implementation behavior. Design for
 the intended model, remove obsolete compatibility layers within scope and update
 retained consumers together. The current plan authorizes autonomous research,
-full development/test environment operation and local commits after checks.
+full development/test environment operation and local commits under the
+execution workflow's phase-specific policy. Deferred checks must be reported;
+implementation checkpoints do not establish acceptance.
 
 REZICS uses Romantic Versioning: `PROJECT.MAJOR.MINOR`. PROJECT changes for a
 separate product generation; MAJOR for significant or breaking product, public
@@ -36,7 +38,7 @@ migrations after the released history rather than editing, deleting or renaming 
 
 - Use the `public` schema, snake_case physical names and lower camel case TypeScript exports. Declare Drizzle `relations` only for actual `database.query` consumers; foreign keys enforce integrity.
 - The current [installation baseline](services/main/src/services/database/baseline.json) records the completed native replacement. Preserve that epoch and its recovery record; historical replacement authorization is not an instruction to regenerate it. Released-history checks enforce immutability.
-- Generate changes with `task services-main:db:generate -- <name>` and qualify them with `task services-main:db:check` on the disposable shadow target. Use the repository replay workflow rather than raw `atlas migrate diff`; see [migration operations](README.md#database-migrations).
+- Generate changes with `task services-main:db:generate -- <name>` and qualify them during verification with `task services-main:db:check` on the disposable shadow target. Follow the execution workflow for generators that bundle validation. Use the repository replay workflow rather than raw `atlas migrate diff`; see [migration operations](README.md#database-migrations).
   For function/trigger-only changes, use the canonical SQL file's underscore-form name or register the requested name in `PostgreSqlSchemaMigrationBundles` in [the PostgreSQL manifest](services/main/src/services/database/schema/postgres/manifest.ts).
   The structural diff excludes functions/triggers; an unregistered name will not install their changed definitions.
 - Unit is a logical identity/reference/capability contract. Stable logical owners hold native identity and lifecycle; physical table/database placement is a separate mapping. Do not restore a global `unit` parent or substitute a universal entity table. Preserve concrete foreign keys and validated reference alternatives.
@@ -57,4 +59,5 @@ server enforcement and allowed/denied tests.
 The GitHub `Check` workflow is advisory, not a merge, tag, release or deployment
 gate. Keep failures visible and fix them when practical. Do not make release
 workflows depend on its conclusion or configure it as a required status check.
-This does not waive the checks required for a change.
+This does not waive the checks required for acceptance; the execution workflow
+owns their timing during the current program.

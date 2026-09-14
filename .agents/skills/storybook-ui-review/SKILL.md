@@ -9,6 +9,10 @@ The goal is to find problems in the current UI. Screenshot counts and pixel
 similarity are not acceptance criteria. Follow the browser authorization boundary
 in [AGENTS.md](../../../AGENTS.md) and the runtime instructions in the
 [Storybook workflow](../../../docs/architecture/storybook-workflow.md).
+For the current implementation program, the
+[execution workflow](../../../docs/plan/execution-workflow.md) owns timing:
+defer story/test authoring to test-authoring and run this rendered review in
+verification. Implementation handoffs record pending review without invoking it.
 
 ## Select meaningful evidence
 

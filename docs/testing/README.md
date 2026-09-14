@@ -1,6 +1,6 @@
 # Testing and evidence
 
-Testing follows [the implementation plan](../plan/README.md): shared schema design, module persistence/domain tests, APIs, combined backend acceptance, then frontend. The agent has standing authority for autonomous research and full development/test environment operation. No old-contract compatibility is an acceptance target.
+The [implementation plan](../plan/README.md) selects the active document- or gate-sized scope and phase. The [execution workflow](../plan/execution-workflow.md) owns timing: complete that scope's implementation, then concentrate on test authoring, verification and repair. This testing owner retains scenarios and evidence; implementation completion does not qualify a gate. The agent has standing authority for autonomous research and full development/test environment operation within those phases. No old-contract compatibility is an acceptance target.
 
 | Owner | Scope |
 | --- | --- |
@@ -23,9 +23,9 @@ Testing follows [the implementation plan](../plan/README.md): shared schema desi
 
 Pure tests verify parsing, typed contracts and deterministic algorithms. Real PostgreSQL verifies constraints, transactions, locks, triggers, permissions and persistence. Stateful API tests carry actual produced IDs through later requests. Captured source fixtures run offline; live drift/acquisition checks are separately reported. Representative load/recovery tests retain failures and explicit dataset/runtime evidence.
 
-Write assertions before changed behavior, then implement the owning DDL/commands/API. Use normal authorized command paths for valid operations and deliberate direct SQL for rejected-state backstops. Do not disable admission, authorization or integrity checks to make a fixture pass. Development databases can be rebuilt freely within the program; identify targets and isolate concurrent test lanes.
+During test-authoring, derive assertions from owning contracts and scenario matrices after the selected scope's implementation is ready. Run them in verification. Use normal authorized command paths for valid operations and deliberate direct SQL for rejected-state backstops. Do not disable admission, authorization or integrity checks to make a fixture pass. Development databases can be rebuilt freely within the program's authorized phase; identify targets and isolate concurrent test lanes.
 
-Useful entry points from the repository root:
+Useful verification-phase entry points from the repository root; these are not implementation-phase prerequisites:
 
 ~~~sh
 python docs/testing/check_docs.py

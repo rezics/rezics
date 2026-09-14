@@ -1,6 +1,6 @@
 # Backend acceptance gate
 
-G4 is the entry condition for frontend implementation. See [the plan](README.md) for policy/progress. Existing test totals and the design checker do not close these gates.
+G4 qualifies the combined backend and is required for whole-program frontend acceptance. Frontend implementation may begin against its available backend contracts before G4. See [the plan](README.md) for scope/progress and the [execution workflow](execution-workflow.md) for when to author and run verification. Existing test totals, implementation completion and the design checker do not close these gates.
 
 | Gate | Required evidence |
 | --- | --- |
@@ -21,7 +21,7 @@ G4 is the entry condition for frontend implementation. See [the plan](README.md)
 | Capacity | EXPLAIN/load/skew evidence, explicit limits, no ignored crashes, storage/WAL/recovery at 500M/3B. |
 | Recovery | Restorable database/objects, erasure frontier, reconciled projections/checkpoints and observed RPO/RTO. |
 
-Run [integrated tests](../testing/backend-integration.md) as modules become available. External-site availability belongs to live-source checks, not deterministic acceptance. Fixed fixtures and checksummed large datasets make offline and scale runs reproducible.
+Run applicable [integrated tests](../testing/backend-integration.md) during each scope's verification as dependencies become available; complete the combined matrix for G4. External-site availability belongs to live-source checks, not deterministic acceptance. Fixed fixtures and checksummed large datasets make offline and scale runs reproducible.
 
 These gates use one PostgreSQL write authority with logical owner/aggregate separation. Future database splitting requires its own integrity, routing and operational qualification; it is not required to pass this program's table-boundary contract. Capacity planning and measured limits remain required at both declared scales.
 

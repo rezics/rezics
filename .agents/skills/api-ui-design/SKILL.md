@@ -47,8 +47,10 @@ type's alternatives can exceed what one operation allows.
 Use concrete producer-to-consumer examples to examine the contract. In design-only
 work, state unresolved choices and validation criteria. In implementation work,
 update the affected contracts and authorized consumers together, use owning
-generators and run relevant deterministic/stateful checks. Existing backend/frontend
-execution gates are unchanged by this skill.
+generators and follow the [execution workflow](../../../docs/plan/execution-workflow.md)
+for test authoring and deterministic/stateful verification timing during the
+current program. The plan owns backend/frontend dependencies and acceptance gates;
+this skill does not require testing before the active scope is implemented.
 
 ## Completion
 

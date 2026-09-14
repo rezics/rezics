@@ -13,7 +13,7 @@ Dependencies: M02-M04. Owners: [Book/creation tests](../../testing/book-and-crea
 - Preserve rating, warning, nondisclosure and unknown states with search, spoilers and exact progress.
 - Replace whole-journal and per-node full-container recomputation with coalesced/delta or resumable statistics, exact-input measurement and bounded deletion. Child/manifest disclosure remains independent of parent visibility.
 - Exercise anthology/album/episode/program package imports, source refresh with local edits, repeated occurrences and mapped/unknown progress through the same operational contracts. Book remains one journey within the cross-domain matrices.
-- Build stateful author/reader APIs and export after native commands; frontend stays behind G4.
+- Build stateful author/reader APIs and export after native commands. Frontend implementation follows its available API dependencies and the active scope; [G4](../backend-acceptance.md) remains required for whole-program frontend acceptance. Follow the [execution workflow](../execution-workflow.md) for test and verification timing.
 
 ## Acceptance
 

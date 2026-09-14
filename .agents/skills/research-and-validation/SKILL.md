@@ -8,6 +8,10 @@ description: Research and evaluate substantive designs, technical proposals and 
 Produce a defensible decision with room for original ideas. Apply the current
 request and [scope rules](../../../AGENTS.md#task-scope-and-evidence); research
 does not authorize implementation or expand verification permissions.
+During the current implementation program, the
+[execution workflow](../../../docs/plan/execution-workflow.md) also governs
+experiments and representative instruction evaluations. Reuse evidence and state
+deferred validation; research must not become a workaround for the testing pause.
 
 ## Frame the decision
 
