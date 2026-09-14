@@ -304,6 +304,11 @@ tasks:
         cmds:
             - yarn exec atlas version
 
+    db:generate:typed:
+        desc: Produce migration SQL from the tracked typed schema anchor without database replay or qualification.
+        cmds:
+            - yarn exec tsx scripts/generate-typed-database-migration.ts {{.CLI_ARGS}}
+
     db:generate:
         desc: Replay migrations into a shadow database and diff it against the Drizzle schema.
         cmds:

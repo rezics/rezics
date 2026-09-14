@@ -4,6 +4,9 @@ Follow the [execution workflow](execution-workflow.md) for program authority, ph
 
 ## Active execution
 
+Production-artifact prerequisite: separate typed-snapshot migration generation from
+replay and qualification while retaining the existing baseline and generator guards.
+
 | Field | Current selection |
 | --- | --- |
 | Scope | Complete selected identity, membership, mixed authorization and connected-application backend contracts. |

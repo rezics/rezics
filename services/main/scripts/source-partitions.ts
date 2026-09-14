@@ -85,7 +85,7 @@ export const sourcePartitionKeys = {
 } as const;
 
 /** @internal Sixty-four bounded hash partitions; children precede generated foreign keys. */
-export function applySourcePartitions(statements: readonly string[]): string[] {
+export function applySourcePartitions(statements: readonly string[], complete = true): string[] {
 	const seen = new Set<string>();
 	const output: string[] = [];
 	for (const original of statements) {
@@ -107,7 +107,7 @@ export function applySourcePartitions(statements: readonly string[]): string[] {
 				`CREATE TABLE "${table}_p${String(remainder).padStart(2, "0")}" PARTITION OF "${table}" FOR VALUES WITH (MODULUS 64, REMAINDER ${remainder});`,
 			);
 	}
-	if (seen.size !== Object.keys(sourcePartitionKeys).length)
+	if (complete && seen.size !== Object.keys(sourcePartitionKeys).length)
 		throw new Error("Source partition tables missing from typed schema export");
 	return output;
 }

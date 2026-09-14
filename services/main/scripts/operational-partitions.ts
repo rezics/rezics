@@ -7,7 +7,7 @@ export const operationalPartitionTables = [
 ] as const;
 
 /** @internal Preserve every typed constraint and attach physical ranges before generated FKs. */
-export function applyOperationalPartitions(statements: readonly string[]): string[] {
+export function applyOperationalPartitions(statements: readonly string[], complete = true): string[] {
 	const seen = new Set<string>();
 	const output: string[] = [];
 	for (const original of statements) {
@@ -29,7 +29,7 @@ export function applyOperationalPartitions(statements: readonly string[]): strin
 			);
 		}
 	}
-	if (seen.size !== operationalPartitionTables.length)
+	if (complete && seen.size !== operationalPartitionTables.length)
 		throw new Error("Operational partition tables missing from typed schema export");
 	return output;
 }

@@ -5,13 +5,16 @@ import {
 	mkdtemp,
 	readFile,
 	readdir,
-	rename,
+	open,
 	rm,
 	stat,
 	writeFile,
 } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { captureTypedDatabaseSchema } from "./typed-schema-snapshot";
+import { writeTypedMigrationAnchor, withMigrationArtifactLock } from "./typed-migration-anchor";
 
 import { PostgreSqlSchemaMigrationBundles } from "../src/services/database/schema/postgres/manifest";
 
@@ -264,7 +267,8 @@ async function exists(path: string): Promise<boolean> {
 	}
 }
 
-async function runYarn(
+/** Run a production migration generator command with the repository platform conventions. @internal */
+export async function runMigrationGeneratorCommand(
 	arguments_: readonly string[],
 	options: {
 		readonly cwd: string;
@@ -353,7 +357,12 @@ async function main(): Promise<void> {
 	const checksum = join(migrationDirectory, "atlas.sum");
 	const checksumBackup = join(workDirectory, "atlas.sum");
 	await copyFile(checksum, checksumBackup);
+	const anchorPath = join(serviceRoot, "src/services/database/typed-schema.generated.json");
+	const anchorBackup = join(workDirectory, "typed-anchor.json");
+	const hadAnchor = await exists(anchorPath);
+	if (hadAnchor) await copyFile(anchorPath, anchorBackup);
 	let targetFile: string | undefined;
+	let targetCreated = false;
 	let completed = false;
 	try {
 		const hasPreOverlay = await exists(preOverlay);
@@ -400,7 +409,7 @@ async function main(): Promise<void> {
 				`${ShadowValidationOverlaySuffix} cannot be combined with ${TransactionModeNoneMarkerSuffix}`,
 			);
 		if (hasShadowValidationOverlay)
-			await runYarn(
+			await runMigrationGeneratorCommand(
 				[
 					"exec",
 					"tsx",
@@ -418,7 +427,7 @@ async function main(): Promise<void> {
 				},
 			);
 		if (generationPlan.applyPreOverlayToShadow)
-			await runYarn(
+			await runMigrationGeneratorCommand(
 				[
 					"exec",
 					"tsx",
@@ -438,7 +447,7 @@ async function main(): Promise<void> {
 
 		let schemaDiff = "";
 		if (generationPlan.runSchemaDiff) {
-			const draft = await runYarn(
+			const draft = await runMigrationGeneratorCommand(
 				[
 					"exec",
 					"atlas",
@@ -497,21 +506,25 @@ async function main(): Promise<void> {
 			...(hasPostOverlay ? { postOverlay: await readFile(postOverlay, "utf8") } : {}),
 			...(transactionModeNoneReason ? { transactionModeNoneReason } : {}),
 		});
-		const composedFile = join(workDirectory, "composed.sql");
-		await writeFile(composedFile, migrationSql, "utf8");
-		await rename(composedFile, targetFile);
-		await runYarn(["exec", "atlas", "migrate", "hash", "--env", "main"], {
+		const targetHandle = await open(targetFile, "wx");
+		targetCreated = true;
+		try { await targetHandle.writeFile(migrationSql, "utf8"); } finally { await targetHandle.close(); }
+		await runMigrationGeneratorCommand(["exec", "atlas", "migrate", "hash", "--env", "main"], {
 			cwd: serviceRoot,
 		});
+		if (await exists(join(serviceRoot, "src/services/database/typed-schema.generated.json")))
+			await writeTypedMigrationAnchor(serviceRoot, await captureTypedDatabaseSchema());
 		completed = true;
 		console.info(`Created reviewed migration draft: ${targetFile}`);
 	} finally {
 		if (!completed) {
-			if (targetFile) await rm(targetFile, { force: true });
+			if (targetFile && targetCreated) await rm(targetFile, { force: true });
 			await copyFile(checksumBackup, checksum);
+			if (hadAnchor) await copyFile(anchorBackup, anchorPath);
 		}
 		await rm(workDirectory, { force: true, recursive: true });
 	}
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await main();
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url))
+	await withMigrationArtifactLock(resolve(fileURLToPath(new URL("..", import.meta.url))), main);

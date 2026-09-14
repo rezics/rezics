@@ -3,35 +3,19 @@ import { applyOperationalPartitions } from "./operational-partitions";
 import { applySourcePartitions } from "./source-partitions";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { is } from "drizzle-orm";
-import { PgTable, getTableConfig } from "drizzle-orm/pg-core";
-import { UnitOwnerValues } from "@rezics/reference";
-import { UnitReferenceConsumers } from "../src/services/database/schema/unit-reference-consumers";
 
-import * as schema from "../src/services/database/schema";
+import { captureTypedDatabaseSchema } from "./typed-schema-snapshot";
 
-const MigrationOwnedExpressionIndexes = [
+/** Expression indexes whose physical definitions remain migration-owned. @internal */
+export const MigrationOwnedExpressionIndexes = [
 	"unit_localization_pgroonga_metadata_idx",
 	"unit_localization_pgroonga_content_idx",
 ] as const;
 
 export async function exportDatabaseSchema(): Promise<string> {
-	const tables = new Map(Object.values(schema).filter(value => is(value, PgTable)).map(table => {
-		const config = getTableConfig(table);
-		return [config.name, new Set(config.columns.map(column => column.name))] as const;
-	}));
-	for (const reference of UnitReferenceConsumers) {
-		const columns = tables.get(reference.table);
-		if (!columns || !columns.has(reference.id))
-			throw new Error(`Logical reference registry targets a missing table or input: ${reference.table}.${reference.id}`);
-		for (const owner of UnitOwnerValues) {
-			const column = `${reference.prefix}_${owner}_id`;
-			if (!columns.has(column)) throw new Error(`Logical reference registry lacks its concrete owner alternative: ${reference.table}.${column}`);
-		}
-	}
 	const [emptySnapshot, desiredSnapshot] = await Promise.all([
 		generateDrizzleJson({}),
-		generateDrizzleJson(schema),
+		captureTypedDatabaseSchema(),
 	]);
 	const statements = applyOperationalPartitions(
 		applySourcePartitions(await generateMigration(emptySnapshot, desiredSnapshot)),
