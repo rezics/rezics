@@ -384,3 +384,16 @@ promise. Set lookups use their complete membership/generation key through either
 the primary or same-prefix scope index. Selected-slot and roster probes use their
 partial indexes; long history uses the complete event primary key. The 512-path
 functional case validates the read bound, not sustained authorization capacity.
+
+
+## Permission ceiling computation
+
+The shared permission set operations admit no more input entries than the current
+registered vocabulary size P. They canonicalize family-qualified references and
+return at most P values. Snapshot and coverage work expands the bounded authored
+closure; effective clipping checks every candidate's prerequisite set against a
+hashed explicit approval. With E registered implication edges, worst-case work is
+O(P*(P+E)), with O(P) result/working-set storage apart from temporary closure arrays. This is per-set computation, not a
+measured end-to-end authorization decision or a substitute for bounded binding
+candidates. Persisted approval rows and their amplification belong to the binding
+and delegation capacity inventories; the pure helper introduces no stored rows.

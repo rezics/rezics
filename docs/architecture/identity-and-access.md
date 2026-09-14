@@ -355,6 +355,51 @@ Role assignment, impact admission, effective-grant queries and APIs require thei
 own native tests before runtime activation. The [role storage envelope](identity-access-capacity.md#role-definition-storage)
 counts permission members and events separately from definition headers.
 
+### Explicit permission approval snapshots
+
+A permission approval records an explicit, family-qualified closure at its
+admission time. Ordinary role definitions keep authored permissions. When the
+resource authority approves a cross-authority binding or external delegation,
+its persisted ceiling includes the then-approved prerequisites; no wildcard or
+role-head pointer substitutes for that snapshot.
+
+At use time, intersect the current role's closure with the stored approval without
+expanding the approval itself. Additionally withhold any permission whose current
+prerequisite closure is not fully inside the stored approval. For example, an
+approval containing only `unit.update` but missing its required `unit.read` does
+not permit update. Expanding the approval after loading would silently manufacture
+that missing read. This rule also prevents a future implication change from adding
+unapproved access. Permitted prerequisites can remain effective independently when
+the broader mutation is clipped. Empty approval permits nothing, and a ceiling
+without a current matching grant grants nothing.
+
+Assignment-impact admission checks the whole proposed closure against the manager's
+explicit ceiling and rejects excess; it must not silently clip the requested
+assignment. Runtime effective use may clip an already-admitted dynamic role under
+its frozen permission ceiling. These are distinct operations in the shared pure
+contract. Scope, recipient constraints, validity, conditions, grantability and
+current manager/representation authority remain independent admission requirements.
+Local bindings can follow a locally activated role only through the separate
+role-activation impact checks; the pure set operations do not authorize activation.
+
+The [shared helpers](../../libraries/access/src/permission-ceilings.ts) return
+canonical frozen values, validate all references before
+returning a result, and cap input length at the registered vocabulary size. Tests
+cover both registry families with identical spellings, independent management
+powers, role growth, missing prerequisites, invalid sets and every registered
+permission. They qualify the set algebra, not persistence, authority loading or
+complete role-binding admission.
+
+Primary evidence revisited September 15, 2026: Kubernetes
+[role and binding escalation prevention](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#privilege-escalation-prevention-and-bootstrapping)
+separates role mutation and explicit binding power; REZICS additionally requires
+recipient/scope ceilings and Group/representation impact checks. AWS
+[permissions boundaries](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html)
+distinguish an authority limit from an identity-policy grant. REZICS uses explicit
+frozen references and does not import AWS resource/session-policy exceptions.
+The prerequisite-preserving intersection above is REZICS's selected rule; neither
+external system establishes its correctness or performance here.
+
 ## Representation and request evaluation
 
 RepresentationGrant records represented Entity, typed delegate, allowed actions

@@ -318,3 +318,15 @@ against the new admission-set initialization. The full gate separately checks
 fresh replay, canonical SQL, constraints, PGroonga health and Drizzle schema drift.
 Owner admission/disclosure and complete role/representation authority remain
 outside these administrator-predicate storage cases.
+
+## Explicit permission ceiling cases
+
+The shared [permission-ceiling tests](../../libraries/access/src/permission-ceilings.test.ts)
+qualify thirteen deterministic cases: captured prerequisite closure, canonical
+ordering, immutable values, no expansion of stored approvals, prerequisite-safe
+clipping, whole-proposal admission, empty ceilings, independently grantable
+management, registry-family collisions, role growth and invalid/budgeted inputs.
+The registry-wide case checks every registered permission against empty, exact,
+closed and full approval sets. The complete access suite passes 31 tests; access
+and backend TypeScript checks pass. These are pure set-algebra results, not native
+assignment authority or permission to change a role/binding.
