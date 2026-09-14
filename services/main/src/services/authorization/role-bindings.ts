@@ -25,6 +25,11 @@ const termsSchema = z
 		targetPath: z.array(z.string().regex(/^[a-z0-9][a-z0-9-]{0,255}$/)).max(8),
 		validFrom: z.date(),
 		validUntil: z.date().nullable(),
+		recipientEligibility: z.strictObject({
+			membershipId: z.uuid(),
+			generation: versionSchema.min(1),
+			selection: z.strictObject({ groupId: z.uuid(), version: versionSchema.min(1) }).nullable(),
+		}).nullable(),
 		permissionPolicy: z.discriminatedUnion("mode", [
 			z.strictObject({ mode: z.literal("local-role") }),
 			z.strictObject({
@@ -157,6 +162,14 @@ export async function applyAccessRoleBindingCommand(
 				? command.recipient
 				: null;
 		if (!roleId || !recipient) throw new AccessRoleBindingConflict();
+		if (command.operation !== "revoke" && command.terms.recipientEligibility) {
+			if (recipient.kind !== "subject") throw new AccessRoleBindingConflict();
+			const dependency = command.terms.recipientEligibility;
+			await work.execute(sql`select public.lock_access_role_binding_eligibility(
+				${dependency.membershipId}::uuid, ${dependency.generation}::bigint,
+				${dependency.selection?.groupId ?? null}::uuid)`);
+			await authorize();
+		}
 		if (recipient.kind === "group") {
 			const [tree] = await work
 				.select({ id: accessGroupTree.scopeId })
@@ -311,6 +324,10 @@ export async function applyAccessRoleBindingCommand(
 				targetPath: terms.targetPath,
 				validFrom: terms.validFrom,
 				validUntil: terms.validUntil,
+				membershipId: terms.recipientEligibility?.membershipId ?? null,
+				membershipGeneration: terms.recipientEligibility?.generation ?? null,
+				selectionGroupId: terms.recipientEligibility?.selection?.groupId ?? null,
+				selectionVersion: terms.recipientEligibility?.selection?.version ?? null,
 				permissionPolicy: terms.permissionPolicy.mode,
 				permissionCount: permissions.length,
 				permissionDigest: createHash("sha256")
@@ -337,6 +354,11 @@ export async function applyAccessRoleBindingCommand(
 				);
 		}
 		const resultReceipt = receipt(event);
+		if (command.operation !== "revoke") {
+			const current = await work.execute<{ eligible: boolean | null }>(sql`
+				select public.access_role_binding_recipient_is_current(${head.id}::uuid,${nextVersion}::bigint) as eligible`);
+			if (current.rows[0]?.eligible !== true) throw new AccessRoleBindingConflict();
+		}
 		const result = await work.execute<{ admitted: boolean | null; changed: string | null }>(sql`
    with admission as materialized(select (${admission}) as admitted),changed as(
     update public.access_role_binding set version=${nextVersion},terms_revision=${resultReceipt.termsRevision},state=${resultReceipt.state}
@@ -462,6 +484,15 @@ export async function readAccessRoleBindingSnapshot(
 			targetPath: terms.targetPath,
 			validFrom: terms.validFrom,
 			validUntil: terms.validUntil,
+			recipientEligibility: terms.membershipId !== null && terms.membershipGeneration !== null
+				? {
+					membershipId: terms.membershipId,
+					generation: terms.membershipGeneration,
+					selection: terms.selectionGroupId !== null && terms.selectionVersion !== null
+						? { groupId: terms.selectionGroupId, version: terms.selectionVersion }
+						: null,
+				}
+				: null,
 			permissionPolicy:
 				terms.permissionPolicy === "local-role"
 					? { mode: "local-role" }

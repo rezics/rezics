@@ -26,6 +26,8 @@ import { accessScope, accessSubject } from "./access-identity";
 import { accessGroup } from "./access-group";
 import { accessRole } from "./access-role";
 import { users } from "./auth";
+import { accessMembershipAdmission } from "./access-membership";
+import { accessGroupMembershipEvent } from "./access-group-membership";
 
 /** Target-local serialization for binding intake and negative candidate reads. @internal */
 export const accessRoleBindingScope = pgTable(
@@ -140,7 +142,7 @@ export const accessRoleBindingEvent = pgTable(
 	],
 );
 
-/** Sealed target-path, validity and permission policy; owner conditions and lineage extend this contract before activation. @internal */
+/** Sealed target-path, validity, exact recipient eligibility and permission policy. @internal */
 export const accessRoleBindingRevision = pgTable(
 	"access_role_binding_revision",
 	{
@@ -152,10 +154,31 @@ export const accessRoleBindingRevision = pgTable(
 		permissionPolicy: text().$type<"local-role" | "frozen-ceiling">().notNull(),
 		permissionCount: integer().notNull(),
 		permissionDigest: text().notNull(),
+		membershipId: uuid(),
+		membershipGeneration: bigint({ mode: "number" }),
+		selectionGroupId: uuid(),
+		selectionVersion: bigint({ mode: "number" }),
 		sealed: boolean().notNull().default(false),
 	},
 	(table) => [
 		primaryKey({ columns: [table.bindingId, table.revision] }),
+		foreignKey({
+			name: "access_role_binding_revision_admission_fk",
+			columns: [table.membershipId, table.membershipGeneration],
+			foreignColumns: [accessMembershipAdmission.membershipId, accessMembershipAdmission.generation],
+		}).onDelete("restrict"),
+		foreignKey({
+			name: "access_role_binding_revision_selection_fk",
+			columns: [table.membershipId, table.membershipGeneration, table.selectionGroupId, table.selectionVersion],
+			foreignColumns: [accessGroupMembershipEvent.membershipId, accessGroupMembershipEvent.generation, accessGroupMembershipEvent.groupId, accessGroupMembershipEvent.version],
+		}).onDelete("restrict"),
+		index("access_role_binding_revision_admission_idx")
+			.on(table.membershipId, table.membershipGeneration, table.bindingId, table.revision)
+			.where(sql`${table.membershipId} is not null`),
+		check(
+			"access_role_binding_revision_eligibility_check",
+			sql`((${table.membershipId} is null and ${table.membershipGeneration} is null and ${table.selectionGroupId} is null and ${table.selectionVersion} is null) or (${table.membershipId} is not null and ${table.membershipGeneration} between 1 and 9007199254740991 and ((${table.selectionGroupId} is null and ${table.selectionVersion} is null) or (${table.selectionGroupId} is not null and ${table.selectionVersion} between 1 and 9007199254740991)))) and (${table.membershipId} is null)=(${table.membershipGeneration} is null) and (${table.selectionGroupId} is null)=(${table.selectionVersion} is null)`,
+		),
 		foreignKey({
 			name: "access_role_binding_revision_event_fk",
 			columns: [table.bindingId, table.revision],

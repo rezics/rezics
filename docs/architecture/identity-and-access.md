@@ -443,6 +443,18 @@ be reconciled with the representation owner before dependent bindings or APIs
 activate. Initial table shape and administrator-predicate fixtures alone do not
 qualify the full binding contract or any current management decision.
 
+Sealed binding terms retain an optional recipient eligibility dependency: a concrete
+membership/admission key and, when required, the exact direct Group assignment
+event. Only subject recipients may select this dependency, and the membership
+must belong to that exact subject. Null explicitly means the binding has no such
+recipient dependency; an empty or missing Group does not create an all-members
+grant. A Group dependency references an `assign` event, never a removal/prune.
+The head effect retains shared tree, enrollment and selection-set fences and
+checks the current generation, selected assignment version and active Group.
+Later policy must repeat those checks; persisted active state alone is not authority.
+An amendment changes these terms under new current admission; it does not mutate
+the old dependency. Revocation can close a binding whose eligibility already ended.
+
 The immutable role/recipient/target choice makes assignment identity and revision
 lineage explicit. An alternative permits all three to change inside one versioned
 object, but every dependent proof would then need to distinguish a terms edit from

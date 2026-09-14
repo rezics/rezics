@@ -1,3 +1,14 @@
+SET search_path TO public;
+
+ALTER TABLE "access_role_binding_revision" ADD COLUMN "membership_id" uuid;
+ALTER TABLE "access_role_binding_revision" ADD COLUMN "membership_generation" bigint;
+ALTER TABLE "access_role_binding_revision" ADD COLUMN "selection_group_id" uuid;
+ALTER TABLE "access_role_binding_revision" ADD COLUMN "selection_version" bigint;
+CREATE INDEX "access_role_binding_revision_admission_idx" ON "access_role_binding_revision" ("membership_id","membership_generation","binding_id","revision") WHERE "membership_id" is not null;
+ALTER TABLE "access_role_binding_revision" ADD CONSTRAINT "access_role_binding_revision_admission_fk" FOREIGN KEY ("membership_id","membership_generation") REFERENCES "access_membership_admission"("membership_id","generation") ON DELETE RESTRICT;
+ALTER TABLE "access_role_binding_revision" ADD CONSTRAINT "access_role_binding_revision_selection_fk" FOREIGN KEY ("membership_id","membership_generation","selection_group_id","selection_version") REFERENCES "access_group_membership_event"("membership_id","generation","group_id","version") ON DELETE RESTRICT;
+ALTER TABLE "access_role_binding_revision" ADD CONSTRAINT "access_role_binding_revision_eligibility_check" CHECK ((("membership_id" is null and "membership_generation" is null and "selection_group_id" is null and "selection_version" is null) or ("membership_id" is not null and "membership_generation" between 1 and 9007199254740991 and (("selection_group_id" is null and "selection_version" is null) or ("selection_group_id" is not null and "selection_version" between 1 and 9007199254740991)))) and ("membership_id" is null)=("membership_generation" is null) and ("selection_group_id" is null)=("selection_version" is null));
+
 -- Exact admission/selection dependencies never follow a later rejoin or reassignment.
 CREATE OR REPLACE FUNCTION public.access_role_binding_recipient_is_current(p_binding uuid,p_revision bigint)
 RETURNS boolean LANGUAGE sql VOLATILE SET search_path=pg_catalog,public AS $$

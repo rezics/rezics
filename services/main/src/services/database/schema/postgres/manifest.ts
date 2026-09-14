@@ -92,6 +92,8 @@ export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly 
 };
 
 export const PostgreSqlSchemaFunctionNames = [
+	"access_role_binding_recipient_is_current",
+	"lock_access_role_binding_eligibility",
 	"initialize_access_role_binding_scope",
 	"guard_access_role_binding_scope",
 	"guard_access_role_binding_head",

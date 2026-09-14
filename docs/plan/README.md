@@ -4,9 +4,6 @@ Follow the [execution workflow](execution-workflow.md) for program authority, ph
 
 ## Active execution
 
-Production-artifact prerequisite: separate typed-snapshot migration generation from
-replay and qualification while retaining the existing baseline and generator guards.
-
 | Field | Current selection |
 | --- | --- |
 | Scope | Complete selected identity, membership, mixed authorization and connected-application backend contracts. |
@@ -59,7 +56,7 @@ This is the sole progress table. Module files detail remaining work; linked test
 
 | ID | Module | Dependencies | Design | Implementation | Verification |
 | --- | --- | --- | --- | --- | --- |
-| M01 | [Foundation](modules/foundation.md) | None | Identity/access and adapter contracts selected | RoleBinding storage/snapshots implemented; policy, APIs and consumers pending | G2 partial; RoleBinding remains unqualified. Remaining [foundation](../testing/foundation.md) and [IAM/APP](../testing/identity-and-access.md) qualification pending. |
+| M01 | [Foundation](modules/foundation.md) | None | Identity/access and adapter contracts selected | RoleBinding storage/snapshots and exact recipient eligibility implemented; live policy, APIs and consumers pending | G2 partial; RoleBinding and typed migration generation remain unqualified. Remaining [foundation](../testing/foundation.md) and [IAM/APP](../testing/identity-and-access.md) qualification pending. |
 | M02 | [Knowledge and graph](modules/knowledge-and-graph.md) | M01 | Graph, Tag classification and Event temporal facts selected | Pending target completion | Pending |
 | M03 | [Content and media](modules/content-and-media.md) | M01, M02 contracts | Defined | Pending target completion | Pending |
 | M04 | [Catalog](modules/catalog.md) | M01-M03 contracts | Cross-domain Work/releases and event-time adapters selected; domain mappings/source-free cases required | Pending target completion | Pending |

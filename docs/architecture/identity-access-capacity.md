@@ -435,3 +435,13 @@ row and its primary-key entry to the private registry allocation path. Include t
 cost even when no binding is ever written. The earlier registry-only tuple/index
 sample does not measure this additional relation. A failed scope allocation rolls
 back its fence with the same transaction; immutable scope identities retain theirs.
+
+Recipient-dependent binding terms add two UUIDs and two bigint values at maximum
+(48 payload bytes), plus a partial membership/generation reverse index. Reserve
+another 160 bytes per dependent revision including its index: 80 GB at 500M rows
+and 480 GB at 3B rows, before the overheads above. Independent terms create no
+reverse-index entry. Exact admission and Group-event FKs preserve historical
+meaning without copying membership history. Binding writes add bounded tree,
+membership and optional selection-set locks and exact current-selection probes;
+live policy must batch those probes within the combined decision budget. These
+are planning inputs, with native race, plan and workload qualification pending.
