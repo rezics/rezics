@@ -56,7 +56,7 @@ This is the sole progress table. Module files detail remaining work; linked test
 
 | ID | Module | Dependencies | Design | Implementation | Verification |
 | --- | --- | --- | --- | --- | --- |
-| M01 | [Foundation](modules/foundation.md) | None | Identity/access and adapter contracts selected | RoleBinding/representation persistence and readers plus native subject/path evaluation implemented; complete management, APIs, consumers and recovery pending | G2 partial; new IAM work and typed migration generation remain unqualified. Remaining [foundation](../testing/foundation.md) and [IAM/APP](../testing/identity-and-access.md) qualification pending. |
+| M01 | [Foundation](modules/foundation.md) | None | Identity/access and adapter contracts selected | RoleBinding/representation persistence and native subject/path evaluation implemented; OAuth protocol schema generated; management, App contracts, APIs, consumers and recovery pending | G2 partial; new IAM/OAuth work and artifact generators remain unqualified. Remaining [foundation](../testing/foundation.md) and [IAM/APP](../testing/identity-and-access.md) qualification pending. |
 | M02 | [Knowledge and graph](modules/knowledge-and-graph.md) | M01 | Graph, Tag classification and Event temporal facts selected | Pending target completion | Pending |
 | M03 | [Content and media](modules/content-and-media.md) | M01, M02 contracts | Defined | Pending target completion | Pending |
 | M04 | [Catalog](modules/catalog.md) | M01-M03 contracts | Cross-domain Work/releases and event-time adapters selected; domain mappings/source-free cases required | Pending target completion | Pending |

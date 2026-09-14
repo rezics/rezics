@@ -1,6 +1,11 @@
 version: "3"
 
 tasks:
+    auth:oauth-schema:generate:
+        desc: Produce protocol table declarations from the pinned OAuth/MCP/JWT metadata without database or adapter qualification.
+        cmds:
+            - yarn exec tsx scripts/generate-oauth-schema.ts
+
     dev:
         desc: Start the backend API and recommendation worker.
         env:

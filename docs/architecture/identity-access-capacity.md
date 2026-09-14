@@ -23,7 +23,7 @@ They are design inputs, not measurements or safe physical-layout commitments.
 | Representation grant or live parent dependency | 384-640 | 192-320 | 1152-1920 |
 | Consent or installation scope grant | 384-640 | 192-320 | 1152-1920 |
 | OAuth client configuration | 1024-2048 | 512-1024 | 3072-6144 |
-| Active token/credential metadata | 256-512 | 128-256 | 768-1536 |
+| API-key/other credential metadata; opaque OAuth rows are inventoried below | 256-512 | 128-256 | 768-1536 |
 | Security transition event | 512-1024 | 256-512 | 1536-3072 |
 
 Count each stored dependency, selected resource and event separately. With M
@@ -128,9 +128,11 @@ stores one opaque access-token row for each issuance, including client credentia
 User offline issuance also creates a refresh-token row; rotation creates new access
 and refresh rows and retains/revokes prior records under the provider lifecycle.
 Count these rows separately from consent, installation and live dependency records.
-The existing 256-512 bytes per active credential estimate remains 128-256 GB at
-500M rows and 768-1536 GB at 3B rows, before retained revoked tokens, payloads, WAL,
-replicas and reserve. The adapter fixture does not measure or accept that width.
+The generated provider tables have a more specific index inventory than the initial
+generic credential estimate. The provider-row budgets below replace that estimate
+for OAuth access/refresh records; do not add both estimates for the same row.
+Retained revoked tokens, maximum payloads, WAL, replicas and reserve remain separate.
+The adapter fixture does not measure or accept these widths.
 
 The September 14, 2026 Bun/Drizzle fixture counted nine SQL statements for each of
 two successful opaque MCP verifications through authenticated HTTP introspection.
@@ -150,6 +152,19 @@ requires bounded credential admission/retention and indexed cleanup of at most
 shared reads if the remote protocol overhead prevents the combined target, while
 preserving exact live revocation and the external privacy presentation boundary.
 No offline allow cache or larger unchecked query budget is elected by this fixture.
+
+The production protocol generator includes the provider's unique token digests,
+client/user/session and refresh/code reverse indexes plus expiry/ID keysets. Planning
+bytes per row including those indexes are 1,536 for client metadata, 640 for a
+client/resource link, 1,024 for opaque access metadata, 1,152 for refresh metadata,
+768 for protocol consent and 320 for assertion replay protection. At 500M rows
+these are 768, 320, 512, 576, 384 and 160 GB respectively; at 3B rows, 4,608,
+1,920, 3,072, 3,456, 2,304 and 960 GB. They exclude large optional metadata/replay
+payloads and all operational overheads. Measure real tuples/indexes in verification.
+Count native consent/context/installation records separately from protocol rows.
+Server JWKS and registered API resource definitions are configuration inventory,
+not one row per account or selected Realm/content resource. Cleanup must preserve
+live token dependencies and use bounded child-before-parent work.
 
 ## Private registry cost
 

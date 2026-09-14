@@ -181,6 +181,35 @@ within the unresolved [Hub execution decisions](../research/ai-hub-execution.md)
 
 ## Qualified external token profile
 
+### Production protocol storage
+
+`task services-main:auth:oauth-schema:generate` produces
+[`auth-oauth.generated.ts`](../../services/main/src/services/database/schema/auth-oauth.generated.ts)
+from the pinned Better Auth/provider/MCP/CIMD 1.7.3 metadata. The owning generator
+rejects unreviewed versions, models, field types and reference shapes. It preserves
+required fields (including the metadata's required-by-default rule), uniqueness,
+compound indexes and concrete references. Existing private account/session UUID
+owners are reused; this is not another account store. Provider defaults remain
+provider behavior rather than silently becoming new database defaults.
+
+Protocol records normally use native UUID identities. The client-assertion replay
+table deliberately uses text: the pinned provider supplies a namespaced, 24-byte
+digest encoded as a 32-character base64url ID even with UUID generation configured.
+Client/resource protocol identifiers remain text and reference their exact unique
+keys. Arrays use the native PostgreSQL array representation exercised by the
+protocol fixture. JSON fields remain unknown until their owning boundary validates
+them. Expiry/ID indexes support bounded cleanup; they do not implement retention.
+
+The generator creates source artifacts atomically under `.temp/`, without starting
+an auth server, contacting an external client or opening a database. Generate SQL
+with the separate typed migration owner after reviewing the resulting model. Its
+plural model aliases are an adapter boundary, not public API models. Production
+client privacy/admission, App/consent/installation records, token-domain context,
+workers and actual adapter/schema qualification remain required before mounting
+the provider in the application's authentication configuration.
+
+### Token and client profile
+
 The September 14, 2026 [executable qualification](../testing/identity-and-access.md#oauth-adapter-qualification)
 selects opaque access tokens, ordinary opaque refresh tokens and separately signed
 RS256 OIDC ID tokens. Keep JWT signing enabled and set the locally patched

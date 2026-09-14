@@ -1,4 +1,5 @@
 export * from "./access";
+export * from "./auth-oauth.generated";
 export * from "./access-identity";
 export * from "./access-role";
 export * from "./access-role-binding";
