@@ -30,7 +30,7 @@
     "scenarios.tsv": "07738e2923baef54d4e4baebedc79b5b5dc25e2196685b51cd170c40f34c7cda",
     "capacity.json": "00565a116367dbdaee7cbddd4e1e0c8ace7be142546c0b46b436f1a32c8b23d4",
     "capacity.md": "7117a8893f40bcfd09a116d974ad2ef3d06b2e6f7d47d725a80c2f1e54e13f84",
-    "dependency-manifest.json": "195cd074d45d4ea265c55981e78f2254a0c32c8ab616e7f381a997f4d6ff553e"
+    "dependency-manifest.json": "0f86596f0b6ec7f7ae3c92e7f9f45a77c4c30d5e43e1911ff1b83229616cc10c"
   },
   "artifact_paths": {
     "current-schema-map.tsv": "docs/testing/database/current-schema-map.tsv",
@@ -52,11 +52,12 @@
     "docs/architecture/database/native-work.md": "9c26c9330ca030b10bb92d1d4595acba6f0dbceffc9538749849820faa1e5e39",
     "docs/architecture/database/relationship-graph.md": "434e3605f60744bc4325193bdc3dab3f4effa95933ab54d5b2acb805fc1bf123",
     "docs/architecture/identity-access-capacity.md": "1fdb8aa6f2be0711768956fb6eca04b1332b42c5ad12e2332e466fcd081e104f",
-    "docs/architecture/identity-and-access-experience.md": "9ae7dfe01701eaafbc8d9de98794db8c0908bedd841c14ff21706be0d1cafdb6",
+    "docs/architecture/identity-and-access-experience.md": "b76f3949bba7ade8b2584aac2ca640ac77c270b1a21f605df2339b0a2e955f9b",
     "docs/architecture/identity-and-access.md": "b1c7c362b54d70a833b29994083cf92d07ae8d411d70ad1eb0f23fc1739b574e",
+    "docs/architecture/product-design-principles.md": "56ef4508dd3fa0dde7410147d33826e94917dc95550f46da7330ed055db63824",
     "docs/plan/README.md": "d4632a7996e6feb03a4173d86be5569be4f4fd6188966b692855dd684c4190ff",
     "docs/plan/backend-acceptance.md": "492c34a8b124fdf0acf70fe2b1cb8033d60b24c66fc62afd995c909637a7285e",
-    "docs/plan/frontend.md": "622b54b37e29a6816509c457547c57931db348202a35255ae5f3027aafc9ffa1",
+    "docs/plan/frontend.md": "cb943560fe058c27ab2ec235a216096ac4c51d5520561960521d50aabab3b1c6",
     "docs/plan/modules/ai-hub.md": "c92ed55823ffa90e46a2ad9ba39ee71c12e08013d1a4408c91df625ce0c856cd",
     "docs/plan/modules/catalog.md": "3ef45bbe98325b887a35671f2da9a5f4135f28e807edaa86ea9834a54e956e84",
     "docs/plan/modules/community-and-governance.md": "b035fb75b24e8d232d96849f26a6e69021834da483f40ee433f59f7e610e7963",
@@ -81,6 +82,6 @@
     "docs/testing/relationship-graph.md": "894859fa72a616701d161d81dee4aed8411938b77916bc35b996289619e5a961",
     "docs/testing/source-conformance.md": "4ea670aa289cf080a1d6838a275b0b662fd3d4ced595a2e35e35d4cd12d27e5c",
     "docs/testing/wiki-composition.md": "951d79cdc5040f703b7712fae630e5c00c64719c1705cb59ddb6edbeb7237a30",
-    "docs/testing/database/check_design.py": "24a69ac8e1d634e65fd03f5cdb727827a3d6ac3c5cc6ccd0544e06c9796f200d"
+    "docs/testing/database/check_design.py": "0ca316cf5ef2d2425bb8038c5891f2e214e355727800f7186b20a52fbf82285d"
   }
 }

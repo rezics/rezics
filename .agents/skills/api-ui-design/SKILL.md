@@ -1,91 +1,59 @@
 ---
 name: api-ui-design
-description: Design or review REZICS UI when information organization, interaction capabilities, or API-to-UI mappings change.
+description: Design or review REZICS capability/API contracts and GUI interactions. Use for semantic or information-organization changes, not routine edits.
 ---
 
 # API and UI design
 
-Structured APIs are the primary interface for REZICS capabilities. UI makes
-those capabilities understandable and usable by people. Preserve the API's
-business meaning while organizing information and actions around the user's task.
-Follow the current request and the [repository scope and evidence rules](../../../AGENTS.md#task-scope-and-evidence).
+Apply the [product design principles](../../../docs/architecture/product-design-principles.md)
+and current [task scope](../../../AGENTS.md#task-scope-and-evidence). This skill
+supplies methods; feature owners retain decisions and acceptance evidence.
 
-## Capability fidelity
+## Select the relevant path
 
-Ground coverage in the owning request and response schemas, runtime validation,
-server capability and permission policies, and affected consumers. Check the
-effective contract for the current context; a shared type's alternatives may
-exceed what a particular operation permits.
+| Task | Method |
+| --- | --- |
+| Capability/API design | Use the contract method below. Assess affected consumers, but do not require GUI design or implementation outside the task. |
+| GUI design | Read [GUI design](references/gui-design.md). Use existing authorized contracts; propose needed contract changes explicitly. |
+| Both | Apply both methods and connect each relevant capability to its user task and state transition. A small mapping can help; it is not a required report for every change. |
 
-- Give each relevant user-facing API capability a discoverable, usable UI path.
-  Do not reduce cardinality, valid choices or operations to fit a control.
-  Identify actual role or product restrictions and uncovered capabilities;
-  do not invent restrictions to dismiss a gap.
-- Preserve identities, limits and collection meaning: a set, ordered list and
-  tuple need different interactions. Multiple values and their relationship
-  are separate capabilities; retain operators such as `any-of`, `all-of` and
-  `none-of`, including supported nesting.
-- Preserve unchanged meaning through editing, submission and redisplay,
-  including state created through the API and switches between basic and
-  advanced controls. Retain distinctions between omitted values, `null` and
-  empty collections where the contract makes them meaningful.
-- Carry operation semantics through the UI: range boundaries, selection scope
-  across pages, batch behavior and partial failures matter when supported.
-  Protocol details such as opaque continuation tokens can be handled by the
-  client without requiring users to edit them.
+Select by the changed responsibility, not a keyword or the presence of a frontend
+directory. Routine copy, style or internal edits use their owning checks without
+reopening product/API design. Read only applicable references; reuse context already
+read. Use [research and validation](../research-and-validation/SKILL.md) for material
+uncertainty or a substantive new choice, retaining original alternatives.
 
-For a complex change or audit, a small mapping from capability to UI expression,
-request/result behavior, evidence and remaining gap can clarify coverage. Choose
-the useful granularity for the affected feature; a table is not a required artifact.
+## Capability and API contracts
 
-## Reading
+Identify the intended users/clients, outcome and actual constraints. Read the
+owning schemas, runtime validation, service policy and affected consumers to
+establish current behavior; distinguish it from the proposed target. A shared
+type's alternatives can exceed what one operation allows.
 
-Identify what users need to find, compare or decide. Choose the information and
-presentation for that task: a table can support comparison across common
-attributes; a list or cards can support browsing individual subjects. Group
-related content and use descriptive headings to support
-[scanning](https://www.nngroup.com/articles/layer-cake-pattern-scanning/).
-Keep identity, units, missing values and status understandable.
+- Define logical identities, resources and domain operations. Choose a useful
+  boundary rather than one endpoint per table, field or GUI control.
+- Specify inputs, state transitions, observable outcomes and authorization,
+  including invalid, stale, denied, partial and unavailable states where relevant.
+  Preserve omitted/null/empty, units, ordering and collection semantics.
+- Define pagination, selection scope, batch atomicity, idempotent retries and
+  long-operation progress/cancellation where the capability needs them. Keep
+  work bounded under the owning capacity policy.
+- Keep private/internal data and policy behind the correct boundary. GUI, SDK,
+  MCP and other adapters must not recreate independent business authorization.
+- Check whether aggregation or orchestration reduces client work without
+  hiding failure, crossing authority boundaries or creating oversized responses.
+  Resource-oriented methods and explicit domain commands are both available.
 
-Use summaries and [progressive disclosure](https://www.nngroup.com/articles/progressive-disclosure/)
-to prioritize common needs while keeping detail and advanced capabilities
-reachable. Make the route to those capabilities clear, and keep active conditions
-and consequences visible enough to understand the current result.
-
-## Interaction
-
-Choose controls by intent, option scale, frequency and device within the
-[existing UI system](../../../libraries/ui/README.md). These are conditional
-patterns, not component mandates:
-
-- A small set of multiple choices can use a
-  [checkbox group](https://design-system.service.gov.uk/components/checkboxes/).
-- Many or remotely searched choices can use a searchable multi-select with
-  persistent selected items. [Input chips](https://developer.android.com/develop/ui/compose/components/chip)
-  can display and remove chosen objects; filter chips can toggle short filter
-  choices. Keep the full selection inspectable and editable when summarizing it.
-- Choose instant or explicit application of filters according to task complexity
-  and response cost. Keep draft and applied state distinguishable, and make
-  clearing behavior clear. [Carbon filtering](https://carbondesignsystem.com/patterns/filtering/)
-  provides examples of these tradeoffs.
-
-Make the affected objects, selection state and execution outcome clear. Preserve
-input on recoverable failure and expose relevant per-item results for batch work.
-Use the chosen component's keyboard and accessibility behavior; focus and
-selection are distinct states. Consult the relevant
-[WAI-ARIA pattern](https://www.w3.org/WAI/ARIA/apg/patterns/) when needed.
+Use concrete producer-to-consumer examples to examine the contract. In design-only
+work, state unresolved choices and validation criteria. In implementation work,
+update the affected contracts and authorized consumers together, use owning
+generators and run relevant deterministic/stateful checks. Existing backend/frontend
+execution gates are unchanged by this skill.
 
 ## Completion
 
-Use evidence that matches the changed capability. For example, verify that two
-distinct selections reach the request together and survive redisplay, or that
-editing a condition preserves its operator and grouping. Component props alone
-do not prove coverage. Reuse or update relevant behavior checks proportionally.
-
-Use [external-content-value](../external-content-value/SKILL.md) for changed
-audience-facing text and [storybook-ui-review](../storybook-ui-review/SKILL.md)
-for visible implementation changes. Those owners govern localization, rendered
-evidence and required checks; this skill adds no separate approval gate.
-Finish when the authorized outcome is met, scoped findings are resolved and
-required checks pass. Report remaining gaps and unverified boundaries accurately;
-AI review and static checks do not establish measured human usability.
+Validate the changed meaning, not only matching field names. For example, a retry
+must not duplicate an effect, a two-value selection must remain two values, and a
+partial result must not become success. Use existing owner tests and verification
+permissions proportionately. Report what was checked and what remains unverified;
+contract integrity does not establish rendered or human-usability acceptance.

@@ -428,6 +428,7 @@ def design_documents():
     return sorted({
         *(p for p in ARCHITECTURE.glob("*.md") if p.name != "capacity.md"),
         *(ROOT / "docs/architecture" / name for name in (
+            "product-design-principles.md",
             "identity-and-access.md", "connected-apps.md",
             "identity-and-access-experience.md", "identity-access-capacity.md",
         )),

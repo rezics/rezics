@@ -2,15 +2,14 @@
 
 Status: selected GUI/API design contract; rendered and human-use acceptance is pending.
 The [identity contract](identity-and-access.md) and [connected-app contract](connected-apps.md)
-own authorization. This owner applies the [shared capability-presentation policy](../../libraries/ui/README.md#capability-presentation)
+own authorization. This owner applies the [product design principles](product-design-principles.md)
 to how people use those capabilities.
 
 ## Ordinary experience and progressive disclosure
 
-Optimize for the approximately 90% ordinary-user audience identified by the
-maintainer. This is a product priority, not a measured population share, a limit
-on feature coverage or a claim of 90% task success. Common tasks must be usable
-without understanding AuthPrincipal, RoleBinding, delegation chains or token claims.
+For ordinary identity tasks, users should not need to understand AuthPrincipal,
+RoleBinding, delegation chains or token claims. Apply the common ordinary-user
+priority and capability-fidelity contract to the following task audiences.
 
 Organize three task audiences, not three mandatory nested screens:
 
@@ -26,10 +25,9 @@ avoid stacks of nested dialogs. Do not present all API fields or all administrat
 concepts on the ordinary account/profile screen. Presets configure the same
 backend contracts as advanced controls; no second simplified permissions system.
 
-This applies [progressive disclosure](https://www.nngroup.com/articles/progressive-disclosure/)
-(Nielsen, 2006) and [recognition rather than recall](https://www.nngroup.com/articles/recognition-and-recall/)
-to REZICS tasks. These sources guide organization, not measured usability of this
-design; validate the chosen split and navigation with representative users.
+The [common evidence and limits](product-design-principles.md#evidence-and-limits)
+support progressive disclosure and recognizable choices. Validate this feature's
+split and navigation with representative users; the sources do not establish its usability.
 
 ## Defaults, attribution and recovery
 

@@ -2,6 +2,10 @@
 
 Dependency: [G4](backend-acceptance.md). Define shared Block and API contracts earlier; implement interfaces after backend qualification.
 
+Apply the [product design principles](../architecture/product-design-principles.md)
+across features. The API/UI skill supplies the relevant GUI or combined workflow;
+feature contracts specify the actual controls and evidence, not a fixed layer count.
+
 ## Remaining experiences
 
 - Identity and access: follow the [layered GUI contract](../architecture/identity-and-access-experience.md). Ordinary users enter a valid main Entity and complete reading/posting/joining/App connection without learning Principal, Binding or delegation internals. Collaboration controls provide named members/teams and role presets; dedicated advanced workspaces expose mixed recipients, multiple custom roles, scopes, representation, client/installation management and restricted diagnostics.

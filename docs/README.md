@@ -1,6 +1,7 @@
 # Documentation
 
 - [Implementation plan](plan/README.md): autonomous policy, module dependencies and remaining work.
+- [Product design principles](architecture/product-design-principles.md): API-centered capabilities, layered GUI, capability fidelity and evidence-based design choices.
 - [Identity and access](architecture/identity-and-access.md): private AuthPrincipals, shared public Entities, membership, mixed grantees and scoped representation.
 - [Connected applications](architecture/connected-apps.md): third-party Entity connections, OAuth, installations and REZICS MCP access.
 - [Identity and access experience](architecture/identity-and-access-experience.md): ordinary-user defaults and progressively disclosed collaboration/administration.

@@ -12,6 +12,7 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) before changing files.
 - When maintaining agent instructions or adapting to a different model, consult current [official model guidance](https://developers.openai.com/api/docs/guides/latest-model). Apply relevant changes and validate them on representative tasks.
 - If a repository rule or skill blocks completion, identify the exact file and instruction, explain the concrete conflict, and report the remaining work.
 - Put task-created temporary files in `.temp/`. Remove only those files before finishing unless retention was requested. Durable requested deliverables belong in their owning location; preserve pre-existing and user-provided files.
+- Define reusable product capabilities through explicit API contracts with server-enforced policy. Design GUI around user tasks, useful defaults and discoverable advanced controls; preserve capability semantics and existing advanced state.
 
 ## Git commits
 
@@ -43,10 +44,10 @@ Follow only the owners relevant to the requested change:
 | --- | --- |
 | Substantive design, research or proposal evaluation | [Research and validation](.agents/skills/research-and-validation/SKILL.md). Study alternatives, assess evidence and validate the claims that matter to the decision. |
 | Web routes, screens or feature organization | [Web feature organization](docs/architecture/web-feature-organization.md). `apps/web/app` contains framework boundary adapters; implementation belongs to features or existing infrastructure owners. |
-| UI information organization, interactions or API-to-UI capability changes | [API and UI design](.agents/skills/api-ui-design/SKILL.md). Preserve API capabilities and semantics while designing information and actions around the user's task. |
+| Product capabilities, API contracts or GUI interaction design | [Product design principles](docs/architecture/product-design-principles.md) and [API/UI workflow](.agents/skills/api-ui-design/SKILL.md). Select the API, GUI or combined path required by the task. |
 | Shared UI or controls | [UI conventions](libraries/ui/README.md). Use `@rezics/ui` and SharkUI; do not introduce another UI library. Preserve `src/ui` as the upstream mirror; project components belong in `src/custom`. |
 | Visible text or localization | [Localization](libraries/i18n/README.md). Every frontend string belongs to its owner's typed locale resources. For external content, use [external-content-value](.agents/skills/external-content-value/SKILL.md); optional copy must serve an audience need. |
-| Identity, resource responses, URLs or redirects | [Slug addressing](docs/architecture/unit-slug-addressing.md). IDs are immutable identities; scoped slugs are optional addresses. |
+| Resource slugs, canonical page links or address redirects | [Slug addressing](docs/architecture/unit-slug-addressing.md). IDs are immutable identities; scoped slugs are optional addresses. |
 | Schema, queries, APIs, queues, workers, caches or persisted flows | [Capacity planning](docs/architecture/data-integrity-and-workload-budgets.md#capacity-planning) when costs or workload assumptions change; [database conventions](CONTRIBUTING.md#database-and-catalog) for schema and catalog changes. |
 | Permissions or grantability | [Access model](libraries/access/README.md); use the shared vocabulary and server-side enforcement. |
 | Aspire topology, lifecycle or diagnostics | [Aspire skill](.agents/skills/aspire/SKILL.md). Ordinary application edits do not trigger it. |
