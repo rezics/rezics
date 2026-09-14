@@ -24,6 +24,7 @@ import {
 	cancelOrganizationMembershipInvitation,
 	controlCatalogSourceJob,
 	createAccessRole,
+	createAccountIdentity,
 	createCatalogDefinition,
 	createCatalogResource,
 	createGroupingOrderProfile,
@@ -241,6 +242,7 @@ import {
 	getCurrentParticipation,
 	getImageAssetsByIdContent,
 	getImageAssetsByIdPresentationsByRoleContent,
+	getMainIdentityPreference,
 	getPublicUnitSeoProjection,
 	getPublicUnitSlugAddress,
 	getUnitReference,
@@ -571,6 +573,7 @@ import {
 	saveProgramContentDraft,
 	saveTextVersionContentDraft,
 	selectParticipation,
+	setMainIdentityPreference,
 	transitionCatalogSemanticState,
 	updateActingEntityPresentation,
 	updateCatalogLifecycle,
@@ -648,6 +651,12 @@ import type {
 	CreateAccessRoleStatus422,
 	CreateAccessRoleStatus429,
 	CreateAccessRoleStatus500,
+	CreateAccountIdentityOptions,
+	CreateAccountIdentityStatus200,
+	CreateAccountIdentityStatus400,
+	CreateAccountIdentityStatus422,
+	CreateAccountIdentityStatus429,
+	CreateAccountIdentityStatus500,
 	CreateCatalogDefinitionOptions,
 	CreateCatalogDefinitionStatus200,
 	CreateCatalogDefinitionStatus400,
@@ -1895,6 +1904,9 @@ import type {
 	GetImageAssetsByIdPresentationsByRoleContentStatus404,
 	GetImageAssetsByIdPresentationsByRoleContentStatus422,
 	GetImageAssetsByIdPresentationsByRoleContentStatus500,
+	GetMainIdentityPreferenceStatus200,
+	GetMainIdentityPreferenceStatus429,
+	GetMainIdentityPreferenceStatus500,
 	GetPublicUnitSeoProjectionOptions,
 	GetPublicUnitSeoProjectionStatus200,
 	GetPublicUnitSeoProjectionStatus404,
@@ -4096,6 +4108,12 @@ import type {
 	SelectParticipationStatus400,
 	SelectParticipationStatus422,
 	SelectParticipationStatus500,
+	SetMainIdentityPreferenceOptions,
+	SetMainIdentityPreferenceStatus200,
+	SetMainIdentityPreferenceStatus400,
+	SetMainIdentityPreferenceStatus422,
+	SetMainIdentityPreferenceStatus429,
+	SetMainIdentityPreferenceStatus500,
 	TransitionCatalogSemanticStateOptions,
 	TransitionCatalogSemanticStateStatus200,
 	TransitionCatalogSemanticStateStatus400,
@@ -4895,6 +4913,259 @@ export function useReviseAccessRole<TContext>(
 			| ReviseAccessRoleStatus500
 		>,
 		ReviseAccessRoleOptions,
+		TContext
+	>;
+}
+
+export const createAccountIdentityMutationKey = () =>
+	[{ url: "/api/v1/account/identities" }] as const;
+
+export function createAccountIdentityMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = createAccountIdentityMutationKey();
+	return mutationOptions<
+		CreateAccountIdentityStatus200,
+		ResponseErrorConfig<
+			| CreateAccountIdentityStatus400
+			| CreateAccountIdentityStatus422
+			| CreateAccountIdentityStatus429
+			| CreateAccountIdentityStatus500
+		>,
+		CreateAccountIdentityOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			return createAccountIdentity({ ...config, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * @description Create a new controlled Entity from explicitly supplied public names. The first identity also requires a main-choice precondition. Retrying an operation returns its original receipt without renewing control.
+ * {@link /api/v1/account/identities}
+ */
+export function useCreateAccountIdentity<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			CreateAccountIdentityStatus200,
+			ResponseErrorConfig<
+				| CreateAccountIdentityStatus400
+				| CreateAccountIdentityStatus422
+				| CreateAccountIdentityStatus429
+				| CreateAccountIdentityStatus500
+			>,
+			CreateAccountIdentityOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? createAccountIdentityMutationKey();
+
+	const baseOptions = createAccountIdentityMutationOptions(config) as UseMutationOptions<
+		CreateAccountIdentityStatus200,
+		ResponseErrorConfig<
+			| CreateAccountIdentityStatus400
+			| CreateAccountIdentityStatus422
+			| CreateAccountIdentityStatus429
+			| CreateAccountIdentityStatus500
+		>,
+		CreateAccountIdentityOptions,
+		TContext
+	>;
+
+	return useMutation<
+		CreateAccountIdentityStatus200,
+		ResponseErrorConfig<
+			| CreateAccountIdentityStatus400
+			| CreateAccountIdentityStatus422
+			| CreateAccountIdentityStatus429
+			| CreateAccountIdentityStatus500
+		>,
+		CreateAccountIdentityOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		CreateAccountIdentityStatus200,
+		ResponseErrorConfig<
+			| CreateAccountIdentityStatus400
+			| CreateAccountIdentityStatus422
+			| CreateAccountIdentityStatus429
+			| CreateAccountIdentityStatus500
+		>,
+		CreateAccountIdentityOptions,
+		TContext
+	>;
+}
+
+export const getMainIdentityPreferenceQueryKey = () =>
+	[{ url: "/api/v1/account/main-identity" }] as const;
+
+type GetMainIdentityPreferenceQueryKey = ReturnType<typeof getMainIdentityPreferenceQueryKey>;
+
+export function getMainIdentityPreferenceQueryOptions(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getMainIdentityPreferenceQueryKey();
+	return queryOptions<
+		GetMainIdentityPreferenceStatus200,
+		ResponseErrorConfig<GetMainIdentityPreferenceStatus429 | GetMainIdentityPreferenceStatus500>,
+		GetMainIdentityPreferenceStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return getMainIdentityPreference({
+				...config,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * @description Read the recorded private main Entity choice. This response does not authorize acting as that Entity.
+ * {@link /api/v1/account/main-identity}
+ */
+export function useGetMainIdentityPreference<
+	TData = GetMainIdentityPreferenceStatus200,
+	TQueryData = GetMainIdentityPreferenceStatus200,
+	TQueryKey extends QueryKey = GetMainIdentityPreferenceQueryKey,
+>(
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetMainIdentityPreferenceStatus200,
+				ResponseErrorConfig<
+					GetMainIdentityPreferenceStatus429 | GetMainIdentityPreferenceStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const queryKey = resolvedOptions?.queryKey ?? getMainIdentityPreferenceQueryKey();
+
+	const queryResult = useQuery(
+		{
+			...getMainIdentityPreferenceQueryOptions(config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<GetMainIdentityPreferenceStatus429 | GetMainIdentityPreferenceStatus500>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const setMainIdentityPreferenceMutationKey = () =>
+	[{ url: "/api/v1/account/main-identity" }] as const;
+
+export function setMainIdentityPreferenceMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = setMainIdentityPreferenceMutationKey();
+	return mutationOptions<
+		SetMainIdentityPreferenceStatus200,
+		ResponseErrorConfig<
+			| SetMainIdentityPreferenceStatus400
+			| SetMainIdentityPreferenceStatus422
+			| SetMainIdentityPreferenceStatus429
+			| SetMainIdentityPreferenceStatus500
+		>,
+		SetMainIdentityPreferenceOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			return setMainIdentityPreference({ ...config, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * @description Select a currently controlled Entity or explicitly clear the main choice. Existing grants, consents and prepared requests retain their selected identity.
+ * {@link /api/v1/account/main-identity}
+ */
+export function useSetMainIdentityPreference<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			SetMainIdentityPreferenceStatus200,
+			ResponseErrorConfig<
+				| SetMainIdentityPreferenceStatus400
+				| SetMainIdentityPreferenceStatus422
+				| SetMainIdentityPreferenceStatus429
+				| SetMainIdentityPreferenceStatus500
+			>,
+			SetMainIdentityPreferenceOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? setMainIdentityPreferenceMutationKey();
+
+	const baseOptions = setMainIdentityPreferenceMutationOptions(config) as UseMutationOptions<
+		SetMainIdentityPreferenceStatus200,
+		ResponseErrorConfig<
+			| SetMainIdentityPreferenceStatus400
+			| SetMainIdentityPreferenceStatus422
+			| SetMainIdentityPreferenceStatus429
+			| SetMainIdentityPreferenceStatus500
+		>,
+		SetMainIdentityPreferenceOptions,
+		TContext
+	>;
+
+	return useMutation<
+		SetMainIdentityPreferenceStatus200,
+		ResponseErrorConfig<
+			| SetMainIdentityPreferenceStatus400
+			| SetMainIdentityPreferenceStatus422
+			| SetMainIdentityPreferenceStatus429
+			| SetMainIdentityPreferenceStatus500
+		>,
+		SetMainIdentityPreferenceOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		SetMainIdentityPreferenceStatus200,
+		ResponseErrorConfig<
+			| SetMainIdentityPreferenceStatus400
+			| SetMainIdentityPreferenceStatus422
+			| SetMainIdentityPreferenceStatus429
+			| SetMainIdentityPreferenceStatus500
+		>,
+		SetMainIdentityPreferenceOptions,
 		TContext
 	>;
 }

@@ -106,14 +106,6 @@ export async function readManagementAuthority(
 		.filter((value): value is number => value !== undefined && value !== null);
 	const validUntil = deadlines.length ? Math.min(...deadlines) : null;
 	const actorAction = input.mutation ? "write" : "read";
-	const credentialCurrent = input.proof.kind === "session"
-		? sql<boolean>`exists(select 1 from public.sessions s where s.id=${input.proof.id}::uuid and s.user_id=${credential.principalId}::uuid
-			and encode(sha256(convert_to(s.token,'UTF8')),'hex')=${input.proof.tokenDigest}
-			and s.created_at=${credential.createdAt}::timestamptz and s.expires_at>clock_timestamp())`
-		: sql<boolean>`exists(select 1 from public.api_key_authority a join public.apikeys k on k.id=a.id
-			where a.id=${input.proof.id}::uuid and a.user_id=${credential.principalId}::uuid and a.version=${credential.version}
-			and a.revoked_at is null and k.reference_id=a.user_id and k.key=${input.proof.tokenDigest} and k.enabled
-			and (k.expires_at is null or k.expires_at>clock_timestamp()))`;
 	const managementCurrent = owner ?? (source ? sql<boolean>`exists(select 1 from public.access_role_binding b join public.access_role r on r.id=b.role_id
 		where b.id=${source.binding.id}::uuid and b.version=${source.binding.version} and b.state='active' and b.terms_revision=${source.terms.revision}
 		and r.version=${source.roleVersion} and r.state='active'
@@ -125,7 +117,7 @@ export async function readManagementAuthority(
 			array[${sql.join(represented.path.map(ref => sql`${ref.revision}::bigint`), sql`, `)}],
 			${principalSubjectId}::uuid,${selection.entityId}::uuid,${actorAction})`
 		: sql<boolean>`true`;
-	const admission: SQL<boolean | null> = sql`(${scopeAdmission}) and (${credentialCurrent}) and (${managementCurrent}) and (${representationCurrent})
+	const admission: SQL<boolean | null> = sql`(${scopeAdmission}) and (${credential.admission}) and (${managementCurrent}) and (${representationCurrent})
 		and exists(select 1 from public.users where id=${credential.principalId}::uuid and principal_kind='human' ${input.mutation ? sql`and email_verified` : sql``})
 		and public.access_subject_is_eligible(${principalSubjectId}::uuid,${actorAction}) is true
 		and public.access_subject_is_eligible(${subjectId}::uuid,${actorAction}) is true

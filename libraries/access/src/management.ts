@@ -7,6 +7,7 @@ import {
 
 /** Canonical management actions for the mixed IAM target; transport activation is separately gated. @alpha */
 export const AccessManagementPermissionValues = [
+	"access.identity.select",
 	"access.role.read",
 	"access.role.create",
 	"access.role.update",
@@ -20,6 +21,12 @@ export type AccessManagementPermission = (typeof AccessManagementPermissionValue
 
 /** Semantic boundaries used by scope policy and future API metadata. @alpha */
 export const AccessManagementPermissionDefinitions = {
+	"access.identity.select": {
+		resource: "access.identity",
+		action: "select",
+		rationale:
+			"Selecting a controlled Entity as a private default requires current representation for this action on that Entity's identity path; it grants no data access or account administration.",
+	},
 	"access.role.read": { resource: "access.role", action: "read" },
 	"access.role.create": { resource: "access.role", action: "create" },
 	"access.role.update": { resource: "access.role", action: "update" },

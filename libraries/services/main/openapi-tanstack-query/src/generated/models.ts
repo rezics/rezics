@@ -3294,6 +3294,7 @@ export type ResolveAccessManagementScopeRequestTargetReferenceOwnerEnum =
 	(typeof ResolveAccessManagementScopeRequestTargetReferenceOwnerEnum)[keyof typeof ResolveAccessManagementScopeRequestTargetReferenceOwnerEnum];
 
 export const ResolveAccessManagementScopeRequestPermissionEnum = {
+	"access.identity.select": "access.identity.select",
 	"access.role.read": "access.role.read",
 	"access.role.create": "access.role.create",
 	"access.role.update": "access.role.update",
@@ -3496,6 +3497,7 @@ export type GetAccessRoleStatus200StateEnum =
 	(typeof GetAccessRoleStatus200StateEnum)[keyof typeof GetAccessRoleStatus200StateEnum];
 
 export const GetAccessRoleStatus200DefinitionPermissionsKeyEnum = {
+	"access.identity.select": "access.identity.select",
 	"access.role.read": "access.role.read",
 	"access.role.create": "access.role.create",
 	"access.role.update": "access.role.update",
@@ -3680,6 +3682,7 @@ export type CreateAccessRoleStatus429 = {
 export type CreateAccessRoleStatus500 = InternalError;
 
 export const CreateAccessRoleRequestDefinitionPermissionsKeyEnum = {
+	"access.identity.select": "access.identity.select",
 	"access.role.read": "access.role.read",
 	"access.role.create": "access.role.create",
 	"access.role.update": "access.role.update",
@@ -3951,6 +3954,7 @@ export type ReviseAccessRoleStatus429 = {
 export type ReviseAccessRoleStatus500 = InternalError;
 
 export const ReviseAccessRoleRequestDefinitionPermissionsKeyEnum = {
+	"access.identity.select": "access.identity.select",
 	"access.role.read": "access.role.read",
 	"access.role.create": "access.role.create",
 	"access.role.update": "access.role.update",
@@ -4020,6 +4024,284 @@ export type ReviseAccessRoleResponse =
 	| ReviseAccessRoleStatus422
 	| ReviseAccessRoleStatus429
 	| ReviseAccessRoleStatus500;
+
+export type CreateAccountIdentityStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	entityId: string;
+	representation: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		revision: number;
+	};
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	mainPreferenceVersion: number | null;
+};
+
+export type CreateAccountIdentityStatus400 = MalformedRequestBody;
+
+export type CreateAccountIdentityStatus422 = ValidationError;
+
+export const CreateAccountIdentityStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type CreateAccountIdentityStatus429ErrorCodeEnum =
+	(typeof CreateAccountIdentityStatus429ErrorCodeEnum)[keyof typeof CreateAccountIdentityStatus429ErrorCodeEnum];
+
+export type CreateAccountIdentityStatus429 = {
+	error: {
+		code: CreateAccountIdentityStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type CreateAccountIdentityStatus500 = InternalError;
+
+export const CreateAccountIdentityRequestNamesLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type CreateAccountIdentityRequestNamesLanguageEnum =
+	(typeof CreateAccountIdentityRequestNamesLanguageEnum)[keyof typeof CreateAccountIdentityRequestNamesLanguageEnum];
+
+export type CreateAccountIdentityBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	names: {
+		language: CreateAccountIdentityRequestNamesLanguageEnum;
+		/**
+		 * @minLength 1
+		 * @maxLength 120
+		 * @type string
+		 */
+		value: string;
+	}[];
+	main: {
+		/**
+		 * @minLength -9007199254740991
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		expectedVersion: number;
+	} | null;
+};
+
+export type CreateAccountIdentityOptions = {
+	body: CreateAccountIdentityBody;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+export type CreateAccountIdentityResponses = {
+	"200": CreateAccountIdentityStatus200;
+	"400": CreateAccountIdentityStatus400;
+	"422": CreateAccountIdentityStatus422;
+	"429": CreateAccountIdentityStatus429;
+	"500": CreateAccountIdentityStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type CreateAccountIdentityResponse =
+	| CreateAccountIdentityStatus200
+	| CreateAccountIdentityStatus400
+	| CreateAccountIdentityStatus422
+	| CreateAccountIdentityStatus429
+	| CreateAccountIdentityStatus500;
+
+export type GetMainIdentityPreferenceStatus200 = {
+	/**
+	 * @minLength -9007199254740991
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	version: number;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	entityId: string | null;
+};
+
+export const GetMainIdentityPreferenceStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetMainIdentityPreferenceStatus429ErrorCodeEnum =
+	(typeof GetMainIdentityPreferenceStatus429ErrorCodeEnum)[keyof typeof GetMainIdentityPreferenceStatus429ErrorCodeEnum];
+
+export type GetMainIdentityPreferenceStatus429 = {
+	error: {
+		code: GetMainIdentityPreferenceStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type GetMainIdentityPreferenceStatus500 = InternalError;
+
+export type GetMainIdentityPreferenceOptions = {
+	body?: never;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+export type GetMainIdentityPreferenceResponses = {
+	"200": GetMainIdentityPreferenceStatus200;
+	"429": GetMainIdentityPreferenceStatus429;
+	"500": GetMainIdentityPreferenceStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetMainIdentityPreferenceResponse =
+	| GetMainIdentityPreferenceStatus200
+	| GetMainIdentityPreferenceStatus429
+	| GetMainIdentityPreferenceStatus500;
+
+export type SetMainIdentityPreferenceStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	version: number;
+};
+
+export type SetMainIdentityPreferenceStatus400 = MalformedRequestBody;
+
+export type SetMainIdentityPreferenceStatus422 = ValidationError;
+
+export const SetMainIdentityPreferenceStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type SetMainIdentityPreferenceStatus429ErrorCodeEnum =
+	(typeof SetMainIdentityPreferenceStatus429ErrorCodeEnum)[keyof typeof SetMainIdentityPreferenceStatus429ErrorCodeEnum];
+
+export type SetMainIdentityPreferenceStatus429 = {
+	error: {
+		code: SetMainIdentityPreferenceStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type SetMainIdentityPreferenceStatus500 = InternalError;
+
+export type SetMainIdentityPreferenceBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @minLength -9007199254740991
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	expectedVersion: number;
+	selection:
+		| {
+				mode: "none";
+		  }
+		| {
+				mode: "represented";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				entityId: string;
+				representations: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @maxLength 9007199254740991
+					 * @type integer
+					 */
+					revision: number;
+				}[];
+		  };
+};
+
+export type SetMainIdentityPreferenceOptions = {
+	body: SetMainIdentityPreferenceBody;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+export type SetMainIdentityPreferenceResponses = {
+	"200": SetMainIdentityPreferenceStatus200;
+	"400": SetMainIdentityPreferenceStatus400;
+	"422": SetMainIdentityPreferenceStatus422;
+	"429": SetMainIdentityPreferenceStatus429;
+	"500": SetMainIdentityPreferenceStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type SetMainIdentityPreferenceResponse =
+	| SetMainIdentityPreferenceStatus200
+	| SetMainIdentityPreferenceStatus400
+	| SetMainIdentityPreferenceStatus422
+	| SetMainIdentityPreferenceStatus429
+	| SetMainIdentityPreferenceStatus500;
 
 export type GetApiUnitByUnitIdAssociationProposalsPath = {
 	/**

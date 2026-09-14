@@ -20,7 +20,7 @@ export interface SessionEntity {
 
 /** Creates precisely one self Entity; serialization is on the private account, not a name match. */
 export async function ensureSelfEntity(
-	authUser: Pick<User, "id" | "email" | "name" | "image">,
+	authUser: Pick<User, "id">,
 	initialInterfaceLocale: UiLocale = DefaultStoredUiLocale,
 ): Promise<SessionEntity> {
 	return database.transaction((tx) =>
@@ -31,7 +31,7 @@ export async function ensureSelfEntity(
 /** Transaction-owning account constructors and SQL fixtures use the same row-locked self-identity admission. @internal */
 export async function ensureSelfEntityInTransaction(
 	tx: DatabaseTransaction,
-	authUser: Pick<User, "id" | "email" | "name" | "image">,
+	authUser: Pick<User, "id">,
 	initialInterfaceLocale: UiLocale = DefaultStoredUiLocale,
 	initializeDefaults = false,
 ): Promise<SessionEntity> {
@@ -95,26 +95,16 @@ export async function ensureSelfEntityInTransaction(
 			preferredLanguages: [account.language],
 		})
 		.onConflictDoNothing();
-	const publicName = initialPublicName(authUser);
 	const entity = await createParticipantIdentity(tx, {
 		shape: "person",
 		operatorAuthUserId: account.id,
-		names: publicName ? [{ language: account.language, value: publicName }] : [],
+		names: [],
 	});
 	await tx.insert(authEntity).values({ authUserId: account.id, entityId: entity.id });
 	if (initializeDefaults) await initializeAccountParticipation(tx, entity.id, account.id);
 	return {
 		id: entity.id,
-		name: publicName,
+		name: null,
 		authorizationRevision: 1,
 	};
-}
-
-function initialPublicName(user: Pick<User, "name" | "email">): string | null {
-	const name = user.name.trim();
-	return name.length > 0 &&
-		name.length <= 120 &&
-		name.toLowerCase() !== user.email.trim().toLowerCase()
-		? name
-		: null;
 }

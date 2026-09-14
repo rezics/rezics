@@ -29,6 +29,12 @@ import type {
 	ListAccessRoleHistoryResponses,
 	ReviseAccessRoleOptions,
 	ReviseAccessRoleResponses,
+	CreateAccountIdentityOptions,
+	CreateAccountIdentityResponses,
+	GetMainIdentityPreferenceOptions,
+	GetMainIdentityPreferenceResponses,
+	SetMainIdentityPreferenceOptions,
+	SetMainIdentityPreferenceResponses,
 	GetApiUnitByUnitIdAssociationProposalsOptions,
 	GetApiUnitByUnitIdAssociationProposalsResponses,
 	PostApiUnitByUnitIdAssociationProposalsRequestsOptions,
@@ -1303,6 +1309,72 @@ export function reviseAccessRole<ThrowOnError extends boolean = true>(
 			],
 			...config,
 		}) as Promise<RequestResult<ReviseAccessRoleResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * @description Create a new controlled Entity from explicitly supplied public names. The first identity also requires a main-choice precondition. Retrying an operation returns its original receipt without renewing control.
+ * {@link /api/v1/account/identities}
+ */
+export function createAccountIdentity<ThrowOnError extends boolean = true>(
+	options: Options<CreateAccountIdentityOptions, ThrowOnError>,
+): Unwrappable<RequestResult<CreateAccountIdentityResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/account/identities",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<CreateAccountIdentityResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * @description Read the recorded private main Entity choice. This response does not authorize acting as that Entity.
+ * {@link /api/v1/account/main-identity}
+ */
+export function getMainIdentityPreference<ThrowOnError extends boolean = true>(
+	options: Options<GetMainIdentityPreferenceOptions, ThrowOnError> = {},
+): Unwrappable<RequestResult<GetMainIdentityPreferenceResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/account/main-identity",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetMainIdentityPreferenceResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * @description Select a currently controlled Entity or explicitly clear the main choice. Existing grants, consents and prepared requests retain their selected identity.
+ * {@link /api/v1/account/main-identity}
+ */
+export function setMainIdentityPreference<ThrowOnError extends boolean = true>(
+	options: Options<SetMainIdentityPreferenceOptions, ThrowOnError>,
+): Unwrappable<RequestResult<SetMainIdentityPreferenceResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/account/main-identity",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<SetMainIdentityPreferenceResponses, ThrowOnError>>,
 	);
 }
 

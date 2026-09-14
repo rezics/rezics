@@ -1,4 +1,4 @@
-h1:Bx1R0hSBnmM5e+K2FsKJ2Hxfgm0uTwLOV+V9FoOYwA0=
+h1:V7Ck5xCs54pWTDBqP3N+GJtsn3IaLifjasQDj6KeQjI=
 20260908000000_operational_target_baseline.sql h1:TJA7Hsx5yrHy3qHeXTSx3Dlc9EqR+z9pQYi/4EFrx/4=
 20260910163748_reference_value.sql h1:Ypzqvw/grXpKO/5P0EyRh9cewhSK4GPFA8jqrBYHdHM=
 20260910173919_revision_reference.sql h1:KflEkT60lsDNJjWaGFenKXYY0cabUrBQerceR+bIDRQ=
@@ -29,3 +29,5 @@ h1:Bx1R0hSBnmM5e+K2FsKJ2Hxfgm0uTwLOV+V9FoOYwA0=
 20260914205817_access_assignment_ceiling.sql h1:RTv5N4U2sVSEeBqkyvrfpYCDks1a6D9Pc8/Fr45YAr0=
 20260914212840_api_key_authority.sql h1:8Pp2e0Iv9CRMmiLahquZRHNNkrflV8xoNQv9OaT+9kI=
 20260914215837_management_authority.sql h1:yu6zQKrROWGjyd0YUa6erngbq5gnRCzwil8caflNT1I=
+20260914225741_identity_selection_permission.sql h1:ZeqQybiOf0iv7qmT6274Y8SsqeBLC3LerCBhT1hFYi4=
+20260914230201_account_identity_admission.sql h1:zLVNORzeXhyVHwaM4bY3eldfpPFpXgOrskzvSM9r9qs=

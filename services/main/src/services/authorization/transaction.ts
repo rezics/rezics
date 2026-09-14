@@ -15,6 +15,14 @@ import { AccessSubjectPolicyUnavailable } from "./subject-eligibility";
 import { AccessRepresentationBudgetExceeded } from "./representation-reader";
 import { AccessRoleBindingBudgetExceeded, AccessRoleBindingDiscoveryChanged } from "./role-binding-permissions";
 import { PrivateRecipientSelectorInvalid } from "./recipient-selectors";
+import { sql, type SQL } from "drizzle-orm";
+
+/** Recheck retained owner admission after read waits without collapsing unavailable into denied. @internal */
+export async function requireAccessAdmission(tx: DatabaseTransaction, admission: SQL<boolean | null>): Promise<void> {
+	const result = (await tx.execute<{ admitted: boolean | null }>(sql`select (${admission}) as admitted`)).rows[0]?.admitted;
+	if (result === false) throw new AccessDenied();
+	if (result !== true) throw new AccessUnavailable();
+}
 
 const denied = [CredentialAuthorityDenied, ManagementAuthorityDenied, AccessRoleAdmissionDenied,
 	AccessRoleBindingAdmissionDenied, AccessGroupAdmissionDenied, AccessMembershipAdmissionDenied,

@@ -21,6 +21,7 @@ import {
 } from "../database/schema/participation";
 import { accountPreference } from "../database/schema/account-preference";
 import { eraseIdentityPreferenceBatch } from "../authorization/identity-preferences";
+import { eraseAccountIdentityAdmissionBatch } from "../authorization/create-account-identity";
 import {
 	notification,
 	notificationPreference,
@@ -298,6 +299,8 @@ export async function dispatchAccountErasureBatch(
 				);
 				break;
 			case "preferences":
+				result = await eraseAccountIdentityAdmissionBatch(tx, authId);
+				if (!result.empty) break;
 				result = await eraseIdentityPreferenceBatch(tx, authId);
 				if (!result.empty) break;
 				result = await deletePrivateBatch(

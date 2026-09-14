@@ -34,6 +34,14 @@ edges, not several credential stores. An installation-specific client adds one
 client per installation, not one per API request. A shared public Entity reference
 does not require copying its biography or private controllers into each platform.
 
+Account-created identities add one private immutable creation receipt, indexed by
+account/operation and the created Entity/grant, alongside the separately counted
+representation and optional preference event. Use the binding estimate of 224-384
+indexed bytes per receipt until measured: 112-192 GB at 500,000,000 rows and
+672-1152 GB at 3,000,000,000 rows, excluding replication/WAL overhead. Creation and
+retry use account/operation point reads; erasure uses that account key in batches
+of at most 500. This receipt does not materialize every future controller pair.
+
 Role definitions and permission dictionaries may be scope-bounded, but the total
 scope count is not globally bounded. Inventory scope heads, definition revisions,
 role-permission entries and retirement history separately using measured width

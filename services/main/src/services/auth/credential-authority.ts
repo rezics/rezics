@@ -121,7 +121,22 @@ export async function readFirstPartyCredentialAuthority(
 	if (createdAt.getTime() > now || (expiresAt !== null && expiresAt.getTime() <= now) || !credentialAllowsSelection(authority, selection)) throw new CredentialAuthorityDenied();
 	const freshSession = proof.kind === "session" && freshUntil !== null && freshUntil > now;
 	if (input.requireFreshSession && !freshSession) throw new CredentialAuthorityDenied();
+	const validUntil = input.requireFreshSession ? Math.min(expiresAt?.getTime() ?? Infinity, freshUntil ?? -Infinity) : expiresAt?.getTime() ?? null;
+	const identityCurrent = proof.kind === "session"
+		? sql<boolean>`exists(select 1 from public.sessions s where s.id=${proof.id}::uuid and s.user_id=${proof.principalId}::uuid
+			and encode(sha256(convert_to(s.token,'UTF8')),'hex')=${proof.tokenDigest}
+			and s.created_at=${createdAt}::timestamptz and s.expires_at>clock_timestamp())`
+		: sql<boolean>`exists(select 1 from public.api_key_authority a join public.apikeys k on k.id=a.id
+			where a.id=${proof.id}::uuid and a.user_id=${proof.principalId}::uuid and a.version=${version}
+			and a.revoked_at is null and k.reference_id=a.user_id and k.key=${proof.tokenDigest} and k.enabled
+			and (k.expires_at is null or k.expires_at>clock_timestamp()))`;
+	// Retained fences protect other transactions; this also rejects a changed source
+	// in the caller's own transaction before a later effect uses the earlier decision.
+	const admission = sql<boolean>`(${identityCurrent}) and exists(select 1 from public.users
+		where id=${proof.principalId}::uuid and principal_kind='human' and erased_at is null
+		${input.requireVerifiedEmail ? sql`and email_verified` : sql``})
+		and (${validUntil === null ? sql`true` : sql`clock_timestamp()<${new Date(validUntil)}::timestamptz`})`;
 	return { principalId: proof.principalId, authority, apiPermissions, version, freshSession, freshSessionValidUntil: freshUntil, createdAt, evaluatedAt: new Date(now),
-		validUntil: input.requireFreshSession ? Math.min(expiresAt?.getTime() ?? Infinity, freshUntil ?? -Infinity) : expiresAt?.getTime() ?? null,
+		validUntil, admission,
 		audience: `${proof.kind}:${proof.id}` };
 }

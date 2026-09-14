@@ -8,6 +8,7 @@ import session from "../auth/session";
 import { env } from "../config";
 import agentGuide from "./agent-guide";
 import accessManagement from "./access";
+import account from "./account";
 import associationProposals from "./association-proposals";
 import audit from "./audit";
 import collections from "./collections";
@@ -84,6 +85,7 @@ export default new Elysia()
 		api.guard({ parse: ["empty-body", "json"] }, (api) =>
 			api
 				.use(accessManagement)
+				.use(account)
 				.use(associationProposals)
 				.use(health)
 				.use(notifications)

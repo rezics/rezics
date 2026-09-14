@@ -193,6 +193,36 @@ explicit Entity, no default, or (for clients only) inheritance from main. A miss
 client override inherits main; explicit no-default does not. Clearing a main choice
 requires later explicit selection rather than silently picking another Entity.
 
+The main-choice API is direct private account ownership under `account:read` or
+`account:update`; it does not reuse a represented Entity's access to personal data.
+Reading the stored choice does not assert that the Entity is currently usable.
+Setting an Entity additionally requires an explicit current representation path
+for `access.identity.select` at that Entity's `identity` path. The credential must
+permit both direct preference management and the selected represented context.
+This purpose-specific permission proves selection control without choosing an
+unrelated data action as a proxy or claiming access to future resources. It is
+literal in representation snapshots and is never added to previously approved
+grants. Clearing the preference needs no replacement representation. Both forms
+retain operation receipts, expected versions and live authority at the effect.
+Client-specific selection remains subject to its separate admitted-client policy.
+
+Private account identity creation accepts explicit public names and never accepts
+an existing Entity ID or copies a private provider name. One transaction creates
+the native Entity, its direct institutional representation grant and the optional
+main choice. The first creation requires a main-choice precondition. The initial
+all-scopes grant seals the current literal permission vocabulary; it gives the
+operator representation, not unrelated resource permissions. Additional identities
+use the same constructor without imposing one-Entity-per-account uniqueness.
+
+An immutable account/operation receipt fixes the created Entity, initial grant and
+optional main revision. A replay requires current private account admission and
+matching intent, returns that original outcome, and never renews a revoked grant
+or resets a subsequently changed default. Account erasure removes these private
+receipts in bounded batches before preference history. Public Entity lifecycle,
+other controllers and institutional grants remain separate cleanup decisions.
+The legacy unique-Self consumer migration and automatic onboarding entry remain
+unqualified until they use these native owners throughout.
+
 Commands use expected versions and stable operation IDs under the account fence,
 with exact private receipts. Current owner SQL must admit management, the client
 and chosen-identity usability; the preference store does not grant representation.

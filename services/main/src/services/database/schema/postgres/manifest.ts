@@ -12,6 +12,7 @@ export const PostgreSqlSchemaFileNames = [
 	"access-identity.sql",
 	"api-key-authority.sql",
 	"identity-preference.sql",
+	"account-identity-admission.sql",
 	"access-subject-policy.sql",
 	"access-role.sql",
 	"access-role-binding.sql",
@@ -100,6 +101,7 @@ export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly 
 };
 
 export const PostgreSqlSchemaFunctionNames = [
+	"guard_account_identity_admission",
 	"access_subject_is_eligible",
 	"access_subject_matches_recipient",
 	"access_representation_path_is_current",
@@ -453,6 +455,7 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "account_identity_admission", name: "account_identity_admission_guard" },
 	{ table: "api_key_authority", name: "api_key_authority_guard" },
 	{ table: "apikeys", name: "apikey_authority_fence" },
 	{ table: "access_assignment_ceiling", name: "access_assignment_ceiling_guard" },
