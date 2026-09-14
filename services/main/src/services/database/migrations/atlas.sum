@@ -1,4 +1,4 @@
-h1:5IyYTOz94E2Ir0Eoo/oUIBZ04Bo+56+EI2xrStE2fiY=
+h1:gYqAtaRgGZfWXR3eK6wIr0ih3+AC2lSgmj4WLN/0ktk=
 20260908000000_operational_target_baseline.sql h1:TJA7Hsx5yrHy3qHeXTSx3Dlc9EqR+z9pQYi/4EFrx/4=
 20260910163748_reference_value.sql h1:Ypzqvw/grXpKO/5P0EyRh9cewhSK4GPFA8jqrBYHdHM=
 20260910173919_revision_reference.sql h1:KflEkT60lsDNJjWaGFenKXYY0cabUrBQerceR+bIDRQ=
@@ -33,3 +33,4 @@ h1:5IyYTOz94E2Ir0Eoo/oUIBZ04Bo+56+EI2xrStE2fiY=
 20260914230201_account_identity_admission.sql h1:zLVNORzeXhyVHwaM4bY3eldfpPFpXgOrskzvSM9r9qs=
 20260914231243_identity_preference.sql h1:r6lMuU9e9jesmVh271WEtp0awnpIFX2H9xGKSZhTOiM=
 20260914233512_connected_app.sql h1:CLzhL+dOAoNFz0nNz+AikwlGapUsTVZZe1e1TrpuQCg=
+20260914234910_oauth_client_authority.sql h1:NToyivhJRwP3uOImXKGrcrKzl4XM4sCwOibKDYMN9Ck=

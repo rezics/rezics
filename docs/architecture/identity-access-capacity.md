@@ -59,6 +59,16 @@ for 500,000,000 rows or 672-1152 GB for 3,000,000,000 rows. Account/Entity inven
 use scope/App keysets; declaration and capability reads use exact composite keys.
 App disablement changes one head/epoch and does not rewrite every installed grant.
 
+Each protocol client adds one retained configuration/epoch fence, separately from
+the provider row and native App/installation admission. Client identifiers are
+bounded at 2,048 UTF-8 bytes and have an exact unique lookup; UUID/App references
+use indexed UUID comparisons. For short identifiers use the 224-384-byte binding
+estimate per fence, retaining the 500,000,000-row (112-192 GB) and 3,000,000,000-row
+(672-1152 GB) envelopes. Long CIMD URLs add both heap and unique-index bytes and
+must be represented in width fixtures. Routine timestamp-only metadata refresh
+does not advance the policy fence. Terminal identities remain retained to prevent
+client-ID reuse; they require explicit retention inventory, not a hidden cascade.
+
 Role definitions and permission dictionaries may be scope-bounded, but the total
 scope count is not globally bounded. Inventory scope heads, definition revisions,
 role-permission entries and retirement history separately using measured width

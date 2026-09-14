@@ -14,6 +14,7 @@ export const PostgreSqlSchemaFileNames = [
 	"identity-preference.sql",
 	"account-identity-admission.sql",
 	"connected-app.sql",
+	"oauth-client-authority.sql",
 	"access-subject-policy.sql",
 	"access-role.sql",
 	"access-role-binding.sql",
@@ -102,6 +103,8 @@ export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly 
 };
 
 export const PostgreSqlSchemaFunctionNames = [
+	"guard_oauth_client_authority",
+	"fence_oauth_client_authority",
 	"guard_connected_app_head",
 	"guard_connected_app_event",
 	"guard_connected_app_revision",
@@ -463,6 +466,8 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "oauth_client_authority", name: "oauth_client_authority_guard" },
+	{ table: "oauth_client", name: "oauth_client_authority_fence" },
 	{ table: "connected_app", name: "connected_app_head_guard" },
 	{ table: "connected_app_event", name: "connected_app_event_guard" },
 	{ table: "connected_app_event", name: "connected_app_event_immutable" },

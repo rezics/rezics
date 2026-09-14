@@ -4,6 +4,7 @@ import { sql } from "drizzle-orm";
 import { boolean, foreignKey, index, integer, jsonb, text, timestamp, type PgTableExtraConfigValue, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { pgTable } from "./base";
 import { sessions, users } from "./auth";
+import { oauthClientAuthority } from "./oauth-client-authority";
 
 /** Provider-owned jwks protocol records; domain admission and disclosure are separate. @internal */
 export const oauthJwks = pgTable("oauth_jwks", {
@@ -58,6 +59,7 @@ export const oauthClients = pgTable("oauth_client", {
 		referenceId: text(),
 		metadata: jsonb().$type<unknown>(),
 	}, (table): PgTableExtraConfigValue[] => [
+		foreignKey({ name: "oauth_client_authority_fk", columns: [table.id], foreignColumns: [oauthClientAuthority.id] }).onDelete("restrict"),
 		uniqueIndex("oauth_client_client_id_key").on(table.clientId),
 		index("oauth_client_user_id_idx").on(table.userId),
 		foreignKey({ name: "oauth_client_user_id_user_id_fk", columns: [table.userId], foreignColumns: [users.id] }),

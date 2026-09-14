@@ -245,6 +245,39 @@ client privacy/admission, App/consent/installation records, token-domain context
 workers and actual adapter/schema qualification remain required before mounting
 the provider in the application's authentication configuration.
 
+The generated client table additionally references a native stable
+`oauth_client_authority` identity. Protocol insertion creates that fence; client
+IDs and discovery provenance cannot be reused or reassigned. Configuration changes
+advance its version, while disablement, redirect/scope/grant/authentication-policy
+changes and deletion also advance its credential epoch. Secret/JWK rotation alone
+changes the configuration version; explicit disablement remains the immediate
+invalidation mechanism. Deleted protocol rows leave terminal control identities.
+
+Native client writes enforce the selected private profile: absent subject type is
+pairwise, explicit public subject type/private user ownership/consent skipping and
+logout extensions are rejected, PKCE is required, and arbitrary metadata extensions
+are discarded. A managed reference can identify only a concrete App. These guards
+do not prove App admission or machine privileges. The current policy reader retains
+the fence, checks explicit registered scopes and optional captured epoch, and gives
+the domain bridge a transaction-local predicate. Named profile violations have a
+redacted OAuth error mapping; other integrity failures remain operational errors.
+
+Production provider configuration must use the native finite scope vocabulary
+(`openid`, `offline_access` and API entry scopes), supply the stable pairwise secret,
+advertise only the supported profile, enforce S256 on authorization requests and
+apply native client/token admission to every protocol surface. The pinned CIMD
+implementation's `onClientCreated`/`onClientRefreshed` callbacks catch failures as
+best-effort notifications; they cannot be security gates. Its exported discovery
+resolver can be wrapped before returning a client for protocol use. The provider
+persists and returns the actual adapter result, including native canonical fields.
+
+Source inspection also found that 1.7.3 serializes client-secret expiry but omits
+it from client schema metadata and does not check a stored client expiry in client
+authentication. The production credential lifecycle must own and enforce secret
+expiry rather than advertise that unqualified provider option as a guarantee.
+Expiry, resolver admission and privacy races still require their native fixtures
+in the program's verification phase.
+
 ### Token and client profile
 
 The September 14, 2026 [executable qualification](../testing/identity-and-access.md#oauth-adapter-qualification)
