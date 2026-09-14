@@ -46,12 +46,12 @@ export class AccessMembershipAdmissionUnavailable extends Error {
 	}
 }
 const schema = z.strictObject({
-	scopeId: z.uuid(),
-	subjectId: z.uuid(),
+	scopeId: z.uuid().toLowerCase(),
+	subjectId: z.uuid().toLowerCase(),
 	expectedVersion: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
-	operationId: z.uuid(),
-	operatorAuthUserId: z.uuid(),
-	authoritySubjectId: z.uuid(),
+	operationId: z.uuid().toLowerCase(),
+	operatorAuthUserId: z.uuid().toLowerCase(),
+	authoritySubjectId: z.uuid().toLowerCase(),
 	operation: z.enum(["admit", "leave", "remove"]),
 });
 function requireAdmission(value: boolean | null | undefined) {
@@ -190,8 +190,7 @@ export async function readAccessMembership(
 	tx: DatabaseTransaction,
 	input: { scopeId: string; subjectId: string },
 ) {
-	z.uuid().parse(input.scopeId);
-	z.uuid().parse(input.subjectId);
+	input = { ...input, scopeId: z.uuid().toLowerCase().parse(input.scopeId), subjectId: z.uuid().toLowerCase().parse(input.subjectId) };
 	const [head] = await tx
 		.select()
 		.from(accessMembership)

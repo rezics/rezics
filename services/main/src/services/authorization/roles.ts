@@ -83,12 +83,12 @@ const definitionSchema = z.strictObject({
 		),
 });
 const common = {
-	scopeId: z.uuid(),
-	roleId: z.uuid(),
+	scopeId: z.uuid().toLowerCase(),
+	roleId: z.uuid().toLowerCase(),
 	expectedVersion: revision,
-	operationId: z.uuid(),
-	operatorAuthUserId: z.uuid(),
-	authoritySubjectId: z.uuid(),
+	operationId: z.uuid().toLowerCase(),
+	operatorAuthUserId: z.uuid().toLowerCase(),
+	authoritySubjectId: z.uuid().toLowerCase(),
 };
 const commandSchema = z.discriminatedUnion("operation", [
 	z.strictObject({
@@ -256,8 +256,7 @@ export async function readAccessRoleSnapshot(
 	tx: DatabaseTransaction,
 	input: { scopeId: string; roleId: string; revision: number | "active" },
 ) {
-	z.uuid().parse(input.scopeId);
-	z.uuid().parse(input.roleId);
+	input = { ...input, scopeId: z.uuid().toLowerCase().parse(input.scopeId), roleId: z.uuid().toLowerCase().parse(input.roleId) };
 	if (input.revision !== "active") revision.refine((value) => value > 0).parse(input.revision);
 	const query = tx
 		.select()

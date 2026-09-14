@@ -14,9 +14,9 @@ import { RepresentationTargetSchema } from "./authority-context";
 
 const versionSchema = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
 const recipientSchema = z.discriminatedUnion("kind", [
-	z.strictObject({ kind: z.literal("subject"), subjectId: z.uuid() }),
-	z.strictObject({ kind: z.literal("group"), scopeId: z.uuid(), groupId: z.uuid() }),
-	z.strictObject({ kind: z.literal("all-members"), scopeId: z.uuid() }),
+	z.strictObject({ kind: z.literal("subject"), subjectId: z.uuid().toLowerCase() }),
+	z.strictObject({ kind: z.literal("group"), scopeId: z.uuid().toLowerCase(), groupId: z.uuid().toLowerCase() }),
+	z.strictObject({ kind: z.literal("all-members"), scopeId: z.uuid().toLowerCase() }),
 ]);
 const termsSchema = z.strictObject({
 	target: RepresentationTargetSchema,
@@ -24,21 +24,21 @@ const termsSchema = z.strictObject({
 	canRedelegate: z.boolean(), requireFreshSession: z.boolean(),
 	permissions: z.array(AccessPermissionSchema).max(AccessPermissionValues.length),
 	recipientEligibility: z.strictObject({
-		membershipId: z.uuid(), generation: versionSchema.min(1),
-		selection: z.strictObject({ groupId: z.uuid(), version: versionSchema.min(1) }).nullable(),
+		membershipId: z.uuid().toLowerCase(), generation: versionSchema.min(1),
+		selection: z.strictObject({ groupId: z.uuid().toLowerCase(), version: versionSchema.min(1) }).nullable(),
 	}).nullable(),
 }).refine(terms => terms.validUntil === null || terms.validUntil > terms.validFrom,
 	"Representation validity must be a nonempty half-open interval");
 const base = {
-	entityId: z.uuid(), grantId: z.uuid(), expectedVersion: versionSchema,
-	operationId: z.uuid(), operatorAuthUserId: z.uuid(), authoritySubjectId: z.uuid(),
+	entityId: z.uuid().toLowerCase(), grantId: z.uuid().toLowerCase(), expectedVersion: versionSchema,
+	operationId: z.uuid().toLowerCase(), operatorAuthUserId: z.uuid().toLowerCase(), authoritySubjectId: z.uuid().toLowerCase(),
 };
 const schema = z.discriminatedUnion("operation", [
 	z.strictObject({ ...base, operation: z.literal("create"),
 		recipient: recipientSchema,
-		parent: z.strictObject({ id: z.uuid(), revision: versionSchema.min(1), subjectId: z.uuid(),
-			membership: z.strictObject({ id: z.uuid(), generation: versionSchema.min(1),
-				selection: z.strictObject({ groupId: z.uuid(), version: versionSchema.min(1) }).nullable(),
+		parent: z.strictObject({ id: z.uuid().toLowerCase(), revision: versionSchema.min(1), subjectId: z.uuid().toLowerCase(),
+			membership: z.strictObject({ id: z.uuid().toLowerCase(), generation: versionSchema.min(1),
+				selection: z.strictObject({ groupId: z.uuid().toLowerCase(), version: versionSchema.min(1) }).nullable(),
 			}).nullable(),
 		}).nullable(), terms: termsSchema }),
 	z.strictObject({ ...base, operation: z.literal("narrow"), terms: termsSchema }),
@@ -229,7 +229,7 @@ export async function applyAccessRepresentationCommand(
 export async function readAccessRepresentationSnapshot(
 	tx: DatabaseTransaction, input: { entityId: string; grantId: string; revision: number | "current" },
 ) {
-	z.uuid().parse(input.entityId); z.uuid().parse(input.grantId);
+	input = { ...input, entityId: z.uuid().toLowerCase().parse(input.entityId), grantId: z.uuid().toLowerCase().parse(input.grantId) };
 	if (input.revision !== "current") versionSchema.min(1).parse(input.revision);
 	if (input.revision === "current") {
 		const [fence] = await tx.select({ id: accessRepresentationEntity.entityId }).from(accessRepresentationEntity)

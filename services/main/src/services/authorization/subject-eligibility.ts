@@ -41,7 +41,7 @@ export async function readAccessSubjectEligibility(
 	tx: DatabaseTransaction,
 	input: { subjectIds: string[]; action: "read" | "write" | "contribute" },
 ): Promise<AccessSubjectEligibility[]> {
-	const request = z.strictObject({ subjectIds: z.array(z.uuid()).max(256), action: z.enum(["read", "write", "contribute"]) }).parse(input);
+	const request = z.strictObject({ subjectIds: z.array(z.uuid().toLowerCase()).max(256), action: z.enum(["read", "write", "contribute"]) }).parse(input);
 	const isolation = (await tx.execute<{ isolation: string }>(sql`select current_setting('transaction_isolation') as isolation`)).rows[0]?.isolation;
 	if (isolation !== "read committed") throw new AccessSubjectPolicyUnavailable();
 	const subjectIds = [...new Set(request.subjectIds)].sort();
@@ -107,7 +107,7 @@ export async function readAccessSubjectEligibility(
 			return { subjectId: subject.id, subject: { kind: "principal" as const, id: account.id }, outcome, evaluatedAt,
 				...(validUntil !== undefined ? { validUntil } : {}) };
 		}
-		const entityId = z.uuid().parse(subject.entityId), entity = entityRows.get(entityId);
+		const entityId = z.uuid().toLowerCase().parse(subject.entityId), entity = entityRows.get(entityId);
 		if (!entity) throw new AccessSubjectPolicyUnavailable();
 		const active = entity.deletedAt === null && participationRows.get(entityId)?.state === "active";
 		return { subjectId: subject.id, subject: { kind: "entity" as const, id: entityId },

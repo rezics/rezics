@@ -22,19 +22,19 @@ import { AccessRoleBindingUnavailable } from "./role-bindings";
 import { readAccessMemberSetRecipients } from "./member-set-recipients";
 
 const discoverySchema = z.strictObject({
-	subjectId: z.uuid(),
+	subjectId: z.uuid().toLowerCase(),
 	targets: z.array(z.strictObject({
-		scopeId: z.uuid(),
+		scopeId: z.uuid().toLowerCase(),
 		path: z.array(z.string().regex(/^[a-z0-9][a-z0-9-]{0,255}$/)).max(8),
 	})).min(1).max(64),
 	memberSets: z.array(z.discriminatedUnion("kind", [
-		z.strictObject({ kind: z.literal("group"), scopeId: z.uuid(), groupId: z.uuid() }),
-		z.strictObject({ kind: z.literal("all-members"), scopeId: z.uuid() }),
+		z.strictObject({ kind: z.literal("group"), scopeId: z.uuid().toLowerCase(), groupId: z.uuid().toLowerCase() }),
+		z.strictObject({ kind: z.literal("all-members"), scopeId: z.uuid().toLowerCase() }),
 	])).max(576),
 });
 const selectionSchema = z.array(z.strictObject({
-	bindingId: z.uuid(),
-	targetScopeId: z.uuid(),
+	bindingId: z.uuid().toLowerCase(),
+	targetScopeId: z.uuid().toLowerCase(),
 	version: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
 })).max(256).refine(rows => new Set(rows.map(row => row.bindingId)).size === rows.length,
 	"Binding candidates must be unique");
@@ -61,7 +61,7 @@ export class AccessRoleBindingBudgetExceeded extends Error {
 export async function discoverAccessRoleBindingRecipientScopes(
 	tx: DatabaseTransaction, scopeIds: string[],
 ): Promise<string[]> {
-	const roots = [...new Set(z.array(z.uuid()).min(1).max(64).parse(scopeIds))].sort();
+	const roots = [...new Set(z.array(z.uuid().toLowerCase()).min(1).max(64).parse(scopeIds))].sort();
 	const fences = await tx.select({ id: accessRoleBindingScope.scopeId }).from(accessRoleBindingScope)
 		.where(inArray(accessRoleBindingScope.scopeId, roots)).orderBy(accessRoleBindingScope.scopeId).for("share");
 	if (fences.length !== roots.length) throw new AccessRoleBindingUnavailable();

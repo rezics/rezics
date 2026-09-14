@@ -8,7 +8,7 @@ import {
 import { z } from "zod";
 import { AccessPermissionSchema } from "./permission";
 
-const uuidSchema = z.uuid();
+const uuidSchema = z.uuid().toLowerCase();
 const authorityPathSchema = z.array(z.string().regex(/^[a-z0-9][a-z0-9-]{0,255}$/)).max(8);
 /** An explicit all-scope or concrete-root representation ceiling; permissions remain separate. @internal */
 export const RepresentationTargetSchema = z.discriminatedUnion("kind", [
@@ -96,11 +96,12 @@ function sameReference(first: RepresentationReference, second: RepresentationRef
 	return first?.id === second.id && first.revision === second.revision;
 }
 function operationKey(operation: AuthorityOperation): string | undefined {
-	if (!AuthorityOperationSchema.safeParse(operation).success) return undefined;
+	const parsed = AuthorityOperationSchema.safeParse(operation);
+	if (!parsed.success) return undefined;
 	return JSON.stringify([
-		accessPermissionKey(operation.permission),
-		operation.scopeId,
-		operation.path,
+		accessPermissionKey(parsed.data.permission),
+		parsed.data.scopeId,
+		parsed.data.path,
 	]);
 }
 function outcome(decision: Decision, now: number): AuthorityOutcome {

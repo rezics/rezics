@@ -11,15 +11,15 @@ import {
 } from "../database/schema/access-group-membership";
 const version = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
 const schema = z.strictObject({
-	scopeId: z.uuid(),
-	membershipId: z.uuid(),
+	scopeId: z.uuid().toLowerCase(),
+	membershipId: z.uuid().toLowerCase(),
 	generation: version.min(1),
-	groupId: z.uuid(),
+	groupId: z.uuid().toLowerCase(),
 	expectedVersion: version,
-	operationId: z.uuid(),
+	operationId: z.uuid().toLowerCase(),
 	operation: z.enum(["assign", "remove", "prune"]),
-	operatorAuthUserId: z.uuid(),
-	authoritySubjectId: z.uuid(),
+	operatorAuthUserId: z.uuid().toLowerCase(),
+	authoritySubjectId: z.uuid().toLowerCase(),
 });
 /** One direct selection transition under current owner authority, for an exact admission. @internal */
 export type AccessGroupMembershipCommand = z.infer<typeof schema>;
@@ -250,8 +250,7 @@ export async function readAccessGroupMemberships(
 	tx: DatabaseTransaction,
 	input: { scopeId: string; membershipId: string },
 ): Promise<AccessGroupMembershipSnapshot> {
-	z.uuid().parse(input.scopeId);
-	z.uuid().parse(input.membershipId);
+	input = { ...input, scopeId: z.uuid().toLowerCase().parse(input.scopeId), membershipId: z.uuid().toLowerCase().parse(input.membershipId) };
 	const [tree] = await tx
 		.select({ id: accessGroupTree.scopeId })
 		.from(accessGroupTree)

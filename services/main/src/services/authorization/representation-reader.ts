@@ -12,7 +12,7 @@ import { decodeAccessPermissionSnapshot } from "./permission";
 import { AccessRepresentationUnavailable } from "./representations";
 import type { AuthorityOutcome } from "./authority-context";
 
-const referencesSchema = z.array(z.strictObject({ id: z.uuid(), revision: z.number().int().positive().max(Number.MAX_SAFE_INTEGER) }))
+const referencesSchema = z.array(z.strictObject({ id: z.uuid().toLowerCase(), revision: z.number().int().positive().max(Number.MAX_SAFE_INTEGER) }))
 	.max(64).refine(refs => new Set(refs.map(ref => ref.id)).size === refs.length, "Selected grants must be unique");
 /** Selected representation graph/lineage exceeds one bounded request evaluation. @internal */
 export class AccessRepresentationBudgetExceeded extends Error {

@@ -16,9 +16,9 @@ import {
 import { AccessPermissionSchema, decodeAccessPermissionSnapshot } from "./permission";
 const versionSchema = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
 const recipientSchema = z.discriminatedUnion("kind", [
-	z.strictObject({ kind: z.literal("subject"), subjectId: z.uuid() }),
-	z.strictObject({ kind: z.literal("group"), groupId: z.uuid(), scopeId: z.uuid() }),
-	z.strictObject({ kind: z.literal("all-members"), scopeId: z.uuid() }),
+	z.strictObject({ kind: z.literal("subject"), subjectId: z.uuid().toLowerCase() }),
+	z.strictObject({ kind: z.literal("group"), groupId: z.uuid().toLowerCase(), scopeId: z.uuid().toLowerCase() }),
+	z.strictObject({ kind: z.literal("all-members"), scopeId: z.uuid().toLowerCase() }),
 ]);
 const termsSchema = z
 	.strictObject({
@@ -26,9 +26,9 @@ const termsSchema = z
 		validFrom: z.date(),
 		validUntil: z.date().nullable(),
 		recipientEligibility: z.strictObject({
-			membershipId: z.uuid(),
+			membershipId: z.uuid().toLowerCase(),
 			generation: versionSchema.min(1),
-			selection: z.strictObject({ groupId: z.uuid(), version: versionSchema.min(1) }).nullable(),
+			selection: z.strictObject({ groupId: z.uuid().toLowerCase(), version: versionSchema.min(1) }).nullable(),
 		}).nullable(),
 		permissionPolicy: z.discriminatedUnion("mode", [
 			z.strictObject({ mode: z.literal("local-role") }),
@@ -43,18 +43,18 @@ const termsSchema = z
 		"Binding validity must be a nonempty half-open interval",
 	);
 const base = {
-	targetScopeId: z.uuid(),
-	bindingId: z.uuid(),
+	targetScopeId: z.uuid().toLowerCase(),
+	bindingId: z.uuid().toLowerCase(),
 	expectedVersion: versionSchema,
-	operationId: z.uuid(),
-	operatorAuthUserId: z.uuid(),
-	authoritySubjectId: z.uuid(),
+	operationId: z.uuid().toLowerCase(),
+	operatorAuthUserId: z.uuid().toLowerCase(),
+	authoritySubjectId: z.uuid().toLowerCase(),
 };
 const schema = z.discriminatedUnion("operation", [
 	z.strictObject({
 		...base,
 		operation: z.literal("create"),
-		roleId: z.uuid(),
+		roleId: z.uuid().toLowerCase(),
 		recipient: recipientSchema,
 		terms: termsSchema,
 	}),
@@ -403,8 +403,7 @@ export async function readAccessRoleBindingSnapshot(
 	tx: DatabaseTransaction,
 	input: { targetScopeId: string; bindingId: string; revision: number | "current" },
 ): Promise<AccessRoleBindingSnapshot | null> {
-	z.uuid().parse(input.targetScopeId);
-	z.uuid().parse(input.bindingId);
+	input = { ...input, targetScopeId: z.uuid().toLowerCase().parse(input.targetScopeId), bindingId: z.uuid().toLowerCase().parse(input.bindingId) };
 	if (input.revision !== "current") versionSchema.min(1).parse(input.revision);
 	if (input.revision === "current") {
 		const [scope] = await tx

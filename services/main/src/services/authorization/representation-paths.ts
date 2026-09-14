@@ -8,30 +8,30 @@ import { RequestedAuthoritySelectionSchema, AuthorityOperationSchema, Representa
 import type { AccessMemberSetRecipient } from "./member-set-recipients";
 
 const subjectSchema = z.discriminatedUnion("kind", [
-	z.strictObject({ kind: z.literal("principal"), id: z.uuid() }),
-	z.strictObject({ kind: z.literal("entity"), id: z.uuid() }),
+	z.strictObject({ kind: z.literal("principal"), id: z.uuid().toLowerCase() }),
+	z.strictObject({ kind: z.literal("entity"), id: z.uuid().toLowerCase() }),
 ]);
 const memberSetSchema = z.discriminatedUnion("kind", [
-	z.strictObject({ kind: z.literal("all-members"), scopeId: z.uuid() }),
-	z.strictObject({ kind: z.literal("group"), scopeId: z.uuid(), groupId: z.uuid() }),
+	z.strictObject({ kind: z.literal("all-members"), scopeId: z.uuid().toLowerCase() }),
+	z.strictObject({ kind: z.literal("group"), scopeId: z.uuid().toLowerCase(), groupId: z.uuid().toLowerCase() }),
 ]);
 const decisionFields = { current: z.enum(["allow", "deny", "unavailable"]), validUntil: z.number().finite().optional() };
 const grantSchema = z.strictObject({
-	grant: z.strictObject({ id: z.uuid(), revision: z.number().int().positive().max(Number.MAX_SAFE_INTEGER) }),
-	entityId: z.uuid(), target: RepresentationTargetSchema,
+	grant: z.strictObject({ id: z.uuid().toLowerCase(), revision: z.number().int().positive().max(Number.MAX_SAFE_INTEGER) }),
+	entityId: z.uuid().toLowerCase(), target: RepresentationTargetSchema,
 	recipient: z.union([subjectSchema, memberSetSchema]),
 	permissions: z.array(AccessPermissionSchema).max(AccessPermissionValues.length),
 	canRedelegate: z.boolean(), requireFreshSession: z.boolean(), ...decisionFields,
 });
 const inputSchema = z.strictObject({
-	principalId: z.uuid(),
+	principalId: z.uuid().toLowerCase(),
 	selection: RequestedAuthoritySelectionSchema,
 	operation: AuthorityOperationSchema,
 	now: z.number().finite(), freshSession: z.boolean(),
 	grants: z.array(grantSchema).max(64),
 	subjects: z.array(z.strictObject({
 		subject: subjectSchema, ...decisionFields,
-		loadedScopes: z.array(z.uuid()).max(64),
+		loadedScopes: z.array(z.uuid().toLowerCase()).max(64),
 		memberSets: z.array(memberSetSchema).max(576),
 	})).max(65),
 });

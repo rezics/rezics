@@ -8,8 +8,8 @@ import { accessGroupMembershipSet } from "../database/schema/access-group-member
 import { AccessGroupMembershipUnavailable, AccessGroupMembershipBudgetExceeded } from "./group-memberships";
 
 const inputSchema = z.strictObject({
-	subjectId: z.uuid(),
-	scopeIds: z.array(z.uuid()).max(64).refine(ids => new Set(ids).size === ids.length, "Scope keys must be unique"),
+	subjectId: z.uuid().toLowerCase(),
+	scopeIds: z.array(z.uuid().toLowerCase()).max(64).refine(ids => new Set(ids).size === ids.length, "Scope keys must be unique"),
 });
 /** Derived recipient alternatives for exactly one selected subject; never authenticated callers. @internal */
 export type AccessMemberSetRecipient =

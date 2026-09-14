@@ -6,13 +6,13 @@ import { accessScope, accessSubject } from "../database/schema/access-identity";
 import { allocateImmutableReference } from "../units/immutable-reference";
 
 const subjectTargetSchema = z.discriminatedUnion("kind", [
-	z.strictObject({ kind: z.literal("principal"), id: z.uuid() }),
-	z.strictObject({ kind: z.literal("entity"), id: z.uuid() }),
+	z.strictObject({ kind: z.literal("principal"), id: z.uuid().toLowerCase() }),
+	z.strictObject({ kind: z.literal("entity"), id: z.uuid().toLowerCase() }),
 ]);
 const scopeTargetSchema = z.discriminatedUnion("kind", [
 	z.strictObject({ kind: z.literal("platform") }),
-	z.strictObject({ kind: z.literal("account"), id: z.uuid() }),
-	z.strictObject({ kind: z.literal("resource"), referenceValueId: z.uuid() }),
+	z.strictObject({ kind: z.literal("account"), id: z.uuid().toLowerCase() }),
+	z.strictObject({ kind: z.literal("resource"), referenceValueId: z.uuid().toLowerCase() }),
 ]);
 
 /**
@@ -54,7 +54,7 @@ export async function resolveAccessSubject(
 	tx: DatabaseTransaction,
 	id: string,
 ): Promise<AccessSubjectTarget | null> {
-	z.uuid().parse(id);
+	id = z.uuid().toLowerCase().parse(id);
 	const [row] = await tx.select().from(accessSubject).where(eq(accessSubject.id, id)).limit(1);
 	if (!row) return null;
 	return subjectTargetSchema.parse(
@@ -119,7 +119,7 @@ export async function resolveAccessScope(
 	tx: DatabaseTransaction,
 	id: string,
 ): Promise<AccessScopeTarget | null> {
-	z.uuid().parse(id);
+	id = z.uuid().toLowerCase().parse(id);
 	const [row] = await tx.select().from(accessScope).where(eq(accessScope.id, id)).limit(1);
 	if (!row) return null;
 	return scopeTargetSchema.parse(

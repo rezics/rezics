@@ -15,22 +15,22 @@ const presentationSchema = z.strictObject({
 		.nullable(),
 });
 const base = {
-	scopeId: z.uuid(),
-	groupId: z.uuid(),
+	scopeId: z.uuid().toLowerCase(),
+	groupId: z.uuid().toLowerCase(),
 	expectedVersion: versionSchema,
-	operationId: z.uuid(),
-	operatorAuthUserId: z.uuid(),
-	authoritySubjectId: z.uuid(),
+	operationId: z.uuid().toLowerCase(),
+	operatorAuthUserId: z.uuid().toLowerCase(),
+	authoritySubjectId: z.uuid().toLowerCase(),
 };
 const commandSchema = z.discriminatedUnion("operation", [
 	z.strictObject({
 		...base,
 		operation: z.literal("create"),
-		parentId: z.uuid().nullable(),
+		parentId: z.uuid().toLowerCase().nullable(),
 		presentation: presentationSchema,
 	}),
 	z.strictObject({ ...base, operation: z.literal("update"), presentation: presentationSchema }),
-	z.strictObject({ ...base, operation: z.literal("reparent"), parentId: z.uuid().nullable() }),
+	z.strictObject({ ...base, operation: z.literal("reparent"), parentId: z.uuid().toLowerCase().nullable() }),
 	z.strictObject({ ...base, operation: z.literal("retire") }),
 ]);
 /** One Group transition with an exact optimistic precondition and captured private attribution. @internal */
@@ -230,8 +230,7 @@ export async function readAccessGroupSnapshot(
 	tx: DatabaseTransaction,
 	input: { scopeId: string; groupId: string; version: number | "current" },
 ) {
-	z.uuid().parse(input.scopeId);
-	z.uuid().parse(input.groupId);
+	input = { ...input, scopeId: z.uuid().toLowerCase().parse(input.scopeId), groupId: z.uuid().toLowerCase().parse(input.groupId) };
 	if (input.version !== "current") versionSchema.min(1).parse(input.version);
 	if (input.version === "current") {
 		const [tree] = await tx

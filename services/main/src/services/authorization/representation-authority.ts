@@ -34,7 +34,7 @@ export async function evaluateCurrentRepresentationAuthority(
 		freshSession: boolean;
 	},
 ) {
-	const request = z.strictObject({ principalId: z.uuid(), selection: RequestedAuthoritySelectionSchema,
+	const request = z.strictObject({ principalId: z.uuid().toLowerCase(), selection: RequestedAuthoritySelectionSchema,
 		operation: AuthorityOperationSchema, action: z.enum(["read", "write", "contribute"]), freshSession: z.boolean() }).parse(input);
 	if (request.selection.mode !== "represented") throw new AccessRepresentationUnavailable();
 	const selection = request.selection;
@@ -51,7 +51,7 @@ export async function evaluateCurrentRepresentationAuthority(
 	const byId = new Map(subjects.map(subject => [subject.id, subject]));
 	const subjectTargets = new Map<string, AccessSubjectTarget>();
 	for (const subject of subjects) subjectTargets.set(subject.id, subject.authUserId !== null
-		? { kind: "principal", id: subject.authUserId } : { kind: "entity", id: z.uuid().parse(subject.entityId) });
+		? { kind: "principal", id: subject.authUserId } : { kind: "entity", id: z.uuid().toLowerCase().parse(subject.entityId) });
 	for (const subjectId of loaded.dependencySubjectIds) if (!byId.has(subjectId)) throw new AccessRepresentationUnavailable();
 	// Lock subject lifecycles before recipient membership discovery; reread time-sensitive
 	// policy once every membership wait has completed.
@@ -108,7 +108,7 @@ export async function evaluateCurrentRepresentationAuthority(
 			: [];
 		return { grant: { id: head.id, revision: terms.revision }, entityId: head.entityId,
 			target: terms.targetKind === "all-scopes" ? { kind: "all-scopes" }
-				: { kind: "scope", scopeId: z.uuid().parse(terms.targetScopeId), path: terms.targetPath }, recipient, permissions,
+				: { kind: "scope", scopeId: z.uuid().toLowerCase().parse(terms.targetScopeId), path: terms.targetPath }, recipient, permissions,
 			canRedelegate: terms.canRedelegate, requireFreshSession: terms.requireFreshSession,
 			current: combined([row.liveness === true ? "allow" : row.liveness === false ? "deny" : "unavailable",
 				...parents.map(parent => parent?.outcome ?? "unavailable")]),
