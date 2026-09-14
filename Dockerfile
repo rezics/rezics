@@ -28,12 +28,14 @@ COPY .yarn/patches .yarn/patches
 COPY libraries/access/package.json libraries/access/package.json
 COPY libraries/avatar/package.json libraries/avatar/package.json
 COPY libraries/block/package.json libraries/block/package.json
+COPY libraries/content-language/package.json libraries/content-language/package.json
 COPY libraries/email/package.json libraries/email/package.json
 COPY libraries/filter/package.json libraries/filter/package.json
 COPY libraries/i18n/package.json libraries/i18n/package.json
 COPY libraries/license/package.json libraries/license/package.json
 COPY libraries/observability/package.json libraries/observability/package.json
 COPY libraries/portable-text/package.json libraries/portable-text/package.json
+COPY libraries/reference/package.json libraries/reference/package.json
 COPY libraries/slug/package.json libraries/slug/package.json
 COPY packages/atlas/package.json packages/atlas/package.json
 COPY packages/brand/package.json packages/brand/package.json
@@ -56,15 +58,18 @@ RUN apt-get update \
 
 FROM scratch AS backend-source
 
+COPY tsconfig.base.json /tsconfig.base.json
 COPY libraries/access /libraries/access
 COPY libraries/avatar /libraries/avatar
 COPY libraries/block /libraries/block
+COPY libraries/content-language /libraries/content-language
 COPY libraries/email /libraries/email
 COPY libraries/filter /libraries/filter
 COPY libraries/i18n /libraries/i18n
 COPY libraries/license /libraries/license
 COPY libraries/observability /libraries/observability
 COPY libraries/portable-text /libraries/portable-text
+COPY libraries/reference /libraries/reference
 COPY libraries/slug /libraries/slug
 COPY packages/atlas /packages/atlas
 COPY packages/brand /packages/brand
