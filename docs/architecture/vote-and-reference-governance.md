@@ -63,7 +63,7 @@ The complete vote-domain boundary is:
 | Structure application | global Profiles per Unit | yes | positive definition and application scores are both required for presentation |
 | Realm Tag on Unit | Profiles within one Realm | yes | rank only inside that Realm and its enabled voting context |
 | Poll option | poll participants | no | option membership/count semantics and result-visibility policy remain Poll-owned |
-| Review score | review author | no | bounded numeric rating, not a `-1/+1` vote |
+| Rating | context-admitted rater with private counting identity | no | [Context, observation and revision contract](database/ratings.md); bounded numeric scale, distinct from `-1/+1` votes and publication citations |
 
 This matrix prevents a shared transport shape from silently sharing policy or
 authority. A global vote must never be merged with a Realm-scoped vote, and a

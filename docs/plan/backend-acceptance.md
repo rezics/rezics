@@ -12,6 +12,7 @@ G4 is the entry condition for frontend implementation. See [the plan](README.md)
 | Composition | Complete local occurrences, exact published selections, staged import/refresh, source/local conflicts, child pagination, measurements and progress with retry/revocation/recovery. |
 | Creation | Full Book journey plus cross-domain original/community contribution and consumption cases through shared capabilities. |
 | Graph | Scoped subgraphs, n-ary semantics, privacy/spoilers, cycles, cursors/budgets and Block descriptors. |
+| Ratings and event time | [RATE01-RATE33 and TIME01-TIME17](../testing/ratings-and-event-time.md): all selected rating cadences, explicit context/history, latest/history reduction, time-bucket drill-down, typed event dates, mixed semantic queries and privacy/recovery. A standing-only first increment does not satisfy this gate. |
 | Hub | Catalog/package/Prompt/MCP conformance; execution scope separately decided and tested. |
 | Authority | Revocation/ownership/erasure across content, relations, media, search, messages, exports and jobs. |
 | Mixed identity and membership | [IAM01-IAM28](../testing/identity-and-access.md): private principals, many-to-many representation, mixed grantees, Groups/custom Roles, admission generations, assignment ceilings, complete request proofs, institutional/dependent lifecycle and recovery. |

@@ -42,11 +42,13 @@ The [evidence matrix](design-evidence.md#native-work-and-classification) records
 
 ## Fixed structure and dynamic semantics
 
-Use typed tables/FKs for domain invariants and frequently queried fields: track-to-recording, release contents, episode occurrences, dependencies and technical TOCs. Use versioned definitions and typed assertions for extensible classifications, properties and contextual relations. An n-ary relation has its own identity/revision and role-bearing participants. Do not use untyped JSON or an arbitrary triple table to bypass structural guarantees.
+Use typed tables/FKs for domain invariants and frequently queried fields: track-to-recording, release contents, episode occurrences, dependencies and technical TOCs. Semantic classifications use governed Tag/Expression/Application identities; catalog class adapters consume that same authority. Versioned definitions and typed assertions describe properties and contextual relations without introducing a parallel editable classification system. An n-ary relation has its own identity/revision and role-bearing participants. Do not use untyped JSON or an arbitrary triple table to bypass structural guarantees.
 
 Dynamic here means extending logical definitions and values. It does not require a physical SQL table for each class, property, Work or user. Registering a logical owner or changing its physical mapping is an explicit schema/adapter change; generic features use the [Unit capability contract](README.md#34-unit-capabilities-across-owner-tables). Queryable properties additionally need the [selected index contract](README.md#13-search-recommendation-export-and-derived-state); storing a typed value does not qualify arbitrary filtering or sorting.
 
 Each field has one writer. Source-managed fixed fields record the decision and update the effective native column atomically. Structural revisions own their own values and evidence. Shared semantic export projects these authorities; it does not create a competing editable truth.
+
+[Event-time discovery](event-time.md) applies this rule to concrete events, domain release/broadcast occurrences and named-event topic bindings. An Event category does not own a single occurrence date; concrete event facts retain actual/planned role, precision, calendar and provenance through elected date queries. AI company/model/version targets use [shared rating contexts](ratings.md), with independent target and evaluation identities rather than per-class score storage.
 
 ## Current selected domain scope
 
@@ -57,6 +59,14 @@ Each field has one writer. Source-managed fixed fields record the decision and u
 - Entity/reference: people, organizations, characters, software agents, areas/places/events/instruments, concepts and web resources required by elected sources.
 - Grouping: universe/world, canon/continuity, franchise, series, membership and order.
 - Distribution/media: cross-domain packages; assets/representations/locations/uses and scoped selection.
+
+AI company/model rating journeys are selected native catalog/discovery scope.
+A company uses its organization referent; an independently maintained model
+creation and its known versions use applicable Work/software or supporting
+reference contracts with explicit structural admission. Unknown correspondence
+does not fabricate a build or version. A classification Tag does not dictate a
+new owner. Indexing/rating these identities does not elect model execution,
+weight hosting, metering or the other service operations in dictionary D16.
 
 AO3-derived creative behavior and Skill/Prompt/MCP catalog behavior use these owners; their additional contracts are [creation](creation.md) and [Hub](ai-hub.md). General commerce, hardware, course delivery and hosted compute activate only when their real product operations are elected; indexing an object is not implementing its business service.
 

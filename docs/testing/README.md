@@ -12,6 +12,7 @@ Testing follows [the implementation plan](../plan/README.md): shared schema desi
 | [Source conformance](source-conformance.md) | Provider data -> converter -> native writes -> API/export -> update/withdraw/replay. |
 | [Book and creation](book-and-creation.md) | Complete Book, original and AO3-derived native workflows. |
 | [Relationship Graph](relationship-graph.md) | Subgraph semantics, permissions, budgets and Block descriptor contracts. |
+| [Ratings and event time](ratings-and-event-time.md) | Context/observation/revision identity, latest/history aggregation, time histograms, event-date queries and explicit user actions. |
 | [Skill/Prompt/MCP Hub](ai-hub.md) | Catalog/package/template and controlled protocol conformance. |
 | [Wiki composition](wiki-composition.md) | Independent stored Collections, Realm publication, Zone presentations and membership disclosure. |
 | [Recommendation generations](recommendations.md) | Bounded partition scoring, repeated snapshots, failure/replay and atomic activation. |

@@ -36,6 +36,28 @@ controls use their field name as the key. Only Tag controls may be repeated
 under a custom key. A document cannot add an indexed field, operator, sort, or
 resource limit beyond the server ceiling.
 
+## Selected temporal capabilities
+
+The target adds [event occurrence-time fields](database/event-time.md) to the
+server registry: actual/planned temporal role, civil-date/instant interpretation,
+definite/possible matching, start-in/overlap predicates and chronological sorting.
+The registry declares each applicable target, typed effective field and index.
+Named-event topic bindings and participant predicates compose through bounded
+candidate plans; a Tag selection alone does not create a date index. Event-list
+and matching-content result modes retain their own identities and denominators.
+Unsupported calendars/operators return typed unavailable/invalid outcomes.
+
+[Rating timeline selection](database/ratings.md) similarly preserves explicit
+context, time basis/range, scale, aggregation method and generation through
+saved state and drill-down. A Filter or display control cannot create a rating
+context, turn an observation correction into a new submission, or relabel an
+observation-weighted mean as an equal-person score. The rating API owns these
+reductions; Search does not recompute them by joining arbitrary raw score rows.
+
+These are selected target contracts pending their backend qualification. The
+[temporal budgets](database/temporal-capacity.md) may narrow this server ceiling;
+they do not silently raise its candidate, posting or response limits.
+
 ## Ownership and persistence
 
 A Zone owns its `filter_document` directly. Book, Media, Software, Realm, and

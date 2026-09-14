@@ -1,6 +1,8 @@
 # Tag Path semantic architecture
 
-Status: accepted and implemented.
+Status: accepted architecture with an implemented Tag Path core. Alignment of
+catalog classification and Event bindings follows the selected database target
+and its pending acceptance cases.
 
 ## Domain boundary
 
@@ -28,6 +30,14 @@ about a Unit. A Path Sense binds Path members to that Expression. An
 Application records that a Unit adopts one immutable Sense under one authority.
 Effective Tags are rebuildable retrieval evidence, and rendered labels are
 temporary UI projections.
+
+Catalog semantic classification uses these same governed concepts and source
+Applications. Class-definition adapters cannot create a parallel editable
+taxonomy; property and structural-capability definitions retain their separate
+typed validation. The [Event case](database/event-time.md) distinguishes a
+category Tag from a named-event topic's accepted binding to a concrete referent.
+Its occurrence date has one authoritative fact/native owner and a typed temporal
+index; neither a Tag label nor its creation time supplies that date.
 
 Consequently, `Character Traits -> Appearance -> Hair Color -> Red` can realize
 the Expression `facetValue(Hair Color, Red)`. The Overview label is
@@ -64,7 +74,8 @@ changed; a semantic correction creates another relation revision and Path.
 
 ## Structural Path identity
 
-`tag_path` is a dedicated `unit.kind = tag_path` Unit. Its identity is exactly:
+`tag_path` has its own native identity under the logical Unit capability contract;
+it does not require a global `unit` parent. Its structural identity is exactly:
 
 ```text
 ordered member_node_ids + ordered relation_ids
