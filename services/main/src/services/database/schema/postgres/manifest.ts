@@ -81,6 +81,7 @@ export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number
  * PostgreSQL definitions remain split by responsibility for review and drift checks.
  */
 export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly PostgreSqlSchemaFileName[]>> = {
+	access_role_binding_readers: ["access-membership.sql", "access-role-binding.sql"],
 	studio_visit_reference_values: ["unit-reference-integrity.sql", "merge-integrity.sql"],
 	following_reference_values: ["unit-reference-integrity.sql", "participation-follow.sql", "platform-aggregates.sql", "merge-integrity.sql"],
 	recommendation_event_reference_values: ["unit-reference-integrity.sql", "participation-private-state.sql"],
@@ -115,6 +116,8 @@ export const PostgreSqlSchemaFunctionNames = [
 	"refresh_access_group_ancestor_height",
 	"validate_access_group_history",
 
+	"lock_access_membership_key",
+	"lock_access_membership_keys",
 	"guard_access_membership_head",
 	"guard_access_membership_event",
 	"guard_access_membership_admission",

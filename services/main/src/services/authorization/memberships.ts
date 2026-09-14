@@ -91,6 +91,8 @@ export async function applyAccessMembershipCommand(
 					.rows[0]?.admitted,
 			);
 		await authorize();
+		await work.execute(sql`select public.lock_access_membership_key(${command.scopeId}::uuid,${command.subjectId}::uuid,true)`);
+		await authorize();
 		if (command.operation === "admit")
 			await work.insert(accessGroupTree).values({ scopeId: command.scopeId }).onConflictDoNothing();
 		const [tree] = await work

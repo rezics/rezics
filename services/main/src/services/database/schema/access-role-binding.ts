@@ -77,6 +77,9 @@ export const accessRoleBinding = pgTable(
 			foreignColumns: [accessRoleBindingRevision.bindingId, accessRoleBindingRevision.revision],
 		}).onDelete("restrict"),
 		index("access_role_binding_target_idx").on(table.targetScopeId, table.id),
+		index("access_role_binding_recipient_scope_idx")
+			.on(table.targetScopeId, table.recipientScopeId, table.id)
+			.where(sql`${table.state}='active' and ${table.recipientScopeId} is not null`),
 		index("access_role_binding_role_idx").on(table.roleId, table.targetScopeId, table.id),
 		index("access_role_binding_subject_idx")
 			.on(table.recipientSubjectId, table.targetScopeId, table.id)

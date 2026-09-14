@@ -1,8 +1,30 @@
+-- A pair-local fence covers both present and absent enrollment rows.
+CREATE OR REPLACE FUNCTION public.lock_access_membership_key(p_scope uuid,p_subject uuid,p_exclusive boolean)
+RETURNS void LANGUAGE plpgsql SET search_path=pg_catalog,public AS $$
+DECLARE lock_key bigint;
+BEGIN
+ IF p_scope IS NULL OR p_subject IS NULL OR p_exclusive IS NULL THEN RAISE EXCEPTION 'Membership fence requires exact scope, subject and mode' USING ERRCODE='22023'; END IF;
+ lock_key:=hashtextextended('access-membership:'||p_scope::text||':'||p_subject::text,0);
+ IF p_exclusive THEN PERFORM pg_advisory_xact_lock(lock_key);
+ ELSE PERFORM pg_advisory_xact_lock_shared(lock_key); END IF;
+END $$;
+
+CREATE OR REPLACE FUNCTION public.lock_access_membership_keys(p_scopes uuid[],p_subject uuid,p_exclusive boolean)
+RETURNS void LANGUAGE plpgsql SET search_path=pg_catalog,public AS $$
+DECLARE scope_id uuid;
+BEGIN
+ IF p_scopes IS NULL OR cardinality(p_scopes)>64 OR coalesce(array_ndims(p_scopes),1)<>1 OR array_position(p_scopes,NULL) IS NOT NULL OR p_subject IS NULL OR p_exclusive IS NULL THEN RAISE EXCEPTION 'Membership fence selection exceeds its bounded scope keys' USING ERRCODE='22023'; END IF;
+ FOR scope_id IN SELECT DISTINCT selected FROM unnest(p_scopes) selected ORDER BY selected LOOP
+  PERFORM public.lock_access_membership_key(scope_id,p_subject,p_exclusive);
+ END LOOP;
+END $$;
+
 CREATE OR REPLACE FUNCTION public.guard_access_membership_head()
 RETURNS trigger LANGUAGE plpgsql SET search_path=pg_catalog,public AS $$
 DECLARE receipt public.access_membership_event%ROWTYPE;
 BEGIN
  IF TG_OP='DELETE' THEN RAISE EXCEPTION 'Membership identity and generations are retained' USING ERRCODE='55000'; END IF;
+ PERFORM public.lock_access_membership_key(NEW.scope_id,NEW.subject_id,true);
  IF TG_OP='INSERT' THEN
   IF NEW.version<>0 OR NEW.last_generation<>0 OR NEW.active_generation IS NOT NULL THEN RAISE EXCEPTION 'Membership identity starts without admission' USING ERRCODE='23514'; END IF;
   RETURN NEW;
@@ -18,6 +40,9 @@ CREATE OR REPLACE FUNCTION public.guard_access_membership_event()
 RETURNS trigger LANGUAGE plpgsql SET search_path=pg_catalog,public AS $$
 DECLARE head public.access_membership%ROWTYPE; declared_actor uuid;
 BEGIN
+ SELECT * INTO head FROM public.access_membership WHERE id=NEW.membership_id;
+ IF NOT FOUND THEN RAISE EXCEPTION 'Membership identity is missing' USING ERRCODE='23503'; END IF;
+ PERFORM public.lock_access_membership_key(head.scope_id,head.subject_id,true);
  SELECT * INTO head FROM public.access_membership WHERE id=NEW.membership_id FOR UPDATE;
  IF NOT FOUND THEN RAISE EXCEPTION 'Membership identity is missing' USING ERRCODE='23503'; END IF;
  SELECT auth_user_id INTO declared_actor FROM public.access_subject WHERE id=NEW.authority_subject_id;

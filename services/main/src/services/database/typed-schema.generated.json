@@ -19,7 +19,8 @@
     {"name":"20260914151755_access_group.sql","digest":"1e4a951d9e4c00dcdd3aa07466eba14451dd97ebe7c191a3e00fbfad6c37cc54"},
     {"name":"20260914162134_access_group_membership.sql","digest":"79947aa7f11b1e75ca8c2bb804c0dd1ed2d6f20965ddc188616a1f3e66cd9f5a"},
     {"name":"20260914171315_access_role_binding.sql","digest":"4b268230e7c4c57761a82004ed965cde62e8131aac657bc02ff86d8f4721d6cd"},
-    {"name":"20260914180839_access_role_binding.sql","digest":"79a37ace2e8f7cd941456a889d1b3f860a54c46abbf0d9dc70724be015e9e20d"}
+    {"name":"20260914180839_access_role_binding.sql","digest":"79a37ace2e8f7cd941456a889d1b3f860a54c46abbf0d9dc70724be015e9e20d"},
+    {"name":"20260914181715_access_role_binding_readers.sql","digest":"7c4fdf8efc5c0eeda870c8993c0ad57df8a0d31c16ca33c150a6a59cd9b34ce1"}
   ],
   "partitions": {
     "operational_outbox": "range:routing_bucket:16:64",
@@ -144,7 +145,7 @@
   },
   "snapshot": {
     "dialect": "postgres",
-    "id": "87c72238-a9d9-4c63-915c-1ca8aba67d30",
+    "id": "3fd96a9b-91aa-48e6-8b18-f9e3d3302579",
     "prevIds": ["00000000-0000-0000-0000-000000000000"],
     "version": "8",
     "renames": [],
@@ -7884,6 +7885,7 @@
       {"nameExplicit":true,"columns":[{"value":"membership_id","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null},{"value":"operation_id","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null}],"isUnique":true,"where":null,"with":"","method":"btree","concurrently":false,"name":"access_membership_event_operation_key","entityType":"indexes","schema":"public","table":"access_membership_event"},
       {"nameExplicit":true,"columns":[{"value":"scope_id","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null},{"value":"id","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null}],"isUnique":false,"where":null,"with":"","method":"btree","concurrently":false,"name":"access_role_scope_idx","entityType":"indexes","schema":"public","table":"access_role"},
       {"nameExplicit":true,"columns":[{"value":"target_scope_id","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null},{"value":"id","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null}],"isUnique":false,"where":null,"with":"","method":"btree","concurrently":false,"name":"access_role_binding_target_idx","entityType":"indexes","schema":"public","table":"access_role_binding"},
+      {"nameExplicit":true,"columns":[{"value":"target_scope_id","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null},{"value":"recipient_scope_id","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null},{"value":"id","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null}],"isUnique":false,"where":"\"state\"='active' and \"recipient_scope_id\" is not null","with":"","method":"btree","concurrently":false,"name":"access_role_binding_recipient_scope_idx","entityType":"indexes","schema":"public","table":"access_role_binding"},
       {"nameExplicit":true,"columns":[{"value":"role_id","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null},{"value":"target_scope_id","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null},{"value":"id","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null}],"isUnique":false,"where":null,"with":"","method":"btree","concurrently":false,"name":"access_role_binding_role_idx","entityType":"indexes","schema":"public","table":"access_role_binding"},
       {"nameExplicit":true,"columns":[{"value":"recipient_subject_id","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null},{"value":"target_scope_id","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null},{"value":"id","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null}],"isUnique":false,"where":"\"recipient_subject_id\" is not null","with":"","method":"btree","concurrently":false,"name":"access_role_binding_subject_idx","entityType":"indexes","schema":"public","table":"access_role_binding"},
       {"nameExplicit":true,"columns":[{"value":"recipient_group_id","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null},{"value":"target_scope_id","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null},{"value":"id","isExpression":false,"asc":true,"nullsFirst":false,"opclass":null}],"isUnique":false,"where":"\"recipient_group_id\" is not null","with":"","method":"btree","concurrently":false,"name":"access_role_binding_group_idx","entityType":"indexes","schema":"public","table":"access_role_binding"},

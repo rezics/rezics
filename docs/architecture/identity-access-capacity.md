@@ -445,3 +445,22 @@ meaning without copying membership history. Binding writes add bounded tree,
 membership and optional selection-set locks and exact current-selection probes;
 live policy must batch those probes within the combined decision budget. These
 are planning inputs, with native race, plan and workload qualification pending.
+
+The positive-binding reader admits 64 target selections, 64 distinct recipient
+scopes, 64 total direct Group selections across those scopes, 512 ancestry rows
+and 256 matching bindings. This composed budget can reject work that fits each
+scope separately; it does not silently omit recipients. A root/recipient-scope
+partial index supports at most 65 ordered next-key seeks per target root when
+discovering cross-scope recipients. Reserve 112 additional bytes per indexed active
+member-set binding: 56 GB at 500M rows and 336 GB at 3B rows, before overheads.
+The total configuration and retained history remain unbounded by these read limits.
+
+Permission hydration reads each selected role definition and binding approval by
+exact keys in batches; each member query returns at most 256 times the registered
+permission vocabulary plus one exhaustion sentinel. Shared negative membership
+fences add no persistent relation, but consume bounded transaction advisory locks.
+One SQL function acquires up to 64 pair keys in canonical order. The composed
+reader has additional statement/lock costs beyond the prior component samples;
+the proposed twelve-statement and latency envelope is not qualified by its source
+implementation. Native query plans, cold/warm and hot-root contention, wait/expiry,
+revocation and combined workload measurements remain required in verification.

@@ -455,6 +455,36 @@ Later policy must repeat those checks; persisted active state alone is not autho
 An amendment changes these terms under new current admission; it does not mutate
 the old dependency. Revocation can close a binding whose eligibility already ended.
 
+The native positive-binding reader composes recipient-scope discovery, selected
+subject membership/Group resolution and batched current role/approval hydration.
+Pair-local shared/exclusive advisory fences cover absent as well as present
+enrollments; membership commands and native guards take the exclusive side.
+Composed membership reads require READ COMMITTED for new statement snapshots after
+waits. Hash collisions only serialize unrelated keys; they cannot alias subjects.
+The reader takes target fences even for empty candidate sets and checks discovered
+binding versions after waits. A changed discovery requires whole-transaction retry.
+Roles load by exact current definitions, frozen approvals are never expanded,
+and expiry uses database time after local locks. Retired/revoked/future/expired
+bindings contribute no positive permissions. Native queries do not expand rosters.
+
+This is the positive RoleBinding contribution, not a final access decision. Resource
+owners still supply complete inherited roots, current actor/credential/representation
+facts, restriction precedence, live delegation, conditions and assignment admission.
+Mutation owners promote overlapping locks and revalidate their complete dependency
+closure. Member sets come from the selected subject; operator membership cannot
+fill a represented Entity's missing grants. Runtime adapter activation and native
+acceptance remain pending.
+
+For the negative-enrollment fence, PostgreSQL 18's
+[transaction advisory locks](https://www.postgresql.org/docs/18/explicit-locking.html#ADVISORY-LOCKS)
+and [READ COMMITTED statement snapshots](https://www.postgresql.org/docs/18/transaction-iso.html#XACT-READ-COMMITTED)
+were reviewed September 15, 2026. A stored fence per possible scope/subject pair
+would require mutation on first negative read and retained rows for nonmembers;
+a scope-wide exclusive enrollment fence would serialize unrelated members.
+The selected pair-local transaction lock avoids both costs, but every writer must
+participate and advisory locks consume shared lock-manager capacity. The native
+guards enforce participation; race and capacity qualification remain pending.
+
 The immutable role/recipient/target choice makes assignment identity and revision
 lineage explicit. An alternative permits all three to change inside one versioned
 object, but every dependent proof would then need to distinguish a terms edit from
