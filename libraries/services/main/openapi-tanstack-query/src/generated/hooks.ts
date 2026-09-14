@@ -23,6 +23,7 @@ import {
 	attachMusicDiscToc,
 	cancelOrganizationMembershipInvitation,
 	controlCatalogSourceJob,
+	createAccessRole,
 	createCatalogDefinition,
 	createCatalogResource,
 	createGroupingOrderProfile,
@@ -87,6 +88,7 @@ import {
 	deleteApiZonesByZoneIdPagesByPageIdPlacement,
 	eraseOwnAccount,
 	findSoftwareReleases,
+	getAccessRole,
 	getActingEntityPresentationRevision,
 	getApiAccountMe,
 	getApiAccountMeBlocks,
@@ -251,6 +253,8 @@ import {
 	inviteOrganizationMember,
 	issueParticipationGrant,
 	leaveOrganizationMembership,
+	listAccessRoleHistory,
+	listAccessRoles,
 	listActingEntityPresentationHistory,
 	listCatalogContentLanguageEvidence,
 	listCatalogContentLanguageHistory,
@@ -530,6 +534,7 @@ import {
 	replaceRealmSlugAddress,
 	replaceUnitSlugAddressWithPlatformAccess,
 	replaceZoneSlugAddress,
+	resolveAccessManagementScope,
 	resolveCatalogEntityShape,
 	resolveNamespaceSlugAddress,
 	resolveNativeMergeReconciliation,
@@ -551,6 +556,7 @@ import {
 	restoreSoftwareParticipationContext,
 	retryNativeMerge,
 	reviewNativeMerge,
+	reviseAccessRole,
 	reviseCatalogDefinition,
 	reviseCatalogIdentifier,
 	reviseCatalogName,
@@ -636,6 +642,12 @@ import type {
 	ControlCatalogSourceJobStatus422,
 	ControlCatalogSourceJobStatus429,
 	ControlCatalogSourceJobStatus500,
+	CreateAccessRoleOptions,
+	CreateAccessRoleStatus200,
+	CreateAccessRoleStatus400,
+	CreateAccessRoleStatus422,
+	CreateAccessRoleStatus429,
+	CreateAccessRoleStatus500,
 	CreateCatalogDefinitionOptions,
 	CreateCatalogDefinitionStatus200,
 	CreateCatalogDefinitionStatus400,
@@ -1070,6 +1082,11 @@ import type {
 	FindSoftwareReleasesStatus200,
 	FindSoftwareReleasesStatus422,
 	FindSoftwareReleasesStatus500,
+	GetAccessRoleOptions,
+	GetAccessRoleStatus200,
+	GetAccessRoleStatus422,
+	GetAccessRoleStatus429,
+	GetAccessRoleStatus500,
 	GetActingEntityPresentationRevisionOptions,
 	GetActingEntityPresentationRevisionStatus200,
 	GetActingEntityPresentationRevisionStatus422,
@@ -1946,6 +1963,16 @@ import type {
 	LeaveOrganizationMembershipStatus409,
 	LeaveOrganizationMembershipStatus422,
 	LeaveOrganizationMembershipStatus500,
+	ListAccessRoleHistoryOptions,
+	ListAccessRoleHistoryStatus200,
+	ListAccessRoleHistoryStatus422,
+	ListAccessRoleHistoryStatus429,
+	ListAccessRoleHistoryStatus500,
+	ListAccessRolesOptions,
+	ListAccessRolesStatus200,
+	ListAccessRolesStatus422,
+	ListAccessRolesStatus429,
+	ListAccessRolesStatus500,
 	ListActingEntityPresentationHistoryOptions,
 	ListActingEntityPresentationHistoryStatus200,
 	ListActingEntityPresentationHistoryStatus422,
@@ -3850,6 +3877,12 @@ import type {
 	ReplaceZoneSlugAddressStatus422,
 	ReplaceZoneSlugAddressStatus429,
 	ReplaceZoneSlugAddressStatus500,
+	ResolveAccessManagementScopeOptions,
+	ResolveAccessManagementScopeStatus200,
+	ResolveAccessManagementScopeStatus400,
+	ResolveAccessManagementScopeStatus422,
+	ResolveAccessManagementScopeStatus429,
+	ResolveAccessManagementScopeStatus500,
 	ResolveCatalogEntityShapeOptions,
 	ResolveCatalogEntityShapeStatus200,
 	ResolveCatalogEntityShapeStatus400,
@@ -3971,6 +4004,12 @@ import type {
 	ReviewNativeMergeStatus400,
 	ReviewNativeMergeStatus422,
 	ReviewNativeMergeStatus500,
+	ReviseAccessRoleOptions,
+	ReviseAccessRoleStatus200,
+	ReviseAccessRoleStatus400,
+	ReviseAccessRoleStatus422,
+	ReviseAccessRoleStatus429,
+	ReviseAccessRoleStatus500,
 	ReviseCatalogDefinitionOptions,
 	ReviseCatalogDefinitionStatus200,
 	ReviseCatalogDefinitionStatus400,
@@ -4313,6 +4352,551 @@ export function useGetImageAssetsByIdContent<
 	queryResult.queryKey = queryKey as TQueryKey;
 
 	return queryResult;
+}
+
+export const resolveAccessManagementScopeMutationKey = () =>
+	[{ url: "/api/v1/access/scopes/resolve" }] as const;
+
+export function resolveAccessManagementScopeMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = resolveAccessManagementScopeMutationKey();
+	return mutationOptions<
+		ResolveAccessManagementScopeStatus200,
+		ResponseErrorConfig<
+			| ResolveAccessManagementScopeStatus400
+			| ResolveAccessManagementScopeStatus422
+			| ResolveAccessManagementScopeStatus429
+			| ResolveAccessManagementScopeStatus500
+		>,
+		ResolveAccessManagementScopeOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			return resolveAccessManagementScope({ ...config, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/scopes/resolve}
+ */
+export function useResolveAccessManagementScope<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			ResolveAccessManagementScopeStatus200,
+			ResponseErrorConfig<
+				| ResolveAccessManagementScopeStatus400
+				| ResolveAccessManagementScopeStatus422
+				| ResolveAccessManagementScopeStatus429
+				| ResolveAccessManagementScopeStatus500
+			>,
+			ResolveAccessManagementScopeOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? resolveAccessManagementScopeMutationKey();
+
+	const baseOptions = resolveAccessManagementScopeMutationOptions(config) as UseMutationOptions<
+		ResolveAccessManagementScopeStatus200,
+		ResponseErrorConfig<
+			| ResolveAccessManagementScopeStatus400
+			| ResolveAccessManagementScopeStatus422
+			| ResolveAccessManagementScopeStatus429
+			| ResolveAccessManagementScopeStatus500
+		>,
+		ResolveAccessManagementScopeOptions,
+		TContext
+	>;
+
+	return useMutation<
+		ResolveAccessManagementScopeStatus200,
+		ResponseErrorConfig<
+			| ResolveAccessManagementScopeStatus400
+			| ResolveAccessManagementScopeStatus422
+			| ResolveAccessManagementScopeStatus429
+			| ResolveAccessManagementScopeStatus500
+		>,
+		ResolveAccessManagementScopeOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		ResolveAccessManagementScopeStatus200,
+		ResponseErrorConfig<
+			| ResolveAccessManagementScopeStatus400
+			| ResolveAccessManagementScopeStatus422
+			| ResolveAccessManagementScopeStatus429
+			| ResolveAccessManagementScopeStatus500
+		>,
+		ResolveAccessManagementScopeOptions,
+		TContext
+	>;
+}
+
+export const listAccessRolesQueryKey = ({ path, query }: Omit<ListAccessRolesOptions, "headers">) =>
+	[{ url: "/api/v1/access/:scope/roles", params: path }, ...(query ? [query] : [])] as const;
+
+type ListAccessRolesQueryKey = ReturnType<typeof listAccessRolesQueryKey>;
+
+export function listAccessRolesQueryOptions(
+	{ path, query }: ListAccessRolesOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listAccessRolesQueryKey({ path, query });
+	return queryOptions<
+		ListAccessRolesStatus200,
+		ResponseErrorConfig<
+			ListAccessRolesStatus422 | ListAccessRolesStatus429 | ListAccessRolesStatus500
+		>,
+		ListAccessRolesStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return listAccessRoles({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/roles}
+ */
+export function useListAccessRoles<
+	TData = ListAccessRolesStatus200,
+	TQueryData = ListAccessRolesStatus200,
+	TQueryKey extends QueryKey = ListAccessRolesQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path: ListAccessRolesOptions["path"] | (() => ListAccessRolesOptions["path"]);
+		query?: ListAccessRolesOptions["query"] | (() => ListAccessRolesOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListAccessRolesStatus200,
+				ResponseErrorConfig<
+					ListAccessRolesStatus422 | ListAccessRolesStatus429 | ListAccessRolesStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey = resolvedOptions?.queryKey ?? listAccessRolesQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listAccessRolesQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			ListAccessRolesStatus422 | ListAccessRolesStatus429 | ListAccessRolesStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getAccessRoleQueryKey = ({ path, query }: Omit<GetAccessRoleOptions, "headers">) =>
+	[
+		{ url: "/api/v1/access/:scope/roles/:roleId", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type GetAccessRoleQueryKey = ReturnType<typeof getAccessRoleQueryKey>;
+
+export function getAccessRoleQueryOptions(
+	{ path, query }: GetAccessRoleOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getAccessRoleQueryKey({ path, query });
+	return queryOptions<
+		GetAccessRoleStatus200,
+		ResponseErrorConfig<GetAccessRoleStatus422 | GetAccessRoleStatus429 | GetAccessRoleStatus500>,
+		GetAccessRoleStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return getAccessRole({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/roles/:roleId}
+ */
+export function useGetAccessRole<
+	TData = GetAccessRoleStatus200,
+	TQueryData = GetAccessRoleStatus200,
+	TQueryKey extends QueryKey = GetAccessRoleQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path: GetAccessRoleOptions["path"] | (() => GetAccessRoleOptions["path"]);
+		query?: GetAccessRoleOptions["query"] | (() => GetAccessRoleOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetAccessRoleStatus200,
+				ResponseErrorConfig<
+					GetAccessRoleStatus422 | GetAccessRoleStatus429 | GetAccessRoleStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey = resolvedOptions?.queryKey ?? getAccessRoleQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getAccessRoleQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<GetAccessRoleStatus422 | GetAccessRoleStatus429 | GetAccessRoleStatus500>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const createAccessRoleMutationKey = () =>
+	[{ url: "/api/v1/access/:scope/roles/:roleId" }] as const;
+
+export function createAccessRoleMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = createAccessRoleMutationKey();
+	return mutationOptions<
+		CreateAccessRoleStatus200,
+		ResponseErrorConfig<
+			| CreateAccessRoleStatus400
+			| CreateAccessRoleStatus422
+			| CreateAccessRoleStatus429
+			| CreateAccessRoleStatus500
+		>,
+		CreateAccessRoleOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return createAccessRole({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/roles/:roleId}
+ */
+export function useCreateAccessRole<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			CreateAccessRoleStatus200,
+			ResponseErrorConfig<
+				| CreateAccessRoleStatus400
+				| CreateAccessRoleStatus422
+				| CreateAccessRoleStatus429
+				| CreateAccessRoleStatus500
+			>,
+			CreateAccessRoleOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? createAccessRoleMutationKey();
+
+	const baseOptions = createAccessRoleMutationOptions(config) as UseMutationOptions<
+		CreateAccessRoleStatus200,
+		ResponseErrorConfig<
+			| CreateAccessRoleStatus400
+			| CreateAccessRoleStatus422
+			| CreateAccessRoleStatus429
+			| CreateAccessRoleStatus500
+		>,
+		CreateAccessRoleOptions,
+		TContext
+	>;
+
+	return useMutation<
+		CreateAccessRoleStatus200,
+		ResponseErrorConfig<
+			| CreateAccessRoleStatus400
+			| CreateAccessRoleStatus422
+			| CreateAccessRoleStatus429
+			| CreateAccessRoleStatus500
+		>,
+		CreateAccessRoleOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		CreateAccessRoleStatus200,
+		ResponseErrorConfig<
+			| CreateAccessRoleStatus400
+			| CreateAccessRoleStatus422
+			| CreateAccessRoleStatus429
+			| CreateAccessRoleStatus500
+		>,
+		CreateAccessRoleOptions,
+		TContext
+	>;
+}
+
+export const listAccessRoleHistoryQueryKey = ({
+	path,
+	query,
+}: Omit<ListAccessRoleHistoryOptions, "headers">) =>
+	[
+		{ url: "/api/v1/access/:scope/roles/:roleId/history", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type ListAccessRoleHistoryQueryKey = ReturnType<typeof listAccessRoleHistoryQueryKey>;
+
+export function listAccessRoleHistoryQueryOptions(
+	{ path, query }: ListAccessRoleHistoryOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listAccessRoleHistoryQueryKey({ path, query });
+	return queryOptions<
+		ListAccessRoleHistoryStatus200,
+		ResponseErrorConfig<
+			| ListAccessRoleHistoryStatus422
+			| ListAccessRoleHistoryStatus429
+			| ListAccessRoleHistoryStatus500
+		>,
+		ListAccessRoleHistoryStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return listAccessRoleHistory({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/roles/:roleId/history}
+ */
+export function useListAccessRoleHistory<
+	TData = ListAccessRoleHistoryStatus200,
+	TQueryData = ListAccessRoleHistoryStatus200,
+	TQueryKey extends QueryKey = ListAccessRoleHistoryQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path: ListAccessRoleHistoryOptions["path"] | (() => ListAccessRoleHistoryOptions["path"]);
+		query?: ListAccessRoleHistoryOptions["query"] | (() => ListAccessRoleHistoryOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListAccessRoleHistoryStatus200,
+				ResponseErrorConfig<
+					| ListAccessRoleHistoryStatus422
+					| ListAccessRoleHistoryStatus429
+					| ListAccessRoleHistoryStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey = resolvedOptions?.queryKey ?? listAccessRoleHistoryQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listAccessRoleHistoryQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| ListAccessRoleHistoryStatus422
+			| ListAccessRoleHistoryStatus429
+			| ListAccessRoleHistoryStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const reviseAccessRoleMutationKey = () =>
+	[{ url: "/api/v1/access/:scope/roles/:roleId/definitions" }] as const;
+
+export function reviseAccessRoleMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = reviseAccessRoleMutationKey();
+	return mutationOptions<
+		ReviseAccessRoleStatus200,
+		ResponseErrorConfig<
+			| ReviseAccessRoleStatus400
+			| ReviseAccessRoleStatus422
+			| ReviseAccessRoleStatus429
+			| ReviseAccessRoleStatus500
+		>,
+		ReviseAccessRoleOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return reviseAccessRole({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/roles/:roleId/definitions}
+ */
+export function useReviseAccessRole<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			ReviseAccessRoleStatus200,
+			ResponseErrorConfig<
+				| ReviseAccessRoleStatus400
+				| ReviseAccessRoleStatus422
+				| ReviseAccessRoleStatus429
+				| ReviseAccessRoleStatus500
+			>,
+			ReviseAccessRoleOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? reviseAccessRoleMutationKey();
+
+	const baseOptions = reviseAccessRoleMutationOptions(config) as UseMutationOptions<
+		ReviseAccessRoleStatus200,
+		ResponseErrorConfig<
+			| ReviseAccessRoleStatus400
+			| ReviseAccessRoleStatus422
+			| ReviseAccessRoleStatus429
+			| ReviseAccessRoleStatus500
+		>,
+		ReviseAccessRoleOptions,
+		TContext
+	>;
+
+	return useMutation<
+		ReviseAccessRoleStatus200,
+		ResponseErrorConfig<
+			| ReviseAccessRoleStatus400
+			| ReviseAccessRoleStatus422
+			| ReviseAccessRoleStatus429
+			| ReviseAccessRoleStatus500
+		>,
+		ReviseAccessRoleOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		ReviseAccessRoleStatus200,
+		ResponseErrorConfig<
+			| ReviseAccessRoleStatus400
+			| ReviseAccessRoleStatus422
+			| ReviseAccessRoleStatus429
+			| ReviseAccessRoleStatus500
+		>,
+		ReviseAccessRoleOptions,
+		TContext
+	>;
 }
 
 export const getApiUnitByUnitIdAssociationProposalsQueryKey = ({

@@ -13,22 +13,24 @@ import type {
 	AddCatalogNameResponses,
 	AddMusicMediumOptions,
 	AddMusicMediumResponses,
-	DeleteApiApiQuotaPoliciesAccountsByUserIdOptions,
-	DeleteApiApiQuotaPoliciesAccountsByUserIdResponses,
-	DeleteApiApiTokensByTokenIdOptions,
-	DeleteApiApiTokensByTokenIdResponses,
-	DeleteApiMessagesByMessageIdOptions,
-	DeleteApiMessagesByMessageIdResponses,
-	DeleteApiRecommendationsExclusionsByUnitIdOptions,
-	DeleteApiRecommendationsExclusionsByUnitIdResponses,
-	DeleteApiUnitByUnitIdAssociationProposalsByProposalIdOptions,
-	DeleteApiUnitByUnitIdAssociationProposalsByProposalIdResponses,
-	GetApiUnitByUnitIdAssociationProposalsOptions,
-	GetApiUnitByUnitIdAssociationProposalsResponses,
+	CreateAccessRoleOptions,
+	CreateAccessRoleResponses,
+	GetAccessRoleOptions,
+	GetAccessRoleResponses,
 	GetImageAssetsByIdContentOptions,
 	GetImageAssetsByIdContentResponses,
 	GetImageAssetsByIdPresentationsByRoleContentOptions,
 	GetImageAssetsByIdPresentationsByRoleContentResponses,
+	ResolveAccessManagementScopeOptions,
+	ResolveAccessManagementScopeResponses,
+	ListAccessRolesOptions,
+	ListAccessRolesResponses,
+	ListAccessRoleHistoryOptions,
+	ListAccessRoleHistoryResponses,
+	ReviseAccessRoleOptions,
+	ReviseAccessRoleResponses,
+	GetApiUnitByUnitIdAssociationProposalsOptions,
+	GetApiUnitByUnitIdAssociationProposalsResponses,
 	PostApiUnitByUnitIdAssociationProposalsRequestsOptions,
 	PostApiUnitByUnitIdAssociationProposalsRequestsResponses,
 	PostApiUnitByUnitIdAssociationProposalsInvitationsOptions,
@@ -37,6 +39,8 @@ import type {
 	PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptResponses,
 	PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineOptions,
 	PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineResponses,
+	DeleteApiUnitByUnitIdAssociationProposalsByProposalIdOptions,
+	DeleteApiUnitByUnitIdAssociationProposalsByProposalIdResponses,
 	GetApiStartupOptions,
 	GetApiStartupResponses,
 	GetApiHealthOptions,
@@ -67,6 +71,8 @@ import type {
 	PostApiRecommendationsEventsResponses,
 	PutApiRecommendationsExclusionsByUnitIdOptions,
 	PutApiRecommendationsExclusionsByUnitIdResponses,
+	DeleteApiRecommendationsExclusionsByUnitIdOptions,
+	DeleteApiRecommendationsExclusionsByUnitIdResponses,
 	GetApiMessagesConversationsOptions,
 	GetApiMessagesConversationsResponses,
 	PostApiMessagesConversationsOptions,
@@ -79,12 +85,16 @@ import type {
 	PostApiMessagesConversationsByConversationIdMessagesResponses,
 	PutApiMessagesConversationsByConversationIdReadOptions,
 	PutApiMessagesConversationsByConversationIdReadResponses,
+	DeleteApiMessagesByMessageIdOptions,
+	DeleteApiMessagesByMessageIdResponses,
 	GetApiApiTokensOptions,
 	GetApiApiTokensResponses,
 	PostApiApiTokensOptions,
 	PostApiApiTokensResponses,
 	PatchApiApiTokensByTokenIdOptions,
 	PatchApiApiTokensByTokenIdResponses,
+	DeleteApiApiTokensByTokenIdOptions,
+	DeleteApiApiTokensByTokenIdResponses,
 	PutApiApiTokensByTokenIdQuotaOverrideOptions,
 	PutApiApiTokensByTokenIdQuotaOverrideResponses,
 	DeleteApiApiTokensByTokenIdQuotaOverrideOptions,
@@ -101,6 +111,8 @@ import type {
 	GetApiApiQuotaPoliciesAccountsByUserIdResponses,
 	PutApiApiQuotaPoliciesAccountsByUserIdOptions,
 	PutApiApiQuotaPoliciesAccountsByUserIdResponses,
+	DeleteApiApiQuotaPoliciesAccountsByUserIdOptions,
+	DeleteApiApiQuotaPoliciesAccountsByUserIdResponses,
 	GetApiApiQuotaPoliciesAccountsByUserIdTokensOptions,
 	GetApiApiQuotaPoliciesAccountsByUserIdTokensResponses,
 	PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdOptions,
@@ -1165,6 +1177,132 @@ export function getImageAssetsByIdContent<ThrowOnError extends boolean = true>(
 		request({ method: "GET", url: "/image-assets/{id}/content", ...config }) as Promise<
 			RequestResult<GetImageAssetsByIdContentResponses, ThrowOnError>
 		>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/scopes/resolve}
+ */
+export function resolveAccessManagementScope<ThrowOnError extends boolean = true>(
+	options: Options<ResolveAccessManagementScopeOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ResolveAccessManagementScopeResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/access/scopes/resolve",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ResolveAccessManagementScopeResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/roles}
+ */
+export function listAccessRoles<ThrowOnError extends boolean = true>(
+	options: Options<ListAccessRolesOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ListAccessRolesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/access/{scope}/roles",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ListAccessRolesResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/roles/:roleId}
+ */
+export function getAccessRole<ThrowOnError extends boolean = true>(
+	options: Options<GetAccessRoleOptions, ThrowOnError>,
+): Unwrappable<RequestResult<GetAccessRoleResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/access/{scope}/roles/{roleId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetAccessRoleResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/roles/:roleId}
+ */
+export function createAccessRole<ThrowOnError extends boolean = true>(
+	options: Options<CreateAccessRoleOptions, ThrowOnError>,
+): Unwrappable<RequestResult<CreateAccessRoleResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/access/{scope}/roles/{roleId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<CreateAccessRoleResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/roles/:roleId/history}
+ */
+export function listAccessRoleHistory<ThrowOnError extends boolean = true>(
+	options: Options<ListAccessRoleHistoryOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ListAccessRoleHistoryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/access/{scope}/roles/{roleId}/history",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ListAccessRoleHistoryResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/roles/:roleId/definitions}
+ */
+export function reviseAccessRole<ThrowOnError extends boolean = true>(
+	options: Options<ReviseAccessRoleOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ReviseAccessRoleResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/access/{scope}/roles/{roleId}/definitions",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ReviseAccessRoleResponses, ThrowOnError>>,
 	);
 }
 

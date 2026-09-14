@@ -168,6 +168,22 @@ predicates require the owning transaction's retained fences and must be rebuilt
 after rollback; they are not portable authorization receipts. Complete API/consumer
 integration and native concurrency qualification remain pending.
 
+Native `/access` management entry authenticates the private principal without
+creating a public Persona. `X-Rezics-Authority` carries the explicit JSON authority
+selection; absent selection means direct authority for sessions/operator keys or
+the key's fixed selection. API entry requires `access:read` for inspection and
+scope resolution, and `access:manage` for changes. These scopes do not supply
+domain management permission. Responses are private and non-cacheable.
+
+Scope resolution accepts the caller's own account, the platform, or a concrete
+resource reference and requested management operation. Missing and undisclosed
+roots share one response. Its fifteen-minute encrypted locator binds the private
+root to the account and exact credential; it carries no authority. Role endpoints
+recheck current admission, expose bounded keyset directories/control history and
+omit private issuer identifiers. Definition creation/revision does not activate
+permissions; activation, assignment impact and protected recovery have separate
+admission requirements. Generated transports preserve these boundaries.
+
 ### Private default selection storage
 
 One preference identity belongs to a private account and either its main selection

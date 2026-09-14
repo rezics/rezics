@@ -41,7 +41,8 @@ export async function captureApiKeyCredentialProof(id: string, principalId: stri
 export function firstPartyAuthorityMetadata(authority: FirstPartyCredentialAuthority) {
 	return { rezicsAuthority: metadataSchema.parse({ version: 1, authority }) };
 }
-function readAuthorityMetadata(value: string | null): FirstPartyCredentialAuthority {
+/** Read the owned authority namespace without treating unrelated metadata as policy. @internal */
+export function readApiKeyAuthorityMetadata(value: string | null): FirstPartyCredentialAuthority {
 	if (value === null || Buffer.byteLength(value, "utf8") > 8192) throw new CredentialAuthorityUnavailable();
 	try {
 		const parsed: unknown = JSON.parse(value);
@@ -105,7 +106,7 @@ export async function readFirstPartyCredentialAuthority(
 		const [key] = await tx.select().from(apikeys).where(eq(apikeys.id, proof.id)).limit(1);
 		if (!key || key.referenceId !== proof.principalId || key.configId !== "default" || key.enabled !== true || !matchesDigest(key.key, proof.tokenDigest)) throw new CredentialAuthorityDenied();
 		expiresAt = key.expiresAt; createdAt = key.createdAt; version = fence.version;
-		authority = readAuthorityMetadata(key.metadata);
+		authority = readApiKeyAuthorityMetadata(key.metadata);
 		if (key.permissions === null || Buffer.byteLength(key.permissions, "utf8") > 8192) throw new CredentialAuthorityUnavailable();
 		try {
 			const parsed = z.record(z.string().max(64), z.array(z.string().max(64)).max(ApiPermissionValues.length)).parse(JSON.parse(key.permissions));

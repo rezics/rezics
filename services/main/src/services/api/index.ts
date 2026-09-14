@@ -7,6 +7,7 @@ import { auth } from "../auth";
 import session from "../auth/session";
 import { env } from "../config";
 import agentGuide from "./agent-guide";
+import accessManagement from "./access";
 import associationProposals from "./association-proposals";
 import audit from "./audit";
 import collections from "./collections";
@@ -64,6 +65,7 @@ export default new Elysia()
 				"Authorization",
 				"Accept-Language",
 				"X-Rezics-Participation",
+				"X-Rezics-Authority",
 			],
 			exposeHeaders: ["X-Request-Id", "Retry-After"],
 		}),
@@ -81,6 +83,7 @@ export default new Elysia()
 	.group("/api/v1", (api) =>
 		api.guard({ parse: ["empty-body", "json"] }, (api) =>
 			api
+				.use(accessManagement)
 				.use(associationProposals)
 				.use(health)
 				.use(notifications)

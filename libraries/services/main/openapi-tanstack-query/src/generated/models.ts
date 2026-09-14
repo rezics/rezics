@@ -2842,6 +2842,11 @@ export const ApiErrorCode = {
 	CustomThemeExternalLiveAccessSelfMutationForbidden:
 		"CustomThemeExternalLiveAccessSelfMutationForbidden",
 	CollectionOwnershipRequired: "CollectionOwnershipRequired",
+	AccessDenied: "AccessDenied",
+	AccessUnavailable: "AccessUnavailable",
+	AccessChanged: "AccessChanged",
+	AccessInputInvalid: "AccessInputInvalid",
+	AccessRecordUnavailable: "AccessRecordUnavailable",
 	UnitNotFound: "UnitNotFound",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
@@ -3223,6 +3228,798 @@ export type GetImageAssetsByIdContentResponse =
 	| GetImageAssetsByIdContentStatus404
 	| GetImageAssetsByIdContentStatus422
 	| GetImageAssetsByIdContentStatus500;
+
+export type ResolveAccessManagementScopeStatus200 = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expiresAt: string;
+};
+
+export type ResolveAccessManagementScopeStatus400 = MalformedRequestBody;
+
+export type ResolveAccessManagementScopeStatus422 = ValidationError;
+
+export const ResolveAccessManagementScopeStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ResolveAccessManagementScopeStatus429ErrorCodeEnum =
+	(typeof ResolveAccessManagementScopeStatus429ErrorCodeEnum)[keyof typeof ResolveAccessManagementScopeStatus429ErrorCodeEnum];
+
+export type ResolveAccessManagementScopeStatus429 = {
+	error: {
+		code: ResolveAccessManagementScopeStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type ResolveAccessManagementScopeStatus500 = InternalError;
+
+export const ResolveAccessManagementScopeRequestTargetReferenceOwnerEnum = {
+	publishing: "publishing",
+	music: "music",
+	program: "program",
+	software: "software",
+	entity: "entity",
+	grouping: "grouping",
+	reference: "reference",
+	distribution: "distribution",
+	video: "video",
+	audio: "audio",
+	post: "post",
+	poll: "poll",
+	zone: "zone",
+	realm: "realm",
+	realm_rule: "realm_rule",
+	custom_theme: "custom_theme",
+	collection: "collection",
+	tag: "tag",
+	tag_path: "tag_path",
+	label: "label",
+} as const;
+
+export type ResolveAccessManagementScopeRequestTargetReferenceOwnerEnum =
+	(typeof ResolveAccessManagementScopeRequestTargetReferenceOwnerEnum)[keyof typeof ResolveAccessManagementScopeRequestTargetReferenceOwnerEnum];
+
+export const ResolveAccessManagementScopeRequestPermissionEnum = {
+	"access.role.read": "access.role.read",
+	"access.role.create": "access.role.create",
+	"access.role.update": "access.role.update",
+	"access.role.activate": "access.role.activate",
+	"access.role.retire": "access.role.retire",
+	"access.role-binding.manage": "access.role-binding.manage",
+	"access.assignment-ceiling.manage": "access.assignment-ceiling.manage",
+} as const;
+
+export type ResolveAccessManagementScopeRequestPermissionEnum =
+	(typeof ResolveAccessManagementScopeRequestPermissionEnum)[keyof typeof ResolveAccessManagementScopeRequestPermissionEnum];
+
+export type ResolveAccessManagementScopeBody = {
+	target:
+		| {
+				kind: "self-account";
+		  }
+		| {
+				kind: "platform";
+		  }
+		| {
+				kind: "resource";
+				reference: {
+					owner: ResolveAccessManagementScopeRequestTargetReferenceOwnerEnum;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+				};
+		  };
+	permission: ResolveAccessManagementScopeRequestPermissionEnum;
+	path: string[];
+};
+
+export type ResolveAccessManagementScopeOptions = {
+	body: ResolveAccessManagementScopeBody;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+export type ResolveAccessManagementScopeResponses = {
+	"200": ResolveAccessManagementScopeStatus200;
+	"400": ResolveAccessManagementScopeStatus400;
+	"422": ResolveAccessManagementScopeStatus422;
+	"429": ResolveAccessManagementScopeStatus429;
+	"500": ResolveAccessManagementScopeStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ResolveAccessManagementScopeResponse =
+	| ResolveAccessManagementScopeStatus200
+	| ResolveAccessManagementScopeStatus400
+	| ResolveAccessManagementScopeStatus422
+	| ResolveAccessManagementScopeStatus429
+	| ResolveAccessManagementScopeStatus500;
+
+export type ListAccessRolesPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+};
+
+export type ListAccessRolesQuery = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	afterId?: string;
+};
+
+export const ListAccessRolesStatus200ItemsStateEnum = {
+	draft: "draft",
+	active: "active",
+	retired: "retired",
+} as const;
+
+export type ListAccessRolesStatus200ItemsStateEnum =
+	(typeof ListAccessRolesStatus200ItemsStateEnum)[keyof typeof ListAccessRolesStatus200ItemsStateEnum];
+
+export type ListAccessRolesStatus200 = {
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @minLength -9007199254740991
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		version: number;
+		state: ListAccessRolesStatus200ItemsStateEnum;
+		/**
+		 * @minLength -9007199254740991
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		activeRevision: number | null;
+		/**
+		 * @minLength -9007199254740991
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		definitionRevision: number;
+		label: string;
+	}[];
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	nextCursor: string | null;
+};
+
+export type ListAccessRolesStatus422 = ValidationError;
+
+export const ListAccessRolesStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ListAccessRolesStatus429ErrorCodeEnum =
+	(typeof ListAccessRolesStatus429ErrorCodeEnum)[keyof typeof ListAccessRolesStatus429ErrorCodeEnum];
+
+export type ListAccessRolesStatus429 = {
+	error: {
+		code: ListAccessRolesStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type ListAccessRolesStatus500 = InternalError;
+
+export type ListAccessRolesOptions = {
+	body?: never;
+	path: ListAccessRolesPath;
+	query?: ListAccessRolesQuery;
+	headers?: never;
+};
+
+export type ListAccessRolesResponses = {
+	"200": ListAccessRolesStatus200;
+	"422": ListAccessRolesStatus422;
+	"429": ListAccessRolesStatus429;
+	"500": ListAccessRolesStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ListAccessRolesResponse =
+	| ListAccessRolesStatus200
+	| ListAccessRolesStatus422
+	| ListAccessRolesStatus429
+	| ListAccessRolesStatus500;
+
+export type GetAccessRolePath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	roleId: string;
+};
+
+export type GetAccessRoleQuery = {
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer | undefined
+	 */
+	definitionRevision?: number;
+};
+
+export const GetAccessRoleStatus200StateEnum = {
+	draft: "draft",
+	active: "active",
+	retired: "retired",
+} as const;
+
+export type GetAccessRoleStatus200StateEnum =
+	(typeof GetAccessRoleStatus200StateEnum)[keyof typeof GetAccessRoleStatus200StateEnum];
+
+export const GetAccessRoleStatus200DefinitionPermissionsKeyEnum = {
+	"access.role.read": "access.role.read",
+	"access.role.create": "access.role.create",
+	"access.role.update": "access.role.update",
+	"access.role.activate": "access.role.activate",
+	"access.role.retire": "access.role.retire",
+	"access.role-binding.manage": "access.role-binding.manage",
+	"access.assignment-ceiling.manage": "access.assignment-ceiling.manage",
+} as const;
+
+export type GetAccessRoleStatus200DefinitionPermissionsKeyEnum =
+	(typeof GetAccessRoleStatus200DefinitionPermissionsKeyEnum)[keyof typeof GetAccessRoleStatus200DefinitionPermissionsKeyEnum];
+
+export type GetAccessRoleStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @minLength -9007199254740991
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	version: number;
+	state: GetAccessRoleStatus200StateEnum;
+	/**
+	 * @minLength -9007199254740991
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	activeRevision: number | null;
+	definition: {
+		label: string;
+		description: string | null;
+		permissions: (
+			| {
+					family: "unit";
+					key: GetAccessRoleStatus200DefinitionPermissionsKeyEnum;
+			  }
+			| {
+					family: "platform";
+					key: GetAccessRoleStatus200DefinitionPermissionsKeyEnum;
+			  }
+			| {
+					family: "management";
+					key: GetAccessRoleStatus200DefinitionPermissionsKeyEnum;
+			  }
+		)[];
+		/**
+		 * @minLength -9007199254740991
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		revision: number;
+	};
+};
+
+export type GetAccessRoleStatus422 = ValidationError;
+
+export const GetAccessRoleStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetAccessRoleStatus429ErrorCodeEnum =
+	(typeof GetAccessRoleStatus429ErrorCodeEnum)[keyof typeof GetAccessRoleStatus429ErrorCodeEnum];
+
+export type GetAccessRoleStatus429 = {
+	error: {
+		code: GetAccessRoleStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type GetAccessRoleStatus500 = InternalError;
+
+export type GetAccessRoleOptions = {
+	body?: never;
+	path: GetAccessRolePath;
+	query?: GetAccessRoleQuery;
+	headers?: never;
+};
+
+export type GetAccessRoleResponses = {
+	"200": GetAccessRoleStatus200;
+	"422": GetAccessRoleStatus422;
+	"429": GetAccessRoleStatus429;
+	"500": GetAccessRoleStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetAccessRoleResponse =
+	| GetAccessRoleStatus200
+	| GetAccessRoleStatus422
+	| GetAccessRoleStatus429
+	| GetAccessRoleStatus500;
+
+export type CreateAccessRolePath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	roleId: string;
+};
+
+export const CreateAccessRoleStatus200StateEnum = {
+	draft: "draft",
+	active: "active",
+	retired: "retired",
+} as const;
+
+export type CreateAccessRoleStatus200StateEnum =
+	(typeof CreateAccessRoleStatus200StateEnum)[keyof typeof CreateAccessRoleStatus200StateEnum];
+
+export type CreateAccessRoleStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	roleId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @minLength -9007199254740991
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	version: number;
+	state: CreateAccessRoleStatus200StateEnum;
+	/**
+	 * @minLength -9007199254740991
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	activeRevision: number | null;
+	/**
+	 * @minLength -9007199254740991
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	definitionRevision: number | null;
+};
+
+export type CreateAccessRoleStatus400 = MalformedRequestBody;
+
+export type CreateAccessRoleStatus422 = ValidationError;
+
+export const CreateAccessRoleStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type CreateAccessRoleStatus429ErrorCodeEnum =
+	(typeof CreateAccessRoleStatus429ErrorCodeEnum)[keyof typeof CreateAccessRoleStatus429ErrorCodeEnum];
+
+export type CreateAccessRoleStatus429 = {
+	error: {
+		code: CreateAccessRoleStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type CreateAccessRoleStatus500 = InternalError;
+
+export const CreateAccessRoleRequestDefinitionPermissionsKeyEnum = {
+	"access.role.read": "access.role.read",
+	"access.role.create": "access.role.create",
+	"access.role.update": "access.role.update",
+	"access.role.activate": "access.role.activate",
+	"access.role.retire": "access.role.retire",
+	"access.role-binding.manage": "access.role-binding.manage",
+	"access.assignment-ceiling.manage": "access.assignment-ceiling.manage",
+} as const;
+
+export type CreateAccessRoleRequestDefinitionPermissionsKeyEnum =
+	(typeof CreateAccessRoleRequestDefinitionPermissionsKeyEnum)[keyof typeof CreateAccessRoleRequestDefinitionPermissionsKeyEnum];
+
+export type CreateAccessRoleBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	expectedVersion: 0;
+	definition: {
+		label: string;
+		description: string | null;
+		permissions: (
+			| {
+					family: "unit";
+					key: CreateAccessRoleRequestDefinitionPermissionsKeyEnum;
+			  }
+			| {
+					family: "platform";
+					key: CreateAccessRoleRequestDefinitionPermissionsKeyEnum;
+			  }
+			| {
+					family: "management";
+					key: CreateAccessRoleRequestDefinitionPermissionsKeyEnum;
+			  }
+		)[];
+	};
+};
+
+export type CreateAccessRoleOptions = {
+	body: CreateAccessRoleBody;
+	path: CreateAccessRolePath;
+	query?: never;
+	headers?: never;
+};
+
+export type CreateAccessRoleResponses = {
+	"200": CreateAccessRoleStatus200;
+	"400": CreateAccessRoleStatus400;
+	"422": CreateAccessRoleStatus422;
+	"429": CreateAccessRoleStatus429;
+	"500": CreateAccessRoleStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type CreateAccessRoleResponse =
+	| CreateAccessRoleStatus200
+	| CreateAccessRoleStatus400
+	| CreateAccessRoleStatus422
+	| CreateAccessRoleStatus429
+	| CreateAccessRoleStatus500;
+
+export type ListAccessRoleHistoryPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	roleId: string;
+};
+
+export type ListAccessRoleHistoryQuery = {
+	/**
+	 * @minLength -9007199254740991
+	 * @maxLength 9007199254740991
+	 * @type integer | undefined
+	 */
+	afterVersion?: number;
+};
+
+export const ListAccessRoleHistoryStatus200ItemsOperationEnum = {
+	create: "create",
+	revise: "revise",
+	activate: "activate",
+	retire: "retire",
+} as const;
+
+export type ListAccessRoleHistoryStatus200ItemsOperationEnum =
+	(typeof ListAccessRoleHistoryStatus200ItemsOperationEnum)[keyof typeof ListAccessRoleHistoryStatus200ItemsOperationEnum];
+
+export const ListAccessRoleHistoryStatus200ItemsStateEnum = {
+	draft: "draft",
+	active: "active",
+	retired: "retired",
+} as const;
+
+export type ListAccessRoleHistoryStatus200ItemsStateEnum =
+	(typeof ListAccessRoleHistoryStatus200ItemsStateEnum)[keyof typeof ListAccessRoleHistoryStatus200ItemsStateEnum];
+
+export type ListAccessRoleHistoryStatus200 = {
+	items: {
+		/**
+		 * @minLength -9007199254740991
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		version: number;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		operationId: string;
+		operation: ListAccessRoleHistoryStatus200ItemsOperationEnum;
+		state: ListAccessRoleHistoryStatus200ItemsStateEnum;
+		/**
+		 * @minLength -9007199254740991
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		activeRevision: number | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+	}[];
+	/**
+	 * @minLength -9007199254740991
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	nextCursor: number | null;
+};
+
+export type ListAccessRoleHistoryStatus422 = ValidationError;
+
+export const ListAccessRoleHistoryStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ListAccessRoleHistoryStatus429ErrorCodeEnum =
+	(typeof ListAccessRoleHistoryStatus429ErrorCodeEnum)[keyof typeof ListAccessRoleHistoryStatus429ErrorCodeEnum];
+
+export type ListAccessRoleHistoryStatus429 = {
+	error: {
+		code: ListAccessRoleHistoryStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type ListAccessRoleHistoryStatus500 = InternalError;
+
+export type ListAccessRoleHistoryOptions = {
+	body?: never;
+	path: ListAccessRoleHistoryPath;
+	query?: ListAccessRoleHistoryQuery;
+	headers?: never;
+};
+
+export type ListAccessRoleHistoryResponses = {
+	"200": ListAccessRoleHistoryStatus200;
+	"422": ListAccessRoleHistoryStatus422;
+	"429": ListAccessRoleHistoryStatus429;
+	"500": ListAccessRoleHistoryStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ListAccessRoleHistoryResponse =
+	| ListAccessRoleHistoryStatus200
+	| ListAccessRoleHistoryStatus422
+	| ListAccessRoleHistoryStatus429
+	| ListAccessRoleHistoryStatus500;
+
+export type ReviseAccessRolePath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	roleId: string;
+};
+
+export const ReviseAccessRoleStatus200StateEnum = {
+	draft: "draft",
+	active: "active",
+	retired: "retired",
+} as const;
+
+export type ReviseAccessRoleStatus200StateEnum =
+	(typeof ReviseAccessRoleStatus200StateEnum)[keyof typeof ReviseAccessRoleStatus200StateEnum];
+
+export type ReviseAccessRoleStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	roleId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @minLength -9007199254740991
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	version: number;
+	state: ReviseAccessRoleStatus200StateEnum;
+	/**
+	 * @minLength -9007199254740991
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	activeRevision: number | null;
+	/**
+	 * @minLength -9007199254740991
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	definitionRevision: number | null;
+};
+
+export type ReviseAccessRoleStatus400 = MalformedRequestBody;
+
+export type ReviseAccessRoleStatus422 = ValidationError;
+
+export const ReviseAccessRoleStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ReviseAccessRoleStatus429ErrorCodeEnum =
+	(typeof ReviseAccessRoleStatus429ErrorCodeEnum)[keyof typeof ReviseAccessRoleStatus429ErrorCodeEnum];
+
+export type ReviseAccessRoleStatus429 = {
+	error: {
+		code: ReviseAccessRoleStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type ReviseAccessRoleStatus500 = InternalError;
+
+export const ReviseAccessRoleRequestDefinitionPermissionsKeyEnum = {
+	"access.role.read": "access.role.read",
+	"access.role.create": "access.role.create",
+	"access.role.update": "access.role.update",
+	"access.role.activate": "access.role.activate",
+	"access.role.retire": "access.role.retire",
+	"access.role-binding.manage": "access.role-binding.manage",
+	"access.assignment-ceiling.manage": "access.assignment-ceiling.manage",
+} as const;
+
+export type ReviseAccessRoleRequestDefinitionPermissionsKeyEnum =
+	(typeof ReviseAccessRoleRequestDefinitionPermissionsKeyEnum)[keyof typeof ReviseAccessRoleRequestDefinitionPermissionsKeyEnum];
+
+export type ReviseAccessRoleBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @minLength -9007199254740991
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	expectedVersion: number;
+	definition: {
+		label: string;
+		description: string | null;
+		permissions: (
+			| {
+					family: "unit";
+					key: ReviseAccessRoleRequestDefinitionPermissionsKeyEnum;
+			  }
+			| {
+					family: "platform";
+					key: ReviseAccessRoleRequestDefinitionPermissionsKeyEnum;
+			  }
+			| {
+					family: "management";
+					key: ReviseAccessRoleRequestDefinitionPermissionsKeyEnum;
+			  }
+		)[];
+	};
+};
+
+export type ReviseAccessRoleOptions = {
+	body: ReviseAccessRoleBody;
+	path: ReviseAccessRolePath;
+	query?: never;
+	headers?: never;
+};
+
+export type ReviseAccessRoleResponses = {
+	"200": ReviseAccessRoleStatus200;
+	"400": ReviseAccessRoleStatus400;
+	"422": ReviseAccessRoleStatus422;
+	"429": ReviseAccessRoleStatus429;
+	"500": ReviseAccessRoleStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ReviseAccessRoleResponse =
+	| ReviseAccessRoleStatus200
+	| ReviseAccessRoleStatus400
+	| ReviseAccessRoleStatus422
+	| ReviseAccessRoleStatus429
+	| ReviseAccessRoleStatus500;
 
 export type GetApiUnitByUnitIdAssociationProposalsPath = {
 	/**
@@ -11380,6 +12177,10 @@ export const GetApiApiTokensStatus200ItemsPermissionsEnum = {
 	"unit:update": "unit:update",
 	"account:read": "account:read",
 	"account:update": "account:update",
+	"access:read": "access:read",
+	"access:manage": "access:manage",
+	"app:read": "app:read",
+	"app:manage": "app:manage",
 	"interaction:read": "interaction:read",
 	"interaction:write": "interaction:write",
 	"realm:read": "realm:read",
@@ -12050,6 +12851,10 @@ export const PostApiApiTokensStatus200PermissionsEnum = {
 	"unit:update": "unit:update",
 	"account:read": "account:read",
 	"account:update": "account:update",
+	"access:read": "access:read",
+	"access:manage": "access:manage",
+	"app:read": "app:read",
+	"app:manage": "app:manage",
 	"interaction:read": "interaction:read",
 	"interaction:write": "interaction:write",
 	"realm:read": "realm:read",
@@ -12723,6 +13528,10 @@ export const PostApiApiTokensRequestPermissionsEnum = {
 	"unit:update": "unit:update",
 	"account:read": "account:read",
 	"account:update": "account:update",
+	"access:read": "access:read",
+	"access:manage": "access:manage",
+	"app:read": "app:read",
+	"app:manage": "app:manage",
 	"interaction:read": "interaction:read",
 	"interaction:write": "interaction:write",
 	"realm:read": "realm:read",
@@ -12802,6 +13611,10 @@ export const PatchApiApiTokensByTokenIdStatus200PermissionsEnum = {
 	"unit:update": "unit:update",
 	"account:read": "account:read",
 	"account:update": "account:update",
+	"access:read": "access:read",
+	"access:manage": "access:manage",
+	"app:read": "app:read",
+	"app:manage": "app:manage",
 	"interaction:read": "interaction:read",
 	"interaction:write": "interaction:write",
 	"realm:read": "realm:read",
@@ -13487,6 +14300,10 @@ export const PatchApiApiTokensByTokenIdRequestPermissionsEnum = {
 	"unit:update": "unit:update",
 	"account:read": "account:read",
 	"account:update": "account:update",
+	"access:read": "access:read",
+	"access:manage": "access:manage",
+	"app:read": "app:read",
+	"app:manage": "app:manage",
 	"interaction:read": "interaction:read",
 	"interaction:write": "interaction:write",
 	"realm:read": "realm:read",
@@ -13649,6 +14466,10 @@ export const PutApiApiTokensByTokenIdQuotaOverrideStatus200PermissionsEnum = {
 	"unit:update": "unit:update",
 	"account:read": "account:read",
 	"account:update": "account:update",
+	"access:read": "access:read",
+	"access:manage": "access:manage",
+	"app:read": "app:read",
+	"app:manage": "app:manage",
 	"interaction:read": "interaction:read",
 	"interaction:write": "interaction:write",
 	"realm:read": "realm:read",
@@ -14582,6 +15403,10 @@ export const GetCurrentApiTokenStatus200PermissionsEnum = {
 	"unit:update": "unit:update",
 	"account:read": "account:read",
 	"account:update": "account:update",
+	"access:read": "access:read",
+	"access:manage": "access:manage",
+	"app:read": "app:read",
+	"app:manage": "app:manage",
 	"interaction:read": "interaction:read",
 	"interaction:write": "interaction:write",
 	"realm:read": "realm:read",

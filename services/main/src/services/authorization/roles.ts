@@ -60,7 +60,8 @@ export class AccessRoleAdmissionUnavailable extends Error {
 	}
 }
 const revision = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
-const definitionSchema = z.strictObject({
+/** Literal role definition shared by management transport and persistence. @internal */
+export const AccessRoleDefinitionSchema = z.strictObject({
 	label: z
 		.string()
 		.refine((value) => value.trim().length > 0 && Buffer.byteLength(value, "utf8") <= 512),
@@ -71,16 +72,7 @@ const definitionSchema = z.strictObject({
 	permissions: z
 		.array(AccessPermissionSchema)
 		.max(AccessPermissionValues.length)
-		.refine((values) => new Set(values.map(accessPermissionKey)).size === values.length)
-		.transform((values) =>
-			values.sort((a, b) =>
-				accessPermissionKey(a) < accessPermissionKey(b)
-					? -1
-					: accessPermissionKey(a) > accessPermissionKey(b)
-						? 1
-						: 0,
-			),
-		),
+		.refine((values) => new Set(values.map(accessPermissionKey)).size === values.length),
 });
 const common = {
 	scopeId: z.uuid().toLowerCase(),
@@ -95,9 +87,9 @@ const commandSchema = z.discriminatedUnion("operation", [
 		...common,
 		operation: z.literal("create"),
 		expectedVersion: z.literal(0),
-		definition: definitionSchema,
+		definition: AccessRoleDefinitionSchema,
 	}),
-	z.strictObject({ ...common, operation: z.literal("revise"), definition: definitionSchema }),
+	z.strictObject({ ...common, operation: z.literal("revise"), definition: AccessRoleDefinitionSchema }),
 	z.strictObject({
 		...common,
 		operation: z.literal("activate"),
@@ -138,6 +130,8 @@ export async function applyAccessRoleCommand(
 	admission: SQL<boolean | null>,
 ): Promise<AccessRoleReceipt> {
 	const command = commandSchema.parse(input);
+	if (command.operation === "create" || command.operation === "revise")
+		command.definition.permissions.sort((a, b) => accessPermissionKey(a) < accessPermissionKey(b) ? -1 : accessPermissionKey(a) > accessPermissionKey(b) ? 1 : 0);
 	const requestDigest = hash(JSON.stringify(command));
 	return tx.transaction(async (work) => {
 		const authorize = async () =>

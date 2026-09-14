@@ -1,5 +1,4 @@
 import type { User } from "better-auth";
-import { eq } from "drizzle-orm";
 import Elysia from "elysia";
 import type { DocumentDecoration } from "elysia/types";
 import type { ParticipationAuthority } from "../participation/policy";
@@ -7,11 +6,8 @@ import { resolveRequestParticipation } from "../participation/request";
 
 import { setAuditCredentialContext } from "../audit";
 import { Authorization } from "../authorization";
-import { database } from "../database";
-import { users } from "../database/schema";
-import { ensureAccountAuthenticationAllowed } from "./account-state";
 import type { ApiPermission } from "./api-permissions";
-import { fromApiKeyPermissions, isApiPermission } from "./api-permissions";
+import { isApiPermission } from "./api-permissions";
 import { enforceApiQuota, type ApiQuotaLease } from "./api-quota/limit-store";
 import type { ApiQuotaOperationId } from "./api-quota/operation";
 import {
@@ -31,14 +27,13 @@ import {
 import { ensureSelfEntity, type SessionEntity } from "./entity";
 import {
 	ApiTokenPermissionRequired,
-	ApiTokenRateLimitExceeded,
 	AuthenticationRequired,
 	EmailVerificationRequired,
 	FreshSessionRequired,
 	InteractiveSessionRequired,
 } from "./errors";
 import { auth, CredentialControlFreshAgeSeconds } from "./index";
-import { captureSessionCredentialProof, captureApiKeyCredentialProof } from "./credential-authority";
+import { personalApiKeyBearer, verifyInteractivePrincipal, verifyPersonalApiKey } from "./authentication";
 import { resolveRequestUiLocale } from "./request-interface-locale";
 
 type BaseIdentity = {
@@ -162,18 +157,10 @@ function accessSecurity(requirement: AccessRequirement): OpenApiSecurity {
 	return ApiTokenOrSessionSecurity;
 }
 
-function bearerToken(headers: Headers) {
-	const authorization = headers.get("Authorization");
-	if (authorization === null) return undefined;
-	const match = /^Bearer (rz_api_[A-Za-z0-9_-]+)$/.exec(authorization);
-	if (!match?.[1]) throw new AuthenticationRequired();
-	return match[1];
-}
-
 async function resolveInteractiveSession(headers: Headers): Promise<SessionIdentity | undefined> {
-	const session = await auth.api.getSession({ headers });
-	if (!session) return undefined;
-	await ensureAccountAuthenticationAllowed(session.user.id);
+	const verified = await verifyInteractivePrincipal(headers);
+	if (!verified) return undefined;
+	const session = verified.record;
 	const entity = await ensureSelfEntity(session.user, resolveRequestUiLocale(headers));
 	const participation = await resolveRequestParticipation(headers, entity, session.user.id);
 	return {
@@ -184,19 +171,9 @@ async function resolveInteractiveSession(headers: Headers): Promise<SessionIdent
 		authorizationRevision: entity.authorizationRevision,
 		session: session.session,
 		entity,
-		authorization: new Authorization(entity.id, session.user.id, participation, captureSessionCredentialProof(session.session)),
+		authorization: new Authorization(entity.id, session.user.id, participation, verified.proof),
 		credential: { kind: "session", session: session.session },
 	};
-}
-
-function rateLimitRetryAfter(error: unknown) {
-	if (typeof error !== "object" || error === null || !("details" in error)) return 60;
-	const { details } = error;
-	if (typeof details !== "object" || details === null || !("tryAgainIn" in details)) return 60;
-	const milliseconds = details.tryAgainIn;
-	return typeof milliseconds === "number" && Number.isFinite(milliseconds)
-		? Math.max(1, Math.ceil(milliseconds / 1_000))
-		: 60;
 }
 
 async function resolveApiKeyIdentity(
@@ -206,27 +183,11 @@ async function resolveApiKeyIdentity(
 	accountAccess?: "authenticated" | "write" | "contribute",
 	headers: Headers = new Headers(),
 ): Promise<UnadmittedApiKeyIdentity> {
-	const verified = await auth.api.verifyApiKey({
-		body: { key },
-	});
-	if (!verified.valid || !verified.key) {
-		if (verified.error?.code === "RATE_LIMITED")
-			throw new ApiTokenRateLimitExceeded(rateLimitRetryAfter(verified.error));
-		throw new AuthenticationRequired();
-	}
-	const permissions = fromApiKeyPermissions(verified.key.permissions);
-	if (requiredPermission && !permissions.includes(requiredPermission))
-		throw new ApiTokenPermissionRequired(requiredPermission);
-	const [user] = await database
-		.select()
-		.from(users)
-		.where(eq(users.id, verified.key.referenceId))
-		.limit(1);
-	if (!user) throw new AuthenticationRequired();
-	await ensureAccountAuthenticationAllowed(user.id);
+	const verified = await verifyPersonalApiKey(key, requiredPermission);
+	const { user, permissions } = verified;
 	const entity = await ensureSelfEntity(user);
 	const participation = await resolveRequestParticipation(headers, entity, user.id);
-	const authorization = new Authorization(entity.id, user.id, participation, await captureApiKeyCredentialProof(verified.key.id, user.id, key));
+	const authorization = new Authorization(entity.id, user.id, participation, verified.proof);
 	if (accountAccess === "write" || accountAccess === "contribute") {
 		if (!user.emailVerified) throw new EmailVerificationRequired();
 		if (accountAccess === "write") await authorization.account.ensureCanWrite();
@@ -295,7 +256,7 @@ async function requireAccess(
 	policy: AccessPolicy,
 	operationId: string,
 ): Promise<AuthenticatedIdentity> {
-	const token = bearerToken(headers);
+	const token = personalApiKeyBearer(headers);
 	if (!("permission" in policy)) {
 		if (policy.credential === "api-key-only") {
 			if (!token) throw new AuthenticationRequired();
@@ -340,7 +301,7 @@ export async function resolveIdentity(
 	permission?: ApiPermission,
 	quotaOperationId?: ApiQuotaOperationId,
 ): Promise<ResolvedIdentity> {
-	const token = bearerToken(request.headers);
+	const token = personalApiKeyBearer(request.headers);
 	let identity: AuthenticatedIdentity | undefined;
 	if (token) {
 		if (!permission) throw new ApiTokenPermissionRequired("an explicit route permission");
@@ -386,7 +347,7 @@ export async function resolveIdentityWithDynamicApiQuota(
 	maximumExecutionCount: number,
 ): Promise<DynamicApiQuotaIdentity> {
 	const operation = resolveApiQuotaOperationById(quotaOperationId);
-	const token = bearerToken(request.headers);
+	const token = personalApiKeyBearer(request.headers);
 	let apiKeyIdentity: UnadmittedApiKeyIdentity | undefined;
 	let identity: UnadmittedApiKeyIdentity | SessionIdentity | undefined;
 	if (token) {
