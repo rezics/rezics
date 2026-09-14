@@ -10,6 +10,7 @@ export const PostgreSqlSchemaFileNames = [
 	"history-integrity.sql",
 	"reference-value.sql",
 	"access-identity.sql",
+	"identity-preference.sql",
 	"access-subject-policy.sql",
 	"access-role.sql",
 	"access-role-binding.sql",
@@ -95,6 +96,9 @@ export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly 
 };
 
 export const PostgreSqlSchemaFunctionNames = [
+	"guard_identity_preference",
+	"guard_identity_preference_event",
+	"complete_identity_preference",
 	"fence_access_subject_policy",
 	"access_representation_recipient_is_current",
 	"access_representation_parent_basis_is_current",
@@ -436,6 +440,10 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "identity_preference", name: "identity_preference_guard" },
+	{ table: "identity_preference_event", name: "identity_preference_event_guard" },
+	{ table: "identity_preference", name: "identity_preference_complete" },
+	{ table: "identity_preference_event", name: "identity_preference_event_complete" },
 	{ table: "user_account_state", name: "user_account_state_authority_fence" },
 	{ table: "account_enforcement", name: "account_enforcement_authority_fence" },
 	{ table: "entity_participation", name: "entity_participation_authority_fence" },

@@ -61,6 +61,10 @@ Structural capability and owner eligibility belong to the consuming command;
 creating a root for a cataloged organization does not admit operational membership.
 Subtree/resource selection narrows a binding or grant, not the identity of its root.
 
+Parsed IAM UUIDs normalize hexadecimal casing before command digests, candidate
+maps and requested-authority selections are formed. Namespace discriminators stay
+distinct; this does not normalize opaque OAuth client IDs or external identifiers.
+
 The concrete `users`/Entity owner and `reference_value` foreign keys establish
 identity integrity. Exactly-one-target checks and per-alternative unique indexes
 prevent malformed or duplicate values. Updates, retargeting, rekeying and deletion
@@ -131,6 +135,28 @@ requiring public publication. Database time after waits controls expiry and the
 first known future policy boundary; nonfinite time and exhausted candidate reads
 are unavailable. Resource/scope restrictions, credentials and independent-approval
 conditions remain additional owner decisions.
+
+### Private default selection storage
+
+One preference identity belongs to a private account and either its main selection
+or one concrete OAuth client. Separate unique keys preserve main/client namespaces;
+Entity is not unique, and these rows are not controller bindings. Selection is an
+explicit Entity, no default, or (for clients only) inheritance from main. A missing
+client override inherits main; explicit no-default does not. Clearing a main choice
+requires later explicit selection rather than silently picking another Entity.
+
+Commands use expected versions and stable operation IDs under the account fence,
+with exact private receipts. Current owner SQL must admit management, the client
+and chosen-identity usability; the preference store does not grant representation.
+Capture reads retain main and client versions separately and return the chosen
+Entity once. Prepared work and consents keep that Entity instead of following a
+later preference change. Erased accounts cannot read or mutate preferences.
+
+These histories are private convenience data with no incoming authority dependency.
+Account erasure deletes receipt batches before their preference heads; native guards
+allow that deletion only after the account's erasure frontier. Ordinary clearing
+advances a revision. The production auth/session and API consumers still require
+migration from the old unique-Self relation before default selection is activated.
 
 ## Membership, groups and teams
 

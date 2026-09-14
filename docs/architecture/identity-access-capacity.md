@@ -550,3 +550,20 @@ subject lifecycle reads. It refreshes time-sensitive subject and lineage state
 after member-set waits. The current per-subject composition adds SQL statements
 beyond the isolated readers; its twelve-statement/latency target remains unqualified
 and must be measured and repaired before applicable capacity acceptance.
+
+## Private identity preferences
+
+Plan 640 bytes per main/client preference head including account, partial namespace, Entity
+and client reverse indexes, and 576 bytes per private receipt including its primary
+and operation-identity keys. Each family is 320/288 GB at 500M rows and 1,920/1,728 GB
+at 3B rows, before bloat, WAL, backups, replicas and reserve. With A accounts and C
+client overrides per account, heads scale as A*(1+C); receipts scale with actual
+configuration changes rather than logins or resource writes.
+
+A capture reads one account fence and at most two preference rows. A mutation writes
+one receipt and one narrow head; competing changes serialize per target account.
+No controller roster, consent or resource grant is copied. Erasure uses receipt
+primary-key pages by preference and account/client head indexes, child before parent
+in at most 500-row batches. Whole history scans and per-resource default copies are
+not part of this protocol. Native capture/change/erasure races and plans remain
+unqualified until verification.
