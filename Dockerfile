@@ -24,6 +24,7 @@ WORKDIR /workspace
 
 COPY LICENSE THIRD_PARTY_NOTICES.md package.json yarn.lock .yarnrc.yml ./
 COPY .yarn/releases/yarn-4.18.0.cjs .yarn/releases/yarn-4.18.0.cjs
+COPY .yarn/patches .yarn/patches
 COPY libraries/access/package.json libraries/access/package.json
 COPY libraries/avatar/package.json libraries/avatar/package.json
 COPY libraries/block/package.json libraries/block/package.json
