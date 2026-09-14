@@ -5,6 +5,7 @@ import Elysia, { t } from "elysia";
 
 import { recordAuditEvent } from "../../audit";
 import { auth } from "../../auth";
+import { firstPartyAuthorityMetadata } from "../../auth/credential-authority";
 import { fromApiKeyPermissions, toApiKeyPermissions } from "../../auth/api-permissions";
 import { ApiQuotaPolicyDocumentInvalid } from "../../auth/api-quota/policy-schema";
 import {
@@ -254,6 +255,7 @@ export default new Elysia({ prefix: "/api-tokens" })
 						userId: user.id,
 						expiresIn: (body.expiresInDays ?? 90) * 24 * 60 * 60,
 						permissions: toApiKeyPermissions(body.permissions),
+						metadata: firstPartyAuthorityMetadata({ mode: "operator" }),
 					},
 				});
 				created = newlyCreated;

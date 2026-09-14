@@ -2,6 +2,7 @@ import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
 import { defineRelationsPart, inArray, sql } from "drizzle-orm";
 import {
 	boolean,
+	bigint,
 	check,
 	index,
 	integer,
@@ -114,10 +115,21 @@ export const verifications = pgTable(
 	(table) => [index("verifications_identifier_idx").on(table.identifier)],
 );
 
+/** Stable personal-key control identity; provider secrets may be removed without losing revocation. @internal */
+export const apiKeyAuthority = pgTable("api_key_authority", {
+	id: uuid().primaryKey(),
+	userId: uuid().notNull().references(() => users.id, { onDelete: "restrict" }),
+	version: bigint({ mode: "number" }).notNull().default(0),
+	revokedAt: timestamp({ withTimezone: true, precision: 3 }),
+}, table => [
+	index("api_key_authority_user_idx").on(table.userId, table.id),
+	check("api_key_authority_version_check", sql`${table.version} between 0 and 9007199254740991`),
+]);
+
 export const apikeys = pgTable(
 	"apikeys",
 	{
-		id: uuid("id").default(sql`uuidv7()`).primaryKey(),
+		id: uuid("id").default(sql`uuidv7()`).primaryKey().references(() => apiKeyAuthority.id, { onDelete: "restrict" }),
 		configId: text("config_id").default("default").notNull(),
 		name: text("name"),
 		start: text("start"),

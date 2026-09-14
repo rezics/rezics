@@ -136,6 +136,38 @@ first known future policy boundary; nonfinite time and exhausted candidate reads
 are unavailable. Resource/scope restrictions, credentials and independent-approval
 conditions remain additional owner decisions.
 
+### First-party credentials and management effects
+
+Verified sessions and personal API keys produce private secret-digest proofs stored
+outside enumerable request authorization state. A current read checks the same
+principal and secret, live expiry and explicit credential authority. Personal keys
+store a versioned operator/direct/represented limit in server-owned metadata; missing
+or malformed limits are unavailable. New ordinary keys explicitly choose operator
+authority. API entry scopes and domain permissions remain separate requirements.
+
+Personal-key control identities are retained separately from removable provider
+secret rows. Owner/identity reuse is forbidden; policy changes advance a narrow
+fence and deletion records terminal revocation. Provider request counters leave
+that fence unchanged. Current readers share the control fence and read configuration
+after waits, avoiding a per-request counter write becoming a long-lived authority
+lock. Sessions retain their own row fence. Only real sessions can satisfy the
+ten-minute fresh-authentication window, and future/nonfinite times fail closed.
+
+Management composition verifies the actor, credential, selected subject and complete
+selected representation path before using management ownership or current role
+bindings. Private accounts have direct-principal ownership; Entity control is not
+inferred from directory metadata ownership. Domain owners still provide resource
+lifecycle/restrictions, confer applicability, impact and recovery/approval policy.
+
+Its final SQL checks the original secret identity, management source versions,
+current recipient membership, subject eligibility and selected representation path,
+as well as the chosen proof's earliest expiry. Thus an earlier mutation in the same
+transaction cannot leave a cached management allow usable after its source changed.
+Paths retain their actual selected references and fresh-session deadline. These
+predicates require the owning transaction's retained fences and must be rebuilt
+after rollback; they are not portable authorization receipts. Complete API/consumer
+integration and native concurrency qualification remain pending.
+
 ### Private default selection storage
 
 One preference identity belongs to a private account and either its main selection

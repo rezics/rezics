@@ -4,6 +4,7 @@ import { StatusCodes } from "http-status-codes";
 
 import { AuthErrors } from "../auth/errors";
 import { AuthorizationErrors } from "../authorization/errors";
+import { AccessApiErrors } from "../authorization/http-errors";
 import {
 	CatalogSourceRequestLimited,
 	CatalogSourceUnavailable,
@@ -96,6 +97,7 @@ export const ApiErrors = [
 	...DatabaseErrors,
 	...AuthErrors,
 	...AuthorizationErrors,
+	...AccessApiErrors,
 	...UnitErrors,
 	...EntityErrors,
 	...FollowingErrors,

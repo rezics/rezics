@@ -1,0 +1,138 @@
+import { and, eq, isNull, sql, type SQL } from "drizzle-orm";
+import { z } from "zod";
+import { AccessManagementPermissionValues, type AccessSubjectTarget, type RequestedAuthoritySelection } from "@rezics/access";
+import type { DatabaseTransaction } from "../database";
+import { accessRoleBindingScope } from "../database/schema/access-role-binding";
+import { accessSubject } from "../database/schema/access-identity";
+import { unitOwnership } from "../database/schema/access";
+import { unitReferenceTargetColumn } from "../database/schema/unit-reference-columns";
+import { resolveReferenceValue } from "../units/reference-value";
+import { ensureAccountAuthenticationAllowed } from "../auth/account-state";
+import { readFirstPartyCredentialAuthority, type FirstPartyCredentialProof } from "../auth/credential-authority";
+import type { ApiPermission } from "../auth/api-permissions";
+import { allocateAccessSubject, resolveAccessScope } from "./identities";
+import { readAccessSubjectEligibility } from "./subject-eligibility";
+import { readSubjectRoleBindingPermissions } from "./role-binding-permissions";
+import { evaluateCurrentRepresentationAuthority } from "./representation-authority";
+import { RequestedAuthoritySelectionSchema } from "./authority-context";
+import { lockUnitAccessState } from "./unit/access-lock";
+
+/** Current management authority denied the requested operation. @internal */
+export class ManagementAuthorityDenied extends Error {
+	constructor() { super("Current management authority is required"); }
+}
+/** Current management authority could not be completely established. @internal */
+export class ManagementAuthorityUnavailable extends Error {
+	constructor() { super("Current management authority is unavailable"); }
+}
+
+async function ownsManagementScope(tx: DatabaseTransaction, scopeId: string, subject: AccessSubjectTarget) {
+	const scope = await resolveAccessScope(tx, scopeId);
+	if (!scope) throw new ManagementAuthorityUnavailable();
+	if (scope.kind === "account") return subject.kind === "principal" && subject.id === scope.id ? sql<boolean>`true` : null;
+	if (scope.kind === "platform") return null;
+	const reference = await resolveReferenceValue(tx, scope.referenceValueId);
+	if (!reference) throw new ManagementAuthorityUnavailable();
+	await lockUnitAccessState(tx, [reference.id], "shared");
+	// Directory metadata ownership is not control of an Entity's identity/governance.
+	if (reference.owner === "entity") return subject.kind === "entity" && subject.id === reference.id ? sql<boolean>`true` : null;
+	if (subject.kind !== "entity") return null;
+	const [owner] = await tx.select({ id: unitOwnership.id }).from(unitOwnership).where(and(
+		eq(unitReferenceTargetColumn("unit", reference.owner, unitOwnership), reference.id),
+		eq(unitOwnership.profileId, subject.id), isNull(unitOwnership.revokedAt),
+	)).for("share");
+	return owner ? sql<boolean>`exists(select 1 from ${unitOwnership} where ${unitOwnership.id}=${owner.id}::uuid
+		and ${unitOwnership.profileId}=${subject.id}::uuid and ${unitOwnership.revokedAt} is null
+		and ${unitReferenceTargetColumn("unit", reference.owner, unitOwnership)}=${reference.id}::uuid)` : null;
+}
+
+/**
+ * Compose first-party actor, credential, representation and management permission at one root.
+ * @internal
+ * @remarks The domain owner must supply current side-effect-free scope admission:
+ * resource lifecycle/restrictions, applicability, confer/impact limits and recovery
+ * or independent approvals. It must discover/promote overlapping mutation fences
+ * before this call. This function does not infer confer rights from metadata ownership.
+ * The returned SQL is usable only in the same retained transaction; retry from
+ * discovery after rollback. It rechecks scope policy and the chosen proof's deadline
+ * at the primitive effect, rather than turning a point decision into a lasting grant.
+ */
+export async function readManagementAuthority(
+	tx: DatabaseTransaction,
+	input: {
+		proof: FirstPartyCredentialProof;
+		selection: RequestedAuthoritySelection;
+		scopeId: string;
+		path: string[];
+		permission: (typeof AccessManagementPermissionValues)[number];
+		apiPermission: ApiPermission | null;
+		requireFreshSession: boolean;
+		mutation: boolean;
+	},
+	scopeAdmission: SQL<boolean | null>,
+) {
+	const selection = RequestedAuthoritySelectionSchema.parse(input.selection);
+	const scopeId = z.uuid().toLowerCase().parse(input.scopeId);
+	const path = z.array(z.string().regex(/^[a-z0-9][a-z0-9-]{0,255}$/)).max(8).parse(input.path);
+	const permission = z.enum(AccessManagementPermissionValues).parse(input.permission);
+	const credential = await readFirstPartyCredentialAuthority(tx, { proof: input.proof, selection,
+		apiPermission: input.apiPermission, requireFreshSession: input.requireFreshSession, requireVerifiedEmail: input.mutation });
+	await ensureAccountAuthenticationAllowed(credential.principalId, tx);
+	const principalSubjectId = await allocateAccessSubject(tx, { kind: "principal", id: credential.principalId });
+	let subjectId = principalSubjectId;
+	let subject: AccessSubjectTarget = { kind: "principal", id: credential.principalId };
+	if (selection.mode === "represented") {
+		const [value] = await tx.select({ id: accessSubject.id }).from(accessSubject).where(eq(accessSubject.entityId, selection.entityId)).limit(1);
+		if (!value) throw new ManagementAuthorityDenied();
+		subjectId = value.id; subject = { kind: "entity", id: selection.entityId };
+	}
+	const fenceQuery = tx.select({ id: accessRoleBindingScope.scopeId }).from(accessRoleBindingScope).where(eq(accessRoleBindingScope.scopeId, scopeId));
+	const [fence] = input.mutation ? await fenceQuery.for("update") : await fenceQuery.for("share");
+	if (!fence) throw new ManagementAuthorityUnavailable();
+	const owner = await ownsManagementScope(tx, scopeId, subject);
+	const roleSources = owner ? null : await readSubjectRoleBindingPermissions(tx, { subjectId, targets: [{ scopeId, path }] });
+	const source = roleSources?.bindings.find(binding => binding.active && binding.permissions.some(value => value.family === "management" && value.key === permission));
+	if (!owner && !source) throw new ManagementAuthorityDenied();
+	const represented = selection.mode === "represented" ? await evaluateCurrentRepresentationAuthority(tx, {
+		principalId: credential.principalId, selection, operation: { scopeId, path, permission: { family: "management", key: permission } },
+		action: input.mutation ? "write" : "read", freshSession: credential.freshSession, freshSessionValidUntil: credential.freshSessionValidUntil,
+	}) : null;
+	if (represented?.outcome === "deny") throw new ManagementAuthorityDenied();
+	if (represented?.outcome === "unavailable") throw new ManagementAuthorityUnavailable();
+	const subjects = await readAccessSubjectEligibility(tx, { subjectIds: [...new Set([principalSubjectId, subjectId])], action: input.mutation ? "write" : "read" });
+	if (subjects.some(value => value.outcome === "deny")) throw new ManagementAuthorityDenied();
+	if (subjects.some(value => value.outcome !== "allow")) throw new ManagementAuthorityUnavailable();
+	const deadlines = [credential.validUntil, represented?.validUntil, source?.terms.validUntil?.getTime(), ...subjects.map(value => value.validUntil)]
+		.filter((value): value is number => value !== undefined && value !== null);
+	const validUntil = deadlines.length ? Math.min(...deadlines) : null;
+	const actorAction = input.mutation ? "write" : "read";
+	const credentialCurrent = input.proof.kind === "session"
+		? sql<boolean>`exists(select 1 from public.sessions s where s.id=${input.proof.id}::uuid and s.user_id=${credential.principalId}::uuid
+			and encode(sha256(convert_to(s.token,'UTF8')),'hex')=${input.proof.tokenDigest}
+			and s.created_at=${credential.createdAt}::timestamptz and s.expires_at>clock_timestamp())`
+		: sql<boolean>`exists(select 1 from public.api_key_authority a join public.apikeys k on k.id=a.id
+			where a.id=${input.proof.id}::uuid and a.user_id=${credential.principalId}::uuid and a.version=${credential.version}
+			and a.revoked_at is null and k.reference_id=a.user_id and k.key=${input.proof.tokenDigest} and k.enabled
+			and (k.expires_at is null or k.expires_at>clock_timestamp()))`;
+	const managementCurrent = owner ?? (source ? sql<boolean>`exists(select 1 from public.access_role_binding b join public.access_role r on r.id=b.role_id
+		where b.id=${source.binding.id}::uuid and b.version=${source.binding.version} and b.state='active' and b.terms_revision=${source.terms.revision}
+		and r.version=${source.roleVersion} and r.state='active'
+		and public.access_role_binding_recipient_is_current(b.id,b.terms_revision) is true
+		and public.access_subject_matches_recipient(${subjectId}::uuid,b.recipient_kind,b.recipient_subject_id,b.recipient_scope_id,b.recipient_group_id) is true)` : sql<boolean>`false`);
+	const representationCurrent = selection.mode === "represented" && represented?.outcome === "allow"
+		? sql<boolean>`public.access_representation_path_is_current(
+			array[${sql.join(represented.path.map(ref => sql`${ref.id}::uuid`), sql`, `)}],
+			array[${sql.join(represented.path.map(ref => sql`${ref.revision}::bigint`), sql`, `)}],
+			${principalSubjectId}::uuid,${selection.entityId}::uuid,${actorAction})`
+		: sql<boolean>`true`;
+	const admission: SQL<boolean | null> = sql`(${scopeAdmission}) and (${credentialCurrent}) and (${managementCurrent}) and (${representationCurrent})
+		and exists(select 1 from public.users where id=${credential.principalId}::uuid and principal_kind='human' ${input.mutation ? sql`and email_verified` : sql``})
+		and public.access_subject_is_eligible(${principalSubjectId}::uuid,${actorAction}) is true
+		and public.access_subject_is_eligible(${subjectId}::uuid,${actorAction}) is true
+		and (${validUntil === null ? sql`true` : sql`clock_timestamp()<${new Date(validUntil)}::timestamptz`})`;
+	const result = (await tx.execute<{ admitted: boolean | null }>(sql`select (${admission}) as admitted`)).rows[0]?.admitted;
+	if (result === false) throw new ManagementAuthorityDenied();
+	if (result !== true) throw new ManagementAuthorityUnavailable();
+	return { principalId: credential.principalId, subjectId, subject, selection, credential, owner: owner !== null,
+		sourceBindingId: source?.binding.id ?? null, representationPath: represented?.path ?? [], validUntil, admission };
+}

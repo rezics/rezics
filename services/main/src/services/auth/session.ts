@@ -38,6 +38,7 @@ import {
 	InteractiveSessionRequired,
 } from "./errors";
 import { auth, CredentialControlFreshAgeSeconds } from "./index";
+import { captureSessionCredentialProof, captureApiKeyCredentialProof } from "./credential-authority";
 import { resolveRequestUiLocale } from "./request-interface-locale";
 
 type BaseIdentity = {
@@ -183,7 +184,7 @@ async function resolveInteractiveSession(headers: Headers): Promise<SessionIdent
 		authorizationRevision: entity.authorizationRevision,
 		session: session.session,
 		entity,
-		authorization: new Authorization(entity.id, session.user.id, participation),
+		authorization: new Authorization(entity.id, session.user.id, participation, captureSessionCredentialProof(session.session)),
 		credential: { kind: "session", session: session.session },
 	};
 }
@@ -225,7 +226,7 @@ async function resolveApiKeyIdentity(
 	await ensureAccountAuthenticationAllowed(user.id);
 	const entity = await ensureSelfEntity(user);
 	const participation = await resolveRequestParticipation(headers, entity, user.id);
-	const authorization = new Authorization(entity.id, user.id, participation);
+	const authorization = new Authorization(entity.id, user.id, participation, await captureApiKeyCredentialProof(verified.key.id, user.id, key));
 	if (accountAccess === "write" || accountAccess === "contribute") {
 		if (!user.emailVerified) throw new EmailVerificationRequired();
 		if (accountAccess === "write") await authorization.account.ensureCanWrite();

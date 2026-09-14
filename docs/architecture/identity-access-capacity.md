@@ -596,3 +596,20 @@ hold pair-local negative fences and exact membership rows without expanding rost
 Actor/client/representation and assignment-impact work remain additional costs.
 Native allowed/denied, source-revision, expiry, rejoin, activation and workload
 qualification is deferred to the active scope's verification phase.
+
+## First-party credential control
+
+Each personal API key adds one retained control identity with principal reverse
+lookup, version and terminal revocation. Plan 256 bytes per control row including
+indexes: 128 GB at 500M rows and 768 GB at 3B rows, before operational overheads.
+This is additional to the provider's removable secret/counter record. Counter
+updates do not write the control head; configuration changes and deletion do.
+No per-request history row is introduced by live credential checks.
+
+Current personal-key reads use a control primary key and provider primary key;
+session reads retain the session row. Permission/authority metadata is limited to
+8 KiB per encoded field. Management effects additionally recheck exact source
+versions and one selected representation path of at most eight edges, including
+bounded Group ancestry and retained parent subjects. These SQL function/trigger
+probes are real work even inside one application statement. Measure their query
+plans, lock time, counter contention and total decision cost during verification.

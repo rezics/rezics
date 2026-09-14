@@ -27,7 +27,7 @@ const inputSchema = z.strictObject({
 	principalId: z.uuid().toLowerCase(),
 	selection: RequestedAuthoritySelectionSchema,
 	operation: AuthorityOperationSchema,
-	now: z.number().finite(), freshSession: z.boolean(),
+	now: z.number().finite(), freshSession: z.boolean(), freshSessionValidUntil: z.number().finite().nullable(),
 	grants: z.array(grantSchema).max(64),
 	subjects: z.array(z.strictObject({
 		subject: subjectSchema, ...decisionFields,
@@ -64,6 +64,7 @@ export interface RepresentationPathEvaluationInput {
 	operation: AuthorityOperation;
 	now: number;
 	freshSession: boolean;
+	freshSessionValidUntil: number | null;
 	grants: RepresentationPathGrant[];
 	subjects: {
 		subject: AccessSubjectTarget;
@@ -77,6 +78,8 @@ export interface RepresentationPathEvaluationInput {
 export interface RepresentationPathDecision {
 	outcome: AuthorityOutcome;
 	basis: RepresentationReference | null;
+	path: RepresentationReference[];
+	validUntil: number | null;
 }
 function subjectKey(subject: AccessSubjectTarget) { return `${subject.kind}:${subject.id}`; }
 function memberSetKey(set: AccessMemberSetRecipient) {
@@ -102,10 +105,10 @@ function combined(...outcomes: AuthorityOutcome[]): AuthorityOutcome {
  */
 export function evaluateRepresentationPath(input: RepresentationPathEvaluationInput): RepresentationPathDecision {
 	const parsed = inputSchema.safeParse(input);
-	if (!parsed.success || parsed.data.selection.mode !== "represented") return { outcome: "unavailable", basis: null };
+	if (!parsed.success || parsed.data.selection.mode !== "represented") return { outcome: "unavailable", basis: null, path: [], validUntil: null };
 	const request = parsed.data, selection = parsed.data.selection;
 	if (request.subjects.reduce((count, fact) => count + fact.memberSets.length, 0) > 4096)
-		return { outcome: "unavailable", basis: null };
+		return { outcome: "unavailable", basis: null, path: [], validUntil: null };
 	const facts = new Map<string, z.infer<typeof grantSchema> | null>();
 	for (const fact of request.grants) facts.set(fact.grant.id, facts.has(fact.grant.id) ? null : fact);
 	const subjects = new Map<string, (typeof request.subjects)[number] | null>();
@@ -129,9 +132,10 @@ export function evaluateRepresentationPath(input: RepresentationPathEvaluationIn
 		const fits = (fact.target.kind === "all-scopes" || (fact.target.scopeId === request.operation.scopeId &&
 			fact.target.path.length <= request.operation.path.length &&
 			fact.target.path.every((segment, index) => segment === request.operation.path[index]))) &&
-			permissions.some(value => accessPermissionKey(value) === permission) &&
-			(!fact.requireFreshSession || request.freshSession);
-		eligible.set(reference.id, fits ? current(fact, request.now) : "deny");
+			permissions.some(value => accessPermissionKey(value) === permission);
+		const freshness: AuthorityOutcome = !fact.requireFreshSession ? "allow" : !request.freshSession ? "deny"
+			: request.freshSessionValidUntil === null ? "unavailable" : request.freshSessionValidUntil <= request.now ? "deny" : "allow";
+		eligible.set(reference.id, combined(fits ? current(fact, request.now) : "deny", freshness));
 		const edges = byEntity.get(fact.entityId) ?? [];
 		edges.push(fact); byEntity.set(fact.entityId, edges);
 	}
@@ -153,33 +157,43 @@ export function evaluateRepresentationPath(input: RepresentationPathEvaluationIn
 		return membership.get(key)?.has(memberSetKey(recipient)) ? subjectOutcome(subject) : "deny";
 	}
 	if (subjectOutcome(principal) === "deny" || subjectOutcome({ kind: "entity", id: selection.entityId }) === "deny")
-		return { outcome: "deny", basis: null };
+		return { outcome: "deny", basis: null, path: [], validUntil: null };
 	let probes = 0, unavailable = false;
 	for (const reference of selection.representations) {
 		const base = selected.get(reference.id);
 		if (base === null) { unavailable = true; continue; }
 		if (!base || base.entityId !== selection.entityId) continue;
-		const queue: { fact: z.infer<typeof grantSchema>; depth: number; prefix: AuthorityOutcome }[] = [{ fact: base, depth: 1, prefix: subjectOutcome({ kind: "entity", id: selection.entityId }) }];
+		const queue: { fact: z.infer<typeof grantSchema>; depth: number; prefix: AuthorityOutcome; path: RepresentationReference[]; until: number }[] = [{
+			fact: base, depth: 1, prefix: subjectOutcome({ kind: "entity", id: selection.entityId }), path: [],
+			until: subjects.get(subjectKey({ kind: "entity", id: selection.entityId }))?.validUntil ?? Infinity,
+		}];
 		const visits = new Map<string, number>([[`${selection.entityId}:allow`, 0], [`${selection.entityId}:unavailable`, 0]]);
 		for (let index = 0; index < queue.length; index++) {
-			if (++probes > 32768) return { outcome: "unavailable", basis: null };
+			if (++probes > 32768) return { outcome: "unavailable", basis: null, path: [], validUntil: null };
 			const item = queue[index]!;
 			const edge = combined(item.prefix, eligible.get(item.fact.grant.id) ?? "unavailable");
 			if (edge === "deny") continue;
+			const path = [...item.path, item.fact.grant];
+			const until = Math.min(item.until, item.fact.validUntil ?? Infinity,
+				item.fact.requireFreshSession ? request.freshSessionValidUntil ?? -Infinity : Infinity);
 			const terminal = combined(edge, receives(item.fact.recipient, principal));
-			if (terminal === "allow") return { outcome: "allow", basis: reference };
+			if (terminal === "allow") {
+				const deadline = Math.min(until, subjects.get(subjectKey(principal))?.validUntil ?? Infinity);
+				return { outcome: "allow", basis: reference, path, validUntil: deadline === Infinity ? null : deadline };
+			}
 			if (terminal === "unavailable") unavailable = true;
 			if (!item.fact.canRedelegate || item.depth >= 8) continue;
 			for (const entity of entities) {
-				if (++probes > 32768) return { outcome: "unavailable", basis: null };
+				if (++probes > 32768) return { outcome: "unavailable", basis: null, path: [], validUntil: null };
 				const prefix = combined(edge, receives(item.fact.recipient, entity));
 				if (prefix === "deny") continue;
 				const key = `${entity.id}:${prefix}`;
 				if ((visits.get(key) ?? Infinity) <= item.depth) continue;
 				visits.set(key, item.depth);
-				for (const next of byEntity.get(entity.id) ?? []) queue.push({ fact: next, depth: item.depth + 1, prefix });
+				for (const next of byEntity.get(entity.id) ?? []) queue.push({ fact: next, depth: item.depth + 1, prefix, path,
+					until: Math.min(until, subjects.get(subjectKey(entity))?.validUntil ?? Infinity) });
 			}
 		}
 	}
-	return { outcome: unavailable ? "unavailable" : "deny", basis: null };
+	return { outcome: unavailable ? "unavailable" : "deny", basis: null, path: [], validUntil: null };
 }

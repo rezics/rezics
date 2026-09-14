@@ -10,12 +10,14 @@ export const PostgreSqlSchemaFileNames = [
 	"history-integrity.sql",
 	"reference-value.sql",
 	"access-identity.sql",
+	"api-key-authority.sql",
 	"identity-preference.sql",
 	"access-subject-policy.sql",
 	"access-role.sql",
 	"access-role-binding.sql",
 	"access-assignment-ceiling.sql",
 	"access-representation.sql",
+	"access-current-policy.sql",
 	"access-membership.sql",
 	"access-group.sql",
 	"access-group-membership.sql",
@@ -85,6 +87,7 @@ export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number
  * PostgreSQL definitions remain split by responsibility for review and drift checks.
  */
 export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly PostgreSqlSchemaFileName[]>> = {
+	management_authority: ["api-key-authority.sql", "access-current-policy.sql"],
 	access_role_binding_readers: ["access-membership.sql", "access-role-binding.sql"],
 	studio_visit_reference_values: ["unit-reference-integrity.sql", "merge-integrity.sql"],
 	following_reference_values: ["unit-reference-integrity.sql", "participation-follow.sql", "platform-aggregates.sql", "merge-integrity.sql"],
@@ -97,6 +100,11 @@ export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly 
 };
 
 export const PostgreSqlSchemaFunctionNames = [
+	"access_subject_is_eligible",
+	"access_subject_matches_recipient",
+	"access_representation_path_is_current",
+	"guard_api_key_authority",
+	"fence_api_key_authority",
 	"guard_access_assignment_ceiling",
 	"guard_access_assignment_ceiling_permission",
 	"guard_access_assignment_ceiling_event",
@@ -445,6 +453,8 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "api_key_authority", name: "api_key_authority_guard" },
+	{ table: "apikeys", name: "apikey_authority_fence" },
 	{ table: "access_assignment_ceiling", name: "access_assignment_ceiling_guard" },
 	{ table: "access_assignment_ceiling_permission", name: "access_assignment_ceiling_permission_guard" },
 	{ table: "access_assignment_ceiling_event", name: "access_assignment_ceiling_event_guard" },

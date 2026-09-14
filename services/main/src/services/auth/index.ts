@@ -13,10 +13,11 @@ import * as schema from "../database/schema/auth";
 import { enqueueAuthenticationEmail } from "../email/outbox";
 import { getRequestTranslation } from "../i18n";
 import { durableAuthenticationCallbacks } from "./durable-callbacks";
+import { CredentialControlFreshAgeSeconds } from "./credential-policy";
 
 const { logger } = getActiveObservability();
 
-export const CredentialControlFreshAgeSeconds = 60 * 10;
+export { CredentialControlFreshAgeSeconds } from "./credential-policy";
 
 function requireTurnstileConfiguration() {
 	if (!env.TURNSTILE_SECRET_KEY)
@@ -83,6 +84,7 @@ export const auth = betterAuth({
 		}),
 		apiKey({
 			references: "user",
+			enableMetadata: true,
 			disableKeyHashing: false,
 			defaultPrefix: "rz_api_",
 			defaultKeyLength: 64,

@@ -32,10 +32,11 @@ export async function evaluateCurrentRepresentationAuthority(
 		operation: AuthorityOperation;
 		action: "read" | "write" | "contribute";
 		freshSession: boolean;
+		freshSessionValidUntil?: number | null;
 	},
 ) {
 	const request = z.strictObject({ principalId: z.uuid().toLowerCase(), selection: RequestedAuthoritySelectionSchema,
-		operation: AuthorityOperationSchema, action: z.enum(["read", "write", "contribute"]), freshSession: z.boolean() }).parse(input);
+		operation: AuthorityOperationSchema, action: z.enum(["read", "write", "contribute"]), freshSession: z.boolean(), freshSessionValidUntil: z.number().finite().nullable().default(null) }).parse(input);
 	if (request.selection.mode !== "represented") throw new AccessRepresentationUnavailable();
 	const selection = request.selection;
 	const loaded = await readCurrentAccessRepresentations(tx, selection.representations);
@@ -47,7 +48,7 @@ export async function evaluateCurrentRepresentationAuthority(
 	if (subjects.length > 256) throw new AccessRepresentationBudgetExceeded();
 	const principal = subjects.find(subject => subject.authUserId === request.principalId);
 	const represented = subjects.find(subject => subject.entityId === selection.entityId);
-	if (!principal || !represented) return { outcome: "deny" as const, basis: null };
+	if (!principal || !represented) return { outcome: "deny" as const, basis: null, path: [], validUntil: null };
 	const byId = new Map(subjects.map(subject => [subject.id, subject]));
 	const subjectTargets = new Map<string, AccessSubjectTarget>();
 	for (const subject of subjects) subjectTargets.set(subject.id, subject.authUserId !== null
@@ -121,5 +122,5 @@ export async function evaluateCurrentRepresentationAuthority(
 			...(fact.validUntil !== undefined ? { validUntil: fact.validUntil } : {}) };
 	});
 	return evaluateRepresentationPath({ principalId: request.principalId, selection,
-		operation: request.operation, now, freshSession: request.freshSession, grants, subjects: graphSubjects });
+		operation: request.operation, now, freshSession: request.freshSession, freshSessionValidUntil: request.freshSessionValidUntil, grants, subjects: graphSubjects });
 }
