@@ -3295,6 +3295,7 @@ export type ResolveAccessManagementScopeRequestTargetReferenceOwnerEnum =
 
 export const ResolveAccessManagementScopeRequestPermissionEnum = {
 	"access.identity.select": "access.identity.select",
+	"access.representation.manage": "access.representation.manage",
 	"access.group.read": "access.group.read",
 	"access.group.create": "access.group.create",
 	"access.group.update": "access.group.update",
@@ -3509,6 +3510,7 @@ export type GetAccessRoleStatus200StateEnum =
 
 export const GetAccessRoleStatus200DefinitionPermissionsKeyEnum = {
 	"access.identity.select": "access.identity.select",
+	"access.representation.manage": "access.representation.manage",
 	"access.group.read": "access.group.read",
 	"access.group.create": "access.group.create",
 	"access.group.update": "access.group.update",
@@ -3705,6 +3707,7 @@ export type CreateAccessRoleStatus500 = InternalError;
 
 export const CreateAccessRoleRequestDefinitionPermissionsKeyEnum = {
 	"access.identity.select": "access.identity.select",
+	"access.representation.manage": "access.representation.manage",
 	"access.group.read": "access.group.read",
 	"access.group.create": "access.group.create",
 	"access.group.update": "access.group.update",
@@ -3988,6 +3991,7 @@ export type ReviseAccessRoleStatus500 = InternalError;
 
 export const ReviseAccessRoleRequestDefinitionPermissionsKeyEnum = {
 	"access.identity.select": "access.identity.select",
+	"access.representation.manage": "access.representation.manage",
 	"access.group.read": "access.group.read",
 	"access.group.create": "access.group.create",
 	"access.group.update": "access.group.update",
@@ -6345,6 +6349,7 @@ export const InspectAccessGroupImpactEvaluationStatus200ItemsDecisionEnum = {
 	pending: "pending",
 	"not-required": "not-required",
 	covered: "covered",
+	"approval-required": "approval-required",
 	denied: "denied",
 	unavailable: "unavailable",
 } as const;
@@ -6573,6 +6578,1139 @@ export type InspectAccessGroupImpactEvaluationResponse =
 	| InspectAccessGroupImpactEvaluationStatus422
 	| InspectAccessGroupImpactEvaluationStatus500
 	| InspectAccessGroupImpactEvaluationStatus503;
+
+export type InspectAccessGroupApprovalProposalPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	groupId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+};
+
+export const InspectAccessGroupApprovalProposalStatus200OperationEnum = {
+	reparent: "reparent",
+	retire: "retire",
+} as const;
+
+export type InspectAccessGroupApprovalProposalStatus200OperationEnum =
+	(typeof InspectAccessGroupApprovalProposalStatus200OperationEnum)[keyof typeof InspectAccessGroupApprovalProposalStatus200OperationEnum];
+
+export type InspectAccessGroupApprovalProposalStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+	proposalDigest: string;
+	effectDigest: string;
+	operation: InspectAccessGroupApprovalProposalStatus200OperationEnum;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	expectedGroupVersion: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	expectedTreeVersion: number;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	proposedParentId: string | null;
+	/**
+	 * @minLength 0
+	 * @maxLength 4096
+	 * @type integer
+	 */
+	effectCount: number;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	validUntil: string;
+};
+
+export type InspectAccessGroupApprovalProposalStatus400 = {
+	error: {
+		/**
+		 * @default 'AccessInputInvalid'
+		 * @type string
+		 */
+		code: "AccessInputInvalid";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const InspectAccessGroupApprovalProposalStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type InspectAccessGroupApprovalProposalStatus401ErrorCodeEnum =
+	(typeof InspectAccessGroupApprovalProposalStatus401ErrorCodeEnum)[keyof typeof InspectAccessGroupApprovalProposalStatus401ErrorCodeEnum];
+
+export type InspectAccessGroupApprovalProposalStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: InspectAccessGroupApprovalProposalStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const InspectAccessGroupApprovalProposalStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type InspectAccessGroupApprovalProposalStatus403ErrorCodeEnum =
+	(typeof InspectAccessGroupApprovalProposalStatus403ErrorCodeEnum)[keyof typeof InspectAccessGroupApprovalProposalStatus403ErrorCodeEnum];
+
+export type InspectAccessGroupApprovalProposalStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: InspectAccessGroupApprovalProposalStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type InspectAccessGroupApprovalProposalStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type InspectAccessGroupApprovalProposalStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type InspectAccessGroupApprovalProposalStatus422 = ValidationError;
+
+export type InspectAccessGroupApprovalProposalStatus500 = InternalError;
+
+export type InspectAccessGroupApprovalProposalStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type InspectAccessGroupApprovalProposalOptions = {
+	body?: never;
+	path: InspectAccessGroupApprovalProposalPath;
+	query?: never;
+	headers?: never;
+};
+
+export type InspectAccessGroupApprovalProposalResponses = {
+	"200": InspectAccessGroupApprovalProposalStatus200;
+	"400": InspectAccessGroupApprovalProposalStatus400;
+	"401": InspectAccessGroupApprovalProposalStatus401;
+	"403": InspectAccessGroupApprovalProposalStatus403;
+	"404": InspectAccessGroupApprovalProposalStatus404;
+	"409": InspectAccessGroupApprovalProposalStatus409;
+	"422": InspectAccessGroupApprovalProposalStatus422;
+	"500": InspectAccessGroupApprovalProposalStatus500;
+	"503": InspectAccessGroupApprovalProposalStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type InspectAccessGroupApprovalProposalResponse =
+	| InspectAccessGroupApprovalProposalStatus200
+	| InspectAccessGroupApprovalProposalStatus400
+	| InspectAccessGroupApprovalProposalStatus401
+	| InspectAccessGroupApprovalProposalStatus403
+	| InspectAccessGroupApprovalProposalStatus404
+	| InspectAccessGroupApprovalProposalStatus409
+	| InspectAccessGroupApprovalProposalStatus422
+	| InspectAccessGroupApprovalProposalStatus500
+	| InspectAccessGroupApprovalProposalStatus503;
+
+export type ApproveAccessGroupImpactPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	groupId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+};
+
+export type ApproveAccessGroupImpactStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	approvalId: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	validUntil: string;
+	revoked: boolean;
+};
+
+export type ApproveAccessGroupImpactStatus400 =
+	| {
+			error: {
+				/**
+				 * @default 'AccessInputInvalid'
+				 * @type string
+				 */
+				code: "AccessInputInvalid";
+				message: string;
+				details?: void;
+			};
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const ApproveAccessGroupImpactStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type ApproveAccessGroupImpactStatus401ErrorCodeEnum =
+	(typeof ApproveAccessGroupImpactStatus401ErrorCodeEnum)[keyof typeof ApproveAccessGroupImpactStatus401ErrorCodeEnum];
+
+export type ApproveAccessGroupImpactStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: ApproveAccessGroupImpactStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ApproveAccessGroupImpactStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type ApproveAccessGroupImpactStatus403ErrorCodeEnum =
+	(typeof ApproveAccessGroupImpactStatus403ErrorCodeEnum)[keyof typeof ApproveAccessGroupImpactStatus403ErrorCodeEnum];
+
+export type ApproveAccessGroupImpactStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: ApproveAccessGroupImpactStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ApproveAccessGroupImpactStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ApproveAccessGroupImpactStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ApproveAccessGroupImpactStatus422 = ValidationError;
+
+export type ApproveAccessGroupImpactStatus500 = InternalError;
+
+export type ApproveAccessGroupImpactStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ApproveAccessGroupImpactBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	approvalId: string;
+	/**
+	 * @pattern ^[0-9a-f]{64}$
+	 * @type string
+	 */
+	proposalDigest: string;
+	/**
+	 * @pattern ^[0-9a-f]{64}$
+	 * @type string
+	 */
+	effectDigest: string;
+};
+
+export type ApproveAccessGroupImpactOptions = {
+	body: ApproveAccessGroupImpactBody;
+	path: ApproveAccessGroupImpactPath;
+	query?: never;
+	headers?: never;
+};
+
+export type ApproveAccessGroupImpactResponses = {
+	"200": ApproveAccessGroupImpactStatus200;
+	"400": ApproveAccessGroupImpactStatus400;
+	"401": ApproveAccessGroupImpactStatus401;
+	"403": ApproveAccessGroupImpactStatus403;
+	"404": ApproveAccessGroupImpactStatus404;
+	"409": ApproveAccessGroupImpactStatus409;
+	"422": ApproveAccessGroupImpactStatus422;
+	"500": ApproveAccessGroupImpactStatus500;
+	"503": ApproveAccessGroupImpactStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ApproveAccessGroupImpactResponse =
+	| ApproveAccessGroupImpactStatus200
+	| ApproveAccessGroupImpactStatus400
+	| ApproveAccessGroupImpactStatus401
+	| ApproveAccessGroupImpactStatus403
+	| ApproveAccessGroupImpactStatus404
+	| ApproveAccessGroupImpactStatus409
+	| ApproveAccessGroupImpactStatus422
+	| ApproveAccessGroupImpactStatus500
+	| ApproveAccessGroupImpactStatus503;
+
+export type ListAccessGroupApprovalsPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	groupId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+};
+
+export const ListAccessGroupApprovalsStatus200OutcomeEnum = {
+	allow: "allow",
+	deny: "deny",
+	unavailable: "unavailable",
+} as const;
+
+export type ListAccessGroupApprovalsStatus200OutcomeEnum =
+	(typeof ListAccessGroupApprovalsStatus200OutcomeEnum)[keyof typeof ListAccessGroupApprovalsStatus200OutcomeEnum];
+
+export type ListAccessGroupApprovalsStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+	/**
+	 * @minLength 0
+	 * @maxLength 64
+	 * @type integer
+	 */
+	validApprovals: number;
+	outcome: ListAccessGroupApprovalsStatus200OutcomeEnum;
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		approvalId: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		validUntil: string;
+		revoked: boolean;
+		valid: boolean;
+	}[];
+};
+
+export type ListAccessGroupApprovalsStatus400 = {
+	error: {
+		/**
+		 * @default 'AccessInputInvalid'
+		 * @type string
+		 */
+		code: "AccessInputInvalid";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ListAccessGroupApprovalsStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type ListAccessGroupApprovalsStatus401ErrorCodeEnum =
+	(typeof ListAccessGroupApprovalsStatus401ErrorCodeEnum)[keyof typeof ListAccessGroupApprovalsStatus401ErrorCodeEnum];
+
+export type ListAccessGroupApprovalsStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: ListAccessGroupApprovalsStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ListAccessGroupApprovalsStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type ListAccessGroupApprovalsStatus403ErrorCodeEnum =
+	(typeof ListAccessGroupApprovalsStatus403ErrorCodeEnum)[keyof typeof ListAccessGroupApprovalsStatus403ErrorCodeEnum];
+
+export type ListAccessGroupApprovalsStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: ListAccessGroupApprovalsStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessGroupApprovalsStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessGroupApprovalsStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessGroupApprovalsStatus422 = ValidationError;
+
+export type ListAccessGroupApprovalsStatus500 = InternalError;
+
+export type ListAccessGroupApprovalsStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessGroupApprovalsOptions = {
+	body?: never;
+	path: ListAccessGroupApprovalsPath;
+	query?: never;
+	headers?: never;
+};
+
+export type ListAccessGroupApprovalsResponses = {
+	"200": ListAccessGroupApprovalsStatus200;
+	"400": ListAccessGroupApprovalsStatus400;
+	"401": ListAccessGroupApprovalsStatus401;
+	"403": ListAccessGroupApprovalsStatus403;
+	"404": ListAccessGroupApprovalsStatus404;
+	"409": ListAccessGroupApprovalsStatus409;
+	"422": ListAccessGroupApprovalsStatus422;
+	"500": ListAccessGroupApprovalsStatus500;
+	"503": ListAccessGroupApprovalsStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ListAccessGroupApprovalsResponse =
+	| ListAccessGroupApprovalsStatus200
+	| ListAccessGroupApprovalsStatus400
+	| ListAccessGroupApprovalsStatus401
+	| ListAccessGroupApprovalsStatus403
+	| ListAccessGroupApprovalsStatus404
+	| ListAccessGroupApprovalsStatus409
+	| ListAccessGroupApprovalsStatus422
+	| ListAccessGroupApprovalsStatus500
+	| ListAccessGroupApprovalsStatus503;
+
+export type RevokeAccessGroupApprovalPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	groupId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	approvalId: string;
+};
+
+export type RevokeAccessGroupApprovalStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	approvalId: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	validUntil: string;
+	revoked: boolean;
+};
+
+export type RevokeAccessGroupApprovalStatus400 =
+	| {
+			error: {
+				/**
+				 * @default 'AccessInputInvalid'
+				 * @type string
+				 */
+				code: "AccessInputInvalid";
+				message: string;
+				details?: void;
+			};
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const RevokeAccessGroupApprovalStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type RevokeAccessGroupApprovalStatus401ErrorCodeEnum =
+	(typeof RevokeAccessGroupApprovalStatus401ErrorCodeEnum)[keyof typeof RevokeAccessGroupApprovalStatus401ErrorCodeEnum];
+
+export type RevokeAccessGroupApprovalStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: RevokeAccessGroupApprovalStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const RevokeAccessGroupApprovalStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type RevokeAccessGroupApprovalStatus403ErrorCodeEnum =
+	(typeof RevokeAccessGroupApprovalStatus403ErrorCodeEnum)[keyof typeof RevokeAccessGroupApprovalStatus403ErrorCodeEnum];
+
+export type RevokeAccessGroupApprovalStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: RevokeAccessGroupApprovalStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RevokeAccessGroupApprovalStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RevokeAccessGroupApprovalStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RevokeAccessGroupApprovalStatus422 = ValidationError;
+
+export type RevokeAccessGroupApprovalStatus500 = InternalError;
+
+export type RevokeAccessGroupApprovalStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RevokeAccessGroupApprovalBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+};
+
+export type RevokeAccessGroupApprovalOptions = {
+	body: RevokeAccessGroupApprovalBody;
+	path: RevokeAccessGroupApprovalPath;
+	query?: never;
+	headers?: never;
+};
+
+export type RevokeAccessGroupApprovalResponses = {
+	"200": RevokeAccessGroupApprovalStatus200;
+	"400": RevokeAccessGroupApprovalStatus400;
+	"401": RevokeAccessGroupApprovalStatus401;
+	"403": RevokeAccessGroupApprovalStatus403;
+	"404": RevokeAccessGroupApprovalStatus404;
+	"409": RevokeAccessGroupApprovalStatus409;
+	"422": RevokeAccessGroupApprovalStatus422;
+	"500": RevokeAccessGroupApprovalStatus500;
+	"503": RevokeAccessGroupApprovalStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type RevokeAccessGroupApprovalResponse =
+	| RevokeAccessGroupApprovalStatus200
+	| RevokeAccessGroupApprovalStatus400
+	| RevokeAccessGroupApprovalStatus401
+	| RevokeAccessGroupApprovalStatus403
+	| RevokeAccessGroupApprovalStatus404
+	| RevokeAccessGroupApprovalStatus409
+	| RevokeAccessGroupApprovalStatus422
+	| RevokeAccessGroupApprovalStatus500
+	| RevokeAccessGroupApprovalStatus503;
+
+export type RegisterAccessRecoveryPathPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+};
+
+export type RegisterAccessRecoveryPathStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pathId: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	validUntil: string;
+	revoked: boolean;
+};
+
+export type RegisterAccessRecoveryPathStatus400 =
+	| {
+			error: {
+				/**
+				 * @default 'AccessInputInvalid'
+				 * @type string
+				 */
+				code: "AccessInputInvalid";
+				message: string;
+				details?: void;
+			};
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const RegisterAccessRecoveryPathStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type RegisterAccessRecoveryPathStatus401ErrorCodeEnum =
+	(typeof RegisterAccessRecoveryPathStatus401ErrorCodeEnum)[keyof typeof RegisterAccessRecoveryPathStatus401ErrorCodeEnum];
+
+export type RegisterAccessRecoveryPathStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: RegisterAccessRecoveryPathStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const RegisterAccessRecoveryPathStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type RegisterAccessRecoveryPathStatus403ErrorCodeEnum =
+	(typeof RegisterAccessRecoveryPathStatus403ErrorCodeEnum)[keyof typeof RegisterAccessRecoveryPathStatus403ErrorCodeEnum];
+
+export type RegisterAccessRecoveryPathStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: RegisterAccessRecoveryPathStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RegisterAccessRecoveryPathStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RegisterAccessRecoveryPathStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RegisterAccessRecoveryPathStatus422 = ValidationError;
+
+export type RegisterAccessRecoveryPathStatus500 = InternalError;
+
+export type RegisterAccessRecoveryPathStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RegisterAccessRecoveryPathBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pathId: string;
+};
+
+export type RegisterAccessRecoveryPathOptions = {
+	body: RegisterAccessRecoveryPathBody;
+	path: RegisterAccessRecoveryPathPath;
+	query?: never;
+	headers?: never;
+};
+
+export type RegisterAccessRecoveryPathResponses = {
+	"200": RegisterAccessRecoveryPathStatus200;
+	"400": RegisterAccessRecoveryPathStatus400;
+	"401": RegisterAccessRecoveryPathStatus401;
+	"403": RegisterAccessRecoveryPathStatus403;
+	"404": RegisterAccessRecoveryPathStatus404;
+	"409": RegisterAccessRecoveryPathStatus409;
+	"422": RegisterAccessRecoveryPathStatus422;
+	"500": RegisterAccessRecoveryPathStatus500;
+	"503": RegisterAccessRecoveryPathStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type RegisterAccessRecoveryPathResponse =
+	| RegisterAccessRecoveryPathStatus200
+	| RegisterAccessRecoveryPathStatus400
+	| RegisterAccessRecoveryPathStatus401
+	| RegisterAccessRecoveryPathStatus403
+	| RegisterAccessRecoveryPathStatus404
+	| RegisterAccessRecoveryPathStatus409
+	| RegisterAccessRecoveryPathStatus422
+	| RegisterAccessRecoveryPathStatus500
+	| RegisterAccessRecoveryPathStatus503;
+
+export type RevokeAccessRecoveryPathPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pathId: string;
+};
+
+export type RevokeAccessRecoveryPathStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pathId: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	validUntil: string;
+	revoked: boolean;
+};
+
+export type RevokeAccessRecoveryPathStatus400 =
+	| {
+			error: {
+				/**
+				 * @default 'AccessInputInvalid'
+				 * @type string
+				 */
+				code: "AccessInputInvalid";
+				message: string;
+				details?: void;
+			};
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const RevokeAccessRecoveryPathStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type RevokeAccessRecoveryPathStatus401ErrorCodeEnum =
+	(typeof RevokeAccessRecoveryPathStatus401ErrorCodeEnum)[keyof typeof RevokeAccessRecoveryPathStatus401ErrorCodeEnum];
+
+export type RevokeAccessRecoveryPathStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: RevokeAccessRecoveryPathStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const RevokeAccessRecoveryPathStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type RevokeAccessRecoveryPathStatus403ErrorCodeEnum =
+	(typeof RevokeAccessRecoveryPathStatus403ErrorCodeEnum)[keyof typeof RevokeAccessRecoveryPathStatus403ErrorCodeEnum];
+
+export type RevokeAccessRecoveryPathStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: RevokeAccessRecoveryPathStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RevokeAccessRecoveryPathStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RevokeAccessRecoveryPathStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RevokeAccessRecoveryPathStatus422 = ValidationError;
+
+export type RevokeAccessRecoveryPathStatus500 = InternalError;
+
+export type RevokeAccessRecoveryPathStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RevokeAccessRecoveryPathBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+};
+
+export type RevokeAccessRecoveryPathOptions = {
+	body: RevokeAccessRecoveryPathBody;
+	path: RevokeAccessRecoveryPathPath;
+	query?: never;
+	headers?: never;
+};
+
+export type RevokeAccessRecoveryPathResponses = {
+	"200": RevokeAccessRecoveryPathStatus200;
+	"400": RevokeAccessRecoveryPathStatus400;
+	"401": RevokeAccessRecoveryPathStatus401;
+	"403": RevokeAccessRecoveryPathStatus403;
+	"404": RevokeAccessRecoveryPathStatus404;
+	"409": RevokeAccessRecoveryPathStatus409;
+	"422": RevokeAccessRecoveryPathStatus422;
+	"500": RevokeAccessRecoveryPathStatus500;
+	"503": RevokeAccessRecoveryPathStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type RevokeAccessRecoveryPathResponse =
+	| RevokeAccessRecoveryPathStatus200
+	| RevokeAccessRecoveryPathStatus400
+	| RevokeAccessRecoveryPathStatus401
+	| RevokeAccessRecoveryPathStatus403
+	| RevokeAccessRecoveryPathStatus404
+	| RevokeAccessRecoveryPathStatus409
+	| RevokeAccessRecoveryPathStatus422
+	| RevokeAccessRecoveryPathStatus500
+	| RevokeAccessRecoveryPathStatus503;
 
 export type UpdateAccessGroupPresentationPath = {
 	/**
@@ -6983,6 +8121,12 @@ export type ReparentAccessGroupBody = {
 	 * @type string
 	 */
 	parentId: string | null;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	reviewId?: string;
 };
 
 export type ReparentAccessGroupOptions = {
@@ -7186,6 +8330,12 @@ export type RetireAccessGroupBody = {
 	 * @type integer
 	 */
 	expectedVersion: number;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	reviewId?: string;
 };
 
 export type RetireAccessGroupOptions = {

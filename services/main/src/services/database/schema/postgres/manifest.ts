@@ -31,6 +31,7 @@ export const PostgreSqlSchemaFileNames = [
 	"access-group.sql",
 	"access-group-membership.sql",
 	"access-group-impact.sql",
+	"access-group-admission.sql",
 	"account-tag-reference.sql",
 	"revision-reference.sql",
 	"association-proposal-authority.sql",
@@ -113,6 +114,8 @@ export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly 
 };
 
 export const PostgreSqlSchemaFunctionNames = [
+	"guard_access_group_approval",
+	"guard_access_recovery_path",
 	"touch_access_impact_fences",
 	"guard_access_impact_fence",
 	"guard_oauth_refresh_family",
@@ -517,6 +520,10 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+ { table: "access_group_approval", name: "access_group_approval_guard" },
+ { table: "access_recovery_path", name: "access_recovery_path_guard" },
+ { table: "access_recovery_policy", name: "access_recovery_policy_immutable" },
+ { table: "access_group_admission_receipt", name: "access_group_admission_receipt_immutable" },
 	{ table: "access_role_binding_scope", name: "access_binding_scope_impact" },
 	{ table: "access_role_binding_scope", name: "access_binding_scope_impact_truncate" },
 	{ table: "access_impact_fence", name: "access_impact_fence_guard" },

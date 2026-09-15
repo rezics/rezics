@@ -33,6 +33,7 @@ export const accessMembership = pgTable(
 	(table): PgTableExtraConfigValue[] => [
 		uniqueIndex("access_membership_scope_subject_key").on(table.scopeId, table.subjectId),
 		uniqueIndex("access_membership_id_scope_key").on(table.id, table.scopeId),
+		index("access_membership_active_scope_idx").on(table.scopeId,table.subjectId).where(sql`${table.activeGeneration} is not null`),
 		index("access_membership_subject_scope_idx").on(table.subjectId, table.scopeId),
 		foreignKey({
 			name: "access_membership_active_admission_fk",

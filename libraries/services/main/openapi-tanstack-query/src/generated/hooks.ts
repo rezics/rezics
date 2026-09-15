@@ -21,6 +21,7 @@ import {
 	addMusicTrack,
 	advanceAccessGroupImpact,
 	advanceAccessGroupImpactEvaluation,
+	approveAccessGroupImpact,
 	assignGroupingClass,
 	attachMusicDiscToc,
 	cancelOrganizationMembershipInvitation,
@@ -262,12 +263,14 @@ import {
 	getZonePageAddressById,
 	getZoneRenderProjection,
 	headApiHealth,
+	inspectAccessGroupApprovalProposal,
 	inspectAccessGroupImpact,
 	inspectAccessGroupImpactEvaluation,
 	intakeCatalogSource,
 	inviteOrganizationMember,
 	issueParticipationGrant,
 	leaveOrganizationMembership,
+	listAccessGroupApprovals,
 	listAccessGroupHistory,
 	listAccessGroups,
 	listAccessRoleHistory,
@@ -542,6 +545,7 @@ import {
 	readTextVersionChapterNode,
 	recordCurrentUserStudioVisit,
 	recoverEntityController,
+	registerAccessRecoveryPath,
 	releaseSlugRedirectWithPlatformAccess,
 	removeCatalogEntityProfile,
 	removeGroupingClass,
@@ -593,6 +597,8 @@ import {
 	reviseSoftwareCredit,
 	reviseSoftwareDetails,
 	reviseSoftwareParticipationContext,
+	revokeAccessGroupApproval,
+	revokeAccessRecoveryPath,
 	revokeOwnAppConsent,
 	revokeParticipationGrant,
 	revokeServicePrincipal,
@@ -669,6 +675,16 @@ import type {
 	AdvanceAccessGroupImpactStatus429,
 	AdvanceAccessGroupImpactStatus500,
 	AdvanceAccessGroupImpactStatus503,
+	ApproveAccessGroupImpactOptions,
+	ApproveAccessGroupImpactStatus200,
+	ApproveAccessGroupImpactStatus400,
+	ApproveAccessGroupImpactStatus401,
+	ApproveAccessGroupImpactStatus403,
+	ApproveAccessGroupImpactStatus404,
+	ApproveAccessGroupImpactStatus409,
+	ApproveAccessGroupImpactStatus422,
+	ApproveAccessGroupImpactStatus500,
+	ApproveAccessGroupImpactStatus503,
 	AssignGroupingClassOptions,
 	AssignGroupingClassStatus200,
 	AssignGroupingClassStatus400,
@@ -2065,6 +2081,16 @@ import type {
 	HeadApiHealthStatus422,
 	HeadApiHealthStatus429,
 	HeadApiHealthStatus500,
+	InspectAccessGroupApprovalProposalOptions,
+	InspectAccessGroupApprovalProposalStatus200,
+	InspectAccessGroupApprovalProposalStatus400,
+	InspectAccessGroupApprovalProposalStatus401,
+	InspectAccessGroupApprovalProposalStatus403,
+	InspectAccessGroupApprovalProposalStatus404,
+	InspectAccessGroupApprovalProposalStatus409,
+	InspectAccessGroupApprovalProposalStatus422,
+	InspectAccessGroupApprovalProposalStatus500,
+	InspectAccessGroupApprovalProposalStatus503,
 	InspectAccessGroupImpactEvaluationOptions,
 	InspectAccessGroupImpactEvaluationStatus200,
 	InspectAccessGroupImpactEvaluationStatus400,
@@ -2113,6 +2139,16 @@ import type {
 	LeaveOrganizationMembershipStatus409,
 	LeaveOrganizationMembershipStatus422,
 	LeaveOrganizationMembershipStatus500,
+	ListAccessGroupApprovalsOptions,
+	ListAccessGroupApprovalsStatus200,
+	ListAccessGroupApprovalsStatus400,
+	ListAccessGroupApprovalsStatus401,
+	ListAccessGroupApprovalsStatus403,
+	ListAccessGroupApprovalsStatus404,
+	ListAccessGroupApprovalsStatus409,
+	ListAccessGroupApprovalsStatus422,
+	ListAccessGroupApprovalsStatus500,
+	ListAccessGroupApprovalsStatus503,
 	ListAccessGroupHistoryOptions,
 	ListAccessGroupHistoryStatus200,
 	ListAccessGroupHistoryStatus400,
@@ -3976,6 +4012,16 @@ import type {
 	RecoverEntityControllerStatus400,
 	RecoverEntityControllerStatus422,
 	RecoverEntityControllerStatus500,
+	RegisterAccessRecoveryPathOptions,
+	RegisterAccessRecoveryPathStatus200,
+	RegisterAccessRecoveryPathStatus400,
+	RegisterAccessRecoveryPathStatus401,
+	RegisterAccessRecoveryPathStatus403,
+	RegisterAccessRecoveryPathStatus404,
+	RegisterAccessRecoveryPathStatus409,
+	RegisterAccessRecoveryPathStatus422,
+	RegisterAccessRecoveryPathStatus500,
+	RegisterAccessRecoveryPathStatus503,
 	ReleaseSlugRedirectWithPlatformAccessOptions,
 	ReleaseSlugRedirectWithPlatformAccessStatus204,
 	ReleaseSlugRedirectWithPlatformAccessStatus400,
@@ -4294,6 +4340,26 @@ import type {
 	ReviseSoftwareParticipationContextStatus422,
 	ReviseSoftwareParticipationContextStatus429,
 	ReviseSoftwareParticipationContextStatus500,
+	RevokeAccessGroupApprovalOptions,
+	RevokeAccessGroupApprovalStatus200,
+	RevokeAccessGroupApprovalStatus400,
+	RevokeAccessGroupApprovalStatus401,
+	RevokeAccessGroupApprovalStatus403,
+	RevokeAccessGroupApprovalStatus404,
+	RevokeAccessGroupApprovalStatus409,
+	RevokeAccessGroupApprovalStatus422,
+	RevokeAccessGroupApprovalStatus500,
+	RevokeAccessGroupApprovalStatus503,
+	RevokeAccessRecoveryPathOptions,
+	RevokeAccessRecoveryPathStatus200,
+	RevokeAccessRecoveryPathStatus400,
+	RevokeAccessRecoveryPathStatus401,
+	RevokeAccessRecoveryPathStatus403,
+	RevokeAccessRecoveryPathStatus404,
+	RevokeAccessRecoveryPathStatus409,
+	RevokeAccessRecoveryPathStatus422,
+	RevokeAccessRecoveryPathStatus500,
+	RevokeAccessRecoveryPathStatus503,
 	RevokeOwnAppConsentOptions,
 	RevokeOwnAppConsentStatus200,
 	RevokeOwnAppConsentStatus400,
@@ -6335,6 +6401,675 @@ export function useInspectAccessGroupImpactEvaluation<
 	queryResult.queryKey = queryKey as TQueryKey;
 
 	return queryResult;
+}
+
+export const inspectAccessGroupApprovalProposalQueryKey = ({
+	path,
+}: Omit<InspectAccessGroupApprovalProposalOptions, "headers">) =>
+	[
+		{
+			url: "/api/v1/access/:scope/groups/:groupId/impact-reviews/:reviewId/approval-proposal",
+			params: path,
+		},
+	] as const;
+
+type InspectAccessGroupApprovalProposalQueryKey = ReturnType<
+	typeof inspectAccessGroupApprovalProposalQueryKey
+>;
+
+export function inspectAccessGroupApprovalProposalQueryOptions(
+	{ path }: InspectAccessGroupApprovalProposalOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = inspectAccessGroupApprovalProposalQueryKey({ path });
+	return queryOptions<
+		InspectAccessGroupApprovalProposalStatus200,
+		ResponseErrorConfig<
+			| InspectAccessGroupApprovalProposalStatus400
+			| InspectAccessGroupApprovalProposalStatus401
+			| InspectAccessGroupApprovalProposalStatus403
+			| InspectAccessGroupApprovalProposalStatus404
+			| InspectAccessGroupApprovalProposalStatus409
+			| InspectAccessGroupApprovalProposalStatus422
+			| InspectAccessGroupApprovalProposalStatus500
+			| InspectAccessGroupApprovalProposalStatus503
+		>,
+		InspectAccessGroupApprovalProposalStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return inspectAccessGroupApprovalProposal({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/impact-reviews/:reviewId/approval-proposal}
+ */
+export function useInspectAccessGroupApprovalProposal<
+	TData = InspectAccessGroupApprovalProposalStatus200,
+	TQueryData = InspectAccessGroupApprovalProposalStatus200,
+	TQueryKey extends QueryKey = InspectAccessGroupApprovalProposalQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| InspectAccessGroupApprovalProposalOptions["path"]
+			| (() => InspectAccessGroupApprovalProposalOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				InspectAccessGroupApprovalProposalStatus200,
+				ResponseErrorConfig<
+					| InspectAccessGroupApprovalProposalStatus400
+					| InspectAccessGroupApprovalProposalStatus401
+					| InspectAccessGroupApprovalProposalStatus403
+					| InspectAccessGroupApprovalProposalStatus404
+					| InspectAccessGroupApprovalProposalStatus409
+					| InspectAccessGroupApprovalProposalStatus422
+					| InspectAccessGroupApprovalProposalStatus500
+					| InspectAccessGroupApprovalProposalStatus503
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ?? inspectAccessGroupApprovalProposalQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...inspectAccessGroupApprovalProposalQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| InspectAccessGroupApprovalProposalStatus400
+			| InspectAccessGroupApprovalProposalStatus401
+			| InspectAccessGroupApprovalProposalStatus403
+			| InspectAccessGroupApprovalProposalStatus404
+			| InspectAccessGroupApprovalProposalStatus409
+			| InspectAccessGroupApprovalProposalStatus422
+			| InspectAccessGroupApprovalProposalStatus500
+			| InspectAccessGroupApprovalProposalStatus503
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const approveAccessGroupImpactMutationKey = () =>
+	[{ url: "/api/v1/access/:scope/groups/:groupId/impact-reviews/:reviewId/approvals" }] as const;
+
+export function approveAccessGroupImpactMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = approveAccessGroupImpactMutationKey();
+	return mutationOptions<
+		ApproveAccessGroupImpactStatus200,
+		ResponseErrorConfig<
+			| ApproveAccessGroupImpactStatus400
+			| ApproveAccessGroupImpactStatus401
+			| ApproveAccessGroupImpactStatus403
+			| ApproveAccessGroupImpactStatus404
+			| ApproveAccessGroupImpactStatus409
+			| ApproveAccessGroupImpactStatus422
+			| ApproveAccessGroupImpactStatus500
+			| ApproveAccessGroupImpactStatus503
+		>,
+		ApproveAccessGroupImpactOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return approveAccessGroupImpact({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/impact-reviews/:reviewId/approvals}
+ */
+export function useApproveAccessGroupImpact<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			ApproveAccessGroupImpactStatus200,
+			ResponseErrorConfig<
+				| ApproveAccessGroupImpactStatus400
+				| ApproveAccessGroupImpactStatus401
+				| ApproveAccessGroupImpactStatus403
+				| ApproveAccessGroupImpactStatus404
+				| ApproveAccessGroupImpactStatus409
+				| ApproveAccessGroupImpactStatus422
+				| ApproveAccessGroupImpactStatus500
+				| ApproveAccessGroupImpactStatus503
+			>,
+			ApproveAccessGroupImpactOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? approveAccessGroupImpactMutationKey();
+
+	const baseOptions = approveAccessGroupImpactMutationOptions(config) as UseMutationOptions<
+		ApproveAccessGroupImpactStatus200,
+		ResponseErrorConfig<
+			| ApproveAccessGroupImpactStatus400
+			| ApproveAccessGroupImpactStatus401
+			| ApproveAccessGroupImpactStatus403
+			| ApproveAccessGroupImpactStatus404
+			| ApproveAccessGroupImpactStatus409
+			| ApproveAccessGroupImpactStatus422
+			| ApproveAccessGroupImpactStatus500
+			| ApproveAccessGroupImpactStatus503
+		>,
+		ApproveAccessGroupImpactOptions,
+		TContext
+	>;
+
+	return useMutation<
+		ApproveAccessGroupImpactStatus200,
+		ResponseErrorConfig<
+			| ApproveAccessGroupImpactStatus400
+			| ApproveAccessGroupImpactStatus401
+			| ApproveAccessGroupImpactStatus403
+			| ApproveAccessGroupImpactStatus404
+			| ApproveAccessGroupImpactStatus409
+			| ApproveAccessGroupImpactStatus422
+			| ApproveAccessGroupImpactStatus500
+			| ApproveAccessGroupImpactStatus503
+		>,
+		ApproveAccessGroupImpactOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		ApproveAccessGroupImpactStatus200,
+		ResponseErrorConfig<
+			| ApproveAccessGroupImpactStatus400
+			| ApproveAccessGroupImpactStatus401
+			| ApproveAccessGroupImpactStatus403
+			| ApproveAccessGroupImpactStatus404
+			| ApproveAccessGroupImpactStatus409
+			| ApproveAccessGroupImpactStatus422
+			| ApproveAccessGroupImpactStatus500
+			| ApproveAccessGroupImpactStatus503
+		>,
+		ApproveAccessGroupImpactOptions,
+		TContext
+	>;
+}
+
+export const listAccessGroupApprovalsQueryKey = ({
+	path,
+}: Omit<ListAccessGroupApprovalsOptions, "headers">) =>
+	[
+		{
+			url: "/api/v1/access/:scope/groups/:groupId/impact-reviews/:reviewId/approvals",
+			params: path,
+		},
+	] as const;
+
+type ListAccessGroupApprovalsQueryKey = ReturnType<typeof listAccessGroupApprovalsQueryKey>;
+
+export function listAccessGroupApprovalsQueryOptions(
+	{ path }: ListAccessGroupApprovalsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listAccessGroupApprovalsQueryKey({ path });
+	return queryOptions<
+		ListAccessGroupApprovalsStatus200,
+		ResponseErrorConfig<
+			| ListAccessGroupApprovalsStatus400
+			| ListAccessGroupApprovalsStatus401
+			| ListAccessGroupApprovalsStatus403
+			| ListAccessGroupApprovalsStatus404
+			| ListAccessGroupApprovalsStatus409
+			| ListAccessGroupApprovalsStatus422
+			| ListAccessGroupApprovalsStatus500
+			| ListAccessGroupApprovalsStatus503
+		>,
+		ListAccessGroupApprovalsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return listAccessGroupApprovals({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/impact-reviews/:reviewId/approvals}
+ */
+export function useListAccessGroupApprovals<
+	TData = ListAccessGroupApprovalsStatus200,
+	TQueryData = ListAccessGroupApprovalsStatus200,
+	TQueryKey extends QueryKey = ListAccessGroupApprovalsQueryKey,
+>(
+	{
+		path,
+	}: {
+		path: ListAccessGroupApprovalsOptions["path"] | (() => ListAccessGroupApprovalsOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListAccessGroupApprovalsStatus200,
+				ResponseErrorConfig<
+					| ListAccessGroupApprovalsStatus400
+					| ListAccessGroupApprovalsStatus401
+					| ListAccessGroupApprovalsStatus403
+					| ListAccessGroupApprovalsStatus404
+					| ListAccessGroupApprovalsStatus409
+					| ListAccessGroupApprovalsStatus422
+					| ListAccessGroupApprovalsStatus500
+					| ListAccessGroupApprovalsStatus503
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey = resolvedOptions?.queryKey ?? listAccessGroupApprovalsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listAccessGroupApprovalsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| ListAccessGroupApprovalsStatus400
+			| ListAccessGroupApprovalsStatus401
+			| ListAccessGroupApprovalsStatus403
+			| ListAccessGroupApprovalsStatus404
+			| ListAccessGroupApprovalsStatus409
+			| ListAccessGroupApprovalsStatus422
+			| ListAccessGroupApprovalsStatus500
+			| ListAccessGroupApprovalsStatus503
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const revokeAccessGroupApprovalMutationKey = () =>
+	[
+		{
+			url: "/api/v1/access/:scope/groups/:groupId/impact-reviews/:reviewId/approvals/:approvalId/revoke",
+		},
+	] as const;
+
+export function revokeAccessGroupApprovalMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = revokeAccessGroupApprovalMutationKey();
+	return mutationOptions<
+		RevokeAccessGroupApprovalStatus200,
+		ResponseErrorConfig<
+			| RevokeAccessGroupApprovalStatus400
+			| RevokeAccessGroupApprovalStatus401
+			| RevokeAccessGroupApprovalStatus403
+			| RevokeAccessGroupApprovalStatus404
+			| RevokeAccessGroupApprovalStatus409
+			| RevokeAccessGroupApprovalStatus422
+			| RevokeAccessGroupApprovalStatus500
+			| RevokeAccessGroupApprovalStatus503
+		>,
+		RevokeAccessGroupApprovalOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return revokeAccessGroupApproval({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/impact-reviews/:reviewId/approvals/:approvalId/revoke}
+ */
+export function useRevokeAccessGroupApproval<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			RevokeAccessGroupApprovalStatus200,
+			ResponseErrorConfig<
+				| RevokeAccessGroupApprovalStatus400
+				| RevokeAccessGroupApprovalStatus401
+				| RevokeAccessGroupApprovalStatus403
+				| RevokeAccessGroupApprovalStatus404
+				| RevokeAccessGroupApprovalStatus409
+				| RevokeAccessGroupApprovalStatus422
+				| RevokeAccessGroupApprovalStatus500
+				| RevokeAccessGroupApprovalStatus503
+			>,
+			RevokeAccessGroupApprovalOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? revokeAccessGroupApprovalMutationKey();
+
+	const baseOptions = revokeAccessGroupApprovalMutationOptions(config) as UseMutationOptions<
+		RevokeAccessGroupApprovalStatus200,
+		ResponseErrorConfig<
+			| RevokeAccessGroupApprovalStatus400
+			| RevokeAccessGroupApprovalStatus401
+			| RevokeAccessGroupApprovalStatus403
+			| RevokeAccessGroupApprovalStatus404
+			| RevokeAccessGroupApprovalStatus409
+			| RevokeAccessGroupApprovalStatus422
+			| RevokeAccessGroupApprovalStatus500
+			| RevokeAccessGroupApprovalStatus503
+		>,
+		RevokeAccessGroupApprovalOptions,
+		TContext
+	>;
+
+	return useMutation<
+		RevokeAccessGroupApprovalStatus200,
+		ResponseErrorConfig<
+			| RevokeAccessGroupApprovalStatus400
+			| RevokeAccessGroupApprovalStatus401
+			| RevokeAccessGroupApprovalStatus403
+			| RevokeAccessGroupApprovalStatus404
+			| RevokeAccessGroupApprovalStatus409
+			| RevokeAccessGroupApprovalStatus422
+			| RevokeAccessGroupApprovalStatus500
+			| RevokeAccessGroupApprovalStatus503
+		>,
+		RevokeAccessGroupApprovalOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		RevokeAccessGroupApprovalStatus200,
+		ResponseErrorConfig<
+			| RevokeAccessGroupApprovalStatus400
+			| RevokeAccessGroupApprovalStatus401
+			| RevokeAccessGroupApprovalStatus403
+			| RevokeAccessGroupApprovalStatus404
+			| RevokeAccessGroupApprovalStatus409
+			| RevokeAccessGroupApprovalStatus422
+			| RevokeAccessGroupApprovalStatus500
+			| RevokeAccessGroupApprovalStatus503
+		>,
+		RevokeAccessGroupApprovalOptions,
+		TContext
+	>;
+}
+
+export const registerAccessRecoveryPathMutationKey = () =>
+	[{ url: "/api/v1/access/:scope/recovery-paths" }] as const;
+
+export function registerAccessRecoveryPathMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = registerAccessRecoveryPathMutationKey();
+	return mutationOptions<
+		RegisterAccessRecoveryPathStatus200,
+		ResponseErrorConfig<
+			| RegisterAccessRecoveryPathStatus400
+			| RegisterAccessRecoveryPathStatus401
+			| RegisterAccessRecoveryPathStatus403
+			| RegisterAccessRecoveryPathStatus404
+			| RegisterAccessRecoveryPathStatus409
+			| RegisterAccessRecoveryPathStatus422
+			| RegisterAccessRecoveryPathStatus500
+			| RegisterAccessRecoveryPathStatus503
+		>,
+		RegisterAccessRecoveryPathOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return registerAccessRecoveryPath({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/recovery-paths}
+ */
+export function useRegisterAccessRecoveryPath<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			RegisterAccessRecoveryPathStatus200,
+			ResponseErrorConfig<
+				| RegisterAccessRecoveryPathStatus400
+				| RegisterAccessRecoveryPathStatus401
+				| RegisterAccessRecoveryPathStatus403
+				| RegisterAccessRecoveryPathStatus404
+				| RegisterAccessRecoveryPathStatus409
+				| RegisterAccessRecoveryPathStatus422
+				| RegisterAccessRecoveryPathStatus500
+				| RegisterAccessRecoveryPathStatus503
+			>,
+			RegisterAccessRecoveryPathOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? registerAccessRecoveryPathMutationKey();
+
+	const baseOptions = registerAccessRecoveryPathMutationOptions(config) as UseMutationOptions<
+		RegisterAccessRecoveryPathStatus200,
+		ResponseErrorConfig<
+			| RegisterAccessRecoveryPathStatus400
+			| RegisterAccessRecoveryPathStatus401
+			| RegisterAccessRecoveryPathStatus403
+			| RegisterAccessRecoveryPathStatus404
+			| RegisterAccessRecoveryPathStatus409
+			| RegisterAccessRecoveryPathStatus422
+			| RegisterAccessRecoveryPathStatus500
+			| RegisterAccessRecoveryPathStatus503
+		>,
+		RegisterAccessRecoveryPathOptions,
+		TContext
+	>;
+
+	return useMutation<
+		RegisterAccessRecoveryPathStatus200,
+		ResponseErrorConfig<
+			| RegisterAccessRecoveryPathStatus400
+			| RegisterAccessRecoveryPathStatus401
+			| RegisterAccessRecoveryPathStatus403
+			| RegisterAccessRecoveryPathStatus404
+			| RegisterAccessRecoveryPathStatus409
+			| RegisterAccessRecoveryPathStatus422
+			| RegisterAccessRecoveryPathStatus500
+			| RegisterAccessRecoveryPathStatus503
+		>,
+		RegisterAccessRecoveryPathOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		RegisterAccessRecoveryPathStatus200,
+		ResponseErrorConfig<
+			| RegisterAccessRecoveryPathStatus400
+			| RegisterAccessRecoveryPathStatus401
+			| RegisterAccessRecoveryPathStatus403
+			| RegisterAccessRecoveryPathStatus404
+			| RegisterAccessRecoveryPathStatus409
+			| RegisterAccessRecoveryPathStatus422
+			| RegisterAccessRecoveryPathStatus500
+			| RegisterAccessRecoveryPathStatus503
+		>,
+		RegisterAccessRecoveryPathOptions,
+		TContext
+	>;
+}
+
+export const revokeAccessRecoveryPathMutationKey = () =>
+	[{ url: "/api/v1/access/:scope/recovery-paths/:pathId/revoke" }] as const;
+
+export function revokeAccessRecoveryPathMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = revokeAccessRecoveryPathMutationKey();
+	return mutationOptions<
+		RevokeAccessRecoveryPathStatus200,
+		ResponseErrorConfig<
+			| RevokeAccessRecoveryPathStatus400
+			| RevokeAccessRecoveryPathStatus401
+			| RevokeAccessRecoveryPathStatus403
+			| RevokeAccessRecoveryPathStatus404
+			| RevokeAccessRecoveryPathStatus409
+			| RevokeAccessRecoveryPathStatus422
+			| RevokeAccessRecoveryPathStatus500
+			| RevokeAccessRecoveryPathStatus503
+		>,
+		RevokeAccessRecoveryPathOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return revokeAccessRecoveryPath({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/recovery-paths/:pathId/revoke}
+ */
+export function useRevokeAccessRecoveryPath<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			RevokeAccessRecoveryPathStatus200,
+			ResponseErrorConfig<
+				| RevokeAccessRecoveryPathStatus400
+				| RevokeAccessRecoveryPathStatus401
+				| RevokeAccessRecoveryPathStatus403
+				| RevokeAccessRecoveryPathStatus404
+				| RevokeAccessRecoveryPathStatus409
+				| RevokeAccessRecoveryPathStatus422
+				| RevokeAccessRecoveryPathStatus500
+				| RevokeAccessRecoveryPathStatus503
+			>,
+			RevokeAccessRecoveryPathOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? revokeAccessRecoveryPathMutationKey();
+
+	const baseOptions = revokeAccessRecoveryPathMutationOptions(config) as UseMutationOptions<
+		RevokeAccessRecoveryPathStatus200,
+		ResponseErrorConfig<
+			| RevokeAccessRecoveryPathStatus400
+			| RevokeAccessRecoveryPathStatus401
+			| RevokeAccessRecoveryPathStatus403
+			| RevokeAccessRecoveryPathStatus404
+			| RevokeAccessRecoveryPathStatus409
+			| RevokeAccessRecoveryPathStatus422
+			| RevokeAccessRecoveryPathStatus500
+			| RevokeAccessRecoveryPathStatus503
+		>,
+		RevokeAccessRecoveryPathOptions,
+		TContext
+	>;
+
+	return useMutation<
+		RevokeAccessRecoveryPathStatus200,
+		ResponseErrorConfig<
+			| RevokeAccessRecoveryPathStatus400
+			| RevokeAccessRecoveryPathStatus401
+			| RevokeAccessRecoveryPathStatus403
+			| RevokeAccessRecoveryPathStatus404
+			| RevokeAccessRecoveryPathStatus409
+			| RevokeAccessRecoveryPathStatus422
+			| RevokeAccessRecoveryPathStatus500
+			| RevokeAccessRecoveryPathStatus503
+		>,
+		RevokeAccessRecoveryPathOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		RevokeAccessRecoveryPathStatus200,
+		ResponseErrorConfig<
+			| RevokeAccessRecoveryPathStatus400
+			| RevokeAccessRecoveryPathStatus401
+			| RevokeAccessRecoveryPathStatus403
+			| RevokeAccessRecoveryPathStatus404
+			| RevokeAccessRecoveryPathStatus409
+			| RevokeAccessRecoveryPathStatus422
+			| RevokeAccessRecoveryPathStatus500
+			| RevokeAccessRecoveryPathStatus503
+		>,
+		RevokeAccessRecoveryPathOptions,
+		TContext
+	>;
 }
 
 export const updateAccessGroupPresentationMutationKey = () =>

@@ -428,9 +428,8 @@ record both private identities from live authority, preserve operation receipts
 and require exact control versions. Reparent and retire additionally require a
 fresh interactive session. Creation and presentation update confer no membership.
 
-The current topology API admits only dependency-free empty leaves for reparent and
-retire. This is a sufficient no-impact proof, not the complete populated-topology
-contract: the exclusive tree fence excludes child/selection changes; the exclusive
+Without a review, the topology API admits dependency-free empty leaves for reparent
+and retire. This is a sufficient no-impact proof: the exclusive tree fence excludes child/selection changes; the exclusive
 Group head excludes new Group-referencing FK inserts. Under both fences, admission
 requires height one, no physically selected direct memberships (including stale
 admissions), and no Group-targeted RoleBinding, representation or assignment-ceiling
@@ -441,14 +440,12 @@ preserved, but this does not certify that the scope already has a valid protecte
 recovery path. Receipt replay still requires live management authority, but does
 not rerun new-effect impact against an already-applied transition.
 
-Populated mutations remain unavailable until assignment-impact admission and protected
-recovery management are implemented. Discovery below supplies old/new ancestors,
-affected Group recipients and exact-selection/representation lineage dependencies.
-The admission owner must retain/promote complete target/Entity/tree/enrollment/selection/role fences,
-admit all proposed permissions and recipient changes against explicit ceilings,
-and prove protected continuity from the pre-change state. Empty roster alone may
-never bypass these requirements. The API's unavailable response is an unfinished
-prerequisite, not a permanent unsupported operation or a denied-policy decision.
+Populated reparent and leaf retirement consume the exact complete impact review,
+current ceiling/effect policy, an independent approval and protected recovery through
+`authorization/group-admission.ts`. Clients pass `reviewId` to the existing mutation
+endpoint. Receipt replay retains current management authority and the original
+review selection; it does not reopen evidence invalidated by its own successful
+Group transition. Empty roster alone cannot bypass the populated admission.
 
 The no-impact proof uses bounded existence seeks, never a descendant or subject
 scan. A partial `(recipient_group_id,id)` ceiling index adds one entry per
@@ -539,8 +536,8 @@ Complete-review consumption also checks retained fact/node counts and an empty
 work queue under the review lock. The evaluation owner below decodes the facts and retains complete source/recipient
 contributions and ceiling decisions. Protected recovery still must establish continuity
 and independent approvals from the pre-change state. It must recheck all time boundaries in the final mutation.
-The discovery owner returns no boolean or SQL admission predicate. Existing populated
-reparent/retire remain unavailable; empty-leaf admission retains its independent proof.
+The discovery owner returns no boolean or SQL admission predicate. The production
+admission owner below composes its evidence; empty-leaf admission retains its separate proof.
 
 Operational budgets are 100 edges per keyset page (101 with lookahead), at most
 eight queue steps and 512 edge/head candidates per advance, 4,096 queued owners,
@@ -643,9 +640,11 @@ reloaded under their native fences. Native resource lifecycle, permission
 applicability/delegability and bounded deny overlays are loaded independently of
 ceiling coverage. Deny overlays retain their own permission/path rather than
 clipping the confer request. They are not cached as approval across transactions.
-The legacy Realm access-manager restriction userset and all-scope representation
-resource policy remain explicit unavailable policy owners; no guessed membership
-or universal resource-policy true value fills those gaps. Current policy outcome
+The bounded `mixed-realm-access-manager.ts` reader composes native selected-subject
+ownership, RoleBindings, retained literal grants and native member admissions for the
+nonrecursive Realm access-manager userset. It never maps an Entity to an assumed
+private self-account. All-scope representation resource-policy expansion remains
+unavailable for both gains and losses; it needs a bounded owning-root inventory. Current policy outcome
 is a separate inspection field, and every response says `admission: not-admitted`.
 
 Private production endpoints append `/evaluation/pages` (POST) and `/evaluation`
@@ -653,8 +652,8 @@ Private production endpoints append `/evaluation/pages` (POST) and `/evaluation`
 proposal's current reparent/retire authority, and original attribution; starting
 an evaluation also requires the existing private review read boundary. Inspection
 returns only review-local random ids, kind, path/permission counts and decisions,
-not private recipients, source ids, target scopes or permission names. The current
-Group mutation endpoint continues its dependency-free empty-leaf proof.
+not private recipients, source ids, target scopes or permission names. Evaluation
+completion is a prerequisite, not an independent approval or mutation receipt.
 
 `lockCompleteGroupImpactEvaluation` is the narrow handoff to protected recovery.
 It returns the exact effect digest, private contributions, selected ceiling ids,
@@ -663,15 +662,13 @@ no mutation admission SQL. Its caller must promote the complete native mutation
 fence closure before entry, independently establish recovery and approval policy,
 and revalidate source authority, policy and all deadlines at the final effect.
 
-The next production owner needs durable independent approval records bound to the
-exact proposal/review/effect digest, approver principal/selected subject and source
-revisions; independence/affectedness rules; and a bounded pre-change protected
-recovery path selection with after-state continuity, expiry and revocation fences.
-It must also supply the explicit representation-confer approval and ceiling
-recipient-expansion approval contracts: the existing named-role ceiling does not
-name a representation edge or authorize expanding its own approval recipient set.
-Those effects are fully retained but evaluated as `unavailable`, even if every
-named-role effect is covered. No populated mutation is admitted by this slice.
+For representation confer, the evaluator requires current
+`access.representation.manage` at the represented Entity root. For ceiling recipient
+expansion it requires current `access.assignment-ceiling.manage` at the ceiling
+scope/path. These effects become `approval-required`; they no longer report an
+unimplemented approval owner. A complete evaluation still requires the independent
+acknowledgement below before any populated effect can execute. Named-role effects
+retain their existing explicit ceiling and reselect that same ceiling at consumption.
 
 Limits remain 4,096 discovered owners, 32,768 facts and 16 MiB discovery payload.
 Compilation reads at most 328 indexed fact pages once and admits at most 65,536
@@ -734,6 +731,150 @@ receipt; an owner can orchestrate bounded cleanup before retrying a full selecti
 budget. Ending enrollment or retiring a Group invalidates effectiveness immediately
 without synchronously rewriting a whole roster. History and private attribution
 remain retained after cleanup.
+
+
+### Populated Group production admission and protected recovery
+
+`group-admission.ts` owns the private acknowledgement and final mutation composition.
+One independent accountable principal must acknowledge the **whole** exact proposal,
+including all changed contributions and all confer targets. Different incomplete
+approvals cannot be stitched together. The initial fixed threshold is one independent
+principal in addition to the initiating operator. Equality is private principal
+identity, not Entity identity; this is not proof of distinct natural people.
+
+An approver inspects `/impact-reviews/:reviewId/approval-proposal` and submits its
+`proposalDigest` and `effectDigest` to `/approvals` with a retry `approvalId`.
+Both operations require fresh first-party session authentication, current Group read
+and action-specific reparent/retire authority, plus every applicable confer target.
+The immutable record also fixes selected subject, exact credential secret digest,
+management/owner/role/representation sources, membership and selection revisions,
+tree epochs and the complete retained discovery witness digest. The record stores
+no raw credential. Revalidation uses server-owned proof captured at approval, never
+client-submitted proof. A changed source or witness invalidates the approval; a retry
+returns the original receipt without extending its lifetime. One review/principal
+unique key prevents persona switching from multiplying approvals.
+
+The initiating principal/subject, active selected subjects in the moved/retired subtree,
+changed recipients/dependency subjects, represented
+Entities, and their potentially controlling operators cannot supply independence.
+Controller discovery conservatively follows active representation recipients through
+at most eight layers, 256 affected subjects, 256 Entities and 256 combined
+grant/recipient visits. The subtree roster query is bounded by the exact complete
+discovery store and its native selection witnesses. Dynamic
+Group recipients are conservatively covered by their active scope membership;
+conditions are not used to assert independence. This can reject an unaffected
+operator in a large/shared scope; overflow is unavailable. The native Entity and
+membership-change fences retain negative discovery. Changing any selected approver
+binding or representation contribution is rejected, so a newly conferred recipient
+or authority cannot authorize its own expansion.
+
+`GET /approvals` is private to the original reviewer with current Group-read authority.
+It returns only local approval IDs, deadlines, revocation flags and currently valid
+counts. Each counted approval is reauthenticated and reauthorized. The original
+approving principal may revoke its receipt with a fresh session and retry operation
+ID even after losing its selected Entity or role. Approval expiry is the earliest
+review, fresh-session, credential, source or current-policy deadline; it cannot be
+renewed under the same review/principal. Expired/revoked receipts remain historical.
+
+The `access_recovery_policy` owner selects fixed `native-repair-v1`: at least one
+currently exercisable pre-change repair path must survive at each affected logical
+root. A root is the Group scope, every effect target scope, and every represented
+Entity root. The policy is immutable; this slice exposes no command to weaken or
+disable continuity. Each path is enrolled by its own authenticated operator through
+`POST /:scope/recovery-paths`. It requires current root-level
+`access.role-binding.manage` and `access.assignment-ceiling.manage`, plus
+`access.representation.manage` for an Entity root. Ownership can supply these
+permissions, while Entity use still needs an actual authorized representation path.
+Registration is evidence of a current repair route, never a new grant. Its lifetime
+is at most fifteen minutes and also bounded by the fresh session and native sources.
+At most eight live candidates exist per scope; the private operator can revoke its
+own path. The enrollment transaction must be visible in the original review snapshot.
+Operators enroll routes before starting the review, and may register a
+new route after expiry for a later review.
+
+Consumption selects an existing candidate per root from the pre-change state and
+loads complete native owner, RoleBinding, representation, membership, eligibility,
+lifecycle and credential policy. For a selected source appearing as a changed contribution, it requires the selected
+management permission before and after and chooses an exact original enrollment/
+ancestry path present in both path sets. Redundant paths may change while that
+original path survives. It keeps exact source/generation/selection evidence. It does **not**
+assume continuity because a source was absent from the delta, nor subtract that
+delta from a supposed effective ACL union. After the actual Group head/tree/height
+writes, it re-runs native authority under the resulting topology and requires the
+same selected repair sources. The expected target-tree epoch and derived member-set recipient changes are excluded
+only from this after-state identity comparison; the selected original path intersection
+and current native recipient/path policy are both required. An alternative candidate is considered before mutation if an older
+candidate is denied, expired or unavailable. No new after-state source rescues a
+failed pre-change selection.
+
+The transaction promotes the written Group/tree/ancestor and impact-witness fences,
+discovers/promotes the bounded confer roots, then retains all native authority,
+credential, enrollment, representation, policy, approval and recovery locks. The
+primitive's final SQL checks exact review/tree/source evidence, approval and earliest
+clock before its head effect. An after-effect callback remains inside the primitive
+savepoint, records an immutable admission receipt and performs the final credential,
+policy-clock and recovery SQL recheck after all waits. Any failure rolls back both
+receipts and every topology/height effect. Deadlock or serialization failure retries
+the complete transaction, not a subset of decisions. Receipt replay compares the
+original command and review under live management authority without reapplying it.
+
+Remaining boundaries have specific owners: all-scope representation needs a
+bounded target/recovery-root inventory and full symbolic resource policy; over-budget
+controller graphs need partitioned private accountability discovery; recovery with
+no surviving original path needs a reviewed replacement-path protocol. These
+are not a blanket prohibition on populated Groups. Missing registered recovery policy
+is unavailable; a known policy without a surviving path or independent approver is
+denied. Nonleaf retirement remains an invalid Group transition. Broader representation
+creation/lifecycle APIs and other IAM owners retain their own scope; these Group
+commands do not claim to finish unrelated management operations.
+
+Capacity remains bounded without a global ACL. The 500,000,000-row baseline and
+3,000,000,000-row estimate still apply. A review admits 64 approval rows; at the
+9 KiB credential/selection JSON cap plus roughly 1 KiB metadata, that is approximately
+640 KiB per review before indexes/WAL/decoded objects. Up to 64 roots × 8 recovery
+candidates implies 512 bounded candidate reads, about 5 MiB encoded candidate payload
+at the same estimate. The global relations are not bounded by those per-root caps:
+at 10 KiB per approval/path row, 500M / 3B rows would require approximately
+5.12 TB / 30.72 TB payload **per relation**, before storage overhead. Three estimated
+64-byte path indexes add 96 GB / 576 GB; two approval indexes add 64 GB / 384 GB.
+The fixed recovery-policy row plus primary index is estimated at 128 bytes, or
+64 GB / 384 GB for 500M / 3B registered roots. Fifteen-minute validity and bounded
+expiry cleanup limit ordinary live populations, but an overloaded cleanup worker
+can retain a backlog; retention throughput and management intake need deployment
+budgets before approaching these counts. Complete approval inspection can make 64 × 66 authority reads;
+recovery can make 512 × 3 repair reads, each retaining the existing 256-candidate
+native reader ceiling. These are upper-bound compositions, not latency measurements;
+hot-scope serialization and repeated native reads need G2/G3 workload qualification.
+Deployments must rate-limit management intake and partition persistent over-budget
+work rather than raise these limits. Indexed review/scope/expiry reads bound cleanup:
+one tick removes at most 100 recovery paths, 64 approvals and the prior 402 review
+rows. Proof payloads become eligible for bounded cleanup after one day; durable admission receipts retain only
+review/operation/digests and opaque approval/path IDs. Revocation and account erasure
+immediately invalidate live proof via native credential/principal policy before cleanup.
+
+For long-lived admission receipts, approximately 0.5 KiB metadata plus up to 65 UUID
+handles (about 2.6 KiB JSON) gives a conservative 3.1 KiB payload bound: about 1.55 TB
+at 500M receipts or 9.3 TB at 3B, excluding tuple/index/WAL/replica reserves. Two
+64-byte unique-index entries add about 64 GB / 384 GB. New active-controller
+`(entity_id,id)` and active-membership `(scope_id,subject_id)` indexes each add
+approximately 32 GB / 192 GB at 64 bytes per all-active entry; multiply by each
+relation’s active fraction. They avoid scans through inactive history for bounded
+controller discovery. Mixed Realm grant probes reuse the three existing active
+subject-kind indexes and reject more than 256 candidates before permission filtering.
+The admission receipt relation grows per admitted command, not per affected corpus resource. A deployment approaching those
+volumes needs retained-receipt partition/archive design; the current indexed table
+has no measured corpus-scale installation, latency or throughput acceptance.
+
+Design evidence reviewed September 15, 2026: [OWASP Transaction Authorization](https://cheatsheetseries.owasp.org/cheatsheets/Transaction_Authorization_Cheat_Sheet.html)
+supports exact server-owned transaction acknowledgement, limited lifetime and final
+execution authorization. [PostgreSQL explicit locking](https://www.postgresql.org/docs/current/explicit-locking.html)
+supports retained conflicting row locks and whole-transaction deadlock retry. Our
+fixed independent threshold, conservative controller closure and native repair path
+selection are project policy choices, not guarantees established by those sources.
+Source/diff inspection and production generators do not qualify correctness,
+TypeScript, migration replay, recovery, races, privacy or capacity. Tests/fixtures,
+static checks, builds, database checks and browser QA remain deferred under the
+current implementation phase.
 
 ## Roles and grants
 

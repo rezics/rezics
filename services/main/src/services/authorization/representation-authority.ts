@@ -121,6 +121,13 @@ export async function evaluateCurrentRepresentationAuthority(
 		return { subject: fact.subject, current: fact.outcome, loadedScopes: scopes, memberSets: sets.recipients,
 			...(fact.validUntil !== undefined ? { validUntil: fact.validUntil } : {}) };
 	});
-	return evaluateRepresentationPath({ principalId: request.principalId, selection,
+	const result = evaluateRepresentationPath({ principalId: request.principalId, selection,
 		operation: request.operation, now, freshSession: request.freshSession, freshSessionValidUntil: request.freshSessionValidUntil, grants, subjects: graphSubjects });
+ return { ...result, sourceEvidence: {
+  grants: loaded.grants.map(grant => ({ id: grant.head.id,version: grant.head.version,revision: grant.terms.revision })).sort((a,b) => a.id.localeCompare(b.id)),
+  memberSets: [...membership.values()].map(value => ({ subjectId: value.subjectId,
+   memberships: value.memberships.map(member => ({ id: member.id,scopeId: member.scopeId,version: member.version,generation: member.activeGeneration })),
+   selections: value.selections,recipients: value.recipients,
+  })).sort((a,b) => a.subjectId.localeCompare(b.subjectId)),
+ } };
 }

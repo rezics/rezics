@@ -9,6 +9,7 @@ export * from "./access-representation";
 export * from "./access-membership";
 export * from "./access-group";
 export * from "./access-group-impact";
+export * from "./access-group-admission";
 export * from "./access-group-membership";
 export * from "./account-block";
 export * from "./account-control";

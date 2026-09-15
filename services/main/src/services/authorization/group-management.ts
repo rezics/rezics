@@ -1,3 +1,5 @@
+import { lockGroupAdmissionClosure, prepareGroupAdmission } from "./group-admission";
+import { accessGroupAdmissionReceipt } from "../database/schema/access-group-admission";
 import { advanceGroupImpactEvaluation, inspectGroupImpactEvaluation } from "./group-impact-evaluation";
 import type { z } from "zod";
 import { beginGroupImpactDiscovery, advanceGroupImpactDiscovery, inspectGroupImpactDiscovery, lockGroupImpactReview, groupImpactSummary, type GroupImpactProposalSchema } from "./group-impact-discovery";
@@ -6,7 +8,7 @@ import type { PrincipalRequestContext } from "../auth/principal-session";
 import type { DatabaseTransaction } from "../database";
 import { accessGroup, accessGroupEvent, accessGroupTree } from "../database/schema/access-group";
 import { accessRoleBindingScope } from "../database/schema/access-role-binding";
-import { applyAccessGroupCommand, readAccessGroupSnapshot, type AccessGroupCommand } from "./groups";
+import { AccessGroupConflict, applyAccessGroupCommand, readAccessGroupSnapshot, type AccessGroupCommand } from "./groups";
 import { readManagementAuthority, ManagementAuthorityUnavailable } from "./management-authority";
 import { scopeLifecycleAdmission } from "./scope-policy";
 import { requireAccessAdmission, runAccessTransaction } from "./transaction";
@@ -16,7 +18,7 @@ type GroupImpactProposal = z.infer<typeof GroupImpactProposalSchema>;
 
 /** Private attribution comes exclusively from live server-owned authority. @internal */
 export type ManagedGroupCommand = AccessGroupCommand extends infer Command
-	? Command extends AccessGroupCommand ? Omit<Command, "operatorAuthUserId" | "authoritySubjectId"> : never
+	? Command extends AccessGroupCommand ? Omit<Command, "operatorAuthUserId" | "authoritySubjectId"> & { reviewId?: string } : never
 	: never;
 
 async function groupAuthority(tx: DatabaseTransaction, context: PrincipalRequestContext, scopeId: string,
@@ -66,15 +68,28 @@ function emptyLeafTransitionAdmission(scopeId: string, groupId: string): SQL<boo
 /**
  * Apply a versioned Group command with live authority and private audit attribution.
  * @internal
- * @remarks Reparent/retire currently admit only dependency-free empty leaves.
- * Populated topology impact remains unavailable pending ceiling/recovery management.
+ * @remarks Populated reparent/retire consume an exact review, independent approval
+ * and pre-change protected recovery proof in the same transaction as the effect.
  */
 export async function writeManagedGroup(context: PrincipalRequestContext, input: ManagedGroupCommand) {
 	return runAccessTransaction(async tx => {
-		const authority = await groupAuthority(tx, context, input.scopeId, input.groupId, input.operation);
-		return applyAccessGroupCommand(tx, { ...input, operatorAuthUserId: authority.principalId, authoritySubjectId: authority.subjectId },
-			authority.admission, input.operation === "reparent" || input.operation === "retire"
-				? emptyLeafTransitionAdmission(input.scopeId, input.groupId) : authority.admission);
+  const { reviewId, ...command } = input;
+  if (command.operation !== "create") await tx.select().from(accessGroupTree).where(eq(accessGroupTree.scopeId,input.scopeId)).for("update");
+  // Replay still uses the primitive's exact command digest and live manager authority.
+  // Do not reopen a consumed review whose own successful effect invalidated its tree.
+  const [prior] = await tx.select().from(accessGroupEvent).where(and(eq(accessGroupEvent.groupId,input.groupId),eq(accessGroupEvent.operationId,input.operationId)));
+  const topology = command.operation === "reparent" || command.operation === "retire";
+  const review = topology && reviewId && !prior ? await lockGroupAdmissionClosure(tx,context,{ scopeId: input.scopeId,groupId: input.groupId,reviewId }) : null;
+  const authority = await groupAuthority(tx, context, input.scopeId, input.groupId, input.operation);
+  if (prior) {
+   const [admitted] = await tx.select().from(accessGroupAdmissionReceipt).where(eq(accessGroupAdmissionReceipt.operationId,input.operationId));
+   if ((admitted?.reviewId ?? undefined) !== reviewId) throw new AccessGroupConflict();
+  }
+  const admitted = review && (command.operation === "reparent" || command.operation === "retire")
+   ? await prepareGroupAdmission(tx,context,review,authority,{ operationId: command.operationId,operation: command.operation,
+    expectedVersion: command.expectedVersion,parentId: command.operation === "reparent" ? command.parentId : null }) : null;
+  return applyAccessGroupCommand(tx,{ ...command,operatorAuthUserId: authority.principalId,authoritySubjectId: authority.subjectId },authority.admission,
+   admitted?.admission ?? (topology ? emptyLeafTransitionAdmission(input.scopeId,input.groupId) : authority.admission),admitted?.afterEffect);
 	});
 }
 

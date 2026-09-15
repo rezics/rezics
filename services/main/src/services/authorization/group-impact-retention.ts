@@ -4,14 +4,18 @@ import { database } from "../database";
 /**
  * Prune one expired review in child-first pages, retaining invalidity while work remains.
  * @internal
- * @remarks Each worker tick removes at most 402 rows, including both heads. Fence tombstones survive all
+ * @remarks Each worker tick removes at most 566 rows, including both heads and bounded private evidence. Fence tombstones survive all
  * reviews so a deleted/reinserted dependency can never reuse an observed epoch.
  */
 export async function pruneExpiredGroupImpactReview(): Promise<void> {
 	await database.transaction(async tx => {
-		const [review] = (await tx.execute<{ id: string }>(sql`select id from public.access_group_impact_review
+		await tx.execute(sql`delete from public.access_recovery_path where id in (
+   select id from public.access_recovery_path where valid_until<clock_timestamp()-interval '1 day' order by valid_until,id limit 100 for update skip locked)`);
+  const [review] = (await tx.execute<{ id: string }>(sql`select id from public.access_group_impact_review
 			where expires_at < clock_timestamp()-interval '1 day' order by expires_at,id limit 1 for update skip locked`)).rows;
 		if (!review) return;
+  await tx.execute(sql`delete from public.access_group_approval where id in (
+   select id from public.access_group_approval where review_id=${review.id}::uuid and valid_until<clock_timestamp()-interval '1 day' order by id limit 64)`);
 		await tx.execute(sql`update public.access_group_impact_review set status='invalidated',reason='expired'
 			where id=${review.id}::uuid and status in ('discovering','complete')`);
 		await tx.execute(sql`delete from public.access_group_impact_effect where id in (
@@ -26,7 +30,8 @@ export async function pruneExpiredGroupImpactReview(): Promise<void> {
 				where review_id=${review.id}::uuid order by kind,key limit 100)`);
 		}
 		await tx.execute(sql`delete from public.access_group_impact_review r where r.id=${review.id}::uuid
-			and not exists(select 1 from public.access_group_impact_evaluation where review_id=r.id)
+			and not exists(select 1 from public.access_group_approval where review_id=r.id)
+   and not exists(select 1 from public.access_group_impact_evaluation where review_id=r.id)
 			and not exists(select 1 from public.access_group_impact_fact where review_id=r.id)
 			and not exists(select 1 from public.access_group_impact_witness where review_id=r.id)
 			and not exists(select 1 from public.access_group_impact_node where review_id=r.id)`);

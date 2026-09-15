@@ -79,9 +79,9 @@ export const accessGroupImpactEvaluation = pgTable("access_group_impact_evaluati
 export const accessGroupImpactEffect = pgTable("access_group_impact_effect", {
 	id: createUuidv7PrimaryKey(), reviewId: uuid().notNull().references(() => accessGroupImpactEvaluation.reviewId, { onDelete: "cascade" }),
 	ordinal: integer().notNull(), payload: jsonb().$type<Record<string, unknown>>().notNull(),
-	decision: text().$type<"pending" | "not-required" | "covered" | "denied" | "unavailable">().notNull().default("pending"),
+	decision: text().$type<"pending" | "not-required" | "covered" | "approval-required" | "denied" | "unavailable">().notNull().default("pending"),
 	reason: text(), ceilingId: uuid().references(() => accessAssignmentCeiling.id, { onDelete: "restrict" }),
 }, t => [uniqueIndex("access_group_impact_effect_page_key").on(t.reviewId,t.ordinal),
 	check("access_group_impact_effect_ceiling_check", sql`(${t.decision}='covered')=(${t.ceilingId} is not null)`),
 	check("access_group_impact_effect_ordinal_check", sql`${t.ordinal} between 1 and 4096`),
-	check("access_group_impact_effect_decision_check", sql`${t.decision} in ('pending','not-required','covered','denied','unavailable')`)]);
+	check("access_group_impact_effect_decision_check", sql`${t.decision} in ('pending','not-required','covered','approval-required','denied','unavailable')`)]);

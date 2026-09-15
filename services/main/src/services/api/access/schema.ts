@@ -59,10 +59,10 @@ export const GroupHistoryQuery = z.strictObject({ afterVersion: z.coerce.number(
 export const CreateGroupBody = z.strictObject({ operationId: id, expectedVersion: z.literal(0), parentId: id.nullable(), presentation: AccessGroupPresentationSchema });
 /** Complete presentation replacement preserves topology and membership. @alpha */
 export const UpdateGroupBody = z.strictObject({ operationId: id, expectedVersion: positiveVersion, presentation: AccessGroupPresentationSchema });
-/** Move one Group; populated assignment impact is currently unavailable. @alpha */
-export const ReparentGroupBody = z.strictObject({ operationId: id, expectedVersion: positiveVersion, parentId: id.nullable() });
-/** Retire one Group; dependent authority requires pending recovery admission. @alpha */
-export const RetireGroupBody = z.strictObject({ operationId: id, expectedVersion: positiveVersion });
+/** Move one Group; populated impact requires the exact approved review. @alpha */
+export const ReparentGroupBody = z.strictObject({ operationId: id, expectedVersion: positiveVersion, parentId: id.nullable(), reviewId: id.optional() });
+/** Retire one leaf Group with exact approved impact and protected recovery. @alpha */
+export const RetireGroupBody = z.strictObject({ operationId: id, expectedVersion: positiveVersion, reviewId: id.optional() });
 /** Original command outcome, never a continuing authority proof. @alpha */
 export const GroupReceipt = z.strictObject({ groupId: id, operationId: id, version: positiveVersion, state: z.enum(["active", "retired"]), parentId: id.nullable() });
 /** Private Group presentation snapshot without principal/subject attribution. @alpha */
@@ -101,5 +101,26 @@ export const GroupImpactEvaluationSummary = z.strictObject({ reviewId: id,
 /** Counts and opaque ids disclose no private recipient, source, target or permission names. @alpha */
 export const GroupImpactEvaluationInspection = GroupImpactEvaluationSummary.extend({ items: z.array(z.strictObject({
 	itemId: id,ordinal: version.max(4096),kind: z.enum(["binding","representation","ceiling"]),beforePermissions: version,afterPermissions: version,
-	beforePaths: version.max(64),afterPaths: version.max(64),confer: z.boolean(),decision: z.enum(["pending","not-required","covered","denied","unavailable"]),reason: z.string().nullable(),
+	beforePaths: version.max(64),afterPaths: version.max(64),confer: z.boolean(),decision: z.enum(["pending","not-required","covered","approval-required","denied","unavailable"]),reason: z.string().nullable(),
 })).max(100),nextCursor: version.max(4096).nullable() });
+
+/** Exact independent acknowledgement of a privately inspected Group transaction. @alpha */
+export const ApproveGroupBody = z.strictObject({ approvalId: id,proposalDigest: z.string().regex(/^[0-9a-f]{64}$/),effectDigest: z.string().regex(/^[0-9a-f]{64}$/) });
+/** Private review-local approval handle. @alpha */
+export const GroupApprovalParams = GroupImpactParams.extend({ approvalId: id });
+/** Revocation retry identity does not renew or replace its original evidence. @alpha */
+export const RevokeEvidenceBody = z.strictObject({ operationId: id });
+/** Independent approvers see the exact proposed topology and complete-effect acknowledgement. @alpha */
+export const GroupApprovalProposal = z.strictObject({ reviewId: id,proposalDigest: z.string(),effectDigest: z.string(),operation: z.enum(["reparent","retire"]),
+ expectedGroupVersion: positiveVersion,expectedTreeVersion: version,proposedParentId: id.nullable(),effectCount: version.max(4096),validUntil: z.iso.datetime() });
+/** An immutable approval receipt remains historical after revocation or expiry. @alpha */
+export const GroupApprovalReceipt = z.strictObject({ approvalId: id,validUntil: z.iso.datetime(),revoked: z.boolean() });
+/** Only currently revalidated complete independent approvals count. @alpha */
+export const GroupApprovalList = z.strictObject({ reviewId: id,validApprovals: version.max(64),outcome: z.enum(["allow","deny","unavailable"]),
+ items: z.array(GroupApprovalReceipt.extend({ valid: z.boolean() })).max(64) });
+/** Recovery evidence is supplied by the authenticated principal and authority selection. @alpha */
+export const RegisterRecoveryBody = z.strictObject({ pathId: id });
+/** Private recovery path handle inside one selected authority root. @alpha */
+export const RecoveryPathParams = ScopeParams.extend({ pathId: id });
+/** Register/revoke returns no private principal, subject or credential fields. @alpha */
+export const RecoveryPathReceipt = z.strictObject({ pathId: id,validUntil: z.iso.datetime(),revoked: z.boolean() });

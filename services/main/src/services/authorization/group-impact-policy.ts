@@ -1,5 +1,6 @@
+import { readMixedRealmAccessManager } from "./mixed-realm-access-manager";
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
-import { AccessManagementPermissionDefinitions, PlatformCapabilityDefinitions, UnitPermissionDefinitions, isUnitPermissionApplicable, isUnitPermissionDelegable, scopeCovers } from "@rezics/access";
+import { AccessManagementPermissionDefinitions, PlatformCapabilityDefinitions, UnitPermissionDefinitions, isUnitPermissionApplicable, isUnitPermissionDelegable, scopeCovers, type AccessManagementPermission } from "@rezics/access";
 import type { PrincipalRequestContext } from "../auth/principal-session";
 import type { DatabaseTransaction } from "../database";
 import { unitAccessRestriction } from "../database/schema/access";
@@ -11,6 +12,8 @@ import { scopeLifecycleAdmission } from "./scope-policy";
 import { readManagementAuthority } from "./management-authority";
 import { lockUnitAccessState } from "./unit/access-lock";
 import { accessMembership } from "../database/schema/access-membership";
+import { accessScope } from "../database/schema/access-identity";
+import { referenceValue } from "../database/schema/reference-value";
 import { AccessRecordUnavailable } from "./http-errors";
 import { GroupImpactDeltaUnavailable, type GroupImpactEffect } from "./group-impact-delta";
 
@@ -28,8 +31,8 @@ export interface GroupImpactCurrentPolicy {
  * Reload source, recipient and native resource policy under current fences.
  * @internal
  * @remarks These facts are never reused across transactions. Logical descendant paths
- * stay symbolic and retain applicable deny overlays. Legacy Realm access-manager
- * usersets cannot be guessed from mixed membership: that owner returns unavailable.
+ * stay symbolic and retain applicable deny overlays. Realm access-manager
+ * usersets use their bounded nonrecursive mixed-subject owner.
  * This policy result does not establish protected recovery or independent approval.
  */
 export async function readGroupImpactCurrentPolicy(tx: DatabaseTransaction, effects: GroupImpactEffect[]): Promise<GroupImpactCurrentPolicy> {
@@ -72,6 +75,7 @@ export async function readGroupImpactCurrentPolicy(tx: DatabaseTransaction, effe
 	}
 	let candidates = 0;
 	const realmScopes = new Map<string,string | null>(), realmMembers = new Map<string,boolean>();
+ const realmManagers = new Map<string,Awaited<ReturnType<typeof readMixedRealmAccessManager>>>();
 	for (const scopeId of scopeIds) {
 		const target = await resolveAccessScope(tx,scopeId);
 		if (!target) throw new GroupImpactDeltaUnavailable("missing");
@@ -110,7 +114,21 @@ export async function readGroupImpactCurrentPolicy(tx: DatabaseTransaction, effe
 				if (!subject) throw new GroupImpactDeltaUnavailable("missing");
 				let matches = row.subjectKind === "auth" && row.authUserId === subject.authUserId;
 				if (row.subjectKind === "realm") {
-					if (row.realmRelation === "access_manager") { unavailable("realm-access-manager-policy"); continue; }
+					if (row.realmRelation === "access_manager") {
+      if (!row.realmId) throw new GroupImpactDeltaUnavailable("missing");
+      const key = `${row.realmId}:${effect.subjectId}`;
+      let manager = realmManagers.get(key);
+      if (!manager) {
+       if (realmManagers.size>=256) throw new GroupImpactDeltaUnavailable("budget");
+       manager = await readMixedRealmAccessManager(tx,row.realmId,effect.subjectId); realmManagers.set(key,manager);
+      }
+      if (manager.validUntil !== null) result.validUntil = Math.min(result.validUntil ?? Infinity,manager.validUntil);
+      if (manager.allowed) result.restrictions.push({ effectOrdinal: ordinal,restrictionId: row.id,permission: row.permission,scope: row.scope,
+       before: effect.before.some(permission => permission.family === "unit" && permission.key === row.permission),
+       after: effect.after.some(permission => permission.family === "unit" && permission.key === row.permission) });
+      if (result.restrictions.length > 4096) throw new GroupImpactDeltaUnavailable("budget");
+      continue;
+     }
 					if (row.realmRelation !== "member") { unavailable("realm-member-policy"); continue; }
 					if (!row.realmId) throw new GroupImpactDeltaUnavailable("missing");
 					if (!realmScopes.has(row.realmId)) {
@@ -143,23 +161,34 @@ export async function readGroupImpactCurrentPolicy(tx: DatabaseTransaction, effe
 	const clock = (await tx.execute<{ now: string }>(sql`select clock_timestamp()::text as now`)).rows[0]?.now;
 	if (!clock || !Number.isFinite(new Date(clock).getTime())) throw new GroupImpactDeltaUnavailable("missing");
 	if (result.validUntil !== null && new Date(clock).getTime() >= result.validUntil) unavailable("policy-expired");
-	if (effects.some(effect => effect.scopeId === null && effect.confer)) unavailable("all-scope-resource-policy");
+	if (effects.some(effect => effect.scopeId === null)) unavailable("all-scope-resource-policy");
 	return result;
 }
 
 /** Reauthorize each distinct confer target from the current actor/credential/representation selection. @internal */
 export async function readGroupImpactConferAuthority(tx: DatabaseTransaction, context: PrincipalRequestContext, effects: GroupImpactEffect[]) {
-	const targets = new Map<string,{ scopeId: string; path: string[] }>();
-	for (const effect of effects) if (effect.confer && effect.kind === "binding" && effect.scopeId !== null)
-		targets.set(`${effect.scopeId}:${JSON.stringify(effect.targetPath)}`,{ scopeId: effect.scopeId,path: effect.targetPath });
-	if (targets.size > 64) throw new GroupImpactDeltaUnavailable("budget");
-	const authorities = [];
-	for (const target of [...targets.values()].sort((a,b) => a.scopeId.localeCompare(b.scopeId) || JSON.stringify(a.path).localeCompare(JSON.stringify(b.path)))) {
-		try {
-			const lifecycle = await scopeLifecycleAdmission(tx,target.scopeId,true);
-			authorities.push(await readManagementAuthority(tx,{ proof: context.credentialProof(),selection: context.selection,scopeId: target.scopeId,
-				path: target.path,permission: "access.role-binding.manage",apiPermission: "access:manage",requireFreshSession: true,mutation: true },lifecycle));
-		} catch (error) { if (error instanceof AccessRecordUnavailable) throw new GroupImpactDeltaUnavailable("missing"); throw error; }
-	}
-	return authorities;
+ const targets = new Map<string,{ scopeId: string; path: string[]; permission: AccessManagementPermission }>();
+ for (const effect of effects) if (effect.confer) {
+  let scopeId = effect.scopeId;
+  const permission = effect.kind === "binding" ? "access.role-binding.manage" : effect.kind === "ceiling" ? "access.assignment-ceiling.manage" : "access.representation.manage";
+  if (effect.kind === "representation") {
+   if (!effect.entityId) throw new GroupImpactDeltaUnavailable("missing");
+   const [root] = await tx.select({ id: accessScope.id }).from(accessScope).innerJoin(referenceValue,eq(accessScope.unitRef,referenceValue.id))
+    .where(eq(referenceValue.targetEntityId,effect.entityId));
+   scopeId = root?.id ?? null;
+  }
+  if (!scopeId) throw new GroupImpactDeltaUnavailable("missing");
+  const path = effect.kind === "representation" ? [] : effect.targetPath;
+  targets.set(`${scopeId}:${JSON.stringify(path)}:${permission}`,{ scopeId,path,permission });
+ }
+ if (targets.size > 64) throw new GroupImpactDeltaUnavailable("budget");
+ const authorities = [];
+ for (const target of [...targets.values()].sort((a,b) => a.scopeId.localeCompare(b.scopeId) || JSON.stringify(a).localeCompare(JSON.stringify(b)))) {
+  try {
+   const lifecycle = await scopeLifecycleAdmission(tx,target.scopeId,true);
+   authorities.push(await readManagementAuthority(tx,{ proof: context.credentialProof(),selection: context.selection,scopeId: target.scopeId,
+    path: target.path,permission: target.permission,apiPermission: "access:manage",requireFreshSession: true,mutation: true },lifecycle));
+  } catch (error) { if (error instanceof AccessRecordUnavailable) throw new GroupImpactDeltaUnavailable("missing"); throw error; }
+ }
+ return authorities;
 }

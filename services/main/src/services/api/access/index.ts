@@ -1,3 +1,5 @@
+import { inspectGroupApproval, approveGroupImpact, revokeGroupApproval, listGroupApprovals, registerRecoveryPath, revokeRecoveryPath } from "../../authorization/group-admission";
+import { ApproveGroupBody, GroupApprovalParams, RevokeEvidenceBody, GroupApprovalProposal, GroupApprovalReceipt, GroupApprovalList, RegisterRecoveryBody, RecoveryPathParams, RecoveryPathReceipt } from "./schema";
 import Elysia from "elysia";
 import { toApiErrorResponse } from "../schema/error-response";
 import principalSession from "../../auth/principal-session";
@@ -103,6 +105,32 @@ export default new Elysia({ prefix: "/access", name: "access-management-api" }).
 		detail: { operationId: "inspectAccessGroupImpactEvaluation",tags: ["Access management"] },
 	}, ({ principalContext,params,query }) => inspectManagedGroupImpactEvaluation(principalContext,{ ...query,reviewId: params.reviewId,groupId: params.groupId,
 		scopeId: selectors.resolve(params.scope,principalContext.credentialProof(),Date.now()) }))
+
+ .get("/:scope/groups/:groupId/impact-reviews/:reviewId/approval-proposal", {
+  principalAccess: { ...manage,fresh: true },params: GroupImpactParams,response: { 200: GroupApprovalProposal,...groupErrors },
+  detail: { operationId: "inspectAccessGroupApprovalProposal",tags: ["Access management"] },
+ }, ({ principalContext,params }) => inspectGroupApproval(principalContext,{ ...params,scopeId: selectors.resolve(params.scope,principalContext.credentialProof(),Date.now()) }))
+ .post("/:scope/groups/:groupId/impact-reviews/:reviewId/approvals", {
+  principalAccess: { ...manage,fresh: true },params: GroupImpactParams,body: ApproveGroupBody,response: { 200: GroupApprovalReceipt,...groupErrors },
+  detail: { operationId: "approveAccessGroupImpact",tags: ["Access management"] },
+ }, ({ principalContext,params,body }) => approveGroupImpact(principalContext,{ ...body,...params,scopeId: selectors.resolve(params.scope,principalContext.credentialProof(),Date.now()) }))
+ .get("/:scope/groups/:groupId/impact-reviews/:reviewId/approvals", {
+  principalAccess: { ...manage,fresh: true },params: GroupImpactParams,response: { 200: GroupApprovalList,...groupErrors },
+  detail: { operationId: "listAccessGroupApprovals",tags: ["Access management"] },
+ }, ({ principalContext,params }) => listGroupApprovals(principalContext,{ ...params,scopeId: selectors.resolve(params.scope,principalContext.credentialProof(),Date.now()) }))
+ .post("/:scope/groups/:groupId/impact-reviews/:reviewId/approvals/:approvalId/revoke", {
+  principalAccess: { ...manage,fresh: true },params: GroupApprovalParams,body: RevokeEvidenceBody,response: { 200: GroupApprovalReceipt,...groupErrors },
+  detail: { operationId: "revokeAccessGroupApproval",tags: ["Access management"] },
+ }, ({ principalContext,params,body }) => revokeGroupApproval(principalContext,{ ...body,...params,scopeId: selectors.resolve(params.scope,principalContext.credentialProof(),Date.now()) }))
+ .post("/:scope/recovery-paths", {
+  principalAccess: { ...manage,fresh: true },params: ScopeParams,body: RegisterRecoveryBody,response: { 200: RecoveryPathReceipt,...groupErrors },
+  detail: { operationId: "registerAccessRecoveryPath",tags: ["Access management"] },
+ }, ({ principalContext,params,body }) => registerRecoveryPath(principalContext,{ ...body,scopeId: selectors.resolve(params.scope,principalContext.credentialProof(),Date.now()) }))
+ .post("/:scope/recovery-paths/:pathId/revoke", {
+  principalAccess: { ...manage,fresh: true },params: RecoveryPathParams,body: RevokeEvidenceBody,response: { 200: RecoveryPathReceipt,...groupErrors },
+  detail: { operationId: "revokeAccessRecoveryPath",tags: ["Access management"] },
+ }, ({ principalContext,params,body }) => revokeRecoveryPath(principalContext,{ ...body,pathId: params.pathId,scopeId: selectors.resolve(params.scope,principalContext.credentialProof(),Date.now()) }))
+
 	.put("/:scope/groups/:groupId", {
 		principalAccess: manage, params: GroupParams, body: CreateGroupBody, response: { 200: GroupReceipt, ...groupErrors },
 		detail: { operationId: "createAccessGroup", tags: ["Access management"] },

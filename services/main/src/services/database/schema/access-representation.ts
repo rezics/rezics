@@ -108,6 +108,7 @@ export const accessRepresentation = pgTable(
 		index("access_representation_parent_subject_idx").on(table.parentSubjectId, table.id).where(sql`${table.parentSubjectId} is not null`),
 		index("access_representation_parent_admission_idx").on(table.parentMembershipId, table.parentMembershipGeneration, table.id).where(sql`${table.parentMembershipId} is not null`),
 		check("access_representation_parent_check", sql`(${table.parentGrantId} is null and ${table.parentRevision} is null) or (${table.parentGrantId} is not null and ${table.parentGrantId}<>${table.id} and ${table.parentRevision} is not null and ${table.parentRevision} between 1 and 9007199254740991)`),
+		index("access_representation_active_controller_idx").on(table.entityId,table.id).where(sql`${table.state}='active'`),
 		index("access_representation_entity_idx").on(table.entityId, table.targetScopeId, table.id),
 		index("access_representation_target_idx").on(table.targetScopeId, table.entityId, table.id),
 		index("access_representation_recipient_scope_idx")

@@ -92,6 +92,7 @@ export async function applyAccessGroupCommand(
 	input: AccessGroupCommand,
 	admission: SQL<boolean | null>,
 	transitionAdmission: SQL<boolean | null> = admission,
+	afterEffect?: (work: DatabaseTransaction) => Promise<void>,
 ): Promise<AccessGroupReceipt> {
 	const command = commandSchema.parse(input),
 		requestDigest = createHash("sha256").update(JSON.stringify(command)).digest("hex");
@@ -237,6 +238,7 @@ export async function applyAccessGroupCommand(
    ) select(select admitted from admission) as admitted,(select id from changed) as changed`);
 		requireAdmission(result.rows[0]?.admitted);
 		if (!result.rows[0]?.changed) throw new AccessGroupConflict();
+		await afterEffect?.(work);
 		return receipt(event);
 	});
 }

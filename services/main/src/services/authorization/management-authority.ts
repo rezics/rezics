@@ -1,8 +1,9 @@
-import { and, eq, isNull, sql, type SQL } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import { AccessManagementPermissionValues, type AccessSubjectTarget, type RequestedAuthoritySelection } from "@rezics/access";
 import type { DatabaseTransaction } from "../database";
 import { accessRoleBindingScope } from "../database/schema/access-role-binding";
+import { accessGroupTree } from "../database/schema/access-group";
 import { accessSubject } from "../database/schema/access-identity";
 import { unitOwnership } from "../database/schema/access";
 import { unitReferenceTargetColumn } from "../database/schema/unit-reference-columns";
@@ -29,21 +30,21 @@ export class ManagementAuthorityUnavailable extends Error {
 async function ownsManagementScope(tx: DatabaseTransaction, scopeId: string, subject: AccessSubjectTarget) {
 	const scope = await resolveAccessScope(tx, scopeId);
 	if (!scope) throw new ManagementAuthorityUnavailable();
-	if (scope.kind === "account") return subject.kind === "principal" && subject.id === scope.id ? sql<boolean>`true` : null;
+	if (scope.kind === "account") return subject.kind === "principal" && subject.id === scope.id ? { admission: sql<boolean>`true`, identity: `account:${scope.id}` } : null;
 	if (scope.kind === "platform") return null;
 	const reference = await resolveReferenceValue(tx, scope.referenceValueId);
 	if (!reference) throw new ManagementAuthorityUnavailable();
 	await lockUnitAccessState(tx, [reference.id], "shared");
 	// Directory metadata ownership is not control of an Entity's identity/governance.
-	if (reference.owner === "entity") return subject.kind === "entity" && subject.id === reference.id ? sql<boolean>`true` : null;
+	if (reference.owner === "entity") return subject.kind === "entity" && subject.id === reference.id ? { admission: sql<boolean>`true`, identity: `entity:${reference.id}` } : null;
 	if (subject.kind !== "entity") return null;
 	const [owner] = await tx.select({ id: unitOwnership.id }).from(unitOwnership).where(and(
 		eq(unitReferenceTargetColumn("unit", reference.owner, unitOwnership), reference.id),
 		eq(unitOwnership.profileId, subject.id), isNull(unitOwnership.revokedAt),
 	)).for("share");
-	return owner ? sql<boolean>`exists(select 1 from ${unitOwnership} where ${unitOwnership.id}=${owner.id}::uuid
+	return owner ? { identity: owner.id, admission: sql<boolean>`exists(select 1 from ${unitOwnership} where ${unitOwnership.id}=${owner.id}::uuid
 		and ${unitOwnership.profileId}=${subject.id}::uuid and ${unitOwnership.revokedAt} is null
-		and ${unitReferenceTargetColumn("unit", reference.owner, unitOwnership)}=${reference.id}::uuid)` : null;
+		and ${unitReferenceTargetColumn("unit", reference.owner, unitOwnership)}=${reference.id}::uuid)` } : null;
 }
 
 /**
@@ -99,6 +100,13 @@ export async function readManagementAuthority(
 	}) : null;
 	if (represented?.outcome === "deny") throw new ManagementAuthorityDenied();
 	if (represented?.outcome === "unavailable") throw new ManagementAuthorityUnavailable();
+ const representationEvidence = represented && "sourceEvidence" in represented ? represented.sourceEvidence : null;
+ const treeIds = [...new Set([...(roleSources?.memberships.map(member => member.scopeId) ?? []),
+  ...(representationEvidence?.memberSets.flatMap(set => set.memberships.map(member => member.scopeId)) ?? [])])].sort();
+ if (treeIds.length>64) throw new ManagementAuthorityUnavailable();
+ const treeVersions = treeIds.length ? await tx.select({ scopeId: accessGroupTree.scopeId,version: accessGroupTree.version }).from(accessGroupTree)
+  .where(inArray(accessGroupTree.scopeId,treeIds)).orderBy(accessGroupTree.scopeId).for("share") : [];
+ if (treeVersions.length!==treeIds.length) throw new ManagementAuthorityUnavailable();
 	const subjects = await readAccessSubjectEligibility(tx, { subjectIds: [...new Set([principalSubjectId, subjectId])], action: input.mutation ? "write" : "read" });
 	if (subjects.some(value => value.outcome === "deny")) throw new ManagementAuthorityDenied();
 	if (subjects.some(value => value.outcome !== "allow")) throw new ManagementAuthorityUnavailable();
@@ -106,7 +114,7 @@ export async function readManagementAuthority(
 		.filter((value): value is number => value !== undefined && value !== null);
 	const validUntil = deadlines.length ? Math.min(...deadlines) : null;
 	const actorAction = input.mutation ? "write" : "read";
-	const managementCurrent = owner ?? (source ? sql<boolean>`exists(select 1 from public.access_role_binding b join public.access_role r on r.id=b.role_id
+	const managementCurrent = owner?.admission ?? (source ? sql<boolean>`exists(select 1 from public.access_role_binding b join public.access_role r on r.id=b.role_id
 		where b.id=${source.binding.id}::uuid and b.version=${source.binding.version} and b.state='active' and b.terms_revision=${source.terms.revision}
 		and r.version=${source.roleVersion} and r.state='active'
 		and public.access_role_binding_recipient_is_current(b.id,b.terms_revision) is true
@@ -125,6 +133,9 @@ export async function readManagementAuthority(
 	const result = (await tx.execute<{ admitted: boolean | null }>(sql`select (${admission}) as admitted`)).rows[0]?.admitted;
 	if (result === false) throw new ManagementAuthorityDenied();
 	if (result !== true) throw new ManagementAuthorityUnavailable();
-	return { principalId: credential.principalId, subjectId, subject, selection, credential, owner: owner !== null,
-		sourceBindingId: source?.binding.id ?? null, sourceBinding: source ?? null, representationPath: represented?.path ?? [], validUntil, admission };
+	return { scopeId, path, permission, principalId: credential.principalId, subjectId, subject, selection, credential, owner: owner !== null,
+		sourceEvidence: { trees: treeVersions, owner: owner?.identity ?? null,
+   memberships: roleSources?.memberships.map(member => ({ id: member.id,version: member.version,generation: member.activeGeneration })) ?? [],
+   selections: roleSources?.selections ?? [], representation: representationEvidence },
+  sourceBindingId: source?.binding.id ?? null, sourceBinding: source ?? null, representationPath: represented?.path ?? [], validUntil, admission };
 }

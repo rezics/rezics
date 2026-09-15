@@ -8,6 +8,7 @@ import {
 /** Canonical management actions for the mixed IAM target; transport activation is separately gated. @alpha */
 export const AccessManagementPermissionValues = [
 	"access.identity.select",
+	"access.representation.manage",
 	"access.group.read",
 	"access.group.create",
 	"access.group.update",
@@ -32,6 +33,7 @@ export type AccessManagementPermission = (typeof AccessManagementPermissionValue
 
 /** Semantic boundaries used by scope policy and future API metadata. @alpha */
 export const AccessManagementPermissionDefinitions = {
+	"access.representation.manage": { resource: "access.representation", action: "manage", rationale: "Confer authority at the represented Entity is separate from exercising its resource permissions." },
 	"app.read": { resource: "app", action: "read" },
 	"app.create": { resource: "app", action: "create" },
 	"app.update": { resource: "app", action: "update", rationale: "App declarations and enabling remain separate from consent and installation approval." },

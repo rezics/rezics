@@ -9,7 +9,7 @@ import { lockCompleteGroupImpactDiscovery, readGroupImpactFacts, revalidateGroup
 import { compileGroupImpactDelta, GroupImpactEffectSchema, GroupImpactDeltaUnavailable, type GroupImpactEffect } from "./group-impact-delta";
 import { findRoleAssignmentCeiling } from "./assignment-ceilings";
 import { AccessPermissionSnapshotUnavailable } from "./permission";
-import { AccessChanged, AccessUnavailable } from "./http-errors";
+import { AccessChanged, AccessDenied, AccessUnavailable } from "./http-errors";
 import { readGroupImpactConferAuthority, readGroupImpactCurrentPolicy, type GroupImpactCurrentPolicy } from "./group-impact-policy";
 import { requireAccessAdmission } from "./transaction";
 import { ManagementAuthorityDenied, ManagementAuthorityUnavailable, type readManagementAuthority } from "./management-authority";
@@ -18,9 +18,10 @@ type Evaluation = typeof evaluations.$inferSelect;
 type Authority = Awaited<ReturnType<typeof readManagementAuthority>>;
 const digest = (value: unknown) => createHash("sha256").update(JSON.stringify(value)).digest("hex");
 const noPolicy: GroupImpactCurrentPolicy = { outcome: "unavailable",reason: "not-evaluated",validUntil: null,subjects: [],restrictions: [] };
-function sourceDigest(authority: Authority) {
-	return digest({ principalId: authority.principalId,subjectId: authority.subjectId,selection: authority.selection,
-		bindingId: authority.sourceBindingId,termsRevision: authority.sourceBinding?.terms.revision ?? null,roleVersion: authority.sourceBinding?.roleVersion ?? null,roleRevision: authority.sourceBinding?.roleRevision ?? null,representationPath: authority.representationPath });
+/** Exact private authority source identity for retained approvals and recovery. @internal */
+export function groupAuthoritySourceDigest(authority: Authority) {
+	return digest({ scopeId: authority.scopeId,path: authority.path,permission: authority.permission,principalId: authority.principalId,subjectId: authority.subjectId,selection: authority.selection,
+		sourceEvidence: authority.sourceEvidence,bindingId: authority.sourceBindingId,termsRevision: authority.sourceBinding?.terms.revision ?? null,roleVersion: authority.sourceBinding?.roleVersion ?? null,roleRevision: authority.sourceBinding?.roleRevision ?? null,representationPath: authority.representationPath });
 }
 async function completeReview(tx: DatabaseTransaction, review: GroupImpactReview) {
 	return lockCompleteGroupImpactDiscovery(tx,{ reviewId: review.id,scopeId: review.scopeId,groupId: review.groupId,
@@ -35,7 +36,7 @@ async function validate(tx: DatabaseTransaction, review: GroupImpactReview, eval
 	await revalidateGroupImpactDiscovery(tx,review);
 	if (review.status !== "complete") {
 		evaluation.status = review.status === "invalidated" ? "invalidated" : "unavailable"; evaluation.reason = review.reason ?? "discovery-incomplete";
-	} else if (evaluation.managerDigest !== sourceDigest(authority)) {
+	} else if (evaluation.managerDigest !== groupAuthoritySourceDigest(authority)) {
 		evaluation.status = "invalidated"; evaluation.reason = "manager-sources-changed";
 	}
 	await persist(tx,evaluation);
@@ -53,13 +54,14 @@ async function readEffects(tx: DatabaseTransaction, evaluation: Evaluation) {
 		const parsed = GroupImpactEffectSchema.safeParse(row.payload);
 		if (!parsed.success) throw new GroupImpactDeltaUnavailable("missing");
 		if ((row.decision === "covered" && (!parsed.data.confer || parsed.data.kind !== "binding" || row.ceilingId === null)) ||
+			(row.decision === "approval-required" && (!parsed.data.confer || parsed.data.kind === "binding")) ||
 			(row.decision !== "covered" && row.ceilingId !== null) || (row.decision === "not-required" && parsed.data.confer) ||
 			(row.ordinal > evaluation.cursor && row.decision !== "pending")) throw new GroupImpactDeltaUnavailable("missing");
 		return parsed.data;
 	});
 	if (digest(payloads) !== evaluation.effectDigest || Buffer.byteLength(JSON.stringify(payloads),"utf8") !== evaluation.byteCount) throw new GroupImpactDeltaUnavailable("missing");
 	if (rows.some(row => row.ordinal <= evaluation.cursor && row.decision === "pending") ||
-		(evaluation.status === "complete" && (evaluation.cursor !== evaluation.effectCount || rows.some(row => !["covered","not-required"].includes(row.decision))))) throw new GroupImpactDeltaUnavailable("missing");
+		(evaluation.status === "complete" && (evaluation.cursor !== evaluation.effectCount || rows.some(row => !["covered","not-required","approval-required"].includes(row.decision))))) throw new GroupImpactDeltaUnavailable("missing");
 	return { rows,payloads };
 }
 async function observeAuthority(tx: DatabaseTransaction, review: GroupImpactReview, authority: Authority) {
@@ -113,8 +115,8 @@ function unavailableReason(error: unknown): string | null {
  * Initialize one atomic complete delta, then resume at most sixteen confer effects per request.
  * @internal
  * @remarks This is production evaluation, not mutation admission. No SQL truth value
- * is returned. Missing representation/ceiling expansion approval owners remain explicit
- * unavailable effects; losses still reach protected-recovery inspection. Current policies
+ * is returned. Representation/ceiling expansion effects retain an explicit independent-approval
+ * requirement; losses also reach protected-recovery admission. Current policies
  * are reloaded when consuming complete evaluation, never cached as durable authority.
  */
 export async function advanceGroupImpactEvaluation(tx: DatabaseTransaction, context: PrincipalRequestContext,
@@ -123,7 +125,7 @@ export async function advanceGroupImpactEvaluation(tx: DatabaseTransaction, cont
 	let [evaluation] = await tx.select().from(evaluations).where(eq(evaluations.reviewId,review.id)).for("update");
 	if (!evaluation) {
 		if (expectedPageVersion !== 0) throw new AccessChanged();
-		const [created] = await tx.insert(evaluations).values({ reviewId: review.id,status: "evaluating",managerDigest: sourceDigest(authority),effectDigest: digest([]) }).returning();
+		const [created] = await tx.insert(evaluations).values({ reviewId: review.id,status: "evaluating",managerDigest: groupAuthoritySourceDigest(authority),effectDigest: digest([]) }).returning();
 		if (!created) throw new AccessUnavailable(); evaluation = created;
 		try {
 			await tx.transaction(async work => {
@@ -162,7 +164,9 @@ export async function advanceGroupImpactEvaluation(tx: DatabaseTransaction, cont
 				let decision: typeof row.decision = "not-required", reason: string | null = null, ceilingId: string | null = null;
 				if (effect.confer) {
 					if (effect.kind !== "binding") {
-						decision = "unavailable"; reason = effect.kind === "representation" ? "representation-confer-approval" : "ceiling-expansion-independent-approval";
+						const sources = await readGroupImpactConferAuthority(work,context,[effect]);
+						for (const source of sources) { await observeAuthority(work,nextReview,source); await requireAccessAdmission(work,source.admission); }
+						decision = "approval-required";
 					} else {
 						try {
 							const sources = await readGroupImpactConferAuthority(work,context,[effect]);
@@ -244,15 +248,27 @@ export async function lockCompleteGroupImpactEvaluation(tx: DatabaseTransaction,
 	const [evaluation] = await tx.select().from(evaluations).where(eq(evaluations.reviewId,review.id)).for("update");
 	if (!evaluation) throw new AccessUnavailable();
 	await validate(tx,review,evaluation,authority);
+	if (evaluation.status === "denied") throw new AccessDenied();
 	if (evaluation.status !== "complete") throw new AccessUnavailable();
 	const { rows,payloads } = await readEffects(tx,evaluation);
 	const sources = await readGroupImpactConferAuthority(tx,context,payloads);
 	const policy = await readGroupImpactCurrentPolicy(tx,payloads);
 	for (const source of sources) await requireAccessAdmission(tx,source.admission);
+	for (const row of rows) if (row.decision === "covered" && await findCeiling(tx,review,payloads[row.ordinal-1]!,authority.subjectId) !== row.ceilingId) throw new AccessUnavailable();
 	await requireAccessAdmission(tx,authority.admission);
 	await revalidateGroupImpactDiscovery(tx,review);
 	if (review.status !== "complete") throw new AccessUnavailable();
 	return { reviewId: review.id,effectDigest: evaluation.effectDigest,effects: payloads,
 		ceilings: rows.map(row => ({ ordinal: row.ordinal,ceilingId: row.ceilingId })),policy,sources,
 		validUntil: new Date(Math.min(review.validUntil.getTime(),policy.validUntil ?? Infinity)),admission: "not-admitted" as const };
+}
+
+/** Complete retained evidence for an independently authorized approver; does not impersonate the reviewer. @internal */
+export async function readCompleteGroupApprovalEvidence(tx: DatabaseTransaction, review: GroupImpactReview) {
+ await completeReview(tx,review);
+ const [evaluation] = await tx.select().from(evaluations).where(eq(evaluations.reviewId,review.id)).for("update");
+ if (evaluation?.status === "denied") throw new AccessDenied();
+ if (!evaluation || evaluation.status !== "complete") throw new AccessUnavailable();
+ const { payloads } = await readEffects(tx,evaluation);
+ return { effectDigest: evaluation.effectDigest, effects: payloads };
 }
