@@ -91,3 +91,15 @@ export const GroupImpactSummary = z.strictObject({ reviewId: id, operation: z.en
 export const GroupImpactInspection = GroupImpactSummary.extend({ items: z.array(z.strictObject({ itemId: id,
 	ordinal: positiveVersion, kind: z.string(), version: version.nullable(), termsRevision: version.nullable(), state: z.string().nullable() })).max(100),
 	nextCursor: positiveVersion.nullable() });
+
+/** Private evaluation progress never represents protected mutation admission. @alpha */
+export const GroupImpactEvaluationSummary = z.strictObject({ reviewId: id,
+	status: z.enum(["evaluating","complete","denied","unavailable","invalidated"]),reason: z.string().nullable(),
+	pageVersion: version.max(4096),processedEffects: version.max(4096),totalEffects: version.max(4096),validUntil: z.iso.datetime(),
+	delta: z.enum(["complete","unavailable"]),currentPolicy: z.enum(["allow","deny","unavailable"]),policyReason: z.string().nullable(),
+	admission: z.literal("not-admitted") });
+/** Counts and opaque ids disclose no private recipient, source, target or permission names. @alpha */
+export const GroupImpactEvaluationInspection = GroupImpactEvaluationSummary.extend({ items: z.array(z.strictObject({
+	itemId: id,ordinal: version.max(4096),kind: z.enum(["binding","representation","ceiling"]),beforePermissions: version,afterPermissions: version,
+	beforePaths: version.max(64),afterPaths: version.max(64),confer: z.boolean(),decision: z.enum(["pending","not-required","covered","denied","unavailable"]),reason: z.string().nullable(),
+})).max(100),nextCursor: version.max(4096).nullable() });

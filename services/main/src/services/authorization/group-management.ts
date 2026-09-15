@@ -1,3 +1,4 @@
+import { advanceGroupImpactEvaluation, inspectGroupImpactEvaluation } from "./group-impact-evaluation";
 import type { z } from "zod";
 import { beginGroupImpactDiscovery, advanceGroupImpactDiscovery, inspectGroupImpactDiscovery, lockGroupImpactReview, groupImpactSummary, type GroupImpactProposalSchema } from "./group-impact-discovery";
 import { and, eq, gt, sql, type SQL } from "drizzle-orm";
@@ -19,19 +20,19 @@ export type ManagedGroupCommand = AccessGroupCommand extends infer Command
 	: never;
 
 async function groupAuthority(tx: DatabaseTransaction, context: PrincipalRequestContext, scopeId: string,
-	groupId: string | undefined, operation: "read" | ManagedGroupCommand["operation"],
+	groupId: string | undefined, operation: "read" | ManagedGroupCommand["operation"], promote = false,
 ) {
-	const mutation = operation !== "read";
+	const mutation = operation !== "read", exclusive = mutation || promote;
 	const lifecycle = await scopeLifecycleAdmission(tx, scopeId, mutation);
 	// Promote both overlapping mutation fences before management/representation
 	// readers can acquire shared locks on either through their own Group membership.
 	const query = tx.select({ id: accessRoleBindingScope.scopeId }).from(accessRoleBindingScope)
 		.where(eq(accessRoleBindingScope.scopeId, scopeId));
-	const [bindingFence] = mutation ? await query.for("update") : await query.for("share");
+	const [bindingFence] = exclusive ? await query.for("update") : await query.for("share");
 	if (!bindingFence) throw new ManagementAuthorityUnavailable();
 	if (mutation) await tx.insert(accessGroupTree).values({ scopeId }).onConflictDoNothing();
 	const treeQuery = tx.select({ id: accessGroupTree.scopeId }).from(accessGroupTree).where(eq(accessGroupTree.scopeId, scopeId));
-	if (mutation) await treeQuery.for("update");
+	if (exclusive) await treeQuery.for("update");
 	else await treeQuery.for("share");
 	return readManagementAuthority(tx, { proof: context.credentialProof(), selection: context.selection, scopeId,
 		path: groupId === undefined ? ["groups"] : ["groups", groupId], permission: `access.group.${operation}`,
@@ -49,7 +50,7 @@ async function groupAuthority(tx: DatabaseTransaction, context: PrincipalRequest
  * No physical selections means exact-selection dependent grants are ineffective;
  * no active children means there are no inherited recipients. Existing recovery
  * authority is unchanged, not independently certified by this proof. Nonempty
- * impact needs the still-unimplemented ceiling and protected recovery owners;
+ * impact needs complete delta/ceiling evaluation and protected recovery admission;
  * unknown admission must remain unavailable, never an implicit approval.
  */
 function emptyLeafTransitionAdmission(scopeId: string, groupId: string): SQL<boolean | null> {
@@ -173,6 +174,35 @@ export async function inspectManagedGroupImpact(context: PrincipalRequestContext
 		const review = await lockGroupImpactReview(tx, { ...input, principalId: authority.principalId, subjectId: authority.subjectId });
 		const result = await inspectGroupImpactDiscovery(tx, review, input.afterOrdinal);
 		await requireAccessAdmission(tx, authority.admission);
+		return result;
+	});
+}
+
+/** Evaluate the exact proposal under current topology-management authority and a fresh session. @internal */
+export async function advanceManagedGroupImpactEvaluation(context: PrincipalRequestContext, input: {
+	scopeId: string; groupId: string; reviewId: string; expectedPageVersion: number;
+}) {
+	return runAccessTransaction(async tx => {
+		// Read attribution first; operation comes only from the private retained proposal.
+		const reader = await groupAuthority(tx,context,input.scopeId,input.groupId,"read",true);
+		const review = await lockGroupImpactReview(tx,{ ...input,principalId: reader.principalId,subjectId: reader.subjectId });
+		const authority = await groupAuthority(tx,context,input.scopeId,input.groupId,review.operation);
+		const result = await advanceGroupImpactEvaluation(tx,context,review,authority,input.expectedPageVersion);
+		await requireAccessAdmission(tx,authority.admission);
+		return result;
+	});
+}
+
+/** Evaluation inspection is private and requires the proposal's live management authority. @internal */
+export async function inspectManagedGroupImpactEvaluation(context: PrincipalRequestContext, input: {
+	scopeId: string; groupId: string; reviewId: string; afterOrdinal?: number;
+}) {
+	return runAccessTransaction(async tx => {
+		const reader = await groupAuthority(tx,context,input.scopeId,input.groupId,"read",true);
+		const review = await lockGroupImpactReview(tx,{ ...input,principalId: reader.principalId,subjectId: reader.subjectId });
+		const authority = await groupAuthority(tx,context,input.scopeId,input.groupId,review.operation);
+		const result = await inspectGroupImpactEvaluation(tx,context,review,authority,input.afterOrdinal);
+		await requireAccessAdmission(tx,authority.admission);
 		return result;
 	});
 }

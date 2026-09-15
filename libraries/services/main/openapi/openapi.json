@@ -9274,6 +9274,626 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
+		"/api/v1/access/{scope}/groups/{groupId}/impact-reviews/{reviewId}/evaluation/pages": {
+			"post": {
+				"operationId": "advanceAccessGroupImpactEvaluation",
+				"tags": ["Access management"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "scope",
+						"in": "path",
+						"required": true,
+						"schema": { "type": "string", "maxLength": 512, "pattern": "^rzs1\\..*" }
+					},
+					{
+						"name": "groupId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					},
+					{
+						"name": "reviewId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"type": "object",
+								"properties": {
+									"expectedPageVersion": { "type": "integer", "minimum": 0, "maximum": 65536 }
+								},
+								"required": ["expectedPageVersion"],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"reviewId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"status": {
+											"type": "string",
+											"enum": ["evaluating", "complete", "denied", "unavailable", "invalidated"]
+										},
+										"reason": { "type": ["string", "null"] },
+										"pageVersion": { "type": "integer", "minimum": 0, "maximum": 4096 },
+										"processedEffects": { "type": "integer", "minimum": 0, "maximum": 4096 },
+										"totalEffects": { "type": "integer", "minimum": 0, "maximum": 4096 },
+										"validUntil": {
+											"type": "string",
+											"format": "date-time",
+											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+										},
+										"delta": { "type": "string", "enum": ["complete", "unavailable"] },
+										"currentPolicy": { "type": "string", "enum": ["allow", "deny", "unavailable"] },
+										"policyReason": { "type": ["string", "null"] },
+										"admission": { "type": "string", "const": "not-admitted" }
+									},
+									"required": [
+										"reviewId",
+										"status",
+										"reason",
+										"pageVersion",
+										"processedEffects",
+										"totalEffects",
+										"validUntil",
+										"delta",
+										"currentPolicy",
+										"policyReason",
+										"admission"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"properties": {
+												"error": {
+													"type": "object",
+													"properties": {
+														"code": {
+															"default": "AccessInputInvalid",
+															"enum": ["AccessInputInvalid"],
+															"type": "string"
+														},
+														"message": { "type": "string" },
+														"details": {}
+													},
+													"required": ["code", "message"]
+												},
+												"requestId": { "type": "string" }
+											},
+											"required": ["error", "requestId"]
+										},
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"enum": ["AuthenticationRequired", "InteractiveSessionRequired"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": [
+														"AccessDenied",
+														"ApiTokenPermissionRequired",
+														"FreshSessionRequired",
+														"EmailVerificationRequired",
+														"AccountSuspended",
+														"AccountClosed"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": ["AccessChanged"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "postApiAccessByScopeGroupsByGroupIdImpact-reviewsByReviewIdEvaluationPages",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/access/{scope}/groups/{groupId}/impact-reviews/{reviewId}/evaluation": {
+			"get": {
+				"operationId": "inspectAccessGroupImpactEvaluation",
+				"tags": ["Access management"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "scope",
+						"in": "path",
+						"required": true,
+						"schema": { "type": "string", "maxLength": 512, "pattern": "^rzs1\\..*" }
+					},
+					{
+						"name": "groupId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					},
+					{
+						"name": "reviewId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					},
+					{
+						"name": "afterOrdinal",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "integer", "minimum": 0, "maximum": 32768 }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"reviewId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"status": {
+											"type": "string",
+											"enum": ["evaluating", "complete", "denied", "unavailable", "invalidated"]
+										},
+										"reason": { "type": ["string", "null"] },
+										"pageVersion": { "type": "integer", "minimum": 0, "maximum": 4096 },
+										"processedEffects": { "type": "integer", "minimum": 0, "maximum": 4096 },
+										"totalEffects": { "type": "integer", "minimum": 0, "maximum": 4096 },
+										"validUntil": {
+											"type": "string",
+											"format": "date-time",
+											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+										},
+										"delta": { "type": "string", "enum": ["complete", "unavailable"] },
+										"currentPolicy": { "type": "string", "enum": ["allow", "deny", "unavailable"] },
+										"policyReason": { "type": ["string", "null"] },
+										"admission": { "type": "string", "const": "not-admitted" },
+										"items": {
+											"maxItems": 100,
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"itemId": {
+														"type": "string",
+														"format": "uuid",
+														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+													},
+													"ordinal": { "type": "integer", "minimum": 0, "maximum": 4096 },
+													"kind": {
+														"type": "string",
+														"enum": ["binding", "representation", "ceiling"]
+													},
+													"beforePermissions": {
+														"type": "integer",
+														"minimum": 0,
+														"maximum": 9007199254740991
+													},
+													"afterPermissions": {
+														"type": "integer",
+														"minimum": 0,
+														"maximum": 9007199254740991
+													},
+													"beforePaths": { "type": "integer", "minimum": 0, "maximum": 64 },
+													"afterPaths": { "type": "integer", "minimum": 0, "maximum": 64 },
+													"confer": { "type": "boolean" },
+													"decision": {
+														"type": "string",
+														"enum": ["pending", "not-required", "covered", "denied", "unavailable"]
+													},
+													"reason": { "type": ["string", "null"] }
+												},
+												"required": [
+													"itemId",
+													"ordinal",
+													"kind",
+													"beforePermissions",
+													"afterPermissions",
+													"beforePaths",
+													"afterPaths",
+													"confer",
+													"decision",
+													"reason"
+												],
+												"additionalProperties": false
+											}
+										},
+										"nextCursor": { "type": ["integer", "null"], "minimum": 0, "maximum": 4096 }
+									},
+									"required": [
+										"reviewId",
+										"status",
+										"reason",
+										"pageVersion",
+										"processedEffects",
+										"totalEffects",
+										"validUntil",
+										"delta",
+										"currentPolicy",
+										"policyReason",
+										"admission",
+										"items",
+										"nextCursor"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessInputInvalid",
+													"enum": ["AccessInputInvalid"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"enum": ["AuthenticationRequired", "InteractiveSessionRequired"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": [
+														"AccessDenied",
+														"ApiTokenPermissionRequired",
+														"FreshSessionRequired",
+														"EmailVerificationRequired",
+														"AccountSuspended",
+														"AccountClosed"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": ["AccessChanged"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "getApiAccessByScopeGroupsByGroupIdImpact-reviewsByReviewIdEvaluation",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
 		"/api/v1/access/{scope}/groups/{groupId}/presentation": {
 			"patch": {
 				"operationId": "updateAccessGroupPresentation",

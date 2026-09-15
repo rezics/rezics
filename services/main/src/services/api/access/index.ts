@@ -5,8 +5,8 @@ import { env } from "../../config";
 import { createScopeSelectors } from "../../authorization/scope-selectors";
 import { resolveManagedScope } from "../../authorization/scope-management";
 import { getManagedRole, listManagedRoleHistory, listManagedRoles, writeRoleDefinition } from "../../authorization/role-management";
-import { getManagedGroupImpactContext, startManagedGroupImpact, advanceManagedGroupImpact, inspectManagedGroupImpact, getManagedGroup, listManagedGroupHistory, listManagedGroups, writeManagedGroup } from "../../authorization/group-management";
-import { GroupImpactContext, StartGroupImpactBody, GroupImpactParams, AdvanceGroupImpactBody, GroupImpactQuery, GroupImpactSummary, GroupImpactInspection, CreateGroupBody, GroupHistoryQuery, GroupListQuery, GroupParams, GroupQuery, GroupReceipt,
+import { advanceManagedGroupImpactEvaluation, inspectManagedGroupImpactEvaluation, getManagedGroupImpactContext, startManagedGroupImpact, advanceManagedGroupImpact, inspectManagedGroupImpact, getManagedGroup, listManagedGroupHistory, listManagedGroups, writeManagedGroup } from "../../authorization/group-management";
+import { GroupImpactEvaluationSummary, GroupImpactEvaluationInspection, GroupImpactContext, StartGroupImpactBody, GroupImpactParams, AdvanceGroupImpactBody, GroupImpactQuery, GroupImpactSummary, GroupImpactInspection, CreateGroupBody, GroupHistoryQuery, GroupListQuery, GroupParams, GroupQuery, GroupReceipt,
 	ManagedGroup, ManagedGroupHistory, ManagedGroups, ReparentGroupBody, RetireGroupBody, UpdateGroupBody } from "./schema";
 import { CreateRoleBody, ManagedRole, ManagedRoleHistory, ManagedRoles, ResolvedScope, ResolveScopeBody,
 	ReviseRoleBody, RoleHistoryQuery, RoleListQuery, RoleParams, RoleQuery, RoleReceipt, ScopeParams } from "./schema";
@@ -93,6 +93,16 @@ export default new Elysia({ prefix: "/access", name: "access-management-api" }).
 		detail: { operationId: "inspectAccessGroupImpact", tags: ["Access management"] },
 	}, ({ principalContext, params, query }) => inspectManagedGroupImpact(principalContext, { ...query, reviewId: params.reviewId, groupId: params.groupId,
 		scopeId: selectors.resolve(params.scope, principalContext.credentialProof(), Date.now()) }))
+	.post("/:scope/groups/:groupId/impact-reviews/:reviewId/evaluation/pages", {
+		principalAccess: { ...manage, fresh: true },params: GroupImpactParams,body: AdvanceGroupImpactBody,response: { 200: GroupImpactEvaluationSummary,...groupErrors },
+		detail: { operationId: "advanceAccessGroupImpactEvaluation",tags: ["Access management"] },
+	}, ({ principalContext,params,body }) => advanceManagedGroupImpactEvaluation(principalContext,{ ...body,reviewId: params.reviewId,groupId: params.groupId,
+		scopeId: selectors.resolve(params.scope,principalContext.credentialProof(),Date.now()) }))
+	.get("/:scope/groups/:groupId/impact-reviews/:reviewId/evaluation", {
+		principalAccess: { ...manage, fresh: true },params: GroupImpactParams,query: GroupImpactQuery,response: { 200: GroupImpactEvaluationInspection,...groupErrors },
+		detail: { operationId: "inspectAccessGroupImpactEvaluation",tags: ["Access management"] },
+	}, ({ principalContext,params,query }) => inspectManagedGroupImpactEvaluation(principalContext,{ ...query,reviewId: params.reviewId,groupId: params.groupId,
+		scopeId: selectors.resolve(params.scope,principalContext.credentialProof(),Date.now()) }))
 	.put("/:scope/groups/:groupId", {
 		principalAccess: manage, params: GroupParams, body: CreateGroupBody, response: { 200: GroupReceipt, ...groupErrors },
 		detail: { operationId: "createAccessGroup", tags: ["Access management"] },

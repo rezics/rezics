@@ -5,13 +5,14 @@ import { createCreatedAtColumn, createUuidv7PrimaryKey } from "./columns";
 import { accessGroup } from "./access-group";
 import { users } from "./auth";
 import { accessSubject } from "./access-identity";
+import { accessAssignmentCeiling } from "./access-assignment-ceiling";
 
 /** Change witnesses, including negative reverse-index reads; never logical identities or authority. @internal */
 export const accessImpactFence = pgTable("access_impact_fence", {
 	kind: text().notNull(), key: uuid().notNull(), version: bigint({ mode: "number" }).notNull().default(0),
 	lastWriterXid: text(),
 }, t => [primaryKey({ columns: [t.kind, t.key] }),
-	check("access_impact_fence_kind_check", sql`${t.kind} in ('group','tree','membership','binding','role','ceiling','representation')`),
+	check("access_impact_fence_kind_check", sql`${t.kind} in ('group','tree','binding-scope','membership','binding','role','ceiling','representation')`),
 	check("access_impact_fence_writer_check", sql`(${t.version}=0 and ${t.lastWriterXid} is null) or (${t.version}>0 and ${t.lastWriterXid} is not null and ${t.lastWriterXid}::xid8>'0'::xid8)`),
 	check("access_impact_fence_version_check", sql`${t.version} between 0 and 9007199254740991`)]);
 
@@ -46,7 +47,7 @@ export const accessGroupImpactNode = pgTable("access_group_impact_node", {
 	payload: jsonb().$type<Record<string, unknown>>(),
 }, t => [primaryKey({ columns: [t.reviewId, t.kind, t.key] }),
 	index("access_group_impact_pending_idx").on(t.reviewId, t.kind, t.key).where(sql`${t.stage}>=0`),
-	check("access_group_impact_node_kind_check", sql`${t.kind} in ('subtree','group','group-context','binding','binding-context','role','ceiling','representation','representation-context','membership')`),
+	check("access_group_impact_node_kind_check", sql`${t.kind} in ('roster','scope-roster','subtree','group','group-context','binding','binding-context','role','ceiling','representation','representation-context','membership')`),
 	check("access_group_impact_node_stage_check", sql`${t.stage} between -1 and 16`)]);
 
 /** Complete retained read set for bounded lock-and-revalidate; a missing fence is never version zero. @internal */
@@ -61,3 +62,26 @@ export const accessGroupImpactFact = pgTable("access_group_impact_fact", {
 	id: createUuidv7PrimaryKey(), reviewId: uuid().notNull().references(() => accessGroupImpactReview.id, { onDelete: "cascade" }),
 	ordinal: integer().notNull(), kind: text().notNull(), payload: jsonb().$type<Record<string, unknown>>().notNull(),
 }, t => [uniqueIndex("access_group_impact_fact_page_key").on(t.reviewId, t.ordinal)]);
+
+/** One server-owned evaluation per exact review; completion only certifies delta/ceiling work. @internal */
+export const accessGroupImpactEvaluation = pgTable("access_group_impact_evaluation", {
+	reviewId: uuid().primaryKey().references(() => accessGroupImpactReview.id, { onDelete: "cascade" }),
+	status: text().$type<"evaluating" | "complete" | "denied" | "unavailable" | "invalidated">().notNull(),
+	reason: text(), pageVersion: integer().notNull().default(0), cursor: integer().notNull().default(0),
+	effectCount: integer().notNull().default(0), byteCount: integer().notNull().default(0),
+	managerDigest: text().notNull(), effectDigest: text().notNull(),
+}, t => [check("access_group_evaluation_status_check", sql`${t.status} in ('evaluating','complete','denied','unavailable','invalidated')`),
+	check("access_group_evaluation_digest_check", sql`${t.managerDigest} ~ '^[0-9a-f]{64}$' and ${t.effectDigest} ~ '^[0-9a-f]{64}$'`),
+	check("access_group_evaluation_completion_check", sql`${t.status}<>'complete' or (${t.cursor}=${t.effectCount} and ${t.reason} is null and ${t.byteCount}>0)`),
+	check("access_group_evaluation_budget_check", sql`${t.cursor} between 0 and ${t.effectCount} and ${t.effectCount} between 0 and 4096 and ${t.byteCount} between 0 and 16777216 and ${t.pageVersion} between 0 and 4096`)]);
+
+/** Complete source contributions and exact before/after paths, never a corpus-wide resource ACL. @internal */
+export const accessGroupImpactEffect = pgTable("access_group_impact_effect", {
+	id: createUuidv7PrimaryKey(), reviewId: uuid().notNull().references(() => accessGroupImpactEvaluation.reviewId, { onDelete: "cascade" }),
+	ordinal: integer().notNull(), payload: jsonb().$type<Record<string, unknown>>().notNull(),
+	decision: text().$type<"pending" | "not-required" | "covered" | "denied" | "unavailable">().notNull().default("pending"),
+	reason: text(), ceilingId: uuid().references(() => accessAssignmentCeiling.id, { onDelete: "restrict" }),
+}, t => [uniqueIndex("access_group_impact_effect_page_key").on(t.reviewId,t.ordinal),
+	check("access_group_impact_effect_ceiling_check", sql`(${t.decision}='covered')=(${t.ceilingId} is not null)`),
+	check("access_group_impact_effect_ordinal_check", sql`${t.ordinal} between 1 and 4096`),
+	check("access_group_impact_effect_decision_check", sql`${t.decision} in ('pending','not-required','covered','denied','unavailable')`)]);

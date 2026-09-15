@@ -13,6 +13,8 @@ import type {
 	AddCatalogNameResponses,
 	AddMusicMediumOptions,
 	AddMusicMediumResponses,
+	AdvanceAccessGroupImpactEvaluationOptions,
+	AdvanceAccessGroupImpactEvaluationResponses,
 	AdvanceAccessGroupImpactOptions,
 	AdvanceAccessGroupImpactResponses,
 	CreateAccessGroupOptions,
@@ -45,6 +47,8 @@ import type {
 	StartAccessGroupImpactResponses,
 	InspectAccessGroupImpactOptions,
 	InspectAccessGroupImpactResponses,
+	InspectAccessGroupImpactEvaluationOptions,
+	InspectAccessGroupImpactEvaluationResponses,
 	UpdateAccessGroupPresentationOptions,
 	UpdateAccessGroupPresentationResponses,
 	ReparentAccessGroupOptions,
@@ -1531,6 +1535,42 @@ export function inspectAccessGroupImpact<ThrowOnError extends boolean = true>(
 			],
 			...config,
 		}) as Promise<RequestResult<InspectAccessGroupImpactResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/impact-reviews/:reviewId/evaluation/pages}
+ */
+export function advanceAccessGroupImpactEvaluation<ThrowOnError extends boolean = true>(
+	options: Options<AdvanceAccessGroupImpactEvaluationOptions, ThrowOnError>,
+): Unwrappable<RequestResult<AdvanceAccessGroupImpactEvaluationResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/access/{scope}/groups/{groupId}/impact-reviews/{reviewId}/evaluation/pages",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<AdvanceAccessGroupImpactEvaluationResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/impact-reviews/:reviewId/evaluation}
+ */
+export function inspectAccessGroupImpactEvaluation<ThrowOnError extends boolean = true>(
+	options: Options<InspectAccessGroupImpactEvaluationOptions, ThrowOnError>,
+): Unwrappable<RequestResult<InspectAccessGroupImpactEvaluationResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/access/{scope}/groups/{groupId}/impact-reviews/{reviewId}/evaluation",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<InspectAccessGroupImpactEvaluationResponses, ThrowOnError>>,
 	);
 }
 

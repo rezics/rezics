@@ -323,6 +323,7 @@ export const unitAccessRestriction = pgTable(
 	(table) => [
 		...unitReferenceConstraints("unit_access_restriction", "unit", table, false, table.unitId),
 
+		index("unit_access_restriction_impact_idx").on(table.unitId, table.id).where(sql`${table.revokedAt} is null`),
 		uniqueIndex("unit_access_restriction_active_auth_user_scope_key")
 			.on(table.unitId, table.authUserId, table.permission, table.scope)
 			.where(sql`${table.revokedAt} is null and ${table.subjectKind} = 'auth'`),

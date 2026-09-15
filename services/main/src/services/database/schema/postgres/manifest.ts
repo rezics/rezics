@@ -517,6 +517,8 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "access_role_binding_scope", name: "access_binding_scope_impact" },
+	{ table: "access_role_binding_scope", name: "access_binding_scope_impact_truncate" },
 	{ table: "access_impact_fence", name: "access_impact_fence_guard" },
 	{ table: "access_impact_fence", name: "access_impact_fence_truncate_guard" },
 	{ table: "access_group", name: "access_group_impact" },

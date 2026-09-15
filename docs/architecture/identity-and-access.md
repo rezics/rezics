@@ -536,10 +536,9 @@ response still says `admission: not-evaluated`. The next owner must use
 inside the mutation transaction, after discovering/promoting all live authority
 fences; `readGroupImpactFacts` supplies bounded private facts in that transaction.
 Complete-review consumption also checks retained fact/node counts and an empty
-work queue under the review lock. It must decode owner facts, compute the complete
-before/after recipient/permission delta, resolve current subject/resource restrictions and credential/representation
-eligibility, obtain explicit assignment ceilings, and prove protected recovery from
-the pre-change state. It must recheck all time boundaries in the final mutation.
+work queue under the review lock. The evaluation owner below decodes the facts and retains complete source/recipient
+contributions and ceiling decisions. Protected recovery still must establish continuity
+and independent approvals from the pre-change state. It must recheck all time boundaries in the final mutation.
 The discovery owner returns no boolean or SQL admission predicate. Existing populated
 reparent/retire remain unavailable; empty-leaf admission retains its independent proof.
 
@@ -587,6 +586,121 @@ this is explicit unavailability, not optimistic approval. Source/diff inspection
 and production generation are the only evidence in the implementation phase;
 concurrency, privacy, expiry, rejected-state, installation and capacity acceptance
 remain deferred under the execution workflow.
+
+### Group delta and explicit-ceiling evaluation
+
+`group-impact-delta.ts` decodes the complete private discovery store using native
+head, sealed permission snapshot, admission and selection schemas. It computes
+before/after contributions per source, logical target path and private recipient.
+A contribution retains all direct/inherited paths, exact admission generation,
+selection and selection-set versions, current role activation, frozen permission
+approval, representation conditions and exact parent lineage/bases. Representation
+permissions remain a ceiling on acting for the Entity; they are not added to the
+Entity's resource permissions or the operator's unrelated direct rights. Target
+paths remain symbolic; no subject-by-corpus-resource ACL matrix is created.
+These are complete changed **source contributions**, not a materialized union of
+all unrelated grants or a claim that every contributed permission is currently
+exercisable. Unchanged sources and independent deny overlays remain in their owners.
+
+Discovery additionally captures selection-set snapshots and bounded recipient
+rosters for affected representation edges. A dependent representation losing its
+parent basis can affect recipients outside the moved subtree. Group roster work
+visits only child/selection indexes; all-member work pages the existing
+`(scope_id,subject_id)` membership key. Neither recursively discovers unrelated
+assignments. Exact retained parent terms cannot follow a newer revision. Existing
+reviews without these required facts fail unavailable and must be rediscovered.
+Membership transitions now touch the scope tree witness, including absence, and
+binding-scope transitions have a dedicated witness for negative manager discovery.
+
+`group-impact-evaluation.ts` owns one resumable evaluation per exact complete
+review. Delta compilation is atomic; no partial delta is published if decoding,
+cardinality or work budgets fail. The durable effect store has an ordered complete
+payload digest and byte/count checks. Every later consumer checks the exact review,
+proposal, original principal/selected subject and topology-management source digest,
+including its selected binding terms, role version/revision and representation path.
+An evaluation request advances at most sixteen source effects with a retry-safe
+page version. Changed/expired witnesses invalidate the whole review, including
+previously covered pages. Budget/missing evidence remains unavailable; explicit
+absence of a complete ceiling remains denied. Inspection never promotes an empty
+page, partial processing or an unavailable effect into completion.
+
+For every gained named-role recipient/path, the evaluator requires current
+`access.role-binding.manage` at the target and calls `findRoleAssignmentCeiling`
+with the entire effective after-set, not only newly different permissions. The
+finder requires one immutable approval for an exact current manager binding/terms,
+named role, target, lifetime and recipient; approvals are never unioned. Manager
+data permissions are not intersected with the role being assigned. Scope-member
+approval retains an exact active admission. A Group/all-member ceiling can cover
+an individual through that exact **pre-change** admission and current membership.
+Group approval additionally requires the source to remain that same dynamic Group;
+a direct subject grant cannot discard the approving Group dependency. In particular,
+the proposed topology cannot bootstrap membership in its own approving Group.
+Manager bindings, roles, memberships, trees, selected representations and complete
+ceiling snapshots retain the original review visibility boundary and earliest clock.
+
+Current source authority and recipient read/write/contribute eligibility are
+reloaded under their native fences. Native resource lifecycle, permission
+applicability/delegability and bounded deny overlays are loaded independently of
+ceiling coverage. Deny overlays retain their own permission/path rather than
+clipping the confer request. They are not cached as approval across transactions.
+The legacy Realm access-manager restriction userset and all-scope representation
+resource policy remain explicit unavailable policy owners; no guessed membership
+or universal resource-policy true value fills those gaps. Current policy outcome
+is a separate inspection field, and every response says `admission: not-admitted`.
+
+Private production endpoints append `/evaluation/pages` (POST) and `/evaluation`
+(GET) to an exact impact-review URL. They require fresh `access:manage`, the
+proposal's current reparent/retire authority, and original attribution; starting
+an evaluation also requires the existing private review read boundary. Inspection
+returns only review-local random ids, kind, path/permission counts and decisions,
+not private recipients, source ids, target scopes or permission names. The current
+Group mutation endpoint continues its dependency-free empty-leaf proof.
+
+`lockCompleteGroupImpactEvaluation` is the narrow handoff to protected recovery.
+It returns the exact effect digest, private contributions, selected ceiling ids,
+current policy and retained source admissions in the same transaction. It returns
+no mutation admission SQL. Its caller must promote the complete native mutation
+fence closure before entry, independently establish recovery and approval policy,
+and revalidate source authority, policy and all deadlines at the final effect.
+
+The next production owner needs durable independent approval records bound to the
+exact proposal/review/effect digest, approver principal/selected subject and source
+revisions; independence/affectedness rules; and a bounded pre-change protected
+recovery path selection with after-state continuity, expiry and revocation fences.
+It must also supply the explicit representation-confer approval and ceiling
+recipient-expansion approval contracts: the existing named-role ceiling does not
+name a representation edge or authorize expanding its own approval recipient set.
+Those effects are fully retained but evaluated as `unavailable`, even if every
+named-role effect is covered. No populated mutation is admitted by this slice.
+
+Limits remain 4,096 discovered owners, 32,768 facts and 16 MiB discovery payload.
+Compilation reads at most 328 indexed fact pages once and admits at most 65,536
+membership/path visits, 4,096 effects and another 16 MiB encoded effect payload.
+The per-advance integrity read is bounded by that whole effect store; it is not
+constant-time pagination. Sixteen effects may each invoke the existing 256-candidate
+manager/approval readers with their permission-vocabulary bounds. Final policy
+loading allows 256 distinct subjects/dependency subjects, 64 scopes/management
+paths, 256 restriction candidates per target, 4,096 total masks, 64 resolved restriction Realms, 256 Realm/subject
+membership probes and 65,536 policy visits. Overflow is unavailable. Decoded-object memory, indexes and WAL add to the
+32 MiB encoded discovery/effect budget; no runtime memory measurement is claimed.
+The existing 16-review/principal intake, fifteen-minute lifetime and one-day cleanup
+remain. Cleanup removes at most 100 effects plus one evaluation head alongside the
+prior 300-row child budget per tick, with no unbounded cascading effect deletion.
+
+Keep the 500,000,000-row baseline and 3,000,000,000-row estimate. The new active
+restriction `(unit_id,id)` index has one entry per nonrevoked mask: at 64 estimated
+bytes/entry the all-active case is 32 GB / 192 GB before bloat, WAL, replicas and
+reserves. Multiply by the active fraction. The binding-scope witness adds O(1)
+write amplification per scope transition; membership changes add one scope witness
+upsert. A hot scope can invalidate concurrent reviews and contend on that witness;
+there is no per-review or per-recipient writer fanout. Deployment index installation
+and widened control-table constraints still need a measured installation/rollout
+plan before corpus-scale deployment. Persistent over-budget or repeatedly
+invalidated reviews require a partitioned/review-epoch protocol, not raised limits
+or partially approved pages. No throughput or capacity acceptance is claimed.
+This implementation reuses the staged-discovery evidence above; source/diff review
+and necessary artifact generation do not qualify tests, types, replay, concurrency,
+recovery or production behavior under the current paused verification phase.
 
 ### Direct and inherited Group membership
 

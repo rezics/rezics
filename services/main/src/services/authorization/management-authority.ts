@@ -126,5 +126,5 @@ export async function readManagementAuthority(
 	if (result === false) throw new ManagementAuthorityDenied();
 	if (result !== true) throw new ManagementAuthorityUnavailable();
 	return { principalId: credential.principalId, subjectId, subject, selection, credential, owner: owner !== null,
-		sourceBindingId: source?.binding.id ?? null, representationPath: represented?.path ?? [], validUntil, admission };
+		sourceBindingId: source?.binding.id ?? null, sourceBinding: source ?? null, representationPath: represented?.path ?? [], validUntil, admission };
 }

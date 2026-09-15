@@ -276,5 +276,5 @@ export async function readSubjectRoleBindingPermissions(
 	const memberSets = await readAccessMemberSetRecipients(tx, { subjectId: request.subjectId, scopeIds: recipientScopes });
 	const candidates = await discoverAccessRoleBindingCandidates(tx, { ...request, memberSets: memberSets.recipients });
 	const bindings = await readCurrentAccessRoleBindingPermissions(tx, candidates);
-	return { subjectId: request.subjectId, bindings, memberships: memberSets.memberships, selections: memberSets.selections };
+	return { subjectId: request.subjectId, bindings, recipientScopes, memberships: memberSets.memberships, selections: memberSets.selections };
 }

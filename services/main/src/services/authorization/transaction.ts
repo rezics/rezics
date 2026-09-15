@@ -1,3 +1,5 @@
+import { GroupImpactDeltaUnavailable } from "./group-impact-delta";
+import { GroupImpactDiscoveryStop } from "./group-impact-discovery";
 import { database, type DatabaseTransaction } from "../database";
 import { CredentialAuthorityDenied, CredentialAuthorityUnavailable } from "../auth/credential-authority";
 import { AccessDenied, AccessUnavailable, AccessChanged, AccessInputInvalid } from "./http-errors";
@@ -38,7 +40,7 @@ const denied = [OAuthGrantContextDenied, UserAuthorizationDenied, InstallationDe
 	AccessGroupMembershipAdmissionDenied, AccessRepresentationAdmissionDenied, AccessAssignmentCeilingDenied, IdentityPreferenceDenied];
 const changed = [UserAuthorizationConflict, InstallationConflict, OAuthClientSecretConflict, AppClientConflict, WorkloadPrincipalConflict, ConnectedAppConflict, AccessRoleConflict, AccessRoleBindingConflict, AccessGroupConflict, AccessMembershipConflict,
 	AccessGroupMembershipConflict, AccessRepresentationConflict, AccessAssignmentCeilingConflict, IdentityPreferenceConflict];
-const unavailable = [OAuthGrantContextUnavailable, UserAuthorizationUnavailable, InstallationUnavailable, OAuthClientSecretUnavailable, AppClientUnavailable, OAuthClientPolicyUnavailable, WorkloadPrincipalUnavailable, ConnectedAppUnavailable, AppCapabilitySnapshotUnavailable, CredentialAuthorityUnavailable, ManagementAuthorityUnavailable, AccessRoleAdmissionUnavailable,
+const unavailable = [GroupImpactDeltaUnavailable, GroupImpactDiscoveryStop, OAuthGrantContextUnavailable, UserAuthorizationUnavailable, InstallationUnavailable, OAuthClientSecretUnavailable, AppClientUnavailable, OAuthClientPolicyUnavailable, WorkloadPrincipalUnavailable, ConnectedAppUnavailable, AppCapabilitySnapshotUnavailable, CredentialAuthorityUnavailable, ManagementAuthorityUnavailable, AccessRoleAdmissionUnavailable,
 	AccessRoleBindingUnavailable, AccessGroupAdmissionUnavailable, AccessMembershipAdmissionUnavailable, AccessGroupMembershipUnavailable,
 	AccessGroupMembershipBudgetExceeded, AccessRepresentationUnavailable, AccessAssignmentCeilingUnavailable, IdentityPreferenceUnavailable,
 	AccessPermissionSnapshotUnavailable, AccessSubjectPolicyUnavailable, AccessRepresentationBudgetExceeded, AccessRoleBindingBudgetExceeded];

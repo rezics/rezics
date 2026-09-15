@@ -1,3 +1,42 @@
+SET search_path TO public;
+
+CREATE TABLE "access_group_impact_effect" (
+	"id" uuid PRIMARY KEY DEFAULT uuidv7(),
+	"review_id" uuid NOT NULL,
+	"ordinal" integer NOT NULL,
+	"payload" jsonb NOT NULL,
+	"decision" text DEFAULT 'pending' NOT NULL,
+	"reason" text,
+	"ceiling_id" uuid,
+	CONSTRAINT "access_group_impact_effect_ceiling_check" CHECK (("decision"='covered')=("ceiling_id" is not null)),
+	CONSTRAINT "access_group_impact_effect_ordinal_check" CHECK ("ordinal" between 1 and 4096),
+	CONSTRAINT "access_group_impact_effect_decision_check" CHECK ("decision" in ('pending','not-required','covered','denied','unavailable'))
+);
+
+CREATE TABLE "access_group_impact_evaluation" (
+	"review_id" uuid PRIMARY KEY,
+	"status" text NOT NULL,
+	"reason" text,
+	"page_version" integer DEFAULT 0 NOT NULL,
+	"cursor" integer DEFAULT 0 NOT NULL,
+	"effect_count" integer DEFAULT 0 NOT NULL,
+	"byte_count" integer DEFAULT 0 NOT NULL,
+	"manager_digest" text NOT NULL,
+	"effect_digest" text NOT NULL,
+	CONSTRAINT "access_group_evaluation_status_check" CHECK ("status" in ('evaluating','complete','denied','unavailable','invalidated')),
+	CONSTRAINT "access_group_evaluation_digest_check" CHECK ("manager_digest" ~ '^[0-9a-f]{64}$' and "effect_digest" ~ '^[0-9a-f]{64}$'),
+	CONSTRAINT "access_group_evaluation_completion_check" CHECK ("status"<>'complete' or ("cursor"="effect_count" and "reason" is null and "byte_count">0)),
+	CONSTRAINT "access_group_evaluation_budget_check" CHECK ("cursor" between 0 and "effect_count" and "effect_count" between 0 and 4096 and "byte_count" between 0 and 16777216 and "page_version" between 0 and 4096)
+);
+
+CREATE UNIQUE INDEX "access_group_impact_effect_page_key" ON "access_group_impact_effect" ("review_id","ordinal");
+CREATE INDEX "unit_access_restriction_impact_idx" ON "unit_access_restriction" ("unit_id","id") WHERE "revoked_at" is null;
+ALTER TABLE "access_group_impact_effect" ADD CONSTRAINT "access_group_impact_effect_SK7Lxf0xFEWE_fkey" FOREIGN KEY ("review_id") REFERENCES "access_group_impact_evaluation"("review_id") ON DELETE CASCADE;
+ALTER TABLE "access_group_impact_effect" ADD CONSTRAINT "access_group_impact_effect_8y0c0GRkigsO_fkey" FOREIGN KEY ("ceiling_id") REFERENCES "access_assignment_ceiling"("id") ON DELETE RESTRICT;
+ALTER TABLE "access_group_impact_evaluation" ADD CONSTRAINT "access_group_impact_evaluation_DXShR9LTr2K4_fkey" FOREIGN KEY ("review_id") REFERENCES "access_group_impact_review"("id") ON DELETE CASCADE;
+ALTER TABLE "access_group_impact_node" DROP CONSTRAINT "access_group_impact_node_kind_check", ADD CONSTRAINT "access_group_impact_node_kind_check" CHECK ("kind" in ('roster','scope-roster','subtree','group','group-context','binding','binding-context','role','ceiling','representation','representation-context','membership'));
+ALTER TABLE "access_impact_fence" DROP CONSTRAINT "access_impact_fence_kind_check", ADD CONSTRAINT "access_impact_fence_kind_check" CHECK ("kind" in ('group','tree','binding-scope','membership','binding','role','ceiling','representation'));
+
 -- Every source writer, including SQL lifecycle/pruning writers, participates in
 -- the same retained change witnesses. No per-review or per-recipient fanout.
 CREATE OR REPLACE FUNCTION public.touch_access_impact_fences()

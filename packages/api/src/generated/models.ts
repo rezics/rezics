@@ -6040,6 +6040,540 @@ export type InspectAccessGroupImpactResponse =
 	| InspectAccessGroupImpactStatus500
 	| InspectAccessGroupImpactStatus503;
 
+export type AdvanceAccessGroupImpactEvaluationPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	groupId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+};
+
+export const AdvanceAccessGroupImpactEvaluationStatus200StatusEnum = {
+	evaluating: "evaluating",
+	complete: "complete",
+	denied: "denied",
+	unavailable: "unavailable",
+	invalidated: "invalidated",
+} as const;
+
+export type AdvanceAccessGroupImpactEvaluationStatus200StatusEnum =
+	(typeof AdvanceAccessGroupImpactEvaluationStatus200StatusEnum)[keyof typeof AdvanceAccessGroupImpactEvaluationStatus200StatusEnum];
+
+export const AdvanceAccessGroupImpactEvaluationStatus200DeltaEnum = {
+	complete: "complete",
+	unavailable: "unavailable",
+} as const;
+
+export type AdvanceAccessGroupImpactEvaluationStatus200DeltaEnum =
+	(typeof AdvanceAccessGroupImpactEvaluationStatus200DeltaEnum)[keyof typeof AdvanceAccessGroupImpactEvaluationStatus200DeltaEnum];
+
+export const AdvanceAccessGroupImpactEvaluationStatus200CurrentPolicyEnum = {
+	allow: "allow",
+	deny: "deny",
+	unavailable: "unavailable",
+} as const;
+
+export type AdvanceAccessGroupImpactEvaluationStatus200CurrentPolicyEnum =
+	(typeof AdvanceAccessGroupImpactEvaluationStatus200CurrentPolicyEnum)[keyof typeof AdvanceAccessGroupImpactEvaluationStatus200CurrentPolicyEnum];
+
+export type AdvanceAccessGroupImpactEvaluationStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+	status: AdvanceAccessGroupImpactEvaluationStatus200StatusEnum;
+	reason: string | null;
+	/**
+	 * @minLength 0
+	 * @maxLength 4096
+	 * @type integer
+	 */
+	pageVersion: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 4096
+	 * @type integer
+	 */
+	processedEffects: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 4096
+	 * @type integer
+	 */
+	totalEffects: number;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	validUntil: string;
+	delta: AdvanceAccessGroupImpactEvaluationStatus200DeltaEnum;
+	currentPolicy: AdvanceAccessGroupImpactEvaluationStatus200CurrentPolicyEnum;
+	policyReason: string | null;
+	admission: "not-admitted";
+};
+
+export type AdvanceAccessGroupImpactEvaluationStatus400 =
+	| {
+			error: {
+				/**
+				 * @default 'AccessInputInvalid'
+				 * @type string
+				 */
+				code: "AccessInputInvalid";
+				message: string;
+				details?: void;
+			};
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const AdvanceAccessGroupImpactEvaluationStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type AdvanceAccessGroupImpactEvaluationStatus401ErrorCodeEnum =
+	(typeof AdvanceAccessGroupImpactEvaluationStatus401ErrorCodeEnum)[keyof typeof AdvanceAccessGroupImpactEvaluationStatus401ErrorCodeEnum];
+
+export type AdvanceAccessGroupImpactEvaluationStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: AdvanceAccessGroupImpactEvaluationStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const AdvanceAccessGroupImpactEvaluationStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type AdvanceAccessGroupImpactEvaluationStatus403ErrorCodeEnum =
+	(typeof AdvanceAccessGroupImpactEvaluationStatus403ErrorCodeEnum)[keyof typeof AdvanceAccessGroupImpactEvaluationStatus403ErrorCodeEnum];
+
+export type AdvanceAccessGroupImpactEvaluationStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: AdvanceAccessGroupImpactEvaluationStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type AdvanceAccessGroupImpactEvaluationStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type AdvanceAccessGroupImpactEvaluationStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type AdvanceAccessGroupImpactEvaluationStatus422 = ValidationError;
+
+export type AdvanceAccessGroupImpactEvaluationStatus500 = InternalError;
+
+export type AdvanceAccessGroupImpactEvaluationStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type AdvanceAccessGroupImpactEvaluationBody = {
+	/**
+	 * @minLength 0
+	 * @maxLength 65536
+	 * @type integer
+	 */
+	expectedPageVersion: number;
+};
+
+export type AdvanceAccessGroupImpactEvaluationOptions = {
+	body: AdvanceAccessGroupImpactEvaluationBody;
+	path: AdvanceAccessGroupImpactEvaluationPath;
+	query?: never;
+	headers?: never;
+};
+
+export type AdvanceAccessGroupImpactEvaluationResponses = {
+	"200": AdvanceAccessGroupImpactEvaluationStatus200;
+	"400": AdvanceAccessGroupImpactEvaluationStatus400;
+	"401": AdvanceAccessGroupImpactEvaluationStatus401;
+	"403": AdvanceAccessGroupImpactEvaluationStatus403;
+	"404": AdvanceAccessGroupImpactEvaluationStatus404;
+	"409": AdvanceAccessGroupImpactEvaluationStatus409;
+	"422": AdvanceAccessGroupImpactEvaluationStatus422;
+	"500": AdvanceAccessGroupImpactEvaluationStatus500;
+	"503": AdvanceAccessGroupImpactEvaluationStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type AdvanceAccessGroupImpactEvaluationResponse =
+	| AdvanceAccessGroupImpactEvaluationStatus200
+	| AdvanceAccessGroupImpactEvaluationStatus400
+	| AdvanceAccessGroupImpactEvaluationStatus401
+	| AdvanceAccessGroupImpactEvaluationStatus403
+	| AdvanceAccessGroupImpactEvaluationStatus404
+	| AdvanceAccessGroupImpactEvaluationStatus409
+	| AdvanceAccessGroupImpactEvaluationStatus422
+	| AdvanceAccessGroupImpactEvaluationStatus500
+	| AdvanceAccessGroupImpactEvaluationStatus503;
+
+export type InspectAccessGroupImpactEvaluationPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	groupId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+};
+
+export type InspectAccessGroupImpactEvaluationQuery = {
+	/**
+	 * @minLength 0
+	 * @maxLength 32768
+	 * @type integer | undefined
+	 */
+	afterOrdinal?: number;
+};
+
+export const InspectAccessGroupImpactEvaluationStatus200StatusEnum = {
+	evaluating: "evaluating",
+	complete: "complete",
+	denied: "denied",
+	unavailable: "unavailable",
+	invalidated: "invalidated",
+} as const;
+
+export type InspectAccessGroupImpactEvaluationStatus200StatusEnum =
+	(typeof InspectAccessGroupImpactEvaluationStatus200StatusEnum)[keyof typeof InspectAccessGroupImpactEvaluationStatus200StatusEnum];
+
+export const InspectAccessGroupImpactEvaluationStatus200DeltaEnum = {
+	complete: "complete",
+	unavailable: "unavailable",
+} as const;
+
+export type InspectAccessGroupImpactEvaluationStatus200DeltaEnum =
+	(typeof InspectAccessGroupImpactEvaluationStatus200DeltaEnum)[keyof typeof InspectAccessGroupImpactEvaluationStatus200DeltaEnum];
+
+export const InspectAccessGroupImpactEvaluationStatus200CurrentPolicyEnum = {
+	allow: "allow",
+	deny: "deny",
+	unavailable: "unavailable",
+} as const;
+
+export type InspectAccessGroupImpactEvaluationStatus200CurrentPolicyEnum =
+	(typeof InspectAccessGroupImpactEvaluationStatus200CurrentPolicyEnum)[keyof typeof InspectAccessGroupImpactEvaluationStatus200CurrentPolicyEnum];
+
+export const InspectAccessGroupImpactEvaluationStatus200ItemsKindEnum = {
+	binding: "binding",
+	representation: "representation",
+	ceiling: "ceiling",
+} as const;
+
+export type InspectAccessGroupImpactEvaluationStatus200ItemsKindEnum =
+	(typeof InspectAccessGroupImpactEvaluationStatus200ItemsKindEnum)[keyof typeof InspectAccessGroupImpactEvaluationStatus200ItemsKindEnum];
+
+export const InspectAccessGroupImpactEvaluationStatus200ItemsDecisionEnum = {
+	pending: "pending",
+	"not-required": "not-required",
+	covered: "covered",
+	denied: "denied",
+	unavailable: "unavailable",
+} as const;
+
+export type InspectAccessGroupImpactEvaluationStatus200ItemsDecisionEnum =
+	(typeof InspectAccessGroupImpactEvaluationStatus200ItemsDecisionEnum)[keyof typeof InspectAccessGroupImpactEvaluationStatus200ItemsDecisionEnum];
+
+export type InspectAccessGroupImpactEvaluationStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+	status: InspectAccessGroupImpactEvaluationStatus200StatusEnum;
+	reason: string | null;
+	/**
+	 * @minLength 0
+	 * @maxLength 4096
+	 * @type integer
+	 */
+	pageVersion: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 4096
+	 * @type integer
+	 */
+	processedEffects: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 4096
+	 * @type integer
+	 */
+	totalEffects: number;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	validUntil: string;
+	delta: InspectAccessGroupImpactEvaluationStatus200DeltaEnum;
+	currentPolicy: InspectAccessGroupImpactEvaluationStatus200CurrentPolicyEnum;
+	policyReason: string | null;
+	admission: "not-admitted";
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		itemId: string;
+		/**
+		 * @minLength 0
+		 * @maxLength 4096
+		 * @type integer
+		 */
+		ordinal: number;
+		kind: InspectAccessGroupImpactEvaluationStatus200ItemsKindEnum;
+		/**
+		 * @minLength 0
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		beforePermissions: number;
+		/**
+		 * @minLength 0
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		afterPermissions: number;
+		/**
+		 * @minLength 0
+		 * @maxLength 64
+		 * @type integer
+		 */
+		beforePaths: number;
+		/**
+		 * @minLength 0
+		 * @maxLength 64
+		 * @type integer
+		 */
+		afterPaths: number;
+		confer: boolean;
+		decision: InspectAccessGroupImpactEvaluationStatus200ItemsDecisionEnum;
+		reason: string | null;
+	}[];
+	/**
+	 * @minLength 0
+	 * @maxLength 4096
+	 * @type integer
+	 */
+	nextCursor: number | null;
+};
+
+export type InspectAccessGroupImpactEvaluationStatus400 = {
+	error: {
+		/**
+		 * @default 'AccessInputInvalid'
+		 * @type string
+		 */
+		code: "AccessInputInvalid";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const InspectAccessGroupImpactEvaluationStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type InspectAccessGroupImpactEvaluationStatus401ErrorCodeEnum =
+	(typeof InspectAccessGroupImpactEvaluationStatus401ErrorCodeEnum)[keyof typeof InspectAccessGroupImpactEvaluationStatus401ErrorCodeEnum];
+
+export type InspectAccessGroupImpactEvaluationStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: InspectAccessGroupImpactEvaluationStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const InspectAccessGroupImpactEvaluationStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type InspectAccessGroupImpactEvaluationStatus403ErrorCodeEnum =
+	(typeof InspectAccessGroupImpactEvaluationStatus403ErrorCodeEnum)[keyof typeof InspectAccessGroupImpactEvaluationStatus403ErrorCodeEnum];
+
+export type InspectAccessGroupImpactEvaluationStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: InspectAccessGroupImpactEvaluationStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type InspectAccessGroupImpactEvaluationStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type InspectAccessGroupImpactEvaluationStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type InspectAccessGroupImpactEvaluationStatus422 = ValidationError;
+
+export type InspectAccessGroupImpactEvaluationStatus500 = InternalError;
+
+export type InspectAccessGroupImpactEvaluationStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type InspectAccessGroupImpactEvaluationOptions = {
+	body?: never;
+	path: InspectAccessGroupImpactEvaluationPath;
+	query?: InspectAccessGroupImpactEvaluationQuery;
+	headers?: never;
+};
+
+export type InspectAccessGroupImpactEvaluationResponses = {
+	"200": InspectAccessGroupImpactEvaluationStatus200;
+	"400": InspectAccessGroupImpactEvaluationStatus400;
+	"401": InspectAccessGroupImpactEvaluationStatus401;
+	"403": InspectAccessGroupImpactEvaluationStatus403;
+	"404": InspectAccessGroupImpactEvaluationStatus404;
+	"409": InspectAccessGroupImpactEvaluationStatus409;
+	"422": InspectAccessGroupImpactEvaluationStatus422;
+	"500": InspectAccessGroupImpactEvaluationStatus500;
+	"503": InspectAccessGroupImpactEvaluationStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type InspectAccessGroupImpactEvaluationResponse =
+	| InspectAccessGroupImpactEvaluationStatus200
+	| InspectAccessGroupImpactEvaluationStatus400
+	| InspectAccessGroupImpactEvaluationStatus401
+	| InspectAccessGroupImpactEvaluationStatus403
+	| InspectAccessGroupImpactEvaluationStatus404
+	| InspectAccessGroupImpactEvaluationStatus409
+	| InspectAccessGroupImpactEvaluationStatus422
+	| InspectAccessGroupImpactEvaluationStatus500
+	| InspectAccessGroupImpactEvaluationStatus503;
+
 export type UpdateAccessGroupPresentationPath = {
 	/**
 	 * @maxLength 512

@@ -9,6 +9,7 @@ import { accessMembership } from "../database/schema/access-membership";
 import { accessSubject } from "../database/schema/access-identity";
 import { AccessPermissionSchema, decodeAccessPermissionSnapshot } from "./permission";
 import { readSubjectRoleBindingPermissions } from "./role-binding-permissions";
+import { readAccessMemberSetRecipients } from "./member-set-recipients";
 
 const id = z.uuid().toLowerCase(), version = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
 const recipient = z.discriminatedUnion("kind", [
@@ -180,16 +181,25 @@ export async function findRoleAssignmentCeiling(
 		recipient: Exclude<z.infer<typeof recipient>, { kind: "scope-members" }>;
 		recipientEligibility: { membershipId: string; generation: number } | null;
 		managerSubjectId: string;
+		/** Server-owned dynamic Group source; only that same Group approval can cover an individual path effect. */
+		recipientGroupEffect?: { scopeId: string; groupId: string } | null;
 	},
+	observe?: (evidence: {
+		manager: Awaited<ReturnType<typeof readSubjectRoleBindingPermissions>>;
+		approvals: Awaited<ReturnType<typeof readAccessAssignmentCeilings>>;
+		recipientMemberSets: Awaited<ReturnType<typeof readAccessMemberSetRecipients>> | null;
+		memberScopes: string[]; memberships: (typeof accessMembership.$inferSelect)[];
+	}) => Promise<void>,
 ): Promise<string | null> {
 	const request = z.strictObject({ scopeId: id, roleId: id,
 		targetPath: z.array(z.string().regex(/^[a-z0-9][a-z0-9-]{0,255}$/)).max(8), operation: z.enum(["bind", "activate"]),
 		permissions: z.array(AccessPermissionSchema).max(AccessPermissionValues.length), recipient,
 		validFrom: z.date(), validUntil: z.date().nullable(), managerSubjectId: id,
+		recipientGroupEffect: z.strictObject({ scopeId: id, groupId: id }).nullable().default(null),
 		recipientEligibility: z.strictObject({ membershipId: id, generation: version.min(1) }).nullable(),
 	}).parse({ scopeId: input.scopeId, roleId: input.roleId, targetPath: input.targetPath, operation: input.operation,
 		permissions: input.permissions, recipient: input.recipient, recipientEligibility: input.recipientEligibility,
-		validFrom: input.validFrom, validUntil: input.validUntil, managerSubjectId: input.managerSubjectId });
+		validFrom: input.validFrom, validUntil: input.validUntil, managerSubjectId: input.managerSubjectId, recipientGroupEffect: input.recipientGroupEffect });
 	if (request.recipient.kind === "scope-members") throw new AccessAssignmentCeilingUnavailable();
 	if (request.validUntil !== null && request.validUntil <= request.validFrom) throw new AccessAssignmentCeilingConflict();
 	const managementPath = request.operation === "activate" ? ["roles", request.roleId] : request.targetPath;
@@ -199,7 +209,7 @@ export async function findRoleAssignmentCeiling(
 	const sources = manager.bindings.filter(source => source.active && source.binding.targetScopeId === request.scopeId &&
 		scopeCovers(source.terms.targetPath, managementPath) && source.permissions.some(permission => permission.family === "management" && permission.key === required));
 	const approvals = await readAccessAssignmentCeilings(tx, { scopeId: request.scopeId, roleId: request.roleId, managerBindingIds: sources.map(source => source.binding.id) });
-	const memberScopes = [...new Set(approvals.flatMap(({ approval }) => approval.recipientKind === "scope-members" && approval.recipientScopeId ? [approval.recipientScopeId] : []))].sort();
+	const memberScopes = [...new Set(approvals.flatMap(({ approval }) => (approval.recipientKind === "scope-members" || approval.recipientKind === "group" || approval.recipientKind === "all-members") && approval.recipientScopeId ? [approval.recipientScopeId] : []))].sort();
 	if (memberScopes.length > 64) throw new AccessAssignmentCeilingUnavailable();
 	let subjectKind: "principal" | "entity" | null = null;
 	let memberships: (typeof accessMembership.$inferSelect)[] = [];
@@ -213,6 +223,11 @@ export async function findRoleAssignmentCeiling(
 		memberships = await tx.select().from(accessMembership).where(and(eq(accessMembership.subjectId, subject.id), inArray(accessMembership.scopeId, memberScopes)))
 			.orderBy(accessMembership.id).for("share");
 	}
+	const groupScopes = [...new Set(approvals.flatMap(({ approval }) => approval.recipientKind === "group" && approval.recipientScopeId !== null && request.recipientGroupEffect !== null &&
+		approval.recipientScopeId === request.recipientGroupEffect.scopeId && approval.recipientGroupId === request.recipientGroupEffect.groupId ? [approval.recipientScopeId] : []))];
+	const recipientMemberSets = request.recipient.kind === "subject" && groupScopes.length
+		? await readAccessMemberSetRecipients(tx,{ subjectId: request.recipient.subjectId,scopeIds: groupScopes }) : null;
+	await observe?.({ manager, approvals, memberScopes, memberships,recipientMemberSets });
 	const value = (await tx.execute<{ now: string }>(sql`select clock_timestamp()::text as now`)).rows[0]?.now;
 	const now = new Date(value ?? "invalid");
 	if (!Number.isFinite(now.getTime())) throw new AccessAssignmentCeilingUnavailable();
@@ -228,6 +243,19 @@ export async function findRoleAssignmentCeiling(
 		if (approval.recipientKind === "subject" && target.kind === "subject" && approval.recipientSubjectId === target.subjectId) return approval.id;
 		if (approval.recipientKind === "group" && target.kind === "group" && approval.recipientGroupId === target.groupId && approval.recipientScopeId === target.scopeId) return approval.id;
 		if (approval.recipientKind === "all-members" && target.kind === "all-members" && approval.recipientScopeId === target.scopeId) return approval.id;
+		// A named member-set ceiling may cover an individual only through the exact
+		// currently retained admission. Proposed topology cannot authorize its own expansion.
+		if (approval.recipientKind === "all-members" && target.kind === "subject" && request.recipientEligibility) {
+			const eligibility = request.recipientEligibility;
+			if (memberships.some(member => member.id === eligibility.membershipId && member.scopeId === approval.recipientScopeId && member.activeGeneration === eligibility.generation)) return approval.id;
+		}
+		if (approval.recipientKind === "group" && target.kind === "subject" && request.recipientEligibility && recipientMemberSets && request.recipientGroupEffect !== null &&
+			approval.recipientScopeId === request.recipientGroupEffect.scopeId && approval.recipientGroupId === request.recipientGroupEffect.groupId) {
+			const eligibility = request.recipientEligibility;
+			const exact = recipientMemberSets.memberships.some(member => member.id === eligibility.membershipId && member.scopeId === approval.recipientScopeId && member.activeGeneration === eligibility.generation);
+			if (exact && recipientMemberSets.recipients.some(set => set.scopeId === approval.recipientScopeId && set.kind === approval.recipientKind &&
+				(set.kind !== "group" || set.groupId === approval.recipientGroupId))) return approval.id;
+		}
 		if (approval.recipientKind === "scope-members" && target.kind === "subject" && approval.memberSubjectKind === subjectKind && request.recipientEligibility) {
 			const eligibility = request.recipientEligibility;
 			if (memberships.some(member => member.id === eligibility.membershipId && member.scopeId === approval.recipientScopeId && member.activeGeneration === eligibility.generation)) return approval.id;
