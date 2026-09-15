@@ -249,8 +249,21 @@ recapturing current defaults. One private client/user family epoch invalidates a
 of that family's contexts in constant work. Authorization-code replay invalidates
 its exact client-bound context. These are invalidation operations, not synchronous
 token deletion. Native token readers retain current dependency fences; DPoP proof,
-resource authorization and quota remain separate obligations. Runtime provider
-integration and qualification of these primitives are still pending.
+resource authorization and quota remain separate obligations. Provider lifecycle
+callbacks capture consent before code disclosure, retain the captured context at
+exchange/refresh, clamp access/refresh expiry to that context, and check native
+dependencies during introspection/UserInfo. HTTP/runtime integration and
+qualification of these primitives are still pending.
+
+The native protocol transaction commits intentional replay invalidation on a
+protocol 4xx and rolls back provisional protocol writes on 5xx or an uncaught
+failure. Refresh admission authenticates the client and checks its sender proof
+before locking/re-reading the native family. A second use of a rotated token
+invalidates that family instead of returning a cached response; the MCP overlap
+window is explicitly zero. Refresh-token revocation invalidates its original grant
+context without scanning its access-token descendants. Login-session expiry does
+not withdraw an approved offline consent; native grant lifetime and revocation own
+post-issuance validity. A live login session is still required for code exchange.
 
 Account erasure drains access tokens, refresh tokens, protocol consent, native grant
 contexts and families in that order before native consent/preferences. Each batch
@@ -418,7 +431,10 @@ Two reproducible Yarn patches against Better Auth 1.7.3 own the adapter delta:
 - [OAuth Provider patch](../../.yarn/patches/@better-auth-oauth-provider-npm-1.7.3-8fc63cd677.patch)
   separates access-token format from OIDC signing and removes the global session
   key from pairwise access/refresh introspection. Internal token validation retains
-  the real user/session keys needed for lookup and revocation.
+  the real user/session keys needed for lookup and revocation. Its native grant
+  callbacks replace unbounded replay cleanup, capture original consent, cap token
+  expiry and check online dependencies. Opaque-only validation rejects ID tokens
+  as API credentials and preserves operational failures through format fallback.
 - [Core verification patch](../../.yarn/patches/@better-auth-core-npm-1.7.3-79aeed22f4.patch)
   turns invalid remote token claims into authentication failures, allowing MCP to
   return discovery challenges. Infrastructure failures remain operational errors.

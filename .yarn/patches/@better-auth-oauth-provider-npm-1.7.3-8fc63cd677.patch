@@ -1,17 +1,208 @@
+diff --git a/dist/authorize-9whjxVLJ.mjs b/dist/authorize-9whjxVLJ.mjs
+index 6c1d5c51cc553db32900bc750dfd0687420b12b7..beda4020443d409686104a55fbe0a4738d030f20 100644
+--- a/dist/authorize-9whjxVLJ.mjs
++++ b/dist/authorize-9whjxVLJ.mjs
+@@ -3508,8 +3508,10 @@ async function revokeRefreshToken(ctx, opts, token, clientId) {
+ 		error_description: "token not found",
+ 		error: "invalid_request"
+ 	});
++	if (!refreshToken.clientId || refreshToken.clientId !== clientId) return null;
++	if (opts.grantLifecycle?.revokeRefreshToken) return opts.grantLifecycle.revokeRefreshToken({ ctx, clientId, refreshToken });
+ 	if (refreshToken.revoked) {
+-		await invalidateRefreshFamily(ctx, clientId, refreshToken.userId);
++		await invalidateRefreshFamily(ctx, clientId, refreshToken.userId, opts);
+ 		throw new APIError$1("BAD_REQUEST", {
+ 			error_description: "refresh token revoked",
+ 			error: "invalid_request"
+@@ -3530,7 +3532,7 @@ async function revokeRefreshToken(ctx, opts, token, clientId) {
+ 		increment: {},
+ 		set: { revoked: /* @__PURE__ */ new Date(iat * 1e3) }
+ 	})) {
+-		await invalidateRefreshFamily(ctx, clientId, refreshToken.userId);
++		await invalidateRefreshFamily(ctx, clientId, refreshToken.userId, opts);
+ 		throw new APIError$1("BAD_REQUEST", {
+ 			error_description: "refresh token revoked",
+ 			error: "invalid_request"
+@@ -5721,6 +5723,7 @@ async function redirectWithAuthorizationCode(ctx, opts, verificationValue) {
+ 			resource: verificationValue.resource
+ 		})
+ 	};
++	await opts.grantLifecycle?.beforeAuthorizationCode?.({ ctx, authorizationCodeId: data.identifier, verificationValue: { ...verificationValue, type: "authorization_code" } });
+ 	await ctx.context.internalAdapter.createVerificationValue({
+ 		...data,
+ 		createdAt: /* @__PURE__ */ new Date(iat * 1e3)
 diff --git a/dist/introspect-CbhhXT0E.mjs b/dist/introspect-CbhhXT0E.mjs
-index e5829d8e200dbb7fe3f451b62d085b0f29856b05..8a0f93009a30072b6a350f16ab4b5ad2b1d6defe 100644
+index e5829d8e200dbb7fe3f451b62d085b0f29856b05..a684769435408a3da7c9c13be9a3fcbebc9193d7 100644
 --- a/dist/introspect-CbhhXT0E.mjs
 +++ b/dist/introspect-CbhhXT0E.mjs
-@@ -1797,7 +1797,7 @@ async function createUserTokens(ctx, opts, params) {
- 	const exp = grantIssuance.accessTokenExpiresAtSeconds;
- 	const refreshTokenExp = grantIssuance.refreshTokenExpiresAtSeconds;
+@@ -1,5 +1,5 @@
+ import { t as __exportAll } from "./rolldown-runtime-wcPFST8Q.mjs";
+-import { A as collectExtensionAccessTokenClaims, C as storeToken, E as validateClientCredentials, F as getExtensionGrantHandler, L as getSupportedGrantTypes, M as collectExtensionUserInfoClaims, R as hasUserInfoClaimExtension, T as toResourceList, a as getClient, b as resolveSubjectIdentifier, c as getStoredToken, h as parseClientMetadata, i as extractClientCredentials, j as collectExtensionIdTokenClaims, l as isPKCERequired, n as decryptStoredClientSecret, o as getJwtPlugin, p as normalizeTimestampValue, r as destructureCredentials, t as clientAllowsGrant, w as toAudienceClaim, y as resolveSessionAuthTime } from "./utils-oOcdCCVw.mjs";
++import { A as collectExtensionAccessTokenClaims, C as storeToken, D as validateClientScopes, E as validateClientCredentials, F as getExtensionGrantHandler, L as getSupportedGrantTypes, M as collectExtensionUserInfoClaims, R as hasUserInfoClaimExtension, T as toResourceList, a as getClient, b as resolveSubjectIdentifier, c as getStoredToken, h as parseClientMetadata, i as extractClientCredentials, j as collectExtensionIdTokenClaims, l as isPKCERequired, n as decryptStoredClientSecret, o as getJwtPlugin, p as normalizeTimestampValue, r as destructureCredentials, t as clientAllowsGrant, w as toAudienceClaim, y as resolveSessionAuthTime } from "./utils-oOcdCCVw.mjs";
+ import { APIError } from "better-auth/api";
+ import { generateRandomString, symmetricDecrypt, symmetricEncrypt } from "better-auth/crypto";
+ import { APIError as APIError$1 } from "better-call";
+@@ -1495,7 +1495,8 @@ async function createOpaqueAccessToken(ctx, opts, user, client, scopes, payload,
+ *
+ * @internal
+ */
+-async function invalidateRefreshFamily(ctx, clientId, userId) {
++async function invalidateRefreshFamily(ctx, clientId, userId, opts) {
++	if (opts?.grantLifecycle?.invalidateRefreshFamily) return opts.grantLifecycle.invalidateRefreshFamily({ ctx, clientId, userId });
+ 	const refreshTokens = await ctx.context.adapter.findMany({
+ 		model: "oauthRefreshToken",
+ 		where: [{
+@@ -1525,7 +1526,8 @@ async function invalidateRefreshFamily(ctx, clientId, userId) {
+ 		}]
+ 	});
+ }
+-async function revokeTokensIssuedForAuthorizationCode(ctx, authorizationCodeId) {
++async function revokeTokensIssuedForAuthorizationCode(ctx, authorizationCodeId, clientId, opts) {
++	if (opts?.grantLifecycle?.revokeAuthorizationCode) return opts.grantLifecycle.revokeAuthorizationCode({ ctx, authorizationCodeId, clientId });
+ 	const deleteIssuedTokens = async (model) => {
+ 		try {
+ 			await ctx.context.adapter.deleteMany({
+@@ -1794,10 +1796,10 @@ async function createUserTokens(ctx, opts, params) {
+ 	});
+ 	const audienceClaim = grantIssuance.audienceClaim;
+ 	const effectiveScopes = grantIssuance.effectiveScopes;
+-	const exp = grantIssuance.accessTokenExpiresAtSeconds;
+-	const refreshTokenExp = grantIssuance.refreshTokenExpiresAtSeconds;
++	let exp = grantIssuance.accessTokenExpiresAtSeconds;
++	let refreshTokenExp = grantIssuance.refreshTokenExpiresAtSeconds;
  	const isRefreshToken = user && clientAllowsGrant(client, "refresh_token") && (existingRefreshToken?.scopes?.includes("offline_access") || scopes.includes("offline_access"));
 -	const isJwtAccessToken = audienceClaim && !opts.disableJwtPlugin;
 +	const isJwtAccessToken = audienceClaim && !opts.disableJwtPlugin && !opts.forceOpaqueAccessTokens;
  	const isIdToken = user && effectiveScopes.includes("openid");
  	const metadata = parseClientMetadata(client.metadata);
  	const additionalIdTokenClaims = isIdToken && user ? {
-@@ -2494,8 +2494,10 @@ async function resolveIntrospectionSub(ctx, opts, payload, introspectingClient)
+@@ -1823,12 +1825,18 @@ async function createUserTokens(ctx, opts, params) {
+ 		verificationValue
+ 	}) : void 0;
+ 	const refreshResources = grantIssuance.refreshResources;
+-	const confirmation = params.confirmation ?? await resolveDpopTokenBinding(ctx, opts, {
++	const confirmation = params.confirmationResolved ? params.confirmation : params.confirmation ?? await resolveDpopTokenBinding(ctx, opts, {
+ 		client,
+ 		grantIssuance,
+ 		verificationValue,
+ 		refreshToken: existingRefreshToken
+ 	});
++	if (opts.grantLifecycle?.beforeIssue) {
++		const limit = await opts.grantLifecycle.beforeIssue({ ctx, params, scopes: effectiveScopes, resources: params.resources, refreshResources, confirmation });
++		if (!Number.isSafeInteger(limit.expiresAtSeconds) || limit.expiresAtSeconds <= iat) throw new APIError("BAD_REQUEST", { error: "invalid_grant", error_description: "Native grant has expired" });
++		exp = Math.min(exp, limit.expiresAtSeconds);
++		refreshTokenExp = Math.min(refreshTokenExp, limit.expiresAtSeconds);
++	}
+ 	const requestedUserInfoClaims = params.requestedUserInfoClaims ?? existingRefreshToken?.requestedUserInfoClaims ?? [];
+ 	const earlyRefreshToken = isRefreshToken && user && !isJwtAccessToken ? await createRefreshToken(ctx, opts, user, referenceId, params.authorizationCodeId, client, effectiveScopes, {
+ 		iat,
+@@ -1894,7 +1902,7 @@ async function checkVerificationValue(ctx, opts, code, client_id, redirect_uri,
+ 	const authorizationCodeId = await storeToken(opts.storeTokens, code, "authorization_code");
+ 	const verification = await ctx.context.internalAdapter.consumeVerificationValue(authorizationCodeId);
+ 	if (!verification) {
+-		await revokeTokensIssuedForAuthorizationCode(ctx, authorizationCodeId);
++		await revokeTokensIssuedForAuthorizationCode(ctx, authorizationCodeId, client_id, opts);
+ 		throw new APIError("BAD_REQUEST", {
+ 			error_description: "invalid code",
+ 			error: "invalid_grant"
+@@ -1971,6 +1979,8 @@ async function handleAuthorizationCodeGrant(ctx, opts) {
+ 		error_description: "Either code_verifier or client_secret is required",
+ 		error: "invalid_request"
+ 	});
++	// Authenticate before consuming a code or invalidating its issued context.
++	const client = await validateClientCredentials(ctx, opts, client_id, client_secret, void 0, preVerified, "authorization_code", authMethod);
+ 	/** Get and check Verification Value */
+ 	const { verificationValue, effectiveResources, authorizedResources, authorizationCodeId } = await checkVerificationValue(ctx, opts, code, client_id, redirect_uri, resources);
+ 	const scopes = verificationValue.query.scope?.split(" ");
+@@ -1978,8 +1988,7 @@ async function handleAuthorizationCodeGrant(ctx, opts) {
+ 		error_description: "verification scope unset",
+ 		error: "invalid_scope"
+ 	});
+-	/** Verify Client */
+-	const client = await validateClientCredentials(ctx, opts, client_id, client_secret, scopes, preVerified, "authorization_code", authMethod);
++	validateClientScopes(client, scopes);
+ 	if (isPKCERequired(client, {
+ 		scopes: (verificationValue.query?.scope)?.split(" ") || [],
+ 		nonce: verificationValue.query?.nonce
+@@ -2143,6 +2152,10 @@ async function handleRefreshTokenGrant(ctx, opts) {
+ 		});
+ 	}
+ 	const client = await validateClientCredentials(ctx, opts, client_id, client_secret, requestedScopes ?? scopes, preVerified, "refresh_token", authMethod);
++	const nativeRefreshProof = opts.grantLifecycle?.beforeRefresh ? await resolveRefreshTokenRotationReplayRequest(ctx, opts, {
++		client, refreshToken, scopes: requestedScopes ?? scopes, resources: resources ?? refreshToken.resources
++	}) : void 0;
++	if (nativeRefreshProof) await opts.grantLifecycle.beforeRefresh({ ctx, client, refreshToken, token: refresh_token });
+ 	if (refreshToken.revoked) {
+ 		if (isWithinRefreshTokenReuseInterval(refreshToken)) {
+ 			const replay = await getRefreshTokenRotationReplay(ctx, refreshToken, await resolveRefreshTokenRotationReplayRequest(ctx, opts, {
+@@ -2157,7 +2170,7 @@ async function handleRefreshTokenGrant(ctx, opts) {
+ 				error: "invalid_grant"
+ 			});
+ 		}
+-		await invalidateRefreshFamily(ctx, client_id, refreshToken.userId);
++		await invalidateRefreshFamily(ctx, client_id, refreshToken.userId, opts);
+ 		throw new APIError("BAD_REQUEST", {
+ 			error_description: "invalid refresh token",
+ 			error: "invalid_grant"
+@@ -2174,6 +2187,8 @@ async function handleRefreshTokenGrant(ctx, opts) {
+ 		scopes: requestedScopes ?? scopes,
+ 		user,
+ 		grantType: "refresh_token",
++		confirmation: nativeRefreshProof?.confirmation,
++		confirmationResolved: !!nativeRefreshProof,
+ 		referenceId: refreshToken.referenceId,
+ 		authorizationCodeId: refreshToken.authorizationCodeId,
+ 		sessionId: refreshToken.sessionId,
+@@ -2310,6 +2325,7 @@ async function validateOpaqueAccessToken(ctx, opts, token, clientId) {
+ 	});
+ 	if (!accessToken.expiresAt || accessToken.expiresAt < /* @__PURE__ */ new Date()) return inactiveAccessToken();
+ 	if (accessToken.revoked) return inactiveAccessToken();
++	if (opts.grantLifecycle?.isTokenActive && !await opts.grantLifecycle.isTokenActive({ ctx, kind: "access_token", tokenId: accessToken.id, clientId: accessToken.clientId })) return inactiveAccessToken();
+ 	const resources = Array.isArray(accessToken.resources) ? accessToken.resources : void 0;
+ 	let client;
+ 	if (accessToken.clientId) {
+@@ -2322,7 +2338,7 @@ async function validateOpaqueAccessToken(ctx, opts, token, clientId) {
+ 		})) return inactiveAccessToken();
+ 	}
+ 	const sessionId = accessToken.sessionId ?? void 0;
+-	if (sessionId) {
++	if (sessionId && !opts.grantLifecycle?.isTokenActive) {
+ 		const session = await ctx.context.adapter.findOne({
+ 			model: "session",
+ 			where: [{
+@@ -2395,6 +2411,7 @@ async function validateRefreshToken(ctx, opts, token, clientId) {
+ 	if (!refreshToken.clientId || refreshToken.clientId !== clientId) return { active: false };
+ 	if (!refreshToken.expiresAt || refreshToken.expiresAt < /* @__PURE__ */ new Date()) return { active: false };
+ 	if (refreshToken.revoked) return { active: false };
++	if (opts.grantLifecycle?.isTokenActive && !await opts.grantLifecycle.isTokenActive({ ctx, kind: "refresh_token", tokenId: refreshToken.id, clientId: refreshToken.clientId })) return { active: false };
+ 	let sessionId = refreshToken.sessionId ?? void 0;
+ 	if (sessionId) {
+ 		const session = await ctx.context.adapter.findOne({
+@@ -2437,19 +2454,21 @@ function isInactiveTokenError(error) {
+ * a JWT access token, which resolves UserInfo claims by scope).
+ */
+ async function resolveAccessTokenValidation(ctx, opts, token, clientId) {
++	// OIDC signing does not make ID tokens valid API credentials.
++	if (opts.forceOpaqueAccessTokens) return validateOpaqueAccessToken(ctx, opts, token, clientId);
+ 	try {
+ 		return {
+ 			payload: await validateJwtAccessToken(ctx, opts, token, clientId),
+ 			requestedUserInfoClaims: []
+ 		};
+ 	} catch (err) {
+-		if (err instanceof APIError$1) {} else if (err instanceof Error) throw err;
++		if (err instanceof APIError$1) { if (!isInactiveTokenError(err)) throw err; } else if (err instanceof Error) throw err;
+ 		else throw new Error(err);
+ 	}
+ 	try {
+ 		return await validateOpaqueAccessToken(ctx, opts, token, clientId);
+ 	} catch (err) {
+-		if (err instanceof APIError$1) {} else if (err instanceof Error) throw err;
++		if (err instanceof APIError$1) { if (!isInactiveTokenError(err)) throw err; } else if (err instanceof Error) throw err;
+ 		else throw new Error("Unknown error validating access token");
+ 	}
+ 	throw createInvalidAccessTokenError();
+@@ -2494,8 +2513,10 @@ async function resolveIntrospectionSub(ctx, opts, payload, introspectingClient)
  	const issuingClient = issuerClientId === introspectingClient.clientId ? introspectingClient : await getClient(ctx, opts, issuerClientId);
  	if (!issuingClient) return payload;
  	const resolvedSub = await resolveSubjectIdentifier(payload.sub, issuingClient, opts);
@@ -23,11 +214,67 @@ index e5829d8e200dbb7fe3f451b62d085b0f29856b05..8a0f93009a30072b6a350f16ab4b5ad2
  		sub: resolvedSub
  	};
  }
+@@ -2518,7 +2539,7 @@ async function introspectEndpoint(ctx, opts) {
+ 			return resolveIntrospectionSub(ctx, opts, await validateAccessToken(ctx, opts, token, client.clientId), client);
+ 		} catch (error) {
+ 			if (error instanceof APIError$1) {
+-				if (token_type_hint === "access_token") throw error;
++				if (token_type_hint === "access_token" || !isInactiveTokenError(error)) throw error;
+ 			} else if (error instanceof Error) throw error;
+ 			else throw new Error(error);
+ 		}
+@@ -2526,7 +2547,7 @@ async function introspectEndpoint(ctx, opts) {
+ 			return resolveIntrospectionSub(ctx, opts, await validateRefreshToken(ctx, opts, (await decodeRefreshToken(opts, token)).token, client.clientId), client);
+ 		} catch (error) {
+ 			if (error instanceof APIError$1) {
+-				if (token_type_hint === "refresh_token") throw error;
++				if (token_type_hint === "refresh_token" || !isInactiveTokenError(error)) throw error;
+ 			} else if (error instanceof Error) throw error;
+ 			else throw new Error(error);
+ 		}
 diff --git a/dist/oauth-1Ud-hvZY.d.mts b/dist/oauth-1Ud-hvZY.d.mts
-index 130fd5d8f3ddd36d1b776338367af5b8cb7f0e79..241250642b217d9057abdfb99e5fea55fc2906ae 100644
+index 130fd5d8f3ddd36d1b776338367af5b8cb7f0e79..0d56bbbe9c3e91e8315bade72911185fc4f25425 100644
 --- a/dist/oauth-1Ud-hvZY.d.mts
 +++ b/dist/oauth-1Ud-hvZY.d.mts
-@@ -1833,6 +1833,14 @@ interface OAuthOptions<Scopes extends readonly Scope[] = InternallySupportedScop
+@@ -1713,6 +1713,37 @@ interface OAuthOptions<Scopes extends readonly Scope[] = InternallySupportedScop
+    *
+    * @param info - context that may be useful when creating custom fields
+    */
++  /**
++   * Native online grant policy. Callbacks run inside the caller-owned transaction;
++   * a callback failure prevents issuance. Invalidation callbacks replace physical
++   * fan-out cleanup and must make every dependent token fail online validation.
++   * The caller must commit intentional replay invalidation on protocol errors.
++   */
++  grantLifecycle?: {
++    /** Native online lifetime/dependency policy replaces login-session expiry for stored access tokens. */
++    isTokenActive?: (info: { ctx: GenericEndpointContext; kind: "access_token" | "refresh_token"; tokenId: string; clientId?: string }) => Awaitable<boolean>;
++    /** Capture the selected consent before storing or disclosing a new code. */
++    beforeAuthorizationCode?: (info: { ctx: GenericEndpointContext; authorizationCodeId: string; verificationValue: VerificationValue }) => Awaitable<void>;
++    /** Called after protocol/client/DPoP checks and before any token insert. */
++    beforeIssue?: (info: {
++      ctx: GenericEndpointContext;
++      params: OAuthTokenIssueParams & { grantType: GrantType; authorizationCodeId?: string };
++      scopes: string[];
++      resources?: string[];
++      refreshResources?: string[];
++      confirmation?: Confirmation;
++    }) => Awaitable<{ expiresAtSeconds: number }>;
++    /** After client authentication, before reuse/rotation; retain native family fences. */
++    beforeRefresh?: (info: {
++      ctx: GenericEndpointContext;
++      client: SchemaClient<Scope[]>;
++      refreshToken: OAuthRefreshToken<Scope[]> & { id: string };
++      token: string;
++    }) => Awaitable<void>;
++    invalidateRefreshFamily?: (info: { ctx: GenericEndpointContext; clientId: string; userId: string }) => Awaitable<void>;
++    revokeAuthorizationCode?: (info: { ctx: GenericEndpointContext; authorizationCodeId: string; clientId: string }) => Awaitable<void>;
++    revokeRefreshToken?: (info: { ctx: GenericEndpointContext; clientId: string; refreshToken: OAuthRefreshToken<Scope[]> & { id: string } }) => Awaitable<void>;
++  };
+   customTokenResponseFields?: (info: {
+     /** The grant type being processed */grantType: GrantType;
+     /**
+@@ -1833,6 +1864,14 @@ interface OAuthOptions<Scopes extends readonly Scope[] = InternallySupportedScop
     * @default false
     */
    disableJwtPlugin?: boolean;

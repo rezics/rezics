@@ -50,6 +50,14 @@ function retryable(error: unknown): boolean {
 	}
 	return error instanceof AccessRoleBindingDiscoveryChanged;
 }
+/** Translate recognized native policy outcomes without opening a transaction or hiding integrity failures. @internal */
+export function rethrowAccessFailure(error: unknown): never {
+	if (denied.some(type => error instanceof type)) throw new AccessDenied();
+	if (changed.some(type => error instanceof type)) throw new AccessChanged();
+	if (unavailable.some(type => error instanceof type)) throw new AccessUnavailable();
+	if (error instanceof PrivateRecipientSelectorInvalid) throw new AccessInputInvalid();
+	throw error;
+}
 /**
  * Retry only aborted/discovery-invalidated whole transactions, then present private-safe outcomes.
  * @internal
@@ -62,11 +70,7 @@ export async function runAccessTransaction<Result>(work: (tx: DatabaseTransactio
 		try { return await database.transaction(work); }
 		catch (error) {
 			if (retryable(error)) { if (attempt < 2) continue; throw new AccessUnavailable(); }
-			if (denied.some(type => error instanceof type)) throw new AccessDenied();
-			if (changed.some(type => error instanceof type)) throw new AccessChanged();
-			if (unavailable.some(type => error instanceof type)) throw new AccessUnavailable();
-			if (error instanceof PrivateRecipientSelectorInvalid) throw new AccessInputInvalid();
-			throw error;
+			rethrowAccessFailure(error);
 		}
 	}
 	throw new AccessUnavailable();
