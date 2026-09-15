@@ -10,7 +10,7 @@ Follow the [execution workflow](execution-workflow.md) for program authority, ph
 | Phase | `implementation`. |
 | Owners | [Identity/access](../architecture/identity-and-access.md), [connected apps](../architecture/connected-apps.md), [access vocabulary](../../libraries/access/README.md) and [capacity obligations](../architecture/identity-access-capacity.md). |
 | Deliverables | M01 persistence, domain commands, account/security/management APIs, OAuth/OIDC/MCP adapters, transports and workers; M06 Org/Realm membership, Groups, Roles and representation; affected existing authorization/disclosure consumers across modules. Include required revocation, erasure and recovery implementations. |
-| Exclusions | Frontend experiences, unrelated domain features and complete M02-M09 implementations; optional token exchange, third-party hosted accounts, uploaded-agent/Hub execution and cross-database operation. Record newly discovered prerequisites explicitly. |
+| Exclusions | Frontend experiences, unrelated domain features and complete M02-M09 implementations; Subscribe/Pro runtime in M10; optional token exchange, third-party hosted accounts, uploaded-agent/Hub execution and cross-database operation. Record newly discovered prerequisites explicitly. |
 | Acceptance | Scoped G2/G3 using [IAM01-IAM28 and APP01-APP14](../testing/identity-and-access.md) and affected foundation/community cases, including applicable concurrency, erasure and capacity obligations. Unavailable full-system dependencies remain for G4; this scope does not qualify all of M01/M06/G4. |
 
 ## Document ownership
@@ -61,6 +61,13 @@ This follow-on sequence does not change the active IAM scope or phase above.
 
 ## Modules and current target qualification
 
+[M10 Subscribe and Realm participation](modules/subscriptions-and-pro.md) is a
+selected follow-on target: native multi-plan subscriptions, independent gifted
+benefits and ordinary Realm quotas/review, with Rezics Pro as the first operated
+Realm. Its implementation depends on selected M01/M03/M06/M09 contracts and requires
+an explicit active-scope selection. Documenting that target does not activate new
+runtime work, change the current phase or add unexecuted results to existing gates.
+
 This is the sole progress table. Module files detail remaining work; linked test owners retain the exact scope and revision of earlier evidence. Partial evidence does not qualify the complete replacement target.
 
 | ID | Module | Dependencies | Design | Implementation | Verification |
@@ -74,3 +81,4 @@ This is the sole progress table. Module files detail remaining work; linked test
 | M07 | [Sources and converters](modules/sources-and-converters.md) | M01/M02 source contracts; M01-M04 native adoption | Schema.org/Wikidata full-index profiles selected alongside catalog sources; field conformance pending | Pending target completion | Pending |
 | M08 | [Skill, Prompt and MCP Hub](modules/ai-hub.md) | M01-M04 | Catalog defined; execution/hosting open | Pending target completion | Pending |
 | M09 | [Search and operations](modules/search-and-operations.md) | M01 and participating events | Rating distributions, event-date indexes and source-query/export profiles selected | In progress | G2 partial; [recommendation evidence](../testing/recommendations.md), [native diagnostics](../../services/main/performance/README.md#native-failure-artifacts) and [open failures](../testing/known-failures.md); source interoperability, disclosure, delivery, capacity and restoration pending. |
+| M10 | [Subscribe and Realm participation](modules/subscriptions-and-pro.md) | Selected M01, M03, M06, M09 contracts | Native multi-plan, independent paid/complimentary benefits, reusable Realm policies and exact-version Pro scope selected | Runtime implementation not activated | [SUB/PRO, capacity and experience scenarios](../testing/subscriptions-and-pro.md) specified; no M10 gate qualified. |

@@ -18,11 +18,16 @@ This matrix defines G4 evidence. See the [plan's gates](README.md#acceptance-gat
 | Authority | Revocation/ownership/erasure across content, relations, media, search, messages, exports and jobs. |
 | Mixed identity and membership | [IAM01-IAM28](../testing/identity-and-access.md): private principals, many-to-many representation, mixed grantees, Groups/custom Roles, admission generations, assignment ceilings, complete request proofs, institutional/dependent lifecycle and recovery. |
 | Connected applications | [APP01-APP14](../testing/identity-and-access.md): actual private token profile, Entity connections, consent/installation isolation, credential lifecycle, REST/MCP parity, Bun CIMD egress, bounded webhooks and quota ownership. |
+| Subscribe and Realm participation, upon M10 activation | [SUB01-SUB24, PRO01-PRO24 and CAPSUB01-CAPSUB08](../testing/subscriptions-and-pro.md): native multi-plan commerce, independent gifts, current benefit proofs, local quotas/review, exact-version Pro discovery and recovery. |
 | Reliability | Replay, fencing, cancellation, interrupted large operations, merge/split and recommendation recovery. |
 | Capacity | EXPLAIN/load/skew evidence, explicit limits, no ignored crashes, storage/WAL/recovery at 500M/3B. |
 | Recovery | Restorable database/objects, erasure frontier, reconciled projections/checkpoints and observed RPO/RTO. |
 
 Run applicable [integrated tests](../testing/backend-integration.md) during each scope's verification as dependencies become available; complete the combined matrix for G4. External-site availability belongs to live-source checks, not deterministic acceptance. Fixed fixtures and checksummed large datasets make offline and scale runs reproducible.
+
+The Subscribe row is a selected follow-on contract. It neither expands the current
+IAM implementation scope nor retroactively qualifies or invalidates its recorded
+evidence; include it in combined acceptance when M10 runtime work is activated.
 
 These gates use one PostgreSQL write authority with logical owner/aggregate separation. Future database splitting requires its own integrity, routing and operational qualification; it is not required to pass this program's table-boundary contract. Capacity planning and measured limits remain required at both declared scales.
 

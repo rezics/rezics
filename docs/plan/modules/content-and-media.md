@@ -14,4 +14,11 @@ Dependencies: M01 and M02 reference/definition contracts. Owner: dictionary D08-
 
 ## Acceptance
 
+[M10's Realm review application](subscriptions-and-pro.md) consumes this owner's
+exact publication/adoption selections: keep the last accepted Realm version during
+review, recheck transitive disclosure at activation/delivery and preserve independent
+social Publication/Thread identities on cross-Realm repost. This is a dependency of
+Pro qualification, not permission for a review flag on a mutable current head to
+replace the content contract.
+
 Short comments, prose, images, audiovisual content and files use explicit compatible contracts. Realms can adopt different versions/covers. Gallery/source ordering cannot overwrite human selection. Delivery and derivatives obey current access/erasure. Body edits do not rewrite unrelated structures or public heads.

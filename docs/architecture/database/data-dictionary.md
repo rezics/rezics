@@ -413,7 +413,7 @@ These are target contracts and activation criteria, not instructions to install 
 | --- | --- | --- |
 | Registry packages, plugins, skills | Package coordinate(namespace/ecosystem/name), package release/digest, manifest entry(path, exact file), declared dependency range and resolved lock target | Software project/content versus registry coordinate versus artifact versus installed instance; describing a skill grants no execution |
 | Product/hardware | Product model, variant/specification, physical item, compatibility relation, condition observation | GPU chip/model/card variant/individual serial; review of model versus seller/item |
-| Market/commerce | Offer(seller,target,terms), price observation(currency/tax/time), order, fulfillment, entitlement and payment ledger | Existing book/software identity stays in its owner; external source price is not entitlement; money requires its own immutable accounting rules |
+| Market/commerce | General sales, price observations, orders and marketplace settlement; Subscribe is selected separately in D22 | Existing book/software identity stays in its owner; external source price is not entitlement; D22 does not activate general commerce or seller payouts |
 | Education | Course definition, syllabus version, offering(term/institution), enrollment and learning occurrence | Course code is institution/context qualified; public catalog and private enrollment separated |
 | Hosted third-party accounts | Provider/tenant account, credential, recovery, assurance and private setting boundaries when elected | Shared Entity connections and verifiable representation are selected in D02; hosting another platform's account system remains deferred |
 | Compute/services | Service specification, deployment instance, capability/price observation, job/run and metering | Model/skill content versus execution versus consumed quota; log retention not content history |
@@ -508,3 +508,39 @@ These use native software/content/assets and typed definitions; runtime executio
 | Registry coordinate/release | Ecosystem/namespace/name, exact artifact/manifest, source and publisher claims | Coordinate/version label differs from software and immutable artifact identity. |
 | MCP endpoint and observation | Native service REF, locator, elected protocol version, auth-context class, observed capability manifest | Endpoint reachability is not full capability proof; credentials remain private and observations retain their scope. |
 | Capability description | Observation/manifest-qualified tool/resource/prompt identity, parameter/resource/message contract and provenance | Distinct MCP capability families; changed observed contract cannot silently reinterpret cached descriptions. |
+
+## D22. Subscribe and participation policy contracts
+
+[Subscribe](../subscriptions.md) owns the selected commercial/benefit semantics;
+[Realm participation](../realm-participation-policies.md) owns local admission,
+metering, review and the first Pro application. These are target physical families
+to implement through native generators after [M10](../../plan/modules/subscriptions-and-pro.md)
+activation, not a statement that the tables or endpoints already exist.
+Use concrete FKs and the existing typed REF/access-subject/access-scope contracts.
+
+| Family | Keys and meaning | Required invariant / access path |
+| --- | --- | --- |
+| subscription_offering | Stable ID, eligible target REF, operating Entity FK, lifecycle/control revision | Target, seller and covered resources are distinct; current authority required; target/operator reverse indexes |
+| subscription_plan_group | Offering/group ID, replaceable or parallel policy, revision | Purchase compatibility only; complimentary grants never occupy a purchased selection |
+| subscription_plan, subscription_plan_revision, subscription_price | Offering/group/plan keys, immutable terms/benefit revision selections, currency/minor units/interval | Native multi-plan support; exact price/terms on purchase; offered revision/order keysets |
+| subscription_benefit, subscription_benefit_revision, subscription_benefit_binding | Typed benefit identity/semantics, approved target scope/role or meter mapping, authority ceiling | No arbitrary permission strings or inferred cross-owner grants; compatible scope/unit/window needed for merging |
+| subscription_agreement, subscription_agreement_revision | Private beneficiary and payer, exact purchased plan/price, provider account/agreement key, interval and renewal intent | Immutable purchased terms; unique replaceable-group selection; source-specific history, never effective-gift level as upgrade base |
+| subscription_operation, subscription_provider_event, subscription_provider_effect | Operation/quote/consent, exact source agreement, verified event/effect keys, pending/settled state | Provider account/environment included in uniqueness; idempotent local fulfillment and bounded due-work reconciliation |
+| contributor_award, complimentary_award | Beneficiary, issuer/program decision, exact benefit revision/scope/validity, operation receipt | Independent sources; no automatic provider transaction, price adjustment, subscription cancellation or transfer |
+| entitlement_grant, entitlement_grant_revision | Beneficiary/benefit/scope, exactly one concrete agreement/award source FK, validity and revocation | Retain provenance and independent overlapping sources; source-specific withdrawal cannot erase another source |
+| entitlement_benefit_head | Beneficiary/benefit/scope, control revision, verified current projection/next boundary | Derived from grants; current validity/completeness required; indexed lookup, not beneficiary-by-resource expansion |
+| realm_participation_policy, realm_participation_policy_revision | Realm/current head, immutable admission/meter/review settings and exact Rule selections | Policy changes do not reset usage, bypass grantability or rewrite historical Rule consent |
+| participation_meter, participation_meter_entry | Beneficiary/Realm/action/window or credit-pool identity; unique debit/credit/reservation effect | Atomic success/intake semantics; finite compute reservations; compensation preserves original units and cannot double-refund |
+| participation_submission, participation_review_attempt | Realm/target exact REV, intake policy/Rules/authority, state/version and leased attempt | Findings are not grants; stale policy/content/worker cannot activate a publication; queue keysets and bounded evidence |
+| Realm accepted-selection and ordered/text projections | Existing publication/adoption REV and realm_unit association; selected revision/order/security generation | Extend D09/D10/D15 owners, not a second publication authority. Same body revision can be reused; current head is not automatically accepted |
+
+Native Group/Role/Binding and Rule/reversal ledgers remain D02/D13 owners. Subscribe
+supplies qualified benefit audiences/conditions through registered IAM adapters;
+it does not create a second permissions system. Private beneficiaries do not become
+public Entity roster rows. Follow, enrollment, selection subscriptions and notification
+subscriptions retain their existing independent identities.
+
+[Capacity](../subscriptions-capacity.md) prices source grants, revisions, meter
+events, review attempts and projections separately at 500M/3B, including relation
+amplification. [SUB/PRO acceptance](../../testing/subscriptions-and-pro.md) covers
+purchase/gift independence, exact-version filtering, rejected states and recovery.

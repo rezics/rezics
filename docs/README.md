@@ -5,6 +5,8 @@
 - [Product design principles](architecture/product-design-principles.md): API-centered capabilities, layered GUI, capability fidelity and evidence-based design choices.
 - [Identity and access](architecture/identity-and-access.md): private AuthPrincipals, shared public Entities, membership, mixed grantees and scoped representation.
 - [Connected applications](architecture/connected-apps.md): third-party Entity connections, OAuth, installations and REZICS MCP access.
+- [Subscribe](architecture/subscriptions.md): native multi-plan offerings for People/Realms, independent purchased and complimentary benefits, commercial lifecycle and authorization boundaries.
+- [Realm participation and Rezics Pro](architecture/realm-participation-policies.md): reusable quotas/review, accepted-version publication and Pro discovery; [capacity](architecture/subscriptions-capacity.md) and [acceptance](testing/subscriptions-and-pro.md) remain unqualified.
 - [Identity and access experience](architecture/identity-and-access-experience.md): ordinary-user defaults and progressively disclosed collaboration/administration.
 - [Database architecture](architecture/database/README.md): target schema, meaning and capacity.
 - [Schema.org and Wikidata interoperability](architecture/semantic-interoperability.md): complete source models, queryable external descriptions, native mappings, export fidelity and coverage; [capacity](architecture/semantic-interoperability-capacity.md) includes source/index amplification.

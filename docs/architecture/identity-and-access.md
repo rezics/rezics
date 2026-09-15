@@ -1437,6 +1437,33 @@ never a stale allow. Recovery replays revocation/erasure frontiers before exposu
 
 ## API contracts
 
+### Subscribe policy integration
+
+The selected [Subscribe contract](subscriptions.md#effective-benefits-and-authorization)
+adds a registered entitlement resolver and native benefit audience/condition adapters
+under M10, not an already implemented IAM recipient kind. Multiple paid and
+complimentary sources can establish one benefit without changing one another's
+commercial state. Resource owners approve exact target/role mappings through the
+same grantability and assignment ceilings; a seller's plan revision cannot widen
+that approval or manufacture another owner's permission.
+
+Personal benefits are verified for the authenticated private beneficiary. They do
+not supply a represented Entity's missing native authority, reveal a private
+subscriber roster or share one controller's access with another controller.
+Ordinary Pro enrollment/attribution still uses this owner's explicit consent,
+membership generations and representation. Ending enrollment or changing a ban
+does not cancel a paid agreement, while continuing payment cannot revive forbidden
+participation. The direct-principal benefit audience must carry an exact native
+resource proof before activation; it is not a cached membership boolean.
+
+Benefit source/mapping revisions and expiry are dependencies of protected effects.
+Revocation and erasure remain current at reads, writes and later delivery. An
+independent gift cannot become an alternative proof for a forbidden operation.
+[SUB18-SUB24](../testing/subscriptions-and-pro.md#subscribe-contract-cases) extends
+this owner's acceptance when that integration is activated.
+
+### Shared API behavior
+
 API capabilities remain complete independently of GUI disclosure level. Keep one
 verified request authority context across owner adapters: direct mode derives its
 AuthPrincipal from authentication, and represented mode selects an Entity and

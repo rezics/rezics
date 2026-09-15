@@ -23,6 +23,19 @@ A user-facing subsite can be composed from a Zone and one or more Collections, w
 
 ## Wiki content and grouping relationships
 
+[Realm participation policies](realm-participation-policies.md) supply reusable
+subscription admission, action/resource budgets and exact-version review. Rezics Pro
+is an ordinary Realm configured through these capabilities. The generic
+[Subscribe owner](subscriptions.md) also supports People and native multi-plan
+offerings; a Realm is neither a purchased plan nor an entitlement source by itself.
+M10 activation is separate from the current IAM/community implementation scope.
+
+An effective Pro publication is an additional query condition over the existing
+Realm association and selected publication/adoption version. Within Realm A,
+selecting Pro means A AND Pro, not the union of their placements. Acceptance of a
+root does not admit unrelated replies or confer body/asset access. Local review,
+withdrawal and adopted revisions preserve other authorized publication contexts.
+
 A Realm's wiki pages may be organized as one or more Collections. The same contextual association can also be represented by an explicit "published in" relationship. When Dynamic Collections are activated, a query over that relationship can present the current set of matching pages. These are different contracts: stored curation, a publication relationship and a computed selection are not three independently writable copies of one membership list.
 
 The relationship must identify its subject, publication/grouping context, state and relevant scope or exact revision. A semantic assertion that something was published in a context is evidence, not authorization to publish or adopt it there. An actual platform publication transition remains owned by the publication/Realm command. Define which accepted relationship the query consumes; a title, tag or source claim cannot silently become an effective publication placement.

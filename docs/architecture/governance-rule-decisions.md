@@ -73,6 +73,19 @@ decision. A restoration that is a new policy judgment instead cites current
 Rules. Content and account domain actions retain their own reversal links so
 their transition-specific invariants remain locally enforceable.
 
+## Configured Realm review
+
+[Realm participation policies](realm-participation-policies.md) extend this
+ledger to configured review activation under M10. AI findings and provider failures
+are evidence/workflow events, not policy decisions. An authorized human or scoped
+delegated policy executor records the actual acceptance/adverse effect with exact
+current Rules, or an exact reversal. Preserve the responsible identity, approved
+automation policy, selected content revision and lease/authority proof. A model
+output cannot select authority, rewrite Rules or bypass the domain transition.
+Human policy ownership remains explicit even when its qualified execution is
+delegated to a native workload. Review notes and model evidence have private
+retention/erasure; they are not copied into immutable public rationales.
+
 ## Workload and capacity
 
 The minimum planning baseline is 500,000,000 decisions and the forward estimate

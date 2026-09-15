@@ -325,6 +325,26 @@ Split/undo is a first-class case with item inventory, candidate destinations, as
 
 Erasure uses durable requests, per-domain items, legal/policy retention disposition and a monotonic erasure ledger outside the restorable data snapshot. Sensitive literals, names, edit summaries and actor metadata are also erasable; protecting only large blobs is inadequate. Dedupe does not join incompatible retention/rights domains. GC marks an unreferenced payload under a storage-domain fence, waits a grace period, and rechecks references before deletion. Restores replay erasure and revocation frontiers before traffic resumes. Immutable audit stores the event and receipt, not an irrevocable copy of the erased secret.
 
+### Subscribe and resource participation
+
+[Subscribe](../subscriptions.md) is a selected native multi-plan capability for
+eligible People/Entities, Realms and other registered targets. Purchased agreements
+and complimentary/contributor grants are independent sources: gifts cannot alter
+purchase eligibility, pricing, billing anchors or renewal, and paid-source withdrawal
+cannot erase independent grants. [D22](data-dictionary.md#d22-subscribe-and-participation-policy-contracts)
+owns its target relational families. [Realm participation policies](../realm-participation-policies.md)
+compose entitlement admission, separate meters and version-bound review. Rezics Pro
+is the first ordinary Realm configuration; no universal Pro identity or alliance
+hierarchy is introduced. Runtime work is separately activated through
+[M10](../../plan/modules/subscriptions-and-pro.md).
+
+Commercial benefits enter the existing authorization model through registered,
+bounded adapters and approved resource mappings. They never replace ownership,
+membership/representation or current disclosure. A Realm's accepted publication
+must select exact reviewed content; Search, media and discussion consumers cannot
+follow an unreviewed source head or import general replies just because a root has
+a Pro association. Scope filtering is an additional conjunction, not authorization.
+
 ## 12. Messages, notifications and personal activity
 
 Private Conversation and Message own their membership/audience and retention. Messages can share content-format/revision infrastructure but never inherit public Publication visibility by default. A message revision is conversation-bound. Membership records specify whether a joiner can see earlier history and whether departure revokes access; default is explicit join/leave visibility intervals. Per-recipient hiding and sender edit/withdrawal are separate operations. Blocking checks initiation and delivery; changing a block does not rewrite all existing messages.

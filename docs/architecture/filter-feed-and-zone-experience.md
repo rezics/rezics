@@ -144,6 +144,30 @@ The frontend-only Advanced Search builder exposes the trusted `kind` control
 under the user-facing “Content type” label and emits the same
 `SearchControlExpression` contract as quick filters.
 
+## Selected Realm participation extension
+
+[Realm participation and Pro](realm-participation-policies.md#pro-query-and-experience-contract)
+uses the same Filter contract and normal Realm publication contexts. This selected
+M10 extension is not a claim that the current Search index implements per-Realm
+accepted versions. A product-selected Pro scope is an enforced conjunction with
+the original Filter, including an existing Realm selection. The simple
+`realmIds: [A, Pro]` control expresses a union and cannot implement A intersect Pro.
+The matching Pro association must itself be active and visible; another Realm's
+state cannot satisfy those conditions.
+
+Keep selection/publication revision and scope through Search, Feed hydration,
+facets, media, scoped details, reply/count readers and recommendation inputs.
+Accepted v1 cannot match unreviewed v2 text from a global current-head document.
+Current body/dependency disclosure remains an independent check. Realm contexts
+shown in a bounded Feed projection are not the authoritative association set.
+
+High-frequency Realm reads need scope-leading candidate/order paths and compatible
+keyset cursors. Retain existing candidate budgets and explicit incomplete results;
+do not scan global content indefinitely, loop through empty pages, or fill Pro
+results from general content. Scope/selection/ranking generations belong in cursor
+and safe-cache identity. [Subscribe capacity](subscriptions-capacity.md) specifies
+this extension's storage, skew and validation envelope.
+
 ## Required Zone experience
 
 Every live Zone must have:

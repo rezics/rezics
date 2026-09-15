@@ -24,6 +24,15 @@ Root removal preserves others' posts. Delegated personas cannot bypass voter uni
 
 Azur Lane and Minecraft wiki scenarios support one or several Collections; a modding ecosystem supports separately maintained Collections and shared or separate Zone presentations. Collection membership, "published in" relationships, adopted revisions and page placement remain independently testable. Removing a presentation or grouping relationship preserves native content identities and other authorized uses.
 
+## Selected Subscribe follow-on
+
+The selected [Subscribe and Realm policy application](subscriptions-and-pro.md)
+adds reusable entitlement admission, action/resource meters and version-bound AI/human
+review when M10 is activated. Keep those changes separate from the active native
+membership scope. Its Pro Realm uses ordinary membership/rules and independent
+publication contexts; general replies and activity do not inherit Pro acceptance
+from a root. Qualify the affected governance/discussion consumers with M10's cases.
+
 ## Optional extension
 
 The [Dynamic Collection implementation guide](../../architecture/realm-collection-zone.md#optional-dynamic-collection-implementation-guide) is available for later activation. Its separate query identity, result semantics, permissions, budgets and recovery tests must be implemented together if activated. Dynamic Collection runtime work is not required by this refactor or its G4/G5 acceptance gates; ordinary Collections must not acquire ambiguous dynamic membership behavior.

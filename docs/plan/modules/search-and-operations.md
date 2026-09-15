@@ -24,4 +24,12 @@ Dependencies: M01 and module event contracts. Owners: database architecture sect
 
 ## Acceptance
 
+The selected [M10 Subscribe/Pro scope](subscriptions-and-pro.md) additionally requires
+Realm-leading retrieval, accepted-version text/snippets/media, local discussion and
+ranking inputs, scoped delivery and entitlement revocation/recovery. Its
+[capacity envelope](../../architecture/subscriptions-capacity.md) and
+[CAPSUB cases](../../testing/subscriptions-and-pro.md#capacity-and-recovery-cases)
+apply upon activation; existing candidate ceilings and one current document per
+Unit do not qualify that extension or permit general-content fallback.
+
 Stale projections cannot leak private content or counts. Failed builds preserve the previous generation. Stale workers cannot duplicate effects or reactivate revoked state. Failures and measured limits remain visible until closed. Fresh rebuild qualification replaces online migration work in this program.

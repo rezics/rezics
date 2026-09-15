@@ -23,6 +23,18 @@ feature contracts specify the actual controls and evidence, not a fixed layer co
 
 Follow [Realm, Collection and Zone composition](../architecture/realm-collection-zone.md). Dynamic Collection interfaces are optional and require their separately qualified backend; the current frontend gate requires ordinary Collection-based composition only.
 
+When [M10](modules/subscriptions-and-pro.md) is activated, add the
+[Subscribe experience](../architecture/subscriptions.md#user-experience-and-disclosure)
+and [Pro scope](../architecture/realm-participation-policies.md#pro-query-and-experience-contract).
+Multiple plans and paid-versus-gifted source views are required from the first
+Subscribe surface. A higher gift cannot hide a lower-plan purchase, change its
+price/upgrade baseline or imply altered renewal. Preserve exact Pro scope and
+accepted versions through Feed/details, review/appeal and notification behavior;
+ordinary drafts and general community experiences retain their own scope.
+Qualify [SUBUX01-SUBUX06](../testing/subscriptions-and-pro.md#experience-cases)
+after the affected backend dependencies. This follow-on does not activate UI work
+inside the current IAM implementation scope.
+
 Apply the [API/UI design skill](../../.agents/skills/api-ui-design/SKILL.md). Keep all permitted alternatives, repeated occurrences, local labels/order and cross-page selections inspectable. An import result marked staged, partial, conflicted or failed cannot be displayed as a completed publication. Preserve user input on recoverable failures. History and reading controls name the relevant selected version; word count, duration, unknown and inapplicable properties follow the [native Work contract](../architecture/database/native-work.md). Backend completion and search/statistic freshness are separate states.
 
 Use existing feature ownership, @rezics/ui and typed locales. Apply [Storybook review](../../.agents/skills/storybook-ui-review/SKILL.md) and the [browser authorization boundary](../../AGENTS.md#data-and-verification-boundaries).
