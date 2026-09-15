@@ -299,10 +299,23 @@ persists and returns the actual adapter result, including native canonical field
 
 Source inspection also found that 1.7.3 serializes client-secret expiry but omits
 it from client schema metadata and does not check a stored client expiry in client
-authentication. The production credential lifecycle must own and enforce secret
-expiry rather than advertise that unqualified provider option as a guarantee.
-Expiry, resolver admission and privacy races still require their native fixtures
-in the program's verification phase.
+authentication. Native shared-secret policy therefore records the current one-way
+digest and a finite half-open lifetime of at most 365 days, paired with the provider
+write in the same transaction. Rotation requires new material and cannot reuse a
+previously issued digest. Retirement retains the old material's digest/lifetime;
+later issuance uses a new key. Only the original producer can return plaintext.
+Receipt replay never reconstructs it; delivery-loss recovery must rotate again
+through a fresh authorized operation instead of creating duplicate client identities.
+
+The current secret reader retains the protocol fence and verifies the stored
+material, active state and database-time lifetime. It returns a predicate for the
+credential-authentication/issuance boundary. Expired or retired secrets cannot
+authenticate there. Secret expiry is separate from already-issued access/refresh
+grant validity; a new valid secret can authenticate a refresh only while the
+original grant and every required epoch/dependency remain current. Protocol hooks
+must consume this native policy; the provider option alone is not the guarantee.
+Expiry, resolver admission and privacy races still require native fixtures in the
+program's verification phase.
 
 ### Token and client profile
 

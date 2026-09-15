@@ -90,6 +90,15 @@ reads; App/client and workload/client indexes serve inventory and invalidation.
 The partial active-workload key prevents concurrent active installation clients
 without rewriting or deleting inactive history.
 
+Managed shared-secret clients add one current lifetime head and immutable secret
+control receipts. Store only fixed-width one-way digests, never plaintext or an
+encrypted replay cache. Use the 224-384-byte indexed-head and 512-1024-byte event
+estimates until measured, retaining the 500,000,000-row and 3,000,000,000-row
+inventories separately for each population. Client/version and client/digest keys
+bound current reads and material-reuse checks; expiry/client keys support bounded
+maintenance without an all-client scan. A rotated secret does not allocate another
+client, workload or installation quota subject.
+
 Role definitions and permission dictionaries may be scope-bounded, but the total
 scope count is not globally bounded. Inventory scope heads, definition revisions,
 role-permission entries and retirement history separately using measured width

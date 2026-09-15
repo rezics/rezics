@@ -17,6 +17,7 @@ export const PostgreSqlSchemaFileNames = [
 	"oauth-client-authority.sql",
 	"workload-principal.sql",
 	"connected-app-client.sql",
+	"oauth-client-secret-policy.sql",
 	"access-subject-policy.sql",
 	"access-role.sql",
 	"access-role-binding.sql",
@@ -107,6 +108,10 @@ export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly 
 };
 
 export const PostgreSqlSchemaFunctionNames = [
+	"guard_oauth_client_secret_policy",
+	"guard_oauth_client_secret_event",
+	"complete_oauth_client_secret_policy",
+	"oauth_client_secret_is_current",
 	"connected_app_client_terms_match_protocol",
 	"guard_connected_app_client_head",
 	"guard_connected_app_client_event",
@@ -482,6 +487,11 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "oauth_client_secret_policy", name: "oauth_client_secret_policy_guard" },
+	{ table: "oauth_client_secret_event", name: "oauth_client_secret_event_guard" },
+	{ table: "oauth_client_secret_event", name: "oauth_client_secret_event_immutable" },
+	{ table: "oauth_client_secret_policy", name: "oauth_client_secret_policy_complete" },
+	{ table: "oauth_client_secret_event", name: "oauth_client_secret_event_complete" },
 	{ table: "connected_app_client", name: "connected_app_client_head_guard" },
 	{ table: "connected_app_client_event", name: "connected_app_client_event_guard" },
 	{ table: "connected_app_client_event", name: "connected_app_client_event_immutable" },

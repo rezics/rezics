@@ -98,3 +98,4 @@ export * from "./connected-app";
 export * from "./oauth-client-authority";
 export * from "./workload-principal";
 export * from "./connected-app-client";
+export * from "./oauth-client-secret-policy";
