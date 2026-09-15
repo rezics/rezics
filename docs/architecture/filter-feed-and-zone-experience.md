@@ -146,27 +146,20 @@ under the user-facing “Content type” label and emits the same
 
 ## Selected Realm participation extension
 
-[Realm participation and Pro](realm-participation-policies.md#pro-query-and-experience-contract)
-uses the same Filter contract and normal Realm publication contexts. This selected
-M10 extension is not a claim that the current Search index implements per-Realm
-accepted versions. A product-selected Pro scope is an enforced conjunction with
-the original Filter, including an existing Realm selection. The simple
-`realmIds: [A, Pro]` control expresses a union and cannot implement A intersect Pro.
-The matching Pro association must itself be active and visible; another Realm's
-state cannot satisfy those conditions.
+[Realm-scoped delivery](realm-scoped-delivery.md) owns fixed site profiles and the
+common API content context, including the independent `pro.rezics.com` entrance.
+It composes the server's site predicate, hosting Zone and user Filter with AND;
+`realmIds: [A, Pro]` remains a union, not the A/Pro intersection. The same accepted
+publication selection drives text, hydration, media, facets and interaction context.
+This M10 target is not implemented by the current one-document-per-Unit text index.
 
-Keep selection/publication revision and scope through Search, Feed hydration,
-facets, media, scoped details, reply/count readers and recommendation inputs.
-Accepted v1 cannot match unreviewed v2 text from a global current-head document.
-Current body/dependency disclosure remains an independent check. Realm contexts
-shown in a bounded Feed projection are not the authoritative association set.
-
-High-frequency Realm reads need scope-leading candidate/order paths and compatible
-keyset cursors. Retain existing candidate budgets and explicit incomplete results;
-do not scan global content indefinitely, loop through empty pages, or fill Pro
-results from general content. Scope/selection/ranking generations belong in cursor
-and safe-cache identity. [Subscribe capacity](subscriptions-capacity.md) specifies
-this extension's storage, skew and validation envelope.
+Reply connections use the same context resolver but their own parent-local
+pagination and [explicit progress contract](realm-scoped-delivery.md#connection-api-and-cursor-semantics).
+Do not force uncertain child existence into a boolean or global reply count. Shared
+Filter syntax does not require reply queries to use a global Feed ordering source.
+Retain bounded work and current authority throughout; unknown/empty Pro results
+cannot trigger general-content fallback. [Capacity](subscriptions-capacity.md)
+defines the separate scoped-reply projection and request envelope.
 
 ## Required Zone experience
 

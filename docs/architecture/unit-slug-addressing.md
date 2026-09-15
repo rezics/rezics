@@ -152,6 +152,17 @@ canonical addresses per target in distinct scopes. That future lookup must not
 change the globally unique Post ID used by relationships, APIs, mutations, or
 cache keys.
 
+### Fixed site origins
+
+The selected [fixed-site delivery contract](realm-scoped-delivery.md#same-origin-site-adapter)
+can serve the same native IDs/route families at an independently configured origin,
+initially `pro.rezics.com`. Keep site/content context through resolution, redirects,
+query keys and share links without adding a second slug store. Validate contextual
+availability before emitting a canonical redirect or private metadata. Frontend
+routing receives the registered site origin; backend presenters still return native
+IDs and optional slug addresses. A fixed Pro page does not redirect to a general
+body merely because that body has a valid global address.
+
 ### Content-language variants
 
 A content-language version is a presentation of the same Unit identity, not a

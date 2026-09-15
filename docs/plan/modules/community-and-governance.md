@@ -32,6 +32,10 @@ review when M10 is activated. Keep those changes separate from the active native
 membership scope. Its Pro Realm uses ordinary membership/rules and independent
 publication contexts; general replies and activity do not inherit Pro acceptance
 from a root. Qualify the affected governance/discussion consumers with M10's cases.
+Use the [multi-context reply contract](../../architecture/realm-scoped-delivery.md#reply-identity-and-multiple-realm-acceptance)
+for create/additional-publication paths, per-destination root/parent admission and
+independent selected revisions. Root-only read checks and global reply statistics
+do not qualify the destination's reply connections or metadata.
 
 ## Optional extension
 

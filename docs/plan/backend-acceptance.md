@@ -18,7 +18,7 @@ This matrix defines G4 evidence. See the [plan's gates](README.md#acceptance-gat
 | Authority | Revocation/ownership/erasure across content, relations, media, search, messages, exports and jobs. |
 | Mixed identity and membership | [IAM01-IAM28](../testing/identity-and-access.md): private principals, many-to-many representation, mixed grantees, Groups/custom Roles, admission generations, assignment ceilings, complete request proofs, institutional/dependent lifecycle and recovery. |
 | Connected applications | [APP01-APP14](../testing/identity-and-access.md): actual private token profile, Entity connections, consent/installation isolation, credential lifecycle, REST/MCP parity, Bun CIMD egress, bounded webhooks and quota ownership. |
-| Subscribe and Realm participation, upon M10 activation | [SUB01-SUB24, PRO01-PRO24 and CAPSUB01-CAPSUB08](../testing/subscriptions-and-pro.md): native multi-plan commerce, independent gifts, current benefit proofs, local quotas/review, exact-version Pro discovery and recovery. |
+| Subscribe and Realm participation, upon M10 activation | [SUB/PRO, SITE/RPLY and CAPSUB cases](../testing/subscriptions-and-pro.md): native multi-plan commerce, independent gifts, current benefit proofs, local quotas/review, fixed-site context, multi-Realm reply connections, exact-version Pro discovery and recovery. |
 | Reliability | Replay, fencing, cancellation, interrupted large operations, merge/split and recommendation recovery. |
 | Capacity | EXPLAIN/load/skew evidence, explicit limits, no ignored crashes, storage/WAL/recovery at 500M/3B. |
 | Recovery | Restorable database/objects, erasure frontier, reconciled projections/checkpoints and observed RPO/RTO. |

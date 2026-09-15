@@ -242,6 +242,15 @@ Ordinary leaf insertion appends to the active layout and its change journal; it 
 
 Top-level status is explicit: known root, resolved reply, unresolved external parent, or unavailable parent information. Unknown never means root. Imported cyclic claims may remain evidence but cannot activate as a validated native reply tree. A cross-Realm repost creates an independent publication; an administrative transfer preserving an utterance requires a dedicated scope-transfer decision and revalidated audience, not a placement update.
 
+[Realm-scoped reply delivery](../realm-scoped-delivery.md) distinguishes a new repost
+from accepting the same reply Publication into several Realms. Additional acceptance
+preserves causal identity and original response targets while selecting destination-
+local revisions and placements. Read parent-local connections from an indexed Realm
+projection, authorize each reply and requested parent, and retain explicit unknown
+continuation/count states when bounded work cannot prove complete visibility. A
+root's read permission or Pro acceptance cannot authorize all of its descendants.
+Site profiles add a fixed query boundary; they are not an additional content owner.
+
 Review role adds a target and optional [rating reference](ratings.md) to a publication; an ordinary opinion is still legal without a numerical score. Exact rating-revision citations and explicitly labeled live views are different contracts. Review-to-article conversion preserves its previous target/history; removing a rating is an explicit rating withdrawal, distinct from detaching its presentation. Publication/reposting never submits another observation. Poll options have stable identities and frozen meanings after voting begins; materially changed alternatives require a new poll/ballot epoch. Closing a Thread, withdrawing a Publication and erasing a payload have independent effects.
 
 ### 8.1 Multiple covers and multimedia

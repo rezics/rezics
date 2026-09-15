@@ -246,6 +246,13 @@ Slot creation checks the pinned role's subject domain, target revision capabilit
 
 Thread generation is not a sealed content revision. It supports ordinary append-only leaf creation in the active topology, with a topology-change journal and a committed frontier for bulk generation catch-up. Parent changes are explicitly serialized/validated. Copying an entire generation for each comment is prohibited. A staged generation must consume concurrent committed leaf changes before activation; otherwise activation is postponed. This requirement also applies to node moves during source structure rebuilds where the current owner permits concurrent authoring.
 
+[Scoped reply delivery](../realm-scoped-delivery.md#reply-identity-and-multiple-realm-acceptance)
+allows one reply Publication to have multiple accepted Realm contexts without
+changing its original response identity. Destination parent placements belong to
+their own Thread/generation; they are not copied source-thread IDs. Independent
+reposts remain separate publications. D15's reply projection supports bounded
+connections; it does not own causal edges, accepted revisions or permissions.
+
 Editing a comment into an article keeps document/publication identities. Selecting it as a wiki body adds a slot adoption. Collaborative policy changes retain contributor history. An independent fork receives a new Document and exact derivation. All four operations use different commands even if a UI combines them into one action.
 
 ## D10. Realm, Zone, structure, curation and themes
@@ -399,6 +406,8 @@ extra postings must be counted before persistence qualification.
 | rating_period_stat / rating_distribution_generation | Target/context/scale/policy/audience, evaluation or submission range, rater-period sufficient state, histogram stripes and processed frontier | Separate latest-per-rater, mean-per-rater and observation populations; generation-bound drill-down; exact non-additive custom ranges use bounded jobs |
 | event_temporal_projection / topic binding inverse | Event REF/exact occurrence key, temporal role, accepted decision REV, scope, normalized civil/instant bounds, precision/certainty and generation | Typed start B-tree and range GiST candidates; current disclosure and exact/possible matching; paged Tag/participant joins without duplicate date authority |
 | score/tag/reaction/reply/collection/Realm/notification/poll/conversation stats | Scope/target/metric generation and value | Recomputable, striped when hot; observed/approximate/exact meanings explicit |
+| realm_reply_projection | Realm, Thread/layout, root, parent placement, reply REF, accepted selection REV, inclusion episode/order | Derived adjacency index; equality-leading context/parent seek, direct reverse repair and concrete selection/placement FKs. No copied body, permission or ancestor closure; current per-reply disclosure at delivery |
+| scoped reply connection cursor/result | Site/context/filter/layout/visibility identity and consumed ordering frontier; selected reply revisions, more/completeness/count status | Authenticated opaque token; encrypt private scan positions. No unreturned-tail skipping, guessed hasMoreChildren, global-count fallback or snapshot claim for live keysets |
 | content metrics / engagement hourly | Exact content/selection REV, language/channel, coverage, algorithm/counting basis; time bucket/target | Applicable measurements, occurrence versus distinct-content semantics and coalesced generation-bound refresh; not authored state |
 | studio candidates | Actor/account, concrete target, eligibility generation | Rebuildable private projection; current access required; indexed erasure |
 | studio_resource_visit | PK Auth,target REF; last visited time | Private account fact; restrictive REF, monotonic completion time, current Self/account/read authority; no editor eligibility or source-order effect; indexed erasure |
@@ -533,6 +542,7 @@ Use concrete FKs and the existing typed REF/access-subject/access-scope contract
 | participation_meter, participation_meter_entry | Beneficiary/Realm/action/window or credit-pool identity; unique debit/credit/reservation effect | Atomic success/intake semantics; finite compute reservations; compensation preserves original units and cannot double-refund |
 | participation_submission, participation_review_attempt | Realm/target exact REV, intake policy/Rules/authority, state/version and leased attempt | Findings are not grants; stale policy/content/worker cannot activate a publication; queue keysets and bounded evidence |
 | Realm accepted-selection and ordered/text projections | Existing publication/adoption REV and realm_unit association; selected revision/order/security generation | Extend D09/D10/D15 owners, not a second publication authority. Same body revision can be reused; current head is not automatically accepted |
+| Site delivery profile | Bounded deployment registry: ID/revision, exact origins, required predicate, presentation Realm, optional Zone and endpoint classifications | First Pro uses a server-bound profile at pro.rezics.com. It is not a new Realm hierarchy, canonical address registry or authorization grant; D15 connections retain the resolved context |
 
 Native Group/Role/Binding and Rule/reversal ledgers remain D02/D13 owners. Subscribe
 supplies qualified benefit audiences/conditions through registered IAM adapters;

@@ -5,6 +5,8 @@ Owners: [Subscribe](../architecture/subscriptions.md),
 [Realm policies/Pro](../architecture/realm-participation-policies.md),
 [capacity](../architecture/subscriptions-capacity.md) and
 [M10](../plan/modules/subscriptions-and-pro.md).
+[Scoped sites/replies](../architecture/realm-scoped-delivery.md) supplies the
+common context, multi-destination reply and connection contracts below.
 The [execution workflow](../plan/execution-workflow.md) governs later test authoring
 and execution. These specifications do not activate runtime implementation, fixtures,
 document checkers, browser QA or a new verification phase.
@@ -79,6 +81,10 @@ configured Realm. Source/current/adopted revisions must intentionally differ.
 
 ## Capacity and recovery cases
 
+Also execute SITE/RPLY cases against actual native SQL and API handlers. Existing
+mocked reply-query/cursor tests do not qualify sparse-Realm scans, per-reply authority,
+connection metadata or a fixed-origin deployment.
+
 | ID | Evidence required |
 | --- | --- |
 | CAPSUB01 | At 0.1%, 1% and 50% Pro selectivity, compare shallow/deep Feed plans and raw candidates, buffers, page fill and latency. Increase unrelated corpus while holding Pro results fixed; confirm scope-leading retrieval. |
@@ -89,6 +95,40 @@ configured Realm. Source/current/adopted revisions must intentionally differ.
 | CAPSUB06 | Measure each new physical family/index, relation/version/attempt amplification, WAL and replica/rebuild headroom at the 500M/3B planning scales. A small fixture qualifies plan shape only; retain the explicit scale estimate. |
 | CAPSUB07 | Interrupt policy/selection backfills, ranking refresh and erasure at every frontier. Resume without rescanning all subscribers/content, losing committed updates or publishing an incomplete generation. |
 | CAPSUB08 | Restore an old database with pending payment/review jobs. Reconcile provider receipts and replay erasure/revocation before exposure; no duplicate charge, restored private text, gifted access resurrection or stale worker publication. |
+
+## Scoped site and reply cases
+
+Use the configured Pro site, an ordinary general context, Realm A, independently
+readable/private replies and the same reply accepted into multiple Realms. Native
+IDs, parent placements and operation handles come from prior admitted commands.
+These specifications do not require live DNS or authorize a deployment now.
+
+| ID | Scenario and required result |
+| --- | --- |
+| SITE01 | Resolve Pro from an allowlisted deployment/adapter binding. Forged internal headers and untrusted Host/forwarded-host/Origin values cannot widen scope or supply user authority. |
+| SITE02 | Route discovery, details, writes, delivery, account/commerce and public-reference operations through the site adapter. Each uses its registered scope behavior; an unknown operation is not exposed as an unrestricted passthrough. Gifts and purchase eligibility remain independent of Pro filtering. |
+| SITE03 | Compose fixed Pro, optional Zone and user Realm A/OR/NOT filters. Require the server conjunction and matching active/visible Pro association; client omission or an empty predicate cannot remove it. |
+| SITE04 | Compare SSR and browser calls across Feed, Search, Work discussion, reply connections and direct details. They preserve the same context/accepted versions; no API or renderer obtains general bodies and filters them only afterward. |
+| SITE05 | Exercise login/logout, provider return, same-origin cookies, CSRF and any elected cross-origin API path. Exact callbacks/origins and end-user authority remain enforced; no wildcard trust or shared admin-service substitution. |
+| SITE06 | Reuse caches/cursors across sites, viewers, languages and accepted selections; change another tab's preference. Reject incompatible reuse, isolate private state and preserve a draft's captured destination. Ordinary new replies do not invalidate every cursor. |
+| SITE07 | Remove or change a site profile during a request/rebuild, then retry. Invalid/stale configuration is explicit, never global fallback; rollback preserves compatible native identities without reviving stale permissions. |
+| SITE08 | Resolve native ID/slug and share/direct links on Pro. Keep the registry authoritative, preserve selected context in site routing, deliberately navigate to general content, and ensure public-reference exemptions cannot expose general social activity/private content. |
+| RPLY01 | Author one reply for origin A and additional Pro acceptance. Retain one utterance and causal target, independent destination states/selected versions, and correct contextual appearances. A separately authored repost remains a separate identity. Preserve generic platform-origin replies with no Realm destination, but reject that alternative through the fixed Pro entry. |
+| RPLY02 | Replay multi-destination authoring and race requests. Allocate one reply/intake set; source/origin denial creates no secondary publication; one additional destination's denial cannot be reported as global success or erase another accepted destination. |
+| RPLY03 | Add/republish a reply via the generic Unit endpoint. Dispatch through reply-specific destination permission, root/parent mapping, quota and review; `realm.units.create` or default visible association state alone cannot bypass them. |
+| RPLY04 | Resolve destination-local Thread/parent placements for the same causal reply. Missing/ambiguous mappings fail explicitly; no source-thread parent FK copied across scopes or automatic general-ancestor publication. |
+| RPLY05 | Hide/withdraw a parent with many descendants. Omit it from traversal and deny expansion in that context; do not promote/delete/reparent its descendants. An independently readable child's direct detail withholds inaccessible parent identity/quotation. No synchronous subtree rewrite. |
+| RPLY06 | Root is readable but a candidate reply, its selected version or attachment is private/revoked. Withhold body, author metadata, translations and child hints; repeat with withdrawal between candidate selection and hydration. |
+| RPLY07 | Expand a parent using an old cursor or a manually supplied ID. Reauthorize Thread/root, parent and context; root permission alone cannot authorize the requested child connection. A rootless Thread uses its own entry authority without a dummy root; independent direct reply reads do not authorize ancestor traversal. |
+| RPLY08 | Compare global reply statistics with Pro, viewer blocks and heterogeneous reply audiences. Return only a proved scoped count, witnessed lower bound or unavailable. Hidden children cannot make `more=yes` or leak through `hasMoreChildren`. |
+| RPLY09 | Fill a candidate chunk with more visible replies than the requested page or output byte budget. Continuation must not skip its unreturned authorized tail. Underfilled/zero-hit budget-limited pages advance encrypted scan frontiers and report unknown/partial without asserting visible children exist. An unresolved authority candidate is retried from before its position, not consumed as denied. |
+| RPLY10 | Reuse cursors for another root/parent/site/layout/viewer/filter, tamper with them or inspect hidden scan IDs. Reject incompatible tokens and preserve private frontiers. Topology reordering restarts; ordinary inserts use live-keyset semantics without a false snapshot promise. |
+| RPLY11 | Edit accepted content, withdraw/republish and insert old source material into a Realm. Accepted-version updates do not bump sibling order; a new inclusion episode has its own order while preserving utterance identity and current-authority checks. A live client reconciles a repeated native reply instead of creating two active cards or votes. |
+| RPLY12 | Increase unrelated general siblings and withdrawn history under one hot root/parent at 0.1%, 1% and 50% Pro selectivity and at deep cursors. Native EXPLAIN/BUFFERS must demonstrate the active Realm/parent source window, MVCC/bloat cost and measured latency; a post-filter LIMIT is insufficient. |
+| RPLY13 | Request maximum parent/child preview sizes with private candidates. Aggregate raw windows, lookahead, authority batches and output bytes stay within one request budget; batch permission/hydration queries replace per-reply calls. Long bodies are explicitly deferred, not silently truncated. |
+| RPLY14 | Rebuild projection/layout with concurrent leaf acceptance, withdrawal and erasure; crash before/after frontier activation. Retain the previous compatible generation, catch up committed changes and reject stale worker publication. |
+| RPLY15 | Evaluate current projection rows for reply-context degree and rebuild generations, plus lazy count stripes and index/WAL costs. Preserve the 500M/3B envelope and distinguish projected estimates from actual load evidence. |
+| RPLY16 | Exercise paid/gifted participants, public catalog roots, local reply moderation, notices and realtime across Pro/general contexts. Multi-context reply support cannot alter subscription billing, duplicate global votes or broaden content delivery. |
 
 ## Experience cases
 

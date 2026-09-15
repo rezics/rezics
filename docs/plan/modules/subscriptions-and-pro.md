@@ -4,6 +4,7 @@ Dependencies: selected M01 identity/access, M03 exact publication/adoption, M06
 Realm membership/governance/discussion and M09 scoped discovery/delivery contracts.
 Owners: [Subscribe](../../architecture/subscriptions.md),
 [Realm policies/Pro](../../architecture/realm-participation-policies.md),
+[scoped sites/replies](../../architecture/realm-scoped-delivery.md),
 [D22](../../architecture/database/data-dictionary.md#d22-subscribe-and-participation-policy-contracts),
 [capacity](../../architecture/subscriptions-capacity.md) and
 [acceptance](../../testing/subscriptions-and-pro.md).
@@ -20,6 +21,9 @@ First runtime activation delivers the generic Subscribe core and ordinary offici
 Rezics Pro Realm with its complete participation/discovery behavior. Pro is the first
 operated offering. Person and non-Pro Realm examples must qualify generic boundaries;
 opening self-service sales for every operator is a separate rollout choice.
+The first frontend may deploy independently at `https://pro.rezics.com` with a
+server-bound Pro site profile and same-origin adapter over the common API. This
+does not activate hosting/DNS changes or a separate backend/data fork.
 
 ## Remaining deliverables and order
 
@@ -38,15 +42,21 @@ opening self-service sales for every operator is a separate rollout choice.
 4. Complete exact accepted-version publication/adoption and scoped discussion reads.
    Keep the accepted Pro version while a new source version is reviewed. Implement
    matching Search text/snippets/media, local counts/ranking, notices and exports.
-   A current-head-only search index cannot qualify this step.
+   Add multi-destination reply commands, Realm/parent projection seeks, batched
+   current reply authorization, explicit connection progress and byte budgets.
+   Neither a current-head-only search index nor a post-filter result LIMIT qualifies
+   this step. Retain causal reply identities and independent destination acceptance.
 5. Configure the official Pro Realm and offering through ordinary operations. Provide
    plan comparison/purchase, separate purchased/awarded/effective views, review and
    appeal states, and a Pro scope carried through shared discovery/detail surfaces.
+   Implement the shared site/content-context resolver for browser and SSR, classified
+   API operations, exact origin/session configuration and scoped link/cache handling.
    Preserve normal Realm/catalog behavior and the full community relationship journey.
 6. Qualify SUB01-SUB24, PRO01-PRO24 and CAPSUB01-CAPSUB08 with relevant existing
-   IAM/composition/governance cases. Then qualify SUBUX01-SUBUX06 at the applicable
-   UI phase. Record actual G2/G3 and scoped integration evidence separately from
-   implementation; provider, AI-quality, recovery and capacity gaps remain visible.
+   IAM/composition/governance cases, plus SITE01-SITE08 and RPLY01-RPLY16. Then
+   qualify SUBUX01-SUBUX06 at the applicable UI phase. Record actual G2/G3 and
+   scoped integration evidence separately from implementation; provider, AI-quality,
+   recovery and capacity gaps remain visible.
 
 ## Completion criteria
 
@@ -60,6 +70,9 @@ Pro uses ordinary Realm policies and effective publication scope. Unreviewed edi
 general replies/activity and incompatible cursors cannot enter that scope. Search,
 body/media and counts use the same accepted selection. Empty/sparse results never
 fall back to general content. Local Pro decisions preserve other authorized uses.
+Native reply plans bound scanned candidates as well as returned nodes; per-reply
+authorization and scoped counts prevent a readable root or stale projection from
+disclosing another reply. Fixed-site requests cannot silently become general ones.
 
 Metering, provider/review retries, source compensation, privacy and restoration are
 qualified under concurrency and recorded 500M/3B capacity obligations. No live sale

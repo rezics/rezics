@@ -9,6 +9,8 @@ Realm remains the community, membership, rules and publication-context owner.
 [Collection/Zone composition](realm-collection-zone.md),
 [content adoption](database/content-composition.md) and
 [governance decisions](governance-rule-decisions.md) retain their responsibilities.
+[Scoped delivery](realm-scoped-delivery.md) owns independent site profiles,
+multi-Realm reply connections, current disclosure and the common API context.
 Quotas and AI review are reusable Realm policies, not special privileges attached
 to a global Pro account type or properties of a purchased plan.
 
@@ -127,13 +129,11 @@ the independent Publication required by the social-publication contract while
 reusing authorized Document revisions. Presentation reuse of an existing publication
 does not invent a new utterance or merge its discussion scope.
 
-Accepting an existing Unit through an authorized Realm association/selection can
-therefore make that same query subject appear in both Realms without a new utterance.
-A distinct social repost remains a distinct query subject: sharing its source body
-or derivation does not make it satisfy the source publication's Realm predicates.
-The Pro view may use a local Thread citing an accepted source publication without
-importing the source Thread's replies. Keep these explicit operations separate in
-the GUI/API; do not deduplicate unrelated publications by equal text.
+[Reply identity and acceptance](realm-scoped-delivery.md#reply-identity-and-multiple-realm-acceptance)
+defines author-once/multi-destination reply publication, additional acceptance and
+independent reposts. One reply can be accepted in A and Pro; neither a shared body
+nor a root acceptance automatically imports another Thread's replies. Each
+destination independently runs this owner's admission, metering and review.
 
 Review intake records submission identity, target Realm, exact content/dependency
 revision, policy/Rule revisions, original authority evidence and idempotency key.
@@ -198,27 +198,15 @@ feature-specific identity and deduplication semantics; reuse must not duplicate 
 
 ## Pro query and experience contract
 
-The Pro entrance selects an ordinary Realm scope in the shared Filter/Search/Feed
-contract. Combine it as an enforced conjunction:
-
-~~~text
-result = original query
-       AND an active, visible publication/adoption in the configured Pro Realm
-       AND current viewer access to the selected content and dependencies
-~~~
-
-If the user is already viewing Realm A, the result is A intersect Pro. Adding Pro
-to an existing `realmIds: [A]` selection would mean A OR Pro in the current simple
-Filter and is incorrect. All state tests refer to the same matching publication
-association; visible in A plus withdrawn in Pro cannot satisfy the Pro condition.
-The GUI's bounded list of displayed Realm contexts is not the filtering authority.
-
-Preserve this scope through home, search, facets, tags, related content, Work
-discussion views, pagination and scoped detail readers. Public catalog metadata
-can remain shared. A Pro author's general post stays outside Pro; an author's
-subscription expiry does not by itself reclassify earlier accepted publications.
-Persist the user's preference but capture scope/identity in each request and draft;
-another tab's switch cannot retarget an in-flight post or reuse another cursor.
+The first independently deployed entrance is `https://pro.rezics.com`, using the
+[same-origin site adapter](realm-scoped-delivery.md#same-origin-site-adapter) and
+shared domain APIs. Its server profile fixes the Pro Realm; a browser preference
+cannot disable that scope. A future general-site Pro toggle uses the same resolver.
+The [common context contract](realm-scoped-delivery.md#three-independent-contexts)
+owns fixed-predicate conjunction, accepted-version selection and cursor/cache
+propagation. A Pro author's general post stays outside Pro; an author's subscription
+expiry does not itself reclassify accepted publications. Public catalog reference
+lookups remain separately declared operations, not a general social-content fallback.
 
 General activity must not fill sparse/empty Pro results. General Realm invitation,
 mention and activity notices are not proactively delivered in Pro mode. Keep those
@@ -242,20 +230,16 @@ rosters, replies and internal review data are not preview content.
 
 ## Performance and qualification
 
-Reuse [shared Filter execution](filter-feed-and-zone-experience.md) and indexed
-Realm publication candidates. Do not create a per-user copy of the Pro catalog,
-one SQL materialized view per Realm, or a separate Pro query language. New ordering
-projections are keyed by ordinary Realm/publication/selection identity; Pro is one
-consumer. Use dedicated scope-leading ordered reads for frequent Realm feeds and
-accepted-version text candidates for Search, then bounded current-policy checks.
-
-The current candidate ceiling alone does not establish acceptable sparse-Pro
-retrieval: global-order filtering can exhaust its window without reaching eligible
-Pro items. Nor does the current one-document-per-Unit index prove accepted-version
-search when Realms select different revisions. [Capacity](subscriptions-capacity.md)
-owns required indexes, memory/work bounds, backpressure and measurements.
+Use the [scoped delivery plan](realm-scoped-delivery.md#physical-query-plan-and-lifecycle)
+and [shared Filter execution](filter-feed-and-zone-experience.md). The current
+singular reply-create API, late Realm filtering, root-only read checks and global
+reply counts do not qualify this product. [Capacity](subscriptions-capacity.md)
+owns candidate/projection budgets and measurements; a result LIMIT is not a bound
+on scanned rows, and an index cannot substitute for current reply authorization.
 
 Required acceptance is [PRO01-PRO24](../testing/subscriptions-and-pro.md#realm-policy-and-pro-cases).
+The [SITE/RPLY scenarios](../testing/subscriptions-and-pro.md#scoped-site-and-reply-cases)
+qualify its fixed-domain and multi-context reply integration.
 The source document in the separately supplied rezics-pro-app example informed the
 Work-to-discussion-to-relationship journey. This owner records the selected REZICS
 contract without depending on that external checkout, copying its UI stack, or

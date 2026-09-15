@@ -30,11 +30,11 @@ is an ordinary Realm configured through these capabilities. The generic
 offerings; a Realm is neither a purchased plan nor an entitlement source by itself.
 M10 activation is separate from the current IAM/community implementation scope.
 
-An effective Pro publication is an additional query condition over the existing
-Realm association and selected publication/adoption version. Within Realm A,
-selecting Pro means A AND Pro, not the union of their placements. Acceptance of a
-root does not admit unrelated replies or confer body/asset access. Local review,
-withdrawal and adopted revisions preserve other authorized publication contexts.
+[Realm-scoped delivery](realm-scoped-delivery.md) owns site/Realm conjunction,
+multi-context reply connections and accepted-version disclosure. A fixed Pro site
+uses the same Realm associations and can select a Zone for presentation; neither
+its hostname nor a root acceptance admits unrelated replies or grants body access.
+Local review, withdrawal and adopted revisions preserve other authorized contexts.
 
 A Realm's wiki pages may be organized as one or more Collections. The same contextual association can also be represented by an explicit "published in" relationship. When Dynamic Collections are activated, a query over that relationship can present the current set of matching pages. These are different contracts: stored curation, a publication relationship and a computed selection are not three independently writable copies of one membership list.
 

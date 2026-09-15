@@ -31,5 +31,9 @@ ranking inputs, scoped delivery and entitlement revocation/recovery. Its
 [CAPSUB cases](../../testing/subscriptions-and-pro.md#capacity-and-recovery-cases)
 apply upon activation; existing candidate ceilings and one current document per
 Unit do not qualify that extension or permit general-content fallback.
+Implement the [Realm/parent reply projection](../../architecture/realm-scoped-delivery.md#physical-query-plan-and-lifecycle),
+batch authority/hydration, explicit more/partial results and fixed-site resolver.
+SITE/RPLY cases require native sparse-parent/deep-cursor plans, shared request/byte
+budgets, protected counts, safe private frontiers and staged rebuild recovery.
 
 Stale projections cannot leak private content or counts. Failed builds preserve the previous generation. Stale workers cannot duplicate effects or reactivate revoked state. Failures and measured limits remain visible until closed. Fresh rebuild qualification replaces online migration work in this program.

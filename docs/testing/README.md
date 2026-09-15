@@ -7,7 +7,7 @@ This directory owns test scenarios and evidence. Follow the [active scope](../pl
 | [Database scenarios](database/scenarios.tsv) | Cross-domain invariant cases; specifications until executed against the target. |
 | [Foundation persistence](foundation.md) | Concrete reference constraints, immutable allocation, concurrency and selective lookup evidence. |
 | [Identity, access and connected apps](identity-and-access.md) | Pending mixed-principal/Entity, groups/roles/representation, OAuth/MCP, privacy, revocation and layered-GUI acceptance; older Self fixtures are not qualification. |
-| [Subscribe and Realm participation](subscriptions-and-pro.md) | Selected M10 scenarios for native multi-plan commerce, purchase/gift independence, local policies, exact-version Pro discovery and capacity; runtime activation and all qualification remain pending. |
+| [Subscribe and Realm participation](subscriptions-and-pro.md) | Selected M10 SUB/PRO, SITE/RPLY, capacity and experience scenarios: multi-plan commerce, independent gifts, local policies, fixed-site context and authorized multi-Realm reply delivery; runtime activation and qualification remain pending. |
 | [Native Work and release](native-work.md) | Cross-domain identity/continuity, virtual/actual releases, applicable properties and source mappings. |
 | [Content composition](content-composition.md) | Explicit local occurrences, exact selections, staged import/refresh, metrics, progress and recovery. |
 | [Source conformance](source-conformance.md) | Provider data -> source queries -> reviewed native writes -> API/export -> update/withdraw/replay; SIO01-SIO18 cover Schema.org/Wikidata preservation, indexing, mapping and recovery. |

@@ -49,6 +49,8 @@ estimate does not conceal large data.
 | Review submission head | 384 | 256 | 320 GB | 1.920 TB |
 | Review attempt metadata, excluding evidence | 512 | 256 | 384 GB | 2.304 TB |
 | Accepted-version Realm mapping/order projection | 160 | 160 | 160 GB | 960 GB |
+| Scoped reply adjacency projection | 224 | 288 | 256 GB | 1.536 TB |
+| Scoped direct-count stripe, when enabled | 128 | 128 | 128 GB | 768 GB |
 | Sparse Realm ranking row | 256 | 256 | 256 GB | 1.536 TB |
 | Exact-version text document plus full-text index allowance | 2,048 | 3,072 | 2.560 TB | 15.360 TB |
 | Outbox/job/delivery receipt metadata, each | 192 | 192 | 192 GB | 1.152 TB |
@@ -157,6 +159,97 @@ can approach 400 KB of UTF-8 summary text before metadata. Model input/output an
 evidence byte caps remain separate from the API response budget.
 
 ## Workload and operating thresholds
+
+### Scoped reply read envelope
+
+[Scoped delivery](realm-scoped-delivery.md) selects an additional rebuildable reply
+adjacency projection with Realm, Thread/layout, parent, accepted selection and
+stable inclusion order. This is separate from native reply/placement history and
+the generic Realm association. If implementation combines read projections, measure
+and subtract actual overlap instead of counting both full estimates. Do not assume
+the existing `realm_unit` PK also provides a Realm/root/parent/order seek.
+
+For N native replies with c accepted contexts each, the current projection is N*c
+rows. At c=2 and the 512-byte heap/index allowance above, N=500M requires about
+512 GB; N=3B requires about 3.072 TB, excluding native histories, payloads, replicas
+and rebuild space. Body revisions are not copied into this relation. Plan up to
+three physical projection generations for a rebuilding Thread: active, building
+and one awaiting bounded retirement. Stop admitting another rebuild while that
+retired generation remains; authoritative history has its own retention budget.
+
+Candidate generation seeks `(realm, thread, layout, parent, inclusion_order, id)`
+with explicit root-parent handling. Native reference/selection FKs and a reverse
+reply-to-context path support repair and withdrawal. Point-probe one acceptance
+for each additional required Realm per candidate; do not precompute every Realm
+intersection. Initial site configuration admits at most 8 mandatory Realm clauses,
+with one declared presentation Realm. User Filter complexity retains its shared
+independent budget. A new leaf writes O(c) accepted context rows/events, not
+O(c*ancestor_depth) closure records or all descendants of its root.
+Use an active-episode partial index plus lifecycle/retirement cleanup; a large
+withdrawn history must not remain in the interactive candidate range. Measure
+MVCC/bloat and buffers as well as emitted rows, and retain cleanup backpressure.
+
+Use these limits together, not as independent budgets multiplied by previews:
+
+| Dimension | Initial admitted ceiling |
+| --- | --- |
+| Returned parent page | 25 default, 50 maximum |
+| Direct-child preview | At most 5 per returned parent; one additional level, no automatic recursive expansion |
+| Returned reply projections | At most 300 for the maximum parent-plus-preview shape |
+| Raw parent candidates | At most 512; stop earlier once enough authorized output/lookahead is established |
+| Raw candidates per child connection | At most 128, including its more-edge probe |
+| Aggregate raw reply candidates | At most 4,096 per HTTP request, including parent, children and all lookahead |
+| Authorization/hydration batch | At most 128 candidate identities per batch; group by native owner and reuse current subject/context resolution |
+| Inline reply body | At most 8 KiB each and 1 MiB total serialized reply response; otherwise explicit deferred body/reference, not silently truncated Portable Text |
+| Site configuration | At most 64 registered profiles and 8 allowlisted origins per profile per deployment; first Pro uses one profile. Not an automatically generated row per Realm. |
+
+Assign child windows from the remaining request budget before running a LATERAL
+batch: 50*128+512 exceeds 4,096 and is not admissible. Partially inspected connections
+return unknown/partial progress, not a false exhausted boolean. Count all examined
+candidate rows, including rejected permissions and duplicates. A timeout is still
+an error/unavailable result, not successful exhaustion. Enforce a physical source
+window before residual filters; EXPLAIN must show the raw-row bound on each path.
+
+At the illustrative 512 bytes per projected candidate, 4,096 candidates use about
+2 MiB before JS/driver/auth-proof overhead. Hydrate bodies only for permitted output
+within the response byte budget; 300 arbitrary full documents is not bounded by a
+300-item limit alone. Deferred-body reads retain the exact selected revision and
+the same context/current permission checks. Measure peak memory and serialized
+bytes alongside query time, rather than subtracting hydration from endpoint latency.
+
+`more=yes` requires an authorized additional edge; `unknown` may carry an encrypted
+scan continuation without revealing a hidden edge ID or count. The frontier must
+not skip unreturned authorized tail items from a fetched chunk. Explicit load actions
+can resume partial connections; automatic retries/infinite scroll cannot turn a
+bounded no-hit response into unbounded work. Stable live keysets do not claim a
+snapshot across concurrent insert/withdraw/review operations.
+
+Current per-view direct counts may use at most 64 lazily allocated counter stripes
+per active parent/audience, with freshness/current-population proof. Do not allocate
+64 rows for every possible parent. In the worst case M active parents times 64
+stripes is a separate amplified relation to price at the 256-byte row/index
+allowance above, not an assumed fixed 64-row total. The first implementation may
+return witnessed lower bounds or unavailable instead. There is no synchronous
+subtree count or ancestor-counter update on every leaf insertion, and no global
+count fallback inside Pro.
+
+Add scoped reply traffic to the existing 200 normal / 2,000 peak deployment-wide
+read-request envelope below; target 200 ms p95 for the admitted default reply page.
+Also measure maximum preview shape and p99. These are unqualified targets. Keep
+the eligible Pro reply set fixed while adding unrelated siblings under the same
+hot root/parent, including 0.1%, 1% and 50% Pro fractions. Compare cold/warm caches,
+deep continuations, private candidates, parent withdrawal and concurrent acceptance.
+Record row/loop/buffer counts, physical index seeks, auth queries, bytes and page
+fill. The existing mocked reply SQL tests are not performance evidence.
+
+Scope publication, projection and count changes share a local commit or a staged
+generation/frontier protocol. Bulk retirement/ancestor changes cannot enqueue one
+unbounded synchronous rewrite per descendant. Revoked roots/parents invalidate
+connection entry immediately while retained child identity/acceptance stays separate.
+Recovery must restore source relations, rebuild projections and replay current
+disclosure before exposing a connection. Source/generation mismatch is unavailable.
+
+### Shared operating targets
 
 Planning loads below are deployment-wide; they require appropriate database/API
 sharding and provider capacity, not one machine. Both the 500M and 3B cardinality

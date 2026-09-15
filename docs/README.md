@@ -7,6 +7,7 @@
 - [Connected applications](architecture/connected-apps.md): third-party Entity connections, OAuth, installations and REZICS MCP access.
 - [Subscribe](architecture/subscriptions.md): native multi-plan offerings for People/Realms, independent purchased and complimentary benefits, commercial lifecycle and authorization boundaries.
 - [Realm participation and Rezics Pro](architecture/realm-participation-policies.md): reusable quotas/review, accepted-version publication and Pro discovery; [capacity](architecture/subscriptions-capacity.md) and [acceptance](testing/subscriptions-and-pro.md) remain unqualified.
+- [Realm-scoped sites and replies](architecture/realm-scoped-delivery.md): fixed-domain API context, multi-Realm reply acceptance, authorized parent connections and scope-leading read projections.
 - [Identity and access experience](architecture/identity-and-access-experience.md): ordinary-user defaults and progressively disclosed collaboration/administration.
 - [Database architecture](architecture/database/README.md): target schema, meaning and capacity.
 - [Schema.org and Wikidata interoperability](architecture/semantic-interoperability.md): complete source models, queryable external descriptions, native mappings, export fidelity and coverage; [capacity](architecture/semantic-interoperability-capacity.md) includes source/index amplification.

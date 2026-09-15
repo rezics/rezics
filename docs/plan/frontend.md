@@ -31,6 +31,11 @@ Subscribe surface. A higher gift cannot hide a lower-plan purchase, change its
 price/upgrade baseline or imply altered renewal. Preserve exact Pro scope and
 accepted versions through Feed/details, review/appeal and notification behavior;
 ordinary drafts and general community experiences retain their own scope.
+The first Pro deployment uses the [fixed-site adapter and common content context](../architecture/realm-scoped-delivery.md#same-origin-site-adapter).
+Browser/SSR features consume one configured client; reply views support bounded
+parent connections, explicit unknown/partial progress and deferred long bodies.
+Do not infer child existence from a global count or automatically fetch unlimited
+empty pages. Site routing retains native identity and explicit context transitions.
 Qualify [SUBUX01-SUBUX06](../testing/subscriptions-and-pro.md#experience-cases)
 after the affected backend dependencies. This follow-on does not activate UI work
 inside the current IAM implementation scope.
