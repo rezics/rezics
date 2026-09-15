@@ -30,9 +30,9 @@ export default {
 		emptyManagement: "Du verwaltest derzeit keine Mitgliederlisten.",
 		acceptPrompt: "Wenn du annimmst, tritt dein angemeldetes Konto dieser Organisation als privates Mitglied bei.",
 		removePrompt:
-			"Das Entfernen der Mitgliedschaft ändert keine gesondert vergebenen Veröffentlichungs-, Sicherheits- oder Verwaltungsrechte.",
+			"Durch das Entfernen dieses Mitglieds enden dessen Mitgliedschaft und alle davon abhängigen Zugriffsrechte.",
 		leavePrompt:
-			"Beim Verlassen endet deine Mitgliedschaft. Gesondert vergebene Berechtigungen bleiben unverändert.",
+			"Mit dem Austritt enden deine Mitgliedschaft und alle davon abhängigen Zugriffsrechte.",
 		recipientHint: `Gib die ${verbatimTerms.id.value} der ${deTerminology.entity.forms.label} ein, die du einladen möchtest.`,
 		states: {
 			pending: "Offen",

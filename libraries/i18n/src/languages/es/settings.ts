@@ -31,8 +31,8 @@ export default {
 		emptyOrganizations: "No te has unido a ninguna organización.",
 		emptyManagement: "Actualmente no administras ninguna lista de miembros.",
 		acceptPrompt: "Al aceptar, la cuenta con la que has iniciado sesión se incorpora como miembro privado de esta organización.",
-		removePrompt: "Quitar la membresía no modifica los permisos concedidos por separado para publicar, administrar la seguridad o gestionar.",
-		leavePrompt: "Al abandonar la organización se eliminará tu membresía. Los permisos concedidos por separado no cambiarán.",
+		removePrompt: "Eliminar a este miembro pone fin a su membresía y a cualquier acceso que dependa de ella.",
+		leavePrompt: "Al salir, finalizan tu membresía y los accesos que dependen de ella.",
 		recipientHint: `Introduce el ${verbatimTerms.id.value} de la ${esTerminology.entity.forms.inline} que quieres invitar.`,
 		states: {
 			pending: "Pendiente",

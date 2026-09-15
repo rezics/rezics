@@ -30,8 +30,8 @@ export default {
 		emptyOrganizations: "Vous n’avez rejoint aucune organisation.",
 		emptyManagement: "Vous ne gérez actuellement aucune liste de membres.",
 		acceptPrompt: "En acceptant, le compte avec lequel vous êtes connecté rejoint cette organisation en tant que membre privé.",
-		removePrompt: "Retirer une adhésion ne modifie pas les autorisations distinctes pour publier, gérer la sécurité ou administrer.",
-		leavePrompt: "Quitter l’organisation met fin à votre adhésion. Vos autorisations distinctes restent inchangées.",
+		removePrompt: "Retirer ce membre met fin à son adhésion et aux accès qui en dépendent.",
+		leavePrompt: "Quitter l’organisation met fin à votre adhésion et aux accès qui en dépendent.",
 		recipientHint: `Saisissez l’${verbatimTerms.id.value} de l’${frTerminology.entity.forms.inline} que vous souhaitez inviter.`,
 		states: {
 			pending: "En attente",

@@ -28,8 +28,8 @@ export default {
 		emptyOrganizations: "你尚未加入组织。",
 		emptyManagement: "你目前没有成员名单管理权限。",
 		acceptPrompt: "接受后，当前登录的账户将作为此组织的私人成员加入。",
-		removePrompt: "移除成员关系不会更改另行授予的发布、安全或管理权限。",
-		leavePrompt: "退出后将移除你的成员关系，另行授予的权限保持不变。",
+		removePrompt: "移除此成员会结束其成员关系，依赖此关系的访问权限也会失效。",
+		leavePrompt: "退出会结束你的成员关系，依赖此关系的访问权限也会失效。",
 		recipientHint: `请输入要邀请的${zhHansTerminology.entity.forms.label}的 ${verbatimTerms.id.value}。`,
 		states: {
 			pending: "待处理",

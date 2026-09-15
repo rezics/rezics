@@ -32,9 +32,9 @@ export default {
 		emptyManagement: "You do not currently manage any member lists.",
 		acceptPrompt: "Accepting enrolls your signed-in account as a private member of this organization.",
 		removePrompt:
-			"Removing membership leaves separately granted publishing, security and management permissions unchanged.",
+			"Removing this member ends their membership and any access that depends on it.",
 		leavePrompt:
-			"Leaving removes your membership. Any separate permissions you hold remain unchanged.",
+			"Leaving ends your membership and any access that depends on it.",
 		recipientHint: `Enter the ${verbatimTerms.id.value} of the ${enTerminology.entity.forms.label} you want to invite.`,
 		states: {
 			pending: "Pending",

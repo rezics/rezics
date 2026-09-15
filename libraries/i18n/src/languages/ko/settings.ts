@@ -30,8 +30,8 @@ export default {
 		emptyOrganizations: "가입한 조직이 없습니다.",
 		emptyManagement: "현재 구성원 목록을 관리할 권한이 없습니다.",
 		acceptPrompt: "수락하면 로그인한 계정이 이 조직의 비공개 구성원으로 가입합니다.",
-		removePrompt: "구성원에서 제거해도 별도로 부여된 게시, 보안, 관리 권한은 변경되지 않습니다.",
-		leavePrompt: "탈퇴하면 소속이 해제됩니다. 별도로 부여된 권한은 유지됩니다.",
+		removePrompt: "이 구성원을 제거하면 구성원 자격과 이에 의존하는 접근 권한이 종료됩니다.",
+		leavePrompt: "탈퇴하면 구성원 자격과 이에 의존하는 접근 권한이 종료됩니다.",
 		recipientHint: `초대할 ${koTerminology.entity.forms.label}의 ${verbatimTerms.id.value}를 입력하세요.`,
 		states: {
 			pending: "대기 중",

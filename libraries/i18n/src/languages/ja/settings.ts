@@ -31,8 +31,8 @@ export default {
 		emptyOrganizations: "所属する組織はありません。",
 		emptyManagement: "現在、メンバー一覧の管理権限はありません。",
 		acceptPrompt: "承認すると、ログイン中のアカウントがこの組織の非公開メンバーとして登録されます。",
-		removePrompt: "所属を解除しても、別途付与された公開、セキュリティ、管理の権限は変わりません。",
-		leavePrompt: "脱退すると所属は解除されます。別途付与された権限は変わりません。",
+		removePrompt: "このメンバーの所属を解除すると、その所属に依存するアクセス権も失われます。",
+		leavePrompt: "脱退すると所属が解除され、その所属に依存するアクセス権も失われます。",
 		recipientHint: `招待する${jaTerminology.entity.forms.label}の${verbatimTerms.id.value}を入力してください。`,
 		states: {
 			pending: "未処理",
