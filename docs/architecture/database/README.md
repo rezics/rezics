@@ -13,6 +13,12 @@ required full-index contract. Source-model preservation and queryability cover
 subjects before native domain mapping; its [additional capacity envelope](../semantic-interoperability-capacity.md)
 is not included in the generated native workbook.
 
+[Information indexing and verification](../information-indexing-and-verification.md)
+owns reusable assessments, quality/coverage evaluation, independent acceptance
+policies and portable answer indexes. It composes source preservation with native
+single-writer adoption; its additional workload remains unqualified. Subscribe may
+grant index/service access without determining factual acceptance.
+
 ## 1. Selected architecture and scope
 
 Use one PostgreSQL write authority initially, in the public schema, with owner-local identity tables and typed domain structures. Separate authored content, publication, content selection, discussion, knowledge assertions, moderation, identity control, and personal activity. Preserve real foreign keys. Keep searchable/current projections rebuildable. Keep large binary payloads in object storage and durable transport in the existing NATS JetStream direction. There is no mandatory graph database, universal Edition, global content table, or all-purpose event-sourced aggregate.
@@ -185,6 +191,13 @@ Language identity follows pinned BCP 47 normalization policy. UI locale, display
 Identifiers are claims under versioned namespaces. An ISBN/ISRC/GTIN syntax check does not prove ownership or correct assignment. Keep collisions as candidates unless a particular authoritative namespace contract justifies uniqueness. Provider IDs, native IDs, public addresses and package coordinates have distinct keys.
 
 A knowledge assertion says that a claimant asserts a typed value for a question. Evidence fixes the source observation, source pointer, mapping contract and relevant native/source revision. An acceptance decision says which assertions a scope currently uses. A projection materializes that result. Scope-specific truth must never be implemented as “latest imported row wins.”
+
+A [verification assessment](../information-indexing-and-verification.md#verification-workflow)
+records what a named method concluded from exact claims/evidence; it does not
+replace the acceptance decision. Multiple evaluators and index policies may
+coexist. Source inclusion, assessment completion, factual acceptance, native
+adoption and Realm publication retain separate states and authority. Known
+corrections fence derived answers while bounded rebuilding catches up.
 
 [Event-time discovery](event-time.md) elects actual/planned occurrence-date operations over typed effective facts or their single-writer native structures. Category Tags, named-event topics, concrete event identities and Tag-to-event bindings remain distinct. Date precision, uncertain points, durations, recorded time and claim validity survive indexing; classification alone supplies neither a date nor structural capability.
 

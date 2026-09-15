@@ -82,6 +82,13 @@ separately. Repeated independent descriptions can remain distinct search hits;
 cross-source grouping requires an explicit correspondence policy and preserves
 each contributing description.
 
+[Information verification](information-indexing-and-verification.md) adds a
+separate assessment and acceptance layer over these preserved statements. A
+statement without a native mapping remains eligible for inspection and assessment;
+full-index coverage does not assert full verification coverage. Source discovery
+and policy-selected answer queries label different guarantees. Quality filters
+consume versioned assessments and cannot rewrite source rank or native values.
+
 This combination preserves the existing [catalog model](database/catalog-model.md):
 requiring native promotion before ingestion would exclude unsupported domains;
 raw archives would omit usable semantic access. Replacing native ownership with
@@ -287,7 +294,12 @@ across pages; budgets cannot silently exclude them from full-dataset coverage.
 Private source inputs, hidden mappings, counts, snippets and exports follow current
 authority, including cache invalidation, revocation and erasure.
 
-Export jobs name one of three contracts:
+The separate
+[assessment exchange profile](information-indexing-and-verification.md#independent-participation-and-portable-assessments)
+can accompany semantic exports to preserve evaluator, policy, evidence and correction history;
+an ordinary vocabulary export does not imply that those records were included.
+
+Semantic export jobs name one of three contracts:
 
 - Source-preserving: original authorized bytes or the equivalent source model for
   the pinned profile; lexical/presentation equality is claimed only for raw bytes.

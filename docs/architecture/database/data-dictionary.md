@@ -111,6 +111,28 @@ For temporal single-value results, either use exclusion constraints on exact eff
 
 Participant targets may span registered catalog and platform owners when the predicate's role contract permits them. The current catalog-only target set is not the target Graph API's full admission contract. Valid REF existence, compatible structural capability and current authority must each be established. [Selected query indexes](README.md#13-search-recommendation-export-and-derived-state) distinguish subject-local fact reads from global property/value search; a typed value node is not evidence that every such search is indexed.
 
+### D03.1. Verification assessments and policies
+
+[Information verification](../information-indexing-and-verification.md) owns these
+selected target contracts. They extend D03/D14.1 and D15 without copying native
+effective fields or forcing external source nodes into native identity. Physical
+schemas, registered capability/permission adapters and qualification are pending.
+
+| Relation family | Key / fields | Invariant and access |
+| --- | --- | --- |
+| verification_method / revision | Operator and method identity; immutable applicability, input/output, procedure/configuration, budgets and qualification references | Bounded operator administration; a model name or reviewer badge is not qualification. |
+| verification_assessment | Issuer/assessment key, exact target alternative, method REV, input manifest, outcome/signals, artifact receipt, time and lifecycle | Validated native assertion/association REV, source statement key, or owner-adapted exact native REV/property; concrete integrity checks and no native write authority. Claim-local and issuer keyset reads. |
+| assessment_input / finding / origin_dependency | Assessment and member key; exact evidence/claim/observation, span, support/refutation, derivation and dependence state | Paged sealed membership, not embedded unbounded JSON; attributable dependence remains uncertain/versioned; evidence-leading reverse invalidation. |
+| assessment_qualification / sample membership | Method REV, population/stratum, sampled claim/input keys, adjudication, measurement and uncertainty | Evaluation populations and labels explicit; no corpus interval masquerades as a per-claim probability. Sensitive samples retain current disclosure. |
+| assessment_lifecycle / dispute | Issuer record, exact assessment target, expected predecessor, correction/retraction/dispute basis and authority | Only issuer-authorized revisions change its status; others publish disputes. Preserve history with independently erasable payloads. |
+| verification_acceptance_policy / revision | Operator/policy identity; scope, eligible methods, evidence/freshness/conflict rules and qualified thresholds | Immutable meaning per revision; independent policies do not edit one another or override native slot authority. |
+
+Reuse native `acceptance_decision` when applying a native fact-slot result;
+source-answer selection is an index-owned result in D15, explicitly distinguished
+from native adoption. Assessment completion, source support and a passing signature
+never grant acceptance. Growing families and artifacts use the owning
+[capacity envelope](../information-indexing-and-verification.md#workload-envelope).
+
 ## D04. Names, identifiers and language
 
 | Relation family | Key / fields | Contract | Access |
@@ -400,6 +422,9 @@ extra postings must be counted before persistence qualification.
 | named-form / identifier / effective-fact search | Native keys + source REV/generation and normalized predicate | One semantic source; projection never edited as a fact |
 | source_semantic_generation / manifest | Dataset/profile/generation, exact representation membership, source watermark vector, state | Complete activation after staged manifest checks; retain old generation on failure; incremental manifests reuse unchanged observations |
 | source_semantic_posting / name index | Source/generation/subject/property/statement or property/value/statement or target/property/subject; role/group key where applicable | Rebuildable minimum source-query operations for every supported property; exact typed-value recheck, keyset/partition continuation and current disclosure; never accepted native truth |
+| verification_index / definition_revision | Operator/index identity; immutable coverage, acceptance-policy REV, supported queries and disclosure contract | Operated index resource, not a global Unit parent or Realm placeholder; approved Subscribe mappings affect access only. |
+| verification_index_generation / manifest / result | Index/generation, exact assessment/policy/correspondence membership, watermark vector, semantic scope, selected value/basis or abstention/conflict | Derived source/native selection is labeled; staged complete activation with expected predecessor; generation/scope-leading keysets and quality postings. |
+| verification_dependency / invalidation frontier | Evidence/method/mapping/policy key, dependent assessment/result/slice and current epoch | Indexed paged repair with coalescing; frontier fences known-invalid answers before replacement, including caches/export and restored state. |
 | recommendation_snapshot / partition | Snapshot/partition, input cut, algorithm version, cursor, completeness | Atomic active generation switch only after all partitions validate |
 | recommendation_event/exclusion/metric | Account/REF/time event; private exclusions; aggregate inputs | Request/REF/type event dedupe; private event erasure preserves references and aggregate inputs; source scores kept identifiable |
 | unit_best_score / ranking | Target/scope/algorithm generation; deterministic tie breaker | Display ranking does not change native score history |

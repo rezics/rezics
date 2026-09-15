@@ -150,6 +150,13 @@ decisions requires a qualified policy/model configuration with acceptable false
 positive/negative and appeal outcomes; until then the same workflow routes to a
 human. AI service failure never becomes approval or a global content ban.
 
+This is publication-policy review. [Information verification](information-indexing-and-verification.md)
+separately assesses factual claims, preserves competing evaluations and derives
+quality indexes. Realm review may cite an exact permitted assessment, but its
+approval does not establish factual truth; factual disagreement does not itself
+authorize a moderation action. Index/service subscription benefits have no required
+Realm or site-profile boundary.
+
 The reviewer is a native, scoped workload with explicit content-read and review
 authority. The model's output is untrusted structured evidence, not an executable
 permission or a tool command. User content cannot replace instructions, select

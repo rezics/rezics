@@ -5,6 +5,8 @@ Dependencies: M01. Owners: dictionary D03-D04/D11, [Tag Path architecture](../..
 ## Remaining work
 
 - Qualify fact slots, typed assertions, evidence/support, scope decisions, n-ary associations and participant type witnesses.
+- Implement [verification assessment and policy semantics](../../architecture/information-indexing-and-verification.md): exact target/input/method revisions, evidence dependence, distinct run/verdict states, competing issuers, correction/dispute and independent acceptance. Reuse D03/D14.1 without a universal claim-subject owner or duplicate native effective writer.
+- Define qualified claim-class methods, quality signals and calibration populations; separate source support, factual acceptance, native adoption and publication. Preserve abstention, unavailable evidence, temporal scope and unknown dependence through APIs. Qualify the M02 portions of [FACT01-FACT36](../../testing/information-verification.md), including same-value human support and false-merge correction.
 - Qualify Schema.org/Wikidata source-value semantics with M07: typed external identity, complete statements, repeated qualifiers/reference groups, value/unknown/no-value states, units, precision, calendar/globe, language and collection semantics. External classification/rank does not grant native capability or acceptance.
 - Implement versioned source-term/native-definition and classification mappings with explicit residual/unresolved semantics. Preserve Property descriptions, Lexeme/Form/Sense and EntitySchema distinctions without forcing native owners or Tag Senses. Qualify the M02 portions of SIO01-SIO18 in source conformance.
 - Extend generic participants beyond the current catalog-only alternatives through qualified Unit identity/revision/occurrence references and role applicability; do not widen every predicate to every owner automatically.
@@ -20,3 +22,8 @@ Dependencies: M01. Owners: dictionary D03-D04/D11, [Tag Path architecture](../..
 ## Acceptance
 
 Multi-participant relations are not fabricated as pairwise facts. Role predicates correlate to one relation revision. Pagination, privacy, spoilers and canon filters work together. The API distinguishes accepted relations, source claims and pending/conflicted results. Block contracts consume this API without embedding authoritative graph data.
+
+Verification qualification includes independently adjudicated strata, evidence
+and origin/time holdouts, reported coverage/abstention/error uncertainty and
+method-change behavior. An AI confidence score, signature or human-review flag
+does not qualify factual accuracy. Runtime activation remains separately selected.

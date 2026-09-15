@@ -59,6 +59,18 @@ statements as initial milestones; Microdata/RDFa and lexical/shape coverage rema
 required before full acceptance. Source indexing can precede native domain mapping.
 This follow-on sequence does not change the active IAM scope or phase above.
 
+[Information indexing and verification](../architecture/information-indexing-and-verification.md)
+is a selected cross-module follow-on target: M02 owns claims, evidence assessments
+and policy semantics; M07 owns exact observations, origin lineage and change intake;
+M09 owns execution, quality indexes, queries, portable exchange and recovery. M04
+participates when results are adopted into native fields, and M10 only when an
+eligible index/service is commercially offered. The sequence is claim/assessment
+and correction contracts -> initial methods and broad/selected queries -> empirical
+qualification -> independent-consumer exchange and capacity -> separately selected
+service packaging. [FACT/CAPFACT acceptance](../testing/information-verification.md)
+remains unexecuted. This target neither activates runtime work nor depends on a
+Realm, Pro site, full P2P network or execution-enabled Hub.
+
 ## Modules and current target qualification
 
 [M10 Subscribe and Realm participation](modules/subscriptions-and-pro.md) is a
@@ -73,12 +85,12 @@ This is the sole progress table. Module files detail remaining work; linked test
 | ID | Module | Dependencies | Design | Implementation | Verification |
 | --- | --- | --- | --- | --- | --- |
 | M01 | [Foundation](modules/foundation.md) | None | Identity/access and adapter contracts selected | RoleBinding/representation/workload persistence, native subject/path evaluation, assignment ceilings, identity/default-context APIs, scope/Role/Binding/Ceiling management APIs and App declaration/lifecycle APIs implemented; OAuth client/consent/installation/context storage, live readers and bounded credential erasure implemented; private Group lifecycle/selection/roster/discovery/evaluation, independent approvals, original-path recovery and native Org/Realm enrollment APIs/consumers implemented; representation administration, Group-derived Org directory, all-scope representation policy, replacement recovery, remaining protocol integration and consumer/onboarding migration pending | G2 partial; new IAM/OAuth/default/ceiling/Group/Org/Realm/API work, migrations, generators and affected retained web consumers remain unqualified. Remaining [foundation](../testing/foundation.md) and [IAM/APP](../testing/identity-and-access.md) qualification pending. |
-| M02 | [Knowledge and graph](modules/knowledge-and-graph.md) | M01 | Graph, Tag classification, Event temporal facts and source interoperability semantics selected | Pending target completion | Pending |
+| M02 | [Knowledge and graph](modules/knowledge-and-graph.md) | M01 | Graph, Tag classification, Event temporal facts, source interoperability and verification/acceptance semantics selected | Pending target completion | Pending |
 | M03 | [Content and media](modules/content-and-media.md) | M01, M02 contracts | Defined | Pending target completion | Pending |
 | M04 | [Catalog](modules/catalog.md) | M01-M03 contracts | Cross-domain Work/releases and event-time adapters selected; domain mappings/source-free cases required | Pending target completion | Pending |
 | M05 | [Creation and reading](modules/creation-and-reading.md) | M02-M04 | Composition selected; Book is the first journey | Pending target completion | Pending |
 | M06 | [Community and governance](modules/community-and-governance.md) | M01-M03 | Membership, wiki composition and complete rating contexts selected; Dynamic Collections optional | Native Org/Realm enrollment uses shared admission generations with independent Realm enforcement, exact consent and Entity projections; remaining community contracts pending | G2 partial; new native enrollment work unqualified; [wiki evidence](../testing/wiki-composition.md), remaining content revisions, authority/history/capacity and community contracts pending. |
-| M07 | [Sources and converters](modules/sources-and-converters.md) | M01/M02 source contracts; M01-M04 native adoption | Schema.org/Wikidata full-index profiles selected alongside catalog sources; field conformance pending | Pending target completion | Pending |
+| M07 | [Sources and converters](modules/sources-and-converters.md) | M01/M02 source contracts; M01-M04 native adoption | Schema.org/Wikidata full-index profiles and verification evidence/lineage intake selected alongside catalog sources; field conformance pending | Pending target completion | Pending |
 | M08 | [Skill, Prompt and MCP Hub](modules/ai-hub.md) | M01-M04 | Catalog defined; execution/hosting open | Pending target completion | Pending |
-| M09 | [Search and operations](modules/search-and-operations.md) | M01 and participating events | Rating distributions, event-date indexes and source-query/export profiles selected | In progress | G2 partial; [recommendation evidence](../testing/recommendations.md), [native diagnostics](../../services/main/performance/README.md#native-failure-artifacts) and [open failures](../testing/known-failures.md); source interoperability, disclosure, delivery, capacity and restoration pending. |
+| M09 | [Search and operations](modules/search-and-operations.md) | M01 and participating events | Rating distributions, event-date indexes, source-query/export profiles and verification execution/quality indexes/exchange selected | In progress; verification runtime not activated | G2 partial; [recommendation evidence](../testing/recommendations.md), [native diagnostics](../../services/main/performance/README.md#native-failure-artifacts) and [open failures](../testing/known-failures.md); source interoperability, information verification, disclosure, delivery, capacity and restoration pending. |
 | M10 | [Subscribe and Realm participation](modules/subscriptions-and-pro.md) | Selected M01, M03, M06, M09 contracts | Native multi-plan, independent paid/complimentary benefits, Realm policies, multi-context reply connections and fixed-site Pro delivery selected | Runtime implementation not activated | [SUB/PRO, SITE/RPLY, capacity and experience scenarios](../testing/subscriptions-and-pro.md) specified; no M10 gate qualified. |

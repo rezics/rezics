@@ -11,6 +11,7 @@ This directory owns test scenarios and evidence. Follow the [active scope](../pl
 | [Native Work and release](native-work.md) | Cross-domain identity/continuity, virtual/actual releases, applicable properties and source mappings. |
 | [Content composition](content-composition.md) | Explicit local occurrences, exact selections, staged import/refresh, metrics, progress and recovery. |
 | [Source conformance](source-conformance.md) | Provider data -> source queries -> reviewed native writes -> API/export -> update/withdraw/replay; SIO01-SIO18 cover Schema.org/Wikidata preservation, indexing, mapping and recovery. |
+| [Information verification](information-verification.md) | FACT01-FACT36 and CAPFACT01-CAPFACT06: broad claims versus selected answers, evidence/AI assessments, calibration, independent evaluators, portable results, correction and optional Subscribe services; specified, not executed. |
 | [Book and creation](book-and-creation.md) | Complete Book, original and AO3-derived native workflows. |
 | [Relationship Graph](relationship-graph.md) | Subgraph semantics, permissions, budgets and Block descriptor contracts. |
 | [Ratings and event time](ratings-and-event-time.md) | Context/observation/revision identity, latest/history aggregation, time histograms, event-date queries and explicit user actions. |

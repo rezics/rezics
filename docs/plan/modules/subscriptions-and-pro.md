@@ -17,6 +17,13 @@ and progress owner. When activated, select dependency-ready contracts across the
 modules and follow implementation, test-authoring, verification and repair phases.
 Do not defer native multi-plan semantics or gift independence to a later redesign.
 
+[Information indexes and verification services](../../architecture/information-indexing-and-verification.md#commercial-boundary)
+are additional eligible Subscribe applications, with M02/M07/M09 quality and
+delivery prerequisites. Their packaging is a separate activation and does not
+expand the first Realm rollout. FACT32-FACT35 require funding-independent verdicts,
+approved resource mappings, gift/purchase independence and material correction
+disclosure whenever these services are offered.
+
 First runtime activation delivers the generic Subscribe core and ordinary official
 Rezics Pro Realm with its complete participation/discovery behavior. Pro is the first
 operated offering. Person and non-Pro Realm examples must qualify generic boundaries;

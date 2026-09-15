@@ -19,6 +19,7 @@ This matrix defines G4 evidence. See the [plan's gates](README.md#acceptance-gat
 | Mixed identity and membership | [IAM01-IAM28](../testing/identity-and-access.md): private principals, many-to-many representation, mixed grantees, Groups/custom Roles, admission generations, assignment ceilings, complete request proofs, institutional/dependent lifecycle and recovery. |
 | Connected applications | [APP01-APP14](../testing/identity-and-access.md): actual private token profile, Entity connections, consent/installation isolation, credential lifecycle, REST/MCP parity, Bun CIMD egress, bounded webhooks and quota ownership. |
 | Subscribe and Realm participation, upon M10 activation | [SUB/PRO, SITE/RPLY and CAPSUB cases](../testing/subscriptions-and-pro.md): native multi-plan commerce, independent gifts, current benefit proofs, local quotas/review, fixed-site context, multi-Realm reply connections, exact-version Pro discovery and recovery. |
+| Information verification, upon cross-module activation | [FACT01-FACT36 and CAPFACT01-CAPFACT06](../testing/information-verification.md): evidence/assessment/acceptance separation, broad versus qualified answers, independent issuers and portable views, correction/privacy and empirical quality/capacity; M10 cases apply only to offered services. |
 | Reliability | Replay, fencing, cancellation, interrupted large operations, merge/split and recommendation recovery. |
 | Capacity | EXPLAIN/load/skew evidence, explicit limits, no ignored crashes, storage/WAL/recovery at 500M/3B. |
 | Recovery | Restorable database/objects, erasure frontier, reconciled projections/checkpoints and observed RPO/RTO. |
@@ -28,6 +29,10 @@ Run applicable [integrated tests](../testing/backend-integration.md) during each
 The Subscribe row is a selected follow-on contract. It neither expands the current
 IAM implementation scope nor retroactively qualifies or invalidates its recorded
 evidence; include it in combined acceptance when M10 runtime work is activated.
+
+The information-verification row likewise remains a separately activated follow-on
+scope across M02/M07/M09 and participating native owners. Documentation and existing
+source/operational components do not qualify its methods, APIs or indexes.
 
 These gates use one PostgreSQL write authority with logical owner/aggregate separation. Future database splitting requires its own integrity, routing and operational qualification; it is not required to pass this program's table-boundary contract. Capacity planning and measured limits remain required at both declared scales.
 

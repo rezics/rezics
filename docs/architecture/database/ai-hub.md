@@ -4,6 +4,11 @@ Selected Hub scope is native cataloging, versioned content/packages, discovery a
 
 Independently maintained Skill, Prompt and software creations use the [common native Work definition](native-work.md); their package releases use the shared release/composition protocol with domain path, dependency and parameter constraints. Content identity, endpoint observation and runtime execution remain distinct. Importing a package's structure records exact local uses without executing it or importing credentials.
 
+The platform's [information verification workflow](../information-indexing-and-verification.md)
+uses bounded, explicitly authorized methods over claims and evidence. That target
+does not activate arbitrary uploaded Skill execution, third-party runtime hosting
+or outbound Hub connections; those retain the execution decisions above.
+
 ## Identity and versions
 
 | Object | Meaning |

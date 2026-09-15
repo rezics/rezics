@@ -22,6 +22,14 @@ uses exact base/source/destination correspondence and current authority. These
 cross-domain flows require qualification beyond the current bounded application
 slices documented below.
 
+[Fact verification](information-indexing-and-verification.md) consumes exact
+observations and versioned correspondence to create independently attributable
+assessments. Observation, assessment, policy selection and native application are
+different transitions. New evidence can invalidate affected quality indexes before
+replacement, but cannot bypass this owner's native writer, predecessor or
+human-override fences. Verification scheduling is separate from commercial
+Subscribe; payment never establishes source authority or factual support.
+
 ## Identity and authority
 
 `source-record-key.ts` fixes the source identity protocol: SHA-256 over UTF-8

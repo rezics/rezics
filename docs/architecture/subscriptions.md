@@ -30,6 +30,22 @@ subscriptions and entitlements retain separate lifecycles. One user journey may
 orchestrate them with explicit consent; none is an implicit writable copy of another.
 Buying access does not subscribe to every notification or expose a member roster.
 
+### Information indexes and verification services
+
+[Information verification](information-indexing-and-verification.md#commercial-boundary)
+defines candidate offerings for operated quality indexes, detailed evidence analysis,
+update tracking and bounded verification allocations. These use the same registered
+target/benefit contracts without requiring a Realm. Index operators, evaluators,
+source owners and sellers are distinct; cross-owner benefits require approval.
+
+Commercial or complimentary eligibility never changes factual scores, evidence
+requirements, native acceptance authority or material correction status. Every
+permitted answer retains baseline provenance and material uncertainty/correction
+disclosure; enhanced analysis may have a separate audience without revealing
+private inputs. Product tiers, prices, service levels and broader beneficiary
+types remain separate activation decisions. [FACT32-FACT35](../testing/information-verification.md#query-quality-and-commercial-cases)
+compose these invariants with the purchase and grant lifecycle below.
+
 ## Logical model
 
 These owners use concrete native keys and validated references, not a new global
