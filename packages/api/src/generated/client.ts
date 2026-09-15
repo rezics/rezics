@@ -61,6 +61,16 @@ import type {
 	RegisterAccessRecoveryPathResponses,
 	RevokeAccessRecoveryPathOptions,
 	RevokeAccessRecoveryPathResponses,
+	ListAccessGroupRosterOptions,
+	ListAccessGroupRosterResponses,
+	GetAccessGroupSelectionOptions,
+	GetAccessGroupSelectionResponses,
+	StartAccessGroupSelectionReviewOptions,
+	StartAccessGroupSelectionReviewResponses,
+	GetAccessGroupReviewRecipientOptions,
+	GetAccessGroupReviewRecipientResponses,
+	WriteAccessGroupSelectionOptions,
+	WriteAccessGroupSelectionResponses,
 	UpdateAccessGroupPresentationOptions,
 	UpdateAccessGroupPresentationResponses,
 	ReparentAccessGroupOptions,
@@ -1691,6 +1701,102 @@ export function revokeAccessRecoveryPath<ThrowOnError extends boolean = true>(
 			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 			...config,
 		}) as Promise<RequestResult<RevokeAccessRecoveryPathResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/roster}
+ */
+export function listAccessGroupRoster<ThrowOnError extends boolean = true>(
+	options: Options<ListAccessGroupRosterOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ListAccessGroupRosterResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/access/{scope}/groups/{groupId}/roster",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ListAccessGroupRosterResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/selections/query}
+ */
+export function getAccessGroupSelection<ThrowOnError extends boolean = true>(
+	options: Options<GetAccessGroupSelectionOptions, ThrowOnError>,
+): Unwrappable<RequestResult<GetAccessGroupSelectionResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/access/{scope}/groups/{groupId}/selections/query",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetAccessGroupSelectionResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/selections/impact-reviews}
+ */
+export function startAccessGroupSelectionReview<ThrowOnError extends boolean = true>(
+	options: Options<StartAccessGroupSelectionReviewOptions, ThrowOnError>,
+): Unwrappable<RequestResult<StartAccessGroupSelectionReviewResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/access/{scope}/groups/{groupId}/selections/impact-reviews",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<StartAccessGroupSelectionReviewResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/impact-reviews/:reviewId/recipient}
+ */
+export function getAccessGroupReviewRecipient<ThrowOnError extends boolean = true>(
+	options: Options<GetAccessGroupReviewRecipientOptions, ThrowOnError>,
+): Unwrappable<RequestResult<GetAccessGroupReviewRecipientResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/access/{scope}/groups/{groupId}/impact-reviews/{reviewId}/recipient",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetAccessGroupReviewRecipientResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/selections}
+ */
+export function writeAccessGroupSelection<ThrowOnError extends boolean = true>(
+	options: Options<WriteAccessGroupSelectionOptions, ThrowOnError>,
+): Unwrappable<RequestResult<WriteAccessGroupSelectionResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/access/{scope}/groups/{groupId}/selections",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<WriteAccessGroupSelectionResponses, ThrowOnError>>,
 	);
 }
 

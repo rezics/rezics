@@ -3301,6 +3301,7 @@ export const ResolveAccessManagementScopeRequestPermissionEnum = {
 	"access.group.update": "access.group.update",
 	"access.group.reparent": "access.group.reparent",
 	"access.group.retire": "access.group.retire",
+	"access.group.membership.manage": "access.group.membership.manage",
 	"access.role.read": "access.role.read",
 	"access.role.create": "access.role.create",
 	"access.role.update": "access.role.update",
@@ -3516,6 +3517,7 @@ export const GetAccessRoleStatus200DefinitionPermissionsKeyEnum = {
 	"access.group.update": "access.group.update",
 	"access.group.reparent": "access.group.reparent",
 	"access.group.retire": "access.group.retire",
+	"access.group.membership.manage": "access.group.membership.manage",
 	"access.role.read": "access.role.read",
 	"access.role.create": "access.role.create",
 	"access.role.update": "access.role.update",
@@ -3713,6 +3715,7 @@ export const CreateAccessRoleRequestDefinitionPermissionsKeyEnum = {
 	"access.group.update": "access.group.update",
 	"access.group.reparent": "access.group.reparent",
 	"access.group.retire": "access.group.retire",
+	"access.group.membership.manage": "access.group.membership.manage",
 	"access.role.read": "access.role.read",
 	"access.role.create": "access.role.create",
 	"access.role.update": "access.role.update",
@@ -3997,6 +4000,7 @@ export const ReviseAccessRoleRequestDefinitionPermissionsKeyEnum = {
 	"access.group.update": "access.group.update",
 	"access.group.reparent": "access.group.reparent",
 	"access.group.retire": "access.group.retire",
+	"access.group.membership.manage": "access.group.membership.manage",
 	"access.role.read": "access.role.read",
 	"access.role.create": "access.role.create",
 	"access.role.update": "access.role.update",
@@ -5205,6 +5209,9 @@ export type StartAccessGroupImpactPath = {
 export const StartAccessGroupImpactStatus200OperationEnum = {
 	reparent: "reparent",
 	retire: "retire",
+	assign: "assign",
+	remove: "remove",
+	prune: "prune",
 } as const;
 
 export type StartAccessGroupImpactStatus200OperationEnum =
@@ -5510,6 +5517,9 @@ export type AdvanceAccessGroupImpactPath = {
 export const AdvanceAccessGroupImpactStatus200OperationEnum = {
 	reparent: "reparent",
 	retire: "retire",
+	assign: "assign",
+	remove: "remove",
+	prune: "prune",
 } as const;
 
 export type AdvanceAccessGroupImpactStatus200OperationEnum =
@@ -5782,6 +5792,9 @@ export type InspectAccessGroupImpactQuery = {
 export const InspectAccessGroupImpactStatus200OperationEnum = {
 	reparent: "reparent",
 	retire: "retire",
+	assign: "assign",
+	remove: "remove",
+	prune: "prune",
 } as const;
 
 export type InspectAccessGroupImpactStatus200OperationEnum =
@@ -6600,15 +6613,61 @@ export type InspectAccessGroupApprovalProposalPath = {
 	reviewId: string;
 };
 
+export const InspectAccessGroupApprovalProposalStatus200SelectionKindEnum = {
+	principal: "principal",
+	entity: "entity",
+} as const;
+
+export type InspectAccessGroupApprovalProposalStatus200SelectionKindEnum =
+	(typeof InspectAccessGroupApprovalProposalStatus200SelectionKindEnum)[keyof typeof InspectAccessGroupApprovalProposalStatus200SelectionKindEnum];
+
 export const InspectAccessGroupApprovalProposalStatus200OperationEnum = {
 	reparent: "reparent",
 	retire: "retire",
+	assign: "assign",
+	remove: "remove",
+	prune: "prune",
 } as const;
 
 export type InspectAccessGroupApprovalProposalStatus200OperationEnum =
 	(typeof InspectAccessGroupApprovalProposalStatus200OperationEnum)[keyof typeof InspectAccessGroupApprovalProposalStatus200OperationEnum];
 
 export type InspectAccessGroupApprovalProposalStatus200 = {
+	selection: {
+		recipient: string;
+		recipientKey: string;
+		kind: InspectAccessGroupApprovalProposalStatus200SelectionKindEnum;
+		/**
+		 * @minLength 0
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		membershipVersion: number;
+		/**
+		 * @minLength 1
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		activeGeneration: number | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		expiresAt: string;
+		/**
+		 * @minLength 1
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		generation: number;
+		/**
+		 * @minLength 0
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		expectedVersion: number;
+	} | null;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -7711,6 +7770,1202 @@ export type RevokeAccessRecoveryPathResponse =
 	| RevokeAccessRecoveryPathStatus422
 	| RevokeAccessRecoveryPathStatus500
 	| RevokeAccessRecoveryPathStatus503;
+
+export type ListAccessGroupRosterPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	groupId: string;
+};
+
+export const ListAccessGroupRosterView = {
+	admitted: "admitted",
+	direct: "direct",
+	inherited: "inherited",
+} as const;
+
+export type ListAccessGroupRosterView =
+	(typeof ListAccessGroupRosterView)[keyof typeof ListAccessGroupRosterView];
+
+export const ListAccessGroupRosterIncludeStale = {
+	true: "true",
+	false: "false",
+} as const;
+
+export type ListAccessGroupRosterIncludeStale =
+	(typeof ListAccessGroupRosterIncludeStale)[keyof typeof ListAccessGroupRosterIncludeStale];
+
+export type ListAccessGroupRosterQuery = {
+	/**
+	 * @default 'direct'
+	 * @type string | undefined
+	 */
+	view?: ListAccessGroupRosterView;
+	includeStale?: ListAccessGroupRosterIncludeStale;
+	/**
+	 * @maxLength 4096
+	 * @pattern ^rzgr1\..*
+	 * @type string | undefined
+	 */
+	cursor?: string;
+};
+
+export const ListAccessGroupRosterStatus200ItemsKindEnum = {
+	principal: "principal",
+	entity: "entity",
+} as const;
+
+export type ListAccessGroupRosterStatus200ItemsKindEnum =
+	(typeof ListAccessGroupRosterStatus200ItemsKindEnum)[keyof typeof ListAccessGroupRosterStatus200ItemsKindEnum];
+
+export type ListAccessGroupRosterStatus200 = {
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	treeVersion: number;
+	nextCursor: string | null;
+	items: {
+		recipient: string;
+		recipientKey: string;
+		kind: ListAccessGroupRosterStatus200ItemsKindEnum;
+		/**
+		 * @minLength 0
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		membershipVersion: number;
+		/**
+		 * @minLength 1
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		activeGeneration: number | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		expiresAt: string;
+		/**
+		 * @minLength 1
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		generation: number;
+		/**
+		 * @minLength 1
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		selectionVersion: number | null;
+		/**
+		 * @minLength 0
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		setVersion: number | null;
+		path: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			groupId: string;
+			/**
+			 * @minLength 1
+			 * @maxLength 9007199254740991
+			 * @type integer
+			 */
+			version: number;
+		}[];
+		direct: boolean;
+		terminallyStale: boolean;
+		eligible: boolean;
+	}[];
+};
+
+export type ListAccessGroupRosterStatus400 = {
+	error: {
+		/**
+		 * @default 'AccessInputInvalid'
+		 * @type string
+		 */
+		code: "AccessInputInvalid";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ListAccessGroupRosterStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type ListAccessGroupRosterStatus401ErrorCodeEnum =
+	(typeof ListAccessGroupRosterStatus401ErrorCodeEnum)[keyof typeof ListAccessGroupRosterStatus401ErrorCodeEnum];
+
+export type ListAccessGroupRosterStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: ListAccessGroupRosterStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ListAccessGroupRosterStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type ListAccessGroupRosterStatus403ErrorCodeEnum =
+	(typeof ListAccessGroupRosterStatus403ErrorCodeEnum)[keyof typeof ListAccessGroupRosterStatus403ErrorCodeEnum];
+
+export type ListAccessGroupRosterStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: ListAccessGroupRosterStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessGroupRosterStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessGroupRosterStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessGroupRosterStatus422 = ValidationError;
+
+export const ListAccessGroupRosterStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ListAccessGroupRosterStatus429ErrorCodeEnum =
+	(typeof ListAccessGroupRosterStatus429ErrorCodeEnum)[keyof typeof ListAccessGroupRosterStatus429ErrorCodeEnum];
+
+export type ListAccessGroupRosterStatus429 = {
+	error: {
+		code: ListAccessGroupRosterStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type ListAccessGroupRosterStatus500 = InternalError;
+
+export type ListAccessGroupRosterStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessGroupRosterOptions = {
+	body?: never;
+	path: ListAccessGroupRosterPath;
+	query?: ListAccessGroupRosterQuery;
+	headers?: never;
+};
+
+export type ListAccessGroupRosterResponses = {
+	"200": ListAccessGroupRosterStatus200;
+	"400": ListAccessGroupRosterStatus400;
+	"401": ListAccessGroupRosterStatus401;
+	"403": ListAccessGroupRosterStatus403;
+	"404": ListAccessGroupRosterStatus404;
+	"409": ListAccessGroupRosterStatus409;
+	"422": ListAccessGroupRosterStatus422;
+	"429": ListAccessGroupRosterStatus429;
+	"500": ListAccessGroupRosterStatus500;
+	"503": ListAccessGroupRosterStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ListAccessGroupRosterResponse =
+	| ListAccessGroupRosterStatus200
+	| ListAccessGroupRosterStatus400
+	| ListAccessGroupRosterStatus401
+	| ListAccessGroupRosterStatus403
+	| ListAccessGroupRosterStatus404
+	| ListAccessGroupRosterStatus409
+	| ListAccessGroupRosterStatus422
+	| ListAccessGroupRosterStatus429
+	| ListAccessGroupRosterStatus500
+	| ListAccessGroupRosterStatus503;
+
+export type GetAccessGroupSelectionPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	groupId: string;
+};
+
+export type GetAccessGroupSelectionStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	groupId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	generation: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	version: number;
+	selected: boolean;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	setVersion: number;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	activeGeneration: number | null;
+	terminallyStale: boolean;
+};
+
+export type GetAccessGroupSelectionStatus400 =
+	| {
+			error: {
+				/**
+				 * @default 'AccessInputInvalid'
+				 * @type string
+				 */
+				code: "AccessInputInvalid";
+				message: string;
+				details?: void;
+			};
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const GetAccessGroupSelectionStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type GetAccessGroupSelectionStatus401ErrorCodeEnum =
+	(typeof GetAccessGroupSelectionStatus401ErrorCodeEnum)[keyof typeof GetAccessGroupSelectionStatus401ErrorCodeEnum];
+
+export type GetAccessGroupSelectionStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: GetAccessGroupSelectionStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const GetAccessGroupSelectionStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type GetAccessGroupSelectionStatus403ErrorCodeEnum =
+	(typeof GetAccessGroupSelectionStatus403ErrorCodeEnum)[keyof typeof GetAccessGroupSelectionStatus403ErrorCodeEnum];
+
+export type GetAccessGroupSelectionStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: GetAccessGroupSelectionStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetAccessGroupSelectionStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetAccessGroupSelectionStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetAccessGroupSelectionStatus422 = ValidationError;
+
+export const GetAccessGroupSelectionStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetAccessGroupSelectionStatus429ErrorCodeEnum =
+	(typeof GetAccessGroupSelectionStatus429ErrorCodeEnum)[keyof typeof GetAccessGroupSelectionStatus429ErrorCodeEnum];
+
+export type GetAccessGroupSelectionStatus429 = {
+	error: {
+		code: GetAccessGroupSelectionStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type GetAccessGroupSelectionStatus500 = InternalError;
+
+export type GetAccessGroupSelectionStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetAccessGroupSelectionBody = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzr1\..*
+	 * @type string
+	 */
+	recipient: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	generation: number;
+};
+
+export type GetAccessGroupSelectionOptions = {
+	body: GetAccessGroupSelectionBody;
+	path: GetAccessGroupSelectionPath;
+	query?: never;
+	headers?: never;
+};
+
+export type GetAccessGroupSelectionResponses = {
+	"200": GetAccessGroupSelectionStatus200;
+	"400": GetAccessGroupSelectionStatus400;
+	"401": GetAccessGroupSelectionStatus401;
+	"403": GetAccessGroupSelectionStatus403;
+	"404": GetAccessGroupSelectionStatus404;
+	"409": GetAccessGroupSelectionStatus409;
+	"422": GetAccessGroupSelectionStatus422;
+	"429": GetAccessGroupSelectionStatus429;
+	"500": GetAccessGroupSelectionStatus500;
+	"503": GetAccessGroupSelectionStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetAccessGroupSelectionResponse =
+	| GetAccessGroupSelectionStatus200
+	| GetAccessGroupSelectionStatus400
+	| GetAccessGroupSelectionStatus401
+	| GetAccessGroupSelectionStatus403
+	| GetAccessGroupSelectionStatus404
+	| GetAccessGroupSelectionStatus409
+	| GetAccessGroupSelectionStatus422
+	| GetAccessGroupSelectionStatus429
+	| GetAccessGroupSelectionStatus500
+	| GetAccessGroupSelectionStatus503;
+
+export type StartAccessGroupSelectionReviewPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	groupId: string;
+};
+
+export const StartAccessGroupSelectionReviewStatus200OperationEnum = {
+	reparent: "reparent",
+	retire: "retire",
+	assign: "assign",
+	remove: "remove",
+	prune: "prune",
+} as const;
+
+export type StartAccessGroupSelectionReviewStatus200OperationEnum =
+	(typeof StartAccessGroupSelectionReviewStatus200OperationEnum)[keyof typeof StartAccessGroupSelectionReviewStatus200OperationEnum];
+
+export const StartAccessGroupSelectionReviewStatus200StatusEnum = {
+	discovering: "discovering",
+	complete: "complete",
+	invalidated: "invalidated",
+	unavailable: "unavailable",
+} as const;
+
+export type StartAccessGroupSelectionReviewStatus200StatusEnum =
+	(typeof StartAccessGroupSelectionReviewStatus200StatusEnum)[keyof typeof StartAccessGroupSelectionReviewStatus200StatusEnum];
+
+export const StartAccessGroupSelectionReviewStatus200ReasonEnum = {
+	changed: "changed",
+	expired: "expired",
+	budget: "budget",
+	missing: "missing",
+} as const;
+
+export type StartAccessGroupSelectionReviewStatus200ReasonEnum =
+	(typeof StartAccessGroupSelectionReviewStatus200ReasonEnum)[keyof typeof StartAccessGroupSelectionReviewStatus200ReasonEnum];
+
+export type StartAccessGroupSelectionReviewStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+	operation: StartAccessGroupSelectionReviewStatus200OperationEnum;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	expectedGroupVersion: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	expectedTreeVersion: number;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	proposedParentId: string | null;
+	status: StartAccessGroupSelectionReviewStatus200StatusEnum;
+	reason: StartAccessGroupSelectionReviewStatus200ReasonEnum | null;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	pageVersion: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	discoveredItems: number;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	validUntil: string;
+	admission: "not-evaluated";
+};
+
+export type StartAccessGroupSelectionReviewStatus400 =
+	| {
+			error: {
+				/**
+				 * @default 'AccessInputInvalid'
+				 * @type string
+				 */
+				code: "AccessInputInvalid";
+				message: string;
+				details?: void;
+			};
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const StartAccessGroupSelectionReviewStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type StartAccessGroupSelectionReviewStatus401ErrorCodeEnum =
+	(typeof StartAccessGroupSelectionReviewStatus401ErrorCodeEnum)[keyof typeof StartAccessGroupSelectionReviewStatus401ErrorCodeEnum];
+
+export type StartAccessGroupSelectionReviewStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: StartAccessGroupSelectionReviewStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const StartAccessGroupSelectionReviewStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type StartAccessGroupSelectionReviewStatus403ErrorCodeEnum =
+	(typeof StartAccessGroupSelectionReviewStatus403ErrorCodeEnum)[keyof typeof StartAccessGroupSelectionReviewStatus403ErrorCodeEnum];
+
+export type StartAccessGroupSelectionReviewStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: StartAccessGroupSelectionReviewStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type StartAccessGroupSelectionReviewStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type StartAccessGroupSelectionReviewStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type StartAccessGroupSelectionReviewStatus422 = ValidationError;
+
+export type StartAccessGroupSelectionReviewStatus500 = InternalError;
+
+export type StartAccessGroupSelectionReviewStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const StartAccessGroupSelectionReviewRequestOperationEnum = {
+	assign: "assign",
+	remove: "remove",
+	prune: "prune",
+} as const;
+
+export type StartAccessGroupSelectionReviewRequestOperationEnum =
+	(typeof StartAccessGroupSelectionReviewRequestOperationEnum)[keyof typeof StartAccessGroupSelectionReviewRequestOperationEnum];
+
+export type StartAccessGroupSelectionReviewBody = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzr1\..*
+	 * @type string
+	 */
+	recipient: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	generation: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	expectedVersion: number;
+	operation: StartAccessGroupSelectionReviewRequestOperationEnum;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	expectedGroupVersion: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	expectedTreeVersion: number;
+};
+
+export type StartAccessGroupSelectionReviewOptions = {
+	body: StartAccessGroupSelectionReviewBody;
+	path: StartAccessGroupSelectionReviewPath;
+	query?: never;
+	headers?: never;
+};
+
+export type StartAccessGroupSelectionReviewResponses = {
+	"200": StartAccessGroupSelectionReviewStatus200;
+	"400": StartAccessGroupSelectionReviewStatus400;
+	"401": StartAccessGroupSelectionReviewStatus401;
+	"403": StartAccessGroupSelectionReviewStatus403;
+	"404": StartAccessGroupSelectionReviewStatus404;
+	"409": StartAccessGroupSelectionReviewStatus409;
+	"422": StartAccessGroupSelectionReviewStatus422;
+	"500": StartAccessGroupSelectionReviewStatus500;
+	"503": StartAccessGroupSelectionReviewStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type StartAccessGroupSelectionReviewResponse =
+	| StartAccessGroupSelectionReviewStatus200
+	| StartAccessGroupSelectionReviewStatus400
+	| StartAccessGroupSelectionReviewStatus401
+	| StartAccessGroupSelectionReviewStatus403
+	| StartAccessGroupSelectionReviewStatus404
+	| StartAccessGroupSelectionReviewStatus409
+	| StartAccessGroupSelectionReviewStatus422
+	| StartAccessGroupSelectionReviewStatus500
+	| StartAccessGroupSelectionReviewStatus503;
+
+export type GetAccessGroupReviewRecipientPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	groupId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+};
+
+export const GetAccessGroupReviewRecipientStatus200KindEnum = {
+	principal: "principal",
+	entity: "entity",
+} as const;
+
+export type GetAccessGroupReviewRecipientStatus200KindEnum =
+	(typeof GetAccessGroupReviewRecipientStatus200KindEnum)[keyof typeof GetAccessGroupReviewRecipientStatus200KindEnum];
+
+export type GetAccessGroupReviewRecipientStatus200 = {
+	recipient: string;
+	recipientKey: string;
+	kind: GetAccessGroupReviewRecipientStatus200KindEnum;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	membershipVersion: number;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	activeGeneration: number | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expiresAt: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	generation: number;
+};
+
+export type GetAccessGroupReviewRecipientStatus400 = {
+	error: {
+		/**
+		 * @default 'AccessInputInvalid'
+		 * @type string
+		 */
+		code: "AccessInputInvalid";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const GetAccessGroupReviewRecipientStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type GetAccessGroupReviewRecipientStatus401ErrorCodeEnum =
+	(typeof GetAccessGroupReviewRecipientStatus401ErrorCodeEnum)[keyof typeof GetAccessGroupReviewRecipientStatus401ErrorCodeEnum];
+
+export type GetAccessGroupReviewRecipientStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: GetAccessGroupReviewRecipientStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const GetAccessGroupReviewRecipientStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type GetAccessGroupReviewRecipientStatus403ErrorCodeEnum =
+	(typeof GetAccessGroupReviewRecipientStatus403ErrorCodeEnum)[keyof typeof GetAccessGroupReviewRecipientStatus403ErrorCodeEnum];
+
+export type GetAccessGroupReviewRecipientStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: GetAccessGroupReviewRecipientStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetAccessGroupReviewRecipientStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetAccessGroupReviewRecipientStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetAccessGroupReviewRecipientStatus422 = ValidationError;
+
+export type GetAccessGroupReviewRecipientStatus500 = InternalError;
+
+export type GetAccessGroupReviewRecipientStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetAccessGroupReviewRecipientOptions = {
+	body?: never;
+	path: GetAccessGroupReviewRecipientPath;
+	query?: never;
+	headers?: never;
+};
+
+export type GetAccessGroupReviewRecipientResponses = {
+	"200": GetAccessGroupReviewRecipientStatus200;
+	"400": GetAccessGroupReviewRecipientStatus400;
+	"401": GetAccessGroupReviewRecipientStatus401;
+	"403": GetAccessGroupReviewRecipientStatus403;
+	"404": GetAccessGroupReviewRecipientStatus404;
+	"409": GetAccessGroupReviewRecipientStatus409;
+	"422": GetAccessGroupReviewRecipientStatus422;
+	"500": GetAccessGroupReviewRecipientStatus500;
+	"503": GetAccessGroupReviewRecipientStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetAccessGroupReviewRecipientResponse =
+	| GetAccessGroupReviewRecipientStatus200
+	| GetAccessGroupReviewRecipientStatus400
+	| GetAccessGroupReviewRecipientStatus401
+	| GetAccessGroupReviewRecipientStatus403
+	| GetAccessGroupReviewRecipientStatus404
+	| GetAccessGroupReviewRecipientStatus409
+	| GetAccessGroupReviewRecipientStatus422
+	| GetAccessGroupReviewRecipientStatus500
+	| GetAccessGroupReviewRecipientStatus503;
+
+export type WriteAccessGroupSelectionPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	groupId: string;
+};
+
+export type WriteAccessGroupSelectionStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	groupId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	generation: number;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	version: number;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	selectedAfter: boolean;
+};
+
+export type WriteAccessGroupSelectionStatus400 =
+	| {
+			error: {
+				/**
+				 * @default 'AccessInputInvalid'
+				 * @type string
+				 */
+				code: "AccessInputInvalid";
+				message: string;
+				details?: void;
+			};
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const WriteAccessGroupSelectionStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type WriteAccessGroupSelectionStatus401ErrorCodeEnum =
+	(typeof WriteAccessGroupSelectionStatus401ErrorCodeEnum)[keyof typeof WriteAccessGroupSelectionStatus401ErrorCodeEnum];
+
+export type WriteAccessGroupSelectionStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: WriteAccessGroupSelectionStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const WriteAccessGroupSelectionStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type WriteAccessGroupSelectionStatus403ErrorCodeEnum =
+	(typeof WriteAccessGroupSelectionStatus403ErrorCodeEnum)[keyof typeof WriteAccessGroupSelectionStatus403ErrorCodeEnum];
+
+export type WriteAccessGroupSelectionStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: WriteAccessGroupSelectionStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type WriteAccessGroupSelectionStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type WriteAccessGroupSelectionStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type WriteAccessGroupSelectionStatus422 = ValidationError;
+
+export type WriteAccessGroupSelectionStatus500 = InternalError;
+
+export type WriteAccessGroupSelectionStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const WriteAccessGroupSelectionRequestOperationEnum = {
+	assign: "assign",
+	remove: "remove",
+	prune: "prune",
+} as const;
+
+export type WriteAccessGroupSelectionRequestOperationEnum =
+	(typeof WriteAccessGroupSelectionRequestOperationEnum)[keyof typeof WriteAccessGroupSelectionRequestOperationEnum];
+
+export type WriteAccessGroupSelectionBody = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzr1\..*
+	 * @type string
+	 */
+	recipient: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	generation: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	expectedVersion: number;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	operation: WriteAccessGroupSelectionRequestOperationEnum;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+};
+
+export type WriteAccessGroupSelectionOptions = {
+	body: WriteAccessGroupSelectionBody;
+	path: WriteAccessGroupSelectionPath;
+	query?: never;
+	headers?: never;
+};
+
+export type WriteAccessGroupSelectionResponses = {
+	"200": WriteAccessGroupSelectionStatus200;
+	"400": WriteAccessGroupSelectionStatus400;
+	"401": WriteAccessGroupSelectionStatus401;
+	"403": WriteAccessGroupSelectionStatus403;
+	"404": WriteAccessGroupSelectionStatus404;
+	"409": WriteAccessGroupSelectionStatus409;
+	"422": WriteAccessGroupSelectionStatus422;
+	"500": WriteAccessGroupSelectionStatus500;
+	"503": WriteAccessGroupSelectionStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type WriteAccessGroupSelectionResponse =
+	| WriteAccessGroupSelectionStatus200
+	| WriteAccessGroupSelectionStatus400
+	| WriteAccessGroupSelectionStatus401
+	| WriteAccessGroupSelectionStatus403
+	| WriteAccessGroupSelectionStatus404
+	| WriteAccessGroupSelectionStatus409
+	| WriteAccessGroupSelectionStatus422
+	| WriteAccessGroupSelectionStatus500
+	| WriteAccessGroupSelectionStatus503;
 
 export type UpdateAccessGroupPresentationPath = {
 	/**

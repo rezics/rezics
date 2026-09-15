@@ -4,6 +4,9 @@ CREATE OR REPLACE FUNCTION public.touch_access_impact_fences()
 RETURNS trigger LANGUAGE plpgsql SET search_path=pg_catalog,public AS $$
 DECLARE old_value jsonb; new_value jsonb; pair record;
 BEGIN
+ -- A version-zero unselected slot exists only inside the first assignment's
+ -- savepoint. It has no recipient effect and cannot commit without its event.
+ IF TG_TABLE_NAME='access_group_membership' AND TG_OP='INSERT' AND (to_jsonb(NEW)->>'version')::bigint=0 AND (to_jsonb(NEW)->>'selected')::boolean IS FALSE THEN RETURN NULL; END IF;
  IF TG_OP<>'INSERT' THEN old_value=to_jsonb(OLD); END IF;
  IF TG_OP<>'DELETE' THEN new_value=to_jsonb(NEW); END IF;
  -- Fixed trigger arguments are (kind, UUID column) pairs. Include both old and

@@ -5454,6 +5454,7 @@
 											"access.group.update",
 											"access.group.reparent",
 											"access.group.retire",
+											"access.group.membership.manage",
 											"access.role.read",
 											"access.role.create",
 											"access.role.update",
@@ -5751,7 +5752,7 @@
 												"label": { "type": "string" },
 												"description": { "type": ["string", "null"] },
 												"permissions": {
-													"maxItems": 95,
+													"maxItems": 96,
 													"type": "array",
 													"items": {
 														"oneOf": [
@@ -5870,6 +5871,7 @@
 																			"access.group.update",
 																			"access.group.reparent",
 																			"access.group.retire",
+																			"access.group.membership.manage",
 																			"access.role.read",
 																			"access.role.create",
 																			"access.role.update",
@@ -5995,7 +5997,7 @@
 											"label": { "type": "string" },
 											"description": { "type": ["string", "null"] },
 											"permissions": {
-												"maxItems": 95,
+												"maxItems": 96,
 												"type": "array",
 												"items": {
 													"oneOf": [
@@ -6114,6 +6116,7 @@
 																		"access.group.update",
 																		"access.group.reparent",
 																		"access.group.retire",
+																		"access.group.membership.manage",
 																		"access.role.read",
 																		"access.role.create",
 																		"access.role.update",
@@ -6444,7 +6447,7 @@
 											"label": { "type": "string" },
 											"description": { "type": ["string", "null"] },
 											"permissions": {
-												"maxItems": 95,
+												"maxItems": 96,
 												"type": "array",
 												"items": {
 													"oneOf": [
@@ -6563,6 +6566,7 @@
 																		"access.group.update",
 																		"access.group.reparent",
 																		"access.group.retire",
+																		"access.group.membership.manage",
 																		"access.role.read",
 																		"access.role.create",
 																		"access.role.update",
@@ -8283,7 +8287,10 @@
 											"format": "uuid",
 											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 										},
-										"operation": { "type": "string", "enum": ["reparent", "retire"] },
+										"operation": {
+											"type": "string",
+											"enum": ["reparent", "retire", "assign", "remove", "prune"]
+										},
 										"expectedGroupVersion": {
 											"type": "integer",
 											"minimum": 1,
@@ -8625,7 +8632,10 @@
 											"format": "uuid",
 											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 										},
-										"operation": { "type": "string", "enum": ["reparent", "retire"] },
+										"operation": {
+											"type": "string",
+											"enum": ["reparent", "retire", "assign", "remove", "prune"]
+										},
 										"expectedGroupVersion": {
 											"type": "integer",
 											"minimum": 1,
@@ -8957,7 +8967,10 @@
 											"format": "uuid",
 											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 										},
-										"operation": { "type": "string", "enum": ["reparent", "retire"] },
+										"operation": {
+											"type": "string",
+											"enum": ["reparent", "retire", "assign", "remove", "prune"]
+										},
 										"expectedGroupVersion": {
 											"type": "integer",
 											"minimum": 1,
@@ -9947,6 +9960,50 @@
 									"$schema": "https://json-schema.org/draft/2020-12/schema",
 									"type": "object",
 									"properties": {
+										"selection": {
+											"type": ["object", "null"],
+											"properties": {
+												"recipient": { "type": "string" },
+												"recipientKey": { "type": "string" },
+												"kind": { "type": "string", "enum": ["principal", "entity"] },
+												"membershipVersion": {
+													"type": "integer",
+													"minimum": 0,
+													"maximum": 9007199254740991
+												},
+												"activeGeneration": {
+													"type": ["integer", "null"],
+													"minimum": 1,
+													"maximum": 9007199254740991
+												},
+												"expiresAt": {
+													"type": "string",
+													"format": "date-time",
+													"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+												},
+												"generation": {
+													"type": "integer",
+													"minimum": 1,
+													"maximum": 9007199254740991
+												},
+												"expectedVersion": {
+													"type": "integer",
+													"minimum": 0,
+													"maximum": 9007199254740991
+												}
+											},
+											"required": [
+												"recipient",
+												"recipientKey",
+												"kind",
+												"membershipVersion",
+												"activeGeneration",
+												"expiresAt",
+												"generation",
+												"expectedVersion"
+											],
+											"additionalProperties": false
+										},
 										"reviewId": {
 											"type": "string",
 											"format": "uuid",
@@ -9954,7 +10011,10 @@
 										},
 										"proposalDigest": { "type": "string" },
 										"effectDigest": { "type": "string" },
-										"operation": { "type": "string", "enum": ["reparent", "retire"] },
+										"operation": {
+											"type": "string",
+											"enum": ["reparent", "retire", "assign", "remove", "prune"]
+										},
 										"expectedGroupVersion": {
 											"type": "integer",
 											"minimum": 1,
@@ -9978,6 +10038,7 @@
 										}
 									},
 									"required": [
+										"selection",
 										"reviewId",
 										"proposalDigest",
 										"effectDigest",
@@ -11514,6 +11575,1553 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
+		"/api/v1/access/{scope}/groups/{groupId}/roster": {
+			"get": {
+				"operationId": "listAccessGroupRoster",
+				"tags": ["Access management"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "scope",
+						"in": "path",
+						"required": true,
+						"schema": { "type": "string", "maxLength": 512, "pattern": "^rzs1\\..*" }
+					},
+					{
+						"name": "groupId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					},
+					{
+						"name": "view",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"default": "direct",
+							"type": "string",
+							"enum": ["admitted", "direct", "inherited"]
+						}
+					},
+					{
+						"name": "includeStale",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "string", "enum": ["true", "false"] }
+					},
+					{
+						"name": "cursor",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "string", "maxLength": 4096, "pattern": "^rzgr1\\..*" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"treeVersion": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+										"nextCursor": { "type": ["string", "null"] },
+										"items": {
+											"maxItems": 100,
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"recipient": { "type": "string" },
+													"recipientKey": { "type": "string" },
+													"kind": { "type": "string", "enum": ["principal", "entity"] },
+													"membershipVersion": {
+														"type": "integer",
+														"minimum": 0,
+														"maximum": 9007199254740991
+													},
+													"activeGeneration": {
+														"type": ["integer", "null"],
+														"minimum": 1,
+														"maximum": 9007199254740991
+													},
+													"expiresAt": {
+														"type": "string",
+														"format": "date-time",
+														"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+													},
+													"generation": {
+														"type": "integer",
+														"minimum": 1,
+														"maximum": 9007199254740991
+													},
+													"selectionVersion": {
+														"type": ["integer", "null"],
+														"minimum": 1,
+														"maximum": 9007199254740991
+													},
+													"setVersion": {
+														"type": ["integer", "null"],
+														"minimum": 0,
+														"maximum": 9007199254740991
+													},
+													"path": {
+														"maxItems": 8,
+														"type": "array",
+														"items": {
+															"type": "object",
+															"properties": {
+																"groupId": {
+																	"type": "string",
+																	"format": "uuid",
+																	"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+																},
+																"version": {
+																	"type": "integer",
+																	"minimum": 1,
+																	"maximum": 9007199254740991
+																}
+															},
+															"required": ["groupId", "version"],
+															"additionalProperties": false
+														}
+													},
+													"direct": { "type": "boolean" },
+													"terminallyStale": { "type": "boolean" },
+													"eligible": { "type": "boolean" }
+												},
+												"required": [
+													"recipient",
+													"recipientKey",
+													"kind",
+													"membershipVersion",
+													"activeGeneration",
+													"expiresAt",
+													"generation",
+													"selectionVersion",
+													"setVersion",
+													"path",
+													"direct",
+													"terminallyStale",
+													"eligible"
+												],
+												"additionalProperties": false
+											}
+										}
+									},
+									"required": ["treeVersion", "nextCursor", "items"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessInputInvalid",
+													"enum": ["AccessInputInvalid"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"enum": ["AuthenticationRequired", "InteractiveSessionRequired"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": [
+														"AccessDenied",
+														"ApiTokenPermissionRequired",
+														"FreshSessionRequired",
+														"EmailVerificationRequired",
+														"AccountSuspended",
+														"AccountClosed"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": ["AccessChanged"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until this request can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "getApiAccessByScopeGroupsByGroupIdRoster",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/access/{scope}/groups/{groupId}/selections/query": {
+			"post": {
+				"operationId": "getAccessGroupSelection",
+				"tags": ["Access management"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "scope",
+						"in": "path",
+						"required": true,
+						"schema": { "type": "string", "maxLength": 512, "pattern": "^rzs1\\..*" }
+					},
+					{
+						"name": "groupId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"type": "object",
+								"properties": {
+									"recipient": { "type": "string", "maxLength": 512, "pattern": "^rzr1\\..*" },
+									"generation": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 }
+								},
+								"required": ["recipient", "generation"],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"groupId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"generation": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+										"version": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+										"selected": { "type": "boolean" },
+										"setVersion": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+										"activeGeneration": {
+											"type": ["integer", "null"],
+											"minimum": 1,
+											"maximum": 9007199254740991
+										},
+										"terminallyStale": { "type": "boolean" }
+									},
+									"required": [
+										"groupId",
+										"generation",
+										"version",
+										"selected",
+										"setVersion",
+										"activeGeneration",
+										"terminallyStale"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"properties": {
+												"error": {
+													"type": "object",
+													"properties": {
+														"code": {
+															"default": "AccessInputInvalid",
+															"enum": ["AccessInputInvalid"],
+															"type": "string"
+														},
+														"message": { "type": "string" },
+														"details": {}
+													},
+													"required": ["code", "message"]
+												},
+												"requestId": { "type": "string" }
+											},
+											"required": ["error", "requestId"]
+										},
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"enum": ["AuthenticationRequired", "InteractiveSessionRequired"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": [
+														"AccessDenied",
+														"ApiTokenPermissionRequired",
+														"FreshSessionRequired",
+														"EmailVerificationRequired",
+														"AccountSuspended",
+														"AccountClosed"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": ["AccessChanged"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until this request can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "postApiAccessByScopeGroupsByGroupIdSelectionsQuery",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/access/{scope}/groups/{groupId}/selections/impact-reviews": {
+			"post": {
+				"operationId": "startAccessGroupSelectionReview",
+				"tags": ["Access management"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "scope",
+						"in": "path",
+						"required": true,
+						"schema": { "type": "string", "maxLength": 512, "pattern": "^rzs1\\..*" }
+					},
+					{
+						"name": "groupId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"type": "object",
+								"properties": {
+									"recipient": { "type": "string", "maxLength": 512, "pattern": "^rzr1\\..*" },
+									"generation": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+									"expectedVersion": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740990
+									},
+									"operation": { "type": "string", "enum": ["assign", "remove", "prune"] },
+									"reviewId": {
+										"type": "string",
+										"format": "uuid",
+										"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+									},
+									"expectedGroupVersion": {
+										"type": "integer",
+										"minimum": 1,
+										"maximum": 9007199254740991
+									},
+									"expectedTreeVersion": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740991
+									}
+								},
+								"required": [
+									"recipient",
+									"generation",
+									"expectedVersion",
+									"operation",
+									"reviewId",
+									"expectedGroupVersion",
+									"expectedTreeVersion"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"reviewId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"operation": {
+											"type": "string",
+											"enum": ["reparent", "retire", "assign", "remove", "prune"]
+										},
+										"expectedGroupVersion": {
+											"type": "integer",
+											"minimum": 1,
+											"maximum": 9007199254740991
+										},
+										"expectedTreeVersion": {
+											"type": "integer",
+											"minimum": 0,
+											"maximum": 9007199254740991
+										},
+										"proposedParentId": {
+											"type": ["string", "null"],
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"status": {
+											"type": "string",
+											"enum": ["discovering", "complete", "invalidated", "unavailable"]
+										},
+										"reason": {
+											"type": ["string", "null"],
+											"enum": ["changed", "expired", "budget", "missing"]
+										},
+										"pageVersion": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+										"discoveredItems": {
+											"type": "integer",
+											"minimum": 0,
+											"maximum": 9007199254740991
+										},
+										"validUntil": {
+											"type": "string",
+											"format": "date-time",
+											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+										},
+										"admission": { "type": "string", "const": "not-evaluated" }
+									},
+									"required": [
+										"reviewId",
+										"operation",
+										"expectedGroupVersion",
+										"expectedTreeVersion",
+										"proposedParentId",
+										"status",
+										"reason",
+										"pageVersion",
+										"discoveredItems",
+										"validUntil",
+										"admission"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"properties": {
+												"error": {
+													"type": "object",
+													"properties": {
+														"code": {
+															"default": "AccessInputInvalid",
+															"enum": ["AccessInputInvalid"],
+															"type": "string"
+														},
+														"message": { "type": "string" },
+														"details": {}
+													},
+													"required": ["code", "message"]
+												},
+												"requestId": { "type": "string" }
+											},
+											"required": ["error", "requestId"]
+										},
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"enum": ["AuthenticationRequired", "InteractiveSessionRequired"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": [
+														"AccessDenied",
+														"ApiTokenPermissionRequired",
+														"FreshSessionRequired",
+														"EmailVerificationRequired",
+														"AccountSuspended",
+														"AccountClosed"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": ["AccessChanged"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "postApiAccessByScopeGroupsByGroupIdSelectionsImpact-reviews",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/access/{scope}/groups/{groupId}/impact-reviews/{reviewId}/recipient": {
+			"post": {
+				"operationId": "getAccessGroupReviewRecipient",
+				"tags": ["Access management"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "scope",
+						"in": "path",
+						"required": true,
+						"schema": { "type": "string", "maxLength": 512, "pattern": "^rzs1\\..*" }
+					},
+					{
+						"name": "groupId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					},
+					{
+						"name": "reviewId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"recipient": { "type": "string" },
+										"recipientKey": { "type": "string" },
+										"kind": { "type": "string", "enum": ["principal", "entity"] },
+										"membershipVersion": {
+											"type": "integer",
+											"minimum": 0,
+											"maximum": 9007199254740991
+										},
+										"activeGeneration": {
+											"type": ["integer", "null"],
+											"minimum": 1,
+											"maximum": 9007199254740991
+										},
+										"expiresAt": {
+											"type": "string",
+											"format": "date-time",
+											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+										},
+										"generation": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 }
+									},
+									"required": [
+										"recipient",
+										"recipientKey",
+										"kind",
+										"membershipVersion",
+										"activeGeneration",
+										"expiresAt",
+										"generation"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessInputInvalid",
+													"enum": ["AccessInputInvalid"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"enum": ["AuthenticationRequired", "InteractiveSessionRequired"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": [
+														"AccessDenied",
+														"ApiTokenPermissionRequired",
+														"FreshSessionRequired",
+														"EmailVerificationRequired",
+														"AccountSuspended",
+														"AccountClosed"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": ["AccessChanged"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "postApiAccessByScopeGroupsByGroupIdImpact-reviewsByReviewIdRecipient",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/access/{scope}/groups/{groupId}/selections": {
+			"post": {
+				"operationId": "writeAccessGroupSelection",
+				"tags": ["Access management"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "scope",
+						"in": "path",
+						"required": true,
+						"schema": { "type": "string", "maxLength": 512, "pattern": "^rzs1\\..*" }
+					},
+					{
+						"name": "groupId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"type": "object",
+								"properties": {
+									"recipient": { "type": "string", "maxLength": 512, "pattern": "^rzr1\\..*" },
+									"generation": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+									"expectedVersion": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740990
+									},
+									"operationId": {
+										"type": "string",
+										"format": "uuid",
+										"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+									},
+									"operation": { "type": "string", "enum": ["assign", "remove", "prune"] },
+									"reviewId": {
+										"type": "string",
+										"format": "uuid",
+										"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+									}
+								},
+								"required": [
+									"recipient",
+									"generation",
+									"expectedVersion",
+									"operationId",
+									"operation",
+									"reviewId"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"groupId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"generation": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+										"version": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+										"operationId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"selectedAfter": { "type": "boolean" }
+									},
+									"required": ["groupId", "generation", "version", "operationId", "selectedAfter"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"properties": {
+												"error": {
+													"type": "object",
+													"properties": {
+														"code": {
+															"default": "AccessInputInvalid",
+															"enum": ["AccessInputInvalid"],
+															"type": "string"
+														},
+														"message": { "type": "string" },
+														"details": {}
+													},
+													"required": ["code", "message"]
+												},
+												"requestId": { "type": "string" }
+											},
+											"required": ["error", "requestId"]
+										},
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"enum": ["AuthenticationRequired", "InteractiveSessionRequired"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": [
+														"AccessDenied",
+														"ApiTokenPermissionRequired",
+														"FreshSessionRequired",
+														"EmailVerificationRequired",
+														"AccountSuspended",
+														"AccountClosed"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": ["AccessChanged"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "postApiAccessByScopeGroupsByGroupIdSelections",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
 		"/api/v1/access/{scope}/groups/{groupId}/presentation": {
 			"patch": {
 				"operationId": "updateAccessGroupPresentation",
@@ -12868,7 +14476,7 @@
 												"offlineAccess": { "type": "boolean" },
 												"entityDisclosure": { "type": "boolean" },
 												"capabilities": {
-													"maxItems": 117,
+													"maxItems": 118,
 													"type": "array",
 													"items": {
 														"oneOf": [
@@ -12987,6 +14595,7 @@
 																			"access.group.update",
 																			"access.group.reparent",
 																			"access.group.retire",
+																			"access.group.membership.manage",
 																			"access.role.read",
 																			"access.role.create",
 																			"access.role.update",
@@ -14197,7 +15806,7 @@
 												"label": { "type": "string", "minLength": 1, "maxLength": 512 },
 												"description": { "type": ["string", "null"], "maxLength": 4096 },
 												"capabilities": {
-													"maxItems": 117,
+													"maxItems": 118,
 													"type": "array",
 													"items": {
 														"oneOf": [
@@ -14316,6 +15925,7 @@
 																			"access.group.update",
 																			"access.group.reparent",
 																			"access.group.retire",
+																			"access.group.membership.manage",
 																			"access.role.read",
 																			"access.role.create",
 																			"access.role.update",
@@ -14490,7 +16100,7 @@
 											"label": { "type": "string", "minLength": 1, "maxLength": 512 },
 											"description": { "type": ["string", "null"], "maxLength": 4096 },
 											"capabilities": {
-												"maxItems": 117,
+												"maxItems": 118,
 												"type": "array",
 												"items": {
 													"oneOf": [
@@ -14609,6 +16219,7 @@
 																		"access.group.update",
 																		"access.group.reparent",
 																		"access.group.retire",
+																		"access.group.membership.manage",
 																		"access.role.read",
 																		"access.role.create",
 																		"access.role.update",
@@ -14988,7 +16599,7 @@
 											"label": { "type": "string", "minLength": 1, "maxLength": 512 },
 											"description": { "type": ["string", "null"], "maxLength": 4096 },
 											"capabilities": {
-												"maxItems": 117,
+												"maxItems": 118,
 												"type": "array",
 												"items": {
 													"oneOf": [
@@ -15107,6 +16718,7 @@
 																		"access.group.update",
 																		"access.group.reparent",
 																		"access.group.retire",
+																		"access.group.membership.manage",
 																		"access.role.read",
 																		"access.role.create",
 																		"access.role.update",

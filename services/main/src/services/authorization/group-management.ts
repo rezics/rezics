@@ -2,7 +2,7 @@ import { lockGroupAdmissionClosure, prepareGroupAdmission } from "./group-admiss
 import { accessGroupAdmissionReceipt } from "../database/schema/access-group-admission";
 import { advanceGroupImpactEvaluation, inspectGroupImpactEvaluation } from "./group-impact-evaluation";
 import type { z } from "zod";
-import { beginGroupImpactDiscovery, advanceGroupImpactDiscovery, inspectGroupImpactDiscovery, lockGroupImpactReview, groupImpactSummary, type GroupImpactProposalSchema } from "./group-impact-discovery";
+import { groupImpactPermission, beginGroupImpactDiscovery, advanceGroupImpactDiscovery, inspectGroupImpactDiscovery, lockGroupImpactReview, groupImpactSummary, type GroupImpactProposalSchema } from "./group-impact-discovery";
 import { and, eq, gt, sql, type SQL } from "drizzle-orm";
 import type { PrincipalRequestContext } from "../auth/principal-session";
 import type { DatabaseTransaction } from "../database";
@@ -21,8 +21,9 @@ export type ManagedGroupCommand = AccessGroupCommand extends infer Command
 	? Command extends AccessGroupCommand ? Omit<Command, "operatorAuthUserId" | "authoritySubjectId"> & { reviewId?: string } : never
 	: never;
 
-async function groupAuthority(tx: DatabaseTransaction, context: PrincipalRequestContext, scopeId: string,
-	groupId: string | undefined, operation: "read" | ManagedGroupCommand["operation"], promote = false,
+/** Current Group authority under promoted native mutation fences. @internal */
+export async function groupAuthority(tx: DatabaseTransaction, context: PrincipalRequestContext, scopeId: string,
+	groupId: string | undefined, operation: "read" | "assign" | "remove" | "prune" | ManagedGroupCommand["operation"], promote = false,
 ) {
 	const mutation = operation !== "read", exclusive = mutation || promote;
 	const lifecycle = await scopeLifecycleAdmission(tx, scopeId, mutation);
@@ -37,8 +38,8 @@ async function groupAuthority(tx: DatabaseTransaction, context: PrincipalRequest
 	if (exclusive) await treeQuery.for("update");
 	else await treeQuery.for("share");
 	return readManagementAuthority(tx, { proof: context.credentialProof(), selection: context.selection, scopeId,
-		path: groupId === undefined ? ["groups"] : ["groups", groupId], permission: `access.group.${operation}`,
-		apiPermission: mutation ? "access:manage" : "access:read", requireFreshSession: operation === "reparent" || operation === "retire", mutation }, lifecycle);
+		path: groupId === undefined ? ["groups"] : ["groups", groupId], permission: operation === "assign" || operation === "remove" || operation === "prune" ? groupImpactPermission(operation) : `access.group.${operation}`,
+		apiPermission: mutation ? "access:manage" : "access:read", requireFreshSession: operation === "reparent" || operation === "retire" || operation === "assign" || operation === "remove" || operation === "prune", mutation }, lifecycle);
 }
 
 /**

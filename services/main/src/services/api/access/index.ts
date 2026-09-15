@@ -1,3 +1,5 @@
+import { getGroupReviewRecipient, listGroupRoster, getGroupSelection, startGroupSelectionReview, writeGroupSelection } from "../../authorization/group-selection-management";
+import { GroupRecipient, GroupRosterQuery, GroupRoster, GroupSelectionBody, GroupSelectionQueryBody, GroupSelectionState, GroupSelectionReceipt, StartGroupSelectionReviewBody } from "./schema";
 import { inspectGroupApproval, approveGroupImpact, revokeGroupApproval, listGroupApprovals, registerRecoveryPath, revokeRecoveryPath } from "../../authorization/group-admission";
 import { ApproveGroupBody, GroupApprovalParams, RevokeEvidenceBody, GroupApprovalProposal, GroupApprovalReceipt, GroupApprovalList, RegisterRecoveryBody, RecoveryPathParams, RecoveryPathReceipt } from "./schema";
 import Elysia from "elysia";
@@ -130,6 +132,27 @@ export default new Elysia({ prefix: "/access", name: "access-management-api" }).
   principalAccess: { ...manage,fresh: true },params: RecoveryPathParams,body: RevokeEvidenceBody,response: { 200: RecoveryPathReceipt,...groupErrors },
   detail: { operationId: "revokeAccessRecoveryPath",tags: ["Access management"] },
  }, ({ principalContext,params,body }) => revokeRecoveryPath(principalContext,{ ...body,pathId: params.pathId,scopeId: selectors.resolve(params.scope,principalContext.credentialProof(),Date.now()) }))
+
+ .get("/:scope/groups/:groupId/roster", {
+  principalAccess: read,params: GroupParams,query: GroupRosterQuery,response: { 200: GroupRoster,...groupErrors },
+  detail: { operationId: "listAccessGroupRoster",tags: ["Access management"] },
+ }, ({ principalContext,params,query }) => listGroupRoster(principalContext,{ groupId: params.groupId,scopeId: selectors.resolve(params.scope,principalContext.credentialProof(),Date.now()) },query))
+ .post("/:scope/groups/:groupId/selections/query", {
+  principalAccess: read,params: GroupParams,body: GroupSelectionQueryBody,response: { 200: GroupSelectionState,...groupErrors },
+  detail: { operationId: "getAccessGroupSelection",tags: ["Access management"] },
+ }, ({ principalContext,params,body }) => getGroupSelection(principalContext,{ groupId: params.groupId,scopeId: selectors.resolve(params.scope,principalContext.credentialProof(),Date.now()) },body))
+ .post("/:scope/groups/:groupId/selections/impact-reviews", {
+  principalAccess: { ...manage,fresh: true },params: GroupParams,body: StartGroupSelectionReviewBody,response: { 200: GroupImpactSummary,...groupErrors },
+  detail: { operationId: "startAccessGroupSelectionReview",tags: ["Access management"] },
+ }, ({ principalContext,params,body }) => startGroupSelectionReview(principalContext,{ groupId: params.groupId,scopeId: selectors.resolve(params.scope,principalContext.credentialProof(),Date.now()) },body))
+ .post("/:scope/groups/:groupId/impact-reviews/:reviewId/recipient", {
+  principalAccess: { ...manage,fresh: true },params: GroupImpactParams,response: { 200: GroupRecipient,...groupErrors },
+  detail: { operationId: "getAccessGroupReviewRecipient",tags: ["Access management"] },
+ }, ({ principalContext,params }) => getGroupReviewRecipient(principalContext,{ groupId: params.groupId,scopeId: selectors.resolve(params.scope,principalContext.credentialProof(),Date.now()) },params.reviewId))
+ .post("/:scope/groups/:groupId/selections", {
+  principalAccess: { ...manage,fresh: true },params: GroupParams,body: GroupSelectionBody,response: { 200: GroupSelectionReceipt,...groupErrors },
+  detail: { operationId: "writeAccessGroupSelection",tags: ["Access management"] },
+ }, ({ principalContext,params,body }) => writeGroupSelection(principalContext,{ groupId: params.groupId,scopeId: selectors.resolve(params.scope,principalContext.credentialProof(),Date.now()) },body))
 
 	.put("/:scope/groups/:groupId", {
 		principalAccess: manage, params: GroupParams, body: CreateGroupBody, response: { 200: GroupReceipt, ...groupErrors },

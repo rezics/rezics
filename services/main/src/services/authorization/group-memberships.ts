@@ -86,6 +86,7 @@ export async function applyAccessGroupMembershipCommand(
 	tx: DatabaseTransaction,
 	input: AccessGroupMembershipCommand,
 	admission: SQL<boolean | null>,
+	afterEffect?: (work: DatabaseTransaction) => Promise<void>,
 ): Promise<AccessGroupMembershipReceipt> {
 	const command = schema.parse(input),
 		requestDigest = createHash("sha256").update(JSON.stringify(command)).digest("hex");
@@ -224,6 +225,9 @@ export async function applyAccessGroupMembershipCommand(
    ) select(select admitted from admission) as admitted,exists(select 1 from changed) as changed`);
 		requireAdmission(result.rows[0]?.admitted);
 		if (!result.rows[0]?.changed) throw new AccessGroupMembershipConflict();
+		// Protected recovery is checked against the actual new selection in this
+		// savepoint; a failed check rolls back the head and operation receipt.
+		await afterEffect?.(work);
 		return receipt(event);
 	});
 }

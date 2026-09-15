@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import { bigint, check, foreignKey, index, integer, jsonb, primaryKey, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { pgTable } from "./base";
 import { createCreatedAtColumn, createUuidv7PrimaryKey } from "./columns";
+import { accessMembership, accessMembershipAdmission } from "./access-membership";
 import { accessGroup } from "./access-group";
 import { users } from "./auth";
 import { accessSubject } from "./access-identity";
@@ -21,7 +22,8 @@ export const accessGroupImpactReview = pgTable("access_group_impact_review", {
 	id: createUuidv7PrimaryKey(), scopeId: uuid().notNull(), groupId: uuid().notNull(),
 	operatorAuthUserId: uuid().notNull().references(() => users.id, { onDelete: "restrict" }),
 	authoritySubjectId: uuid().notNull().references(() => accessSubject.id, { onDelete: "restrict" }),
-	operation: text().$type<"reparent" | "retire">().notNull(), proposedParentId: uuid().references(() => accessGroup.id, { onDelete: "restrict" }),
+	operation: text().$type<"reparent" | "retire" | "assign" | "remove" | "prune">().notNull(), proposedParentId: uuid().references(() => accessGroup.id, { onDelete: "restrict" }),
+	membershipId: uuid(), generation: bigint({ mode: "number" }), expectedSelectionVersion: bigint({ mode: "number" }),
 	expectedGroupVersion: bigint({ mode: "number" }).notNull(), expectedTreeVersion: bigint({ mode: "number" }).notNull(),
 	status: text().$type<"discovering" | "complete" | "invalidated" | "unavailable">().notNull().default("discovering"),
 	reason: text().$type<"changed" | "expired" | "budget" | "missing">(),
@@ -31,10 +33,13 @@ export const accessGroupImpactReview = pgTable("access_group_impact_review", {
 	workCount: integer().notNull().default(0), byteCount: integer().notNull().default(0),
 	createdAt: createCreatedAtColumn(), expiresAt: timestamp({ withTimezone: true, precision: 3, mode: "date" }).notNull(),
 	validUntil: timestamp({ withTimezone: true, precision: 3, mode: "date" }).notNull(),
-}, t => [foreignKey({ columns: [t.groupId, t.scopeId], foreignColumns: [accessGroup.id, accessGroup.scopeId] }).onDelete("restrict"),
+}, t => [foreignKey({ columns: [t.membershipId, t.scopeId], foreignColumns: [accessMembership.id, accessMembership.scopeId] }).onDelete("restrict"),
+	foreignKey({ columns: [t.membershipId, t.generation], foreignColumns: [accessMembershipAdmission.membershipId, accessMembershipAdmission.generation] }).onDelete("restrict"),
+	check("access_group_impact_selection_check", sql`(${t.operation} in ('assign','remove','prune') and ${t.membershipId} is not null and ${t.generation} is not null and ${t.generation} between 1 and 9007199254740991 and ${t.expectedSelectionVersion} is not null and ${t.expectedSelectionVersion} between 0 and 9007199254740990) or (${t.operation} in ('reparent','retire') and ${t.membershipId} is null and ${t.generation} is null and ${t.expectedSelectionVersion} is null)`),
+	foreignKey({ columns: [t.groupId, t.scopeId], foreignColumns: [accessGroup.id, accessGroup.scopeId] }).onDelete("restrict"),
 	index("access_group_impact_expiry_idx").on(t.expiresAt, t.id),
 	index("access_group_impact_reviewer_idx").on(t.operatorAuthUserId, t.expiresAt, t.id),
-	check("access_group_impact_proposal_check", sql`${t.operation} in ('reparent','retire') and (${t.operation}<>'retire' or ${t.proposedParentId} is null) and ${t.expectedGroupVersion} between 1 and 9007199254740991 and ${t.expectedTreeVersion} between 0 and 9007199254740991`),
+	check("access_group_impact_proposal_check", sql`${t.operation} in ('reparent','retire','assign','remove','prune') and (${t.operation}='reparent' or ${t.proposedParentId} is null) and ${t.expectedGroupVersion} between 1 and 9007199254740991 and ${t.expectedTreeVersion} between 0 and 9007199254740991`),
 	check("access_group_impact_status_check", sql`(${t.status} in ('discovering','complete') and ${t.reason} is null) or (${t.status}='invalidated' and ${t.reason} is not null and ${t.reason} in ('changed','expired')) or (${t.status}='unavailable' and ${t.reason} is not null and ${t.reason} in ('budget','missing'))`),
 	check("access_group_impact_budget_check", sql`${t.witnessCount} between 0 and 8193 and ${t.nodeCount} between 0 and 4096 and ${t.factCount} between 0 and 32768 and ${t.workCount} between 0 and 65536 and ${t.byteCount} between 0 and 16777216 and ${t.pageVersion} between 0 and 65536`),
 	check("access_group_impact_snapshot_check", sql`octet_length(${t.baseSnapshot}) between 1 and 65536 and pg_snapshot_xmax(${t.baseSnapshot}::pg_snapshot)>=pg_snapshot_xmin(${t.baseSnapshot}::pg_snapshot)`),

@@ -4,6 +4,7 @@ import { pgTable } from "./base";
 import { createCreatedAtColumn } from "./columns";
 import { accessScope, accessSubject } from "./access-identity";
 import { accessGroupImpactReview } from "./access-group-impact";
+import { accessGroupMembershipEvent } from "./access-group-membership";
 import { accessGroupEvent } from "./access-group";
 import { users } from "./auth";
 
@@ -48,8 +49,12 @@ export const accessGroupApproval = pgTable("access_group_approval", {
 /** Immutable admission attribution retained independently of disposable discovery evidence. @internal */
 export const accessGroupAdmissionReceipt = pgTable("access_group_admission_receipt", {
  operationId: uuid().primaryKey(), groupId: uuid().notNull(), reviewId: uuid().notNull(),
+ membershipId: uuid(), generation: bigint({ mode: "number" }),
+ groupOperationId: uuid().generatedAlwaysAs(sql`case when membership_id is null then operation_id else null end`),
  proposalDigest: text().notNull(), effectDigest: text().notNull(),
  approvalIds: jsonb().$type<string[]>().notNull(), recoveryPathIds: jsonb().$type<string[]>().notNull(), createdAt: createCreatedAtColumn(),
-}, t => [foreignKey({ columns: [t.groupId,t.operationId],foreignColumns: [accessGroupEvent.groupId,accessGroupEvent.operationId] }).onDelete("restrict"),
+}, t => [foreignKey({ name: "access_group_admission_receipt_0o7aOReEQy7V_fkey", columns: [t.groupId,t.groupOperationId],foreignColumns: [accessGroupEvent.groupId,accessGroupEvent.operationId] }).onDelete("restrict"),
+ foreignKey({ columns: [t.membershipId,t.generation,t.groupId,t.operationId],foreignColumns: [accessGroupMembershipEvent.membershipId,accessGroupMembershipEvent.generation,accessGroupMembershipEvent.groupId,accessGroupMembershipEvent.operationId] }).onDelete("restrict"),
+ check("access_group_admission_selection_check", sql`(${t.membershipId} is null and ${t.generation} is null) or (${t.membershipId} is not null and ${t.generation} is not null and ${t.generation} between 1 and 9007199254740991)`),
  uniqueIndex("access_group_admission_review_key").on(t.reviewId),
  check("access_group_admission_receipt_budget_check", sql`jsonb_array_length(${t.approvalIds}) between 1 and 64 and jsonb_array_length(${t.recoveryPathIds}) between 1 and 64`)]);

@@ -733,6 +733,96 @@ without synchronously rewriting a whole roster. History and private attribution
 remain retained after cleanup.
 
 
+### Managed direct selections and private roster API
+
+`group-selection-management.ts` composes already admitted membership selections;
+there is no enrollment, invitation or writable all-members command in this owner.
+The separate `access.group.membership.manage` permission operates at
+`["groups", groupId]`. It is necessary alongside Group read, fresh first-party
+session admission, current operator/selected-subject/owner policy, complete impact,
+explicit named-role ceilings, one independent complete approval and preexisting
+protected recovery. Even an empty selection impact follows this admission path.
+Known recipient suspension/closure blocks assignment; removal and terminal prune
+can still revoke an ineligible recipient's selection. Unknown recipient policy
+remains unavailable. The selected subject's policy deadline is checked after
+recovery as well as before the actual effect.
+
+Selection proposals extend the existing private impact review with exact enrollment,
+admission generation and expected direct-selection version. FK alternatives bind
+immutable admission receipts to either a Group lifecycle event or an exact Group
+selection event; a generated topology-event discriminator keeps those alternatives
+exclusive. Receipts survive disposable discovery cleanup. Original reviewers can
+refresh a five-minute recipient selector using the retained review or its immutable
+receipt, so lost-response retries remain possible after remove/prune and review
+cleanup. Retries reauthorize the current actor and resolved recipient and preserve
+original command attribution; they do not reopen consumed impact evidence.
+
+The compiler changes only the selected direct edge, keeping its other inherited
+paths and incrementing the selection-set witness. A set revision is completeness
+evidence, not a newly conferred path by itself. Remove/reassign cannot reactivate
+any binding or representation depending on an old exact selection version. Related
+representation descendants retain their exact parent bases and recipient rosters.
+Manager-binding changes also retain attached ceiling confer effects, including the
+ceiling's full symbolic recipient predicate and lifetime limits; these are confer
+capabilities, not another copied recipient roster. Existing all-scope representation
+policy remains unavailable, as do incomplete/over-budget discovery, absent explicit
+ceilings, missing independent approvals and missing pre-change recovery paths.
+
+All routes below are relative to `/api/v1/access/{scope}/groups/{groupId}`; `scope`
+comes from `POST /api/v1/access/scopes/resolve`. Public Fetch, TanStack and
+`packages/api` clients are generated from the same route owner.
+
+| Operation | Route / input and result |
+| --- | --- |
+| Choose an admitted recipient | `GET /roster?view=admitted`; requires Group read and membership management. Current scope admissions yield Group-purpose opaque recipients, private context-local correlation keys, subject kind and exact active generation. No private account id, subject id or account/Profile association is returned. |
+| Inspect direct/current inherited roster | `GET /roster?view=direct` or `view=inherited`; the latter includes the root's direct rows and descendants' inherited rows. Each selected path is a separate row, including duplicate direct plus inherited participation by one recipient. |
+| Inspect stale cleanup candidates | `GET /roster?view=direct&includeStale=true`; additionally requires membership management and returns physical stale selections with generation/version and terminal status. |
+| Read selection preconditions | `POST /selections/query` with `{ recipient, generation }`; returns physical selected/version, set version, active generation and terminally-stale status. An absent slot has version zero. This is not an effectiveness receipt. |
+| Start selection impact | `POST /selections/impact-reviews` with `{ reviewId, recipient, generation, expectedVersion, operation, expectedGroupVersion, expectedTreeVersion }`, where operation is `assign`, `remove` or `prune`. Group/tree preconditions come from `GET /impact-context`. |
+| Discover/evaluate/approve | Use existing `POST /impact-reviews/{reviewId}/pages`, `POST /impact-reviews/{reviewId}/evaluation/pages`, inspection, approval-proposal and approvals routes. The independent proposal includes a selector minted for that approver's current context and the exact target generation/version. Page requests supply `expectedPageVersion`; continue only while discovering/evaluating. |
+| Apply the selection | `POST /selections` with `{ operationId, reviewId, recipient, generation, expectedVersion, operation }`; atomically writes one selection and both receipts after complete admission, then checks native recovery in the actual resulting state inside the savepoint. |
+| Refresh the private target | `POST /impact-reviews/{reviewId}/recipient`; original reviewer only, with current Group read and membership management. Returns a fresh purpose-bound selector even for retained consumed receipts. |
+
+Before starting a review, eligible recovery operators register each needed root
+through `POST /api/v1/access/{scope}/recovery-paths` with `{ pathId }`. Independent
+approvers obtain their own credential-bound scope locator, inspect the complete
+proposal, then submit `{ approvalId, proposalDigest, effectDigest }`. An updated
+selector can replace an expired token when retrying the exact same operation:
+tokens are locators, while the decoded membership/generation/selection and actor
+form the command identity. No client-supplied private subject/principal id is accepted.
+
+Roster cursors encrypt the private keyset and bind the principal, exact credential
+proof domain, normalized selected authority, scope, Group, view and stale mode.
+Their lifetime is five minutes. Every page reauthorizes disclosure; a tree epoch
+change produces a conflict. Enrollment and selection updates use live keyset
+semantics rather than a retained cross-request snapshot. Empty pages can have a
+continuation, and clients must follow it. Direct candidates use the selected
+`(group_id,membership_id,generation)` index; admitted candidates use the active
+`(scope_id,subject_id)` index. Limits precede joins, eligibility and deduplication.
+Each page hydrates at most 100 candidates, with at most one additional
+selection sentinel across the entire page and at most 100 child-index seeks;
+at most 101 physical selection candidates are read before filtering. The encrypted DFS stack has at most eight
+frames. Paths retain direct selection generation/version, set version and every
+Group/version through the requested root. Subject policy retains its existing
+256-owner and 512-enforcement candidate limits; overflow is explicit unavailable.
+
+Keep the 500,000,000-row baseline and 3,000,000,000-row estimate. This slice adds
+three nullable 8/16-byte selection fields per retained review and nullable
+membership/generation plus the stored topology discriminator per admission receipt;
+there is no roster projection or per-recipient writer fanout. Existing indexes
+bound reads, and each selection updates its head, immutable event, set witness,
+Group/membership impact witnesses and one admission receipt. Recovery comparison
+normalizes only the exact target set's expected one-version advance; exact admission,
+selection versions and a surviving original path remain required. With an estimated
+additional 32 bytes per receipt including its stored discriminator, an all-receipt
+500M/3B scenario adds roughly 16 GB / 96 GB before alignment, indexes, bloat, WAL,
+replicas and reserves; actual incidence and storage need measurement. The fixed
+review/effect budgets above still apply and may reject high-fanout dependencies.
+The new typed migrations and all three client generators are implementation
+artifacts. Tests, fixtures, typechecks, lint validation, builds, replay, concurrency,
+recovery, capacity and browser qualification remain deferred in implementation.
+
+
 ### Populated Group production admission and protected recovery
 
 `group-admission.ts` owns the private acknowledgement and final mutation composition.

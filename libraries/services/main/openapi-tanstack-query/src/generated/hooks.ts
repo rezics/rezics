@@ -99,6 +99,8 @@ import {
 	findSoftwareReleases,
 	getAccessGroup,
 	getAccessGroupImpactContext,
+	getAccessGroupReviewRecipient,
+	getAccessGroupSelection,
 	getAccessRole,
 	getActingEntityPresentationRevision,
 	getApiAccountMe,
@@ -272,6 +274,7 @@ import {
 	leaveOrganizationMembership,
 	listAccessGroupApprovals,
 	listAccessGroupHistory,
+	listAccessGroupRoster,
 	listAccessGroups,
 	listAccessRoleHistory,
 	listAccessRoles,
@@ -608,6 +611,7 @@ import {
 	setConnectedAppTrust,
 	setMainIdentityPreference,
 	startAccessGroupImpact,
+	startAccessGroupSelectionReview,
 	transitionCatalogSemanticState,
 	updateAccessGroupPresentation,
 	updateActingEntityPresentation,
@@ -615,6 +619,7 @@ import {
 	updateCurrentUserPrivacy,
 	withdrawCatalogEditorial,
 	withdrawSoftwareComponent,
+	writeAccessGroupSelection,
 	writeCatalogEditorial,
 	writeCatalogEntityProfile,
 	writeCatalogFact,
@@ -1204,6 +1209,27 @@ import type {
 	GetAccessGroupImpactContextStatus500,
 	GetAccessGroupImpactContextStatus503,
 	GetAccessGroupOptions,
+	GetAccessGroupReviewRecipientOptions,
+	GetAccessGroupReviewRecipientStatus200,
+	GetAccessGroupReviewRecipientStatus400,
+	GetAccessGroupReviewRecipientStatus401,
+	GetAccessGroupReviewRecipientStatus403,
+	GetAccessGroupReviewRecipientStatus404,
+	GetAccessGroupReviewRecipientStatus409,
+	GetAccessGroupReviewRecipientStatus422,
+	GetAccessGroupReviewRecipientStatus500,
+	GetAccessGroupReviewRecipientStatus503,
+	GetAccessGroupSelectionOptions,
+	GetAccessGroupSelectionStatus200,
+	GetAccessGroupSelectionStatus400,
+	GetAccessGroupSelectionStatus401,
+	GetAccessGroupSelectionStatus403,
+	GetAccessGroupSelectionStatus404,
+	GetAccessGroupSelectionStatus409,
+	GetAccessGroupSelectionStatus422,
+	GetAccessGroupSelectionStatus429,
+	GetAccessGroupSelectionStatus500,
+	GetAccessGroupSelectionStatus503,
 	GetAccessGroupStatus200,
 	GetAccessGroupStatus400,
 	GetAccessGroupStatus401,
@@ -2160,6 +2186,17 @@ import type {
 	ListAccessGroupHistoryStatus429,
 	ListAccessGroupHistoryStatus500,
 	ListAccessGroupHistoryStatus503,
+	ListAccessGroupRosterOptions,
+	ListAccessGroupRosterStatus200,
+	ListAccessGroupRosterStatus400,
+	ListAccessGroupRosterStatus401,
+	ListAccessGroupRosterStatus403,
+	ListAccessGroupRosterStatus404,
+	ListAccessGroupRosterStatus409,
+	ListAccessGroupRosterStatus422,
+	ListAccessGroupRosterStatus429,
+	ListAccessGroupRosterStatus500,
+	ListAccessGroupRosterStatus503,
 	ListAccessGroupsOptions,
 	ListAccessGroupsStatus200,
 	ListAccessGroupsStatus400,
@@ -4421,6 +4458,16 @@ import type {
 	StartAccessGroupImpactStatus429,
 	StartAccessGroupImpactStatus500,
 	StartAccessGroupImpactStatus503,
+	StartAccessGroupSelectionReviewOptions,
+	StartAccessGroupSelectionReviewStatus200,
+	StartAccessGroupSelectionReviewStatus400,
+	StartAccessGroupSelectionReviewStatus401,
+	StartAccessGroupSelectionReviewStatus403,
+	StartAccessGroupSelectionReviewStatus404,
+	StartAccessGroupSelectionReviewStatus409,
+	StartAccessGroupSelectionReviewStatus422,
+	StartAccessGroupSelectionReviewStatus500,
+	StartAccessGroupSelectionReviewStatus503,
 	TransitionCatalogSemanticStateOptions,
 	TransitionCatalogSemanticStateStatus200,
 	TransitionCatalogSemanticStateStatus400,
@@ -4468,6 +4515,16 @@ import type {
 	WithdrawSoftwareComponentStatus422,
 	WithdrawSoftwareComponentStatus429,
 	WithdrawSoftwareComponentStatus500,
+	WriteAccessGroupSelectionOptions,
+	WriteAccessGroupSelectionStatus200,
+	WriteAccessGroupSelectionStatus400,
+	WriteAccessGroupSelectionStatus401,
+	WriteAccessGroupSelectionStatus403,
+	WriteAccessGroupSelectionStatus404,
+	WriteAccessGroupSelectionStatus409,
+	WriteAccessGroupSelectionStatus422,
+	WriteAccessGroupSelectionStatus500,
+	WriteAccessGroupSelectionStatus503,
 	WriteCatalogEditorialOptions,
 	WriteCatalogEditorialStatus200,
 	WriteCatalogEditorialStatus400,
@@ -7068,6 +7125,574 @@ export function useRevokeAccessRecoveryPath<TContext>(
 			| RevokeAccessRecoveryPathStatus503
 		>,
 		RevokeAccessRecoveryPathOptions,
+		TContext
+	>;
+}
+
+export const listAccessGroupRosterQueryKey = ({
+	path,
+	query,
+}: Omit<ListAccessGroupRosterOptions, "headers">) =>
+	[
+		{ url: "/api/v1/access/:scope/groups/:groupId/roster", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type ListAccessGroupRosterQueryKey = ReturnType<typeof listAccessGroupRosterQueryKey>;
+
+export function listAccessGroupRosterQueryOptions(
+	{ path, query }: ListAccessGroupRosterOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listAccessGroupRosterQueryKey({ path, query });
+	return queryOptions<
+		ListAccessGroupRosterStatus200,
+		ResponseErrorConfig<
+			| ListAccessGroupRosterStatus400
+			| ListAccessGroupRosterStatus401
+			| ListAccessGroupRosterStatus403
+			| ListAccessGroupRosterStatus404
+			| ListAccessGroupRosterStatus409
+			| ListAccessGroupRosterStatus422
+			| ListAccessGroupRosterStatus429
+			| ListAccessGroupRosterStatus500
+			| ListAccessGroupRosterStatus503
+		>,
+		ListAccessGroupRosterStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return listAccessGroupRoster({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/roster}
+ */
+export function useListAccessGroupRoster<
+	TData = ListAccessGroupRosterStatus200,
+	TQueryData = ListAccessGroupRosterStatus200,
+	TQueryKey extends QueryKey = ListAccessGroupRosterQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path: ListAccessGroupRosterOptions["path"] | (() => ListAccessGroupRosterOptions["path"]);
+		query?: ListAccessGroupRosterOptions["query"] | (() => ListAccessGroupRosterOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListAccessGroupRosterStatus200,
+				ResponseErrorConfig<
+					| ListAccessGroupRosterStatus400
+					| ListAccessGroupRosterStatus401
+					| ListAccessGroupRosterStatus403
+					| ListAccessGroupRosterStatus404
+					| ListAccessGroupRosterStatus409
+					| ListAccessGroupRosterStatus422
+					| ListAccessGroupRosterStatus429
+					| ListAccessGroupRosterStatus500
+					| ListAccessGroupRosterStatus503
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey = resolvedOptions?.queryKey ?? listAccessGroupRosterQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listAccessGroupRosterQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| ListAccessGroupRosterStatus400
+			| ListAccessGroupRosterStatus401
+			| ListAccessGroupRosterStatus403
+			| ListAccessGroupRosterStatus404
+			| ListAccessGroupRosterStatus409
+			| ListAccessGroupRosterStatus422
+			| ListAccessGroupRosterStatus429
+			| ListAccessGroupRosterStatus500
+			| ListAccessGroupRosterStatus503
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getAccessGroupSelectionMutationKey = () =>
+	[{ url: "/api/v1/access/:scope/groups/:groupId/selections/query" }] as const;
+
+export function getAccessGroupSelectionMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = getAccessGroupSelectionMutationKey();
+	return mutationOptions<
+		GetAccessGroupSelectionStatus200,
+		ResponseErrorConfig<
+			| GetAccessGroupSelectionStatus400
+			| GetAccessGroupSelectionStatus401
+			| GetAccessGroupSelectionStatus403
+			| GetAccessGroupSelectionStatus404
+			| GetAccessGroupSelectionStatus409
+			| GetAccessGroupSelectionStatus422
+			| GetAccessGroupSelectionStatus429
+			| GetAccessGroupSelectionStatus500
+			| GetAccessGroupSelectionStatus503
+		>,
+		GetAccessGroupSelectionOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return getAccessGroupSelection({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/selections/query}
+ */
+export function useGetAccessGroupSelection<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			GetAccessGroupSelectionStatus200,
+			ResponseErrorConfig<
+				| GetAccessGroupSelectionStatus400
+				| GetAccessGroupSelectionStatus401
+				| GetAccessGroupSelectionStatus403
+				| GetAccessGroupSelectionStatus404
+				| GetAccessGroupSelectionStatus409
+				| GetAccessGroupSelectionStatus422
+				| GetAccessGroupSelectionStatus429
+				| GetAccessGroupSelectionStatus500
+				| GetAccessGroupSelectionStatus503
+			>,
+			GetAccessGroupSelectionOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? getAccessGroupSelectionMutationKey();
+
+	const baseOptions = getAccessGroupSelectionMutationOptions(config) as UseMutationOptions<
+		GetAccessGroupSelectionStatus200,
+		ResponseErrorConfig<
+			| GetAccessGroupSelectionStatus400
+			| GetAccessGroupSelectionStatus401
+			| GetAccessGroupSelectionStatus403
+			| GetAccessGroupSelectionStatus404
+			| GetAccessGroupSelectionStatus409
+			| GetAccessGroupSelectionStatus422
+			| GetAccessGroupSelectionStatus429
+			| GetAccessGroupSelectionStatus500
+			| GetAccessGroupSelectionStatus503
+		>,
+		GetAccessGroupSelectionOptions,
+		TContext
+	>;
+
+	return useMutation<
+		GetAccessGroupSelectionStatus200,
+		ResponseErrorConfig<
+			| GetAccessGroupSelectionStatus400
+			| GetAccessGroupSelectionStatus401
+			| GetAccessGroupSelectionStatus403
+			| GetAccessGroupSelectionStatus404
+			| GetAccessGroupSelectionStatus409
+			| GetAccessGroupSelectionStatus422
+			| GetAccessGroupSelectionStatus429
+			| GetAccessGroupSelectionStatus500
+			| GetAccessGroupSelectionStatus503
+		>,
+		GetAccessGroupSelectionOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		GetAccessGroupSelectionStatus200,
+		ResponseErrorConfig<
+			| GetAccessGroupSelectionStatus400
+			| GetAccessGroupSelectionStatus401
+			| GetAccessGroupSelectionStatus403
+			| GetAccessGroupSelectionStatus404
+			| GetAccessGroupSelectionStatus409
+			| GetAccessGroupSelectionStatus422
+			| GetAccessGroupSelectionStatus429
+			| GetAccessGroupSelectionStatus500
+			| GetAccessGroupSelectionStatus503
+		>,
+		GetAccessGroupSelectionOptions,
+		TContext
+	>;
+}
+
+export const startAccessGroupSelectionReviewMutationKey = () =>
+	[{ url: "/api/v1/access/:scope/groups/:groupId/selections/impact-reviews" }] as const;
+
+export function startAccessGroupSelectionReviewMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = startAccessGroupSelectionReviewMutationKey();
+	return mutationOptions<
+		StartAccessGroupSelectionReviewStatus200,
+		ResponseErrorConfig<
+			| StartAccessGroupSelectionReviewStatus400
+			| StartAccessGroupSelectionReviewStatus401
+			| StartAccessGroupSelectionReviewStatus403
+			| StartAccessGroupSelectionReviewStatus404
+			| StartAccessGroupSelectionReviewStatus409
+			| StartAccessGroupSelectionReviewStatus422
+			| StartAccessGroupSelectionReviewStatus500
+			| StartAccessGroupSelectionReviewStatus503
+		>,
+		StartAccessGroupSelectionReviewOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return startAccessGroupSelectionReview({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/selections/impact-reviews}
+ */
+export function useStartAccessGroupSelectionReview<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			StartAccessGroupSelectionReviewStatus200,
+			ResponseErrorConfig<
+				| StartAccessGroupSelectionReviewStatus400
+				| StartAccessGroupSelectionReviewStatus401
+				| StartAccessGroupSelectionReviewStatus403
+				| StartAccessGroupSelectionReviewStatus404
+				| StartAccessGroupSelectionReviewStatus409
+				| StartAccessGroupSelectionReviewStatus422
+				| StartAccessGroupSelectionReviewStatus500
+				| StartAccessGroupSelectionReviewStatus503
+			>,
+			StartAccessGroupSelectionReviewOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? startAccessGroupSelectionReviewMutationKey();
+
+	const baseOptions = startAccessGroupSelectionReviewMutationOptions(config) as UseMutationOptions<
+		StartAccessGroupSelectionReviewStatus200,
+		ResponseErrorConfig<
+			| StartAccessGroupSelectionReviewStatus400
+			| StartAccessGroupSelectionReviewStatus401
+			| StartAccessGroupSelectionReviewStatus403
+			| StartAccessGroupSelectionReviewStatus404
+			| StartAccessGroupSelectionReviewStatus409
+			| StartAccessGroupSelectionReviewStatus422
+			| StartAccessGroupSelectionReviewStatus500
+			| StartAccessGroupSelectionReviewStatus503
+		>,
+		StartAccessGroupSelectionReviewOptions,
+		TContext
+	>;
+
+	return useMutation<
+		StartAccessGroupSelectionReviewStatus200,
+		ResponseErrorConfig<
+			| StartAccessGroupSelectionReviewStatus400
+			| StartAccessGroupSelectionReviewStatus401
+			| StartAccessGroupSelectionReviewStatus403
+			| StartAccessGroupSelectionReviewStatus404
+			| StartAccessGroupSelectionReviewStatus409
+			| StartAccessGroupSelectionReviewStatus422
+			| StartAccessGroupSelectionReviewStatus500
+			| StartAccessGroupSelectionReviewStatus503
+		>,
+		StartAccessGroupSelectionReviewOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		StartAccessGroupSelectionReviewStatus200,
+		ResponseErrorConfig<
+			| StartAccessGroupSelectionReviewStatus400
+			| StartAccessGroupSelectionReviewStatus401
+			| StartAccessGroupSelectionReviewStatus403
+			| StartAccessGroupSelectionReviewStatus404
+			| StartAccessGroupSelectionReviewStatus409
+			| StartAccessGroupSelectionReviewStatus422
+			| StartAccessGroupSelectionReviewStatus500
+			| StartAccessGroupSelectionReviewStatus503
+		>,
+		StartAccessGroupSelectionReviewOptions,
+		TContext
+	>;
+}
+
+export const getAccessGroupReviewRecipientMutationKey = () =>
+	[{ url: "/api/v1/access/:scope/groups/:groupId/impact-reviews/:reviewId/recipient" }] as const;
+
+export function getAccessGroupReviewRecipientMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = getAccessGroupReviewRecipientMutationKey();
+	return mutationOptions<
+		GetAccessGroupReviewRecipientStatus200,
+		ResponseErrorConfig<
+			| GetAccessGroupReviewRecipientStatus400
+			| GetAccessGroupReviewRecipientStatus401
+			| GetAccessGroupReviewRecipientStatus403
+			| GetAccessGroupReviewRecipientStatus404
+			| GetAccessGroupReviewRecipientStatus409
+			| GetAccessGroupReviewRecipientStatus422
+			| GetAccessGroupReviewRecipientStatus500
+			| GetAccessGroupReviewRecipientStatus503
+		>,
+		GetAccessGroupReviewRecipientOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			return getAccessGroupReviewRecipient({ ...config, path, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/impact-reviews/:reviewId/recipient}
+ */
+export function useGetAccessGroupReviewRecipient<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			GetAccessGroupReviewRecipientStatus200,
+			ResponseErrorConfig<
+				| GetAccessGroupReviewRecipientStatus400
+				| GetAccessGroupReviewRecipientStatus401
+				| GetAccessGroupReviewRecipientStatus403
+				| GetAccessGroupReviewRecipientStatus404
+				| GetAccessGroupReviewRecipientStatus409
+				| GetAccessGroupReviewRecipientStatus422
+				| GetAccessGroupReviewRecipientStatus500
+				| GetAccessGroupReviewRecipientStatus503
+			>,
+			GetAccessGroupReviewRecipientOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? getAccessGroupReviewRecipientMutationKey();
+
+	const baseOptions = getAccessGroupReviewRecipientMutationOptions(config) as UseMutationOptions<
+		GetAccessGroupReviewRecipientStatus200,
+		ResponseErrorConfig<
+			| GetAccessGroupReviewRecipientStatus400
+			| GetAccessGroupReviewRecipientStatus401
+			| GetAccessGroupReviewRecipientStatus403
+			| GetAccessGroupReviewRecipientStatus404
+			| GetAccessGroupReviewRecipientStatus409
+			| GetAccessGroupReviewRecipientStatus422
+			| GetAccessGroupReviewRecipientStatus500
+			| GetAccessGroupReviewRecipientStatus503
+		>,
+		GetAccessGroupReviewRecipientOptions,
+		TContext
+	>;
+
+	return useMutation<
+		GetAccessGroupReviewRecipientStatus200,
+		ResponseErrorConfig<
+			| GetAccessGroupReviewRecipientStatus400
+			| GetAccessGroupReviewRecipientStatus401
+			| GetAccessGroupReviewRecipientStatus403
+			| GetAccessGroupReviewRecipientStatus404
+			| GetAccessGroupReviewRecipientStatus409
+			| GetAccessGroupReviewRecipientStatus422
+			| GetAccessGroupReviewRecipientStatus500
+			| GetAccessGroupReviewRecipientStatus503
+		>,
+		GetAccessGroupReviewRecipientOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		GetAccessGroupReviewRecipientStatus200,
+		ResponseErrorConfig<
+			| GetAccessGroupReviewRecipientStatus400
+			| GetAccessGroupReviewRecipientStatus401
+			| GetAccessGroupReviewRecipientStatus403
+			| GetAccessGroupReviewRecipientStatus404
+			| GetAccessGroupReviewRecipientStatus409
+			| GetAccessGroupReviewRecipientStatus422
+			| GetAccessGroupReviewRecipientStatus500
+			| GetAccessGroupReviewRecipientStatus503
+		>,
+		GetAccessGroupReviewRecipientOptions,
+		TContext
+	>;
+}
+
+export const writeAccessGroupSelectionMutationKey = () =>
+	[{ url: "/api/v1/access/:scope/groups/:groupId/selections" }] as const;
+
+export function writeAccessGroupSelectionMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = writeAccessGroupSelectionMutationKey();
+	return mutationOptions<
+		WriteAccessGroupSelectionStatus200,
+		ResponseErrorConfig<
+			| WriteAccessGroupSelectionStatus400
+			| WriteAccessGroupSelectionStatus401
+			| WriteAccessGroupSelectionStatus403
+			| WriteAccessGroupSelectionStatus404
+			| WriteAccessGroupSelectionStatus409
+			| WriteAccessGroupSelectionStatus422
+			| WriteAccessGroupSelectionStatus500
+			| WriteAccessGroupSelectionStatus503
+		>,
+		WriteAccessGroupSelectionOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return writeAccessGroupSelection({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/selections}
+ */
+export function useWriteAccessGroupSelection<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			WriteAccessGroupSelectionStatus200,
+			ResponseErrorConfig<
+				| WriteAccessGroupSelectionStatus400
+				| WriteAccessGroupSelectionStatus401
+				| WriteAccessGroupSelectionStatus403
+				| WriteAccessGroupSelectionStatus404
+				| WriteAccessGroupSelectionStatus409
+				| WriteAccessGroupSelectionStatus422
+				| WriteAccessGroupSelectionStatus500
+				| WriteAccessGroupSelectionStatus503
+			>,
+			WriteAccessGroupSelectionOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? writeAccessGroupSelectionMutationKey();
+
+	const baseOptions = writeAccessGroupSelectionMutationOptions(config) as UseMutationOptions<
+		WriteAccessGroupSelectionStatus200,
+		ResponseErrorConfig<
+			| WriteAccessGroupSelectionStatus400
+			| WriteAccessGroupSelectionStatus401
+			| WriteAccessGroupSelectionStatus403
+			| WriteAccessGroupSelectionStatus404
+			| WriteAccessGroupSelectionStatus409
+			| WriteAccessGroupSelectionStatus422
+			| WriteAccessGroupSelectionStatus500
+			| WriteAccessGroupSelectionStatus503
+		>,
+		WriteAccessGroupSelectionOptions,
+		TContext
+	>;
+
+	return useMutation<
+		WriteAccessGroupSelectionStatus200,
+		ResponseErrorConfig<
+			| WriteAccessGroupSelectionStatus400
+			| WriteAccessGroupSelectionStatus401
+			| WriteAccessGroupSelectionStatus403
+			| WriteAccessGroupSelectionStatus404
+			| WriteAccessGroupSelectionStatus409
+			| WriteAccessGroupSelectionStatus422
+			| WriteAccessGroupSelectionStatus500
+			| WriteAccessGroupSelectionStatus503
+		>,
+		WriteAccessGroupSelectionOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		WriteAccessGroupSelectionStatus200,
+		ResponseErrorConfig<
+			| WriteAccessGroupSelectionStatus400
+			| WriteAccessGroupSelectionStatus401
+			| WriteAccessGroupSelectionStatus403
+			| WriteAccessGroupSelectionStatus404
+			| WriteAccessGroupSelectionStatus409
+			| WriteAccessGroupSelectionStatus422
+			| WriteAccessGroupSelectionStatus500
+			| WriteAccessGroupSelectionStatus503
+		>,
+		WriteAccessGroupSelectionOptions,
 		TContext
 	>;
 }

@@ -33,6 +33,7 @@ const representation = recipient.extend({ recipient_kind: z.enum(["subject", "gr
 	parentTerms: terms.extend({ grant_id: id }).optional(), parentPermissions: permissionRows.optional(), parentTermsEligibility: eligibility.nullable().optional() });
 const ceiling = recipient.extend({ ...snapshot.shape, id, scope_id: id, role_id: id, manager_binding_id: id, manager_terms_revision: version.min(1),
 	state: z.enum(["draft", "active", "revoked"]), version, target_path: path, valid_from: instant, valid_until: instant.nullable(),
+	maximum_grant_duration_seconds: version.nullable(), grant_not_after: instant.nullable(),
 	permissions: permissionRows, managerTerms: terms.extend({ binding_id: id }), managerPermissions: permissionRows,
 	managerEligibility: eligibility.nullable(), member_subject_kind: z.enum(["principal", "entity"]).nullable() });
 
@@ -51,6 +52,9 @@ export const GroupImpactEffectSchema = z.strictObject({ kind: z.enum(["binding",
 	lineageBases: z.array(z.strictObject({ grantId: id,subjectId: id,membershipId: id.nullable(),generation: version.nullable(),
 		selectionGroupId: id.nullable(),selectionVersion: version.nullable(),beforeGroups: z.array(id).max(8),afterGroups: z.array(id).max(8) })).max(8),
 	validFrom: z.iso.datetime(), validUntil: z.iso.datetime().nullable(),
+	/** Symbolic confer recipient boundary when a manager gains/loses a ceiling. */
+ ceilingRecipient: z.strictObject({ kind: z.enum(["subject","group","all-members","scope-members"]),subjectId: id.nullable(),groupId: id.nullable(),scopeId: id.nullable(),
+  memberSubjectKind: z.enum(["principal","entity"]).nullable(),maximumGrantDurationSeconds: version.nullable(),grantNotAfter: z.iso.datetime().nullable() }).optional(),
 	confer: z.boolean(),
 });
 /** Private complete contribution delta, including redundant paths for later recovery analysis. @internal */
@@ -112,7 +116,7 @@ export function compileGroupImpactDelta(review: GroupImpactReview, facts: { ordi
 		if (memberKeys.has(key)) throw new GroupImpactDeltaUnavailable("missing"); memberKeys.add(key);
 	}
 	const root = required(groups.get(review.groupId));
-	if (root.scope_id !== review.scopeId || root.version !== review.expectedGroupVersion || root.state !== "active") throw new GroupImpactDeltaUnavailable("missing");
+	if (root.scope_id !== review.scopeId || root.version !== review.expectedGroupVersion || (root.state !== "active" && !(review.membershipId && review.operation !== "assign" && root.state === "retired"))) throw new GroupImpactDeltaUnavailable("missing");
 	let work = 0;
 	function charge() { if (++work > 65536) throw new GroupImpactDeltaUnavailable("budget"); }
 	function groupPath(groupId: string, scopeId: string, after: boolean): string[] {
@@ -121,10 +125,30 @@ export function compileGroupImpactDelta(review: GroupImpactReview, facts: { ordi
 			charge(); const row = required(groups.get(key));
 			if (row.scope_id !== scopeId || result.includes(key) || result.length >= 8) throw new GroupImpactDeltaUnavailable("missing");
 			if (row.state !== "active" || (after && key === review.groupId && review.operation === "retire")) return [];
-			result.push(key); key = after && key === review.groupId ? review.proposedParentId : row.parent_id;
+			result.push(key); key = after && review.operation === "reparent" && key === review.groupId ? review.proposedParentId : row.parent_id;
 		}
 		return result;
 	}
+	function changedSelection(membershipId: string, generation: number | null, groupId: string | null, after: boolean) {
+  return after && review.membershipId === membershipId && review.generation === generation && review.groupId === groupId;
+ }
+ function selectedRoots(m: z.infer<typeof member>, after: boolean) {
+  const roots = required(m.selections);
+  if (!review.membershipId || !after || m.id !== review.membershipId || m.active_generation !== review.generation) return roots;
+  const retained = roots.filter(row => row.group_id !== review.groupId);
+  if (review.operation === "assign") retained.push({ membership_id: m.id, generation: required(review.generation), scope_id: m.scope_id,
+   group_id: review.groupId, version: required(review.expectedSelectionVersion) + 1, selected: true });
+  if (retained.length > 64) throw new GroupImpactDeltaUnavailable("budget");
+  return retained.sort((a,b) => a.group_id.localeCompare(b.group_id));
+ }
+ function setVersion(m: z.infer<typeof member>, after: boolean) {
+  return required(m.selectionSet).version + (after && m.id === review.membershipId && m.active_generation === review.generation ? 1 : 0);
+ }
+ // Set revisions fence completeness, while exact selection revisions identify
+ // paths. An unrelated set stamp change alone is not a newly conferred path.
+ function pathIdentity(value: z.infer<typeof GroupImpactPathSchema>) {
+  return JSON.stringify({ ...value, selectionSetVersion: null });
+ }
 	function eligible(b: z.infer<typeof basis>, evidence: z.infer<typeof eligibility> | null | undefined, subjectId: string, after: boolean) {
 		if (b.membership_id === null) {
 			if (b.membership_generation !== null || b.selection_group_id !== null || b.selection_version !== null) throw new GroupImpactDeltaUnavailable("missing");
@@ -136,7 +160,7 @@ export function compileGroupImpactDelta(review: GroupImpactReview, facts: { ordi
 		if (b.selection_group_id === null) return true;
 		const selected = required(e.selection);
 		if (selected.membership_id !== m.id || selected.generation !== b.membership_generation || selected.group_id !== b.selection_group_id || selected.scope_id !== m.scope_id) throw new GroupImpactDeltaUnavailable("missing");
-		return selected.selected && selected.version === b.selection_version && e.expectedSelectionVersion === b.selection_version && groupPath(selected.group_id,m.scope_id,after).length > 0;
+		return !changedSelection(m.id, b.membership_generation, b.selection_group_id, after) && selected.selected && selected.version === b.selection_version && e.expectedSelectionVersion === b.selection_version && groupPath(selected.group_id,m.scope_id,after).length > 0;
 	}
 	const emptyPath: z.infer<typeof GroupImpactPathSchema> = { membershipId: null, generation: null, selectionGroupId: null, selectionVersion: null, selectionSetVersion: null, groups: [] };
 	function recipients(r: z.infer<typeof recipient>, after: boolean): Map<string,z.infer<typeof GroupImpactPathSchema>[]> {
@@ -145,13 +169,13 @@ export function compileGroupImpactDelta(review: GroupImpactReview, facts: { ordi
 		for (const m of members.values()) {
 			charge(); if (m.scope_id !== r.recipient_scope_id || m.active_generation === null) continue;
 			if (r.recipient_kind === "all-members" || r.recipient_kind === "scope-members") {
-				found.set(m.subject_id,[{ ...emptyPath,membershipId: m.id,generation: m.active_generation,selectionSetVersion: required(m.selectionSet).version }]); continue;
+				found.set(m.subject_id,[{ ...emptyPath,membershipId: m.id,generation: m.active_generation,selectionSetVersion: setVersion(m,after) }]); continue;
 			}
 			const paths: z.infer<typeof GroupImpactPathSchema>[] = [];
-			for (const selected of required(m.selections)) {
+			for (const selected of selectedRoots(m,after)) {
 				const chain = groupPath(selected.group_id,m.scope_id,after), index = chain.indexOf(required(r.recipient_group_id));
 				if (index >= 0) paths.push({ membershipId: m.id,generation: m.active_generation,selectionGroupId: selected.group_id,
-					selectionVersion: selected.version,selectionSetVersion: required(m.selectionSet).version,groups: chain.slice(0,index+1) });
+					selectionVersion: selected.version,selectionSetVersion: setVersion(m,after),groups: chain.slice(0,index+1) });
 			}
 			if (paths.length) found.set(m.subject_id,paths);
 		}
@@ -192,10 +216,10 @@ export function compileGroupImpactDelta(review: GroupImpactReview, facts: { ordi
 		beforeRecipients: ReturnType<typeof recipients>, afterRecipients: ReturnType<typeof recipients>, permissions: z.infer<typeof AccessPermissionSchema>[]) {
 		for (const subjectId of [...new Set([...beforeRecipients.keys(),...afterRecipients.keys()])].sort()) {
 			charge(); const beforePaths = beforeRecipients.get(subjectId) ?? [], afterPaths = afterRecipients.get(subjectId) ?? [];
-			if (JSON.stringify(beforePaths) === JSON.stringify(afterPaths)) continue;
-			const oldPaths = new Set(beforePaths.map(value => JSON.stringify(value)));
+			if (JSON.stringify(beforePaths.map(pathIdentity)) === JSON.stringify(afterPaths.map(pathIdentity))) continue;
+			const oldPaths = new Set(beforePaths.map(pathIdentity));
 			effects.push({ ...base,subjectId,before: beforePaths.length ? permissions : [],after: afterPaths.length ? permissions : [],beforePaths,afterPaths,
-				confer: permissions.length > 0 && afterPaths.some(value => !oldPaths.has(JSON.stringify(value))) });
+				confer: permissions.length > 0 && afterPaths.some(value => !oldPaths.has(pathIdentity(value))) });
 			if (effects.length > 4096) throw new GroupImpactDeltaUnavailable("budget");
 		}
 	}
@@ -258,6 +282,33 @@ export function compileGroupImpactDelta(review: GroupImpactReview, facts: { ordi
 			}),
 			validFrom: t.valid_from.toISOString(),validUntil: t.valid_until?.toISOString() ?? null },before,after,[...constrainAccessPermissions(approved,approved)]);
 	}
+ // A selected manager path can gain/lose the ability to exercise its attached
+ // ceiling even when the ceiling's own recipient set does not change. Retain
+ // that recipient predicate symbolically; enumerating its population is neither
+ // necessary nor a bounded representation of confer authority.
+ for (const row of ceilings.values()) {
+  const manager = required(bindings.get(row.manager_binding_id)), mt = required(manager.terms), role = required(roles.get(manager.role_id));
+  if (row.state !== "active" || !live(row.valid_from,row.valid_until) || manager.terms_revision !== row.manager_terms_revision || manager.state !== "active" || role.state !== "active" || role.active_revision === null || !live(mt.valid_from,mt.valid_until)) continue;
+  const authored = decoded(required(role.terms),role.permissions), approved = decoded(mt,manager.permissions);
+  const authority = mt.permission_policy === "local-role" ? authored : constrainAccessPermissions(authored,approved);
+  if (!authority.some(permission => permission.family === "management" && permission.key === "access.role-binding.manage")) continue;
+  const managerPaths = (after: boolean) => {
+   if (mt.membership_id !== null && (manager.recipient_kind !== "subject" || !eligible(mt,manager.eligibility,required(manager.recipient_subject_id),after))) return new Map<string,z.infer<typeof GroupImpactPathSchema>[]>();
+   const found = recipients(manager,after);
+   if (mt.membership_id !== null && manager.recipient_subject_id !== null) {
+    const m = required(members.get(mt.membership_id));
+    found.set(manager.recipient_subject_id,[{ membershipId: m.id,generation: mt.membership_generation,selectionGroupId: mt.selection_group_id,
+     selectionVersion: mt.selection_version,selectionSetVersion: m.selectionSet?.version ?? null,groups: mt.selection_group_id ? [mt.selection_group_id] : [] }]);
+   }
+   return found;
+  };
+  append({ kind: "ceiling",sourceId: row.id,sourceVersion: row.version,termsRevision: row.manager_terms_revision,roleId: row.role_id,roleRevision: null,
+   entityId: null,dependencySubjectIds: [],conditions: null,recipientGroup: null,scopeId: row.scope_id,targetPath: row.target_path,lineage: [],lineageBases: [],
+   validFrom: row.valid_from.toISOString(),validUntil: row.valid_until?.toISOString() ?? null,
+   ceilingRecipient: { kind: row.recipient_kind,subjectId: row.recipient_subject_id,groupId: row.recipient_group_id,scopeId: row.recipient_scope_id,
+    memberSubjectKind: row.member_subject_kind,maximumGrantDurationSeconds: row.maximum_grant_duration_seconds,grantNotAfter: row.grant_not_after?.toISOString() ?? null },
+  },managerPaths(false),managerPaths(true),decoded(row,row.permissions));
+ }
 	// A ceiling changes confer eligibility, never data access. Keep it in a separate effect family.
 	for (const row of [...ceilings.values()].sort((a,b) => a.id.localeCompare(b.id))) {
 		const permissions = decoded(row,row.permissions); decoded(row.managerTerms,row.managerPermissions);

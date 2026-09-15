@@ -83,7 +83,7 @@ export const AdvanceGroupImpactBody = z.strictObject({ expectedPageVersion: vers
 /** Inspection is paginated independently from discovery execution. @alpha */
 export const GroupImpactQuery = z.strictObject({ afterOrdinal: z.coerce.number().int().min(0).max(32768).optional() });
 /** Completeness and validity are distinct from ceiling/recovery approval. @alpha */
-export const GroupImpactSummary = z.strictObject({ reviewId: id, operation: z.enum(["reparent", "retire"]),
+export const GroupImpactSummary = z.strictObject({ reviewId: id, operation: z.enum(["reparent", "retire", "assign", "remove", "prune"]),
 	expectedGroupVersion: positiveVersion, expectedTreeVersion: version, proposedParentId: id.nullable(),
 	status: z.enum(["discovering", "complete", "invalidated", "unavailable"]), reason: z.enum(["changed", "expired", "budget", "missing"]).nullable(),
 	pageVersion: version, discoveredItems: version, validUntil: z.iso.datetime(), admission: z.literal("not-evaluated") });
@@ -110,8 +110,11 @@ export const ApproveGroupBody = z.strictObject({ approvalId: id,proposalDigest: 
 export const GroupApprovalParams = GroupImpactParams.extend({ approvalId: id });
 /** Revocation retry identity does not renew or replace its original evidence. @alpha */
 export const RevokeEvidenceBody = z.strictObject({ operationId: id });
+/** Purpose-bound recipient presentation has no private account or global subject identifier. @alpha */
+export const GroupRecipient = z.strictObject({ recipient: z.string(),recipientKey: z.string(),kind: z.enum(["principal","entity"]),
+ membershipVersion: version,activeGeneration: positiveVersion.nullable(),expiresAt: z.iso.datetime(),generation: positiveVersion });
 /** Independent approvers see the exact proposed topology and complete-effect acknowledgement. @alpha */
-export const GroupApprovalProposal = z.strictObject({ reviewId: id,proposalDigest: z.string(),effectDigest: z.string(),operation: z.enum(["reparent","retire"]),
+export const GroupApprovalProposal = z.strictObject({ selection: GroupRecipient.extend({ expectedVersion: version }).nullable(),reviewId: id,proposalDigest: z.string(),effectDigest: z.string(),operation: z.enum(["reparent","retire","assign","remove","prune"]),
  expectedGroupVersion: positiveVersion,expectedTreeVersion: version,proposedParentId: id.nullable(),effectCount: version.max(4096),validUntil: z.iso.datetime() });
 /** An immutable approval receipt remains historical after revocation or expiry. @alpha */
 export const GroupApprovalReceipt = z.strictObject({ approvalId: id,validUntil: z.iso.datetime(),revoked: z.boolean() });
@@ -124,3 +127,22 @@ export const RegisterRecoveryBody = z.strictObject({ pathId: id });
 export const RecoveryPathParams = ScopeParams.extend({ pathId: id });
 /** Register/revoke returns no private principal, subject or credential fields. @alpha */
 export const RecoveryPathReceipt = z.strictObject({ pathId: id,validUntil: z.iso.datetime(),revoked: z.boolean() });
+
+/** Private direct selection commands and impact proposals use purpose-bound recipients. @alpha */
+export { GroupSelectionCommandSchema as GroupSelectionBody, GroupSelectionReviewSchema as StartGroupSelectionReviewBody } from "../../authorization/group-selection-management";
+/** Select one admitted generation without placing its private selector in URL logs. @alpha */
+export const GroupSelectionQueryBody = z.strictObject({ recipient: z.string().startsWith("rzr1.").max(512),generation: positiveVersion });
+/** Original direct selection command outcome; not a current membership proof. @alpha */
+export const GroupSelectionReceipt = z.strictObject({ groupId: id,generation: positiveVersion,version: positiveVersion,operationId: id,selectedAfter: z.boolean() });
+/** Current physical selection and generation preconditions, independent of current eligibility. @alpha */
+export const GroupSelectionState = z.strictObject({ groupId: id,generation: positiveVersion,version,selected: z.boolean(),setVersion: version,
+ activeGeneration: positiveVersion.nullable(),terminallyStale: z.boolean() });
+/** Current private roster view; admitted candidates and stale direct slots require membership management. @alpha */
+export const GroupRosterQuery = z.strictObject({ view: z.enum(["admitted","direct","inherited"]).default("direct"),
+ includeStale: z.enum(["true","false"]).transform(value => value === "true").optional(),cursor: z.string().startsWith("rzgr1.").max(4096).optional() });
+/** Live keyset page preserves one row per direct path; empty pages can have a continuation. @alpha */
+export const GroupRoster = z.strictObject({ treeVersion: version,nextCursor: z.string().nullable(),items: z.array(z.strictObject({
+ recipient: z.string(),recipientKey: z.string(),kind: z.enum(["principal","entity"]),membershipVersion: version,
+ activeGeneration: positiveVersion.nullable(),expiresAt: z.iso.datetime(),generation: positiveVersion,selectionVersion: positiveVersion.nullable(),
+ setVersion: version.nullable(),path: z.array(z.strictObject({ groupId: id,version: positiveVersion })).max(8),direct: z.boolean(),terminallyStale: z.boolean(),eligible: z.boolean(),
+})).max(100) });

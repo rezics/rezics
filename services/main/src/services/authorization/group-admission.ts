@@ -1,3 +1,5 @@
+import { presentGroupRecipient } from "./group-recipient-selectors";
+import { readAccessSubjectEligibility } from "./subject-eligibility";
 import { createHash } from "node:crypto";
 import { and, eq, gt, inArray, isNull, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
@@ -10,12 +12,12 @@ import { accessGroupApproval as approvals, accessRecoveryPath as paths, accessRe
 import { accessSubject } from "../database/schema/access-identity";
 import { accessRepresentation, accessRepresentationEntity } from "../database/schema/access-representation";
 import { accessMembership } from "../database/schema/access-membership";
-import { accessGroupMembership } from "../database/schema/access-group-membership";
+import { accessGroupMembershipSet, accessGroupMembership } from "../database/schema/access-group-membership";
 import { accessGroupTree } from "../database/schema/access-group";
 import { accessRoleBindingScope } from "../database/schema/access-role-binding";
 import { RequestedAuthoritySelectionSchema } from "./authority-context";
 import { groupAuthoritySourceDigest, readCompleteGroupApprovalEvidence, lockCompleteGroupImpactEvaluation } from "./group-impact-evaluation";
-import { revalidateGroupImpactDiscovery, type GroupImpactReview } from "./group-impact-discovery";
+import { groupImpactPermission, revalidateGroupImpactDiscovery, type GroupImpactReview } from "./group-impact-discovery";
 import { GroupImpactEffectSchema, type GroupImpactEffect } from "./group-impact-delta";
 import { readGroupImpactConferAuthority, readGroupImpactCurrentPolicy } from "./group-impact-policy";
 import { readManagementAuthority } from "./management-authority";
@@ -32,17 +34,20 @@ type ReviewKey = { scopeId: string; groupId: string; reviewId: string };
 const repairPermissions: AccessManagementPermission[] = ["access.role-binding.manage", "access.assignment-ceiling.manage"];
 function proposalDigest(review: GroupImpactReview) {
  return hash({ reviewId: review.id, scopeId: review.scopeId, groupId: review.groupId, operation: review.operation,
+  membershipId: review.membershipId, generation: review.generation, selectionVersion: review.expectedSelectionVersion,
   parentId: review.proposedParentId, groupVersion: review.expectedGroupVersion, treeVersion: review.expectedTreeVersion,
   principalId: review.operatorAuthUserId, subjectId: review.authoritySubjectId });
 }
 function sourcesDigest(sources: Authority[]) { return hash(sources.map(groupAuthoritySourceDigest)); }
-function continuityDigest(sources: Authority[]) {
+function continuityDigest(sources: Authority[], review: GroupImpactReview, after = false) {
+ const selection = (value: { membershipId: string; generation: number; setVersion: number }) => ({ ...value,
+  setVersion: value.setVersion - (after && value.membershipId === review.membershipId && value.generation === review.generation ? 1 : 0) });
  // The target tree epoch advances with this command. Exact sources, membership
  // generations/selections and represented paths still must survive unchanged.
  return hash(sources.map(source => {
   const representation = source.sourceEvidence.representation;
-  return groupAuthoritySourceDigest({ ...source,sourceEvidence: { ...source.sourceEvidence,trees: [],
-   representation: representation ? { ...representation,memberSets: representation.memberSets.map(set => ({ ...set,recipients: [] })) } : null,
+  return groupAuthoritySourceDigest({ ...source,sourceEvidence: { ...source.sourceEvidence,trees: [],selections: source.sourceEvidence.selections.map(selection),
+   representation: representation ? { ...representation,memberSets: representation.memberSets.map(set => ({ ...set,selections: set.selections.map(selection),recipients: [] })) } : null,
   } });
  }));
 }
@@ -92,9 +97,15 @@ async function recoveryRoots(tx: DatabaseTransaction, review: GroupImpactReview,
 export async function lockGroupAdmissionClosure(tx: DatabaseTransaction, context: PrincipalRequestContext, input: ReviewKey) {
  await tx.select().from(accessRoleBindingScope).where(eq(accessRoleBindingScope.scopeId,input.scopeId)).for("update");
  await tx.select().from(accessGroupTree).where(eq(accessGroupTree.scopeId,input.scopeId)).for("update");
- await authority(tx,context,input.scopeId,"access.group.read",["groups",input.groupId]);
  const [review] = await tx.select().from(reviews).where(and(eq(reviews.id,input.reviewId),eq(reviews.scopeId,input.scopeId),eq(reviews.groupId,input.groupId))).for("update");
  if (!review) throw new AccessRecordUnavailable();
+ if (review.membershipId && review.generation !== null) {
+  await tx.select().from(accessMembership).where(eq(accessMembership.id,review.membershipId)).for("share");
+  const [set] = await tx.select().from(accessGroupMembershipSet).where(and(eq(accessGroupMembershipSet.membershipId,review.membershipId),eq(accessGroupMembershipSet.generation,review.generation))).for("update");
+  if (!set) throw new AccessUnavailable();
+  await tx.select().from(accessImpactFence).where(and(eq(accessImpactFence.kind,"membership"),eq(accessImpactFence.key,review.membershipId))).for("update");
+ }
+ await authority(tx,context,input.scopeId,"access.group.read",["groups",input.groupId]);
  const rows = await tx.select({ payload: accessGroupImpactEffect.payload }).from(accessGroupImpactEffect).where(eq(accessGroupImpactEffect.reviewId,review.id)).orderBy(accessGroupImpactEffect.ordinal).limit(4097);
  if (rows.length > 4096) throw new AccessUnavailable();
  const effects = rows.map(row => GroupImpactEffectSchema.parse(row.payload));
@@ -110,20 +121,25 @@ export async function lockGroupAdmissionClosure(tx: DatabaseTransaction, context
  if (groupFences.length > 4096) throw new AccessUnavailable();
  const impacted = (await tx.execute<{ key: string }>(sql`select f.key from public.access_impact_fence f
   join public.access_group_impact_witness w on w.kind=f.kind and w.key=f.key
-  where w.review_id=${review.id}::uuid and f.kind in ('group','tree') order by f.kind,f.key for update of f`)).rows;
+  where w.review_id=${review.id}::uuid and (f.kind in ('group','tree') or (f.kind='membership' and f.key=${review.membershipId}::uuid)) order by f.kind,f.key for update of f`)).rows;
  if (impacted.length > 8193) throw new AccessUnavailable();
  return review;
 }
 
 async function reviewAuthorities(tx: DatabaseTransaction, context: PrincipalRequestContext, review: GroupImpactReview, evidence: Evidence) {
  const reader = await authority(tx,context,review.scopeId,"access.group.read",["groups",review.groupId]);
- const manager = await authority(tx,context,review.scopeId,`access.group.${review.operation}`,["groups",review.groupId]);
+ const manager = await authority(tx,context,review.scopeId,groupImpactPermission(review.operation),["groups",review.groupId]);
  const confer = await readGroupImpactConferAuthority(tx,context,evidence.effects);
  return [reader,manager,...confer];
 }
 
 /** Read bounded physical candidates before current-admission filtering or subject deduplication. */
 async function independentSubtreeRoster(tx: DatabaseTransaction, review: GroupImpactReview) {
+ if (review.membershipId) {
+  const [member] = await tx.select().from(accessMembership).where(eq(accessMembership.id,review.membershipId)).for("share");
+  if (!member) throw new AccessUnavailable();
+  return [member.subjectId];
+ }
  await revalidateGroupImpactDiscovery(tx,review);
  if (review.status !== "complete") throw new AccessUnavailable();
  const groups = await tx.select({ groupId: accessGroupImpactNode.key }).from(accessGroupImpactNode)
@@ -213,15 +229,18 @@ function rejectChangedBasis(effects: GroupImpactEffect[], sources: Authority[]) 
    source.representationPath.some(reference => reference.id === effect.sourceId))) throw new AccessDenied();
  }
 }
-function requireRecoveryPaths(effects: GroupImpactEffect[], sources: Authority[]) {
+function requireRecoveryPaths(effects: GroupImpactEffect[], sources: Authority[], review: GroupImpactReview) {
+ const identity = (path: GroupImpactEffect["beforePaths"][number], after: boolean) => JSON.stringify({ ...path,
+  selectionSetVersion: path.selectionSetVersion === null ? null : path.selectionSetVersion -
+   (after && path.membershipId === review.membershipId && path.generation === review.generation ? 1 : 0) });
  for (const source of sources) for (const effect of effects) {
   if (!(effect.sourceId === source.sourceBindingId && effect.subjectId === source.subjectId) &&
    !source.representationPath.some(reference => reference.id === effect.sourceId)) continue;
   const allows = (permissions: GroupImpactEffect["before"]) => permissions.some(permission => permission.family === "management" && permission.key === source.permission);
-  const surviving = new Set(effect.afterPaths.map(path => JSON.stringify(path)));
+  const surviving = new Set(effect.afterPaths.map(path => identity(path,true)));
   // Select a complete original enrollment/ancestry path, not a newly gained path
   // for the same binding. Redundant paths can change while this original one survives.
-  if (!allows(effect.before) || !allows(effect.after) || !effect.beforePaths.some(path => surviving.has(JSON.stringify(path)))) throw new AccessDenied();
+  if (!allows(effect.before) || !allows(effect.after) || !effect.beforePaths.some(path => surviving.has(identity(path,false)))) throw new AccessDenied();
  }
 }
 async function livePolicy(tx: DatabaseTransaction, effects: GroupImpactEffect[]) {
@@ -243,7 +262,16 @@ export async function inspectGroupApproval(context: PrincipalRequestContext, inp
   await independent(tx,review,evidence.effects,sources[1]!); rejectChangedBasis(evidence.effects,sources);
   const policy = await livePolicy(tx,evidence.effects);
   for (const source of sources) await requireAccessAdmission(tx,source.admission);
-  return { reviewId: review.id, proposalDigest: proposalDigest(review),effectDigest: evidence.effectDigest,
+  let selection = null;
+  if (review.membershipId) {
+   const [member] = await tx.select().from(accessMembership).where(eq(accessMembership.id,review.membershipId)).for("share");
+   if (!member || member.scopeId !== review.scopeId || review.generation === null || review.expectedSelectionVersion === null) throw new AccessUnavailable();
+   const [policy] = await readAccessSubjectEligibility(tx,{ subjectIds: [member.subjectId],action: "read" });
+   if (!policy || policy.outcome === "unavailable") throw new AccessUnavailable();
+   selection = { ...presentGroupRecipient(context,review,member,policy.subject.kind,(await clock(tx)).getTime()),generation: review.generation,expectedVersion: review.expectedSelectionVersion };
+  }
+  for (const source of sources) await requireAccessAdmission(tx,source.admission);
+  return { selection,reviewId: review.id, proposalDigest: proposalDigest(review),effectDigest: evidence.effectDigest,
    operation: review.operation,expectedGroupVersion: review.expectedGroupVersion,expectedTreeVersion: review.expectedTreeVersion,
    proposedParentId: review.proposedParentId, effectCount: evidence.effects.length, validUntil: deadline(review,sources,policy.validUntil).toISOString() };
  });
@@ -253,7 +281,7 @@ export async function inspectGroupApproval(context: PrincipalRequestContext, inp
 export async function approveGroupImpact(context: PrincipalRequestContext, input: ReviewKey & { approvalId: string; proposalDigest: string; effectDigest: string }) {
  return runAccessTransaction(async tx => {
   const review = await lockGroupAdmissionClosure(tx,context,input);
-  const original = await authority(tx,context,review.scopeId,`access.group.${review.operation}`,["groups",review.groupId]);
+  const original = await authority(tx,context,review.scopeId,groupImpactPermission(review.operation),["groups",review.groupId]);
   const [prior] = await tx.select().from(approvals).where(eq(approvals.id,input.approvalId)).for("update");
   if (prior) {
    if (prior.reviewId !== review.id || prior.principalId !== original.principalId || prior.subjectId !== original.subjectId ||
@@ -408,7 +436,7 @@ async function selectRecovery(tx: DatabaseTransaction, review: GroupImpactReview
    try {
     const sources = await repairAuthorities(tx,storedContext(row),scopeId);
     if (sources[0]!.subjectId !== row.subjectId || sourcesDigest(sources) !== row.sourceDigest) continue;
-    requireRecoveryPaths(effects,sources);
+    requireRecoveryPaths(effects,sources,review);
     for (const source of sources) await requireAccessAdmission(tx,source.admission);
     selected.push({ row,sources }); found = true; break;
    } catch (error) {
@@ -434,9 +462,10 @@ async function selectRecovery(tx: DatabaseTransaction, review: GroupImpactReview
  * proof is selected even when its sources never appeared in the changed-source delta.
  */
 export async function prepareGroupAdmission(tx: DatabaseTransaction, context: PrincipalRequestContext, review: GroupImpactReview, manager: Authority,
- input: { operationId: string; operation: "reparent" | "retire"; expectedVersion: number; parentId: string | null }) {
+ input: { operationId: string; operation: GroupImpactReview["operation"]; expectedVersion: number; parentId: string | null; membershipId?: string; generation?: number; expectedSelectionVersion?: number }) {
  if (manager.principalId !== review.operatorAuthUserId || manager.subjectId !== review.authoritySubjectId || input.operation !== review.operation ||
-  input.expectedVersion !== review.expectedGroupVersion || input.parentId !== review.proposedParentId) throw new AccessChanged();
+  input.expectedVersion !== review.expectedGroupVersion || input.parentId !== review.proposedParentId ||
+  (input.membershipId ?? null) !== review.membershipId || (input.generation ?? null) !== review.generation || (input.expectedSelectionVersion ?? null) !== review.expectedSelectionVersion) throw new AccessChanged();
  const [alreadyUsed] = await tx.select({ id: receipts.operationId }).from(receipts).where(eq(receipts.operationId,input.operationId));
  if (alreadyUsed) throw new AccessChanged();
  const evaluated = await lockCompleteGroupImpactEvaluation(tx,context,review,manager);
@@ -467,11 +496,11 @@ export async function prepareGroupAdmission(tx: DatabaseTransaction, context: Pr
   const after: Authority[] = [];
   for (const path of recovery) {
    const sources = await repairAuthorities(work,storedContext(path.row),path.row.scopeId);
-   if (continuityDigest(sources) !== continuityDigest(path.sources)) throw new AccessDenied();
+   if (continuityDigest(sources,review,true) !== continuityDigest(path.sources,review)) throw new AccessDenied();
    after.push(...sources);
   }
   const currentPolicy = await livePolicy(work,evidence.effects);
-  await work.insert(receipts).values({ operationId: input.operationId,groupId: review.groupId,reviewId: review.id,
+  await work.insert(receipts).values({ operationId: input.operationId,groupId: review.groupId,reviewId: review.id,membershipId: review.membershipId,generation: review.generation,
    proposalDigest: proposalDigest(review),effectDigest: evidence.effectDigest,approvalIds: [accepted.row.id],recoveryPathIds: recovery.map(path => path.row.id) });
   // No further row-locking work after this final clock/credential/recovery check.
   await requireAccessAdmission(work,sql`(${deadlineSql}) and (${approvalSql})

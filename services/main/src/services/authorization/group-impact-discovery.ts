@@ -3,6 +3,8 @@ import { and, eq, gt, gte, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import { AccessPermissionValues } from "@rezics/access";
 import type { DatabaseTransaction } from "../database";
+import { accessMembership } from "../database/schema/access-membership";
+import { accessGroupMembership } from "../database/schema/access-group-membership";
 import { accessGroup, accessGroupTree } from "../database/schema/access-group";
 import { accessGroupImpactReview as reviews, accessGroupImpactNode as nodes, accessGroupImpactFact as facts,
 	accessGroupImpactWitness as witnesses, accessImpactFence as fences } from "../database/schema/access-group-impact";
@@ -15,6 +17,14 @@ export const GroupImpactProposalSchema = z.discriminatedUnion("operation", [
 	z.strictObject({ reviewId: id, operation: z.literal("reparent"), expectedGroupVersion: version.min(1), expectedTreeVersion: version, proposedParentId: id.nullable() }),
 	z.strictObject({ reviewId: id, operation: z.literal("retire"), expectedGroupVersion: version.min(1), expectedTreeVersion: version, proposedParentId: z.null() }),
 ]);
+/** Private exact selection proposal, populated only after recipient-selector resolution. @internal */
+export const GroupSelectionImpactProposalSchema = z.strictObject({ reviewId: id, operation: z.enum(["assign", "remove", "prune"]),
+ expectedGroupVersion: version.min(1), expectedTreeVersion: version, proposedParentId: z.null(),
+ membershipId: id, generation: version.min(1), expectedSelectionVersion: version.max(Number.MAX_SAFE_INTEGER - 1) });
+/** Operation-specific management permission, shared by discovery, approval and consumption. @internal */
+export function groupImpactPermission(operation: GroupImpactReview["operation"]) {
+ return operation === "reparent" || operation === "retire" ? `access.group.${operation}` as const : "access.group.membership.manage" as const;
+}
 /** Private retained proposal and its bounded evidence budget. @internal */
 export type GroupImpactReview = typeof reviews.$inferSelect;
 type Review = GroupImpactReview;
@@ -116,11 +126,12 @@ export async function lockGroupImpactReview(tx: DatabaseTransaction, input: {
 }
 
 /** Start a retryable proposal at exact Group/tree versions; ancestor traversal is bounded to eight. @internal */
-export async function beginGroupImpactDiscovery(tx: DatabaseTransaction, input: z.infer<typeof GroupImpactProposalSchema> & {
+export async function beginGroupImpactDiscovery(tx: DatabaseTransaction, input: (z.infer<typeof GroupImpactProposalSchema> | z.infer<typeof GroupSelectionImpactProposalSchema>) & {
 	scopeId: string; groupId: string; principalId: string; subjectId: string;
 	reviewerSources: { bindingId: string | null; representationIds: string[]; validUntil: number | null };
 }): Promise<Review> {
-	const proposal = GroupImpactProposalSchema.parse({ reviewId: input.reviewId, operation: input.operation,
+	const selectionProposal = "membershipId" in input ? GroupSelectionImpactProposalSchema.parse({ reviewId: input.reviewId, operation: input.operation, expectedGroupVersion: input.expectedGroupVersion, expectedTreeVersion: input.expectedTreeVersion, proposedParentId: input.proposedParentId, membershipId: input.membershipId, generation: input.generation, expectedSelectionVersion: input.expectedSelectionVersion }) : null;
+	const proposal = selectionProposal ?? GroupImpactProposalSchema.parse({ reviewId: input.reviewId, operation: input.operation,
 		expectedGroupVersion: input.expectedGroupVersion, expectedTreeVersion: input.expectedTreeVersion, proposedParentId: input.proposedParentId });
 	// Serializes only this reviewer's intake; unrelated principals have independent budgets.
 	await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${'group-impact:'+input.principalId},0))`);
@@ -129,6 +140,7 @@ export async function beginGroupImpactDiscovery(tx: DatabaseTransaction, input: 
 		if (prior.scopeId !== input.scopeId || prior.groupId !== input.groupId || prior.operatorAuthUserId !== input.principalId || prior.authoritySubjectId !== input.subjectId)
 			throw new AccessRecordUnavailable();
 		if (prior.operation !== proposal.operation || prior.proposedParentId !== proposal.proposedParentId ||
+			prior.membershipId !== (selectionProposal?.membershipId ?? null) || prior.generation !== (selectionProposal?.generation ?? null) || prior.expectedSelectionVersion !== (selectionProposal?.expectedSelectionVersion ?? null) ||
 			prior.expectedGroupVersion !== proposal.expectedGroupVersion || prior.expectedTreeVersion !== proposal.expectedTreeVersion) throw new AccessChanged();
 		await revalidateGroupImpactDiscovery(tx, prior); return prior;
 	}
@@ -137,8 +149,15 @@ export async function beginGroupImpactDiscovery(tx: DatabaseTransaction, input: 
 	const [tree] = await tx.select().from(accessGroupTree).where(eq(accessGroupTree.scopeId, input.scopeId)).for("share");
 	const [head] = await tx.select().from(accessGroup).where(and(eq(accessGroup.id, input.groupId), eq(accessGroup.scopeId, input.scopeId)));
 	if (!head || !tree) throw new AccessRecordUnavailable();
-	if (tree.version !== proposal.expectedTreeVersion || head.version !== proposal.expectedGroupVersion || head.state !== "active" ||
+	if (tree.version !== proposal.expectedTreeVersion || head.version !== proposal.expectedGroupVersion || (head.state !== "active" && !(selectionProposal && proposal.operation !== "assign" && head.state === "retired")) ||
 		(proposal.operation === "retire" && head.subtreeHeight !== 1) || (proposal.operation === "reparent" && proposal.proposedParentId === head.parentId)) throw new AccessChanged();
+	if (selectionProposal) {
+  const [member] = await tx.select().from(accessMembership).where(and(eq(accessMembership.id, selectionProposal.membershipId), eq(accessMembership.scopeId, input.scopeId))).for("share");
+  const [selected] = await tx.select().from(accessGroupMembership).where(and(eq(accessGroupMembership.membershipId, selectionProposal.membershipId), eq(accessGroupMembership.generation, selectionProposal.generation), eq(accessGroupMembership.groupId, input.groupId)));
+  if (!member || (selected?.version ?? 0) !== selectionProposal.expectedSelectionVersion || (selected?.selected ?? false) === (proposal.operation === "assign") ||
+   (proposal.operation === "assign" && member.activeGeneration !== selectionProposal.generation) ||
+   (proposal.operation === "prune" && member.activeGeneration === selectionProposal.generation && head.state !== "retired")) throw new AccessChanged();
+ }
 	const [start] = (await tx.execute<{ now: string; snapshot: string }>(sql`select clock_timestamp()::text as now,pg_current_snapshot()::text as snapshot`)).rows;
 	if (!start || Buffer.byteLength(start.snapshot,"utf8") > 65536) throw new AccessUnavailable();
 	const started = new Date(start.now), expiresAt = new Date(started.getTime() + 900_000);
@@ -147,15 +166,20 @@ export async function beginGroupImpactDiscovery(tx: DatabaseTransaction, input: 
 	if (retained.length >= 16) throw new AccessUnavailable();
 	const [review] = await tx.insert(reviews).values({ id: proposal.reviewId, scopeId: input.scopeId, groupId: input.groupId,
 		operatorAuthUserId: input.principalId, authoritySubjectId: input.subjectId, operation: proposal.operation,
+		membershipId: selectionProposal?.membershipId ?? null, generation: selectionProposal?.generation ?? null, expectedSelectionVersion: selectionProposal?.expectedSelectionVersion ?? null,
 		proposedParentId: proposal.proposedParentId, expectedGroupVersion: proposal.expectedGroupVersion,
 		expectedTreeVersion: proposal.expectedTreeVersion, baseSnapshot: start.snapshot, createdAt: started, expiresAt, validUntil: input.reviewerSources.validUntil === null ? expiresAt : new Date(Math.min(expiresAt.getTime(), input.reviewerSources.validUntil)) }).onConflictDoNothing().returning();
 	if (!review) return beginGroupImpactDiscovery(tx, input);
 	await retainGroupImpactWitness(tx, review, "tree", input.scopeId);
 	await retainGroupImpactWitness(tx, review, "group", input.groupId);
-	await enqueue(tx, review, "subtree", head.id);
+	await enqueue(tx, review, selectionProposal ? "group" : "subtree", head.id);
+ if (selectionProposal) {
+  await retainGroupImpactWitness(tx, review, "membership", selectionProposal.membershipId);
+  await enqueue(tx, review, "membership", selectionProposal.membershipId);
+ }
 	await enqueue(tx, review, "binding-context", input.reviewerSources.bindingId);
 	for (const grantId of input.reviewerSources.representationIds) await enqueue(tx, review, "representation-context", grantId);
-	for (const [kind, root] of [["old-ancestor", head.parentId], ["new-ancestor", proposal.proposedParentId]] as const) {
+	for (const [kind, root] of [["old-ancestor", head.state === "active" ? head.parentId : null], ["new-ancestor", proposal.proposedParentId]] as const) {
 		let key = root, depth = 0;
 		while (key !== null) {
 			if (++depth > 8 || key === head.id) throw new AccessChanged();
@@ -247,7 +271,7 @@ async function capture(tx: DatabaseTransaction, review: Review, node: Node) {
 		if (kind === "representation") {
 			// A dependent edge can lose/reacquire liveness for recipients outside the moved subtree.
 			// Roster work expands only recipients, never their unrelated assignment graph.
-			if (node.kind === "representation") {
+			if (node.kind === "representation" && (!review.membershipId || head.parent_grant_id || headSchema.parse(payload.terms ?? {}).membership_id)) {
 				if (payload.recipient_kind === "group") await enqueue(tx, review, "roster", head.recipient_group_id);
 				if (payload.recipient_kind === "all-members") await enqueue(tx, review, "scope-roster", id.parse(payload.recipient_scope_id));
 			}
@@ -414,7 +438,7 @@ export function groupImpactSummary(review: Review) {
  */
 export async function lockCompleteGroupImpactDiscovery(tx: DatabaseTransaction, input: {
 	reviewId: string; scopeId: string; groupId: string; principalId: string; subjectId: string;
-	operation: "reparent" | "retire"; expectedGroupVersion: number; expectedTreeVersion: number; proposedParentId: string | null;
+	operation: GroupImpactReview["operation"]; expectedGroupVersion: number; expectedTreeVersion: number; proposedParentId: string | null;
 }) {
 	const review = await lockGroupImpactReview(tx, input);
 	await revalidateGroupImpactDiscovery(tx, review);
