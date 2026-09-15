@@ -20,9 +20,8 @@ FOR EACH ROW EXECUTE FUNCTION public.participation_guard_self_binding();
 CREATE OR REPLACE FUNCTION public.participation_guard_account_kind()
 RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
 BEGIN
-  IF NEW.principal_kind <> OLD.principal_kind AND
-     (EXISTS(SELECT 1 FROM public.auth_entity WHERE auth_user_id = OLD.id) OR EXISTS(SELECT 1 FROM public.service_principal WHERE auth_user_id = OLD.id)) THEN
-    RAISE EXCEPTION 'An admitted principal cannot change its authentication kind' USING ERRCODE = '23514';
+  IF NEW.principal_kind IS DISTINCT FROM OLD.principal_kind THEN
+    RAISE EXCEPTION 'A principal cannot change its authentication kind' USING ERRCODE = '23514';
   END IF;
   IF OLD.erased_at IS NOT NULL AND (NEW.erased_at IS DISTINCT FROM OLD.erased_at OR NEW.name <> '' OR NEW.image IS NOT NULL OR NEW.email_verified OR NEW.email IS DISTINCT FROM OLD.email OR NEW.principal_kind <> OLD.principal_kind) THEN
     RAISE EXCEPTION 'Erased authentication accounts cannot be restored' USING ERRCODE = '23514';
@@ -36,8 +35,13 @@ FOR EACH ROW EXECUTE FUNCTION public.participation_guard_account_kind();
 CREATE OR REPLACE FUNCTION public.participation_guard_entity_shape()
 RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
 BEGIN
+  IF NEW.shape IS DISTINCT FROM OLD.shape AND current_setting('transaction_isolation')<>'read committed' THEN
+    RAISE EXCEPTION 'Entity shape admission requires READ COMMITTED for current dependent identities' USING ERRCODE='40001';
+  END IF;
   IF NEW.shape <> OLD.shape AND
-     (EXISTS(SELECT 1 FROM public.auth_entity WHERE entity_id = OLD.id) OR EXISTS(SELECT 1 FROM public.service_principal WHERE entity_id = OLD.id)) THEN
+     (EXISTS(SELECT 1 FROM public.auth_entity WHERE entity_id = OLD.id) OR EXISTS(SELECT 1 FROM public.service_principal WHERE entity_id = OLD.id)
+      OR EXISTS(SELECT 1 FROM public.reference_value r JOIN public.access_scope s ON s.unit_ref=r.id
+       JOIN public.workload_principal w ON w.owner_scope_id=s.id WHERE r.target_entity_id=OLD.id)) THEN
     RAISE EXCEPTION 'An admitted participant cannot change identity shape' USING ERRCODE = '23514';
   END IF;
   RETURN NEW;

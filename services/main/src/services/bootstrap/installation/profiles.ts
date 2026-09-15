@@ -21,6 +21,7 @@ import {
 	BootstrapProfileManifest,
 } from "../data";
 import { assertFields, bootstrapEpoch } from "./common";
+import { ensurePlatformWorkloads } from "./workloads";
 
 export async function ensureBootstrapProfiles(
 	tx: DatabaseTransaction,
@@ -83,6 +84,7 @@ export async function ensureBootstrapProfiles(
 		}
 	}
 	const operator = BootstrapPlatformAdministratorProfile;
+	await ensurePlatformWorkloads(tx, operator.authUserId);
 	for (const value of BootstrapProfileManifest) {
 		const [stored] = await tx
 			.select({ id: entityIdentity.id, shape: entityIdentity.shape })

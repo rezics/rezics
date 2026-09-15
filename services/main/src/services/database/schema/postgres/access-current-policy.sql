@@ -1,16 +1,39 @@
-CREATE OR REPLACE FUNCTION public.access_subject_is_eligible(p_subject uuid,p_action text)
+CREATE OR REPLACE FUNCTION public.access_principal_account_is_eligible(p_principal uuid,p_action text)
 RETURNS boolean LANGUAGE sql VOLATILE SET search_path=pg_catalog,public AS $$
  WITH evaluated AS MATERIALIZED(SELECT clock_timestamp() AS now)
  SELECT CASE WHEN p_action IS NULL OR p_action NOT IN ('read','write','contribute') THEN NULL
-  WHEN s.auth_user_id IS NOT NULL THEN EXISTS(
-   SELECT 1 FROM public.users u CROSS JOIN evaluated WHERE u.id=s.auth_user_id AND u.erased_at IS NULL
+  ELSE EXISTS(
+   SELECT 1 FROM public.users u CROSS JOIN evaluated WHERE u.id=p_principal AND u.erased_at IS NULL
     AND NOT EXISTS(SELECT 1 FROM public.user_account_state a WHERE a.user_id=u.id AND
      (a.state='closed' OR (a.state='suspended' AND (a.expires_at IS NULL OR NOT isfinite(a.expires_at) OR a.expires_at>evaluated.now))))
     AND (p_action='read' OR NOT EXISTS(SELECT 1 FROM public.account_enforcement e WHERE e.auth_user_id=u.id AND e.revocation_action_id IS NULL
      AND (e.kind IN ('ban','suspension') OR (p_action='contribute' AND e.kind='silence'))
      AND (NOT isfinite(e.starts_at) OR (e.expires_at IS NOT NULL AND NOT isfinite(e.expires_at)) OR
       (e.starts_at<=evaluated.now AND (e.expires_at IS NULL OR e.expires_at>evaluated.now)))))
-  )
+  ) END
+$$;
+
+CREATE OR REPLACE FUNCTION public.workload_principal_is_eligible(p_principal uuid,p_action text)
+RETURNS boolean LANGUAGE sql VOLATILE SET search_path=pg_catalog,public AS $$
+ SELECT CASE WHEN p_action IS NULL OR p_action NOT IN ('read','write','contribute') THEN NULL ELSE EXISTS(
+  SELECT 1 FROM public.workload_principal w JOIN public.access_scope s ON s.id=w.owner_scope_id
+   LEFT JOIN public.reference_value r ON r.id=s.unit_ref LEFT JOIN public.users a ON a.id=s.auth_user_id
+   LEFT JOIN public.entity_identity e ON e.id=r.target_entity_id LEFT JOIN public.entity_participation ep ON ep.entity_id=e.id
+   LEFT JOIN public.realm realm ON realm.id=r.target_realm_id
+  WHERE w.auth_user_id=p_principal AND w.state='active' AND w.version>0 AND (
+   (w.purpose='system' AND s.platform_root='platform') OR (w.purpose='installation' AND (
+    (a.principal_kind='human' AND public.access_principal_account_is_eligible(a.id,p_action) IS TRUE) OR
+    (e.shape='organization' AND e.deleted_at IS NULL AND ep.state='active') OR
+    (realm.id IS NOT NULL AND realm.deleted_at IS NULL)
+   )))) END
+$$;
+
+CREATE OR REPLACE FUNCTION public.access_subject_is_eligible(p_subject uuid,p_action text)
+RETURNS boolean LANGUAGE sql VOLATILE SET search_path=pg_catalog,public AS $$
+ SELECT CASE WHEN p_action IS NULL OR p_action NOT IN ('read','write','contribute') THEN NULL
+  WHEN s.auth_user_id IS NOT NULL THEN EXISTS(SELECT 1 FROM public.users u WHERE u.id=s.auth_user_id
+   AND public.access_principal_account_is_eligible(u.id,p_action) IS TRUE
+   AND (u.principal_kind='human' OR (u.principal_kind='service' AND public.workload_principal_is_eligible(u.id,p_action) IS TRUE)))
   ELSE EXISTS(SELECT 1 FROM public.entity_identity e JOIN public.entity_participation p ON p.entity_id=e.id
    WHERE e.id=s.entity_id AND e.deleted_at IS NULL AND p.state='active') END
  FROM public.access_subject s WHERE s.id=p_subject

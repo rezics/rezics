@@ -136,6 +136,47 @@ first known future policy boundary; nonfinite time and exhausted candidate reads
 are unavailable. Resource/scope restrictions, credentials and independent-approval
 conditions remain additional owner decisions.
 
+### Scope-owned workload principals
+
+A native workload uses a private service AuthPrincipal and does not require a
+public Persona, password or personal API key. Its immutable owner is a human
+account, Org or Realm installation scope, or the platform for a named internal
+duty. Purpose and system key cannot be repurposed. Installation workloads begin
+suspended; their owning installation must separately admit activation. Platform
+duties use a unique private system key and remain a trusted provisioning boundary.
+
+Control transitions retain exact operation receipts and private operator history.
+Suspension/revocation advance a credential epoch; resumption does not restore the
+previous epoch, and revocation is terminal. The original operator is never the
+owner or a continuing liveness dependency. Installation/client binding, credentials,
+quota and public attribution remain separate requirements.
+
+Native subject eligibility requires an active workload in addition to its own
+account policy. Account-owned workloads also obey that human owner's lifecycle
+and action-specific enforcement. Org-owned workloads require an undeleted,
+participating organization; Realm-owned workloads require the undeleted Realm.
+Platform duties require the platform root. These dependencies are loaded under
+owner fences within a combined 256-account/Entity/Realm budget. Missing workload
+admission denies service use; missing/incomplete bounded evidence is unavailable.
+No creator-history lookup substitutes for current owner policy.
+
+Principal authentication kind is immutable from creation. Entity shape changes
+retain the workload-owner dependency guard and require READ COMMITTED so a
+post-wait check cannot miss a newly admitted dependent workload. The workload
+admission locks its Org identity while validating the structural owner type.
+Native session/linked-credential writes require an unerased human account, preserve
+credential ownership and linked issuer/subject identity, and cannot reset a
+session's authentication time through an update. Existing personal-key guards
+enforce the same human/service boundary.
+
+The trusted installer provisions private duties for CIMD registration, webhook
+delivery and account erasure. A unique duty key reuses its existing identity and
+retains any suspension/revocation; installation reruns never renew it. These
+accounts have no public Persona, password or interactive session. Runtime duties
+still require current workload eligibility and their purpose-specific policy.
+Legacy service-Persona consumers, installation provisioning and runtime-duty use
+must migrate to this owner before the complete runtime is qualified.
+
 ### First-party credentials and management effects
 
 Verified sessions and personal API keys produce private secret-digest proofs stored

@@ -69,6 +69,17 @@ must be represented in width fixtures. Routine timestamp-only metadata refresh
 does not advance the policy fence. Terminal identities remain retained to prevent
 client-ID reuse; they require explicit retention inventory, not a hidden cascade.
 
+Workload identities are one private head per scope-owned service principal, plus
+immutable control events. Credential rotation does not create another principal
+or another scope quota. Use the 224-384-byte indexed binding estimate for heads
+until measured: 112-192 GB for 500,000,000 and 672-1152 GB for 3,000,000,000 heads;
+count control events separately with the security-event estimate. Direct lookup
+uses the private principal key, inventory uses owner-scope/principal keysets, and
+internal-duty lookup uses a unique system key. Native eligibility includes workload
+owner dependencies within 256 concrete account/Entity/Realm rows, retaining the
+256-per-principal and 512-total enforcement limits. Revocation changes one workload
+head/epoch; token consumers invalidate old contexts without a synchronous fan-out.
+
 Role definitions and permission dictionaries may be scope-bounded, but the total
 scope count is not globally bounded. Inventory scope heads, definition revisions,
 role-permission entries and retirement history separately using measured width

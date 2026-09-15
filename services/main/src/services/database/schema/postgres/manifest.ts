@@ -15,6 +15,7 @@ export const PostgreSqlSchemaFileNames = [
 	"account-identity-admission.sql",
 	"connected-app.sql",
 	"oauth-client-authority.sql",
+	"workload-principal.sql",
 	"access-subject-policy.sql",
 	"access-role.sql",
 	"access-role-binding.sql",
@@ -90,6 +91,7 @@ export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number
  * PostgreSQL definitions remain split by responsibility for review and drift checks.
  */
 export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly PostgreSqlSchemaFileName[]>> = {
+	workload_principals: ["workload-principal.sql", "access-current-policy.sql", "participation-integrity.sql"],
 	management_authority: ["api-key-authority.sql", "access-current-policy.sql"],
 	access_role_binding_readers: ["access-membership.sql", "access-role-binding.sql"],
 	studio_visit_reference_values: ["unit-reference-integrity.sql", "merge-integrity.sql"],
@@ -103,6 +105,12 @@ export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly 
 };
 
 export const PostgreSqlSchemaFunctionNames = [
+	"guard_workload_principal",
+	"guard_workload_principal_event",
+	"complete_workload_principal",
+	"guard_interactive_principal_credential",
+	"access_principal_account_is_eligible",
+	"workload_principal_is_eligible",
 	"guard_oauth_client_authority",
 	"fence_oauth_client_authority",
 	"guard_connected_app_head",
@@ -466,6 +474,13 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "workload_principal", name: "workload_principal_guard" },
+	{ table: "workload_principal_event", name: "workload_principal_event_guard" },
+	{ table: "workload_principal_event", name: "workload_principal_event_immutable" },
+	{ table: "workload_principal", name: "workload_principal_complete" },
+	{ table: "workload_principal_event", name: "workload_principal_event_complete" },
+	{ table: "sessions", name: "sessions_principal_kind_guard" },
+	{ table: "accounts", name: "accounts_principal_kind_guard" },
 	{ table: "oauth_client_authority", name: "oauth_client_authority_guard" },
 	{ table: "oauth_client", name: "oauth_client_authority_fence" },
 	{ table: "connected_app", name: "connected_app_head_guard" },

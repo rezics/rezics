@@ -7,6 +7,8 @@ import { users } from "../database/schema/auth";
 import { userAccountState } from "../database/schema/account-control";
 import { entityIdentity } from "../database/schema/catalog-identity";
 import { entityParticipation } from "../database/schema/participation";
+import { workloadPrincipal } from "../database/schema/workload-principal";
+import { realm } from "../database/schema/realm";
 import { EnforcementKindValues } from "../database/schema/contract-values";
 import { doesEnforcementBlockAction } from "./account/policy";
 import type { AuthorityOutcome } from "./authority-context";
@@ -34,7 +36,8 @@ export class AccessSubjectPolicyUnavailable extends Error {
  * semantics distinguish writes from contributions. Entity publication visibility
  * is not participation eligibility. Scope bans/restrictions, credential policy,
  * representation, assignment authority and independent approvals remain separate.
- * At most 256 subjects, 256 nonrevoked enforcements per principal and 512 total
+ * At most 256 subjects and 256 concrete accounts/Entities/Realms including workload
+ * owners, 256 nonrevoked enforcements per principal and 512 total
  * enforcement candidates are read; exhaustion never produces a partial allow.
  */
 export async function readAccessSubjectEligibility(
@@ -49,14 +52,35 @@ export async function readAccessSubjectEligibility(
 	const subjects = await tx.select().from(accessSubject).where(inArray(accessSubject.id, subjectIds));
 	if (subjects.length !== subjectIds.length) throw new AccessSubjectPolicyUnavailable();
 	const principalIds = [...new Set(subjects.flatMap(subject => subject.authUserId ? [subject.authUserId] : []))].sort();
-	const entityIds = [...new Set(subjects.flatMap(subject => subject.entityId ? [subject.entityId] : []))].sort();
-	const accounts = principalIds.length ? await tx.select({ id: users.id, erasedAt: users.erasedAt }).from(users)
+	const accounts = principalIds.length ? await tx.select({ id: users.id, kind: users.principalKind, erasedAt: users.erasedAt }).from(users)
 		.where(inArray(users.id, principalIds)).orderBy(users.id).for("share") : [];
 	if (accounts.length !== principalIds.length) throw new AccessSubjectPolicyUnavailable();
-	const entities = entityIds.length ? await tx.select({ id: entityIdentity.id, deletedAt: entityIdentity.deletedAt }).from(entityIdentity)
+	const serviceIds = accounts.filter(account => account.kind === "service").map(account => account.id);
+	const workloads = serviceIds.length ? await tx.select().from(workloadPrincipal).where(inArray(workloadPrincipal.authUserId, serviceIds)) : [];
+	const workloadScopeIds = [...new Set(workloads.filter(value => value.state === "active" && value.version > 0).map(value => value.ownerScopeId))].sort();
+	const ownerScopes = workloadScopeIds.length ? (await tx.execute<{
+		id: string; platform_root: string | null; auth_user_id: string | null; entity_id: string | null; realm_id: string | null;
+	}>(sql`select s.id,s.platform_root,s.auth_user_id,r.target_entity_id as entity_id,r.target_realm_id as realm_id
+		from public.access_scope s left join public.reference_value r on r.id=s.unit_ref
+		where s.id in (${sql.join(workloadScopeIds.map(id => sql`${id}::uuid`), sql`, `)})`)).rows : [];
+	if (ownerScopes.length !== workloadScopeIds.length) throw new AccessSubjectPolicyUnavailable();
+	const ownerPrincipalIds = [...new Set(ownerScopes.flatMap(scope => scope.auth_user_id ? [scope.auth_user_id] : []))].filter(id => !principalIds.includes(id)).sort();
+	const allPrincipalIds = [...new Set([...principalIds, ...ownerPrincipalIds])].sort();
+	const entityIds = [...new Set([...subjects.flatMap(subject => subject.entityId ? [subject.entityId] : []),
+		...ownerScopes.flatMap(scope => scope.entity_id ? [scope.entity_id] : [])])].sort();
+	const realmIds = [...new Set(ownerScopes.flatMap(scope => scope.realm_id ? [scope.realm_id] : []))].sort();
+	if (allPrincipalIds.length + entityIds.length + realmIds.length > 256) throw new AccessSubjectPolicyUnavailable();
+	const ownerAccounts = ownerPrincipalIds.length ? await tx.select({ id: users.id, kind: users.principalKind, erasedAt: users.erasedAt }).from(users)
+		.where(inArray(users.id, ownerPrincipalIds)).orderBy(users.id).for("share") : [];
+	if (ownerAccounts.length !== ownerPrincipalIds.length) throw new AccessSubjectPolicyUnavailable();
+	accounts.push(...ownerAccounts);
+	const entities = entityIds.length ? await tx.select({ id: entityIdentity.id, shape: entityIdentity.shape, deletedAt: entityIdentity.deletedAt }).from(entityIdentity)
 		.where(inArray(entityIdentity.id, entityIds)).orderBy(entityIdentity.id).for("share") : [];
 	if (entities.length !== entityIds.length) throw new AccessSubjectPolicyUnavailable();
-	const states = principalIds.length ? await tx.select().from(userAccountState).where(inArray(userAccountState.userId, principalIds)) : [];
+	const realms = realmIds.length ? await tx.select({ id: realm.id, deletedAt: realm.deletedAt }).from(realm)
+		.where(inArray(realm.id, realmIds)).orderBy(realm.id).for("share") : [];
+	if (realms.length !== realmIds.length) throw new AccessSubjectPolicyUnavailable();
+	const states = allPrincipalIds.length ? await tx.select().from(userAccountState).where(inArray(userAccountState.userId, allPrincipalIds)) : [];
 	const participation = entityIds.length ? await tx.select().from(entityParticipation).where(inArray(entityParticipation.entityId, entityIds)) : [];
 	const nonErased = accounts.filter(account => account.erasedAt === null).map(account => account.id);
 	const action = request.action;
@@ -85,24 +109,51 @@ export async function readAccessSubjectEligibility(
 	const stateRows = new Map(states.map(state => [state.userId, state]));
 	const entityRows = new Map(entities.map(entity => [entity.id, entity]));
 	const participationRows = new Map(participation.map(member => [member.entityId, member]));
+	const realmRows = new Map(realms.map(value => [value.id, value]));
+	const workloadRows = new Map(workloads.map(value => [value.authUserId, value]));
+	const scopeRows = new Map(ownerScopes.map(value => [value.id, value]));
+	function accountPolicy(accountId: string): { outcome: AuthorityOutcome; validUntil?: number } {
+		const account = accountRows.get(accountId);
+		if (!account) throw new AccessSubjectPolicyUnavailable();
+		const state = stateRows.get(account.id);
+		if (account.erasedAt !== null || state?.state === "closed") return { outcome: "deny" };
+		const stateExpiry = state?.expiresAt?.getTime();
+		if (stateExpiry !== undefined && !Number.isFinite(stateExpiry)) throw new AccessSubjectPolicyUnavailable();
+		let outcome: AuthorityOutcome = state?.state === "suspended" && (stateExpiry === undefined || stateExpiry > now) ? "deny" : "allow";
+		let validUntil = stateExpiry !== undefined && stateExpiry > now ? stateExpiry : undefined;
+		for (const row of byPrincipal.get(account.id) ?? []) {
+			if (request.action === "read" || !doesEnforcementBlockAction(row.kind, request.action)) continue;
+			const start = new Date(row.starts_at).getTime(), end = row.expires_at === null ? null : new Date(row.expires_at).getTime();
+			if (!Number.isFinite(start) || (end !== null && !Number.isFinite(end))) throw new AccessSubjectPolicyUnavailable();
+			if (start <= now && (end === null || end > now)) outcome = "deny";
+			for (const boundary of [start, end]) if (boundary !== null && boundary > now)
+				validUntil = validUntil === undefined ? boundary : Math.min(validUntil, boundary);
+		}
+		return { outcome, ...(validUntil !== undefined ? { validUntil } : {}) };
+	}
 	return subjects.map(subject => {
 		if (subject.authUserId !== null) {
 			const account = accountRows.get(subject.authUserId);
 			if (!account) throw new AccessSubjectPolicyUnavailable();
-			const state = stateRows.get(account.id);
-			if (account.erasedAt !== null || state?.state === "closed")
-				return { subjectId: subject.id, subject: { kind: "principal" as const, id: account.id }, outcome: "deny" as const, evaluatedAt };
-			const stateExpiry = state?.expiresAt?.getTime();
-			if (stateExpiry !== undefined && !Number.isFinite(stateExpiry)) throw new AccessSubjectPolicyUnavailable();
-			let outcome: AuthorityOutcome = state?.state === "suspended" && (stateExpiry === undefined || stateExpiry > now) ? "deny" : "allow";
-			let validUntil = stateExpiry !== undefined && stateExpiry > now ? stateExpiry : undefined;
-			for (const row of byPrincipal.get(account.id) ?? []) {
-				if (request.action === "read" || !doesEnforcementBlockAction(row.kind, request.action)) continue;
-				const start = new Date(row.starts_at).getTime(), end = row.expires_at === null ? null : new Date(row.expires_at).getTime();
-				if (!Number.isFinite(start) || (end !== null && !Number.isFinite(end))) throw new AccessSubjectPolicyUnavailable();
-				if (start <= now && (end === null || end > now)) outcome = "deny";
-				for (const boundary of [start, end]) if (boundary !== null && boundary > now)
-					validUntil = validUntil === undefined ? boundary : Math.min(validUntil, boundary);
+			let { outcome, validUntil } = accountPolicy(account.id);
+			if (account.kind === "service") {
+				const workload = workloadRows.get(account.id), scope = workload ? scopeRows.get(workload.ownerScopeId) : undefined;
+				if (!workload || workload.version < 1 || workload.state !== "active" || !scope) outcome = "deny";
+				else if (workload.purpose === "system") {
+					if (scope.platform_root !== "platform") outcome = "deny";
+				} else if (scope.auth_user_id) {
+					if (accountRows.get(scope.auth_user_id)?.kind !== "human") outcome = "deny";
+					else {
+						const owner = accountPolicy(scope.auth_user_id);
+						if (owner.outcome !== "allow") outcome = owner.outcome;
+						if (owner.validUntil !== undefined) validUntil = validUntil === undefined ? owner.validUntil : Math.min(validUntil, owner.validUntil);
+					}
+				} else if (scope.entity_id) {
+					const owner = entityRows.get(scope.entity_id);
+					if (!owner || owner.shape !== "organization" || owner.deletedAt !== null || participationRows.get(scope.entity_id)?.state !== "active") outcome = "deny";
+				} else if (scope.realm_id) {
+					if (!realmRows.has(scope.realm_id) || realmRows.get(scope.realm_id)?.deletedAt !== null) outcome = "deny";
+				} else outcome = "deny";
 			}
 			return { subjectId: subject.id, subject: { kind: "principal" as const, id: account.id }, outcome, evaluatedAt,
 				...(validUntil !== undefined ? { validUntil } : {}) };
