@@ -13,6 +13,29 @@ RETURNS boolean LANGUAGE sql VOLATILE SET search_path=pg_catalog,public AS $$
   ) END
 $$;
 
+CREATE OR REPLACE FUNCTION public.connected_app_is_eligible(p_app uuid)
+RETURNS boolean LANGUAGE sql VOLATILE SET search_path=pg_catalog,public AS $$
+ SELECT EXISTS(SELECT 1 FROM public.connected_app app JOIN public.access_scope s ON s.id=app.scope_id
+  LEFT JOIN public.users a ON a.id=s.auth_user_id LEFT JOIN public.workload_principal w ON w.auth_user_id=a.id
+  LEFT JOIN public.access_scope ws ON ws.id=w.owner_scope_id
+  LEFT JOIN public.reference_value r ON r.id=s.unit_ref LEFT JOIN public.entity_identity e ON e.id=r.target_entity_id
+  LEFT JOIN public.entity_participation ep ON ep.entity_id=e.id
+  WHERE app.id=p_app AND app.state='active' AND app.trust<>'blocked' AND (
+   (a.principal_kind='human' AND public.access_principal_account_is_eligible(a.id,'read') IS TRUE) OR
+   (a.principal_kind='service' AND w.purpose='system' AND w.state='active' AND ws.platform_root='platform'
+    AND public.access_principal_account_is_eligible(a.id,'read') IS TRUE) OR
+   (e.id IS NOT NULL AND e.deleted_at IS NULL AND ep.state='active')))
+$$;
+
+CREATE OR REPLACE FUNCTION public.connected_installation_is_eligible(p_installation uuid)
+RETURNS boolean LANGUAGE sql VOLATILE SET search_path=pg_catalog,public AS $$
+ WITH evaluated AS MATERIALIZED(SELECT clock_timestamp() AS now)
+ SELECT EXISTS(SELECT 1 FROM public.connected_installation i JOIN public.connected_installation_revision r
+  ON r.installation_id=i.id AND r.revision=i.approved_revision CROSS JOIN evaluated
+  WHERE i.id=p_installation AND i.state='active' AND r.sealed AND r.valid_from<=evaluated.now
+   AND (r.valid_until IS NULL OR r.valid_until>evaluated.now) AND public.connected_app_is_eligible(i.app_id) IS TRUE)
+$$;
+
 CREATE OR REPLACE FUNCTION public.workload_principal_is_eligible(p_principal uuid,p_action text)
 RETURNS boolean LANGUAGE sql VOLATILE SET search_path=pg_catalog,public AS $$
  SELECT CASE WHEN p_action IS NULL OR p_action NOT IN ('read','write','contribute') THEN NULL ELSE EXISTS(
@@ -21,7 +44,9 @@ RETURNS boolean LANGUAGE sql VOLATILE SET search_path=pg_catalog,public AS $$
    LEFT JOIN public.entity_identity e ON e.id=r.target_entity_id LEFT JOIN public.entity_participation ep ON ep.entity_id=e.id
    LEFT JOIN public.realm realm ON realm.id=r.target_realm_id
   WHERE w.auth_user_id=p_principal AND w.state='active' AND w.version>0 AND (
-   (w.purpose='system' AND s.platform_root='platform') OR (w.purpose='installation' AND (
+   (w.purpose='system' AND s.platform_root='platform') OR (w.purpose='installation' AND EXISTS(
+    SELECT 1 FROM public.connected_installation i WHERE i.workload_principal_id=w.auth_user_id AND i.owner_scope_id=w.owner_scope_id
+     AND public.connected_installation_is_eligible(i.id) IS TRUE) AND (
     (a.principal_kind='human' AND public.access_principal_account_is_eligible(a.id,p_action) IS TRUE) OR
     (e.shape='organization' AND e.deleted_at IS NULL AND ep.state='active') OR
     (realm.id IS NOT NULL AND realm.deleted_at IS NULL)

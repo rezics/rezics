@@ -111,6 +111,17 @@ use a separate database session so failed issuer transactions cannot refund them
 Connection acquisition, rolling-window behavior and combined query/latency costs
 still require verification; this is an admission envelope, not measured throughput.
 
+Installation approval revisions add capability members, up to 64 exact frozen
+RoleBinding references and up to eight attribution references. Inventory these
+rows separately from installation heads, events and workload/client records. Use
+the 224-384-byte indexed-reference estimate until measured: 112-192 GB for
+500,000,000 reference rows and 672-1152 GB for 3,000,000,000. Approval membership
+reads use installation/revision keys with 65/9 sentinels; reverse binding/grant
+indexes support bounded impact and cleanup. Resource authorization must select
+only approved matching paths, not hydrate an entire roster. Subject eligibility
+adds at most one installation/App per active installation workload and retains
+the existing combined 256 concrete account/Entity/Realm and 512 enforcement bounds.
+
 Role definitions and permission dictionaries may be scope-bounded, but the total
 scope count is not globally bounded. Inventory scope heads, definition revisions,
 role-permission entries and retirement history separately using measured width

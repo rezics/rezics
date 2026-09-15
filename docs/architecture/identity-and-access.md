@@ -152,7 +152,8 @@ owner or a continuing liveness dependency. Installation/client binding, credenti
 quota and public attribution remain separate requirements.
 
 Native subject eligibility requires an active workload in addition to its own
-account policy. Account-owned workloads also obey that human owner's lifecycle
+account policy. Installation workloads additionally require their exact active
+installation approval window and App/controller lifecycle. Account-owned workloads also obey that human owner's lifecycle
 and action-specific enforcement. Org-owned workloads require an undeleted,
 participating organization; Realm-owned workloads require the undeleted Realm.
 Platform duties require the platform root. These dependencies are loaded under

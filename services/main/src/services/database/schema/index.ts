@@ -100,3 +100,4 @@ export * from "./workload-principal";
 export * from "./connected-app-client";
 export * from "./oauth-client-secret-policy";
 export * from "./oauth-discovery-fetch";
+export * from "./connected-installation";

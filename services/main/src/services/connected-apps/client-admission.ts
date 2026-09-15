@@ -8,11 +8,13 @@ import { accessSubject } from "../database/schema/access-identity";
 import { connectedApp } from "../database/schema/connected-app";
 import { connectedAppClient } from "../database/schema/connected-app-client";
 import { workloadPrincipal } from "../database/schema/workload-principal";
+import { connectedInstallation } from "../database/schema/connected-installation";
 import { resolveAccessScope } from "../authorization/identities";
 import { resolveReferenceValue } from "../units/reference-value";
 import { readAccessSubjectEligibility } from "../authorization/subject-eligibility";
 import { readOAuthClientPolicy } from "../auth/oauth-client-policy";
 import { AppClientDenied, AppClientUnavailable, readAppClientTerms } from "./clients";
+import { readInstallationApproval } from "./installations";
 
 async function subjectAdmission(tx: DatabaseTransaction, principalId: string) {
 	const [subject] = await tx.select({ id: accessSubject.id }).from(accessSubject).where(eq(accessSubject.authUserId, principalId)).limit(1);
@@ -48,19 +50,21 @@ async function appOwnerAdmission(tx: DatabaseTransaction, scopeId: string): Prom
 /**
  * Read current App/client admission with optional exact credential-context preconditions.
  * @internal
- * @remarks Protocol authentication, user consent or the exact active installation,
- * credential expiry/quota and operation-specific authority remain mandatory. This
+ * @remarks Protocol authentication, user consent, current resource bindings and
+ * attribution, credential expiry/quota and operation-specific authority remain mandatory. This
  * reader never chooses a workload from request data: it follows the immutable binding.
  * Retain the transaction and use its predicate at later protected effects.
  */
 export async function readAppClientAdmission(tx: DatabaseTransaction, input: {
 	clientId: string; protocolCredentialEpoch?: number; clientCredentialEpoch?: number;
 	clientTermsRevision?: number; appAuthorityEpoch?: number; workloadCredentialEpoch?: number;
+	installationId?: string; installationCredentialEpoch?: number; installationApprovalRevision?: number;
 }) {
 	const revision = z.number().int().nonnegative().safe();
 	const request = z.strictObject({ clientId: z.string().min(1).refine(value => Buffer.byteLength(value, "utf8") <= 2048),
 		protocolCredentialEpoch: revision.optional(), clientCredentialEpoch: revision.optional(), clientTermsRevision: revision.min(1).optional(),
-		appAuthorityEpoch: revision.optional(), workloadCredentialEpoch: revision.optional() }).parse(input);
+		appAuthorityEpoch: revision.optional(), workloadCredentialEpoch: revision.optional(), installationId: z.uuid().toLowerCase().optional(),
+		installationCredentialEpoch: revision.optional(), installationApprovalRevision: revision.min(1).optional() }).parse(input);
 	const protocol = await readOAuthClientPolicy(tx, { clientId: request.clientId, credentialEpoch: request.protocolCredentialEpoch });
 	const [head] = await tx.select().from(connectedAppClient).where(eq(connectedAppClient.clientId, protocol.id)).limit(1);
 	if (!head || head.state !== "active" || head.termsRevision === null ||
@@ -74,6 +78,8 @@ export async function readAppClientAdmission(tx: DatabaseTransaction, input: {
 		(request.appAuthorityEpoch !== undefined && request.appAuthorityEpoch !== app.authorityEpoch)) throw new AppClientDenied();
 	const owner = await appOwnerAdmission(tx, app.scopeId);
 	let workload: typeof workloadPrincipal.$inferSelect | null = null;
+	let installation: typeof connectedInstallation.$inferSelect | null = null;
+	let installationApproval: Awaited<ReturnType<typeof readInstallationApproval>> = null;
 	let workloadAdmission = sql<boolean>`true`;
 	if (head.kind === "installation") {
 		if (!head.workloadPrincipalId) throw new AppClientUnavailable();
@@ -83,10 +89,21 @@ export async function readAppClientAdmission(tx: DatabaseTransaction, input: {
 		if (!value || value.purpose !== "installation" || value.state !== "active" ||
 			(request.workloadCredentialEpoch !== undefined && request.workloadCredentialEpoch !== value.credentialEpoch)) throw new AppClientDenied();
 		workload = value;
+		const [instance] = await tx.select().from(connectedInstallation).where(eq(connectedInstallation.workloadPrincipalId, value.authUserId)).limit(1);
+		if (!instance || instance.appId !== app.id || instance.ownerScopeId !== value.ownerScopeId || instance.state !== "active" || instance.approvedRevision === null ||
+			(request.installationId !== undefined && request.installationId !== instance.id) ||
+			(request.installationCredentialEpoch !== undefined && request.installationCredentialEpoch !== instance.credentialEpoch) ||
+			(request.installationApprovalRevision !== undefined && request.installationApprovalRevision !== instance.approvedRevision)) throw new AppClientDenied();
+		installation = instance;
+		installationApproval = await readInstallationApproval(tx, { installationId: instance.id, revision: instance.approvedRevision });
+		if (!installationApproval || installationApproval.appId !== app.id) throw new AppClientUnavailable();
 		const eligible = await subjectAdmission(tx, value.authUserId);
 		workloadAdmission = sql<boolean>`(${eligible}) and exists(select 1 from public.workload_principal
-			where auth_user_id=${value.authUserId}::uuid and version=${value.version} and credential_epoch=${value.credentialEpoch} and state='active' and purpose='installation')`;
-	} else if (request.workloadCredentialEpoch !== undefined) throw new AppClientDenied();
+			where auth_user_id=${value.authUserId}::uuid and version=${value.version} and credential_epoch=${value.credentialEpoch} and state='active' and purpose='installation')
+			and exists(select 1 from public.connected_installation where id=${instance.id}::uuid and version=${instance.version}
+			 and approved_revision=${instance.approvedRevision} and credential_epoch=${instance.credentialEpoch} and state='active')
+			and public.connected_installation_is_eligible(${instance.id}::uuid) is true`;
+	} else if (request.workloadCredentialEpoch !== undefined || request.installationId !== undefined || request.installationCredentialEpoch !== undefined || request.installationApprovalRevision !== undefined) throw new AppClientDenied();
 	const admission = sql<boolean>`(${protocol.admission}) and (${owner}) and (${workloadAdmission})
 		and exists(select 1 from public.connected_app_client where client_id=${head.clientId}::uuid and app_id=${head.appId}::uuid
 		 and version=${head.version} and terms_revision=${terms.revision} and credential_epoch=${head.credentialEpoch} and state='active')
@@ -95,5 +112,5 @@ export async function readAppClientAdmission(tx: DatabaseTransaction, input: {
 	const admitted = (await tx.execute<{ admitted: boolean | null }>(sql`select (${admission}) as admitted`)).rows[0]?.admitted;
 	if (admitted === false) throw new AppClientDenied();
 	if (admitted !== true) throw new AppClientUnavailable();
-	return { protocol, client: head, app, terms, workload, admission };
+	return { protocol, client: head, app, terms, workload, installation, installationApproval, admission };
 }

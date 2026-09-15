@@ -9,6 +9,7 @@ import { accessSubject } from "./access-identity";
 import { connectedApp, connectedAppRevision } from "./connected-app";
 import { oauthClientAuthority } from "./oauth-client-authority";
 import { workloadPrincipal } from "./workload-principal";
+import { connectedInstallation } from "./connected-installation";
 
 /** Server-owned admission of a protocol client to an App and optional exact installation workload. @internal */
 export const connectedAppClient = pgTable("connected_app_client", {
@@ -27,6 +28,8 @@ export const connectedAppClient = pgTable("connected_app_client", {
 	uniqueIndex("connected_app_client_active_workload_key").on(table.workloadPrincipalId).where(sql`${table.workloadPrincipalId} is not null and ${table.state}='active'`),
 	foreignKey({ name: "connected_app_client_terms_fk", columns: [table.clientId, table.termsRevision],
 		foreignColumns: [connectedAppClientRevision.clientId, connectedAppClientRevision.revision] }).onDelete("restrict"),
+	foreignKey({ name: "connected_app_client_installation_fk", columns: [table.workloadPrincipalId, table.appId],
+		foreignColumns: [connectedInstallation.workloadPrincipalId, connectedInstallation.appId] }).onDelete("restrict"),
 	check("connected_app_client_kind_check", sql`(${table.kind}='user' and ${table.workloadPrincipalId} is null) or (${table.kind}='installation' and ${table.workloadPrincipalId} is not null)`),
 	check("connected_app_client_version_check", sql`${table.version} between 0 and 9007199254740991 and ${table.credentialEpoch} between 0 and ${table.version} and (${table.termsRevision} is null or ${table.termsRevision} between 1 and ${table.version})`),
 	check("connected_app_client_state_check", sql`(${table.state}='draft' and ${table.version}=0 and ${table.credentialEpoch}=0 and ${table.termsRevision} is null) or (${table.state} in ('active','disabled','revoked') and ${table.version}>0 and ${table.credentialEpoch}>0 and ${table.termsRevision} is not null)`),

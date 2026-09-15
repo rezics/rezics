@@ -21,6 +21,7 @@ import { WorkloadPrincipalConflict, WorkloadPrincipalDenied, WorkloadPrincipalUn
 import { AppClientConflict, AppClientDenied, AppClientUnavailable } from "../connected-apps/clients";
 import { OAuthClientPolicyDenied, OAuthClientPolicyUnavailable } from "../auth/oauth-client-policy";
 import { OAuthClientSecretConflict, OAuthClientSecretDenied, OAuthClientSecretUnavailable } from "../auth/oauth-client-secrets";
+import { InstallationConflict, InstallationDenied, InstallationUnavailable } from "../connected-apps/installations";
 import { sql, type SQL } from "drizzle-orm";
 
 /** Recheck retained owner admission after read waits without collapsing unavailable into denied. @internal */
@@ -30,12 +31,12 @@ export async function requireAccessAdmission(tx: DatabaseTransaction, admission:
 	if (result !== true) throw new AccessUnavailable();
 }
 
-const denied = [OAuthClientSecretDenied, AppClientDenied, OAuthClientPolicyDenied, WorkloadPrincipalDenied, ConnectedAppDenied, CredentialAuthorityDenied, ManagementAuthorityDenied, AccessRoleAdmissionDenied,
+const denied = [InstallationDenied, OAuthClientSecretDenied, AppClientDenied, OAuthClientPolicyDenied, WorkloadPrincipalDenied, ConnectedAppDenied, CredentialAuthorityDenied, ManagementAuthorityDenied, AccessRoleAdmissionDenied,
 	AccessRoleBindingAdmissionDenied, AccessGroupAdmissionDenied, AccessMembershipAdmissionDenied,
 	AccessGroupMembershipAdmissionDenied, AccessRepresentationAdmissionDenied, AccessAssignmentCeilingDenied, IdentityPreferenceDenied];
-const changed = [OAuthClientSecretConflict, AppClientConflict, WorkloadPrincipalConflict, ConnectedAppConflict, AccessRoleConflict, AccessRoleBindingConflict, AccessGroupConflict, AccessMembershipConflict,
+const changed = [InstallationConflict, OAuthClientSecretConflict, AppClientConflict, WorkloadPrincipalConflict, ConnectedAppConflict, AccessRoleConflict, AccessRoleBindingConflict, AccessGroupConflict, AccessMembershipConflict,
 	AccessGroupMembershipConflict, AccessRepresentationConflict, AccessAssignmentCeilingConflict, IdentityPreferenceConflict];
-const unavailable = [OAuthClientSecretUnavailable, AppClientUnavailable, OAuthClientPolicyUnavailable, WorkloadPrincipalUnavailable, ConnectedAppUnavailable, AppCapabilitySnapshotUnavailable, CredentialAuthorityUnavailable, ManagementAuthorityUnavailable, AccessRoleAdmissionUnavailable,
+const unavailable = [InstallationUnavailable, OAuthClientSecretUnavailable, AppClientUnavailable, OAuthClientPolicyUnavailable, WorkloadPrincipalUnavailable, ConnectedAppUnavailable, AppCapabilitySnapshotUnavailable, CredentialAuthorityUnavailable, ManagementAuthorityUnavailable, AccessRoleAdmissionUnavailable,
 	AccessRoleBindingUnavailable, AccessGroupAdmissionUnavailable, AccessMembershipAdmissionUnavailable, AccessGroupMembershipUnavailable,
 	AccessGroupMembershipBudgetExceeded, AccessRepresentationUnavailable, AccessAssignmentCeilingUnavailable, IdentityPreferenceUnavailable,
 	AccessPermissionSnapshotUnavailable, AccessSubjectPolicyUnavailable, AccessRepresentationBudgetExceeded, AccessRoleBindingBudgetExceeded];

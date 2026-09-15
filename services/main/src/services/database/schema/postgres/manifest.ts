@@ -18,6 +18,7 @@ export const PostgreSqlSchemaFileNames = [
 	"workload-principal.sql",
 	"connected-app-client.sql",
 	"oauth-client-secret-policy.sql",
+	"connected-installation.sql",
 	"access-subject-policy.sql",
 	"access-role.sql",
 	"access-role-binding.sql",
@@ -93,6 +94,7 @@ export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number
  * PostgreSQL definitions remain split by responsibility for review and drift checks.
  */
 export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly PostgreSqlSchemaFileName[]>> = {
+	connected_installations: ["connected-installation.sql", "connected-app-client.sql", "access-current-policy.sql"],
 	connected_app_clients: ["connected-app.sql", "connected-app-client.sql"],
 	workload_principals: ["workload-principal.sql", "access-current-policy.sql", "participation-integrity.sql"],
 	management_authority: ["api-key-authority.sql", "access-current-policy.sql"],
@@ -108,6 +110,13 @@ export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly 
 };
 
 export const PostgreSqlSchemaFunctionNames = [
+	"guard_connected_installation_head",
+	"guard_connected_installation_event",
+	"guard_connected_installation_revision",
+	"guard_connected_installation_member",
+	"complete_connected_installation",
+	"connected_app_is_eligible",
+	"connected_installation_is_eligible",
 	"guard_oauth_client_secret_policy",
 	"guard_oauth_client_secret_event",
 	"complete_oauth_client_secret_policy",
@@ -487,6 +496,16 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "connected_installation", name: "connected_installation_head_guard" },
+	{ table: "connected_installation_event", name: "connected_installation_event_guard" },
+	{ table: "connected_installation_event", name: "connected_installation_event_immutable" },
+	{ table: "connected_installation_revision", name: "connected_installation_revision_guard" },
+	{ table: "connected_installation_capability", name: "connected_installation_capability_guard" },
+	{ table: "connected_installation_binding", name: "connected_installation_binding_guard" },
+	{ table: "connected_installation_attribution", name: "connected_installation_attribution_guard" },
+	{ table: "connected_installation", name: "connected_installation_head_complete" },
+	{ table: "connected_installation_event", name: "connected_installation_event_complete" },
+	{ table: "connected_installation_revision", name: "connected_installation_revision_complete" },
 	{ table: "oauth_client_secret_policy", name: "oauth_client_secret_policy_guard" },
 	{ table: "oauth_client_secret_event", name: "oauth_client_secret_event_guard" },
 	{ table: "oauth_client_secret_event", name: "oauth_client_secret_event_immutable" },

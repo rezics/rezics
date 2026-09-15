@@ -156,6 +156,40 @@ role changes or new resource selection require new approval where they exceed th
 recorded ceiling. Listing an App as trusted is not approval for every permission.
 Uninstalling does not delete content that the installation legitimately created.
 
+Native installation identity fixes its App, owner scope and private workload. A
+workload belongs to one installation, and a client's composite FK must match that
+workload and App together. Preparation records a pending instance without approval.
+Approval seals an exact App declaration, finite capabilities, a validity window,
+up to 64 frozen RoleBinding references and an optional public-attribution context
+of at most eight representation references. Counts/digests close each snapshot.
+Every referenced resource binding targets that workload and its approved literal
+permissions fit the installation ceiling; resource grants retain their own owners.
+
+Approval requires separately admitted resource assignment and attribution policy.
+The coordinating command activates the workload, installation and client under
+the same retained transaction; no primitive alone supplies those other admissions.
+Reapproval, suspension and revocation advance the installation credential epoch;
+resumption never restores a previous epoch, and revocation is terminal. Public
+attribution carries no data rights: each public effect validates its selected
+representation context in addition to the workload's resource permission.
+
+Current workload eligibility includes the installation's active sealed approval
+window and App/controller lifecycle. It never depends on the historical installer.
+The current client reader follows the stored workload-to-installation relation,
+loads its complete approval and checks captured installation identity/revision/
+epoch when supplied. Per-resource RoleBinding liveness, attribution, token scope
+and quota remain mandatory at the actual effect; one revoked resource path cannot
+be replaced by an unrelated grant held by that workload.
+
+The installation-operation reader loads only approved RoleBinding IDs for the
+owner-supplied target root/path, rechecks exact terms and current role permissions,
+and requires the requested action's prerequisites inside both client and
+installation ceilings. It separately evaluates current workload policy and, for
+public effects, the saved attribution context with no fresh-session assumption for
+machine credentials. Its predicate retains the chosen binding/role and attribution
+versions plus expiry. Resource restrictions, inherited-root selection, credential
+proof/expiry and quota remain with the final operation owner.
+
 Distinguish user consent withdrawal, connection removal, token revocation, client
 disablement, installation suspension/removal and app-wide emergency disablement.
 Each invalidates its own live authorization paths. Issuer/operator departure does

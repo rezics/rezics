@@ -37,7 +37,8 @@ BEGIN
    IF protocol.client_discovery_id IS NOT NULL OR protocol.grant_types IS DISTINCT FROM ARRAY['client_credentials']::text[]
     OR coalesce(protocol.token_endpoint_auth_method,'client_secret_basic') NOT IN ('client_secret_basic','client_secret_post','private_key_jwt')
    THEN RAISE EXCEPTION 'Installation clients require managed confidential client credentials' USING ERRCODE='23514'; END IF;
-   PERFORM auth_user_id FROM public.workload_principal WHERE auth_user_id=NEW.workload_principal_id AND purpose='installation';
+   PERFORM w.auth_user_id FROM public.workload_principal w JOIN public.connected_installation i ON i.workload_principal_id=w.auth_user_id
+    WHERE w.auth_user_id=NEW.workload_principal_id AND w.purpose='installation' AND i.app_id=NEW.app_id;
    IF NOT FOUND THEN RAISE EXCEPTION 'Installation client must name its installation workload' USING ERRCODE='23514'; END IF;
   END IF;
   RETURN NEW;
@@ -56,7 +57,8 @@ BEGIN
  IF NEW.state='active' AND OLD.state<>'active' THEN
   IF NOT EXISTS(SELECT 1 FROM public.connected_app WHERE id=NEW.app_id AND state='active' AND trust<>'blocked')
   THEN RAISE EXCEPTION 'Client activation requires an active App' USING ERRCODE='23514'; END IF;
-  IF NEW.kind='installation' AND NOT EXISTS(SELECT 1 FROM public.workload_principal WHERE auth_user_id=NEW.workload_principal_id AND state='active' AND purpose='installation')
+  IF NEW.kind='installation' AND NOT EXISTS(SELECT 1 FROM public.workload_principal w JOIN public.connected_installation i ON i.workload_principal_id=w.auth_user_id
+   WHERE w.auth_user_id=NEW.workload_principal_id AND w.state='active' AND w.purpose='installation' AND i.app_id=NEW.app_id AND i.state='active')
   THEN RAISE EXCEPTION 'Client activation requires its active installation workload' USING ERRCODE='23514'; END IF;
  END IF;
  RETURN NEW;
