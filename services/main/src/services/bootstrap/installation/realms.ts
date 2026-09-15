@@ -10,7 +10,6 @@ import {
 	contentStructure,
 	imageAsset,
 	imageObject,
-	realmMember,
 	unitAccessGrant,
 } from "../../database/schema";
 import { fractionalPositionAt } from "../../ordering/position";
@@ -151,17 +150,6 @@ export async function ensureBootstrapRealm(
 				updatedAt: createdAt,
 			});
 		}
-	for (const memberProfileId of value.members)
-		await tx
-			.insert(realmMember)
-			.values({
-				realmId: value.id,
-				profileId: memberProfileId,
-				state: "active",
-				joinedAt: createdAt,
-				updatedAt: createdAt,
-			})
-			.onConflictDoNothing();
 	if (createdUnit)
 		await recordUnitRevision(tx, {
 			unitId: value.id,
@@ -173,16 +161,6 @@ export async function ensureBootstrapRealm(
 
 export async function ensureScoreRealmProfileDefaults(tx: DatabaseTransaction): Promise<void> {
 	if (BootstrapAccountManifest.length) {
-		await tx
-			.insert(realmMember)
-			.values(
-				BootstrapAccountManifest.map(({ profileId }) => ({
-					realmId: RezicsScoreRealmManifest.id,
-					profileId,
-					state: "active" as const,
-				})),
-			)
-			.onConflictDoNothing();
 		await tx
 			.insert(accountPreference)
 			.values(

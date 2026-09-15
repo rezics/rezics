@@ -306,7 +306,21 @@ export default {
 		ownerMarker: "擁有權",
 		unitOwner: "條目擁有者",
 	},
+	membershipIdentityRequired: "請先選擇你可控制的公開身分，再管理成員資格。",
+	memberActions: {
+		approve: "核准",
+		reject: "拒絕",
+		remove: "移除",
+		mute: "禁止發言",
+		ban: "停權",
+		clear: "解除限制",
+	},
 	memberStates: {
+		open: "未加入",
+		invited: "已邀請",
+		rejected: "已拒絕",
+		left: "已退出",
+
 		active: "正常",
 		pending: "待審核",
 		muted: "禁止發言",
@@ -315,12 +329,11 @@ export default {
 	},
 	requireOnJoin: "加入前須同意",
 	requireOnPost: "發布內容前須同意",
-	ruleAcknowledgementHint:
-		"每個規則版本只需同意一次；發布新版本後，成員需在下一次進行已勾選的操作前再次同意。",
+	ruleAcknowledgementHint: "規則確認僅適用於當次加入與指定版本；發布新版本後，可能需要再次確認。",
 	ruleAcknowledgementMode: "規則確認方式",
 	ruleAcknowledgementModes: {
 		explicit: "要求明確確認",
-		implicitOnFollow: `${followTerms.actionLabel}${realmTerms.label}時自動確認`,
+		implicitOnFollow: "加入時確認",
 	},
 	ruleLanguage: "規則語言",
 	ruleTitle: "規則標題",

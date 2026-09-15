@@ -318,38 +318,6 @@ BEGIN
 END;
 $function$;
 
-CREATE OR REPLACE FUNCTION public.maintain_realm_member_stat()
- RETURNS trigger
- LANGUAGE plpgsql
- SET search_path TO pg_catalog, public
-AS $function$
-DECLARE
-    old_delta bigint := CASE WHEN TG_OP <> 'INSERT' AND OLD.state = 'active' THEN -1 ELSE 0 END;
-    new_delta bigint := CASE WHEN TG_OP <> 'DELETE' AND NEW.state = 'active' THEN 1 ELSE 0 END;
-BEGIN
-    IF TG_OP <> 'INSERT' AND old_delta <> 0
-       AND EXISTS (SELECT 1 FROM public.realm WHERE id = OLD.realm_id) THEN
-        -- CHECK constraints apply to the proposed INSERT before conflict handling.
-        -- Decrements update an existing counter; they must never insert a negative row.
-        UPDATE public.realm_stat
-        SET active_member_count = active_member_count + old_delta, updated_at = now()
-        WHERE realm_id = OLD.realm_id;
-        IF NOT FOUND THEN
-            RAISE EXCEPTION 'missing realm_stat row for decrement: %', OLD.realm_id
-                USING ERRCODE = '23514';
-        END IF;
-    END IF;
-    IF TG_OP <> 'DELETE' AND new_delta <> 0 THEN
-        INSERT INTO public.realm_stat (realm_id, active_member_count)
-        VALUES (NEW.realm_id, new_delta)
-        ON CONFLICT (realm_id) DO UPDATE SET
-            active_member_count = public.realm_stat.active_member_count + EXCLUDED.active_member_count,
-            updated_at = now();
-    END IF;
-    RETURN coalesce(NEW, OLD);
-END
-$function$;
-
 CREATE OR REPLACE FUNCTION public.maintain_reply_unit_state()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -705,8 +673,6 @@ CREATE TRIGGER poll_option_vote_stat_maintain AFTER INSERT OR DELETE OR UPDATE O
 DROP TRIGGER IF EXISTS realm_stat_initialize ON public.realm;
 CREATE TRIGGER realm_stat_initialize AFTER INSERT ON public.realm FOR EACH ROW EXECUTE FUNCTION public.initialize_realm_stat();
 
-DROP TRIGGER IF EXISTS realm_member_stat_maintain ON public.realm_member;
-CREATE TRIGGER realm_member_stat_maintain AFTER INSERT OR DELETE OR UPDATE OF realm_id, state ON public.realm_member FOR EACH ROW EXECUTE FUNCTION public.maintain_realm_member_stat();
 
 DROP TRIGGER IF EXISTS score_stat_maintain ON public.score;
 CREATE TRIGGER score_stat_maintain AFTER INSERT OR DELETE OR UPDATE ON public.score FOR EACH ROW EXECUTE FUNCTION public.maintain_score_stat();

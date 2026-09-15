@@ -1,3 +1,4 @@
+import { publicRealmMembershipCandidates } from "../realms/authorization";
 import { allocateReferenceValue, referenceValueIdForNativeId } from "../units/reference-value";
 import type { Authorization } from "../authorization";
 import { ensureAccountAuthenticationAllowed } from "../auth/account-state";
@@ -144,80 +145,87 @@ function unitOwnerValue(value: string | null): UnitOwner | undefined {
 }
 
 /** Loads the small dynamic userset used to seek Realm candidate streams. */
-async function loadRealmSubjects(profileId: string): Promise<RealmSubject[]> {
-	const managedRealm = alias(realm, "studio_managed_realm_subject");
-	const result = await database.execute<RawRealmSubject>(sql`
-		with possible_subject as (
-			(select member.realm_id, 'member'::text as realm_relation
-			from ${realmMember} member
-			where member.profile_id = ${profileId}
-				and member.state = 'active'
-			order by member.realm_id limit 257)
-
-			union all
-
-			(select ownership.unit_realm_id, 'access_manager'
-			from ${unitOwnership} ownership
-			where ownership.profile_id = ${profileId}
-				and ownership.revoked_at is null and ownership.unit_realm_id is not null
-			order by ownership.unit_realm_id limit 257)
-
-			union all
-
-			(select access_grant.unit_realm_id, 'access_manager'
-			from ${unitAccessGrant} access_grant
-			where access_grant.subject_kind = 'auth'
-				and access_grant.auth_user_id = ${selfAuthUserIdForEntity(profileId)}
-				and access_grant.permission = 'unit.access.manage'
-				and cardinality(access_grant.scope) = 0
-				and access_grant.revoked_at is null
-				and access_grant.unit_realm_id is not null
-			order by access_grant.unit_realm_id limit 257)
-
-			union all
-
-			(select delegated.unit_realm_id, 'access_manager'
-			from (select realm_id from ${realmMember} where profile_id = ${profileId} and state = 'active' order by realm_id limit 257) member
-			cross join lateral (
-				select unit_realm_id from ${unitAccessGrant} access_grant
-				where access_grant.realm_id = member.realm_id and access_grant.subject_kind = 'realm'
-				and access_grant.realm_relation = 'member' and access_grant.permission = 'unit.access.manage'
-				and cardinality(access_grant.scope) = 0 and access_grant.revoked_at is null and access_grant.unit_realm_id is not null
-				order by access_grant.unit_realm_id limit 257
-			) delegated order by delegated.unit_realm_id limit 257)
-		)
-		select distinct
-			(select count(*) > 256 from possible_subject) as "sourceLimitExceeded",
-			possible_subject.realm_id as "realmId",
-			possible_subject.realm_relation as "realmRelation"
-		from possible_subject
-		where (select count(*) > 256 from possible_subject) or (exists (
-			select 1
-			from ${realm}
-			where ${realm.id} = possible_subject.realm_id
-		)
-			and (
-				possible_subject.realm_relation = 'member'
-			or exists (
-					select 1
-					from ${realm} studio_managed_realm_subject
-					where ${managedRealm.id} = possible_subject.realm_id
-						and ${profileCanManageRealmAccess(database, managedRealm.id, profileId)}
-				)
-			)
-		)
-		order by possible_subject.realm_id, possible_subject.realm_relation
-		limit ${StudioRealmSubjectLimit + 1}
-	`);
-	if (
-		result.rows.length > StudioRealmSubjectLimit ||
-		result.rows.some((row) => row.sourceLimitExceeded)
-	)
-		throw new StudioRealmSubjectLimitExceeded(StudioRealmSubjectLimit);
-	return result.rows.map((subject) => ({
-		realmId: subject.realmId,
-		realmRelation: realmRelation(subject.realmRelation),
+async function loadRealmSubjects(profileId: string, authUserId: string): Promise<RealmSubject[]> {
+	const membership = await publicRealmMembershipCandidates(database, profileId);
+	let physical = membership.candidateCount;
+	const possible: RealmSubject[] = membership.realmIds.map((realmId) => ({
+		realmId,
+		realmRelation: "member",
 	}));
+	const add = (rows: { realmId: string | null }[]) => {
+		physical += rows.length;
+		if (physical > StudioRealmSubjectLimit)
+			throw new StudioRealmSubjectLimitExceeded(StudioRealmSubjectLimit);
+		for (const row of rows)
+			if (row.realmId) possible.push({ realmId: row.realmId, realmRelation: "access_manager" });
+	};
+	add(
+		await database
+			.select({ realmId: unitOwnership.unitRealmId })
+			.from(unitOwnership)
+			.where(
+				and(
+					eq(unitOwnership.profileId, profileId),
+					isNull(unitOwnership.revokedAt),
+					sql`${unitOwnership.unitRealmId} is not null`,
+				),
+			)
+			.orderBy(unitOwnership.unitRealmId)
+			.limit(257 - physical),
+	);
+	add(
+		await database
+			.select({ realmId: unitAccessGrant.unitRealmId })
+			.from(unitAccessGrant)
+			.where(
+				and(
+					eq(unitAccessGrant.subjectKind, "auth"),
+					eq(unitAccessGrant.authUserId, authUserId),
+					eq(unitAccessGrant.permission, "unit.access.manage"),
+					sql`cardinality(${unitAccessGrant.scope})=0`,
+					isNull(unitAccessGrant.revokedAt),
+					sql`${unitAccessGrant.unitRealmId} is not null`,
+				),
+			)
+			.orderBy(unitAccessGrant.unitRealmId)
+			.limit(257 - physical),
+	);
+	for (const realmId of membership.realmIds)
+		add(
+			await database
+				.select({ realmId: unitAccessGrant.unitRealmId })
+				.from(unitAccessGrant)
+				.where(
+					and(
+						eq(unitAccessGrant.realmId, realmId),
+						eq(unitAccessGrant.subjectKind, "realm"),
+						eq(unitAccessGrant.realmRelation, "member"),
+						eq(unitAccessGrant.permission, "unit.access.manage"),
+						sql`cardinality(${unitAccessGrant.scope})=0`,
+						isNull(unitAccessGrant.revokedAt),
+						sql`${unitAccessGrant.unitRealmId} is not null`,
+					),
+				)
+				.orderBy(unitAccessGrant.unitRealmId)
+				.limit(257 - physical),
+		);
+	const unique = new Map<string, RealmSubject>();
+	for (const candidate of possible) {
+		if (candidate.realmRelation === "member") unique.set(`${candidate.realmId}:member`, candidate);
+		else {
+			const [allowed] = await database
+				.select({ id: realm.id })
+				.from(realm)
+				.where(
+					and(
+						eq(realm.id, candidate.realmId),
+						profileCanManageRealmAccess(database, realm.id, profileId),
+					),
+				);
+			if (allowed) unique.set(`${candidate.realmId}:access_manager`, candidate);
+		}
+	}
+	return [...unique.values()];
 }
 
 function cursorCondition(
@@ -755,7 +763,9 @@ export async function listStudioContent(input: {
 	const initialCursor = decodeStudioCursor(input.query.cursor, input.query);
 	const source = input.query.source ?? "all";
 	const realmSubjects =
-		source === "all" || source === "delegated" ? await loadRealmSubjects(input.profileId) : [];
+		source === "all" || source === "delegated"
+			? await loadRealmSubjects(input.profileId, input.authUserId)
+			: [];
 	const items: PresentedWorkspaceCandidate[] = [];
 	let scanCursor = initialCursor;
 	let scanned = 0;

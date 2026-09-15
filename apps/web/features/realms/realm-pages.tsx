@@ -1,13 +1,20 @@
 "use client";
+import {
+	getRealmMembership,
+	useGetRealmMembership,
+	useGetRealmMembershipCapabilities,
+} from "@rezics/openapi-tanstack-query";
+import { useRealmMembershipContext } from "./hooks/use-realm-membership-context";
+import { realmMembershipPreconditions } from "./data/membership-preconditions";
 
 import {
-	useDeleteApiRealmsByRealmIdMembership,
+	useLeaveRealm,
 	useGetApiRealms,
 	useGetApiRealmsByRealmId,
 	useGetApiRealmsByRealmIdPins,
 	useGetApiRealmsByRealmIdRules,
 	usePostApiRealms,
-	usePutApiRealmsByRealmIdMembership,
+	useJoinRealm,
 	type GetApiRealmsByRealmIdPinsStatus200,
 	type GetApiRealmsByRealmIdStatus200,
 	type GetApiRealmsStatus200,
@@ -67,7 +74,7 @@ import { realmContentCreateHref } from "./routing/realm-content-create-route";
 import { RequestFailure } from "@/i18n/request-failure";
 import { publicUnitHref } from "@/features/units/routing/public-unit-route";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
-import { canOpenRealmSettings, isRealmOwner } from "./realm-permissions";
+import { canOpenRealmSettings } from "./realm-permissions";
 import { invalidateRealmDetails } from "./query";
 import { RealmFeed } from "./components/realm-feed";
 import { RealmScoreContextCard } from "./components/realm-score-context-card";
@@ -612,14 +619,57 @@ function RealmActions({
 	const { t } = useTranslation(["actions", "media", "posts", "realms", "state", "ui"]);
 	const queryClient = useQueryClient();
 	const { data: session } = useHydratedSession();
-	const join = usePutApiRealmsByRealmIdMembership();
-	const leave = useDeleteApiRealmsByRealmIdMembership();
+	const [transitionError, setTransitionError] = useState<unknown>();
+	const membershipContext = useRealmMembershipContext();
+	const membershipCapabilities = useGetRealmMembershipCapabilities(
+		{ path: { realmId: realm.id } },
+		{
+			query: {
+				enabled: membershipContext.ready,
+				queryKey: ["realm-membership-capabilities", realm.id, membershipContext.selectionKey],
+			},
+			client: { client: membershipContext.client },
+		},
+	);
+	const join = useJoinRealm({ client: { client: membershipContext.client } });
+	const leave = useLeaveRealm({ client: { client: membershipContext.client } });
 	const rulesAcknowledgement = useRealmRulesAcknowledgement([realm.id]);
-	const membership = realm.viewerMembership;
+	const enrollment = useGetRealmMembership(
+		{ path: { realmId: realm.id } },
+		{
+			query: {
+				enabled: membershipContext.ready,
+				queryKey: ["realm-enrollment", realm.id, membershipContext.selectionKey],
+			},
+			client: { client: membershipContext.client },
+		},
+	);
+	const membership = enrollment.data?.receipt;
+	const joined =
+		membership &&
+		(membership.activeGeneration !== null || ["pending", "invited"].includes(membership.state));
 
 	async function joinRealm() {
-		await join.mutateAsync({ path: { realmId: realm.id } });
-		await invalidateRealmDetails(queryClient, realm.id);
+		if (!membershipContext.client) return;
+		setTransitionError(undefined);
+		try {
+			const status = await getRealmMembership({
+				path: { realmId: realm.id },
+				client: membershipContext.client,
+			}).unwrap();
+			await join.mutateAsync({
+				path: { realmId: realm.id },
+				body: {
+					...realmMembershipPreconditions(status),
+					consent: true,
+					ruleRevisionId: status.acknowledgedRuleRevisionId,
+				},
+			});
+			await invalidateRealmDetails(queryClient, realm.id);
+		} catch (error) {
+			setTransitionError(error);
+			throw error;
+		}
 	}
 
 	if (!session)
@@ -634,22 +684,29 @@ function RealmActions({
 						onChanged={() => invalidateRealmDetails(queryClient, realm.id)}
 						unitId={realm.id}
 					/>
-					{!isRealmOwner(membership) && (
+					{!enrollment.data?.isOwner && (
 						<Button
 							variant="outline"
 							isLoading={join.isPending || leave.isPending}
+							disabled={!membershipContext.ready || enrollment.isPending || enrollment.isError}
 							onClick={() => {
-								if (membership)
-									leave.mutate(
-										{ path: { realmId: realm.id } },
-										{
-											onSuccess: () => invalidateRealmDetails(queryClient, realm.id),
-										},
-									);
+								if (joined)
+									void (async () => {
+										if (!membershipContext.client) return;
+										const status = await getRealmMembership({
+											path: { realmId: realm.id },
+											client: membershipContext.client,
+										}).unwrap();
+										await leave.mutateAsync({
+											path: { realmId: realm.id },
+											body: realmMembershipPreconditions(status),
+										});
+										await invalidateRealmDetails(queryClient, realm.id);
+									})().catch(setTransitionError);
 								else void rulesAcknowledgement.run(joinRealm).catch(() => undefined);
 							}}
 						>
-							{membership ? t.realms.leave : t.realms.join}
+							{joined ? t.realms.leave : t.realms.join}
 						</Button>
 					)}
 					{canPost ? (
@@ -657,13 +714,26 @@ function RealmActions({
 							<Link href={realmContentCreateHref(realm)}>{t.realms.contentComposer.open}</Link>
 						</Button>
 					) : null}
-					{canManage && (
+					{(canManage ||
+						membershipCapabilities.data?.canReadMembers ||
+						membershipCapabilities.data?.canManageMembers) && (
 						<Button variant="solid" asChild>
 							<Link href={realmSettingsHref(realm)}>{t.realms.settings}</Link>
 						</Button>
 					)}
 				</div>
-				<RequestFailure error={join.error ?? leave.error} />
+				<RequestFailure
+					error={
+						transitionError ??
+						join.error ??
+						leave.error ??
+						enrollment.error ??
+						membershipContext.error
+					}
+				/>
+				{!membershipContext.pending && !membershipContext.ready ? (
+					<p>{t.realms.membershipIdentityRequired}</p>
+				) : null}
 			</div>
 			<RealmRulesAcknowledgementPrompt controller={rulesAcknowledgement} intent="join" />
 		</>

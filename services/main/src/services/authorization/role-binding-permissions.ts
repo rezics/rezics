@@ -1,3 +1,4 @@
+import { lockAccessMembershipScopePolicy } from "./memberships";
 import { and, eq, inArray, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
@@ -185,6 +186,7 @@ export async function readCurrentAccessRoleBindingPermissions(
 			.from(accessMembership).where(inArray(accessMembership.id, membershipIds));
 		if (memberships.length !== membershipIds.length) throw new AccessRoleBindingUnavailable();
 		const treeIds = [...new Set(memberships.map(row => row.scopeId))].sort();
+		await lockAccessMembershipScopePolicy(tx,treeIds);
 		const trees = await tx.select({ id: accessGroupTree.scopeId }).from(accessGroupTree)
 			.where(inArray(accessGroupTree.scopeId, treeIds)).orderBy(accessGroupTree.scopeId).for("share");
 		if (trees.length !== treeIds.length) throw new AccessRoleBindingUnavailable();

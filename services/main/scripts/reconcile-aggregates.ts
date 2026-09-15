@@ -169,9 +169,9 @@ const checks: readonly { name: string; query: SQL }[] = [
 		query: sql`
 			with expected as (
 				select realm.id as realm_id,
-					count(realm_member.profile_id) filter (where realm_member.state = 'active')
+					count(current_realm_entity_membership.profile_id) filter (where current_realm_entity_membership.state = 'active')
 						as active_member_count
-				from realm left join realm_member on realm_member.realm_id = realm.id
+				from realm left join current_realm_entity_membership on current_realm_entity_membership.realm_id = realm.id
 				group by realm.id
 			)
 			select count(*)::text as drift_count from expected

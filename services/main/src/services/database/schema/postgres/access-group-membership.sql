@@ -38,7 +38,7 @@ BEGIN
  IF NOT FOUND THEN RAISE EXCEPTION 'Authority subject is missing' USING ERRCODE='23503'; END IF;
  IF declared_actor IS NOT NULL AND declared_actor<>NEW.operator_auth_user_id THEN RAISE EXCEPTION 'Direct authority cannot name another private actor' USING ERRCODE='23514'; END IF;
  IF NEW.version<>head.version+1 OR NEW.selected_after=head.selected THEN RAISE EXCEPTION 'Selection command is stale or does not change selection' USING ERRCODE='23514'; END IF;
- IF NEW.operation='assign' AND (member.active_generation IS DISTINCT FROM head.generation OR group_state IS DISTINCT FROM 'active') THEN RAISE EXCEPTION 'Assignment requires a current admission and active Group' USING ERRCODE='23514'; END IF;
+ IF NEW.operation='assign' AND (member.active_generation IS DISTINCT FROM head.generation OR public.access_membership_is_eligible(member.id) IS DISTINCT FROM true OR group_state IS DISTINCT FROM 'active') THEN RAISE EXCEPTION 'Assignment requires a current admission and active Group' USING ERRCODE='23514'; END IF;
  IF NEW.operation='prune' AND member.active_generation IS NOT DISTINCT FROM head.generation AND group_state IS DISTINCT FROM 'retired' THEN RAISE EXCEPTION 'Pruning requires a permanently ineffective selection' USING ERRCODE='23514'; END IF;
  RETURN NEW;
 END $$;
@@ -63,7 +63,7 @@ BEGIN
  IF NOT FOUND THEN RAISE EXCEPTION 'Selection set fence is missing' USING ERRCODE='23503'; END IF;
  SELECT state INTO group_state FROM public.access_group WHERE id=NEW.group_id AND scope_id=NEW.scope_id;
  IF member.id IS NULL OR group_state IS NULL THEN RAISE EXCEPTION 'Selection eligibility source is missing' USING ERRCODE='23503'; END IF;
- IF NEW.selected AND (member.active_generation IS DISTINCT FROM NEW.generation OR group_state IS DISTINCT FROM 'active') THEN RAISE EXCEPTION 'Assignment requires current admission and Group eligibility at the effect' USING ERRCODE='23514'; END IF;
+ IF NEW.selected AND (member.active_generation IS DISTINCT FROM NEW.generation OR public.access_membership_is_eligible(member.id) IS DISTINCT FROM true OR group_state IS DISTINCT FROM 'active') THEN RAISE EXCEPTION 'Assignment requires current admission and Group eligibility at the effect' USING ERRCODE='23514'; END IF;
  IF receipt.operation='prune' AND member.active_generation IS NOT DISTINCT FROM NEW.generation AND group_state IS DISTINCT FROM 'retired' THEN RAISE EXCEPTION 'Pruning requires permanent ineffectiveness at the effect' USING ERRCODE='23514'; END IF;
  IF NEW.selected THEN
   SELECT count(*) INTO selected_count FROM (SELECT 1 FROM public.access_group_membership WHERE membership_id=NEW.membership_id AND generation=NEW.generation AND selected LIMIT 65) candidates;

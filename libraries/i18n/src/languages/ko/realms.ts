@@ -326,7 +326,21 @@ export default {
 		ownerMarker: "소유권",
 		unitOwner: "유닛 소유자",
 	},
+	membershipIdentityRequired: "멤버십을 관리하기 전에 제어 권한이 있는 공개 프로필을 선택하세요.",
+	memberActions: {
+		approve: "승인",
+		reject: "거절",
+		remove: "제거",
+		mute: "발언 제한",
+		ban: "이용 금지",
+		clear: "제한 해제",
+	},
 	memberStates: {
+		open: "미가입",
+		invited: "초대됨",
+		rejected: "거절됨",
+		left: "탈퇴함",
+
 		active: "활성",
 		pending: "보류 중",
 		muted: "음소거됨",
@@ -336,11 +350,11 @@ export default {
 	requireOnJoin: "가입 시 확인 필요",
 	requireOnPost: "콘텐츠 게시 전 확인 필요",
 	ruleAcknowledgementHint:
-		"각 규칙 개정은 한 번만 확인하면 됩니다. 새 개정이 게시되면 다음 선택된 동작 전에 멤버가 다시 확인해야 합니다.",
+		"규칙 확인은 해당 가입과 지정된 버전에 적용됩니다. 새 버전이 게시되면 다시 확인해야 할 수 있습니다.",
 	ruleAcknowledgementMode: "규칙 확인",
 	ruleAcknowledgementModes: {
 		explicit: "명시적 확인 요청",
-		implicitOnFollow: `${followTerms.gerund} 시 조용히 확인`,
+		implicitOnFollow: "가입할 때 확인",
 	},
 	ruleLanguage: "규칙 언어",
 	ruleTitle: "규칙 제목",

@@ -1,3 +1,4 @@
+import { realmEntityContributionCondition } from "../../realms/authorization";
 import { and, eq, exists, isNull, or, sql, type SQLWrapper } from "drizzle-orm";
 import { selfAuthUserIdForEntity } from "../../participation/account-query";
 
@@ -61,6 +62,7 @@ export function getRealmContributionCondition(
 	);
 	return and(
 		isNull(target.deletedAt),
+		realmEntityContributionCondition(target.id, profileId),
 		or(
 			getUnitRootPermissionCondition(profileId, "realm.contribute", target),
 			platformParticipation,

@@ -403,7 +403,17 @@ export const RealmRuleAcknowledgementModeValues = ["explicit", "implicit_on_foll
  *
  * @tag low-priority
  */
-export const RealmMemberStateValues = ["active", "pending", "muted", "removed", "banned"] as const;
+export const RealmMemberStateValues = [
+	"active",
+	"pending",
+	"muted",
+	"removed",
+	"banned",
+	"open",
+	"invited",
+	"rejected",
+	"left",
+] as const;
 export const RealmPageKindValues = ["main", "tags", "wiki"] as const;
 export type RealmPageKind = (typeof RealmPageKindValues)[number];
 export const RealmPinKindValues = ["pinned", "highlight"] as const;

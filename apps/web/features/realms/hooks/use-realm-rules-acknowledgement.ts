@@ -1,9 +1,12 @@
 "use client";
+import { getRealmMembership } from "@rezics/openapi-tanstack-query";
+import { useRealmMembershipContext } from "./use-realm-membership-context";
+import { realmMembershipPreconditions } from "../data/membership-preconditions";
 
 import { toContentLanguage } from "@rezics/i18n";
 import {
-	useGetApiRealmsByRealmIdRules,
-	usePutApiRealmsByRealmIdRulesByRevisionIdAcknowledgement,
+	useGetRealmEnrollmentRules,
+	useAcknowledgeRealmRules,
 } from "@rezics/openapi-tanstack-query";
 import { useCallback, useState } from "react";
 
@@ -41,18 +44,31 @@ export function useRealmRulesAcknowledgement(realmIds: readonly string[]) {
 	const { locale } = useTranslation(["realms"]);
 	const localizationLanguages = useLocalizationLanguages();
 	const [open, setOpen] = useState(false);
+	const [preconditionError, setPreconditionError] = useState<unknown>();
 	const [pendingOperation, setPendingOperation] = useState<PendingOperation>();
 	const realmIdsKey = realmIds.join("\u0000");
 	const operationRealmIds = realmIdsKey ? realmIdsKey.split("\u0000") : [];
 	const acknowledgementRealmId = pendingOperation?.remainingRealmIds[0];
-	const rules = useGetApiRealmsByRealmIdRules(
+	const context = useRealmMembershipContext();
+	const rules = useGetRealmEnrollmentRules(
 		{
 			path: { realmId: acknowledgementRealmId ?? "" },
 			query: { localizationLanguages },
 		},
-		{ query: { enabled: open && Boolean(acknowledgementRealmId) } },
+		{
+			query: {
+				enabled: context.ready && open && Boolean(acknowledgementRealmId),
+				queryKey: [
+					"realm-enrollment-rules",
+					acknowledgementRealmId,
+					localizationLanguages,
+					context.selectionKey,
+				],
+			},
+			client: { client: context.client },
+		},
 	);
-	const acknowledge = usePutApiRealmsByRealmIdRulesByRevisionIdAcknowledgement();
+	const acknowledge = useAcknowledgeRealmRules({ client: { client: context.client } });
 
 	const runForRealms = useCallback(
 		async (
@@ -91,15 +107,25 @@ export function useRealmRulesAcknowledgement(realmIds: readonly string[]) {
 
 	const confirm = useCallback(async (): Promise<void> => {
 		const revisionId = rules.data?.revisionId;
-		if (!revisionId || !pendingOperation) return;
+		if (!revisionId || !pendingOperation || !context.client) return;
 		const currentRealmId = pendingOperation.remainingRealmIds[0];
+		setPreconditionError(undefined);
 		try {
+			const status = await getRealmMembership({
+				path: { realmId: currentRealmId },
+				client: context.client,
+			}).unwrap();
 			await acknowledge.mutateAsync({
 				path: { realmId: currentRealmId, revisionId },
-				body: { language: toContentLanguage(locale.target) },
+				body: {
+					...realmMembershipPreconditions(status),
+					consent: true,
+					language: toContentLanguage(locale.target),
+				},
 			});
 		} catch (error) {
-			if (hasErrorCode(error, "RealmRuleRevisionChanged")) await rules.refetch();
+			setPreconditionError(error);
+			if (hasErrorCode(error, "AccessChanged")) await rules.refetch();
 			return;
 		}
 
@@ -122,13 +148,13 @@ export function useRealmRulesAcknowledgement(realmIds: readonly string[]) {
 		} catch {
 			// The protected mutation owns and renders its typed failure state.
 		}
-	}, [acknowledge, locale.target, pendingOperation, rules, runForRealms]);
+	}, [acknowledge, context.client, locale.target, pendingOperation, rules, runForRealms]);
 
 	return {
 		close,
 		confirm,
 		dialogKey: `${acknowledgementRealmId ?? "pending"}:${rules.data?.revisionId ?? "pending"}`,
-		error: acknowledge.error ?? rules.error,
+		error: preconditionError ?? acknowledge.error ?? rules.error,
 		isLoading: !rules.data || rules.isFetching,
 		isPending: acknowledge.isPending,
 		open,

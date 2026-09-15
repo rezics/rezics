@@ -1,3 +1,4 @@
+import { eraseRealmEnrollmentBatch } from "../realms/membership-worker";
 import { accountFollowPreference } from "../database/schema/follow";
 import { governanceNoticeRecipient } from "../database/schema/governance-delivery";
 import { eraseOrganizationEnrollmentBatch } from "./membership-worker";
@@ -315,20 +316,34 @@ export async function dispatchAccountErasureBatch(
 			case "notifications":
 				// Partitioned receipts require the composite key, never a cross-partition ctid delete.
 				{
-					const receipts = await tx.select({ postId: governanceNoticeRecipient.postId })
-						.from(governanceNoticeRecipient).where(eq(governanceNoticeRecipient.authUserId, authId))
-						.orderBy(governanceNoticeRecipient.postId).limit(500).for("update", { skipLocked: true });
+					const receipts = await tx
+						.select({ postId: governanceNoticeRecipient.postId })
+						.from(governanceNoticeRecipient)
+						.where(eq(governanceNoticeRecipient.authUserId, authId))
+						.orderBy(governanceNoticeRecipient.postId)
+						.limit(500)
+						.for("update", { skipLocked: true });
 					if (receipts.length) {
-						await tx.delete(governanceNoticeRecipient).where(and(
-							eq(governanceNoticeRecipient.authUserId, authId),
-							sql`${governanceNoticeRecipient.postId} = any(${receipts.map(row => row.postId)}::uuid[])`,
-						));
+						await tx
+							.delete(governanceNoticeRecipient)
+							.where(
+								and(
+									eq(governanceNoticeRecipient.authUserId, authId),
+									sql`${governanceNoticeRecipient.postId} = any(${receipts.map((row) => row.postId)}::uuid[])`,
+								),
+							);
 						result = { deleted: receipts.length, empty: false };
 						break;
 					}
-					const [remaining] = await tx.select({ postId: governanceNoticeRecipient.postId })
-						.from(governanceNoticeRecipient).where(eq(governanceNoticeRecipient.authUserId, authId)).limit(1);
-					if (remaining) { result = { deleted: 0, empty: false }; break; }
+					const [remaining] = await tx
+						.select({ postId: governanceNoticeRecipient.postId })
+						.from(governanceNoticeRecipient)
+						.where(eq(governanceNoticeRecipient.authUserId, authId))
+						.limit(1);
+					if (remaining) {
+						result = { deleted: 0, empty: false };
+						break;
+					}
 				}
 				result = await deletePrivateBatch(
 					tx,
@@ -437,6 +452,10 @@ export async function dispatchAccountErasureBatch(
 				break;
 			case "membership_received_invitations":
 				result = await eraseOrganizationEnrollmentBatch(tx, authId, "invitations");
+				if (result.empty) {
+					const realm = await eraseRealmEnrollmentBatch(tx, authId);
+					result = { deleted: result.deleted + realm.deleted, empty: realm.empty };
+				}
 				break;
 			case "favorite_history":
 				result = await deletePrivateBatch(

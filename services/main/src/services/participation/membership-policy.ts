@@ -1,3 +1,4 @@
+import { groupAuthoritySourceDigest } from "../authorization/group-impact-evaluation";
 import { createHash } from "node:crypto";
 import { eq, sql, type SQL } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
@@ -109,12 +110,13 @@ export async function enrollmentSubjectAuthority(
 	tx: DatabaseTransaction,
 	context: PrincipalRequestContext,
 	mutation: boolean,
+	fresh = mutation,
 ) {
 	const credential = await readFirstPartyCredentialAuthority(tx, {
 		proof: context.credentialProof(),
 		selection: context.selection,
 		apiPermission: mutation ? "access:manage" : "access:read",
-		requireFreshSession: mutation,
+		requireFreshSession: fresh,
 		requireVerifiedEmail: mutation,
 	});
 	const actorId = await allocateAccessSubject(tx, { kind: "principal", id: context.principalId });
@@ -133,7 +135,7 @@ export async function enrollmentSubjectAuthority(
 				path: ["memberships"],
 				permission: "access.membership.participate",
 				apiPermission: mutation ? "access:manage" : "access:read",
-				requireFreshSession: mutation,
+				requireFreshSession: fresh,
 				mutation,
 			},
 			sql<boolean>`true`,
@@ -144,6 +146,7 @@ export async function enrollmentSubjectAuthority(
 			subjectId: authority.subjectId,
 			principalId: context.principalId,
 			admission: authority.admission,
+			sourceDigest: groupAuthoritySourceDigest(authority),
 		};
 	}
 	const [eligibility] = await readAccessSubjectEligibility(tx, {
@@ -155,5 +158,12 @@ export async function enrollmentSubjectAuthority(
 	const admission = sql<boolean>`(${credential.admission}) and public.access_subject_is_eligible(${actorId}::uuid,${mutation ? "write" : "read"})
  and exists(select 1 from public.users where id=${context.principalId}::uuid and principal_kind='human')`;
 	await requireAccessAdmission(tx, admission);
-	return { subjectId: actorId, principalId: context.principalId, admission };
+	return {
+		subjectId: actorId,
+		principalId: context.principalId,
+		admission,
+		sourceDigest: createHash("sha256")
+			.update(JSON.stringify({ subjectId: actorId, credential: context.credentialProof() }))
+			.digest("hex"),
+	};
 }

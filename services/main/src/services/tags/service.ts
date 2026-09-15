@@ -1,3 +1,4 @@
+import { publicRealmMembershipCandidates } from "../realms/authorization";
 import { selfAuthUserIdForEntity } from "../participation/account-query";
 import { and, eq, exists, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
@@ -100,6 +101,8 @@ export async function listRealmTagVoteContexts(input: {
 	readonly profileId: string;
 	readonly localizationLanguages?: LocalizationLanguageQuery;
 }) {
+	const candidates = await publicRealmMembershipCandidates(database, input.profileId);
+	if (!candidates.realmIds.length) return [];
 	const rows = await database
 		.select({
 			realmId: realm.id,
@@ -114,8 +117,7 @@ export async function listRealmTagVoteContexts(input: {
 			),
 			avatar: resolvedUnitLocalizationAvatar(voteContextRealmUnit.id, input.localizationLanguages),
 		})
-		.from(realmMember)
-		.innerJoin(realm, eq(realm.id, realmMember.realmId))
+		.from(realm)
 		.innerJoin(voteContextRealmUnit, eq(voteContextRealmUnit.id, realm.id))
 		.leftJoin(
 			accountRealmTagSubscription,
@@ -126,8 +128,7 @@ export async function listRealmTagVoteContexts(input: {
 		)
 		.where(
 			and(
-				eq(realmMember.profileId, input.profileId),
-				eq(realmMember.state, "active"),
+				inArray(realm.id, candidates.realmIds),
 				eq(realm.realmTagVotingEnabled, true),
 				getRealmContributionCondition(input.profileId, voteContextRealmUnit),
 				exists(

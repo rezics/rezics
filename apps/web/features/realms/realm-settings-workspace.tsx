@@ -1,8 +1,11 @@
 "use client";
+import { useRealmMembershipContext } from "./hooks/use-realm-membership-context";
 
 import {
 	useGetApiRealmsByRealmId,
-	useGetApiRealmsByRealmIdMembers,
+	useListRealmMembers,
+	listRealmMembersQueryKey,
+	useGetRealmMembershipCapabilities,
 	useGetApiRealmsByRealmIdPins,
 	useGetApiRealmsByRealmIdRulesAuthoring,
 } from "@rezics/openapi-tanstack-query";
@@ -107,6 +110,17 @@ function RealmSettingsWorkspaceContent({
 	const { t } = useTranslation(["docks", "errors", "history", "realms"]);
 	const localizationLanguages = useLocalizationLanguages();
 	const dockAccess = useDockManagementAccess(realmId, "realm");
+	const membershipContext = useRealmMembershipContext();
+	const membershipCapabilities = useGetRealmMembershipCapabilities(
+		{ path: { realmId } },
+		{
+			query: {
+				enabled: membershipContext.ready,
+				queryKey: ["realm-membership-capabilities", realmId, membershipContext.selectionKey],
+			},
+			client: { client: membershipContext.client },
+		},
+	);
 	const realm = useGetApiRealmsByRealmId({
 		path: { realmId },
 		query: { localizationLanguages },
@@ -114,10 +128,22 @@ function RealmSettingsWorkspaceContent({
 	if (realm.isPending) return <QueryPending />;
 	if (realm.isError || !realm.data)
 		return <QueryFailure error={realm.error} retry={() => void realm.refetch()} />;
-	if (dockAccess.pending) return <QueryPending />;
+	if (dockAccess.pending || (membershipContext.ready && membershipCapabilities.isPending))
+		return <QueryPending />;
+	if (membershipCapabilities.isError)
+		return (
+			<QueryFailure
+				error={membershipCapabilities.error}
+				retry={() => void membershipCapabilities.refetch()}
+			/>
+		);
 	if (dockAccess.error)
 		return <QueryFailure error={dockAccess.error} retry={() => void dockAccess.refetch()} />;
-	const capabilities = realm.data.capabilities;
+	const capabilities = {
+		...realm.data.capabilities,
+		canReadMembers: membershipCapabilities.data?.canReadMembers ?? false,
+		canManageMembers: membershipCapabilities.data?.canManageMembers ?? false,
+	};
 	const canManageDocks = dockAccess.allowedKinds.length > 0;
 	if (!canOpenRealmSettings(capabilities, canManageDocks))
 		return (
@@ -375,15 +401,28 @@ function RealmMembersSection({
 	canManage: boolean;
 }) {
 	const localizationLanguages = useLocalizationLanguages();
-	const query = useGetApiRealmsByRealmIdMembers({
-		path: { realmId },
-		query: { limit: 100, localizationLanguages },
-	});
+	const context = useRealmMembershipContext();
+	const query = useListRealmMembers(
+		{
+			path: { realmId },
+			query: { localizationLanguages },
+		},
+		{
+			query: {
+				enabled: context.ready,
+				queryKey: [
+					...listRealmMembersQueryKey({ path: { realmId }, query: { localizationLanguages } }),
+					context.selectionKey,
+				],
+			},
+			client: { client: context.client },
+		},
+	);
 	return (
 		<RealmSettingsSection baseHref={baseHref} section="members">
 			<RealmMembers
 				canManage={canManage}
-				error={query.error}
+				error={query.error ?? context.error}
 				members={query.data?.items}
 				pending={query.isPending}
 				realmId={realmId}

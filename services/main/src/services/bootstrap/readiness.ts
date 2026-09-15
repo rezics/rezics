@@ -132,7 +132,6 @@ export async function isInitialInstallationBundleReady(): Promise<boolean> {
 		officialZoneNavigations,
 		officialRealmAvatar,
 		bootstrapProfiles,
-		profileScoreMemberships,
 		accountPreferences,
 		profileFollows,
 		firstOrdinaryFollowPositions,
@@ -284,9 +283,6 @@ export async function isInitialInstallationBundleReady(): Promise<boolean> {
 		officialRealmAvatar[0].byteSize > 0 &&
 		officialRealmAvatar[0]?.width === OfficialRealmAvatarAsset.width &&
 		officialRealmAvatar[0]?.height === OfficialRealmAvatarAsset.height &&
-		bootstrapProfiles.every((targetProfile) =>
-			profileScoreMemberships.some((membership) => membership.profileId === targetProfile.id),
-		) &&
 		bootstrapProfiles.every((targetProfile) =>
 			accountPreferences.some(
 				(preference) =>

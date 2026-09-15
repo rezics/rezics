@@ -1,3 +1,4 @@
+import { lockAccessMembershipScopePolicy } from "./memberships";
 import { createHash } from "node:crypto";
 import { and, eq, inArray, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
@@ -220,7 +221,8 @@ export async function findRoleAssignmentCeiling(
 		if (!subject) throw new AccessAssignmentCeilingUnavailable();
 		subjectKind = subject.authUserId !== null ? "principal" : "entity";
 		await tx.execute(sql`select public.lock_access_membership_keys(array[${sql.join(memberScopes.map(scope => sql`${scope}::uuid`), sql`, `)}],${subject.id}::uuid,false)`);
-		memberships = await tx.select().from(accessMembership).where(and(eq(accessMembership.subjectId, subject.id), inArray(accessMembership.scopeId, memberScopes)))
+		await lockAccessMembershipScopePolicy(tx,memberScopes);
+		memberships = await tx.select().from(accessMembership).where(and(eq(accessMembership.subjectId, subject.id), inArray(accessMembership.scopeId, memberScopes),sql`public.access_membership_is_eligible(${accessMembership.id}) is true`))
 			.orderBy(accessMembership.id).for("share");
 	}
 	const groupScopes = [...new Set(approvals.flatMap(({ approval }) => approval.recipientKind === "group" && approval.recipientScopeId !== null && request.recipientGroupEffect !== null &&

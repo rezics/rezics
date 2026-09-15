@@ -1,3 +1,4 @@
+import { lockAccessMembershipScopePolicy } from "./memberships";
 import { createHash } from "node:crypto";
 import { and, eq, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
@@ -115,6 +116,12 @@ export async function applyAccessGroupMembershipCommand(
 			)
 			.for("share");
 		if (!member) throw new AccessGroupMembershipConflict();
+  await lockAccessMembershipScopePolicy(work,[member.scopeId]);
+  if(command.operation==="assign") {
+   const eligible=(await work.execute<{eligible:boolean|null}>(sql`select public.access_membership_is_eligible(${member.id}::uuid) as eligible`)).rows[0]?.eligible;
+   if(eligible===false) throw new AccessGroupMembershipAdmissionDenied();
+   if(eligible!==true) throw new AccessGroupMembershipUnavailable();
+  }
 		await authorize();
 		const [set] = await work
 			.select()

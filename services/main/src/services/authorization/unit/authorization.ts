@@ -1,3 +1,4 @@
+import { lockRealmGrantMemberships } from "../../realms/authorization";
 import { lockUnitAccessState } from "./access-lock";
 import { CatalogReferenceSchema } from "@rezics/reference";
 import { readUnitStateById } from "../../units/query";
@@ -44,7 +45,10 @@ import { profileMatchesRealmAccessSubject } from "./realm-subject";
 import { scopeCovers, scopeKey, type UnitScope } from "./scope";
 
 export type UnitAccessDecision =
-	| { readonly allowed: true; readonly source: "public" | "platform" | "owner" | "native" | "governance_notice" }
+	| {
+			readonly allowed: true;
+			readonly source: "public" | "platform" | "owner" | "native" | "governance_notice";
+	  }
 	| {
 			readonly allowed: true;
 			readonly source: "grant";
@@ -63,13 +67,19 @@ export type UnitAccessDecision =
 	  };
 
 function active(expiresAt: typeof unitAccessGrant.expiresAt) {
-	return and(isNull(unitAccessGrant.revokedAt), or(isNull(expiresAt), sql`${expiresAt} > statement_timestamp()`));
+	return and(
+		isNull(unitAccessGrant.revokedAt),
+		or(isNull(expiresAt), sql`${expiresAt} > statement_timestamp()`),
+	);
 }
 
 function activeRestriction() {
 	return and(
 		isNull(unitAccessRestriction.revokedAt),
-		or(isNull(unitAccessRestriction.expiresAt), sql`${unitAccessRestriction.expiresAt} > statement_timestamp()`),
+		or(
+			isNull(unitAccessRestriction.expiresAt),
+			sql`${unitAccessRestriction.expiresAt} > statement_timestamp()`,
+		),
 	);
 }
 
@@ -142,6 +152,7 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 		scope: UnitScope,
 	): Promise<UnitAccessDecision> {
 		await lockUnitAccessState(executor, [unitId], "shared");
+		if (this.profileId) await lockRealmGrantMemberships(executor, unitId, this.profileId);
 		const record = await readUnitStateById(executor, unitId);
 		if (!record || record.deletedAt) return { allowed: false, reason: "missing" };
 		if (!isUnitPermissionApplicable(record.reference.owner, permission))
@@ -265,11 +276,16 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 		if (!this.profileId) return { allowed: false, reason: "anonymous" };
 
 		if (permission === "unit.read" && record.reference.owner === "post" && this.authUserId) {
-			const [receipt] = await executor.select({ postId: governanceNoticeRecipient.postId })
-				.from(governanceNoticeRecipient).where(and(
-					eq(governanceNoticeRecipient.postId, unitId),
-					eq(governanceNoticeRecipient.authUserId, this.authUserId),
-				)).limit(1);
+			const [receipt] = await executor
+				.select({ postId: governanceNoticeRecipient.postId })
+				.from(governanceNoticeRecipient)
+				.where(
+					and(
+						eq(governanceNoticeRecipient.postId, unitId),
+						eq(governanceNoticeRecipient.authUserId, this.authUserId),
+					),
+				)
+				.limit(1);
 			if (receipt) return { allowed: true, source: "governance_notice" };
 		}
 		const grants = await executor

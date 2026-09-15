@@ -332,7 +332,21 @@ export default {
 		ownerMarker: "Ownership",
 		unitOwner: "Unit owner",
 	},
+	membershipIdentityRequired: "Select a controlled public identity before managing membership.",
+	memberActions: {
+		approve: "Approve",
+		reject: "Reject",
+		remove: "Remove",
+		mute: "Mute",
+		ban: "Ban",
+		clear: "Clear restriction",
+	},
 	memberStates: {
+		open: "Not enrolled",
+		invited: "Invited",
+		rejected: "Rejected",
+		left: "Left",
+
 		active: "Active",
 		pending: "Pending",
 		muted: "Muted",
@@ -342,11 +356,11 @@ export default {
 	requireOnJoin: "Require acknowledgement to join",
 	requireOnPost: "Require acknowledgement before publishing content",
 	ruleAcknowledgementHint:
-		"Each rule revision only needs to be acknowledged once. After a new revision is published, members must acknowledge it again before the next selected action.",
+		"Acknowledgement applies to one rule revision and enrollment. A new revision may require confirmation again.",
 	ruleAcknowledgementMode: "Rule acknowledgement",
 	ruleAcknowledgementModes: {
 		explicit: "Ask for explicit confirmation",
-		implicitOnFollow: `Acknowledge silently when ${followTerms.gerund}`,
+		implicitOnFollow: "Confirm when joining",
 	},
 	ruleLanguage: "Rule language",
 	ruleTitle: "Rule title",

@@ -1,3 +1,4 @@
+import { lockAccessMembershipScopePolicy } from "./memberships";
 import { and, eq, inArray, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { AccessPermissionValues, type AccessPermission, type RepresentationReference } from "@rezics/access";
@@ -75,6 +76,7 @@ export async function readCurrentAccessRepresentations(
 		...memberships.map(member => member.scopeId),
 		...snapshots.flatMap(row => row.head.recipientKind === "group" && row.head.recipientScopeId ? [row.head.recipientScopeId] : []),
 	])].sort();
+	await lockAccessMembershipScopePolicy(tx,treeIds);
 	if (treeIds.length) {
 		const trees = await tx.select({ id: accessGroupTree.scopeId }).from(accessGroupTree)
 			.where(inArray(accessGroupTree.scopeId, treeIds)).orderBy(accessGroupTree.scopeId).for("share");

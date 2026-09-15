@@ -330,7 +330,22 @@ export default {
 		ownerMarker: "所有権",
 		unitOwner: "ユニット所有者",
 	},
+	membershipIdentityRequired:
+		"メンバーシップを管理する前に、操作権限のある公開プロフィールを選択してください。",
+	memberActions: {
+		approve: "承認",
+		reject: "却下",
+		remove: "削除",
+		mute: "ミュート",
+		ban: "参加禁止",
+		clear: "制限を解除",
+	},
 	memberStates: {
+		open: "未参加",
+		invited: "招待済み",
+		rejected: "却下済み",
+		left: "退会済み",
+
 		active: "アクティブ",
 		pending: "保留中",
 		muted: "ミュート",
@@ -340,11 +355,11 @@ export default {
 	requireOnJoin: "参加には確認が必要",
 	requireOnPost: "コンテンツを公開する前に確認が必要",
 	ruleAcknowledgementHint:
-		"各ルールの改訂は一度だけ確認すればよい。新しい改訂が公開された後は、次の選択アクションの前にメンバーは再度確認する必要があります。",
+		"確認は、その参加と指定されたルールの版に適用されます。新しい版では再確認が必要になる場合があります。",
 	ruleAcknowledgementMode: "ルールの確認",
 	ruleAcknowledgementModes: {
 		explicit: "明示的な確認を求める",
-		implicitOnFollow: `${followTerms.gerund} の場合は静かに確認`,
+		implicitOnFollow: "参加時に確認",
 	},
 	ruleLanguage: "ルールの言語",
 	ruleTitle: "ルールのタイトル",

@@ -1,10 +1,20 @@
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
-import type { GetApiRealmsByRealmIdMembersStatus200 } from "@rezics/openapi-tanstack-query";
+import type { ListRealmMembersStatus200 } from "@rezics/openapi-tanstack-query";
 
-export const MemberStates = ["active", "pending", "muted", "removed", "banned"] as const;
+export const MemberStates = [
+	"active",
+	"pending",
+	"muted",
+	"removed",
+	"banned",
+	"open",
+	"invited",
+	"rejected",
+	"left",
+] as const;
 
 export type MemberState = (typeof MemberStates)[number];
-export type RealmMember = GetApiRealmsByRealmIdMembersStatus200["items"][number];
+export type RealmMember = ListRealmMembersStatus200["items"][number];
 export type MemberFilter<Value extends string> = Value | "all";
 
 export function isMemberState(value: string): value is MemberState {

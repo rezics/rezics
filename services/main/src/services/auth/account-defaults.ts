@@ -1,6 +1,4 @@
-import { OfficialRealmUnitIds } from "@rezics/slug";
 import type { DatabaseTransaction } from "../database";
-import { realmMember } from "../database/schema/realm";
 import { accountFavoritesState } from "../database/schema/favorites";
 import { ensureOfficialZoneFollows } from "../bootstrap/official-zone-follows";
 
@@ -10,10 +8,6 @@ export async function initializeAccountParticipation(
 	selfEntityId: string,
 	authUserId: string,
 ) {
-	await tx
-		.insert(realmMember)
-		.values({ realmId: OfficialRealmUnitIds.score, profileId: selfEntityId, state: "active" })
-		.onConflictDoNothing();
 	await tx.insert(accountFavoritesState).values({ authUserId }).onConflictDoNothing();
 	await ensureOfficialZoneFollows(tx, [selfEntityId], { sequenceIsEmpty: true });
 }

@@ -15,6 +15,7 @@ import { mutationOptions, queryOptions, useMutation, useQuery } from "@tanstack/
 import type { RequestConfig, ResponseErrorConfig } from "./.kubb/client";
 import {
 	acceptOrganizationMembershipInvitation,
+	acknowledgeRealmRules,
 	addCatalogIdentifier,
 	addCatalogName,
 	addMusicMedium,
@@ -35,6 +36,7 @@ import {
 	createManagedOrganization,
 	createNativeOrganization,
 	createOrganizationEnrollmentContact,
+	createRealmEnrollmentContact,
 	createServicePrincipal,
 	createSoftwareCredit,
 	createSoftwareParticipationContext,
@@ -59,7 +61,6 @@ import {
 	deleteApiProgressByUnitIdNodesByNodeId,
 	deleteApiReactionsSharesByUnitId,
 	deleteApiReactionsUnitsByUnitId,
-	deleteApiRealmsByRealmIdMembership,
 	deleteApiRealmsByRealmIdPinsByUnitId,
 	deleteApiRealmsByRealmIdScoreContext,
 	deleteApiRealmsByRealmIdTagPathsByPathIdVote,
@@ -179,7 +180,6 @@ import {
 	getApiReady,
 	getApiRealms,
 	getApiRealmsByRealmId,
-	getApiRealmsByRealmIdMembers,
 	getApiRealmsByRealmIdPins,
 	getApiRealmsByRealmIdReports,
 	getApiRealmsByRealmIdRules,
@@ -260,6 +260,10 @@ import {
 	getOwnAppConsent,
 	getPublicUnitSeoProjection,
 	getPublicUnitSlugAddress,
+	getRealmEnrollmentRules,
+	getRealmMemberHistory,
+	getRealmMembership,
+	getRealmMembershipCapabilities,
 	getUnitReference,
 	getUnitSlugAddressWithPlatformAccess,
 	getUserProfileActivity,
@@ -269,10 +273,13 @@ import {
 	inspectAccessGroupApprovalProposal,
 	inspectAccessGroupImpact,
 	inspectAccessGroupImpactEvaluation,
+	inspectRealmMember,
 	intakeCatalogSource,
 	inviteOrganizationMember,
 	issueParticipationGrant,
+	joinRealm,
 	leaveOrganizationMembership,
+	leaveRealm,
 	listAccessGroupApprovals,
 	listAccessGroupHistory,
 	listAccessGroupRoster,
@@ -334,6 +341,8 @@ import {
 	listPublishingComponentHistory,
 	listPublishingComponents,
 	listPublishingConnections,
+	listRealmEnrollments,
+	listRealmMembers,
 	listResourceCreditAttributions,
 	listSoftwareComponentHistory,
 	listSoftwareComponents,
@@ -355,7 +364,6 @@ import {
 	patchApiPostsByPostId,
 	patchApiPostsByPostIdRepliesByReplyPostId,
 	patchApiRealmsByRealmId,
-	patchApiRealmsByRealmIdMembersByProfileId,
 	patchApiRealmsByRealmIdUnitsByUnitId,
 	patchApiResourcesByOwnerByUnitIdAliasesByAliasId,
 	patchApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkId,
@@ -492,11 +500,9 @@ import {
 	putApiProgressByUnitIdNodesByNodeId,
 	putApiReactionsSharesByUnitId,
 	putApiReactionsUnitsByUnitId,
-	putApiRealmsByRealmIdMembership,
 	putApiRealmsByRealmIdPages,
 	putApiRealmsByRealmIdPinsByUnitId,
 	putApiRealmsByRealmIdRules,
-	putApiRealmsByRealmIdRulesByRevisionIdAcknowledgement,
 	putApiRealmsByRealmIdScoreContext,
 	putApiRealmsByRealmIdTagPathPolicy,
 	putApiRealmsByRealmIdTagPathSensesBySenseId,
@@ -574,6 +580,7 @@ import {
 	resolveNamespaceSlugAddress,
 	resolveNativeMergeReconciliation,
 	resolveOrganizationEnrollmentContact,
+	resolveRealmEnrollmentContact,
 	resolveScopedUnitSlugAddress,
 	resolveUnitSlugAddress,
 	resolveZonePageAddressBySlug,
@@ -611,6 +618,7 @@ import {
 	revokeOrganizationMembershipInvitation,
 	revokeOwnAppConsent,
 	revokeParticipationGrant,
+	revokeRealmEnrollmentContact,
 	revokeServicePrincipal,
 	saveProgramContentDraft,
 	saveTextVersionContentDraft,
@@ -625,6 +633,7 @@ import {
 	updateActingEntityPresentation,
 	updateCatalogLifecycle,
 	updateCurrentUserPrivacy,
+	updateRealmMember,
 	withdrawCatalogEditorial,
 	withdrawSoftwareComponent,
 	writeAccessGroupSelection,
@@ -644,6 +653,15 @@ import type {
 	AcceptOrganizationMembershipInvitationStatus422,
 	AcceptOrganizationMembershipInvitationStatus500,
 	AcceptOrganizationMembershipInvitationStatus503,
+	AcknowledgeRealmRulesOptions,
+	AcknowledgeRealmRulesStatus200,
+	AcknowledgeRealmRulesStatus400,
+	AcknowledgeRealmRulesStatus403,
+	AcknowledgeRealmRulesStatus404,
+	AcknowledgeRealmRulesStatus409,
+	AcknowledgeRealmRulesStatus422,
+	AcknowledgeRealmRulesStatus500,
+	AcknowledgeRealmRulesStatus503,
 	AddCatalogIdentifierOptions,
 	AddCatalogIdentifierStatus200,
 	AddCatalogIdentifierStatus400,
@@ -785,6 +803,14 @@ import type {
 	CreateOrganizationEnrollmentContactStatus422,
 	CreateOrganizationEnrollmentContactStatus500,
 	CreateOrganizationEnrollmentContactStatus503,
+	CreateRealmEnrollmentContactOptions,
+	CreateRealmEnrollmentContactStatus200,
+	CreateRealmEnrollmentContactStatus403,
+	CreateRealmEnrollmentContactStatus404,
+	CreateRealmEnrollmentContactStatus409,
+	CreateRealmEnrollmentContactStatus422,
+	CreateRealmEnrollmentContactStatus500,
+	CreateRealmEnrollmentContactStatus503,
 	CreateServicePrincipalOptions,
 	CreateServicePrincipalStatus200,
 	CreateServicePrincipalStatus400,
@@ -951,14 +977,6 @@ import type {
 	DeleteApiReactionsUnitsByUnitIdStatus422,
 	DeleteApiReactionsUnitsByUnitIdStatus429,
 	DeleteApiReactionsUnitsByUnitIdStatus500,
-	DeleteApiRealmsByRealmIdMembershipOptions,
-	DeleteApiRealmsByRealmIdMembershipStatus204,
-	DeleteApiRealmsByRealmIdMembershipStatus403,
-	DeleteApiRealmsByRealmIdMembershipStatus404,
-	DeleteApiRealmsByRealmIdMembershipStatus409,
-	DeleteApiRealmsByRealmIdMembershipStatus422,
-	DeleteApiRealmsByRealmIdMembershipStatus429,
-	DeleteApiRealmsByRealmIdMembershipStatus500,
 	DeleteApiRealmsByRealmIdPinsByUnitIdOptions,
 	DeleteApiRealmsByRealmIdPinsByUnitIdStatus204,
 	DeleteApiRealmsByRealmIdPinsByUnitIdStatus400,
@@ -1658,12 +1676,6 @@ import type {
 	GetApiReadyStatus200,
 	GetApiReadyStatus500,
 	GetApiReadyStatus503,
-	GetApiRealmsByRealmIdMembersOptions,
-	GetApiRealmsByRealmIdMembersStatus200,
-	GetApiRealmsByRealmIdMembersStatus403,
-	GetApiRealmsByRealmIdMembersStatus422,
-	GetApiRealmsByRealmIdMembersStatus429,
-	GetApiRealmsByRealmIdMembersStatus500,
 	GetApiRealmsByRealmIdOptions,
 	GetApiRealmsByRealmIdPinsOptions,
 	GetApiRealmsByRealmIdPinsStatus200,
@@ -2095,6 +2107,43 @@ import type {
 	GetPublicUnitSlugAddressStatus404,
 	GetPublicUnitSlugAddressStatus422,
 	GetPublicUnitSlugAddressStatus500,
+	GetRealmEnrollmentRulesOptions,
+	GetRealmEnrollmentRulesStatus200,
+	GetRealmEnrollmentRulesStatus403,
+	GetRealmEnrollmentRulesStatus404,
+	GetRealmEnrollmentRulesStatus409,
+	GetRealmEnrollmentRulesStatus422,
+	GetRealmEnrollmentRulesStatus429,
+	GetRealmEnrollmentRulesStatus500,
+	GetRealmEnrollmentRulesStatus503,
+	GetRealmMemberHistoryOptions,
+	GetRealmMemberHistoryStatus200,
+	GetRealmMemberHistoryStatus400,
+	GetRealmMemberHistoryStatus403,
+	GetRealmMemberHistoryStatus404,
+	GetRealmMemberHistoryStatus409,
+	GetRealmMemberHistoryStatus422,
+	GetRealmMemberHistoryStatus429,
+	GetRealmMemberHistoryStatus500,
+	GetRealmMemberHistoryStatus503,
+	GetRealmMembershipCapabilitiesOptions,
+	GetRealmMembershipCapabilitiesStatus200,
+	GetRealmMembershipCapabilitiesStatus403,
+	GetRealmMembershipCapabilitiesStatus404,
+	GetRealmMembershipCapabilitiesStatus409,
+	GetRealmMembershipCapabilitiesStatus422,
+	GetRealmMembershipCapabilitiesStatus429,
+	GetRealmMembershipCapabilitiesStatus500,
+	GetRealmMembershipCapabilitiesStatus503,
+	GetRealmMembershipOptions,
+	GetRealmMembershipStatus200,
+	GetRealmMembershipStatus403,
+	GetRealmMembershipStatus404,
+	GetRealmMembershipStatus409,
+	GetRealmMembershipStatus422,
+	GetRealmMembershipStatus429,
+	GetRealmMembershipStatus500,
+	GetRealmMembershipStatus503,
 	GetUnitReferenceOptions,
 	GetUnitReferenceStatus200,
 	GetUnitReferenceStatus404,
@@ -2157,6 +2206,16 @@ import type {
 	InspectAccessGroupImpactStatus429,
 	InspectAccessGroupImpactStatus500,
 	InspectAccessGroupImpactStatus503,
+	InspectRealmMemberOptions,
+	InspectRealmMemberStatus200,
+	InspectRealmMemberStatus400,
+	InspectRealmMemberStatus403,
+	InspectRealmMemberStatus404,
+	InspectRealmMemberStatus409,
+	InspectRealmMemberStatus422,
+	InspectRealmMemberStatus429,
+	InspectRealmMemberStatus500,
+	InspectRealmMemberStatus503,
 	IntakeCatalogSourceOptions,
 	IntakeCatalogSourceStatus200,
 	IntakeCatalogSourceStatus400,
@@ -2177,6 +2236,15 @@ import type {
 	IssueParticipationGrantStatus400,
 	IssueParticipationGrantStatus422,
 	IssueParticipationGrantStatus500,
+	JoinRealmOptions,
+	JoinRealmStatus200,
+	JoinRealmStatus400,
+	JoinRealmStatus403,
+	JoinRealmStatus404,
+	JoinRealmStatus409,
+	JoinRealmStatus422,
+	JoinRealmStatus500,
+	JoinRealmStatus503,
 	LeaveOrganizationMembershipOptions,
 	LeaveOrganizationMembershipStatus200,
 	LeaveOrganizationMembershipStatus400,
@@ -2186,6 +2254,15 @@ import type {
 	LeaveOrganizationMembershipStatus422,
 	LeaveOrganizationMembershipStatus500,
 	LeaveOrganizationMembershipStatus503,
+	LeaveRealmOptions,
+	LeaveRealmStatus200,
+	LeaveRealmStatus400,
+	LeaveRealmStatus403,
+	LeaveRealmStatus404,
+	LeaveRealmStatus409,
+	LeaveRealmStatus422,
+	LeaveRealmStatus500,
+	LeaveRealmStatus503,
 	ListAccessGroupApprovalsOptions,
 	ListAccessGroupApprovalsStatus200,
 	ListAccessGroupApprovalsStatus400,
@@ -2505,6 +2582,24 @@ import type {
 	ListPublishingConnectionsStatus200,
 	ListPublishingConnectionsStatus422,
 	ListPublishingConnectionsStatus500,
+	ListRealmEnrollmentsOptions,
+	ListRealmEnrollmentsStatus200,
+	ListRealmEnrollmentsStatus403,
+	ListRealmEnrollmentsStatus404,
+	ListRealmEnrollmentsStatus409,
+	ListRealmEnrollmentsStatus422,
+	ListRealmEnrollmentsStatus429,
+	ListRealmEnrollmentsStatus500,
+	ListRealmEnrollmentsStatus503,
+	ListRealmMembersOptions,
+	ListRealmMembersStatus200,
+	ListRealmMembersStatus403,
+	ListRealmMembersStatus404,
+	ListRealmMembersStatus409,
+	ListRealmMembersStatus422,
+	ListRealmMembersStatus429,
+	ListRealmMembersStatus500,
+	ListRealmMembersStatus503,
 	ListResourceCreditAttributionsOptions,
 	ListResourceCreditAttributionsStatus200,
 	ListResourceCreditAttributionsStatus422,
@@ -2633,15 +2728,6 @@ import type {
 	PatchApiPostsByPostIdStatus422,
 	PatchApiPostsByPostIdStatus429,
 	PatchApiPostsByPostIdStatus500,
-	PatchApiRealmsByRealmIdMembersByProfileIdOptions,
-	PatchApiRealmsByRealmIdMembersByProfileIdStatus200,
-	PatchApiRealmsByRealmIdMembersByProfileIdStatus400,
-	PatchApiRealmsByRealmIdMembersByProfileIdStatus403,
-	PatchApiRealmsByRealmIdMembersByProfileIdStatus404,
-	PatchApiRealmsByRealmIdMembersByProfileIdStatus409,
-	PatchApiRealmsByRealmIdMembersByProfileIdStatus422,
-	PatchApiRealmsByRealmIdMembersByProfileIdStatus429,
-	PatchApiRealmsByRealmIdMembersByProfileIdStatus500,
 	PatchApiRealmsByRealmIdOptions,
 	PatchApiRealmsByRealmIdStatus200,
 	PatchApiRealmsByRealmIdStatus400,
@@ -3701,14 +3787,6 @@ import type {
 	PutApiReactionsUnitsByUnitIdStatus422,
 	PutApiReactionsUnitsByUnitIdStatus429,
 	PutApiReactionsUnitsByUnitIdStatus500,
-	PutApiRealmsByRealmIdMembershipOptions,
-	PutApiRealmsByRealmIdMembershipStatus200,
-	PutApiRealmsByRealmIdMembershipStatus403,
-	PutApiRealmsByRealmIdMembershipStatus404,
-	PutApiRealmsByRealmIdMembershipStatus409,
-	PutApiRealmsByRealmIdMembershipStatus422,
-	PutApiRealmsByRealmIdMembershipStatus429,
-	PutApiRealmsByRealmIdMembershipStatus500,
 	PutApiRealmsByRealmIdPagesOptions,
 	PutApiRealmsByRealmIdPagesStatus200,
 	PutApiRealmsByRealmIdPagesStatus400,
@@ -3725,14 +3803,6 @@ import type {
 	PutApiRealmsByRealmIdPinsByUnitIdStatus422,
 	PutApiRealmsByRealmIdPinsByUnitIdStatus429,
 	PutApiRealmsByRealmIdPinsByUnitIdStatus500,
-	PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementOptions,
-	PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus204,
-	PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus400,
-	PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus404,
-	PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus409,
-	PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus422,
-	PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429,
-	PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus500,
 	PutApiRealmsByRealmIdRulesOptions,
 	PutApiRealmsByRealmIdRulesStatus200,
 	PutApiRealmsByRealmIdRulesStatus400,
@@ -4260,6 +4330,15 @@ import type {
 	ResolveOrganizationEnrollmentContactStatus422,
 	ResolveOrganizationEnrollmentContactStatus500,
 	ResolveOrganizationEnrollmentContactStatus503,
+	ResolveRealmEnrollmentContactOptions,
+	ResolveRealmEnrollmentContactStatus200,
+	ResolveRealmEnrollmentContactStatus400,
+	ResolveRealmEnrollmentContactStatus403,
+	ResolveRealmEnrollmentContactStatus404,
+	ResolveRealmEnrollmentContactStatus409,
+	ResolveRealmEnrollmentContactStatus422,
+	ResolveRealmEnrollmentContactStatus500,
+	ResolveRealmEnrollmentContactStatus503,
 	ResolveScopedUnitSlugAddressOptions,
 	ResolveScopedUnitSlugAddressStatus200,
 	ResolveScopedUnitSlugAddressStatus400,
@@ -4492,6 +4571,15 @@ import type {
 	RevokeParticipationGrantStatus400,
 	RevokeParticipationGrantStatus422,
 	RevokeParticipationGrantStatus500,
+	RevokeRealmEnrollmentContactOptions,
+	RevokeRealmEnrollmentContactStatus200,
+	RevokeRealmEnrollmentContactStatus400,
+	RevokeRealmEnrollmentContactStatus403,
+	RevokeRealmEnrollmentContactStatus404,
+	RevokeRealmEnrollmentContactStatus409,
+	RevokeRealmEnrollmentContactStatus422,
+	RevokeRealmEnrollmentContactStatus500,
+	RevokeRealmEnrollmentContactStatus503,
 	RevokeServicePrincipalOptions,
 	RevokeServicePrincipalStatus200,
 	RevokeServicePrincipalStatus400,
@@ -4596,6 +4684,15 @@ import type {
 	UpdateCurrentUserPrivacyStatus404,
 	UpdateCurrentUserPrivacyStatus422,
 	UpdateCurrentUserPrivacyStatus500,
+	UpdateRealmMemberOptions,
+	UpdateRealmMemberStatus200,
+	UpdateRealmMemberStatus400,
+	UpdateRealmMemberStatus403,
+	UpdateRealmMemberStatus404,
+	UpdateRealmMemberStatus409,
+	UpdateRealmMemberStatus422,
+	UpdateRealmMemberStatus500,
+	UpdateRealmMemberStatus503,
 	WithdrawCatalogEditorialOptions,
 	WithdrawCatalogEditorialStatus200,
 	WithdrawCatalogEditorialStatus400,
@@ -59290,6 +59387,1492 @@ export function usePatchApiPostsByPostIdRepliesByReplyPostId<TContext>(
 	>;
 }
 
+export const createRealmEnrollmentContactMutationKey = () =>
+	[{ url: "/api/v1/realms/:realmId/enrollment-contact" }] as const;
+
+export function createRealmEnrollmentContactMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = createRealmEnrollmentContactMutationKey();
+	return mutationOptions<
+		CreateRealmEnrollmentContactStatus200,
+		ResponseErrorConfig<
+			| CreateRealmEnrollmentContactStatus403
+			| CreateRealmEnrollmentContactStatus404
+			| CreateRealmEnrollmentContactStatus409
+			| CreateRealmEnrollmentContactStatus422
+			| CreateRealmEnrollmentContactStatus500
+			| CreateRealmEnrollmentContactStatus503
+		>,
+		CreateRealmEnrollmentContactOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			return createRealmEnrollmentContact({ ...config, path, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/realms/:realmId/enrollment-contact}
+ */
+export function useCreateRealmEnrollmentContact<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			CreateRealmEnrollmentContactStatus200,
+			ResponseErrorConfig<
+				| CreateRealmEnrollmentContactStatus403
+				| CreateRealmEnrollmentContactStatus404
+				| CreateRealmEnrollmentContactStatus409
+				| CreateRealmEnrollmentContactStatus422
+				| CreateRealmEnrollmentContactStatus500
+				| CreateRealmEnrollmentContactStatus503
+			>,
+			CreateRealmEnrollmentContactOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? createRealmEnrollmentContactMutationKey();
+
+	const baseOptions = createRealmEnrollmentContactMutationOptions(config) as UseMutationOptions<
+		CreateRealmEnrollmentContactStatus200,
+		ResponseErrorConfig<
+			| CreateRealmEnrollmentContactStatus403
+			| CreateRealmEnrollmentContactStatus404
+			| CreateRealmEnrollmentContactStatus409
+			| CreateRealmEnrollmentContactStatus422
+			| CreateRealmEnrollmentContactStatus500
+			| CreateRealmEnrollmentContactStatus503
+		>,
+		CreateRealmEnrollmentContactOptions,
+		TContext
+	>;
+
+	return useMutation<
+		CreateRealmEnrollmentContactStatus200,
+		ResponseErrorConfig<
+			| CreateRealmEnrollmentContactStatus403
+			| CreateRealmEnrollmentContactStatus404
+			| CreateRealmEnrollmentContactStatus409
+			| CreateRealmEnrollmentContactStatus422
+			| CreateRealmEnrollmentContactStatus500
+			| CreateRealmEnrollmentContactStatus503
+		>,
+		CreateRealmEnrollmentContactOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		CreateRealmEnrollmentContactStatus200,
+		ResponseErrorConfig<
+			| CreateRealmEnrollmentContactStatus403
+			| CreateRealmEnrollmentContactStatus404
+			| CreateRealmEnrollmentContactStatus409
+			| CreateRealmEnrollmentContactStatus422
+			| CreateRealmEnrollmentContactStatus500
+			| CreateRealmEnrollmentContactStatus503
+		>,
+		CreateRealmEnrollmentContactOptions,
+		TContext
+	>;
+}
+
+export const resolveRealmEnrollmentContactMutationKey = () =>
+	[{ url: "/api/v1/realms/:realmId/enrollment-contacts/resolve" }] as const;
+
+export function resolveRealmEnrollmentContactMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = resolveRealmEnrollmentContactMutationKey();
+	return mutationOptions<
+		ResolveRealmEnrollmentContactStatus200,
+		ResponseErrorConfig<
+			| ResolveRealmEnrollmentContactStatus400
+			| ResolveRealmEnrollmentContactStatus403
+			| ResolveRealmEnrollmentContactStatus404
+			| ResolveRealmEnrollmentContactStatus409
+			| ResolveRealmEnrollmentContactStatus422
+			| ResolveRealmEnrollmentContactStatus500
+			| ResolveRealmEnrollmentContactStatus503
+		>,
+		ResolveRealmEnrollmentContactOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return resolveRealmEnrollmentContact({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/realms/:realmId/enrollment-contacts/resolve}
+ */
+export function useResolveRealmEnrollmentContact<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			ResolveRealmEnrollmentContactStatus200,
+			ResponseErrorConfig<
+				| ResolveRealmEnrollmentContactStatus400
+				| ResolveRealmEnrollmentContactStatus403
+				| ResolveRealmEnrollmentContactStatus404
+				| ResolveRealmEnrollmentContactStatus409
+				| ResolveRealmEnrollmentContactStatus422
+				| ResolveRealmEnrollmentContactStatus500
+				| ResolveRealmEnrollmentContactStatus503
+			>,
+			ResolveRealmEnrollmentContactOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? resolveRealmEnrollmentContactMutationKey();
+
+	const baseOptions = resolveRealmEnrollmentContactMutationOptions(config) as UseMutationOptions<
+		ResolveRealmEnrollmentContactStatus200,
+		ResponseErrorConfig<
+			| ResolveRealmEnrollmentContactStatus400
+			| ResolveRealmEnrollmentContactStatus403
+			| ResolveRealmEnrollmentContactStatus404
+			| ResolveRealmEnrollmentContactStatus409
+			| ResolveRealmEnrollmentContactStatus422
+			| ResolveRealmEnrollmentContactStatus500
+			| ResolveRealmEnrollmentContactStatus503
+		>,
+		ResolveRealmEnrollmentContactOptions,
+		TContext
+	>;
+
+	return useMutation<
+		ResolveRealmEnrollmentContactStatus200,
+		ResponseErrorConfig<
+			| ResolveRealmEnrollmentContactStatus400
+			| ResolveRealmEnrollmentContactStatus403
+			| ResolveRealmEnrollmentContactStatus404
+			| ResolveRealmEnrollmentContactStatus409
+			| ResolveRealmEnrollmentContactStatus422
+			| ResolveRealmEnrollmentContactStatus500
+			| ResolveRealmEnrollmentContactStatus503
+		>,
+		ResolveRealmEnrollmentContactOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		ResolveRealmEnrollmentContactStatus200,
+		ResponseErrorConfig<
+			| ResolveRealmEnrollmentContactStatus400
+			| ResolveRealmEnrollmentContactStatus403
+			| ResolveRealmEnrollmentContactStatus404
+			| ResolveRealmEnrollmentContactStatus409
+			| ResolveRealmEnrollmentContactStatus422
+			| ResolveRealmEnrollmentContactStatus500
+			| ResolveRealmEnrollmentContactStatus503
+		>,
+		ResolveRealmEnrollmentContactOptions,
+		TContext
+	>;
+}
+
+export const revokeRealmEnrollmentContactMutationKey = () =>
+	[{ url: "/api/v1/realms/enrollment-contacts/:contactId" }] as const;
+
+export function revokeRealmEnrollmentContactMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = revokeRealmEnrollmentContactMutationKey();
+	return mutationOptions<
+		RevokeRealmEnrollmentContactStatus200,
+		ResponseErrorConfig<
+			| RevokeRealmEnrollmentContactStatus400
+			| RevokeRealmEnrollmentContactStatus403
+			| RevokeRealmEnrollmentContactStatus404
+			| RevokeRealmEnrollmentContactStatus409
+			| RevokeRealmEnrollmentContactStatus422
+			| RevokeRealmEnrollmentContactStatus500
+			| RevokeRealmEnrollmentContactStatus503
+		>,
+		RevokeRealmEnrollmentContactOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return revokeRealmEnrollmentContact({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/realms/enrollment-contacts/:contactId}
+ */
+export function useRevokeRealmEnrollmentContact<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			RevokeRealmEnrollmentContactStatus200,
+			ResponseErrorConfig<
+				| RevokeRealmEnrollmentContactStatus400
+				| RevokeRealmEnrollmentContactStatus403
+				| RevokeRealmEnrollmentContactStatus404
+				| RevokeRealmEnrollmentContactStatus409
+				| RevokeRealmEnrollmentContactStatus422
+				| RevokeRealmEnrollmentContactStatus500
+				| RevokeRealmEnrollmentContactStatus503
+			>,
+			RevokeRealmEnrollmentContactOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? revokeRealmEnrollmentContactMutationKey();
+
+	const baseOptions = revokeRealmEnrollmentContactMutationOptions(config) as UseMutationOptions<
+		RevokeRealmEnrollmentContactStatus200,
+		ResponseErrorConfig<
+			| RevokeRealmEnrollmentContactStatus400
+			| RevokeRealmEnrollmentContactStatus403
+			| RevokeRealmEnrollmentContactStatus404
+			| RevokeRealmEnrollmentContactStatus409
+			| RevokeRealmEnrollmentContactStatus422
+			| RevokeRealmEnrollmentContactStatus500
+			| RevokeRealmEnrollmentContactStatus503
+		>,
+		RevokeRealmEnrollmentContactOptions,
+		TContext
+	>;
+
+	return useMutation<
+		RevokeRealmEnrollmentContactStatus200,
+		ResponseErrorConfig<
+			| RevokeRealmEnrollmentContactStatus400
+			| RevokeRealmEnrollmentContactStatus403
+			| RevokeRealmEnrollmentContactStatus404
+			| RevokeRealmEnrollmentContactStatus409
+			| RevokeRealmEnrollmentContactStatus422
+			| RevokeRealmEnrollmentContactStatus500
+			| RevokeRealmEnrollmentContactStatus503
+		>,
+		RevokeRealmEnrollmentContactOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		RevokeRealmEnrollmentContactStatus200,
+		ResponseErrorConfig<
+			| RevokeRealmEnrollmentContactStatus400
+			| RevokeRealmEnrollmentContactStatus403
+			| RevokeRealmEnrollmentContactStatus404
+			| RevokeRealmEnrollmentContactStatus409
+			| RevokeRealmEnrollmentContactStatus422
+			| RevokeRealmEnrollmentContactStatus500
+			| RevokeRealmEnrollmentContactStatus503
+		>,
+		RevokeRealmEnrollmentContactOptions,
+		TContext
+	>;
+}
+
+export const getRealmEnrollmentRulesQueryKey = ({
+	path,
+	query,
+}: Omit<GetRealmEnrollmentRulesOptions, "headers">) =>
+	[
+		{ url: "/api/v1/realms/:realmId/enrollment-rules", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type GetRealmEnrollmentRulesQueryKey = ReturnType<typeof getRealmEnrollmentRulesQueryKey>;
+
+export function getRealmEnrollmentRulesQueryOptions(
+	{ path, query }: GetRealmEnrollmentRulesOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getRealmEnrollmentRulesQueryKey({ path, query });
+	return queryOptions<
+		GetRealmEnrollmentRulesStatus200,
+		ResponseErrorConfig<
+			| GetRealmEnrollmentRulesStatus403
+			| GetRealmEnrollmentRulesStatus404
+			| GetRealmEnrollmentRulesStatus409
+			| GetRealmEnrollmentRulesStatus422
+			| GetRealmEnrollmentRulesStatus429
+			| GetRealmEnrollmentRulesStatus500
+			| GetRealmEnrollmentRulesStatus503
+		>,
+		GetRealmEnrollmentRulesStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return getRealmEnrollmentRules({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/realms/:realmId/enrollment-rules}
+ */
+export function useGetRealmEnrollmentRules<
+	TData = GetRealmEnrollmentRulesStatus200,
+	TQueryData = GetRealmEnrollmentRulesStatus200,
+	TQueryKey extends QueryKey = GetRealmEnrollmentRulesQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path: GetRealmEnrollmentRulesOptions["path"] | (() => GetRealmEnrollmentRulesOptions["path"]);
+		query?:
+			| GetRealmEnrollmentRulesOptions["query"]
+			| (() => GetRealmEnrollmentRulesOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetRealmEnrollmentRulesStatus200,
+				ResponseErrorConfig<
+					| GetRealmEnrollmentRulesStatus403
+					| GetRealmEnrollmentRulesStatus404
+					| GetRealmEnrollmentRulesStatus409
+					| GetRealmEnrollmentRulesStatus422
+					| GetRealmEnrollmentRulesStatus429
+					| GetRealmEnrollmentRulesStatus500
+					| GetRealmEnrollmentRulesStatus503
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey = resolvedOptions?.queryKey ?? getRealmEnrollmentRulesQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getRealmEnrollmentRulesQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetRealmEnrollmentRulesStatus403
+			| GetRealmEnrollmentRulesStatus404
+			| GetRealmEnrollmentRulesStatus409
+			| GetRealmEnrollmentRulesStatus422
+			| GetRealmEnrollmentRulesStatus429
+			| GetRealmEnrollmentRulesStatus500
+			| GetRealmEnrollmentRulesStatus503
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getRealmMembershipCapabilitiesQueryKey = ({
+	path,
+}: Omit<GetRealmMembershipCapabilitiesOptions, "headers">) =>
+	[{ url: "/api/v1/realms/:realmId/membership-capabilities", params: path }] as const;
+
+type GetRealmMembershipCapabilitiesQueryKey = ReturnType<
+	typeof getRealmMembershipCapabilitiesQueryKey
+>;
+
+export function getRealmMembershipCapabilitiesQueryOptions(
+	{ path }: GetRealmMembershipCapabilitiesOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getRealmMembershipCapabilitiesQueryKey({ path });
+	return queryOptions<
+		GetRealmMembershipCapabilitiesStatus200,
+		ResponseErrorConfig<
+			| GetRealmMembershipCapabilitiesStatus403
+			| GetRealmMembershipCapabilitiesStatus404
+			| GetRealmMembershipCapabilitiesStatus409
+			| GetRealmMembershipCapabilitiesStatus422
+			| GetRealmMembershipCapabilitiesStatus429
+			| GetRealmMembershipCapabilitiesStatus500
+			| GetRealmMembershipCapabilitiesStatus503
+		>,
+		GetRealmMembershipCapabilitiesStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return getRealmMembershipCapabilities({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/realms/:realmId/membership-capabilities}
+ */
+export function useGetRealmMembershipCapabilities<
+	TData = GetRealmMembershipCapabilitiesStatus200,
+	TQueryData = GetRealmMembershipCapabilitiesStatus200,
+	TQueryKey extends QueryKey = GetRealmMembershipCapabilitiesQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetRealmMembershipCapabilitiesOptions["path"]
+			| (() => GetRealmMembershipCapabilitiesOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetRealmMembershipCapabilitiesStatus200,
+				ResponseErrorConfig<
+					| GetRealmMembershipCapabilitiesStatus403
+					| GetRealmMembershipCapabilitiesStatus404
+					| GetRealmMembershipCapabilitiesStatus409
+					| GetRealmMembershipCapabilitiesStatus422
+					| GetRealmMembershipCapabilitiesStatus429
+					| GetRealmMembershipCapabilitiesStatus500
+					| GetRealmMembershipCapabilitiesStatus503
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ?? getRealmMembershipCapabilitiesQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getRealmMembershipCapabilitiesQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetRealmMembershipCapabilitiesStatus403
+			| GetRealmMembershipCapabilitiesStatus404
+			| GetRealmMembershipCapabilitiesStatus409
+			| GetRealmMembershipCapabilitiesStatus422
+			| GetRealmMembershipCapabilitiesStatus429
+			| GetRealmMembershipCapabilitiesStatus500
+			| GetRealmMembershipCapabilitiesStatus503
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getRealmMembershipQueryKey = ({ path }: Omit<GetRealmMembershipOptions, "headers">) =>
+	[{ url: "/api/v1/realms/:realmId/membership", params: path }] as const;
+
+type GetRealmMembershipQueryKey = ReturnType<typeof getRealmMembershipQueryKey>;
+
+export function getRealmMembershipQueryOptions(
+	{ path }: GetRealmMembershipOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getRealmMembershipQueryKey({ path });
+	return queryOptions<
+		GetRealmMembershipStatus200,
+		ResponseErrorConfig<
+			| GetRealmMembershipStatus403
+			| GetRealmMembershipStatus404
+			| GetRealmMembershipStatus409
+			| GetRealmMembershipStatus422
+			| GetRealmMembershipStatus429
+			| GetRealmMembershipStatus500
+			| GetRealmMembershipStatus503
+		>,
+		GetRealmMembershipStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return getRealmMembership({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/realms/:realmId/membership}
+ */
+export function useGetRealmMembership<
+	TData = GetRealmMembershipStatus200,
+	TQueryData = GetRealmMembershipStatus200,
+	TQueryKey extends QueryKey = GetRealmMembershipQueryKey,
+>(
+	{ path }: { path: GetRealmMembershipOptions["path"] | (() => GetRealmMembershipOptions["path"]) },
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetRealmMembershipStatus200,
+				ResponseErrorConfig<
+					| GetRealmMembershipStatus403
+					| GetRealmMembershipStatus404
+					| GetRealmMembershipStatus409
+					| GetRealmMembershipStatus422
+					| GetRealmMembershipStatus429
+					| GetRealmMembershipStatus500
+					| GetRealmMembershipStatus503
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey = resolvedOptions?.queryKey ?? getRealmMembershipQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getRealmMembershipQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetRealmMembershipStatus403
+			| GetRealmMembershipStatus404
+			| GetRealmMembershipStatus409
+			| GetRealmMembershipStatus422
+			| GetRealmMembershipStatus429
+			| GetRealmMembershipStatus500
+			| GetRealmMembershipStatus503
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const joinRealmMutationKey = () => [{ url: "/api/v1/realms/:realmId/membership" }] as const;
+
+export function joinRealmMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = joinRealmMutationKey();
+	return mutationOptions<
+		JoinRealmStatus200,
+		ResponseErrorConfig<
+			| JoinRealmStatus400
+			| JoinRealmStatus403
+			| JoinRealmStatus404
+			| JoinRealmStatus409
+			| JoinRealmStatus422
+			| JoinRealmStatus500
+			| JoinRealmStatus503
+		>,
+		JoinRealmOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return joinRealm({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/realms/:realmId/membership}
+ */
+export function useJoinRealm<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			JoinRealmStatus200,
+			ResponseErrorConfig<
+				| JoinRealmStatus400
+				| JoinRealmStatus403
+				| JoinRealmStatus404
+				| JoinRealmStatus409
+				| JoinRealmStatus422
+				| JoinRealmStatus500
+				| JoinRealmStatus503
+			>,
+			JoinRealmOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? joinRealmMutationKey();
+
+	const baseOptions = joinRealmMutationOptions(config) as UseMutationOptions<
+		JoinRealmStatus200,
+		ResponseErrorConfig<
+			| JoinRealmStatus400
+			| JoinRealmStatus403
+			| JoinRealmStatus404
+			| JoinRealmStatus409
+			| JoinRealmStatus422
+			| JoinRealmStatus500
+			| JoinRealmStatus503
+		>,
+		JoinRealmOptions,
+		TContext
+	>;
+
+	return useMutation<
+		JoinRealmStatus200,
+		ResponseErrorConfig<
+			| JoinRealmStatus400
+			| JoinRealmStatus403
+			| JoinRealmStatus404
+			| JoinRealmStatus409
+			| JoinRealmStatus422
+			| JoinRealmStatus500
+			| JoinRealmStatus503
+		>,
+		JoinRealmOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		JoinRealmStatus200,
+		ResponseErrorConfig<
+			| JoinRealmStatus400
+			| JoinRealmStatus403
+			| JoinRealmStatus404
+			| JoinRealmStatus409
+			| JoinRealmStatus422
+			| JoinRealmStatus500
+			| JoinRealmStatus503
+		>,
+		JoinRealmOptions,
+		TContext
+	>;
+}
+
+export const leaveRealmMutationKey = () => [{ url: "/api/v1/realms/:realmId/membership" }] as const;
+
+export function leaveRealmMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = leaveRealmMutationKey();
+	return mutationOptions<
+		LeaveRealmStatus200,
+		ResponseErrorConfig<
+			| LeaveRealmStatus400
+			| LeaveRealmStatus403
+			| LeaveRealmStatus404
+			| LeaveRealmStatus409
+			| LeaveRealmStatus422
+			| LeaveRealmStatus500
+			| LeaveRealmStatus503
+		>,
+		LeaveRealmOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return leaveRealm({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/realms/:realmId/membership}
+ */
+export function useLeaveRealm<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			LeaveRealmStatus200,
+			ResponseErrorConfig<
+				| LeaveRealmStatus400
+				| LeaveRealmStatus403
+				| LeaveRealmStatus404
+				| LeaveRealmStatus409
+				| LeaveRealmStatus422
+				| LeaveRealmStatus500
+				| LeaveRealmStatus503
+			>,
+			LeaveRealmOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? leaveRealmMutationKey();
+
+	const baseOptions = leaveRealmMutationOptions(config) as UseMutationOptions<
+		LeaveRealmStatus200,
+		ResponseErrorConfig<
+			| LeaveRealmStatus400
+			| LeaveRealmStatus403
+			| LeaveRealmStatus404
+			| LeaveRealmStatus409
+			| LeaveRealmStatus422
+			| LeaveRealmStatus500
+			| LeaveRealmStatus503
+		>,
+		LeaveRealmOptions,
+		TContext
+	>;
+
+	return useMutation<
+		LeaveRealmStatus200,
+		ResponseErrorConfig<
+			| LeaveRealmStatus400
+			| LeaveRealmStatus403
+			| LeaveRealmStatus404
+			| LeaveRealmStatus409
+			| LeaveRealmStatus422
+			| LeaveRealmStatus500
+			| LeaveRealmStatus503
+		>,
+		LeaveRealmOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		LeaveRealmStatus200,
+		ResponseErrorConfig<
+			| LeaveRealmStatus400
+			| LeaveRealmStatus403
+			| LeaveRealmStatus404
+			| LeaveRealmStatus409
+			| LeaveRealmStatus422
+			| LeaveRealmStatus500
+			| LeaveRealmStatus503
+		>,
+		LeaveRealmOptions,
+		TContext
+	>;
+}
+
+export const listRealmEnrollmentsQueryKey = ({
+	path,
+	query,
+}: Omit<ListRealmEnrollmentsOptions, "headers">) =>
+	[
+		{ url: "/api/v1/realms/:realmId/enrollments", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type ListRealmEnrollmentsQueryKey = ReturnType<typeof listRealmEnrollmentsQueryKey>;
+
+export function listRealmEnrollmentsQueryOptions(
+	{ path, query }: ListRealmEnrollmentsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listRealmEnrollmentsQueryKey({ path, query });
+	return queryOptions<
+		ListRealmEnrollmentsStatus200,
+		ResponseErrorConfig<
+			| ListRealmEnrollmentsStatus403
+			| ListRealmEnrollmentsStatus404
+			| ListRealmEnrollmentsStatus409
+			| ListRealmEnrollmentsStatus422
+			| ListRealmEnrollmentsStatus429
+			| ListRealmEnrollmentsStatus500
+			| ListRealmEnrollmentsStatus503
+		>,
+		ListRealmEnrollmentsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return listRealmEnrollments({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/realms/:realmId/enrollments}
+ */
+export function useListRealmEnrollments<
+	TData = ListRealmEnrollmentsStatus200,
+	TQueryData = ListRealmEnrollmentsStatus200,
+	TQueryKey extends QueryKey = ListRealmEnrollmentsQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path: ListRealmEnrollmentsOptions["path"] | (() => ListRealmEnrollmentsOptions["path"]);
+		query?: ListRealmEnrollmentsOptions["query"] | (() => ListRealmEnrollmentsOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListRealmEnrollmentsStatus200,
+				ResponseErrorConfig<
+					| ListRealmEnrollmentsStatus403
+					| ListRealmEnrollmentsStatus404
+					| ListRealmEnrollmentsStatus409
+					| ListRealmEnrollmentsStatus422
+					| ListRealmEnrollmentsStatus429
+					| ListRealmEnrollmentsStatus500
+					| ListRealmEnrollmentsStatus503
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey = resolvedOptions?.queryKey ?? listRealmEnrollmentsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listRealmEnrollmentsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| ListRealmEnrollmentsStatus403
+			| ListRealmEnrollmentsStatus404
+			| ListRealmEnrollmentsStatus409
+			| ListRealmEnrollmentsStatus422
+			| ListRealmEnrollmentsStatus429
+			| ListRealmEnrollmentsStatus500
+			| ListRealmEnrollmentsStatus503
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const listRealmMembersQueryKey = ({
+	path,
+	query,
+}: Omit<ListRealmMembersOptions, "headers">) =>
+	[{ url: "/api/v1/realms/:realmId/members", params: path }, ...(query ? [query] : [])] as const;
+
+type ListRealmMembersQueryKey = ReturnType<typeof listRealmMembersQueryKey>;
+
+export function listRealmMembersQueryOptions(
+	{ path, query }: ListRealmMembersOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listRealmMembersQueryKey({ path, query });
+	return queryOptions<
+		ListRealmMembersStatus200,
+		ResponseErrorConfig<
+			| ListRealmMembersStatus403
+			| ListRealmMembersStatus404
+			| ListRealmMembersStatus409
+			| ListRealmMembersStatus422
+			| ListRealmMembersStatus429
+			| ListRealmMembersStatus500
+			| ListRealmMembersStatus503
+		>,
+		ListRealmMembersStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return listRealmMembers({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/realms/:realmId/members}
+ */
+export function useListRealmMembers<
+	TData = ListRealmMembersStatus200,
+	TQueryData = ListRealmMembersStatus200,
+	TQueryKey extends QueryKey = ListRealmMembersQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path: ListRealmMembersOptions["path"] | (() => ListRealmMembersOptions["path"]);
+		query?: ListRealmMembersOptions["query"] | (() => ListRealmMembersOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListRealmMembersStatus200,
+				ResponseErrorConfig<
+					| ListRealmMembersStatus403
+					| ListRealmMembersStatus404
+					| ListRealmMembersStatus409
+					| ListRealmMembersStatus422
+					| ListRealmMembersStatus429
+					| ListRealmMembersStatus500
+					| ListRealmMembersStatus503
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey = resolvedOptions?.queryKey ?? listRealmMembersQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listRealmMembersQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| ListRealmMembersStatus403
+			| ListRealmMembersStatus404
+			| ListRealmMembersStatus409
+			| ListRealmMembersStatus422
+			| ListRealmMembersStatus429
+			| ListRealmMembersStatus500
+			| ListRealmMembersStatus503
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const updateRealmMemberMutationKey = () =>
+	[{ url: "/api/v1/realms/:realmId/members" }] as const;
+
+export function updateRealmMemberMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = updateRealmMemberMutationKey();
+	return mutationOptions<
+		UpdateRealmMemberStatus200,
+		ResponseErrorConfig<
+			| UpdateRealmMemberStatus400
+			| UpdateRealmMemberStatus403
+			| UpdateRealmMemberStatus404
+			| UpdateRealmMemberStatus409
+			| UpdateRealmMemberStatus422
+			| UpdateRealmMemberStatus500
+			| UpdateRealmMemberStatus503
+		>,
+		UpdateRealmMemberOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return updateRealmMember({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/realms/:realmId/members}
+ */
+export function useUpdateRealmMember<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			UpdateRealmMemberStatus200,
+			ResponseErrorConfig<
+				| UpdateRealmMemberStatus400
+				| UpdateRealmMemberStatus403
+				| UpdateRealmMemberStatus404
+				| UpdateRealmMemberStatus409
+				| UpdateRealmMemberStatus422
+				| UpdateRealmMemberStatus500
+				| UpdateRealmMemberStatus503
+			>,
+			UpdateRealmMemberOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? updateRealmMemberMutationKey();
+
+	const baseOptions = updateRealmMemberMutationOptions(config) as UseMutationOptions<
+		UpdateRealmMemberStatus200,
+		ResponseErrorConfig<
+			| UpdateRealmMemberStatus400
+			| UpdateRealmMemberStatus403
+			| UpdateRealmMemberStatus404
+			| UpdateRealmMemberStatus409
+			| UpdateRealmMemberStatus422
+			| UpdateRealmMemberStatus500
+			| UpdateRealmMemberStatus503
+		>,
+		UpdateRealmMemberOptions,
+		TContext
+	>;
+
+	return useMutation<
+		UpdateRealmMemberStatus200,
+		ResponseErrorConfig<
+			| UpdateRealmMemberStatus400
+			| UpdateRealmMemberStatus403
+			| UpdateRealmMemberStatus404
+			| UpdateRealmMemberStatus409
+			| UpdateRealmMemberStatus422
+			| UpdateRealmMemberStatus500
+			| UpdateRealmMemberStatus503
+		>,
+		UpdateRealmMemberOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		UpdateRealmMemberStatus200,
+		ResponseErrorConfig<
+			| UpdateRealmMemberStatus400
+			| UpdateRealmMemberStatus403
+			| UpdateRealmMemberStatus404
+			| UpdateRealmMemberStatus409
+			| UpdateRealmMemberStatus422
+			| UpdateRealmMemberStatus500
+			| UpdateRealmMemberStatus503
+		>,
+		UpdateRealmMemberOptions,
+		TContext
+	>;
+}
+
+export const inspectRealmMemberMutationKey = () =>
+	[{ url: "/api/v1/realms/:realmId/members/inspect" }] as const;
+
+export function inspectRealmMemberMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = inspectRealmMemberMutationKey();
+	return mutationOptions<
+		InspectRealmMemberStatus200,
+		ResponseErrorConfig<
+			| InspectRealmMemberStatus400
+			| InspectRealmMemberStatus403
+			| InspectRealmMemberStatus404
+			| InspectRealmMemberStatus409
+			| InspectRealmMemberStatus422
+			| InspectRealmMemberStatus429
+			| InspectRealmMemberStatus500
+			| InspectRealmMemberStatus503
+		>,
+		InspectRealmMemberOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return inspectRealmMember({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/realms/:realmId/members/inspect}
+ */
+export function useInspectRealmMember<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			InspectRealmMemberStatus200,
+			ResponseErrorConfig<
+				| InspectRealmMemberStatus400
+				| InspectRealmMemberStatus403
+				| InspectRealmMemberStatus404
+				| InspectRealmMemberStatus409
+				| InspectRealmMemberStatus422
+				| InspectRealmMemberStatus429
+				| InspectRealmMemberStatus500
+				| InspectRealmMemberStatus503
+			>,
+			InspectRealmMemberOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? inspectRealmMemberMutationKey();
+
+	const baseOptions = inspectRealmMemberMutationOptions(config) as UseMutationOptions<
+		InspectRealmMemberStatus200,
+		ResponseErrorConfig<
+			| InspectRealmMemberStatus400
+			| InspectRealmMemberStatus403
+			| InspectRealmMemberStatus404
+			| InspectRealmMemberStatus409
+			| InspectRealmMemberStatus422
+			| InspectRealmMemberStatus429
+			| InspectRealmMemberStatus500
+			| InspectRealmMemberStatus503
+		>,
+		InspectRealmMemberOptions,
+		TContext
+	>;
+
+	return useMutation<
+		InspectRealmMemberStatus200,
+		ResponseErrorConfig<
+			| InspectRealmMemberStatus400
+			| InspectRealmMemberStatus403
+			| InspectRealmMemberStatus404
+			| InspectRealmMemberStatus409
+			| InspectRealmMemberStatus422
+			| InspectRealmMemberStatus429
+			| InspectRealmMemberStatus500
+			| InspectRealmMemberStatus503
+		>,
+		InspectRealmMemberOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		InspectRealmMemberStatus200,
+		ResponseErrorConfig<
+			| InspectRealmMemberStatus400
+			| InspectRealmMemberStatus403
+			| InspectRealmMemberStatus404
+			| InspectRealmMemberStatus409
+			| InspectRealmMemberStatus422
+			| InspectRealmMemberStatus429
+			| InspectRealmMemberStatus500
+			| InspectRealmMemberStatus503
+		>,
+		InspectRealmMemberOptions,
+		TContext
+	>;
+}
+
+export const getRealmMemberHistoryMutationKey = () =>
+	[{ url: "/api/v1/realms/:realmId/members/history" }] as const;
+
+export function getRealmMemberHistoryMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = getRealmMemberHistoryMutationKey();
+	return mutationOptions<
+		GetRealmMemberHistoryStatus200,
+		ResponseErrorConfig<
+			| GetRealmMemberHistoryStatus400
+			| GetRealmMemberHistoryStatus403
+			| GetRealmMemberHistoryStatus404
+			| GetRealmMemberHistoryStatus409
+			| GetRealmMemberHistoryStatus422
+			| GetRealmMemberHistoryStatus429
+			| GetRealmMemberHistoryStatus500
+			| GetRealmMemberHistoryStatus503
+		>,
+		GetRealmMemberHistoryOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return getRealmMemberHistory({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/realms/:realmId/members/history}
+ */
+export function useGetRealmMemberHistory<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			GetRealmMemberHistoryStatus200,
+			ResponseErrorConfig<
+				| GetRealmMemberHistoryStatus400
+				| GetRealmMemberHistoryStatus403
+				| GetRealmMemberHistoryStatus404
+				| GetRealmMemberHistoryStatus409
+				| GetRealmMemberHistoryStatus422
+				| GetRealmMemberHistoryStatus429
+				| GetRealmMemberHistoryStatus500
+				| GetRealmMemberHistoryStatus503
+			>,
+			GetRealmMemberHistoryOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? getRealmMemberHistoryMutationKey();
+
+	const baseOptions = getRealmMemberHistoryMutationOptions(config) as UseMutationOptions<
+		GetRealmMemberHistoryStatus200,
+		ResponseErrorConfig<
+			| GetRealmMemberHistoryStatus400
+			| GetRealmMemberHistoryStatus403
+			| GetRealmMemberHistoryStatus404
+			| GetRealmMemberHistoryStatus409
+			| GetRealmMemberHistoryStatus422
+			| GetRealmMemberHistoryStatus429
+			| GetRealmMemberHistoryStatus500
+			| GetRealmMemberHistoryStatus503
+		>,
+		GetRealmMemberHistoryOptions,
+		TContext
+	>;
+
+	return useMutation<
+		GetRealmMemberHistoryStatus200,
+		ResponseErrorConfig<
+			| GetRealmMemberHistoryStatus400
+			| GetRealmMemberHistoryStatus403
+			| GetRealmMemberHistoryStatus404
+			| GetRealmMemberHistoryStatus409
+			| GetRealmMemberHistoryStatus422
+			| GetRealmMemberHistoryStatus429
+			| GetRealmMemberHistoryStatus500
+			| GetRealmMemberHistoryStatus503
+		>,
+		GetRealmMemberHistoryOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		GetRealmMemberHistoryStatus200,
+		ResponseErrorConfig<
+			| GetRealmMemberHistoryStatus400
+			| GetRealmMemberHistoryStatus403
+			| GetRealmMemberHistoryStatus404
+			| GetRealmMemberHistoryStatus409
+			| GetRealmMemberHistoryStatus422
+			| GetRealmMemberHistoryStatus429
+			| GetRealmMemberHistoryStatus500
+			| GetRealmMemberHistoryStatus503
+		>,
+		GetRealmMemberHistoryOptions,
+		TContext
+	>;
+}
+
+export const acknowledgeRealmRulesMutationKey = () =>
+	[{ url: "/api/v1/realms/:realmId/rules/:revisionId/acknowledgement" }] as const;
+
+export function acknowledgeRealmRulesMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = acknowledgeRealmRulesMutationKey();
+	return mutationOptions<
+		AcknowledgeRealmRulesStatus200,
+		ResponseErrorConfig<
+			| AcknowledgeRealmRulesStatus400
+			| AcknowledgeRealmRulesStatus403
+			| AcknowledgeRealmRulesStatus404
+			| AcknowledgeRealmRulesStatus409
+			| AcknowledgeRealmRulesStatus422
+			| AcknowledgeRealmRulesStatus500
+			| AcknowledgeRealmRulesStatus503
+		>,
+		AcknowledgeRealmRulesOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return acknowledgeRealmRules({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/realms/:realmId/rules/:revisionId/acknowledgement}
+ */
+export function useAcknowledgeRealmRules<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			AcknowledgeRealmRulesStatus200,
+			ResponseErrorConfig<
+				| AcknowledgeRealmRulesStatus400
+				| AcknowledgeRealmRulesStatus403
+				| AcknowledgeRealmRulesStatus404
+				| AcknowledgeRealmRulesStatus409
+				| AcknowledgeRealmRulesStatus422
+				| AcknowledgeRealmRulesStatus500
+				| AcknowledgeRealmRulesStatus503
+			>,
+			AcknowledgeRealmRulesOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? acknowledgeRealmRulesMutationKey();
+
+	const baseOptions = acknowledgeRealmRulesMutationOptions(config) as UseMutationOptions<
+		AcknowledgeRealmRulesStatus200,
+		ResponseErrorConfig<
+			| AcknowledgeRealmRulesStatus400
+			| AcknowledgeRealmRulesStatus403
+			| AcknowledgeRealmRulesStatus404
+			| AcknowledgeRealmRulesStatus409
+			| AcknowledgeRealmRulesStatus422
+			| AcknowledgeRealmRulesStatus500
+			| AcknowledgeRealmRulesStatus503
+		>,
+		AcknowledgeRealmRulesOptions,
+		TContext
+	>;
+
+	return useMutation<
+		AcknowledgeRealmRulesStatus200,
+		ResponseErrorConfig<
+			| AcknowledgeRealmRulesStatus400
+			| AcknowledgeRealmRulesStatus403
+			| AcknowledgeRealmRulesStatus404
+			| AcknowledgeRealmRulesStatus409
+			| AcknowledgeRealmRulesStatus422
+			| AcknowledgeRealmRulesStatus500
+			| AcknowledgeRealmRulesStatus503
+		>,
+		AcknowledgeRealmRulesOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		AcknowledgeRealmRulesStatus200,
+		ResponseErrorConfig<
+			| AcknowledgeRealmRulesStatus400
+			| AcknowledgeRealmRulesStatus403
+			| AcknowledgeRealmRulesStatus404
+			| AcknowledgeRealmRulesStatus409
+			| AcknowledgeRealmRulesStatus422
+			| AcknowledgeRealmRulesStatus500
+			| AcknowledgeRealmRulesStatus503
+		>,
+		AcknowledgeRealmRulesOptions,
+		TContext
+	>;
+}
+
 export const getApiRealmsQueryKey = ({ query }: Omit<GetApiRealmsOptions, "headers"> = {}) =>
 	[{ url: "/api/v1/realms" }, ...(query ? [query] : [])] as const;
 
@@ -60586,431 +62169,6 @@ export function usePutApiRealmsByRealmIdTagVoting<TContext>(
 	>;
 }
 
-export const putApiRealmsByRealmIdMembershipMutationKey = () =>
-	[{ url: "/api/v1/realms/:realmId/membership" }] as const;
-
-export function putApiRealmsByRealmIdMembershipMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = putApiRealmsByRealmIdMembershipMutationKey();
-	return mutationOptions<
-		PutApiRealmsByRealmIdMembershipStatus200,
-		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdMembershipStatus403
-			| PutApiRealmsByRealmIdMembershipStatus404
-			| PutApiRealmsByRealmIdMembershipStatus409
-			| PutApiRealmsByRealmIdMembershipStatus422
-			| PutApiRealmsByRealmIdMembershipStatus429
-			| PutApiRealmsByRealmIdMembershipStatus500
-		>,
-		PutApiRealmsByRealmIdMembershipOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path }) => {
-			return putApiRealmsByRealmIdMembership({ ...config, path, throwOnError: true }).unwrap();
-		},
-	});
-}
-
-/**
- * @summary Join Realm
- * {@link /api/v1/realms/:realmId/membership}
- */
-export function usePutApiRealmsByRealmIdMembership<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PutApiRealmsByRealmIdMembershipStatus200,
-			ResponseErrorConfig<
-				| PutApiRealmsByRealmIdMembershipStatus403
-				| PutApiRealmsByRealmIdMembershipStatus404
-				| PutApiRealmsByRealmIdMembershipStatus409
-				| PutApiRealmsByRealmIdMembershipStatus422
-				| PutApiRealmsByRealmIdMembershipStatus429
-				| PutApiRealmsByRealmIdMembershipStatus500
-			>,
-			PutApiRealmsByRealmIdMembershipOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? putApiRealmsByRealmIdMembershipMutationKey();
-
-	const baseOptions = putApiRealmsByRealmIdMembershipMutationOptions(config) as UseMutationOptions<
-		PutApiRealmsByRealmIdMembershipStatus200,
-		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdMembershipStatus403
-			| PutApiRealmsByRealmIdMembershipStatus404
-			| PutApiRealmsByRealmIdMembershipStatus409
-			| PutApiRealmsByRealmIdMembershipStatus422
-			| PutApiRealmsByRealmIdMembershipStatus429
-			| PutApiRealmsByRealmIdMembershipStatus500
-		>,
-		PutApiRealmsByRealmIdMembershipOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PutApiRealmsByRealmIdMembershipStatus200,
-		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdMembershipStatus403
-			| PutApiRealmsByRealmIdMembershipStatus404
-			| PutApiRealmsByRealmIdMembershipStatus409
-			| PutApiRealmsByRealmIdMembershipStatus422
-			| PutApiRealmsByRealmIdMembershipStatus429
-			| PutApiRealmsByRealmIdMembershipStatus500
-		>,
-		PutApiRealmsByRealmIdMembershipOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PutApiRealmsByRealmIdMembershipStatus200,
-		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdMembershipStatus403
-			| PutApiRealmsByRealmIdMembershipStatus404
-			| PutApiRealmsByRealmIdMembershipStatus409
-			| PutApiRealmsByRealmIdMembershipStatus422
-			| PutApiRealmsByRealmIdMembershipStatus429
-			| PutApiRealmsByRealmIdMembershipStatus500
-		>,
-		PutApiRealmsByRealmIdMembershipOptions,
-		TContext
-	>;
-}
-
-export const deleteApiRealmsByRealmIdMembershipMutationKey = () =>
-	[{ url: "/api/v1/realms/:realmId/membership" }] as const;
-
-export function deleteApiRealmsByRealmIdMembershipMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = deleteApiRealmsByRealmIdMembershipMutationKey();
-	return mutationOptions<
-		DeleteApiRealmsByRealmIdMembershipStatus204,
-		ResponseErrorConfig<
-			| DeleteApiRealmsByRealmIdMembershipStatus403
-			| DeleteApiRealmsByRealmIdMembershipStatus404
-			| DeleteApiRealmsByRealmIdMembershipStatus409
-			| DeleteApiRealmsByRealmIdMembershipStatus422
-			| DeleteApiRealmsByRealmIdMembershipStatus429
-			| DeleteApiRealmsByRealmIdMembershipStatus500
-		>,
-		DeleteApiRealmsByRealmIdMembershipOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path }) => {
-			return deleteApiRealmsByRealmIdMembership({ ...config, path, throwOnError: true }).unwrap();
-		},
-	});
-}
-
-/**
- * @summary Leave Realm
- * {@link /api/v1/realms/:realmId/membership}
- */
-export function useDeleteApiRealmsByRealmIdMembership<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			DeleteApiRealmsByRealmIdMembershipStatus204,
-			ResponseErrorConfig<
-				| DeleteApiRealmsByRealmIdMembershipStatus403
-				| DeleteApiRealmsByRealmIdMembershipStatus404
-				| DeleteApiRealmsByRealmIdMembershipStatus409
-				| DeleteApiRealmsByRealmIdMembershipStatus422
-				| DeleteApiRealmsByRealmIdMembershipStatus429
-				| DeleteApiRealmsByRealmIdMembershipStatus500
-			>,
-			DeleteApiRealmsByRealmIdMembershipOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? deleteApiRealmsByRealmIdMembershipMutationKey();
-
-	const baseOptions = deleteApiRealmsByRealmIdMembershipMutationOptions(
-		config,
-	) as UseMutationOptions<
-		DeleteApiRealmsByRealmIdMembershipStatus204,
-		ResponseErrorConfig<
-			| DeleteApiRealmsByRealmIdMembershipStatus403
-			| DeleteApiRealmsByRealmIdMembershipStatus404
-			| DeleteApiRealmsByRealmIdMembershipStatus409
-			| DeleteApiRealmsByRealmIdMembershipStatus422
-			| DeleteApiRealmsByRealmIdMembershipStatus429
-			| DeleteApiRealmsByRealmIdMembershipStatus500
-		>,
-		DeleteApiRealmsByRealmIdMembershipOptions,
-		TContext
-	>;
-
-	return useMutation<
-		DeleteApiRealmsByRealmIdMembershipStatus204,
-		ResponseErrorConfig<
-			| DeleteApiRealmsByRealmIdMembershipStatus403
-			| DeleteApiRealmsByRealmIdMembershipStatus404
-			| DeleteApiRealmsByRealmIdMembershipStatus409
-			| DeleteApiRealmsByRealmIdMembershipStatus422
-			| DeleteApiRealmsByRealmIdMembershipStatus429
-			| DeleteApiRealmsByRealmIdMembershipStatus500
-		>,
-		DeleteApiRealmsByRealmIdMembershipOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		DeleteApiRealmsByRealmIdMembershipStatus204,
-		ResponseErrorConfig<
-			| DeleteApiRealmsByRealmIdMembershipStatus403
-			| DeleteApiRealmsByRealmIdMembershipStatus404
-			| DeleteApiRealmsByRealmIdMembershipStatus409
-			| DeleteApiRealmsByRealmIdMembershipStatus422
-			| DeleteApiRealmsByRealmIdMembershipStatus429
-			| DeleteApiRealmsByRealmIdMembershipStatus500
-		>,
-		DeleteApiRealmsByRealmIdMembershipOptions,
-		TContext
-	>;
-}
-
-export const getApiRealmsByRealmIdMembersQueryKey = ({
-	path,
-	query,
-}: Omit<GetApiRealmsByRealmIdMembersOptions, "headers">) =>
-	[{ url: "/api/v1/realms/:realmId/members", params: path }, ...(query ? [query] : [])] as const;
-
-type GetApiRealmsByRealmIdMembersQueryKey = ReturnType<typeof getApiRealmsByRealmIdMembersQueryKey>;
-
-export function getApiRealmsByRealmIdMembersQueryOptions(
-	{ path, query }: GetApiRealmsByRealmIdMembersOptions,
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const queryKey = getApiRealmsByRealmIdMembersQueryKey({ path, query });
-	return queryOptions<
-		GetApiRealmsByRealmIdMembersStatus200,
-		ResponseErrorConfig<
-			| GetApiRealmsByRealmIdMembersStatus403
-			| GetApiRealmsByRealmIdMembersStatus422
-			| GetApiRealmsByRealmIdMembersStatus429
-			| GetApiRealmsByRealmIdMembersStatus500
-		>,
-		GetApiRealmsByRealmIdMembersStatus200,
-		typeof queryKey
-	>({
-		queryKey,
-		queryFn: async ({ signal }) => {
-			return getApiRealmsByRealmIdMembers({
-				...config,
-				path,
-				query,
-				signal: config.signal ?? signal,
-				throwOnError: true,
-			}).unwrap();
-		},
-	});
-}
-
-/**
- * @summary List Realm members
- * {@link /api/v1/realms/:realmId/members}
- */
-export function useGetApiRealmsByRealmIdMembers<
-	TData = GetApiRealmsByRealmIdMembersStatus200,
-	TQueryData = GetApiRealmsByRealmIdMembersStatus200,
-	TQueryKey extends QueryKey = GetApiRealmsByRealmIdMembersQueryKey,
->(
-	{
-		path,
-		query,
-	}: {
-		path:
-			| GetApiRealmsByRealmIdMembersOptions["path"]
-			| (() => GetApiRealmsByRealmIdMembersOptions["path"]);
-		query?:
-			| GetApiRealmsByRealmIdMembersOptions["query"]
-			| (() => GetApiRealmsByRealmIdMembersOptions["query"]);
-	},
-	options: {
-		query?: Partial<
-			QueryObserverOptions<
-				GetApiRealmsByRealmIdMembersStatus200,
-				ResponseErrorConfig<
-					| GetApiRealmsByRealmIdMembersStatus403
-					| GetApiRealmsByRealmIdMembersStatus422
-					| GetApiRealmsByRealmIdMembersStatus429
-					| GetApiRealmsByRealmIdMembersStatus500
-				>,
-				TData,
-				TQueryData,
-				TQueryKey
-			>
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { query: queryConfig = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const resolvedParams = {
-		path: typeof path === "function" ? path() : path,
-		query: typeof query === "function" ? query() : query,
-	};
-	const queryKey =
-		resolvedOptions?.queryKey ?? getApiRealmsByRealmIdMembersQueryKey(resolvedParams);
-
-	const queryResult = useQuery(
-		{
-			...getApiRealmsByRealmIdMembersQueryOptions(resolvedParams, config),
-			...resolvedOptions,
-			queryKey,
-		} as unknown as QueryObserverOptions,
-		queryClient,
-	) as UseQueryResult<
-		TData,
-		ResponseErrorConfig<
-			| GetApiRealmsByRealmIdMembersStatus403
-			| GetApiRealmsByRealmIdMembersStatus422
-			| GetApiRealmsByRealmIdMembersStatus429
-			| GetApiRealmsByRealmIdMembersStatus500
-		>
-	> & { queryKey: TQueryKey };
-
-	queryResult.queryKey = queryKey as TQueryKey;
-
-	return queryResult;
-}
-
-export const patchApiRealmsByRealmIdMembersByProfileIdMutationKey = () =>
-	[{ url: "/api/v1/realms/:realmId/members/:profileId" }] as const;
-
-export function patchApiRealmsByRealmIdMembersByProfileIdMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = patchApiRealmsByRealmIdMembersByProfileIdMutationKey();
-	return mutationOptions<
-		PatchApiRealmsByRealmIdMembersByProfileIdStatus200,
-		ResponseErrorConfig<
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus400
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus403
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus404
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus409
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus422
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus429
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus500
-		>,
-		PatchApiRealmsByRealmIdMembersByProfileIdOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path, body }) => {
-			return patchApiRealmsByRealmIdMembersByProfileId({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			}).unwrap();
-		},
-	});
-}
-
-/**
- * @summary Update Realm member
- * {@link /api/v1/realms/:realmId/members/:profileId}
- */
-export function usePatchApiRealmsByRealmIdMembersByProfileId<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PatchApiRealmsByRealmIdMembersByProfileIdStatus200,
-			ResponseErrorConfig<
-				| PatchApiRealmsByRealmIdMembersByProfileIdStatus400
-				| PatchApiRealmsByRealmIdMembersByProfileIdStatus403
-				| PatchApiRealmsByRealmIdMembersByProfileIdStatus404
-				| PatchApiRealmsByRealmIdMembersByProfileIdStatus409
-				| PatchApiRealmsByRealmIdMembersByProfileIdStatus422
-				| PatchApiRealmsByRealmIdMembersByProfileIdStatus429
-				| PatchApiRealmsByRealmIdMembersByProfileIdStatus500
-			>,
-			PatchApiRealmsByRealmIdMembersByProfileIdOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? patchApiRealmsByRealmIdMembersByProfileIdMutationKey();
-
-	const baseOptions = patchApiRealmsByRealmIdMembersByProfileIdMutationOptions(
-		config,
-	) as UseMutationOptions<
-		PatchApiRealmsByRealmIdMembersByProfileIdStatus200,
-		ResponseErrorConfig<
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus400
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus403
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus404
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus409
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus422
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus429
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus500
-		>,
-		PatchApiRealmsByRealmIdMembersByProfileIdOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PatchApiRealmsByRealmIdMembersByProfileIdStatus200,
-		ResponseErrorConfig<
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus400
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus403
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus404
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus409
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus422
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus429
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus500
-		>,
-		PatchApiRealmsByRealmIdMembersByProfileIdOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PatchApiRealmsByRealmIdMembersByProfileIdStatus200,
-		ResponseErrorConfig<
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus400
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus403
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus404
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus409
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus422
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus429
-			| PatchApiRealmsByRealmIdMembersByProfileIdStatus500
-		>,
-		PatchApiRealmsByRealmIdMembersByProfileIdOptions,
-		TContext
-	>;
-}
-
 export const putApiRealmsByRealmIdRulesMutationKey = () =>
 	[{ url: "/api/v1/realms/:realmId/rules" }] as const;
 
@@ -61311,116 +62469,6 @@ export function useGetApiRealmsByRealmIdRulesAuthoring<
 	queryResult.queryKey = queryKey as TQueryKey;
 
 	return queryResult;
-}
-
-export const putApiRealmsByRealmIdRulesByRevisionIdAcknowledgementMutationKey = () =>
-	[{ url: "/api/v1/realms/:realmId/rules/:revisionId/acknowledgement" }] as const;
-
-export function putApiRealmsByRealmIdRulesByRevisionIdAcknowledgementMutationOptions<
-	TContext = unknown,
->(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
-	const mutationKey = putApiRealmsByRealmIdRulesByRevisionIdAcknowledgementMutationKey();
-	return mutationOptions<
-		PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus204,
-		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus400
-			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus404
-			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus409
-			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus422
-			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429
-			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus500
-		>,
-		PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path, body }) => {
-			return putApiRealmsByRealmIdRulesByRevisionIdAcknowledgement({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			}).unwrap();
-		},
-	});
-}
-
-/**
- * @summary Acknowledge current Realm rules
- * {@link /api/v1/realms/:realmId/rules/:revisionId/acknowledgement}
- */
-export function usePutApiRealmsByRealmIdRulesByRevisionIdAcknowledgement<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus204,
-			ResponseErrorConfig<
-				| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus400
-				| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus404
-				| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus409
-				| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus422
-				| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429
-				| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus500
-			>,
-			PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ??
-		putApiRealmsByRealmIdRulesByRevisionIdAcknowledgementMutationKey();
-
-	const baseOptions = putApiRealmsByRealmIdRulesByRevisionIdAcknowledgementMutationOptions(
-		config,
-	) as UseMutationOptions<
-		PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus204,
-		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus400
-			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus404
-			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus409
-			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus422
-			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429
-			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus500
-		>,
-		PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus204,
-		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus400
-			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus404
-			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus409
-			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus422
-			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429
-			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus500
-		>,
-		PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus204,
-		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus400
-			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus404
-			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus409
-			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus422
-			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429
-			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus500
-		>,
-		PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementOptions,
-		TContext
-	>;
 }
 
 export const getApiRealmsByRealmIdPinsQueryKey = ({

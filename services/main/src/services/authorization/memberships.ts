@@ -203,3 +203,14 @@ export async function readAccessMembership(
 		.limit(1);
 	return head ?? null;
 }
+
+/** Lock each concrete owner lifecycle referenced by bounded membership evidence. @internal */
+export async function lockAccessMembershipScopePolicy(tx: DatabaseTransaction, input: readonly string[]) {
+ const unique=[...new Set(input)].sort();
+ if(unique.length>64) throw new AccessMembershipAdmissionUnavailable();
+ const ids=z.array(z.uuid()).parse(unique);
+ if(!ids.length) return;
+ const selected=sql.join(ids.map(id=>sql`${id}::uuid`),sql`, `);
+ await tx.execute(sql`select r.id from public.access_scope s join public.reference_value v on v.id=s.unit_ref join public.realm r on r.id=v.target_realm_id where s.id in (${selected}) order by r.id for share of r`);
+ await tx.execute(sql`select e.id from public.access_scope s join public.reference_value v on v.id=s.unit_ref join public.entity_identity e on e.id=v.target_entity_id join public.entity_participation p on p.entity_id=e.id where s.id in (${selected}) and e.shape='organization' order by e.id for share of e,p`);
+}

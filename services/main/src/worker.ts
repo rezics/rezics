@@ -1,3 +1,4 @@
+import { expireRealmEnrollmentBatch } from "./services/realms/membership-worker";
 import { initializeObservability, runWorkerJob } from "@rezics/observability";
 
 import { RezicsVersion } from "./version";
@@ -127,6 +128,7 @@ const lanes = {
 		},
 	],
 	maintenance: [
+		{ name: "realm.enrollment_expiry", intervalMs: 30_000, run: async () => { await expireRealmEnrollmentBatch(); } },
 		{ name: "organization.enrollment_reconcile", intervalMs: 10_000, run: reconcileOrganizationEnrollmentBatch },
 		{ name: "organization.enrollment_expiry", intervalMs: 10_000, run: expireOrganizationEnrollmentBatch },
 		{ name: "access.group_impact_retention", intervalMs: 10_000, run: pruneExpiredGroupImpactReview },

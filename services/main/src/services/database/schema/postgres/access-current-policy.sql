@@ -67,10 +67,19 @@ $$;
 -- Org admission remains institutional, but a disabled/recovery-required scope supplies no live member-set authority.
 CREATE OR REPLACE FUNCTION public.access_membership_scope_is_eligible(p_scope uuid)
 RETURNS boolean LANGUAGE sql VOLATILE SET search_path=pg_catalog,public AS $$
- SELECT CASE WHEN e.shape='organization' THEN e.deleted_at IS NULL AND coalesce(p.state='active',false) ELSE true END
+ SELECT CASE WHEN e.shape='organization' THEN e.deleted_at IS NULL AND coalesce(p.state='active',false) WHEN r.target_realm_id IS NOT NULL THEN EXISTS(SELECT 1 FROM public.realm realm WHERE realm.id=r.target_realm_id AND realm.deleted_at IS NULL AND realm.moderation_status='approved' AND realm.status='published') ELSE true END
  FROM public.access_scope s LEFT JOIN public.reference_value r ON r.id=s.unit_ref
  LEFT JOIN public.entity_identity e ON e.id=r.target_entity_id LEFT JOIN public.entity_participation p ON p.entity_id=e.id
  WHERE s.id=p_scope
+$$;
+
+-- Realm bans are independent hard restrictions on every shared member-set path.
+CREATE OR REPLACE FUNCTION public.access_membership_is_eligible(p_membership uuid)
+RETURNS boolean LANGUAGE sql VOLATILE SET search_path=pg_catalog,public AS $$
+ SELECT public.access_membership_scope_is_eligible(m.scope_id) AND m.active_generation IS NOT NULL
+  AND public.access_subject_is_eligible(m.subject_id,'read')
+  AND NOT EXISTS(SELECT 1 FROM public.realm_enforcement e WHERE e.scope_id=m.scope_id AND e.subject_id=m.subject_id AND e.state='banned')
+ FROM public.access_membership m WHERE m.id=p_membership
 $$;
 
 CREATE OR REPLACE FUNCTION public.access_subject_matches_recipient(p_subject uuid,p_kind text,p_recipient uuid,p_scope uuid,p_group uuid)
@@ -83,7 +92,7 @@ BEGIN
  IF public.access_membership_scope_is_eligible(p_scope) IS NULL THEN RETURN NULL; END IF;
  IF NOT public.access_membership_scope_is_eligible(p_scope) THEN RETURN false; END IF;
  SELECT * INTO member FROM public.access_membership WHERE subject_id=p_subject AND scope_id=p_scope;
- IF NOT FOUND OR member.active_generation IS NULL THEN RETURN false; END IF;
+ IF NOT FOUND OR public.access_membership_is_eligible(member.id) IS DISTINCT FROM true THEN RETURN false; END IF;
  IF p_kind='all-members' THEN RETURN true; END IF;
  IF p_group IS NULL OR NOT EXISTS(SELECT 1 FROM public.access_group_membership_set WHERE membership_id=member.id AND generation=member.active_generation) THEN RETURN NULL; END IF;
  SELECT count(*) INTO selected_count FROM (SELECT 1 FROM public.access_group_membership WHERE membership_id=member.id AND generation=member.active_generation AND selected LIMIT 65) selected;

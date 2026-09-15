@@ -1,3 +1,4 @@
+import { lockAccessMembershipScopePolicy } from "./memberships";
 import { and, eq, inArray, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
@@ -57,6 +58,7 @@ export async function readAccessMemberSetRecipients(
 	const trees = await tx.select({ id: accessGroupTree.scopeId }).from(accessGroupTree)
 		.where(inArray(accessGroupTree.scopeId, treeIds)).orderBy(accessGroupTree.scopeId).for("share");
 	if (trees.length !== treeIds.length) throw new AccessGroupMembershipUnavailable();
+	await lockAccessMembershipScopePolicy(tx,treeIds);
 	const memberships = await tx.select().from(accessMembership)
 		.where(inArray(accessMembership.id, candidates.map(member => member.id))).orderBy(accessMembership.id).for("share");
 	if (memberships.length !== candidates.length) throw new AccessGroupMembershipUnavailable();
@@ -66,7 +68,10 @@ export async function readAccessMemberSetRecipients(
  const lifecycle = (await tx.execute<{ id: string; eligible: boolean | null }>(sql`select id,public.access_membership_scope_is_eligible(id) as eligible from public.access_scope where id in (${sql.join(treeIds.map(id => sql`${id}::uuid`),sql`, `)})`)).rows;
  if (lifecycle.length!==treeIds.length || lifecycle.some(row => row.eligible===null)) throw new AccessGroupMembershipUnavailable();
  const admittedScopes = new Set(lifecycle.filter(row => row.eligible).map(row => row.id));
- const active = memberships.filter(member => member.activeGeneration !== null && admittedScopes.has(member.scopeId));
+ const eligibleMembers = (await tx.execute<{ id:string; eligible:boolean|null }>(sql`select id,public.access_membership_is_eligible(id) as eligible from public.access_membership where id in (${sql.join(memberships.map(member=>sql`${member.id}::uuid`),sql`, `)})`)).rows;
+ if(eligibleMembers.length!==memberships.length||eligibleMembers.some(row=>row.eligible===null)) throw new AccessGroupMembershipUnavailable();
+ const eligibleIds=new Set(eligibleMembers.filter(row=>row.eligible).map(row=>row.id));
+ const active = memberships.filter(member => member.activeGeneration !== null && admittedScopes.has(member.scopeId) && eligibleIds.has(member.id));
 	if (!active.length) return { subjectId: request.subjectId, memberships, selections: [], recipients: [] };
 	const sets = await tx.select().from(accessGroupMembershipSet).where(or(...active.map(member =>
 		and(eq(accessGroupMembershipSet.membershipId, member.id), eq(accessGroupMembershipSet.generation, member.activeGeneration!)))))

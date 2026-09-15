@@ -26,7 +26,6 @@ import {
 	platformCapabilityGrant,
 	post,
 	realm,
-	realmMember,
 	unitDock,
 	accountFollowPreference,
 	unitLocalization,
@@ -73,7 +72,6 @@ export async function inspectInitialInstallationBundle() {
 		officialZoneNavigations,
 		officialRealmAvatar,
 		bootstrapProfiles,
-		profileScoreMemberships,
 		accountPreferences,
 		profileFollows,
 		firstOrdinaryFollowPositions,
@@ -316,15 +314,6 @@ export async function inspectInitialInstallationBundle() {
 				),
 			),
 		database
-			.select({ profileId: realmMember.profileId })
-			.from(realmMember)
-			.where(
-				and(
-					eq(realmMember.realmId, RezicsScoreRealmManifest.id),
-					inArray(realmMember.profileId, BootstrapProfileIdValues),
-				),
-			),
-		database
 			.select({
 				authUserId: accountPreference.authUserId,
 				defaultScoreRealmId: accountPreference.defaultScoreRealmId,
@@ -365,12 +354,22 @@ export async function inspectInitialInstallationBundle() {
 							eq(accountFollowPreference.favorite, false),
 							notInArray(
 								accountFollowPreference.targetReferenceId,
-								database.select({ id: referenceValue.id }).from(referenceValue)
-									.where(inArray(referenceValue.targetZoneId, OfficialZoneManifest.map(({ id }) => id))),
+								database
+									.select({ id: referenceValue.id })
+									.from(referenceValue)
+									.where(
+										inArray(
+											referenceValue.targetZoneId,
+											OfficialZoneManifest.map(({ id }) => id),
+										),
+									),
 							),
 						),
 					)
-					.orderBy(asc(accountFollowPreference.position), asc(accountFollowPreference.targetReferenceId))
+					.orderBy(
+						asc(accountFollowPreference.position),
+						asc(accountFollowPreference.targetReferenceId),
+					)
 					.limit(1);
 				return { profileId, position: follow?.position ?? null };
 			}),
@@ -445,7 +444,6 @@ export async function inspectInitialInstallationBundle() {
 		officialZoneNavigations,
 		officialRealmAvatar,
 		bootstrapProfiles,
-		profileScoreMemberships,
 		accountPreferences,
 		profileFollows,
 		firstOrdinaryFollowPositions,

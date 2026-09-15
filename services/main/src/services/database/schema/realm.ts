@@ -4,6 +4,9 @@ import { inArray, sql } from "drizzle-orm";
 import {
 	type AnyPgColumn,
 	boolean,
+	bigint,
+	pgView,
+	timestamp,
 	check,
 	index,
 	integer,
@@ -54,13 +57,14 @@ export const realmTagFallbackPolicy = pgEnum(
 	"realm_tag_fallback_policy",
 	toEnumValues(RealmTagFallbackPolicyValues),
 );
-const platformCapabilityStorageValues=toEnumValues(PlatformCapabilityValues);
+const platformCapabilityStorageValues = toEnumValues(PlatformCapabilityValues);
 export const platformCapability = pgEnum("platform_capability", platformCapabilityStorageValues);
 
 export const realm = pgTable(
 	"realm",
 	{
 		...createPlatformIdentityColumns(),
+		membershipControlRevision: bigint({ mode: "number" }).notNull().default(1),
 		joinPolicy: realmJoinPolicy().default("open").notNull(),
 		realmTagVotingEnabled: boolean("realm_tag_voting_enabled").default(false).notNull(),
 		tagFitFallbackPolicy: realmTagFallbackPolicy("tag_fit_fallback_policy")
@@ -76,6 +80,10 @@ export const realm = pgTable(
 	},
 	(table) => [
 		...platformIdentityConstraints("realm", table),
+		check(
+			"realm_membership_control_revision_check",
+			sql`${table.membershipControlRevision} between 1 and 9007199254740991`,
+		),
 		check(
 			"realm_enabled_pages_cardinality_check",
 			sql`cardinality(${table.enabledPages}) between 1 and ${RealmPageKindValues.length}`,
@@ -99,25 +107,14 @@ export const realm = pgTable(
 	],
 );
 
-export const realmMember = pgTable(
-	"realm_member",
-	{
-		realmId: uuid()
-			.notNull()
-			.references(() => realm.id, { onDelete: "cascade" }),
-		profileId: uuid()
-			.notNull()
-			.references(() => entityIdentity.id, { onDelete: "cascade" }),
-		state: realmMemberState().default("active").notNull(),
-		joinedAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
-	},
-	(table) => [
-		primaryKey({ columns: [table.realmId, table.profileId] }),
-		index("realm_member_realm_state_idx").on(table.realmId, table.state),
-		index("realm_member_profile_idx").on(table.profileId),
-	],
-);
+/** Read-only public Entity participation projection over the shared enrollment identity. @internal */
+export const realmMember = pgView("current_realm_entity_membership", {
+	realmId: uuid("realm_id").notNull(),
+	profileId: uuid("profile_id").notNull(),
+	state: realmMemberState("state").notNull(),
+	joinedAt: timestamp("joined_at", { withTimezone: true, precision: 3 }).notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
+}).existing();
 
 export const realmRuleRevision = pgTable(
 	"realm_rule_revision",
@@ -158,27 +155,13 @@ export const realmRule = pgTable(
 	],
 );
 
-export const realmRuleAcceptance = pgTable(
-	"realm_rule_acceptance",
-	{
-		revisionId: uuid()
-			.notNull()
-			.references(() => realmRuleRevision.id, { onDelete: "cascade" }),
-		profileId: uuid()
-			.notNull()
-			.references(() => entityIdentity.id, { onDelete: "cascade" }),
-		language: text().$type<ContentLanguage>(),
-		acceptedAt: createCreatedAtColumn(),
-	},
-	(table) => [
-		primaryKey({ columns: [table.revisionId, table.profileId] }),
-		index("realm_rule_acceptance_profile_idx").on(table.profileId, table.acceptedAt.desc()),
-		check(
-			"realm_rule_acceptance_language_check",
-			sql`${table.language} is null or ${inArray(table.language, ContentLanguageValues)}`,
-		),
-	],
-);
+/** Current-generation public Entity rule consent; private subjects never appear here. @internal */
+export const realmRuleAcceptance = pgView("current_realm_entity_rule_acceptance", {
+	revisionId: uuid("revision_id").notNull(),
+	profileId: uuid("profile_id").notNull(),
+	language: text("language").$type<ContentLanguage>(),
+	acceptedAt: timestamp("accepted_at", { withTimezone: true, precision: 3 }).notNull(),
+}).existing();
 
 export const realmPin = pgTable(
 	"realm_pin",

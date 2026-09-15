@@ -336,7 +336,22 @@ export default {
 		ownerMarker: "Propriété",
 		unitOwner: "Propriétaire de la Unit",
 	},
+	membershipIdentityRequired:
+		"Sélectionnez une identité publique que vous contrôlez avant de gérer les adhésions.",
+	memberActions: {
+		approve: "Approuver",
+		reject: "Refuser",
+		remove: "Retirer",
+		mute: "Rendre muet",
+		ban: "Bannir",
+		clear: "Lever la restriction",
+	},
 	memberStates: {
+		open: "Non inscrit",
+		invited: "Invité",
+		rejected: "Refusé",
+		left: "A quitté",
+
 		active: "Actif",
 		pending: "En attente",
 		muted: "Réduit au silence",
@@ -346,11 +361,11 @@ export default {
 	requireOnJoin: "Exiger l’acceptation pour rejoindre",
 	requireOnPost: "Exiger l’acceptation avant de publier du contenu",
 	ruleAcknowledgementHint:
-		"Chaque version des règles ne doit être acceptée qu’une seule fois. Après la mise en ligne d’une nouvelle version, les membres doivent l’accepter de nouveau avant la prochaine action sélectionnée.",
+		"La confirmation concerne une version des règles et une adhésion. Une nouvelle version peut demander une autre confirmation.",
 	ruleAcknowledgementMode: "Acceptation des règles",
 	ruleAcknowledgementModes: {
 		explicit: "Demander une confirmation explicite",
-		implicitOnFollow: `Accepter discrètement lors du ${followTerms.gerund}`,
+		implicitOnFollow: "Confirmer lors de l’adhésion",
 	},
 	ruleLanguage: "Langue de la règle",
 	ruleTitle: "Titre de la règle",

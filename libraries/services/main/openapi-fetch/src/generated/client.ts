@@ -1109,6 +1109,34 @@ import type {
 	PostApiPostsByPostIdRepliesResponses,
 	PatchApiPostsByPostIdRepliesByReplyPostIdOptions,
 	PatchApiPostsByPostIdRepliesByReplyPostIdResponses,
+	CreateRealmEnrollmentContactOptions,
+	CreateRealmEnrollmentContactResponses,
+	ResolveRealmEnrollmentContactOptions,
+	ResolveRealmEnrollmentContactResponses,
+	RevokeRealmEnrollmentContactOptions,
+	RevokeRealmEnrollmentContactResponses,
+	GetRealmEnrollmentRulesOptions,
+	GetRealmEnrollmentRulesResponses,
+	GetRealmMembershipCapabilitiesOptions,
+	GetRealmMembershipCapabilitiesResponses,
+	GetRealmMembershipOptions,
+	GetRealmMembershipResponses,
+	JoinRealmOptions,
+	JoinRealmResponses,
+	LeaveRealmOptions,
+	LeaveRealmResponses,
+	ListRealmEnrollmentsOptions,
+	ListRealmEnrollmentsResponses,
+	ListRealmMembersOptions,
+	ListRealmMembersResponses,
+	UpdateRealmMemberOptions,
+	UpdateRealmMemberResponses,
+	InspectRealmMemberOptions,
+	InspectRealmMemberResponses,
+	GetRealmMemberHistoryOptions,
+	GetRealmMemberHistoryResponses,
+	AcknowledgeRealmRulesOptions,
+	AcknowledgeRealmRulesResponses,
 	GetApiRealmsOptions,
 	GetApiRealmsResponses,
 	PostApiRealmsOptions,
@@ -1135,22 +1163,12 @@ import type {
 	DeleteApiRealmsByRealmIdScoreContextResponses,
 	PutApiRealmsByRealmIdTagVotingOptions,
 	PutApiRealmsByRealmIdTagVotingResponses,
-	PutApiRealmsByRealmIdMembershipOptions,
-	PutApiRealmsByRealmIdMembershipResponses,
-	DeleteApiRealmsByRealmIdMembershipOptions,
-	DeleteApiRealmsByRealmIdMembershipResponses,
-	GetApiRealmsByRealmIdMembersOptions,
-	GetApiRealmsByRealmIdMembersResponses,
-	PatchApiRealmsByRealmIdMembersByProfileIdOptions,
-	PatchApiRealmsByRealmIdMembersByProfileIdResponses,
 	PutApiRealmsByRealmIdRulesOptions,
 	PutApiRealmsByRealmIdRulesResponses,
 	GetApiRealmsByRealmIdRulesOptions,
 	GetApiRealmsByRealmIdRulesResponses,
 	GetApiRealmsByRealmIdRulesAuthoringOptions,
 	GetApiRealmsByRealmIdRulesAuthoringResponses,
-	PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementOptions,
-	PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementResponses,
 	GetApiRealmsByRealmIdPinsOptions,
 	GetApiRealmsByRealmIdPinsResponses,
 	PostApiRealmsByRealmIdPinsMoveOptions,
@@ -13043,6 +13061,279 @@ export function patchApiPostsByPostIdRepliesByReplyPostId<ThrowOnError extends b
 }
 
 /**
+ * {@link /api/v1/realms/:realmId/enrollment-contact}
+ */
+export function createRealmEnrollmentContact<ThrowOnError extends boolean = true>(
+	options: Options<CreateRealmEnrollmentContactOptions, ThrowOnError>,
+): Unwrappable<RequestResult<CreateRealmEnrollmentContactResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/realms/{realmId}/enrollment-contact",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<CreateRealmEnrollmentContactResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/realms/:realmId/enrollment-contacts/resolve}
+ */
+export function resolveRealmEnrollmentContact<ThrowOnError extends boolean = true>(
+	options: Options<ResolveRealmEnrollmentContactOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ResolveRealmEnrollmentContactResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/realms/{realmId}/enrollment-contacts/resolve",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ResolveRealmEnrollmentContactResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/realms/enrollment-contacts/:contactId}
+ */
+export function revokeRealmEnrollmentContact<ThrowOnError extends boolean = true>(
+	options: Options<RevokeRealmEnrollmentContactOptions, ThrowOnError>,
+): Unwrappable<RequestResult<RevokeRealmEnrollmentContactResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/realms/enrollment-contacts/{contactId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<RevokeRealmEnrollmentContactResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/realms/:realmId/enrollment-rules}
+ */
+export function getRealmEnrollmentRules<ThrowOnError extends boolean = true>(
+	options: Options<GetRealmEnrollmentRulesOptions, ThrowOnError>,
+): Unwrappable<RequestResult<GetRealmEnrollmentRulesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/realms/{realmId}/enrollment-rules",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetRealmEnrollmentRulesResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/realms/:realmId/membership-capabilities}
+ */
+export function getRealmMembershipCapabilities<ThrowOnError extends boolean = true>(
+	options: Options<GetRealmMembershipCapabilitiesOptions, ThrowOnError>,
+): Unwrappable<RequestResult<GetRealmMembershipCapabilitiesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/realms/{realmId}/membership-capabilities",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetRealmMembershipCapabilitiesResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/realms/:realmId/membership}
+ */
+export function getRealmMembership<ThrowOnError extends boolean = true>(
+	options: Options<GetRealmMembershipOptions, ThrowOnError>,
+): Unwrappable<RequestResult<GetRealmMembershipResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/realms/{realmId}/membership",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetRealmMembershipResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/realms/:realmId/membership}
+ */
+export function joinRealm<ThrowOnError extends boolean = true>(
+	options: Options<JoinRealmOptions, ThrowOnError>,
+): Unwrappable<RequestResult<JoinRealmResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/realms/{realmId}/membership",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<JoinRealmResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/realms/:realmId/membership}
+ */
+export function leaveRealm<ThrowOnError extends boolean = true>(
+	options: Options<LeaveRealmOptions, ThrowOnError>,
+): Unwrappable<RequestResult<LeaveRealmResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/realms/{realmId}/membership",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<LeaveRealmResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/realms/:realmId/enrollments}
+ */
+export function listRealmEnrollments<ThrowOnError extends boolean = true>(
+	options: Options<ListRealmEnrollmentsOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ListRealmEnrollmentsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/realms/{realmId}/enrollments",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ListRealmEnrollmentsResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/realms/:realmId/members}
+ */
+export function listRealmMembers<ThrowOnError extends boolean = true>(
+	options: Options<ListRealmMembersOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ListRealmMembersResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/realms/{realmId}/members",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ListRealmMembersResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/realms/:realmId/members}
+ */
+export function updateRealmMember<ThrowOnError extends boolean = true>(
+	options: Options<UpdateRealmMemberOptions, ThrowOnError>,
+): Unwrappable<RequestResult<UpdateRealmMemberResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/realms/{realmId}/members",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<UpdateRealmMemberResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/realms/:realmId/members/inspect}
+ */
+export function inspectRealmMember<ThrowOnError extends boolean = true>(
+	options: Options<InspectRealmMemberOptions, ThrowOnError>,
+): Unwrappable<RequestResult<InspectRealmMemberResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/realms/{realmId}/members/inspect",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<InspectRealmMemberResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/realms/:realmId/members/history}
+ */
+export function getRealmMemberHistory<ThrowOnError extends boolean = true>(
+	options: Options<GetRealmMemberHistoryOptions, ThrowOnError>,
+): Unwrappable<RequestResult<GetRealmMemberHistoryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/realms/{realmId}/members/history",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetRealmMemberHistoryResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/realms/:realmId/rules/:revisionId/acknowledgement}
+ */
+export function acknowledgeRealmRules<ThrowOnError extends boolean = true>(
+	options: Options<AcknowledgeRealmRulesOptions, ThrowOnError>,
+): Unwrappable<RequestResult<AcknowledgeRealmRulesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/realms/{realmId}/rules/{revisionId}/acknowledgement",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<AcknowledgeRealmRulesResponses, ThrowOnError>>,
+	);
+}
+
+/**
  * @summary List Realms
  * {@link /api/v1/realms}
  */
@@ -13297,94 +13588,6 @@ export function putApiRealmsByRealmIdTagVoting<ThrowOnError extends boolean = tr
 }
 
 /**
- * @summary Join Realm
- * {@link /api/v1/realms/:realmId/membership}
- */
-export function putApiRealmsByRealmIdMembership<ThrowOnError extends boolean = true>(
-	options: Options<PutApiRealmsByRealmIdMembershipOptions, ThrowOnError>,
-): Unwrappable<RequestResult<PutApiRealmsByRealmIdMembershipResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return withUnwrap(
-		request({
-			method: "PUT",
-			url: "/api/v1/realms/{realmId}/membership",
-			security: [
-				{ type: "http", scheme: "bearer" },
-				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-			],
-			...config,
-		}) as Promise<RequestResult<PutApiRealmsByRealmIdMembershipResponses, ThrowOnError>>,
-	);
-}
-
-/**
- * @summary Leave Realm
- * {@link /api/v1/realms/:realmId/membership}
- */
-export function deleteApiRealmsByRealmIdMembership<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiRealmsByRealmIdMembershipOptions, ThrowOnError>,
-): Unwrappable<RequestResult<DeleteApiRealmsByRealmIdMembershipResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return withUnwrap(
-		request({
-			method: "DELETE",
-			url: "/api/v1/realms/{realmId}/membership",
-			security: [
-				{ type: "http", scheme: "bearer" },
-				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-			],
-			...config,
-		}) as Promise<RequestResult<DeleteApiRealmsByRealmIdMembershipResponses, ThrowOnError>>,
-	);
-}
-
-/**
- * @summary List Realm members
- * {@link /api/v1/realms/:realmId/members}
- */
-export function getApiRealmsByRealmIdMembers<ThrowOnError extends boolean = true>(
-	options: Options<GetApiRealmsByRealmIdMembersOptions, ThrowOnError>,
-): Unwrappable<RequestResult<GetApiRealmsByRealmIdMembersResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return withUnwrap(
-		request({
-			method: "GET",
-			url: "/api/v1/realms/{realmId}/members",
-			security: [
-				{ type: "http", scheme: "bearer" },
-				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-			],
-			...config,
-		}) as Promise<RequestResult<GetApiRealmsByRealmIdMembersResponses, ThrowOnError>>,
-	);
-}
-
-/**
- * @summary Update Realm member
- * {@link /api/v1/realms/:realmId/members/:profileId}
- */
-export function patchApiRealmsByRealmIdMembersByProfileId<ThrowOnError extends boolean = true>(
-	options: Options<PatchApiRealmsByRealmIdMembersByProfileIdOptions, ThrowOnError>,
-): Unwrappable<RequestResult<PatchApiRealmsByRealmIdMembersByProfileIdResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return withUnwrap(
-		request({
-			method: "PATCH",
-			url: "/api/v1/realms/{realmId}/members/{profileId}",
-			security: [
-				{ type: "http", scheme: "bearer" },
-				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-			],
-			...config,
-		}) as Promise<RequestResult<PatchApiRealmsByRealmIdMembersByProfileIdResponses, ThrowOnError>>,
-	);
-}
-
-/**
  * @summary Update Realm rules
  * {@link /api/v1/realms/:realmId/rules}
  */
@@ -13441,34 +13644,6 @@ export function getApiRealmsByRealmIdRulesAuthoring<ThrowOnError extends boolean
 			],
 			...config,
 		}) as Promise<RequestResult<GetApiRealmsByRealmIdRulesAuthoringResponses, ThrowOnError>>,
-	);
-}
-
-/**
- * @summary Acknowledge current Realm rules
- * {@link /api/v1/realms/:realmId/rules/:revisionId/acknowledgement}
- */
-export function putApiRealmsByRealmIdRulesByRevisionIdAcknowledgement<
-	ThrowOnError extends boolean = true,
->(
-	options: Options<PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementOptions, ThrowOnError>,
-): Unwrappable<
-	RequestResult<PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementResponses, ThrowOnError>
-> {
-	const { client: request = client, ...config } = options;
-
-	return withUnwrap(
-		request({
-			method: "PUT",
-			url: "/api/v1/realms/{realmId}/rules/{revisionId}/acknowledgement",
-			security: [
-				{ type: "http", scheme: "bearer" },
-				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-			],
-			...config,
-		}) as Promise<
-			RequestResult<PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementResponses, ThrowOnError>
-		>,
 	);
 }
 

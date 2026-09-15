@@ -1,10 +1,10 @@
 "use client";
+import { inspectRealmMember } from "@rezics/openapi-tanstack-query";
+import { useRealmMembershipContext } from "./hooks/use-realm-membership-context";
+import { realmMembershipPreconditions } from "./data/membership-preconditions";
 
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
-import {
-	getApiRealmsByRealmIdMembersQueryKey,
-	usePatchApiRealmsByRealmIdMembersByProfileId,
-} from "@rezics/openapi-tanstack-query";
+import { listRealmMembersQueryKey, useUpdateRealmMember } from "@rezics/openapi-tanstack-query";
 import {
 	Badge,
 	Card,
@@ -36,6 +36,11 @@ import {
 } from "./model/realm-member-filters";
 import { invalidateRealmDetails } from "./query";
 
+const MemberOperations = ["approve", "reject", "remove", "mute", "ban", "clear"] as const;
+type MemberOperation = (typeof MemberOperations)[number];
+const isMemberOperation = (value: string): value is MemberOperation =>
+	MemberOperations.some((operation) => operation === value);
+
 const EmptyMembers: readonly RealmMember[] = [];
 
 export function RealmMembers({
@@ -53,13 +58,15 @@ export function RealmMembers({
 }) {
 	const { t } = useTranslation(["realms", "state"]);
 	const queryClient = useQueryClient();
-	const bulkUpdate = usePatchApiRealmsByRealmIdMembersByProfileId();
+	const context = useRealmMembershipContext();
+	const bulkUpdate = useUpdateRealmMember({ client: { client: context.client } });
 	const [search, setSearch] = useState("");
 	const deferredSearch = useDeferredValue(search);
 	const [stateFilter, setStateFilter] = useState<MemberFilter<MemberState>>("all");
 	const [selected, setSelected] = useState<ReadonlySet<string>>(() => new Set());
 	const [bulkState, setBulkState] = useState("");
 	const [bulkPending, setBulkPending] = useState(false);
+	const [bulkFailure, setBulkFailure] = useState<unknown>();
 	const items = members ?? EmptyMembers;
 	const filtered = useMemo(
 		() => filterRealmMembers(items, deferredSearch, stateFilter),
@@ -75,26 +82,37 @@ export function RealmMembers({
 	const invalidateMembers = async () => {
 		await Promise.all([
 			queryClient.invalidateQueries({
-				queryKey: getApiRealmsByRealmIdMembersQueryKey({ path: { realmId } }),
+				queryKey: listRealmMembersQueryKey({ path: { realmId } }),
 			}),
 			invalidateRealmDetails(queryClient, realmId),
 		]);
 	};
 
-	const applyBulkState = async (state: MemberState) => {
-		if (!selectedProfileIds.length || bulkPending) return;
+	const applyBulkState = async (operation: MemberOperation) => {
+		if (!selectedProfileIds.length || bulkPending || !context.client) return;
 		bulkUpdate.reset();
+		setBulkFailure(undefined);
 		setBulkPending(true);
 		let completed = false;
 		try {
 			for (const profileId of selectedProfileIds) {
+				const status = await inspectRealmMember({
+					path: { realmId },
+					body: { kind: "entity", entityId: profileId },
+					client: context.client,
+				}).unwrap();
 				await bulkUpdate.mutateAsync({
-					path: { realmId, profileId },
-					body: { state },
+					path: { realmId },
+					body: {
+						...realmMembershipPreconditions(status),
+						recipient: { kind: "entity", entityId: profileId },
+						operation,
+					},
 				});
 			}
 			completed = true;
-		} catch {
+		} catch (error) {
+			setBulkFailure(error);
 			// The mutation exposes its localized request failure below.
 		} finally {
 			try {
@@ -149,7 +167,7 @@ export function RealmMembers({
 					>
 						<NativeSelectOption value="all">{t.realms.membersView.allStates}</NativeSelectOption>
 						{MemberStates.map((state) => (
-							<NativeSelectOption key={state} value={state}>
+							<NativeSelectOption key={state} value="">
 								{t.realms.memberStates[state]}
 							</NativeSelectOption>
 						))}
@@ -186,16 +204,16 @@ export function RealmMembers({
 											onChange={(event) => {
 												const value = event.currentTarget.value;
 												setBulkState(value);
-												if (isMemberState(value)) void applyBulkState(value);
+												if (isMemberOperation(value)) void applyBulkState(value);
 											}}
 											value={bulkState}
 										>
 											<NativeSelectOption value="">
 												{t.realms.membersView.bulkState}
 											</NativeSelectOption>
-											{MemberStates.map((state) => (
-												<NativeSelectOption key={state} value={state}>
-													{t.realms.memberStates[state]}
+											{MemberOperations.map((state) => (
+												<NativeSelectOption key={state} value="">
+													{t.realms.memberActions[state]}
 												</NativeSelectOption>
 											))}
 										</NativeSelect>
@@ -247,7 +265,7 @@ export function RealmMembers({
 					</CardContent>
 				</Card>
 			)}
-			<RequestFailure error={bulkUpdate.error} />
+			<RequestFailure error={bulkFailure ?? bulkUpdate.error} />
 		</section>
 	);
 }
@@ -268,27 +286,36 @@ function RealmMemberRow({
 	onChanged: () => Promise<void>;
 }) {
 	const { t } = useTranslation(["realms"]);
-	const update = usePatchApiRealmsByRealmIdMembersByProfileId();
-	const [state, setState] = useState(member.state);
+	const context = useRealmMembershipContext();
+	const update = useUpdateRealmMember({ client: { client: context.client } });
+	const [commandError, setCommandError] = useState<unknown>();
 	const name = member.name ?? t.realms.unknownMember;
 	const href = profileHref({
 		id: member.profileId,
 		slugAddress: member.slugAddress,
 	});
 
-	const updateState = (next: MemberState) => {
-		const previous = state;
-		setState(next);
-		update.mutate(
-			{
-				path: { realmId, profileId: member.profileId },
-				body: { state: next },
-			},
-			{
-				onError: () => setState(previous),
-				onSuccess: onChanged,
-			},
-		);
+	const updateState = async (operation: MemberOperation) => {
+		setCommandError(undefined);
+		if (!context.client) return;
+		try {
+			const status = await inspectRealmMember({
+				path: { realmId },
+				body: { kind: "entity", entityId: member.profileId },
+				client: context.client,
+			}).unwrap();
+			await update.mutateAsync({
+				path: { realmId },
+				body: {
+					...realmMembershipPreconditions(status),
+					recipient: { kind: "entity", entityId: member.profileId },
+					operation,
+				},
+			});
+			await onChanged();
+		} catch (error) {
+			setCommandError(error);
+		}
 	};
 
 	return (
@@ -334,22 +361,23 @@ function RealmMemberRow({
 			<NativeSelect
 				aria-label={t.realms.membersView.stateFor({ member: name })}
 				className="col-span-2 col-start-2 w-full sm:col-span-1 sm:col-start-auto"
-				disabled={!canManage || update.isPending}
+				disabled={!canManage || !context.ready || update.isPending}
 				onChange={(event) => {
 					const value = event.currentTarget.value;
-					if (isMemberState(value)) updateState(value);
+					if (isMemberOperation(value)) void updateState(value);
 				}}
-				value={state}
+				value=""
 			>
-				{MemberStates.map((value) => (
+				<NativeSelectOption value="">{t.realms.memberStates[member.state]}</NativeSelectOption>
+				{MemberOperations.map((value) => (
 					<NativeSelectOption key={value} value={value}>
-						{t.realms.memberStates[value]}
+						{t.realms.memberActions[value]}
 					</NativeSelectOption>
 				))}
 			</NativeSelect>
-			{update.error ? (
+			{(commandError ?? update.error) ? (
 				<div className="col-span-2 col-start-2 sm:col-span-3">
-					<RequestFailure error={update.error} />
+					<RequestFailure error={commandError ?? update.error} />
 				</div>
 			) : null}
 		</li>

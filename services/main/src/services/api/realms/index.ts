@@ -1,3 +1,4 @@
+import nativeMembership from "./membership";
 import { allocateReferenceValue, referenceValueIdForNativeId } from "../../units/reference-value";
 import { presentImageAsset } from "../image-assets/presentation";
 import { unitStateRelation } from "../../units/state-relation";
@@ -11,12 +12,7 @@ import { StatusCodes } from "http-status-codes";
 import { recordAuditEvent as appendAuditEvent } from "../../audit";
 import session, { resolveIdentity } from "../../auth/session";
 import type { Authorization } from "../../authorization";
-import { joinRealm, leaveRealm, updateRealmMember } from "../../realms/membership";
-import { listRealmMembers } from "../../realms/roster";
-import {
-	isRealmVisible,
-	type RealmCapability,
-} from "../../authorization/realm/policy";
+import { isRealmVisible, type RealmCapability } from "../../authorization/realm/policy";
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import { ContentStructureSnapshotSchema } from "../../content-structure/contracts";
 import { createContentStructureHistory } from "../../content-structure/history";
@@ -37,10 +33,8 @@ import {
 	governanceDecisionRule,
 	post,
 	realm,
-	realmMember,
 	realmPin,
 	realmRule,
-	realmRuleAcceptance,
 	realmRuleRevision,
 	realmScoreContext,
 	realmStat,
@@ -303,8 +297,23 @@ async function ensureRealmVisible(realmId: string, request: Request) {
 	const identity = await resolveIdentity(request, "realm:read");
 	const { entity } = identity;
 	const membership = entity ? await findRealmMembership(realmId, entity.id) : undefined;
-	if (!isRealmVisible(record.status, record.visibility, membership?.state))
-		throw new RealmNotFound();
+	if (!isRealmVisible(record.status, record.visibility, membership?.state)) {
+		const [owner] =
+			entity && record.status === "published"
+				? await database
+						.select({ id: unitOwnership.id })
+						.from(unitOwnership)
+						.where(
+							and(
+								eq(unitOwnership.unitRealmId, realmId),
+								eq(unitOwnership.profileId, entity.id),
+								isNull(unitOwnership.revokedAt),
+							),
+						)
+						.limit(1)
+				: [];
+		if (!owner) throw new RealmNotFound();
+	}
 	await identity.authorization.unit.ensureCanRead(realmId, () => new RealmNotFound());
 	return identity;
 }
@@ -592,6 +601,7 @@ async function readRealmTaxonomy(
 }
 
 export default new Elysia({ prefix: "/realms" })
+	.use(nativeMembership)
 	.use(session)
 	.get(
 		"",
@@ -709,10 +719,6 @@ export default new Elysia({ prefix: "/realms" })
 						unitId: created.id,
 						profileId: entity.id,
 						assignedByProfileId: entity.id,
-					});
-					await tx.insert(realmMember).values({
-						realmId: created.id,
-						profileId: entity.id,
 					});
 					await tx.insert(unitAccessGrant).values(
 						(["unit.read", "realm.contribute", ...RealmUnitCreatePermissionValues] as const).map(
@@ -852,7 +858,9 @@ export default new Elysia({ prefix: "/realms" })
 				? await Promise.all([
 						findRealmMembership(params.realmId, viewer.id),
 						database
-							.select({ realmId: sql<string>`public.reference_value_native_id(${unitFollow.targetReferenceId})` })
+							.select({
+								realmId: sql<string>`public.reference_value_native_id(${unitFollow.targetReferenceId})`,
+							})
 							.from(unitFollow)
 							.where(
 								and(
@@ -1352,100 +1360,6 @@ export default new Elysia({ prefix: "/realms" })
 		},
 	)
 	.put(
-		"/:realmId/membership",
-		{
-			access: "contribute:interaction:write",
-			params: RealmParams,
-			response: {
-				[StatusCodes.OK]: MembershipResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"ParticipationDenied",
-					"AccountRestricted",
-					"AccountSuspended",
-					"AccountClosed",
-				]),
-				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmRulesAcceptanceRequired"]),
-			},
-			detail: { summary: "Join Realm", tags: ["Realms"] },
-		},
-		({ params, authorization }) =>
-			database.transaction((tx) => joinRealm(tx, authorization, params.realmId)),
-	)
-	.delete(
-		"/:realmId/membership",
-		{
-			access: "write:realm:manage",
-			params: RealmParams,
-			response: {
-				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"ParticipationDenied",
-					"AccountRestricted",
-					"AccountSuspended",
-					"AccountClosed",
-				]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmMembershipNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmOwnerLeaveForbidden"]),
-			},
-			detail: {
-				summary: "Leave Realm",
-				tags: ["Realms"],
-				responses: NoContentResponse,
-			},
-		},
-		async ({ params, authorization }) => {
-			await database.transaction((tx) => leaveRealm(tx, authorization, params.realmId));
-			return new Response(null, { status: StatusCodes.NO_CONTENT });
-		},
-	)
-	.get(
-		"/:realmId/members",
-		{
-			access: "realm:read",
-			params: RealmParams,
-			query: ListRealmMembersQuery,
-			response: {
-				[StatusCodes.OK]: RealmMemberListResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"RealmCapabilityRequired",
-					"ParticipationDenied",
-					"AccountRestricted",
-					"AccountSuspended",
-					"AccountClosed",
-				]),
-			},
-			detail: { summary: "List Realm members", tags: ["Realms"] },
-		},
-		({ params, authorization, query }) =>
-			database.transaction((tx) => listRealmMembers(tx, authorization, params.realmId, query)),
-	)
-	.patch(
-		"/:realmId/members/:profileId",
-		{
-			access: "contribute:realm:manage",
-			params: RealmMemberParams,
-			body: UpdateRealmMemberBody,
-			response: {
-				[StatusCodes.OK]: RealmMemberResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"RealmCapabilityRequired",
-					"ParticipationDenied",
-					"AccountRestricted",
-					"AccountSuspended",
-					"AccountClosed",
-				]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmMemberNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmOwnerLeaveForbidden"]),
-			},
-			detail: { summary: "Update Realm member", tags: ["Realms"] },
-		},
-		({ params, authorization, body }) =>
-			database.transaction((tx) =>
-				updateRealmMember(tx, authorization, params.realmId, params.profileId, body.state),
-			),
-	)
-	.put(
 		"/:realmId/rules",
 		{
 			access: "write:realm:manage",
@@ -1622,48 +1536,6 @@ export default new Elysia({ prefix: "/realms" })
 					};
 				}),
 			};
-		},
-	)
-	.put(
-		"/:realmId/rules/:revisionId/acknowledgement",
-		{
-			access: "contribute:interaction:write",
-			params: RealmRuleRevisionParams,
-			body: AcknowledgeRealmRulesBody,
-			response: {
-				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmRuleRevisionChanged"]),
-			},
-			detail: {
-				summary: "Acknowledge current Realm rules",
-				tags: ["Realms"],
-				responses: NoContentResponse,
-			},
-		},
-		async ({ params, entity, body, request }) => {
-			await ensureRealmVisible(params.realmId, request);
-			await database.transaction(async (tx) => {
-				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(${params.realmId}::text, 0))`,
-				);
-				const [current] = await tx
-					.select({ revisionId: realmRuleRevision.id })
-					.from(realmRuleRevision)
-					.where(eq(realmRuleRevision.realmId, params.realmId))
-					.orderBy(desc(realmRuleRevision.version))
-					.limit(1);
-				const revisionId = requireCurrentRealmRuleRevision(params.revisionId, current?.revisionId);
-				await tx
-					.insert(realmRuleAcceptance)
-					.values({
-						revisionId,
-						profileId: entity.id,
-						language: body.language,
-					})
-					.onConflictDoNothing();
-			});
-			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
 	)
 	.get(
@@ -3041,11 +2913,15 @@ export default new Elysia({ prefix: "/realms" })
 						.where(eq(contentReviewCase.id, caseRow.id));
 				}
 				if (body.command === "dismiss" || body.annotation?.role === "public_notice") {
-					if (!authorization.authUserId) throw new Error("Review delivery requires the operator account");
+					if (!authorization.authUserId)
+						throw new Error("Review delivery requires the operator account");
 					await enqueueGovernanceReportDelivery(tx, {
-						kind: body.command === "dismiss" ? "dismissal" : "notice", caseId: caseRow.id,
-						actorEntityId: entity.id, actorAuthUserId: authorization.authUserId,
-						publicNoticePostId: body.annotation?.role === "public_notice" ? annotation?.postId : undefined,
+						kind: body.command === "dismiss" ? "dismissal" : "notice",
+						caseId: caseRow.id,
+						actorEntityId: entity.id,
+						actorAuthUserId: authorization.authUserId,
+						publicNoticePostId:
+							body.annotation?.role === "public_notice" ? annotation?.postId : undefined,
 					});
 				}
 				await appendAuditEvent(tx, {

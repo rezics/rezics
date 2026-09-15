@@ -366,8 +366,22 @@ Admission commands require current owner policy, actor eligibility and the corre
 subject's consent/representation basis where applicable. Mute/ban/enforcement state
 is independent from admission generations: leave, rejoin and Group changes neither
 clear it nor bypass its current effect. Those owner policies, disclosure, invitation
-and erasure flows must pass native tests before the old Org/Realm consumers are
-replaced; the shared storage primitives alone do not qualify them.
+and erasure flows must pass native tests before the Org/Realm consumer replacement
+qualifies for acceptance; the shared storage primitives alone do not qualify them.
+
+### Realm native enrollment owner
+
+[Realm enrollment](../../services/main/src/services/realms/README.md) implements
+explicit Entity/public and principal/private admission over the shared identity.
+Its policy/application and independent enforcement heads do not create parallel
+rosters. Pending consent retains original native authority evidence; issue-time
+freshness and later credential/source liveness are separate checks. A private
+Realm's first principal invitation uses a scoped, revocable contact exchange rather
+than account identifiers or inferred Entity/account associations. Exit and
+revocation remain possible after unpublishing; new admission still requires the
+current published policy. Public active counts and Entity presentation are distinct
+from private operational enrollment. That owner records physical candidate budgets,
+bounded cleanup/recovery, affected consumers and the deferred G2/G3/G5 prerequisites.
 
 ### Scoped Group topology protocol
 

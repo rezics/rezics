@@ -1,125 +1,197 @@
-# Realm membership
+# Realm enrollment
 
-The behavior below is the current Self-Entity roster implementation. The selected
+Realm enrollment owns policy inputs to the shared `access_membership` identity and
+`access_membership_admission` generations. `membership.ts` owns commands;
+`membership-policy.ts` composes native scope, credential, actor, selected subject,
+representation and manager authority. The selected
 [identity/access contract](../../../../../docs/architecture/identity-and-access.md)
-owns typed Realm participation, private operational membership, multiple groups,
-custom roles and restricted representation. The
-[layered experience](../../../../../docs/architecture/identity-and-access-experience.md)
-keeps ordinary joining separate from collaboration/advanced administration.
-Existing state and owner guards remain implementation evidence until the
-[target tests](../../../../../docs/testing/identity-and-access.md) qualify replacement.
+and [execution phase](../../../../../docs/plan/execution-workflow.md) govern acceptance.
+This implementation has source review and generated artifacts, not G2/G3 qualification.
 
-Realm membership uses the authenticated account's current Self Entity. Selecting
-an organization as an acting identity does not enroll that organization or confer
-its control permissions. Realm grouping/governance and the Collection/Zone subsite
-composition retain their [separate responsibilities](../../../../../docs/architecture/realm-collection-zone.md).
+## Identity and state
 
-`joinRealm` owns admission in the write transaction. It takes the shared current
-Realm-rule/history fence before account and membership checks. Rule publication
-and Realm history commit take the matching exclusive fence, following the
-[transaction advisory-lock contract](https://www.postgresql.org/docs/18/explicit-locking.html#ADVISORY-LOCKS). Policy is read in a
-current statement after admission to that fence. The command locks and rechecks
-account contribution eligibility, sign-in state and the captured Self binding
-revision. A key-share lock preserves the concrete Realm identity; an existing
-membership row is locked for update before its state is used.
+A request explicitly selects private direct principal authority or a represented
+public Entity using `X-Rezics-Authority`. Public Self presentation, catalog
+organization affiliation, Org enrollment and Realm creation never enroll another
+identity. Account provisioning and official Realm installation no longer fabricate
+public enrollments. A Realm owner retains ownership independently of membership.
 
-A join requires a published, approved, non-deleted Realm and the existing private
-Realm join policy. New open joins become active; new approval joins become pending.
-Already active members stay active if the Realm later requires approval. Muted
-members cannot remove their mute by joining again. Banned and removed members
-cannot rejoin themselves. An unchanged membership is not rewritten.
+One Realm policy row references the concrete shared scope/subject/member tuple.
+`open` is a reserved, unenrolled identity; `invited` and `pending` are policy inputs
+with no admission. A consenting open join or approved application becomes
+`approved` and selects a new generation. `left` and `removed` clear that selection;
+`rejected` ends an invitation/application. Rejoin creates a new generation, so
+previous Group selections and generation-dependent roles/representation never
+reactivate. The all-members set uses the same shared head.
 
-When no membership row was visible, another transaction may still win its unique
-key before insertion. The conflict action preserves an existing active/muted
-state and refuses banned/removed rows. A rejected admission writes no follow or
-rule acceptance. This uses PostgreSQL's conflict-update predicate and its
-[returning behavior](https://www.postgresql.org/docs/18/sql-insert.html#SQL-ON-CONFLICT):
-a conflicting row that fails the predicate is locked but not returned.
-The command records one follow and, for implicit-on-follow
-rules, the current acceptance in the same transaction. Explicit required consent
-must name the current rule revision. No external delivery occurs as part of joining.
+`realm_enforcement` has independent `clear`, `muted` and `banned` state and revision.
+Mute suppresses contribution without ending enrollment. Ban prevents admission and
+membership-derived authority. Neither leaving, rejoining, nor deleting a follow
+clears enforcement. Clear restriction restores only restriction eligibility; it
+never enrolls a departed member. Current owners cannot be removed, muted or banned
+through enrollment commands. Ownership checks use the concrete Realm target key.
 
-Departure and moderator commands also recheck the account and Self binding in
-their transaction. Departure takes the resource-access fence before checking
-ownership; an owner cannot leave. Active/pending membership is removed, while
-muted/banned/removed rows remain as moderation evidence. Follows and rule
-acknowledgements are removed in either case. Leaving and rejoining cannot erase
-a moderator's restriction.
+## Native commands and consent
 
-Member updates recheck `realm.members.manage` in the write transaction, including
-the resource fence that conflicts with grant revocation and ownership changes.
-The target membership is locked before the owner check and update. An owner
-cannot be made inactive. The state, eligible internal notification and Realm-scoped audit
-record commit together; an earlier cached capability result cannot admit the write.
+All enrollment mutations carry `operationId`, `expectedControlRevision`,
+`expectedRevision`, `expectedMembershipVersion` and `expectedEnforcementRevision`.
+The policy, enforcement and shared membership heads are distinct preconditions.
+Read them with `GET /realms/:realmId/membership` for the selected subject or
+`POST /realms/:realmId/members/inspect` for a manager-selected recipient.
 
-The active-member aggregate decrements an existing counter with `UPDATE`.
-A negative `INSERT` value is invalid before `ON CONFLICT` can apply its update.
-Decrements with a missing counter and underflow fail instead of clamping or recreating
-a plausible count; parent-Realm deletion may remove the aggregate through its FK cascade.
-The native projection fixture checks activation, muting, deletion, relocation,
-missing/underflow rejection and parent deletion.
+- `POST /membership` takes `consent: true` and the exact `ruleRevisionId` (null
+  declines optional acknowledgement; a required current revision must match). Open Realms admit; approval Realms
+  retain a pending request. A live native manager invitation supplies admission
+  authority for private Realms and approval-policy joins. A current native manager
+  can instead authorize their own explicitly consenting private-Realm enrollment.
+- `PATCH /members` takes a typed Entity recipient or private opaque selector and
+  an explicit `invite`, `approve`, `reject`, `remove`, `mute`, `ban` or `clear`
+  operation. Approval consumes the original applicant's current consent sources.
+- `DELETE /membership` leaves or withdraws the selected subject's application.
+  Managers can remove an admission or cancel a pending relationship. Closed,
+  unpublished and soft-deleted Realms still permit authorized management/exit;
+  only new invitation/admission requires current published, approved lifecycle.
+- `GET /enrollment-rules` discloses bounded current rules to a currently authorized
+  enrollment subject, including private invitees. `PUT /rules/:revisionId/acknowledgement`
+  records exact preparatory consent or active-generation acknowledgement. The
+  published-rule fence prevents consent racing a new revision. A non-current
+  revision is rejected. Following alone never acknowledges rules.
+- `POST /members/history` traverses immutable human and system receipts by
+  policy revision. Expiry and erasure have explicit system operations without
+  attributing those actions to the original human. Replay preserves the original
+  result and requires current caller admission; expiring selectors are excluded
+  from the digest after resolving their exact subject.
 
-## Roster reads
+Consent and invitation evidence retain the original credential and exact native
+source digest (representation path, binding/role revisions and membership/selection
+bases). Issue-time consent requires a fresh session. Approval rechecks current
+credential/source liveness without requiring that old session to remain *fresh*.
+A replacement authority source cannot silently adopt an old consent. The current
+Realm control revision, exact rules, invitation deadline and contact consent must
+still match. Preparatory acknowledgement cannot extend an invitation's deadline.
 
-Roster reads recheck the account, captured Self revision and `realm.members.read`
-in their transaction. They hydrate public native Entity names and avatars in a
-bounded batch. A private Auth name is never a roster label. Missing or non-public
-Entity presentation yields null name, language, avatar and address; the authorized
-Realm membership reference remains visible. Presentation languages retain native
-BCP 47 tags instead of being forced into the authoring-language enum. Canonical
-address projection uses the caller's transaction.
+Commands retain complete native authority and pair/tree/control fences before the
+effect. `prepareEnrollmentRecovery` reuses bounded reverse impact and original
+native recovery paths before and after membership/enforcement changes. Departure
+may intentionally end its own management/representation source: the final check
+retains live credential, actor/selected-subject policy, Realm control and selected
+recovery rather than demanding that ended source again. No generated boolean or
+cached capability substitutes for transaction admission.
 
-The live cursor is the last consumed `profileId`, supplied as `afterProfileId` on
-the next request. Members are ordered by immutable profile UUID. Output is capped
-at 100. Without a state filter, candidate work is the requested limit plus one;
-with a state filter, at most 512 candidates plus one lookahead are read before
-filtering. An empty filtered page can therefore carry `nextCursor`; only null
-means exhaustion. This is live keyset traversal, not a frozen historical roster.
-Only returned members are hydrated. No whole-roster sort or count is needed.
+## Private invitation contact exchange
 
-## Workload and qualification
+A never-enrolled private principal can use the complete backend flow:
 
-Retain the 500,000,000-row baseline and 3,000,000,000-row estimate for potentially
-large membership relations. Admission uses account/Self/Realm primary keys, one
-Realm/member primary key, the latest-rule index and at most one exact acceptance
-key. It does not scan a roster or copy membership history. The change adds no
-storage or indexes; it removes unnecessary rewrites for repeated active/muted
-joins. Existing follow and aggregate writes remain part of the cost.
+1. With direct principal authority, `POST /realms/:realmId/enrollment-contact`
+   issues a secret for that exact Realm address. This endpoint does not inspect
+   the addressed Realm or reveal whether a private Realm exists. It records
+   explicit recipient consent to the scoped disclosure.
+2. An authorized native manager exchanges that secret through
+   `POST /realms/:realmId/enrollment-contacts/resolve`. The response contains
+   `contactId` and a membership-purpose recipient selector bound to this manager's
+   exact selected authority and verified credential.
+3. The manager inspects the recipient's exact head, then invites with that selector,
+   `contactId` and revision preconditions. The recipient reads their own status and
+   rules, consents, and joins using their own direct context. No account ID is
+   exposed or inferred from an Entity.
+4. `DELETE /realms/enrollment-contacts/:contactId` revokes the contact with its
+   expected revision, independently of Realm lifecycle. Acceptance holds and
+   rechecks the original contact; revocation/expiry invalidates an unaccepted invite.
 
-Use 100 joins/changes per second normally and 2,000 globally at peak, spread
-across Realms, with a 200 ms p95 admission target excluding transport. These are
-planning assumptions. A new join uses at most 12 application SQL statements plus
-existing trigger work: budget up to 24,000 application statements/s at peak.
-Join request memory is constant in roster size; join responses contain only membership state.
-Departure still deletes the account's acknowledgements across that Realm's rule
-history. This owner-indexed cleanup needs a bounded withdrawal/erasure protocol
-before scale acceptance; its cost is not covered by the join statement budget.
-The unchanged membership tuple and three indexes are budgeted at roughly 256-320
-bytes per row including page headroom: 128-160 GB at 500M or 768-960 GB at 3B,
-before WAL, replication and maintenance copies. These are estimates to qualify
-against representative data, not storage measurements from this fixture.
+The contact is a revocable locator/consent, never membership or authority. Contact
+creation is bounded to 64 physical active rows per principal, with 29-day expiry;
+selectors and private roster cursors expire within five minutes.
 
-The shared Realm fence permits independent admission checks while publication
-waits for admitted joins. Same-member changes and aggregate counter updates can
-still contend. Sustained admission above the 200 ms p95 target requires reviewing
-contention on the counter row and account enforcement history. A hot-Realm growth path
-is a bounded striped member counter with an explicit read/repair contract; roster
-storage can route by Realm while account-facing lookup needs its own maintained
-projection. Qualify their FK, cutover and reconciliation behavior before use.
-Measure fence hold/wait time and hot-Realm write latency under sustained load; local two-connection checks do not establish 500M/3B throughput.
-[Foundation verification](../../../../../docs/testing/foundation.md#realm-membership-admission)
-records the executable API and race cases. Broader ownership transitions,
-transitive Realm access subjects and exact disclosure fences require remaining qualification.
+## Disclosure and retained consumers
 
-Roster candidate extraction is O(log N + K) on the Realm/member primary key, with
-K at most 513; PostgreSQL may choose the narrower profile index when a Realm
-dominates the relation. Monitor actual buffers and filtered rows under skew. At
-5,000 roster pages/s, budget up to 505,000 candidates/s without state filtering
-or 2,565,000/s for sparse filters, plus at most 500,000 public Entity summaries/s.
-These are upper-bound planning rates, not measured throughput. Random heap access
-can touch one page per candidate; low-latency reads at that extreme require
-Realm-local storage/cache locality or a qualified covering projection. The
-100 ms p95 read target remains a load gate. No new indexes or stored rows are
-required by this change at the 500M/3B scales. Bounded candidate metadata and
-at most 100 names/avatars keep application memory independent of roster size;
-long authority histories and address ancestry retain their separate owner budgets.
+`current_realm_entity_membership` and `current_realm_entity_rule_acceptance` are
+read-only public Entity projections over native shared membership/consent. Private
+principals never appear in them. `GET /members` retains public Entity names,
+avatars, canonical addresses and ownership presentation under native membership
+read authority. The earlier roster also required an authenticated account via
+`admitRealmAccount`; it did not authorize anonymous roster reads. Existing public
+Realm/feed counts remain accessible through their own read policies.
+
+`GET /enrollments?view=operational` is a separate private administrative roster;
+`view=public` selects only Entity recipients. Both consume physical policy
+candidates before subject filtering. Empty filtered pages can have a next cursor.
+The public `active_member_count` keeps its existing active-state meaning: enrolled
+Entities with clear Realm enforcement. Private subjects, muted and banned members
+are excluded. Shared-head and independent enforcement triggers apply matching
+counter deltas; reconciliation reads the same public projection. Missing counter
+rows and underflow fail rather than being repaired with invented values.
+
+Group/member-set evaluation, assignment eligibility, role/representation current
+SQL and the mixed Group impact evaluator consume the same shared admission and
+Realm ban policy. Existing public Realm permission/rule readers, Unit Realm
+usersets, Tag contexts and Studio discovery consume the derived native Entity
+projection or bounded shared candidates. Transactional retained Unit userset
+consumers lock the exact membership pairs, including negative enrollment keys.
+Studio/Tag discovery bounds physical active subject/scope candidates before Realm,
+state or presentation filtering. Realm follows no longer write rule acceptance. Moderation commands retain
+private audit events and the existing Realm notification event. Principal notices
+use the exact principal; Entity notices use the original consenting inbox's
+explicit represented context, revalidated against current native representation
+and recipient policy. A notice destination never changes membership identity,
+becomes a public actor, or expands a controller roster. Credential proofs expire
+separately from this small revocable delivery basis; account erasure clears both.
+Broader institutional inbox selection remains with its own future owner.
+
+## Retention, capacity and qualification
+
+The existing account erasure worker synchronously disables principal eligibility
+and uses its bounded shared-membership removal stage. Realm cleanup then revokes
+contacts and clears pending/private credential evidence through indexed subject
+and original-consenter/inviter ranges; public Entity membership remains
+institutional when an individual controller is erased. Deadline-indexed maintenance
+expires applications/invitations and removes stale credential proofs. Independent
+moderation and minimal shared/native audit anchors remain retained. Neither exit
+nor cleanup scans all rule revisions or deletes prior generation acknowledgements.
+
+Retain the 500,000,000-row baseline and 3,000,000,000-row estimate. Online admission
+uses exact Realm/subject/member keys; roster pages consume at most 51 physical
+scope/subject rows and return at most 50. Public per-subject discovery consumes at
+most 257 indexed admissions and fails over its 256-candidate budget before hydration.
+The retained userset discovery also counts physical candidates before deduplication.
+Recovery keeps the existing 256-source/64-root budgets; an overflow is unavailable,
+not a reason to raise limits. Expiry visits at most 50 applications and 50 contacts;
+erasure visits at most 20 rows per indexed evidence range (including the retained notice destination) and 20 contacts per batch.
+
+The policy head, shared identity/generations, enforcement, receipts and rule consent
+are separately retained rows; do not reuse the old 256–320-byte roster estimate.
+Planning allowances (not measurements) are 0.5–1 KiB per policy head with indexes,
+0.25–0.5 KiB per retained enforcement row, and 0.5–1 KiB per command receipt before
+WAL/replicas. At 500M/3B policy heads this is roughly 250–500 GB / 1.5–3 TB in
+addition to shared IAM storage. Original credential evidence is capped at 32 KiB
+per consent/invitation and cleared by deadline; measure actual pending fractions
+and receipt volume before capacity acceptance. The existing 100 normal / 2,000
+peak global changes/s and 200 ms p95 admission, 100 ms p95 roster targets remain
+unqualified. Scope/tree management fences and hot-Realm counters require workload
+qualification; these source bounds are not throughput evidence.
+
+The forward replacement drops the obsolete writable roster/acceptance tables and
+resets only their obsolete count projection. It preserves released migrations and
+the completed native installation baseline. Generate from the tracked typed anchor
+with `task services-main:db:generate:typed -- realm_enrollment`; fresh installations
+replay the retained history and this forward migration. No legacy data transfer or
+dual write is provided.
+
+Required next-phase work: migrate the existing Realm membership/roster/rule and
+projection fixtures (including `seed/service.ts`, whose old roster writes are
+fixture work), author stateful API/contact/receipt and rejected-source scenarios,
+then run owning TypeScript/deterministic checks, native replay and G2/G3 cases.
+Include competing join/approval, source replacement, stale revisions, contact
+revocation, last-clock expiry, leave/rejoin privilege non-revival, moderation
+counter transitions, private disclosure, physical-candidate skew, erasure restart
+and recovery continuity. OpenAPI/Fetch/TanStack/public SDK artifacts are generated,
+not typechecked or runtime-qualified.
+
+Existing web hooks mechanically capture native main Entity authority and explicit
+preconditions, preserve rule confirmation, and use explicit moderation operations.
+A missing/unusable native main context requires the account identity selection
+flow; there is no Self-to-account fallback. A new private membership/contact UI,
+advanced Entity selection and invitation/application management journeys remain
+frontend design prerequisites, excluded from this task. The retained public
+controls require later Storybook and affected workspace qualification. No tests,
+fixtures, typechecks, lint validation, builds, replay/checks or rendered QA were run
+in this implementation phase.

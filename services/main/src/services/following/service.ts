@@ -39,7 +39,6 @@ import { users } from "../database/schema/auth";
 import { authEntity } from "../database/schema/participation";
 import { ParticipationDenied } from "../participation/policy";
 import { createNotification } from "../notifications/service";
-import { acknowledgeCurrentRealmRulesOnFollow } from "../realms/service";
 import { UnitNotFound } from "../units/errors";
 import { resolvedUnitLocalizationImageAssetId } from "../units/localization";
 
@@ -379,8 +378,6 @@ export async function followUnit(input: {
 				actorProfileId: input.followerProfileId,
 				dedupeKey: `new-follower:${input.followerProfileId}:${target.id}`,
 			});
-		if (target.owner === "realm")
-			await acknowledgeCurrentRealmRulesOnFollow(tx, target.id, input.followerProfileId);
 		await resolveFollowTarget(tx, input.unitId, input.authorization);
 		await input.authorization.account.ensureCanContribute(tx);
 	});

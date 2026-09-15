@@ -127849,6 +127849,2809 @@ export type PatchApiPostsByPostIdRepliesByReplyPostIdResponse =
 	| PatchApiPostsByPostIdRepliesByReplyPostIdStatus429
 	| PatchApiPostsByPostIdRepliesByReplyPostIdStatus500;
 
+export type CreateRealmEnrollmentContactPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+export type CreateRealmEnrollmentContactStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @minLength -9007199254740991
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	revision: number;
+	contact: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expiresAt: string;
+};
+
+export type CreateRealmEnrollmentContactStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: "AccessDenied";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type CreateRealmEnrollmentContactStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const CreateRealmEnrollmentContactStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
+	RealmRulesAcceptanceRequired: "RealmRulesAcceptanceRequired",
+} as const;
+
+export type CreateRealmEnrollmentContactStatus409ErrorCodeEnum =
+	(typeof CreateRealmEnrollmentContactStatus409ErrorCodeEnum)[keyof typeof CreateRealmEnrollmentContactStatus409ErrorCodeEnum];
+
+export type CreateRealmEnrollmentContactStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: CreateRealmEnrollmentContactStatus409ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type CreateRealmEnrollmentContactStatus422 = ValidationError;
+
+export type CreateRealmEnrollmentContactStatus500 = InternalError;
+
+export type CreateRealmEnrollmentContactStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type CreateRealmEnrollmentContactOptions = {
+	body?: never;
+	path: CreateRealmEnrollmentContactPath;
+	query?: never;
+	headers?: never;
+};
+
+export type CreateRealmEnrollmentContactResponses = {
+	"200": CreateRealmEnrollmentContactStatus200;
+	"403": CreateRealmEnrollmentContactStatus403;
+	"404": CreateRealmEnrollmentContactStatus404;
+	"409": CreateRealmEnrollmentContactStatus409;
+	"422": CreateRealmEnrollmentContactStatus422;
+	"500": CreateRealmEnrollmentContactStatus500;
+	"503": CreateRealmEnrollmentContactStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type CreateRealmEnrollmentContactResponse =
+	| CreateRealmEnrollmentContactStatus200
+	| CreateRealmEnrollmentContactStatus403
+	| CreateRealmEnrollmentContactStatus404
+	| CreateRealmEnrollmentContactStatus409
+	| CreateRealmEnrollmentContactStatus422
+	| CreateRealmEnrollmentContactStatus500
+	| CreateRealmEnrollmentContactStatus503;
+
+export type ResolveRealmEnrollmentContactPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+export type ResolveRealmEnrollmentContactStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	contactId: string;
+	recipient:
+		| {
+				kind: "entity";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				entityId: string;
+		  }
+		| {
+				kind: "principal";
+				/**
+				 * @minLength 1
+				 * @maxLength 512
+				 * @type string
+				 */
+				selector: string;
+		  };
+};
+
+export type ResolveRealmEnrollmentContactStatus400 = MalformedRequestBody;
+
+export type ResolveRealmEnrollmentContactStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: "AccessDenied";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ResolveRealmEnrollmentContactStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ResolveRealmEnrollmentContactStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
+	RealmRulesAcceptanceRequired: "RealmRulesAcceptanceRequired",
+} as const;
+
+export type ResolveRealmEnrollmentContactStatus409ErrorCodeEnum =
+	(typeof ResolveRealmEnrollmentContactStatus409ErrorCodeEnum)[keyof typeof ResolveRealmEnrollmentContactStatus409ErrorCodeEnum];
+
+export type ResolveRealmEnrollmentContactStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: ResolveRealmEnrollmentContactStatus409ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ResolveRealmEnrollmentContactStatus422 = ValidationError;
+
+export type ResolveRealmEnrollmentContactStatus500 = InternalError;
+
+export type ResolveRealmEnrollmentContactStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ResolveRealmEnrollmentContactBody = {
+	/**
+	 * @minLength 32
+	 * @maxLength 128
+	 * @type string
+	 */
+	contact: string;
+};
+
+export type ResolveRealmEnrollmentContactOptions = {
+	body: ResolveRealmEnrollmentContactBody;
+	path: ResolveRealmEnrollmentContactPath;
+	query?: never;
+	headers?: never;
+};
+
+export type ResolveRealmEnrollmentContactResponses = {
+	"200": ResolveRealmEnrollmentContactStatus200;
+	"400": ResolveRealmEnrollmentContactStatus400;
+	"403": ResolveRealmEnrollmentContactStatus403;
+	"404": ResolveRealmEnrollmentContactStatus404;
+	"409": ResolveRealmEnrollmentContactStatus409;
+	"422": ResolveRealmEnrollmentContactStatus422;
+	"500": ResolveRealmEnrollmentContactStatus500;
+	"503": ResolveRealmEnrollmentContactStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ResolveRealmEnrollmentContactResponse =
+	| ResolveRealmEnrollmentContactStatus200
+	| ResolveRealmEnrollmentContactStatus400
+	| ResolveRealmEnrollmentContactStatus403
+	| ResolveRealmEnrollmentContactStatus404
+	| ResolveRealmEnrollmentContactStatus409
+	| ResolveRealmEnrollmentContactStatus422
+	| ResolveRealmEnrollmentContactStatus500
+	| ResolveRealmEnrollmentContactStatus503;
+
+export type RevokeRealmEnrollmentContactPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	contactId: string;
+};
+
+export type RevokeRealmEnrollmentContactStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @minLength -9007199254740991
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	revision: number;
+};
+
+export type RevokeRealmEnrollmentContactStatus400 = MalformedRequestBody;
+
+export type RevokeRealmEnrollmentContactStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: "AccessDenied";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RevokeRealmEnrollmentContactStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const RevokeRealmEnrollmentContactStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
+	RealmRulesAcceptanceRequired: "RealmRulesAcceptanceRequired",
+} as const;
+
+export type RevokeRealmEnrollmentContactStatus409ErrorCodeEnum =
+	(typeof RevokeRealmEnrollmentContactStatus409ErrorCodeEnum)[keyof typeof RevokeRealmEnrollmentContactStatus409ErrorCodeEnum];
+
+export type RevokeRealmEnrollmentContactStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: RevokeRealmEnrollmentContactStatus409ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RevokeRealmEnrollmentContactStatus422 = ValidationError;
+
+export type RevokeRealmEnrollmentContactStatus500 = InternalError;
+
+export type RevokeRealmEnrollmentContactStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RevokeRealmEnrollmentContactBody = {
+	/**
+	 * @minLength 1
+	 * @maxLength 2
+	 * @type integer
+	 */
+	expectedRevision: number;
+};
+
+export type RevokeRealmEnrollmentContactOptions = {
+	body: RevokeRealmEnrollmentContactBody;
+	path: RevokeRealmEnrollmentContactPath;
+	query?: never;
+	headers?: never;
+};
+
+export type RevokeRealmEnrollmentContactResponses = {
+	"200": RevokeRealmEnrollmentContactStatus200;
+	"400": RevokeRealmEnrollmentContactStatus400;
+	"403": RevokeRealmEnrollmentContactStatus403;
+	"404": RevokeRealmEnrollmentContactStatus404;
+	"409": RevokeRealmEnrollmentContactStatus409;
+	"422": RevokeRealmEnrollmentContactStatus422;
+	"500": RevokeRealmEnrollmentContactStatus500;
+	"503": RevokeRealmEnrollmentContactStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type RevokeRealmEnrollmentContactResponse =
+	| RevokeRealmEnrollmentContactStatus200
+	| RevokeRealmEnrollmentContactStatus400
+	| RevokeRealmEnrollmentContactStatus403
+	| RevokeRealmEnrollmentContactStatus404
+	| RevokeRealmEnrollmentContactStatus409
+	| RevokeRealmEnrollmentContactStatus422
+	| RevokeRealmEnrollmentContactStatus500
+	| RevokeRealmEnrollmentContactStatus503;
+
+export type GetRealmEnrollmentRulesPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+export const GetRealmEnrollmentRulesLocalizationLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetRealmEnrollmentRulesLocalizationLanguagesEnum =
+	(typeof GetRealmEnrollmentRulesLocalizationLanguagesEnum)[keyof typeof GetRealmEnrollmentRulesLocalizationLanguagesEnum];
+
+export type GetRealmEnrollmentRulesQuery = {
+	localizationLanguages?: GetRealmEnrollmentRulesLocalizationLanguagesEnum[];
+};
+
+export const GetRealmEnrollmentRulesStatus200AcknowledgementModeEnum = {
+	explicit: "explicit",
+	implicit_on_follow: "implicit_on_follow",
+} as const;
+
+export type GetRealmEnrollmentRulesStatus200AcknowledgementModeEnum =
+	(typeof GetRealmEnrollmentRulesStatus200AcknowledgementModeEnum)[keyof typeof GetRealmEnrollmentRulesStatus200AcknowledgementModeEnum];
+
+export const GetRealmEnrollmentRulesStatus200ItemsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetRealmEnrollmentRulesStatus200ItemsLanguageEnum =
+	(typeof GetRealmEnrollmentRulesStatus200ItemsLanguageEnum)[keyof typeof GetRealmEnrollmentRulesStatus200ItemsLanguageEnum];
+
+export type GetRealmEnrollmentRulesStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	revisionId: string | null;
+	version: number | null;
+	/**
+	 * @default 'explicit'
+	 * @type string
+	 */
+	acknowledgementMode: GetRealmEnrollmentRulesStatus200AcknowledgementModeEnum;
+	requireOnJoin: boolean;
+	requireOnPost: boolean;
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @minLength 0
+		 * @type integer
+		 */
+		position: number;
+		language: GetRealmEnrollmentRulesStatus200ItemsLanguageEnum;
+		title: string;
+		content: PortableTextDocument;
+	}[];
+};
+
+export type GetRealmEnrollmentRulesStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: "AccessDenied";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetRealmEnrollmentRulesStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const GetRealmEnrollmentRulesStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
+	RealmRulesAcceptanceRequired: "RealmRulesAcceptanceRequired",
+} as const;
+
+export type GetRealmEnrollmentRulesStatus409ErrorCodeEnum =
+	(typeof GetRealmEnrollmentRulesStatus409ErrorCodeEnum)[keyof typeof GetRealmEnrollmentRulesStatus409ErrorCodeEnum];
+
+export type GetRealmEnrollmentRulesStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: GetRealmEnrollmentRulesStatus409ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetRealmEnrollmentRulesStatus422 = ValidationError;
+
+export const GetRealmEnrollmentRulesStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetRealmEnrollmentRulesStatus429ErrorCodeEnum =
+	(typeof GetRealmEnrollmentRulesStatus429ErrorCodeEnum)[keyof typeof GetRealmEnrollmentRulesStatus429ErrorCodeEnum];
+
+export type GetRealmEnrollmentRulesStatus429 = {
+	error: {
+		code: GetRealmEnrollmentRulesStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type GetRealmEnrollmentRulesStatus500 = InternalError;
+
+export type GetRealmEnrollmentRulesStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetRealmEnrollmentRulesOptions = {
+	body?: never;
+	path: GetRealmEnrollmentRulesPath;
+	query?: GetRealmEnrollmentRulesQuery;
+	headers?: never;
+};
+
+export type GetRealmEnrollmentRulesResponses = {
+	"200": GetRealmEnrollmentRulesStatus200;
+	"403": GetRealmEnrollmentRulesStatus403;
+	"404": GetRealmEnrollmentRulesStatus404;
+	"409": GetRealmEnrollmentRulesStatus409;
+	"422": GetRealmEnrollmentRulesStatus422;
+	"429": GetRealmEnrollmentRulesStatus429;
+	"500": GetRealmEnrollmentRulesStatus500;
+	"503": GetRealmEnrollmentRulesStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetRealmEnrollmentRulesResponse =
+	| GetRealmEnrollmentRulesStatus200
+	| GetRealmEnrollmentRulesStatus403
+	| GetRealmEnrollmentRulesStatus404
+	| GetRealmEnrollmentRulesStatus409
+	| GetRealmEnrollmentRulesStatus422
+	| GetRealmEnrollmentRulesStatus429
+	| GetRealmEnrollmentRulesStatus500
+	| GetRealmEnrollmentRulesStatus503;
+
+export type GetRealmMembershipCapabilitiesPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+export type GetRealmMembershipCapabilitiesStatus200 = {
+	canReadMembers: boolean;
+	canManageMembers: boolean;
+};
+
+export type GetRealmMembershipCapabilitiesStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: "AccessDenied";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetRealmMembershipCapabilitiesStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const GetRealmMembershipCapabilitiesStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
+	RealmRulesAcceptanceRequired: "RealmRulesAcceptanceRequired",
+} as const;
+
+export type GetRealmMembershipCapabilitiesStatus409ErrorCodeEnum =
+	(typeof GetRealmMembershipCapabilitiesStatus409ErrorCodeEnum)[keyof typeof GetRealmMembershipCapabilitiesStatus409ErrorCodeEnum];
+
+export type GetRealmMembershipCapabilitiesStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: GetRealmMembershipCapabilitiesStatus409ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetRealmMembershipCapabilitiesStatus422 = ValidationError;
+
+export const GetRealmMembershipCapabilitiesStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetRealmMembershipCapabilitiesStatus429ErrorCodeEnum =
+	(typeof GetRealmMembershipCapabilitiesStatus429ErrorCodeEnum)[keyof typeof GetRealmMembershipCapabilitiesStatus429ErrorCodeEnum];
+
+export type GetRealmMembershipCapabilitiesStatus429 = {
+	error: {
+		code: GetRealmMembershipCapabilitiesStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type GetRealmMembershipCapabilitiesStatus500 = InternalError;
+
+export type GetRealmMembershipCapabilitiesStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetRealmMembershipCapabilitiesOptions = {
+	body?: never;
+	path: GetRealmMembershipCapabilitiesPath;
+	query?: never;
+	headers?: never;
+};
+
+export type GetRealmMembershipCapabilitiesResponses = {
+	"200": GetRealmMembershipCapabilitiesStatus200;
+	"403": GetRealmMembershipCapabilitiesStatus403;
+	"404": GetRealmMembershipCapabilitiesStatus404;
+	"409": GetRealmMembershipCapabilitiesStatus409;
+	"422": GetRealmMembershipCapabilitiesStatus422;
+	"429": GetRealmMembershipCapabilitiesStatus429;
+	"500": GetRealmMembershipCapabilitiesStatus500;
+	"503": GetRealmMembershipCapabilitiesStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetRealmMembershipCapabilitiesResponse =
+	| GetRealmMembershipCapabilitiesStatus200
+	| GetRealmMembershipCapabilitiesStatus403
+	| GetRealmMembershipCapabilitiesStatus404
+	| GetRealmMembershipCapabilitiesStatus409
+	| GetRealmMembershipCapabilitiesStatus422
+	| GetRealmMembershipCapabilitiesStatus429
+	| GetRealmMembershipCapabilitiesStatus500
+	| GetRealmMembershipCapabilitiesStatus503;
+
+export type GetRealmMembershipPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+export const GetRealmMembershipStatus200JoinPolicyEnum = {
+	open: "open",
+	approval: "approval",
+} as const;
+
+export type GetRealmMembershipStatus200JoinPolicyEnum =
+	(typeof GetRealmMembershipStatus200JoinPolicyEnum)[keyof typeof GetRealmMembershipStatus200JoinPolicyEnum];
+
+export const GetRealmMembershipStatus200ReceiptStateEnum = {
+	open: "open",
+	invited: "invited",
+	pending: "pending",
+	approved: "approved",
+	rejected: "rejected",
+	left: "left",
+	removed: "removed",
+} as const;
+
+export type GetRealmMembershipStatus200ReceiptStateEnum =
+	(typeof GetRealmMembershipStatus200ReceiptStateEnum)[keyof typeof GetRealmMembershipStatus200ReceiptStateEnum];
+
+export const GetRealmMembershipStatus200ReceiptEnforcementEnum = {
+	clear: "clear",
+	muted: "muted",
+	banned: "banned",
+} as const;
+
+export type GetRealmMembershipStatus200ReceiptEnforcementEnum =
+	(typeof GetRealmMembershipStatus200ReceiptEnforcementEnum)[keyof typeof GetRealmMembershipStatus200ReceiptEnforcementEnum];
+
+export type GetRealmMembershipStatus200 = {
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	controlRevision: number;
+	joinPolicy: GetRealmMembershipStatus200JoinPolicyEnum;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	ruleRevisionId: string | null;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	acknowledgedRuleRevisionId: string | null;
+	isOwner: boolean;
+	recipient:
+		| {
+				kind: "entity";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				entityId: string;
+		  }
+		| {
+				kind: "principal";
+				/**
+				 * @minLength 1
+				 * @maxLength 512
+				 * @type string
+				 */
+				selector: string;
+		  };
+	receipt: {
+		state: GetRealmMembershipStatus200ReceiptStateEnum;
+		/**
+		 * @minLength 0
+		 * @maxLength 9007199254740990
+		 * @type integer
+		 */
+		revision: number;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		membershipId: string;
+		/**
+		 * @minLength 0
+		 * @maxLength 9007199254740990
+		 * @type integer
+		 */
+		version: number;
+		/**
+		 * @minLength 0
+		 * @maxLength 9007199254740990
+		 * @type integer
+		 */
+		activeGeneration: number | null;
+		/**
+		 * @minLength 0
+		 * @maxLength 9007199254740990
+		 * @type integer
+		 */
+		lastGeneration: number;
+		enforcement: GetRealmMembershipStatus200ReceiptEnforcementEnum;
+		/**
+		 * @minLength 0
+		 * @maxLength 9007199254740990
+		 * @type integer
+		 */
+		enforcementRevision: number;
+	} | null;
+};
+
+export type GetRealmMembershipStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: "AccessDenied";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetRealmMembershipStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const GetRealmMembershipStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
+	RealmRulesAcceptanceRequired: "RealmRulesAcceptanceRequired",
+} as const;
+
+export type GetRealmMembershipStatus409ErrorCodeEnum =
+	(typeof GetRealmMembershipStatus409ErrorCodeEnum)[keyof typeof GetRealmMembershipStatus409ErrorCodeEnum];
+
+export type GetRealmMembershipStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: GetRealmMembershipStatus409ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetRealmMembershipStatus422 = ValidationError;
+
+export const GetRealmMembershipStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetRealmMembershipStatus429ErrorCodeEnum =
+	(typeof GetRealmMembershipStatus429ErrorCodeEnum)[keyof typeof GetRealmMembershipStatus429ErrorCodeEnum];
+
+export type GetRealmMembershipStatus429 = {
+	error: {
+		code: GetRealmMembershipStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type GetRealmMembershipStatus500 = InternalError;
+
+export type GetRealmMembershipStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetRealmMembershipOptions = {
+	body?: never;
+	path: GetRealmMembershipPath;
+	query?: never;
+	headers?: never;
+};
+
+export type GetRealmMembershipResponses = {
+	"200": GetRealmMembershipStatus200;
+	"403": GetRealmMembershipStatus403;
+	"404": GetRealmMembershipStatus404;
+	"409": GetRealmMembershipStatus409;
+	"422": GetRealmMembershipStatus422;
+	"429": GetRealmMembershipStatus429;
+	"500": GetRealmMembershipStatus500;
+	"503": GetRealmMembershipStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetRealmMembershipResponse =
+	| GetRealmMembershipStatus200
+	| GetRealmMembershipStatus403
+	| GetRealmMembershipStatus404
+	| GetRealmMembershipStatus409
+	| GetRealmMembershipStatus422
+	| GetRealmMembershipStatus429
+	| GetRealmMembershipStatus500
+	| GetRealmMembershipStatus503;
+
+export type JoinRealmPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+export const JoinRealmStatus200StateEnum = {
+	open: "open",
+	invited: "invited",
+	pending: "pending",
+	approved: "approved",
+	rejected: "rejected",
+	left: "left",
+	removed: "removed",
+} as const;
+
+export type JoinRealmStatus200StateEnum =
+	(typeof JoinRealmStatus200StateEnum)[keyof typeof JoinRealmStatus200StateEnum];
+
+export const JoinRealmStatus200EnforcementEnum = {
+	clear: "clear",
+	muted: "muted",
+	banned: "banned",
+} as const;
+
+export type JoinRealmStatus200EnforcementEnum =
+	(typeof JoinRealmStatus200EnforcementEnum)[keyof typeof JoinRealmStatus200EnforcementEnum];
+
+export type JoinRealmStatus200 = {
+	state: JoinRealmStatus200StateEnum;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	revision: number;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	membershipId: string;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	version: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	activeGeneration: number | null;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	lastGeneration: number;
+	enforcement: JoinRealmStatus200EnforcementEnum;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	enforcementRevision: number;
+};
+
+export type JoinRealmStatus400 = MalformedRequestBody;
+
+export type JoinRealmStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: "AccessDenied";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type JoinRealmStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const JoinRealmStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
+	RealmRulesAcceptanceRequired: "RealmRulesAcceptanceRequired",
+} as const;
+
+export type JoinRealmStatus409ErrorCodeEnum =
+	(typeof JoinRealmStatus409ErrorCodeEnum)[keyof typeof JoinRealmStatus409ErrorCodeEnum];
+
+export type JoinRealmStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: JoinRealmStatus409ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type JoinRealmStatus422 = ValidationError;
+
+export type JoinRealmStatus500 = InternalError;
+
+export type JoinRealmStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type JoinRealmBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	expectedControlRevision: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	expectedRevision: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	expectedMembershipVersion: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	expectedEnforcementRevision: number;
+	consent: true;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	ruleRevisionId: string | null;
+};
+
+export type JoinRealmOptions = {
+	body: JoinRealmBody;
+	path: JoinRealmPath;
+	query?: never;
+	headers?: never;
+};
+
+export type JoinRealmResponses = {
+	"200": JoinRealmStatus200;
+	"400": JoinRealmStatus400;
+	"403": JoinRealmStatus403;
+	"404": JoinRealmStatus404;
+	"409": JoinRealmStatus409;
+	"422": JoinRealmStatus422;
+	"500": JoinRealmStatus500;
+	"503": JoinRealmStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type JoinRealmResponse =
+	| JoinRealmStatus200
+	| JoinRealmStatus400
+	| JoinRealmStatus403
+	| JoinRealmStatus404
+	| JoinRealmStatus409
+	| JoinRealmStatus422
+	| JoinRealmStatus500
+	| JoinRealmStatus503;
+
+export type LeaveRealmPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+export const LeaveRealmStatus200StateEnum = {
+	open: "open",
+	invited: "invited",
+	pending: "pending",
+	approved: "approved",
+	rejected: "rejected",
+	left: "left",
+	removed: "removed",
+} as const;
+
+export type LeaveRealmStatus200StateEnum =
+	(typeof LeaveRealmStatus200StateEnum)[keyof typeof LeaveRealmStatus200StateEnum];
+
+export const LeaveRealmStatus200EnforcementEnum = {
+	clear: "clear",
+	muted: "muted",
+	banned: "banned",
+} as const;
+
+export type LeaveRealmStatus200EnforcementEnum =
+	(typeof LeaveRealmStatus200EnforcementEnum)[keyof typeof LeaveRealmStatus200EnforcementEnum];
+
+export type LeaveRealmStatus200 = {
+	state: LeaveRealmStatus200StateEnum;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	revision: number;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	membershipId: string;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	version: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	activeGeneration: number | null;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	lastGeneration: number;
+	enforcement: LeaveRealmStatus200EnforcementEnum;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	enforcementRevision: number;
+};
+
+export type LeaveRealmStatus400 = MalformedRequestBody;
+
+export type LeaveRealmStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: "AccessDenied";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type LeaveRealmStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const LeaveRealmStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
+	RealmRulesAcceptanceRequired: "RealmRulesAcceptanceRequired",
+} as const;
+
+export type LeaveRealmStatus409ErrorCodeEnum =
+	(typeof LeaveRealmStatus409ErrorCodeEnum)[keyof typeof LeaveRealmStatus409ErrorCodeEnum];
+
+export type LeaveRealmStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: LeaveRealmStatus409ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type LeaveRealmStatus422 = ValidationError;
+
+export type LeaveRealmStatus500 = InternalError;
+
+export type LeaveRealmStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type LeaveRealmBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	expectedControlRevision: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	expectedRevision: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	expectedMembershipVersion: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	expectedEnforcementRevision: number;
+};
+
+export type LeaveRealmOptions = {
+	body: LeaveRealmBody;
+	path: LeaveRealmPath;
+	query?: never;
+	headers?: never;
+};
+
+export type LeaveRealmResponses = {
+	"200": LeaveRealmStatus200;
+	"400": LeaveRealmStatus400;
+	"403": LeaveRealmStatus403;
+	"404": LeaveRealmStatus404;
+	"409": LeaveRealmStatus409;
+	"422": LeaveRealmStatus422;
+	"500": LeaveRealmStatus500;
+	"503": LeaveRealmStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type LeaveRealmResponse =
+	| LeaveRealmStatus200
+	| LeaveRealmStatus400
+	| LeaveRealmStatus403
+	| LeaveRealmStatus404
+	| LeaveRealmStatus409
+	| LeaveRealmStatus422
+	| LeaveRealmStatus500
+	| LeaveRealmStatus503;
+
+export type ListRealmEnrollmentsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+export const ListRealmEnrollmentsView = {
+	public: "public",
+	operational: "operational",
+} as const;
+
+export type ListRealmEnrollmentsView =
+	(typeof ListRealmEnrollmentsView)[keyof typeof ListRealmEnrollmentsView];
+
+export type ListRealmEnrollmentsQuery = {
+	/**
+	 * @maxLength 512
+	 * @type string | undefined
+	 */
+	afterId?: string;
+	/**
+	 * @default 'public'
+	 * @type string | undefined
+	 */
+	view?: ListRealmEnrollmentsView;
+};
+
+export const ListRealmEnrollmentsStatus200ItemsReceiptStateEnum = {
+	open: "open",
+	invited: "invited",
+	pending: "pending",
+	approved: "approved",
+	rejected: "rejected",
+	left: "left",
+	removed: "removed",
+} as const;
+
+export type ListRealmEnrollmentsStatus200ItemsReceiptStateEnum =
+	(typeof ListRealmEnrollmentsStatus200ItemsReceiptStateEnum)[keyof typeof ListRealmEnrollmentsStatus200ItemsReceiptStateEnum];
+
+export const ListRealmEnrollmentsStatus200ItemsReceiptEnforcementEnum = {
+	clear: "clear",
+	muted: "muted",
+	banned: "banned",
+} as const;
+
+export type ListRealmEnrollmentsStatus200ItemsReceiptEnforcementEnum =
+	(typeof ListRealmEnrollmentsStatus200ItemsReceiptEnforcementEnum)[keyof typeof ListRealmEnrollmentsStatus200ItemsReceiptEnforcementEnum];
+
+export type ListRealmEnrollmentsStatus200 = {
+	items: {
+		recipient:
+			| {
+					kind: "entity";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					entityId: string;
+			  }
+			| {
+					kind: "principal";
+					/**
+					 * @minLength 1
+					 * @maxLength 512
+					 * @type string
+					 */
+					selector: string;
+			  };
+		receipt: {
+			state: ListRealmEnrollmentsStatus200ItemsReceiptStateEnum;
+			/**
+			 * @minLength 0
+			 * @maxLength 9007199254740990
+			 * @type integer
+			 */
+			revision: number;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			membershipId: string;
+			/**
+			 * @minLength 0
+			 * @maxLength 9007199254740990
+			 * @type integer
+			 */
+			version: number;
+			/**
+			 * @minLength 0
+			 * @maxLength 9007199254740990
+			 * @type integer
+			 */
+			activeGeneration: number | null;
+			/**
+			 * @minLength 0
+			 * @maxLength 9007199254740990
+			 * @type integer
+			 */
+			lastGeneration: number;
+			enforcement: ListRealmEnrollmentsStatus200ItemsReceiptEnforcementEnum;
+			/**
+			 * @minLength 0
+			 * @maxLength 9007199254740990
+			 * @type integer
+			 */
+			enforcementRevision: number;
+		};
+	}[];
+	/**
+	 * @maxLength 512
+	 * @type string
+	 */
+	nextCursor: string | null;
+};
+
+export type ListRealmEnrollmentsStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: "AccessDenied";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListRealmEnrollmentsStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ListRealmEnrollmentsStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
+	RealmRulesAcceptanceRequired: "RealmRulesAcceptanceRequired",
+} as const;
+
+export type ListRealmEnrollmentsStatus409ErrorCodeEnum =
+	(typeof ListRealmEnrollmentsStatus409ErrorCodeEnum)[keyof typeof ListRealmEnrollmentsStatus409ErrorCodeEnum];
+
+export type ListRealmEnrollmentsStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: ListRealmEnrollmentsStatus409ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListRealmEnrollmentsStatus422 = ValidationError;
+
+export const ListRealmEnrollmentsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ListRealmEnrollmentsStatus429ErrorCodeEnum =
+	(typeof ListRealmEnrollmentsStatus429ErrorCodeEnum)[keyof typeof ListRealmEnrollmentsStatus429ErrorCodeEnum];
+
+export type ListRealmEnrollmentsStatus429 = {
+	error: {
+		code: ListRealmEnrollmentsStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type ListRealmEnrollmentsStatus500 = InternalError;
+
+export type ListRealmEnrollmentsStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListRealmEnrollmentsOptions = {
+	body?: never;
+	path: ListRealmEnrollmentsPath;
+	query?: ListRealmEnrollmentsQuery;
+	headers?: never;
+};
+
+export type ListRealmEnrollmentsResponses = {
+	"200": ListRealmEnrollmentsStatus200;
+	"403": ListRealmEnrollmentsStatus403;
+	"404": ListRealmEnrollmentsStatus404;
+	"409": ListRealmEnrollmentsStatus409;
+	"422": ListRealmEnrollmentsStatus422;
+	"429": ListRealmEnrollmentsStatus429;
+	"500": ListRealmEnrollmentsStatus500;
+	"503": ListRealmEnrollmentsStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ListRealmEnrollmentsResponse =
+	| ListRealmEnrollmentsStatus200
+	| ListRealmEnrollmentsStatus403
+	| ListRealmEnrollmentsStatus404
+	| ListRealmEnrollmentsStatus409
+	| ListRealmEnrollmentsStatus422
+	| ListRealmEnrollmentsStatus429
+	| ListRealmEnrollmentsStatus500
+	| ListRealmEnrollmentsStatus503;
+
+export type ListRealmMembersPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+export type ListRealmMembersQuery = {
+	/**
+	 * @maxLength 512
+	 * @type string | undefined
+	 */
+	afterId?: string;
+	localizationLanguages?: string[];
+};
+
+export const ListRealmMembersStatus200ItemsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type ListRealmMembersStatus200ItemsAvatarIconPrefixEnum =
+	(typeof ListRealmMembersStatus200ItemsAvatarIconPrefixEnum)[keyof typeof ListRealmMembersStatus200ItemsAvatarIconPrefixEnum];
+
+export const ListRealmMembersStatus200ItemsStateEnum = {
+	active: "active",
+	pending: "pending",
+	muted: "muted",
+	removed: "removed",
+	banned: "banned",
+	open: "open",
+	invited: "invited",
+	rejected: "rejected",
+	left: "left",
+} as const;
+
+export type ListRealmMembersStatus200ItemsStateEnum =
+	(typeof ListRealmMembersStatus200ItemsStateEnum)[keyof typeof ListRealmMembersStatus200ItemsStateEnum];
+
+export type ListRealmMembersStatus200 = {
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		profileId: string;
+		/**
+		 * @minLength 1
+		 * @maxLength 255
+		 * @pattern ^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$
+		 * @type string
+		 */
+		language: string | null;
+		name: string | null;
+		slugAddress: {
+			/**
+			 * @minLength 1
+			 * @maxLength 63
+			 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+			 * @type string
+			 */
+			slug: string;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			scopeUnitId: string | null;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			scopeNamespaceId: string | null;
+			canonicalPath: string[];
+		} | null;
+		avatar:
+			| (
+					| (
+							| {
+									type: "image";
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										url: string;
+									};
+							  }
+							| {
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									type: "icon";
+									icon: {
+										provider: "font-awesome";
+										prefix: ListRealmMembersStatus200ItemsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
+			| null;
+		isOwner: boolean;
+		/**
+		 * @default 'active'
+		 * @type string
+		 */
+		state: ListRealmMembersStatus200ItemsStateEnum;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		joinedAt: string;
+	}[];
+	/**
+	 * @maxLength 512
+	 * @type string
+	 */
+	nextCursor: string | null;
+};
+
+export type ListRealmMembersStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: "AccessDenied";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListRealmMembersStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ListRealmMembersStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
+	RealmRulesAcceptanceRequired: "RealmRulesAcceptanceRequired",
+} as const;
+
+export type ListRealmMembersStatus409ErrorCodeEnum =
+	(typeof ListRealmMembersStatus409ErrorCodeEnum)[keyof typeof ListRealmMembersStatus409ErrorCodeEnum];
+
+export type ListRealmMembersStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: ListRealmMembersStatus409ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListRealmMembersStatus422 = ValidationError;
+
+export const ListRealmMembersStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ListRealmMembersStatus429ErrorCodeEnum =
+	(typeof ListRealmMembersStatus429ErrorCodeEnum)[keyof typeof ListRealmMembersStatus429ErrorCodeEnum];
+
+export type ListRealmMembersStatus429 = {
+	error: {
+		code: ListRealmMembersStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type ListRealmMembersStatus500 = InternalError;
+
+export type ListRealmMembersStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListRealmMembersOptions = {
+	body?: never;
+	path: ListRealmMembersPath;
+	query?: ListRealmMembersQuery;
+	headers?: never;
+};
+
+export type ListRealmMembersResponses = {
+	"200": ListRealmMembersStatus200;
+	"403": ListRealmMembersStatus403;
+	"404": ListRealmMembersStatus404;
+	"409": ListRealmMembersStatus409;
+	"422": ListRealmMembersStatus422;
+	"429": ListRealmMembersStatus429;
+	"500": ListRealmMembersStatus500;
+	"503": ListRealmMembersStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ListRealmMembersResponse =
+	| ListRealmMembersStatus200
+	| ListRealmMembersStatus403
+	| ListRealmMembersStatus404
+	| ListRealmMembersStatus409
+	| ListRealmMembersStatus422
+	| ListRealmMembersStatus429
+	| ListRealmMembersStatus500
+	| ListRealmMembersStatus503;
+
+export type UpdateRealmMemberPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+export const UpdateRealmMemberStatus200StateEnum = {
+	open: "open",
+	invited: "invited",
+	pending: "pending",
+	approved: "approved",
+	rejected: "rejected",
+	left: "left",
+	removed: "removed",
+} as const;
+
+export type UpdateRealmMemberStatus200StateEnum =
+	(typeof UpdateRealmMemberStatus200StateEnum)[keyof typeof UpdateRealmMemberStatus200StateEnum];
+
+export const UpdateRealmMemberStatus200EnforcementEnum = {
+	clear: "clear",
+	muted: "muted",
+	banned: "banned",
+} as const;
+
+export type UpdateRealmMemberStatus200EnforcementEnum =
+	(typeof UpdateRealmMemberStatus200EnforcementEnum)[keyof typeof UpdateRealmMemberStatus200EnforcementEnum];
+
+export type UpdateRealmMemberStatus200 = {
+	state: UpdateRealmMemberStatus200StateEnum;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	revision: number;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	membershipId: string;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	version: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	activeGeneration: number | null;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	lastGeneration: number;
+	enforcement: UpdateRealmMemberStatus200EnforcementEnum;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	enforcementRevision: number;
+};
+
+export type UpdateRealmMemberStatus400 = MalformedRequestBody;
+
+export type UpdateRealmMemberStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: "AccessDenied";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type UpdateRealmMemberStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const UpdateRealmMemberStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
+	RealmRulesAcceptanceRequired: "RealmRulesAcceptanceRequired",
+} as const;
+
+export type UpdateRealmMemberStatus409ErrorCodeEnum =
+	(typeof UpdateRealmMemberStatus409ErrorCodeEnum)[keyof typeof UpdateRealmMemberStatus409ErrorCodeEnum];
+
+export type UpdateRealmMemberStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: UpdateRealmMemberStatus409ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type UpdateRealmMemberStatus422 = ValidationError;
+
+export type UpdateRealmMemberStatus500 = InternalError;
+
+export type UpdateRealmMemberStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const UpdateRealmMemberRequestOperationEnum = {
+	invite: "invite",
+	approve: "approve",
+	reject: "reject",
+	remove: "remove",
+	mute: "mute",
+	ban: "ban",
+	clear: "clear",
+} as const;
+
+export type UpdateRealmMemberRequestOperationEnum =
+	(typeof UpdateRealmMemberRequestOperationEnum)[keyof typeof UpdateRealmMemberRequestOperationEnum];
+
+export type UpdateRealmMemberBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	expectedControlRevision: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	expectedRevision: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	expectedMembershipVersion: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	expectedEnforcementRevision: number;
+	recipient:
+		| {
+				kind: "entity";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				entityId: string;
+		  }
+		| {
+				kind: "principal";
+				/**
+				 * @minLength 1
+				 * @maxLength 512
+				 * @type string
+				 */
+				selector: string;
+		  };
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	contactId?: string;
+	operation: UpdateRealmMemberRequestOperationEnum;
+};
+
+export type UpdateRealmMemberOptions = {
+	body: UpdateRealmMemberBody;
+	path: UpdateRealmMemberPath;
+	query?: never;
+	headers?: never;
+};
+
+export type UpdateRealmMemberResponses = {
+	"200": UpdateRealmMemberStatus200;
+	"400": UpdateRealmMemberStatus400;
+	"403": UpdateRealmMemberStatus403;
+	"404": UpdateRealmMemberStatus404;
+	"409": UpdateRealmMemberStatus409;
+	"422": UpdateRealmMemberStatus422;
+	"500": UpdateRealmMemberStatus500;
+	"503": UpdateRealmMemberStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type UpdateRealmMemberResponse =
+	| UpdateRealmMemberStatus200
+	| UpdateRealmMemberStatus400
+	| UpdateRealmMemberStatus403
+	| UpdateRealmMemberStatus404
+	| UpdateRealmMemberStatus409
+	| UpdateRealmMemberStatus422
+	| UpdateRealmMemberStatus500
+	| UpdateRealmMemberStatus503;
+
+export type InspectRealmMemberPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+export const InspectRealmMemberStatus200JoinPolicyEnum = {
+	open: "open",
+	approval: "approval",
+} as const;
+
+export type InspectRealmMemberStatus200JoinPolicyEnum =
+	(typeof InspectRealmMemberStatus200JoinPolicyEnum)[keyof typeof InspectRealmMemberStatus200JoinPolicyEnum];
+
+export const InspectRealmMemberStatus200ReceiptStateEnum = {
+	open: "open",
+	invited: "invited",
+	pending: "pending",
+	approved: "approved",
+	rejected: "rejected",
+	left: "left",
+	removed: "removed",
+} as const;
+
+export type InspectRealmMemberStatus200ReceiptStateEnum =
+	(typeof InspectRealmMemberStatus200ReceiptStateEnum)[keyof typeof InspectRealmMemberStatus200ReceiptStateEnum];
+
+export const InspectRealmMemberStatus200ReceiptEnforcementEnum = {
+	clear: "clear",
+	muted: "muted",
+	banned: "banned",
+} as const;
+
+export type InspectRealmMemberStatus200ReceiptEnforcementEnum =
+	(typeof InspectRealmMemberStatus200ReceiptEnforcementEnum)[keyof typeof InspectRealmMemberStatus200ReceiptEnforcementEnum];
+
+export type InspectRealmMemberStatus200 = {
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	controlRevision: number;
+	joinPolicy: InspectRealmMemberStatus200JoinPolicyEnum;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	ruleRevisionId: string | null;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	acknowledgedRuleRevisionId: string | null;
+	isOwner: boolean;
+	recipient:
+		| {
+				kind: "entity";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				entityId: string;
+		  }
+		| {
+				kind: "principal";
+				/**
+				 * @minLength 1
+				 * @maxLength 512
+				 * @type string
+				 */
+				selector: string;
+		  };
+	receipt: {
+		state: InspectRealmMemberStatus200ReceiptStateEnum;
+		/**
+		 * @minLength 0
+		 * @maxLength 9007199254740990
+		 * @type integer
+		 */
+		revision: number;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		membershipId: string;
+		/**
+		 * @minLength 0
+		 * @maxLength 9007199254740990
+		 * @type integer
+		 */
+		version: number;
+		/**
+		 * @minLength 0
+		 * @maxLength 9007199254740990
+		 * @type integer
+		 */
+		activeGeneration: number | null;
+		/**
+		 * @minLength 0
+		 * @maxLength 9007199254740990
+		 * @type integer
+		 */
+		lastGeneration: number;
+		enforcement: InspectRealmMemberStatus200ReceiptEnforcementEnum;
+		/**
+		 * @minLength 0
+		 * @maxLength 9007199254740990
+		 * @type integer
+		 */
+		enforcementRevision: number;
+	} | null;
+};
+
+export type InspectRealmMemberStatus400 = MalformedRequestBody;
+
+export type InspectRealmMemberStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: "AccessDenied";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type InspectRealmMemberStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const InspectRealmMemberStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
+	RealmRulesAcceptanceRequired: "RealmRulesAcceptanceRequired",
+} as const;
+
+export type InspectRealmMemberStatus409ErrorCodeEnum =
+	(typeof InspectRealmMemberStatus409ErrorCodeEnum)[keyof typeof InspectRealmMemberStatus409ErrorCodeEnum];
+
+export type InspectRealmMemberStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: InspectRealmMemberStatus409ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type InspectRealmMemberStatus422 = ValidationError;
+
+export const InspectRealmMemberStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type InspectRealmMemberStatus429ErrorCodeEnum =
+	(typeof InspectRealmMemberStatus429ErrorCodeEnum)[keyof typeof InspectRealmMemberStatus429ErrorCodeEnum];
+
+export type InspectRealmMemberStatus429 = {
+	error: {
+		code: InspectRealmMemberStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type InspectRealmMemberStatus500 = InternalError;
+
+export type InspectRealmMemberStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type InspectRealmMemberBody =
+	| {
+			kind: "entity";
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			entityId: string;
+	  }
+	| {
+			kind: "principal";
+			/**
+			 * @minLength 1
+			 * @maxLength 512
+			 * @type string
+			 */
+			selector: string;
+	  };
+
+export type InspectRealmMemberOptions = {
+	body: InspectRealmMemberBody;
+	path: InspectRealmMemberPath;
+	query?: never;
+	headers?: never;
+};
+
+export type InspectRealmMemberResponses = {
+	"200": InspectRealmMemberStatus200;
+	"400": InspectRealmMemberStatus400;
+	"403": InspectRealmMemberStatus403;
+	"404": InspectRealmMemberStatus404;
+	"409": InspectRealmMemberStatus409;
+	"422": InspectRealmMemberStatus422;
+	"429": InspectRealmMemberStatus429;
+	"500": InspectRealmMemberStatus500;
+	"503": InspectRealmMemberStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type InspectRealmMemberResponse =
+	| InspectRealmMemberStatus200
+	| InspectRealmMemberStatus400
+	| InspectRealmMemberStatus403
+	| InspectRealmMemberStatus404
+	| InspectRealmMemberStatus409
+	| InspectRealmMemberStatus422
+	| InspectRealmMemberStatus429
+	| InspectRealmMemberStatus500
+	| InspectRealmMemberStatus503;
+
+export type GetRealmMemberHistoryPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+export const GetRealmMemberHistoryStatus200ItemsResultStateEnum = {
+	open: "open",
+	invited: "invited",
+	pending: "pending",
+	approved: "approved",
+	rejected: "rejected",
+	left: "left",
+	removed: "removed",
+} as const;
+
+export type GetRealmMemberHistoryStatus200ItemsResultStateEnum =
+	(typeof GetRealmMemberHistoryStatus200ItemsResultStateEnum)[keyof typeof GetRealmMemberHistoryStatus200ItemsResultStateEnum];
+
+export const GetRealmMemberHistoryStatus200ItemsResultEnforcementEnum = {
+	clear: "clear",
+	muted: "muted",
+	banned: "banned",
+} as const;
+
+export type GetRealmMemberHistoryStatus200ItemsResultEnforcementEnum =
+	(typeof GetRealmMemberHistoryStatus200ItemsResultEnforcementEnum)[keyof typeof GetRealmMemberHistoryStatus200ItemsResultEnforcementEnum];
+
+export type GetRealmMemberHistoryStatus200 = {
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		operationId: string;
+		operation: string;
+		result: {
+			state: GetRealmMemberHistoryStatus200ItemsResultStateEnum;
+			/**
+			 * @minLength 0
+			 * @maxLength 9007199254740990
+			 * @type integer
+			 */
+			revision: number;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			membershipId: string;
+			/**
+			 * @minLength 0
+			 * @maxLength 9007199254740990
+			 * @type integer
+			 */
+			version: number;
+			/**
+			 * @minLength 0
+			 * @maxLength 9007199254740990
+			 * @type integer
+			 */
+			activeGeneration: number | null;
+			/**
+			 * @minLength 0
+			 * @maxLength 9007199254740990
+			 * @type integer
+			 */
+			lastGeneration: number;
+			enforcement: GetRealmMemberHistoryStatus200ItemsResultEnforcementEnum;
+			/**
+			 * @minLength 0
+			 * @maxLength 9007199254740990
+			 * @type integer
+			 */
+			enforcementRevision: number;
+		};
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+	}[];
+	/**
+	 * @minLength -9007199254740991
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	nextCursor: number | null;
+};
+
+export type GetRealmMemberHistoryStatus400 = MalformedRequestBody;
+
+export type GetRealmMemberHistoryStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: "AccessDenied";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetRealmMemberHistoryStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const GetRealmMemberHistoryStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
+	RealmRulesAcceptanceRequired: "RealmRulesAcceptanceRequired",
+} as const;
+
+export type GetRealmMemberHistoryStatus409ErrorCodeEnum =
+	(typeof GetRealmMemberHistoryStatus409ErrorCodeEnum)[keyof typeof GetRealmMemberHistoryStatus409ErrorCodeEnum];
+
+export type GetRealmMemberHistoryStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: GetRealmMemberHistoryStatus409ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetRealmMemberHistoryStatus422 = ValidationError;
+
+export const GetRealmMemberHistoryStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetRealmMemberHistoryStatus429ErrorCodeEnum =
+	(typeof GetRealmMemberHistoryStatus429ErrorCodeEnum)[keyof typeof GetRealmMemberHistoryStatus429ErrorCodeEnum];
+
+export type GetRealmMemberHistoryStatus429 = {
+	error: {
+		code: GetRealmMemberHistoryStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type GetRealmMemberHistoryStatus500 = InternalError;
+
+export type GetRealmMemberHistoryStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetRealmMemberHistoryBody = {
+	recipient:
+		| {
+				kind: "entity";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				entityId: string;
+		  }
+		| {
+				kind: "principal";
+				/**
+				 * @minLength 1
+				 * @maxLength 512
+				 * @type string
+				 */
+				selector: string;
+		  };
+	/**
+	 * @minLength -9007199254740991
+	 * @maxLength 9007199254740991
+	 * @type integer | undefined
+	 */
+	afterRevision?: number;
+};
+
+export type GetRealmMemberHistoryOptions = {
+	body: GetRealmMemberHistoryBody;
+	path: GetRealmMemberHistoryPath;
+	query?: never;
+	headers?: never;
+};
+
+export type GetRealmMemberHistoryResponses = {
+	"200": GetRealmMemberHistoryStatus200;
+	"400": GetRealmMemberHistoryStatus400;
+	"403": GetRealmMemberHistoryStatus403;
+	"404": GetRealmMemberHistoryStatus404;
+	"409": GetRealmMemberHistoryStatus409;
+	"422": GetRealmMemberHistoryStatus422;
+	"429": GetRealmMemberHistoryStatus429;
+	"500": GetRealmMemberHistoryStatus500;
+	"503": GetRealmMemberHistoryStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetRealmMemberHistoryResponse =
+	| GetRealmMemberHistoryStatus200
+	| GetRealmMemberHistoryStatus400
+	| GetRealmMemberHistoryStatus403
+	| GetRealmMemberHistoryStatus404
+	| GetRealmMemberHistoryStatus409
+	| GetRealmMemberHistoryStatus422
+	| GetRealmMemberHistoryStatus429
+	| GetRealmMemberHistoryStatus500
+	| GetRealmMemberHistoryStatus503;
+
+export type AcknowledgeRealmRulesPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	revisionId: string;
+};
+
+export const AcknowledgeRealmRulesStatus200StateEnum = {
+	open: "open",
+	invited: "invited",
+	pending: "pending",
+	approved: "approved",
+	rejected: "rejected",
+	left: "left",
+	removed: "removed",
+} as const;
+
+export type AcknowledgeRealmRulesStatus200StateEnum =
+	(typeof AcknowledgeRealmRulesStatus200StateEnum)[keyof typeof AcknowledgeRealmRulesStatus200StateEnum];
+
+export const AcknowledgeRealmRulesStatus200EnforcementEnum = {
+	clear: "clear",
+	muted: "muted",
+	banned: "banned",
+} as const;
+
+export type AcknowledgeRealmRulesStatus200EnforcementEnum =
+	(typeof AcknowledgeRealmRulesStatus200EnforcementEnum)[keyof typeof AcknowledgeRealmRulesStatus200EnforcementEnum];
+
+export type AcknowledgeRealmRulesStatus200 = {
+	state: AcknowledgeRealmRulesStatus200StateEnum;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	revision: number;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	membershipId: string;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	version: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	activeGeneration: number | null;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	lastGeneration: number;
+	enforcement: AcknowledgeRealmRulesStatus200EnforcementEnum;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	enforcementRevision: number;
+};
+
+export type AcknowledgeRealmRulesStatus400 = MalformedRequestBody;
+
+export type AcknowledgeRealmRulesStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: "AccessDenied";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type AcknowledgeRealmRulesStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const AcknowledgeRealmRulesStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
+	RealmRulesAcceptanceRequired: "RealmRulesAcceptanceRequired",
+} as const;
+
+export type AcknowledgeRealmRulesStatus409ErrorCodeEnum =
+	(typeof AcknowledgeRealmRulesStatus409ErrorCodeEnum)[keyof typeof AcknowledgeRealmRulesStatus409ErrorCodeEnum];
+
+export type AcknowledgeRealmRulesStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: AcknowledgeRealmRulesStatus409ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type AcknowledgeRealmRulesStatus422 = ValidationError;
+
+export type AcknowledgeRealmRulesStatus500 = InternalError;
+
+export type AcknowledgeRealmRulesStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const AcknowledgeRealmRulesRequestLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type AcknowledgeRealmRulesRequestLanguageEnum =
+	(typeof AcknowledgeRealmRulesRequestLanguageEnum)[keyof typeof AcknowledgeRealmRulesRequestLanguageEnum];
+
+export type AcknowledgeRealmRulesBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	expectedControlRevision: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	expectedRevision: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	expectedMembershipVersion: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	expectedEnforcementRevision: number;
+	consent: true;
+	language: AcknowledgeRealmRulesRequestLanguageEnum | null;
+};
+
+export type AcknowledgeRealmRulesOptions = {
+	body: AcknowledgeRealmRulesBody;
+	path: AcknowledgeRealmRulesPath;
+	query?: never;
+	headers?: never;
+};
+
+export type AcknowledgeRealmRulesResponses = {
+	"200": AcknowledgeRealmRulesStatus200;
+	"400": AcknowledgeRealmRulesStatus400;
+	"403": AcknowledgeRealmRulesStatus403;
+	"404": AcknowledgeRealmRulesStatus404;
+	"409": AcknowledgeRealmRulesStatus409;
+	"422": AcknowledgeRealmRulesStatus422;
+	"500": AcknowledgeRealmRulesStatus500;
+	"503": AcknowledgeRealmRulesStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type AcknowledgeRealmRulesResponse =
+	| AcknowledgeRealmRulesStatus200
+	| AcknowledgeRealmRulesStatus400
+	| AcknowledgeRealmRulesStatus403
+	| AcknowledgeRealmRulesStatus404
+	| AcknowledgeRealmRulesStatus409
+	| AcknowledgeRealmRulesStatus422
+	| AcknowledgeRealmRulesStatus500
+	| AcknowledgeRealmRulesStatus503;
+
 export const GetApiRealmsLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
@@ -130537,651 +133340,6 @@ export type PutApiRealmsByRealmIdTagVotingResponse =
 	| PutApiRealmsByRealmIdTagVotingStatus429
 	| PutApiRealmsByRealmIdTagVotingStatus500;
 
-export type PutApiRealmsByRealmIdMembershipPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	realmId: string;
-};
-
-export type PutApiRealmsByRealmIdMembershipStatus200 = {
-	state: string;
-};
-
-export const PutApiRealmsByRealmIdMembershipStatus403ErrorCodeEnum = {
-	ParticipationDenied: "ParticipationDenied",
-	AccountRestricted: "AccountRestricted",
-	AccountSuspended: "AccountSuspended",
-	AccountClosed: "AccountClosed",
-} as const;
-
-export type PutApiRealmsByRealmIdMembershipStatus403ErrorCodeEnum =
-	(typeof PutApiRealmsByRealmIdMembershipStatus403ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdMembershipStatus403ErrorCodeEnum];
-
-export type PutApiRealmsByRealmIdMembershipStatus403 = {
-	error: {
-		/**
-		 * @default 'ParticipationDenied'
-		 * @type string
-		 */
-		code: PutApiRealmsByRealmIdMembershipStatus403ErrorCodeEnum;
-		message: string;
-		details?: void;
-	};
-	requestId: string;
-};
-
-export type PutApiRealmsByRealmIdMembershipStatus404 = {
-	error: {
-		/**
-		 * @default 'RealmNotFound'
-		 * @type string
-		 */
-		code: "RealmNotFound";
-		message: string;
-		details?: void;
-	};
-	requestId: string;
-};
-
-export type PutApiRealmsByRealmIdMembershipStatus409 = {
-	error: {
-		/**
-		 * @default 'RealmRulesAcceptanceRequired'
-		 * @type string
-		 */
-		code: "RealmRulesAcceptanceRequired";
-		message: string;
-		details?: void;
-	};
-	requestId: string;
-};
-
-export type PutApiRealmsByRealmIdMembershipStatus422 = ValidationError;
-
-export const PutApiRealmsByRealmIdMembershipStatus429ErrorCodeEnum = {
-	ApiQuotaExceeded: "ApiQuotaExceeded",
-	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
-} as const;
-
-export type PutApiRealmsByRealmIdMembershipStatus429ErrorCodeEnum =
-	(typeof PutApiRealmsByRealmIdMembershipStatus429ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdMembershipStatus429ErrorCodeEnum];
-
-export type PutApiRealmsByRealmIdMembershipStatus429 = {
-	error: {
-		code: PutApiRealmsByRealmIdMembershipStatus429ErrorCodeEnum;
-		message: string;
-		details?: JsonValue;
-	};
-	requestId: string;
-};
-
-export type PutApiRealmsByRealmIdMembershipStatus500 = InternalError;
-
-export type PutApiRealmsByRealmIdMembershipOptions = {
-	body?: never;
-	path: PutApiRealmsByRealmIdMembershipPath;
-	query?: never;
-	headers?: never;
-};
-
-export type PutApiRealmsByRealmIdMembershipResponses = {
-	"200": PutApiRealmsByRealmIdMembershipStatus200;
-	"403": PutApiRealmsByRealmIdMembershipStatus403;
-	"404": PutApiRealmsByRealmIdMembershipStatus404;
-	"409": PutApiRealmsByRealmIdMembershipStatus409;
-	"422": PutApiRealmsByRealmIdMembershipStatus422;
-	"429": PutApiRealmsByRealmIdMembershipStatus429;
-	"500": PutApiRealmsByRealmIdMembershipStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PutApiRealmsByRealmIdMembershipResponse =
-	| PutApiRealmsByRealmIdMembershipStatus200
-	| PutApiRealmsByRealmIdMembershipStatus403
-	| PutApiRealmsByRealmIdMembershipStatus404
-	| PutApiRealmsByRealmIdMembershipStatus409
-	| PutApiRealmsByRealmIdMembershipStatus422
-	| PutApiRealmsByRealmIdMembershipStatus429
-	| PutApiRealmsByRealmIdMembershipStatus500;
-
-export type DeleteApiRealmsByRealmIdMembershipPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	realmId: string;
-};
-
-export type DeleteApiRealmsByRealmIdMembershipStatus204 = void;
-
-export const DeleteApiRealmsByRealmIdMembershipStatus403ErrorCodeEnum = {
-	ParticipationDenied: "ParticipationDenied",
-	AccountRestricted: "AccountRestricted",
-	AccountSuspended: "AccountSuspended",
-	AccountClosed: "AccountClosed",
-} as const;
-
-export type DeleteApiRealmsByRealmIdMembershipStatus403ErrorCodeEnum =
-	(typeof DeleteApiRealmsByRealmIdMembershipStatus403ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdMembershipStatus403ErrorCodeEnum];
-
-export type DeleteApiRealmsByRealmIdMembershipStatus403 = {
-	error: {
-		/**
-		 * @default 'ParticipationDenied'
-		 * @type string
-		 */
-		code: DeleteApiRealmsByRealmIdMembershipStatus403ErrorCodeEnum;
-		message: string;
-		details?: void;
-	};
-	requestId: string;
-};
-
-export type DeleteApiRealmsByRealmIdMembershipStatus404 = {
-	error: {
-		/**
-		 * @default 'RealmMembershipNotFound'
-		 * @type string
-		 */
-		code: "RealmMembershipNotFound";
-		message: string;
-		details?: void;
-	};
-	requestId: string;
-};
-
-export type DeleteApiRealmsByRealmIdMembershipStatus409 = {
-	error: {
-		/**
-		 * @default 'RealmOwnerLeaveForbidden'
-		 * @type string
-		 */
-		code: "RealmOwnerLeaveForbidden";
-		message: string;
-		details?: void;
-	};
-	requestId: string;
-};
-
-export type DeleteApiRealmsByRealmIdMembershipStatus422 = ValidationError;
-
-export const DeleteApiRealmsByRealmIdMembershipStatus429ErrorCodeEnum = {
-	ApiQuotaExceeded: "ApiQuotaExceeded",
-	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
-} as const;
-
-export type DeleteApiRealmsByRealmIdMembershipStatus429ErrorCodeEnum =
-	(typeof DeleteApiRealmsByRealmIdMembershipStatus429ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdMembershipStatus429ErrorCodeEnum];
-
-export type DeleteApiRealmsByRealmIdMembershipStatus429 = {
-	error: {
-		code: DeleteApiRealmsByRealmIdMembershipStatus429ErrorCodeEnum;
-		message: string;
-		details?: JsonValue;
-	};
-	requestId: string;
-};
-
-export type DeleteApiRealmsByRealmIdMembershipStatus500 = InternalError;
-
-export type DeleteApiRealmsByRealmIdMembershipOptions = {
-	body?: never;
-	path: DeleteApiRealmsByRealmIdMembershipPath;
-	query?: never;
-	headers?: never;
-};
-
-export type DeleteApiRealmsByRealmIdMembershipResponses = {
-	"204": DeleteApiRealmsByRealmIdMembershipStatus204;
-	"403": DeleteApiRealmsByRealmIdMembershipStatus403;
-	"404": DeleteApiRealmsByRealmIdMembershipStatus404;
-	"409": DeleteApiRealmsByRealmIdMembershipStatus409;
-	"422": DeleteApiRealmsByRealmIdMembershipStatus422;
-	"429": DeleteApiRealmsByRealmIdMembershipStatus429;
-	"500": DeleteApiRealmsByRealmIdMembershipStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type DeleteApiRealmsByRealmIdMembershipResponse =
-	| DeleteApiRealmsByRealmIdMembershipStatus204
-	| DeleteApiRealmsByRealmIdMembershipStatus403
-	| DeleteApiRealmsByRealmIdMembershipStatus404
-	| DeleteApiRealmsByRealmIdMembershipStatus409
-	| DeleteApiRealmsByRealmIdMembershipStatus422
-	| DeleteApiRealmsByRealmIdMembershipStatus429
-	| DeleteApiRealmsByRealmIdMembershipStatus500;
-
-export type GetApiRealmsByRealmIdMembersPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	realmId: string;
-};
-
-export const GetApiRealmsByRealmIdMembersState = {
-	active: "active",
-	pending: "pending",
-	muted: "muted",
-	removed: "removed",
-	banned: "banned",
-} as const;
-
-export type GetApiRealmsByRealmIdMembersState =
-	(typeof GetApiRealmsByRealmIdMembersState)[keyof typeof GetApiRealmsByRealmIdMembersState];
-
-export const GetApiRealmsByRealmIdMembersLocalizationLanguagesEnum = {
-	zh: "zh",
-	en: "en",
-	ja: "ja",
-	ko: "ko",
-	de: "de",
-	fr: "fr",
-	es: "es",
-} as const;
-
-export type GetApiRealmsByRealmIdMembersLocalizationLanguagesEnum =
-	(typeof GetApiRealmsByRealmIdMembersLocalizationLanguagesEnum)[keyof typeof GetApiRealmsByRealmIdMembersLocalizationLanguagesEnum];
-
-export type GetApiRealmsByRealmIdMembersQuery = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string | undefined
-	 */
-	profileId?: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string | undefined
-	 */
-	afterProfileId?: string;
-	state?: GetApiRealmsByRealmIdMembersState;
-	localizationLanguages?: GetApiRealmsByRealmIdMembersLocalizationLanguagesEnum[];
-	/**
-	 * @minLength 1
-	 * @maxLength 100
-	 * @default 50
-	 * @type integer | undefined
-	 */
-	limit?: number;
-};
-
-export const GetApiRealmsByRealmIdMembersStatus200ItemsAvatarIconPrefixEnum = {
-	fas: "fas",
-	fab: "fab",
-} as const;
-
-export type GetApiRealmsByRealmIdMembersStatus200ItemsAvatarIconPrefixEnum =
-	(typeof GetApiRealmsByRealmIdMembersStatus200ItemsAvatarIconPrefixEnum)[keyof typeof GetApiRealmsByRealmIdMembersStatus200ItemsAvatarIconPrefixEnum];
-
-export const GetApiRealmsByRealmIdMembersStatus200ItemsStateEnum = {
-	active: "active",
-	pending: "pending",
-	muted: "muted",
-	removed: "removed",
-	banned: "banned",
-} as const;
-
-export type GetApiRealmsByRealmIdMembersStatus200ItemsStateEnum =
-	(typeof GetApiRealmsByRealmIdMembersStatus200ItemsStateEnum)[keyof typeof GetApiRealmsByRealmIdMembersStatus200ItemsStateEnum];
-
-export type GetApiRealmsByRealmIdMembersStatus200 = {
-	items: {
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		profileId: string;
-		/**
-		 * @minLength 1
-		 * @maxLength 255
-		 * @pattern ^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$
-		 * @type string
-		 */
-		language: string | null;
-		name: string | null;
-		slugAddress: {
-			/**
-			 * @minLength 1
-			 * @maxLength 63
-			 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
-			 * @type string
-			 */
-			slug: string;
-			/**
-			 * @description
-			 * Format: `uuid`
-			 * @type string
-			 */
-			scopeUnitId: string | null;
-			/**
-			 * @description
-			 * Format: `uuid`
-			 * @type string
-			 */
-			scopeNamespaceId: string | null;
-			canonicalPath: string[];
-		} | null;
-		avatar:
-			| (
-					| (
-							| {
-									type: "image";
-									image: {
-										/**
-										 * @description
-										 * Format: `uuid`
-										 * @type string
-										 */
-										id: string;
-										url: string;
-									};
-							  }
-							| {
-									type: "emoji";
-									/**
-									 * @maxLength 64
-									 * @type string
-									 */
-									emoji: string;
-							  }
-							| {
-									type: "icon";
-									icon: {
-										provider: "font-awesome";
-										prefix: GetApiRealmsByRealmIdMembersStatus200ItemsAvatarIconPrefixEnum;
-										/**
-										 * @maxLength 128
-										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-										 * @type string
-										 */
-										name: string;
-									};
-							  }
-					  )
-					| null
-			  )
-			| null;
-		isOwner: boolean;
-		/**
-		 * @default 'active'
-		 * @type string
-		 */
-		state: GetApiRealmsByRealmIdMembersStatus200ItemsStateEnum;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		joinedAt: string;
-	}[];
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	nextCursor: string | null;
-};
-
-export const GetApiRealmsByRealmIdMembersStatus403ErrorCodeEnum = {
-	RealmCapabilityRequired: "RealmCapabilityRequired",
-	ParticipationDenied: "ParticipationDenied",
-	AccountRestricted: "AccountRestricted",
-	AccountSuspended: "AccountSuspended",
-	AccountClosed: "AccountClosed",
-} as const;
-
-export type GetApiRealmsByRealmIdMembersStatus403ErrorCodeEnum =
-	(typeof GetApiRealmsByRealmIdMembersStatus403ErrorCodeEnum)[keyof typeof GetApiRealmsByRealmIdMembersStatus403ErrorCodeEnum];
-
-export type GetApiRealmsByRealmIdMembersStatus403 = {
-	error: {
-		/**
-		 * @default 'RealmCapabilityRequired'
-		 * @type string
-		 */
-		code: GetApiRealmsByRealmIdMembersStatus403ErrorCodeEnum;
-		message: string;
-		details?: void;
-	};
-	requestId: string;
-};
-
-export type GetApiRealmsByRealmIdMembersStatus422 = ValidationError;
-
-export const GetApiRealmsByRealmIdMembersStatus429ErrorCodeEnum = {
-	ApiQuotaExceeded: "ApiQuotaExceeded",
-	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
-} as const;
-
-export type GetApiRealmsByRealmIdMembersStatus429ErrorCodeEnum =
-	(typeof GetApiRealmsByRealmIdMembersStatus429ErrorCodeEnum)[keyof typeof GetApiRealmsByRealmIdMembersStatus429ErrorCodeEnum];
-
-export type GetApiRealmsByRealmIdMembersStatus429 = {
-	error: {
-		code: GetApiRealmsByRealmIdMembersStatus429ErrorCodeEnum;
-		message: string;
-		details?: JsonValue;
-	};
-	requestId: string;
-};
-
-export type GetApiRealmsByRealmIdMembersStatus500 = InternalError;
-
-export type GetApiRealmsByRealmIdMembersOptions = {
-	body?: never;
-	path: GetApiRealmsByRealmIdMembersPath;
-	query?: GetApiRealmsByRealmIdMembersQuery;
-	headers?: never;
-};
-
-export type GetApiRealmsByRealmIdMembersResponses = {
-	"200": GetApiRealmsByRealmIdMembersStatus200;
-	"403": GetApiRealmsByRealmIdMembersStatus403;
-	"422": GetApiRealmsByRealmIdMembersStatus422;
-	"429": GetApiRealmsByRealmIdMembersStatus429;
-	"500": GetApiRealmsByRealmIdMembersStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type GetApiRealmsByRealmIdMembersResponse =
-	| GetApiRealmsByRealmIdMembersStatus200
-	| GetApiRealmsByRealmIdMembersStatus403
-	| GetApiRealmsByRealmIdMembersStatus422
-	| GetApiRealmsByRealmIdMembersStatus429
-	| GetApiRealmsByRealmIdMembersStatus500;
-
-export type PatchApiRealmsByRealmIdMembersByProfileIdPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	realmId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	profileId: string;
-};
-
-export const PatchApiRealmsByRealmIdMembersByProfileIdStatus200StateEnum = {
-	active: "active",
-	pending: "pending",
-	muted: "muted",
-	removed: "removed",
-	banned: "banned",
-} as const;
-
-export type PatchApiRealmsByRealmIdMembersByProfileIdStatus200StateEnum =
-	(typeof PatchApiRealmsByRealmIdMembersByProfileIdStatus200StateEnum)[keyof typeof PatchApiRealmsByRealmIdMembersByProfileIdStatus200StateEnum];
-
-export type PatchApiRealmsByRealmIdMembersByProfileIdStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	realmId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	profileId: string;
-	isOwner: boolean;
-	/**
-	 * @default 'active'
-	 * @type string
-	 */
-	state: PatchApiRealmsByRealmIdMembersByProfileIdStatus200StateEnum;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	joinedAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	updatedAt: string;
-};
-
-export type PatchApiRealmsByRealmIdMembersByProfileIdStatus400 = MalformedRequestBody;
-
-export const PatchApiRealmsByRealmIdMembersByProfileIdStatus403ErrorCodeEnum = {
-	RealmCapabilityRequired: "RealmCapabilityRequired",
-	ParticipationDenied: "ParticipationDenied",
-	AccountRestricted: "AccountRestricted",
-	AccountSuspended: "AccountSuspended",
-	AccountClosed: "AccountClosed",
-} as const;
-
-export type PatchApiRealmsByRealmIdMembersByProfileIdStatus403ErrorCodeEnum =
-	(typeof PatchApiRealmsByRealmIdMembersByProfileIdStatus403ErrorCodeEnum)[keyof typeof PatchApiRealmsByRealmIdMembersByProfileIdStatus403ErrorCodeEnum];
-
-export type PatchApiRealmsByRealmIdMembersByProfileIdStatus403 = {
-	error: {
-		/**
-		 * @default 'RealmCapabilityRequired'
-		 * @type string
-		 */
-		code: PatchApiRealmsByRealmIdMembersByProfileIdStatus403ErrorCodeEnum;
-		message: string;
-		details?: void;
-	};
-	requestId: string;
-};
-
-export type PatchApiRealmsByRealmIdMembersByProfileIdStatus404 = {
-	error: {
-		/**
-		 * @default 'RealmMemberNotFound'
-		 * @type string
-		 */
-		code: "RealmMemberNotFound";
-		message: string;
-		details?: void;
-	};
-	requestId: string;
-};
-
-export type PatchApiRealmsByRealmIdMembersByProfileIdStatus409 = {
-	error: {
-		/**
-		 * @default 'RealmOwnerLeaveForbidden'
-		 * @type string
-		 */
-		code: "RealmOwnerLeaveForbidden";
-		message: string;
-		details?: void;
-	};
-	requestId: string;
-};
-
-export type PatchApiRealmsByRealmIdMembersByProfileIdStatus422 = ValidationError;
-
-export const PatchApiRealmsByRealmIdMembersByProfileIdStatus429ErrorCodeEnum = {
-	ApiQuotaExceeded: "ApiQuotaExceeded",
-	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
-} as const;
-
-export type PatchApiRealmsByRealmIdMembersByProfileIdStatus429ErrorCodeEnum =
-	(typeof PatchApiRealmsByRealmIdMembersByProfileIdStatus429ErrorCodeEnum)[keyof typeof PatchApiRealmsByRealmIdMembersByProfileIdStatus429ErrorCodeEnum];
-
-export type PatchApiRealmsByRealmIdMembersByProfileIdStatus429 = {
-	error: {
-		code: PatchApiRealmsByRealmIdMembersByProfileIdStatus429ErrorCodeEnum;
-		message: string;
-		details?: JsonValue;
-	};
-	requestId: string;
-};
-
-export type PatchApiRealmsByRealmIdMembersByProfileIdStatus500 = InternalError;
-
-export const PatchApiRealmsByRealmIdMembersByProfileIdRequestStateEnum = {
-	active: "active",
-	pending: "pending",
-	muted: "muted",
-	removed: "removed",
-	banned: "banned",
-} as const;
-
-export type PatchApiRealmsByRealmIdMembersByProfileIdRequestStateEnum =
-	(typeof PatchApiRealmsByRealmIdMembersByProfileIdRequestStateEnum)[keyof typeof PatchApiRealmsByRealmIdMembersByProfileIdRequestStateEnum];
-
-export type PatchApiRealmsByRealmIdMembersByProfileIdBody = {
-	state: PatchApiRealmsByRealmIdMembersByProfileIdRequestStateEnum;
-};
-
-export type PatchApiRealmsByRealmIdMembersByProfileIdOptions = {
-	body: PatchApiRealmsByRealmIdMembersByProfileIdBody;
-	path: PatchApiRealmsByRealmIdMembersByProfileIdPath;
-	query?: never;
-	headers?: never;
-};
-
-export type PatchApiRealmsByRealmIdMembersByProfileIdResponses = {
-	"200": PatchApiRealmsByRealmIdMembersByProfileIdStatus200;
-	"400": PatchApiRealmsByRealmIdMembersByProfileIdStatus400;
-	"403": PatchApiRealmsByRealmIdMembersByProfileIdStatus403;
-	"404": PatchApiRealmsByRealmIdMembersByProfileIdStatus404;
-	"409": PatchApiRealmsByRealmIdMembersByProfileIdStatus409;
-	"422": PatchApiRealmsByRealmIdMembersByProfileIdStatus422;
-	"429": PatchApiRealmsByRealmIdMembersByProfileIdStatus429;
-	"500": PatchApiRealmsByRealmIdMembersByProfileIdStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PatchApiRealmsByRealmIdMembersByProfileIdResponse =
-	| PatchApiRealmsByRealmIdMembersByProfileIdStatus200
-	| PatchApiRealmsByRealmIdMembersByProfileIdStatus400
-	| PatchApiRealmsByRealmIdMembersByProfileIdStatus403
-	| PatchApiRealmsByRealmIdMembersByProfileIdStatus404
-	| PatchApiRealmsByRealmIdMembersByProfileIdStatus409
-	| PatchApiRealmsByRealmIdMembersByProfileIdStatus422
-	| PatchApiRealmsByRealmIdMembersByProfileIdStatus429
-	| PatchApiRealmsByRealmIdMembersByProfileIdStatus500;
-
 export type PutApiRealmsByRealmIdRulesPath = {
 	/**
 	 * @description
@@ -131638,118 +133796,6 @@ export type GetApiRealmsByRealmIdRulesAuthoringResponse =
 	| GetApiRealmsByRealmIdRulesAuthoringStatus422
 	| GetApiRealmsByRealmIdRulesAuthoringStatus429
 	| GetApiRealmsByRealmIdRulesAuthoringStatus500;
-
-export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	realmId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	revisionId: string;
-};
-
-export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus204 = void;
-
-export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus400 = MalformedRequestBody;
-
-export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus404 = {
-	error: {
-		/**
-		 * @default 'RealmNotFound'
-		 * @type string
-		 */
-		code: "RealmNotFound";
-		message: string;
-		details?: void;
-	};
-	requestId: string;
-};
-
-export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus409 = {
-	error: {
-		/**
-		 * @default 'RealmRuleRevisionChanged'
-		 * @type string
-		 */
-		code: "RealmRuleRevisionChanged";
-		message: string;
-		details?: void;
-	};
-	requestId: string;
-};
-
-export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus422 = ValidationError;
-
-export const PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429ErrorCodeEnum = {
-	ApiQuotaExceeded: "ApiQuotaExceeded",
-	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
-} as const;
-
-export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429ErrorCodeEnum =
-	(typeof PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429ErrorCodeEnum];
-
-export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429 = {
-	error: {
-		code: PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429ErrorCodeEnum;
-		message: string;
-		details?: JsonValue;
-	};
-	requestId: string;
-};
-
-export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus500 = InternalError;
-
-export const PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementRequestLanguageEnum = {
-	zh: "zh",
-	en: "en",
-	ja: "ja",
-	ko: "ko",
-	de: "de",
-	fr: "fr",
-	es: "es",
-} as const;
-
-export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementRequestLanguageEnum =
-	(typeof PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementRequestLanguageEnum)[keyof typeof PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementRequestLanguageEnum];
-
-export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementBody = {
-	language: PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementRequestLanguageEnum;
-};
-
-export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementOptions = {
-	body: PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementBody;
-	path: PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementPath;
-	query?: never;
-	headers?: never;
-};
-
-export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementResponses = {
-	"204": PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus204;
-	"400": PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus400;
-	"404": PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus404;
-	"409": PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus409;
-	"422": PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus422;
-	"429": PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429;
-	"500": PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementResponse =
-	| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus204
-	| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus400
-	| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus404
-	| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus409
-	| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus422
-	| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429
-	| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus500;
 
 export type GetApiRealmsByRealmIdPinsPath = {
 	/**

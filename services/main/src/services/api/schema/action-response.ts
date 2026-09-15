@@ -116,7 +116,7 @@ export const FollowingListResponse = t.Object({
 			id: Uuid,
 			slugAddress: NullablePublicSlugAddressResponse,
 			owner: FollowableUnitOwner,
-            shape:t.String(),
+			shape: t.String(),
 			language: t.Nullable(ContentLanguageTag),
 			title: t.Nullable(t.String()),
 			avatar: AvatarResponse,
@@ -160,7 +160,7 @@ export const RealmMemberListResponse = t.Object({
 			joinedAt: DateTime,
 		}),
 	),
-	nextCursor: NullableUuid,
+	nextCursor: t.Nullable(t.String({ maxLength: 512 })),
 });
 export const RealmMemberResponse = t.Object({
 	realmId: Uuid,

@@ -155075,6 +155075,3717 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
+		"/api/v1/realms/{realmId}/enrollment-contact": {
+			"post": {
+				"operationId": "createRealmEnrollmentContact",
+				"tags": ["Realms"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"revision": {
+											"type": "integer",
+											"minimum": -9007199254740991,
+											"maximum": 9007199254740991
+										},
+										"contact": { "type": "string" },
+										"expiresAt": {
+											"type": "string",
+											"format": "date-time",
+											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+										}
+									},
+									"required": ["id", "revision", "contact", "expiresAt"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": ["AccessChanged", "RealmRulesAcceptanceRequired"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "postApiRealmsByRealmIdEnrollment-contact",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/realms/{realmId}/enrollment-contacts/resolve": {
+			"post": {
+				"operationId": "resolveRealmEnrollmentContact",
+				"tags": ["Realms"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"type": "object",
+								"properties": {
+									"contact": { "type": "string", "minLength": 32, "maxLength": 128 }
+								},
+								"required": ["contact"],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"contactId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"recipient": {
+											"oneOf": [
+												{
+													"type": "object",
+													"properties": {
+														"kind": { "type": "string", "const": "entity" },
+														"entityId": {
+															"type": "string",
+															"format": "uuid",
+															"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+														}
+													},
+													"required": ["kind", "entityId"],
+													"additionalProperties": false
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": { "type": "string", "const": "principal" },
+														"selector": { "type": "string", "minLength": 1, "maxLength": 512 }
+													},
+													"required": ["kind", "selector"],
+													"additionalProperties": false
+												}
+											]
+										}
+									},
+									"required": ["contactId", "recipient"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": ["AccessChanged", "RealmRulesAcceptanceRequired"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "postApiRealmsByRealmIdEnrollment-contactsResolve",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/realms/enrollment-contacts/{contactId}": {
+			"delete": {
+				"operationId": "revokeRealmEnrollmentContact",
+				"tags": ["Realms"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "contactId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"type": "object",
+								"properties": {
+									"expectedRevision": { "type": "integer", "minimum": 1, "maximum": 2 }
+								},
+								"required": ["expectedRevision"],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"revision": {
+											"type": "integer",
+											"minimum": -9007199254740991,
+											"maximum": 9007199254740991
+										}
+									},
+									"required": ["id", "revision"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": ["AccessChanged", "RealmRulesAcceptanceRequired"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "deleteApiRealmsEnrollment-contactsByContactId",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/realms/{realmId}/enrollment-rules": {
+			"get": {
+				"operationId": "getRealmEnrollmentRules",
+				"tags": ["Realms"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					},
+					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"maxItems": 7,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "enum": ["zh", "en", "ja", "ko", "de", "fr", "es"], "type": "string" }
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"revisionId": {
+											"nullable": true,
+											"type": ["string", "null"],
+											"format": "uuid"
+										},
+										"version": { "nullable": true, "type": ["integer", "null"] },
+										"acknowledgementMode": {
+											"default": "explicit",
+											"enum": ["explicit", "implicit_on_follow"],
+											"type": "string"
+										},
+										"requireOnJoin": { "type": "boolean" },
+										"requireOnPost": { "type": "boolean" },
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"id": { "type": "string", "format": "uuid" },
+													"position": { "minimum": 0, "type": "integer" },
+													"language": {
+														"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"],
+														"type": "string"
+													},
+													"title": { "type": "string" },
+													"content": { "$ref": "#/components/schemas/PortableTextDocument" }
+												},
+												"required": ["id", "position", "language", "title", "content"]
+											}
+										}
+									},
+									"required": [
+										"revisionId",
+										"version",
+										"acknowledgementMode",
+										"requireOnJoin",
+										"requireOnPost",
+										"items"
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": ["AccessChanged", "RealmRulesAcceptanceRequired"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until this request can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "getApiRealmsByRealmIdEnrollment-rules",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/realms/{realmId}/membership-capabilities": {
+			"get": {
+				"operationId": "getRealmMembershipCapabilities",
+				"tags": ["Realms"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"canReadMembers": { "type": "boolean" },
+										"canManageMembers": { "type": "boolean" }
+									},
+									"required": ["canReadMembers", "canManageMembers"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": ["AccessChanged", "RealmRulesAcceptanceRequired"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until this request can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "getApiRealmsByRealmIdMembership-capabilities",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/realms/{realmId}/membership": {
+			"get": {
+				"operationId": "getRealmMembership",
+				"tags": ["Realms"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"controlRevision": {
+											"type": "integer",
+											"minimum": 1,
+											"maximum": 9007199254740990
+										},
+										"joinPolicy": { "type": "string", "enum": ["open", "approval"] },
+										"ruleRevisionId": {
+											"type": ["string", "null"],
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"acknowledgedRuleRevisionId": {
+											"type": ["string", "null"],
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"isOwner": { "type": "boolean" },
+										"recipient": {
+											"oneOf": [
+												{
+													"type": "object",
+													"properties": {
+														"kind": { "type": "string", "const": "entity" },
+														"entityId": {
+															"type": "string",
+															"format": "uuid",
+															"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+														}
+													},
+													"required": ["kind", "entityId"],
+													"additionalProperties": false
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": { "type": "string", "const": "principal" },
+														"selector": { "type": "string", "minLength": 1, "maxLength": 512 }
+													},
+													"required": ["kind", "selector"],
+													"additionalProperties": false
+												}
+											]
+										},
+										"receipt": {
+											"type": ["object", "null"],
+											"properties": {
+												"state": {
+													"type": "string",
+													"enum": [
+														"open",
+														"invited",
+														"pending",
+														"approved",
+														"rejected",
+														"left",
+														"removed"
+													]
+												},
+												"revision": {
+													"type": "integer",
+													"minimum": 0,
+													"maximum": 9007199254740990
+												},
+												"membershipId": {
+													"type": "string",
+													"format": "uuid",
+													"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+												},
+												"version": { "type": "integer", "minimum": 0, "maximum": 9007199254740990 },
+												"activeGeneration": {
+													"type": ["integer", "null"],
+													"minimum": 0,
+													"maximum": 9007199254740990
+												},
+												"lastGeneration": {
+													"type": "integer",
+													"minimum": 0,
+													"maximum": 9007199254740990
+												},
+												"enforcement": { "type": "string", "enum": ["clear", "muted", "banned"] },
+												"enforcementRevision": {
+													"type": "integer",
+													"minimum": 0,
+													"maximum": 9007199254740990
+												}
+											},
+											"required": [
+												"state",
+												"revision",
+												"membershipId",
+												"version",
+												"activeGeneration",
+												"lastGeneration",
+												"enforcement",
+												"enforcementRevision"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"controlRevision",
+										"joinPolicy",
+										"ruleRevisionId",
+										"acknowledgedRuleRevisionId",
+										"isOwner",
+										"recipient",
+										"receipt"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": ["AccessChanged", "RealmRulesAcceptanceRequired"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until this request can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "getApiRealmsByRealmIdMembership",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			},
+			"post": {
+				"operationId": "joinRealm",
+				"tags": ["Realms"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"type": "object",
+								"properties": {
+									"operationId": {
+										"type": "string",
+										"format": "uuid",
+										"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+									},
+									"expectedControlRevision": {
+										"type": "integer",
+										"minimum": 1,
+										"maximum": 9007199254740990
+									},
+									"expectedRevision": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740990
+									},
+									"expectedMembershipVersion": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740990
+									},
+									"expectedEnforcementRevision": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740990
+									},
+									"consent": { "type": "boolean", "const": true },
+									"ruleRevisionId": {
+										"type": ["string", "null"],
+										"format": "uuid",
+										"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+									}
+								},
+								"required": [
+									"operationId",
+									"expectedControlRevision",
+									"expectedRevision",
+									"expectedMembershipVersion",
+									"expectedEnforcementRevision",
+									"consent",
+									"ruleRevisionId"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"state": {
+											"type": "string",
+											"enum": [
+												"open",
+												"invited",
+												"pending",
+												"approved",
+												"rejected",
+												"left",
+												"removed"
+											]
+										},
+										"revision": { "type": "integer", "minimum": 0, "maximum": 9007199254740990 },
+										"membershipId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"version": { "type": "integer", "minimum": 0, "maximum": 9007199254740990 },
+										"activeGeneration": {
+											"type": ["integer", "null"],
+											"minimum": 0,
+											"maximum": 9007199254740990
+										},
+										"lastGeneration": {
+											"type": "integer",
+											"minimum": 0,
+											"maximum": 9007199254740990
+										},
+										"enforcement": { "type": "string", "enum": ["clear", "muted", "banned"] },
+										"enforcementRevision": {
+											"type": "integer",
+											"minimum": 0,
+											"maximum": 9007199254740990
+										}
+									},
+									"required": [
+										"state",
+										"revision",
+										"membershipId",
+										"version",
+										"activeGeneration",
+										"lastGeneration",
+										"enforcement",
+										"enforcementRevision"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": ["AccessChanged", "RealmRulesAcceptanceRequired"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "postApiRealmsByRealmIdMembership",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			},
+			"delete": {
+				"operationId": "leaveRealm",
+				"tags": ["Realms"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"type": "object",
+								"properties": {
+									"operationId": {
+										"type": "string",
+										"format": "uuid",
+										"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+									},
+									"expectedControlRevision": {
+										"type": "integer",
+										"minimum": 1,
+										"maximum": 9007199254740990
+									},
+									"expectedRevision": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740990
+									},
+									"expectedMembershipVersion": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740990
+									},
+									"expectedEnforcementRevision": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740990
+									}
+								},
+								"required": [
+									"operationId",
+									"expectedControlRevision",
+									"expectedRevision",
+									"expectedMembershipVersion",
+									"expectedEnforcementRevision"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"state": {
+											"type": "string",
+											"enum": [
+												"open",
+												"invited",
+												"pending",
+												"approved",
+												"rejected",
+												"left",
+												"removed"
+											]
+										},
+										"revision": { "type": "integer", "minimum": 0, "maximum": 9007199254740990 },
+										"membershipId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"version": { "type": "integer", "minimum": 0, "maximum": 9007199254740990 },
+										"activeGeneration": {
+											"type": ["integer", "null"],
+											"minimum": 0,
+											"maximum": 9007199254740990
+										},
+										"lastGeneration": {
+											"type": "integer",
+											"minimum": 0,
+											"maximum": 9007199254740990
+										},
+										"enforcement": { "type": "string", "enum": ["clear", "muted", "banned"] },
+										"enforcementRevision": {
+											"type": "integer",
+											"minimum": 0,
+											"maximum": 9007199254740990
+										}
+									},
+									"required": [
+										"state",
+										"revision",
+										"membershipId",
+										"version",
+										"activeGeneration",
+										"lastGeneration",
+										"enforcement",
+										"enforcementRevision"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": ["AccessChanged", "RealmRulesAcceptanceRequired"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "deleteApiRealmsByRealmIdMembership",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/realms/{realmId}/enrollments": {
+			"get": {
+				"operationId": "listRealmEnrollments",
+				"tags": ["Realms"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					},
+					{
+						"name": "afterId",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "string", "maxLength": 512 }
+					},
+					{
+						"name": "view",
+						"in": "query",
+						"required": false,
+						"schema": { "default": "public", "type": "string", "enum": ["public", "operational"] }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"items": {
+											"maxItems": 50,
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"recipient": {
+														"oneOf": [
+															{
+																"type": "object",
+																"properties": {
+																	"kind": { "type": "string", "const": "entity" },
+																	"entityId": {
+																		"type": "string",
+																		"format": "uuid",
+																		"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+																	}
+																},
+																"required": ["kind", "entityId"],
+																"additionalProperties": false
+															},
+															{
+																"type": "object",
+																"properties": {
+																	"kind": { "type": "string", "const": "principal" },
+																	"selector": { "type": "string", "minLength": 1, "maxLength": 512 }
+																},
+																"required": ["kind", "selector"],
+																"additionalProperties": false
+															}
+														]
+													},
+													"receipt": {
+														"type": "object",
+														"properties": {
+															"state": {
+																"type": "string",
+																"enum": [
+																	"open",
+																	"invited",
+																	"pending",
+																	"approved",
+																	"rejected",
+																	"left",
+																	"removed"
+																]
+															},
+															"revision": {
+																"type": "integer",
+																"minimum": 0,
+																"maximum": 9007199254740990
+															},
+															"membershipId": {
+																"type": "string",
+																"format": "uuid",
+																"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+															},
+															"version": {
+																"type": "integer",
+																"minimum": 0,
+																"maximum": 9007199254740990
+															},
+															"activeGeneration": {
+																"type": ["integer", "null"],
+																"minimum": 0,
+																"maximum": 9007199254740990
+															},
+															"lastGeneration": {
+																"type": "integer",
+																"minimum": 0,
+																"maximum": 9007199254740990
+															},
+															"enforcement": {
+																"type": "string",
+																"enum": ["clear", "muted", "banned"]
+															},
+															"enforcementRevision": {
+																"type": "integer",
+																"minimum": 0,
+																"maximum": 9007199254740990
+															}
+														},
+														"required": [
+															"state",
+															"revision",
+															"membershipId",
+															"version",
+															"activeGeneration",
+															"lastGeneration",
+															"enforcement",
+															"enforcementRevision"
+														],
+														"additionalProperties": false
+													}
+												},
+												"required": ["recipient", "receipt"],
+												"additionalProperties": false
+											}
+										},
+										"nextCursor": { "type": ["string", "null"], "maxLength": 512 }
+									},
+									"required": ["items", "nextCursor"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": ["AccessChanged", "RealmRulesAcceptanceRequired"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until this request can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "getApiRealmsByRealmIdEnrollments",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/realms/{realmId}/members": {
+			"get": {
+				"operationId": "listRealmMembers",
+				"tags": ["Realms"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					},
+					{
+						"name": "afterId",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "string", "maxLength": 512 }
+					},
+					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"maxItems": 16,
+							"type": "array",
+							"items": { "type": "string", "maxLength": 64 }
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"profileId": { "type": "string", "format": "uuid" },
+													"language": {
+														"nullable": true,
+														"minLength": 1,
+														"maxLength": 255,
+														"pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$",
+														"type": ["string", "null"]
+													},
+													"name": { "nullable": true, "type": ["string", "null"] },
+													"slugAddress": {
+														"nullable": true,
+														"additionalProperties": false,
+														"type": ["object", "null"],
+														"properties": {
+															"slug": {
+																"minLength": 1,
+																"maxLength": 63,
+																"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																"type": "string"
+															},
+															"scopeUnitId": {
+																"nullable": true,
+																"type": ["string", "null"],
+																"format": "uuid"
+															},
+															"scopeNamespaceId": {
+																"nullable": true,
+																"type": ["string", "null"],
+																"format": "uuid"
+															},
+															"canonicalPath": {
+																"minItems": 2,
+																"maxItems": 3,
+																"type": "array",
+																"items": {
+																	"minLength": 1,
+																	"maxLength": 63,
+																	"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																	"type": "string"
+																}
+															}
+														},
+														"required": ["slug", "scopeUnitId", "scopeNamespaceId", "canonicalPath"]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"properties": {
+																			"type": { "type": "string", "const": "image" },
+																			"image": {
+																				"type": "object",
+																				"properties": {
+																					"id": { "type": "string", "format": "uuid" },
+																					"url": { "type": "string" }
+																				},
+																				"required": ["id", "url"]
+																			}
+																		},
+																		"required": ["type", "image"]
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"properties": {
+																			"type": { "type": "string", "const": "emoji" },
+																			"emoji": { "maxLength": 64, "type": "string" }
+																		},
+																		"required": ["type", "emoji"]
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"properties": {
+																			"type": { "type": "string", "const": "icon" },
+																			"icon": {
+																				"additionalProperties": false,
+																				"type": "object",
+																				"properties": {
+																					"provider": { "type": "string", "const": "font-awesome" },
+																					"prefix": { "enum": ["fas", "fab"], "type": "string" },
+																					"name": {
+																						"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+																						"maxLength": 128,
+																						"type": "string"
+																					}
+																				},
+																				"required": ["provider", "prefix", "name"]
+																			}
+																		},
+																		"required": ["type", "icon"]
+																	}
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"isOwner": { "type": "boolean" },
+													"state": {
+														"default": "active",
+														"enum": [
+															"active",
+															"pending",
+															"muted",
+															"removed",
+															"banned",
+															"open",
+															"invited",
+															"rejected",
+															"left"
+														],
+														"type": "string"
+													},
+													"joinedAt": { "type": "string", "format": "date-time" }
+												},
+												"required": [
+													"profileId",
+													"language",
+													"name",
+													"slugAddress",
+													"avatar",
+													"isOwner",
+													"state",
+													"joinedAt"
+												]
+											}
+										},
+										"nextCursor": { "nullable": true, "maxLength": 512, "type": ["string", "null"] }
+									},
+									"required": ["items", "nextCursor"]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": ["AccessChanged", "RealmRulesAcceptanceRequired"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until this request can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "getApiRealmsByRealmIdMembers",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			},
+			"patch": {
+				"operationId": "updateRealmMember",
+				"tags": ["Realms"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"type": "object",
+								"properties": {
+									"operationId": {
+										"type": "string",
+										"format": "uuid",
+										"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+									},
+									"expectedControlRevision": {
+										"type": "integer",
+										"minimum": 1,
+										"maximum": 9007199254740990
+									},
+									"expectedRevision": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740990
+									},
+									"expectedMembershipVersion": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740990
+									},
+									"expectedEnforcementRevision": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740990
+									},
+									"recipient": {
+										"oneOf": [
+											{
+												"type": "object",
+												"properties": {
+													"kind": { "type": "string", "const": "entity" },
+													"entityId": {
+														"type": "string",
+														"format": "uuid",
+														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+													}
+												},
+												"required": ["kind", "entityId"],
+												"additionalProperties": false
+											},
+											{
+												"type": "object",
+												"properties": {
+													"kind": { "type": "string", "const": "principal" },
+													"selector": { "type": "string", "minLength": 1, "maxLength": 512 }
+												},
+												"required": ["kind", "selector"],
+												"additionalProperties": false
+											}
+										]
+									},
+									"contactId": {
+										"type": "string",
+										"format": "uuid",
+										"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+									},
+									"operation": {
+										"type": "string",
+										"enum": ["invite", "approve", "reject", "remove", "mute", "ban", "clear"]
+									}
+								},
+								"required": [
+									"operationId",
+									"expectedControlRevision",
+									"expectedRevision",
+									"expectedMembershipVersion",
+									"expectedEnforcementRevision",
+									"recipient",
+									"operation"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"state": {
+											"type": "string",
+											"enum": [
+												"open",
+												"invited",
+												"pending",
+												"approved",
+												"rejected",
+												"left",
+												"removed"
+											]
+										},
+										"revision": { "type": "integer", "minimum": 0, "maximum": 9007199254740990 },
+										"membershipId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"version": { "type": "integer", "minimum": 0, "maximum": 9007199254740990 },
+										"activeGeneration": {
+											"type": ["integer", "null"],
+											"minimum": 0,
+											"maximum": 9007199254740990
+										},
+										"lastGeneration": {
+											"type": "integer",
+											"minimum": 0,
+											"maximum": 9007199254740990
+										},
+										"enforcement": { "type": "string", "enum": ["clear", "muted", "banned"] },
+										"enforcementRevision": {
+											"type": "integer",
+											"minimum": 0,
+											"maximum": 9007199254740990
+										}
+									},
+									"required": [
+										"state",
+										"revision",
+										"membershipId",
+										"version",
+										"activeGeneration",
+										"lastGeneration",
+										"enforcement",
+										"enforcementRevision"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": ["AccessChanged", "RealmRulesAcceptanceRequired"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "patchApiRealmsByRealmIdMembers",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/realms/{realmId}/members/inspect": {
+			"post": {
+				"operationId": "inspectRealmMember",
+				"tags": ["Realms"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"oneOf": [
+									{
+										"type": "object",
+										"properties": {
+											"kind": { "type": "string", "const": "entity" },
+											"entityId": {
+												"type": "string",
+												"format": "uuid",
+												"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+											}
+										},
+										"required": ["kind", "entityId"],
+										"additionalProperties": false
+									},
+									{
+										"type": "object",
+										"properties": {
+											"kind": { "type": "string", "const": "principal" },
+											"selector": { "type": "string", "minLength": 1, "maxLength": 512 }
+										},
+										"required": ["kind", "selector"],
+										"additionalProperties": false
+									}
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"controlRevision": {
+											"type": "integer",
+											"minimum": 1,
+											"maximum": 9007199254740990
+										},
+										"joinPolicy": { "type": "string", "enum": ["open", "approval"] },
+										"ruleRevisionId": {
+											"type": ["string", "null"],
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"acknowledgedRuleRevisionId": {
+											"type": ["string", "null"],
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"isOwner": { "type": "boolean" },
+										"recipient": {
+											"oneOf": [
+												{
+													"type": "object",
+													"properties": {
+														"kind": { "type": "string", "const": "entity" },
+														"entityId": {
+															"type": "string",
+															"format": "uuid",
+															"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+														}
+													},
+													"required": ["kind", "entityId"],
+													"additionalProperties": false
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": { "type": "string", "const": "principal" },
+														"selector": { "type": "string", "minLength": 1, "maxLength": 512 }
+													},
+													"required": ["kind", "selector"],
+													"additionalProperties": false
+												}
+											]
+										},
+										"receipt": {
+											"type": ["object", "null"],
+											"properties": {
+												"state": {
+													"type": "string",
+													"enum": [
+														"open",
+														"invited",
+														"pending",
+														"approved",
+														"rejected",
+														"left",
+														"removed"
+													]
+												},
+												"revision": {
+													"type": "integer",
+													"minimum": 0,
+													"maximum": 9007199254740990
+												},
+												"membershipId": {
+													"type": "string",
+													"format": "uuid",
+													"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+												},
+												"version": { "type": "integer", "minimum": 0, "maximum": 9007199254740990 },
+												"activeGeneration": {
+													"type": ["integer", "null"],
+													"minimum": 0,
+													"maximum": 9007199254740990
+												},
+												"lastGeneration": {
+													"type": "integer",
+													"minimum": 0,
+													"maximum": 9007199254740990
+												},
+												"enforcement": { "type": "string", "enum": ["clear", "muted", "banned"] },
+												"enforcementRevision": {
+													"type": "integer",
+													"minimum": 0,
+													"maximum": 9007199254740990
+												}
+											},
+											"required": [
+												"state",
+												"revision",
+												"membershipId",
+												"version",
+												"activeGeneration",
+												"lastGeneration",
+												"enforcement",
+												"enforcementRevision"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": [
+										"controlRevision",
+										"joinPolicy",
+										"ruleRevisionId",
+										"acknowledgedRuleRevisionId",
+										"isOwner",
+										"recipient",
+										"receipt"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": ["AccessChanged", "RealmRulesAcceptanceRequired"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until this request can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "postApiRealmsByRealmIdMembersInspect",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/realms/{realmId}/members/history": {
+			"post": {
+				"operationId": "getRealmMemberHistory",
+				"tags": ["Realms"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"type": "object",
+								"properties": {
+									"recipient": {
+										"oneOf": [
+											{
+												"type": "object",
+												"properties": {
+													"kind": { "type": "string", "const": "entity" },
+													"entityId": {
+														"type": "string",
+														"format": "uuid",
+														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+													}
+												},
+												"required": ["kind", "entityId"],
+												"additionalProperties": false
+											},
+											{
+												"type": "object",
+												"properties": {
+													"kind": { "type": "string", "const": "principal" },
+													"selector": { "type": "string", "minLength": 1, "maxLength": 512 }
+												},
+												"required": ["kind", "selector"],
+												"additionalProperties": false
+											}
+										]
+									},
+									"afterRevision": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991
+									}
+								},
+								"required": ["recipient"],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"items": {
+											"maxItems": 50,
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"operationId": {
+														"type": "string",
+														"format": "uuid",
+														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+													},
+													"operation": { "type": "string" },
+													"result": {
+														"type": "object",
+														"properties": {
+															"state": {
+																"type": "string",
+																"enum": [
+																	"open",
+																	"invited",
+																	"pending",
+																	"approved",
+																	"rejected",
+																	"left",
+																	"removed"
+																]
+															},
+															"revision": {
+																"type": "integer",
+																"minimum": 0,
+																"maximum": 9007199254740990
+															},
+															"membershipId": {
+																"type": "string",
+																"format": "uuid",
+																"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+															},
+															"version": {
+																"type": "integer",
+																"minimum": 0,
+																"maximum": 9007199254740990
+															},
+															"activeGeneration": {
+																"type": ["integer", "null"],
+																"minimum": 0,
+																"maximum": 9007199254740990
+															},
+															"lastGeneration": {
+																"type": "integer",
+																"minimum": 0,
+																"maximum": 9007199254740990
+															},
+															"enforcement": {
+																"type": "string",
+																"enum": ["clear", "muted", "banned"]
+															},
+															"enforcementRevision": {
+																"type": "integer",
+																"minimum": 0,
+																"maximum": 9007199254740990
+															}
+														},
+														"required": [
+															"state",
+															"revision",
+															"membershipId",
+															"version",
+															"activeGeneration",
+															"lastGeneration",
+															"enforcement",
+															"enforcementRevision"
+														],
+														"additionalProperties": false
+													},
+													"createdAt": {
+														"type": "string",
+														"format": "date-time",
+														"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+													}
+												},
+												"required": ["operationId", "operation", "result", "createdAt"],
+												"additionalProperties": false
+											}
+										},
+										"nextCursor": {
+											"type": ["integer", "null"],
+											"minimum": -9007199254740991,
+											"maximum": 9007199254740991
+										}
+									},
+									"required": ["items", "nextCursor"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": ["AccessChanged", "RealmRulesAcceptanceRequired"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until this request can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "postApiRealmsByRealmIdMembersHistory",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/realms/{realmId}/rules/{revisionId}/acknowledgement": {
+			"put": {
+				"operationId": "acknowledgeRealmRules",
+				"tags": ["Realms"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					},
+					{
+						"name": "revisionId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"type": "object",
+								"properties": {
+									"operationId": {
+										"type": "string",
+										"format": "uuid",
+										"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+									},
+									"expectedControlRevision": {
+										"type": "integer",
+										"minimum": 1,
+										"maximum": 9007199254740990
+									},
+									"expectedRevision": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740990
+									},
+									"expectedMembershipVersion": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740990
+									},
+									"expectedEnforcementRevision": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740990
+									},
+									"consent": { "type": "boolean", "const": true },
+									"language": {
+										"type": ["string", "null"],
+										"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+									}
+								},
+								"required": [
+									"operationId",
+									"expectedControlRevision",
+									"expectedRevision",
+									"expectedMembershipVersion",
+									"expectedEnforcementRevision",
+									"consent",
+									"language"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"state": {
+											"type": "string",
+											"enum": [
+												"open",
+												"invited",
+												"pending",
+												"approved",
+												"rejected",
+												"left",
+												"removed"
+											]
+										},
+										"revision": { "type": "integer", "minimum": 0, "maximum": 9007199254740990 },
+										"membershipId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"version": { "type": "integer", "minimum": 0, "maximum": 9007199254740990 },
+										"activeGeneration": {
+											"type": ["integer", "null"],
+											"minimum": 0,
+											"maximum": 9007199254740990
+										},
+										"lastGeneration": {
+											"type": "integer",
+											"minimum": 0,
+											"maximum": 9007199254740990
+										},
+										"enforcement": { "type": "string", "enum": ["clear", "muted", "banned"] },
+										"enforcementRevision": {
+											"type": "integer",
+											"minimum": 0,
+											"maximum": 9007199254740990
+										}
+									},
+									"required": [
+										"state",
+										"revision",
+										"membershipId",
+										"version",
+										"activeGeneration",
+										"lastGeneration",
+										"enforcement",
+										"enforcementRevision"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": ["AccessChanged", "RealmRulesAcceptanceRequired"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "putApiRealmsByRealmIdRulesByRevisionIdAcknowledgement",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
 		"/api/v1/realms": {
 			"get": {
 				"summary": "List Realms",
@@ -158224,802 +161935,6 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/v1/realms/{realmId}/membership": {
-			"put": {
-				"summary": "Join Realm",
-				"tags": ["Realms"],
-				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
-				"parameters": [
-					{
-						"name": "realmId",
-						"in": "path",
-						"required": true,
-						"schema": { "type": "string", "format": "uuid" }
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Response for status 200",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"properties": { "state": { "type": "string" } },
-									"required": ["state"]
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"properties": {
-										"error": {
-											"type": "object",
-											"properties": {
-												"code": {
-													"default": "ParticipationDenied",
-													"enum": [
-														"ParticipationDenied",
-														"AccountRestricted",
-														"AccountSuspended",
-														"AccountClosed"
-													],
-													"type": "string"
-												},
-												"message": { "type": "string" },
-												"details": {}
-											},
-											"required": ["code", "message"]
-										},
-										"requestId": { "type": "string" }
-									},
-									"required": ["error", "requestId"]
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Response for status 404",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"properties": {
-										"error": {
-											"type": "object",
-											"properties": {
-												"code": {
-													"default": "RealmNotFound",
-													"enum": ["RealmNotFound"],
-													"type": "string"
-												},
-												"message": { "type": "string" },
-												"details": {}
-											},
-											"required": ["code", "message"]
-										},
-										"requestId": { "type": "string" }
-									},
-									"required": ["error", "requestId"]
-								}
-							}
-						}
-					},
-					"409": {
-						"description": "Response for status 409",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"properties": {
-										"error": {
-											"type": "object",
-											"properties": {
-												"code": {
-													"default": "RealmRulesAcceptanceRequired",
-													"enum": ["RealmRulesAcceptanceRequired"],
-													"type": "string"
-												},
-												"message": { "type": "string" },
-												"details": {}
-											},
-											"required": ["code", "message"]
-										},
-										"requestId": { "type": "string" }
-									},
-									"required": ["error", "requestId"]
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Request validation failed",
-						"content": {
-							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
-						}
-					},
-					"429": {
-						"description": "API quota exceeded",
-						"headers": {
-							"Retry-After": {
-								"description": "Seconds until this request can be retried",
-								"schema": { "type": "integer", "minimum": 1 }
-							}
-						},
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"type": "string",
-													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
-												},
-												"message": { "type": "string" },
-												"details": { "$ref": "#/components/schemas/JsonValue" }
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
-						}
-					}
-				},
-				"operationId": "putApiRealmsByRealmIdMembership",
-				"x-rezics-quota-route-operation-id": "putApiRealmsByRealmIdMembership",
-				"x-rezics-quota-operation-id": "*",
-				"x-rezics-quota-cost-units": 1
-			},
-			"delete": {
-				"summary": "Leave Realm",
-				"tags": ["Realms"],
-				"responses": {
-					"204": { "description": "Response for status 204" },
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"properties": {
-										"error": {
-											"type": "object",
-											"properties": {
-												"code": {
-													"default": "ParticipationDenied",
-													"enum": [
-														"ParticipationDenied",
-														"AccountRestricted",
-														"AccountSuspended",
-														"AccountClosed"
-													],
-													"type": "string"
-												},
-												"message": { "type": "string" },
-												"details": {}
-											},
-											"required": ["code", "message"]
-										},
-										"requestId": { "type": "string" }
-									},
-									"required": ["error", "requestId"]
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Response for status 404",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"properties": {
-										"error": {
-											"type": "object",
-											"properties": {
-												"code": {
-													"default": "RealmMembershipNotFound",
-													"enum": ["RealmMembershipNotFound"],
-													"type": "string"
-												},
-												"message": { "type": "string" },
-												"details": {}
-											},
-											"required": ["code", "message"]
-										},
-										"requestId": { "type": "string" }
-									},
-									"required": ["error", "requestId"]
-								}
-							}
-						}
-					},
-					"409": {
-						"description": "Response for status 409",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"properties": {
-										"error": {
-											"type": "object",
-											"properties": {
-												"code": {
-													"default": "RealmOwnerLeaveForbidden",
-													"enum": ["RealmOwnerLeaveForbidden"],
-													"type": "string"
-												},
-												"message": { "type": "string" },
-												"details": {}
-											},
-											"required": ["code", "message"]
-										},
-										"requestId": { "type": "string" }
-									},
-									"required": ["error", "requestId"]
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Request validation failed",
-						"content": {
-							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
-						}
-					},
-					"429": {
-						"description": "API quota exceeded",
-						"headers": {
-							"Retry-After": {
-								"description": "Seconds until this request can be retried",
-								"schema": { "type": "integer", "minimum": 1 }
-							}
-						},
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"type": "string",
-													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
-												},
-												"message": { "type": "string" },
-												"details": { "$ref": "#/components/schemas/JsonValue" }
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
-						}
-					}
-				},
-				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
-				"parameters": [
-					{
-						"name": "realmId",
-						"in": "path",
-						"required": true,
-						"schema": { "type": "string", "format": "uuid" }
-					}
-				],
-				"operationId": "deleteApiRealmsByRealmIdMembership",
-				"x-rezics-quota-route-operation-id": "deleteApiRealmsByRealmIdMembership",
-				"x-rezics-quota-operation-id": "*",
-				"x-rezics-quota-cost-units": 1
-			}
-		},
-		"/api/v1/realms/{realmId}/members": {
-			"get": {
-				"summary": "List Realm members",
-				"tags": ["Realms"],
-				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
-				"parameters": [
-					{
-						"name": "realmId",
-						"in": "path",
-						"required": true,
-						"schema": { "type": "string", "format": "uuid" }
-					},
-					{
-						"name": "profileId",
-						"in": "query",
-						"required": false,
-						"schema": { "type": "string", "format": "uuid" }
-					},
-					{
-						"name": "afterProfileId",
-						"in": "query",
-						"required": false,
-						"schema": { "type": "string", "format": "uuid" }
-					},
-					{
-						"name": "state",
-						"in": "query",
-						"required": false,
-						"schema": {
-							"type": "string",
-							"enum": ["active", "pending", "muted", "removed", "banned"]
-						}
-					},
-					{
-						"name": "localizationLanguages",
-						"in": "query",
-						"required": false,
-						"schema": {
-							"maxItems": 7,
-							"uniqueItems": true,
-							"type": "array",
-							"items": { "enum": ["zh", "en", "ja", "ko", "de", "fr", "es"], "type": "string" }
-						}
-					},
-					{
-						"name": "limit",
-						"in": "query",
-						"required": false,
-						"schema": { "minimum": 1, "maximum": 100, "default": 50, "type": "integer" }
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Response for status 200",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"properties": {
-										"items": {
-											"type": "array",
-											"items": {
-												"type": "object",
-												"properties": {
-													"profileId": { "type": "string", "format": "uuid" },
-													"language": {
-														"nullable": true,
-														"minLength": 1,
-														"maxLength": 255,
-														"pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$",
-														"type": ["string", "null"]
-													},
-													"name": { "nullable": true, "type": ["string", "null"] },
-													"slugAddress": {
-														"nullable": true,
-														"additionalProperties": false,
-														"type": ["object", "null"],
-														"properties": {
-															"slug": {
-																"minLength": 1,
-																"maxLength": 63,
-																"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
-																"type": "string"
-															},
-															"scopeUnitId": {
-																"nullable": true,
-																"type": ["string", "null"],
-																"format": "uuid"
-															},
-															"scopeNamespaceId": {
-																"nullable": true,
-																"type": ["string", "null"],
-																"format": "uuid"
-															},
-															"canonicalPath": {
-																"minItems": 2,
-																"maxItems": 3,
-																"type": "array",
-																"items": {
-																	"minLength": 1,
-																	"maxLength": 63,
-																	"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
-																	"type": "string"
-																}
-															}
-														},
-														"required": ["slug", "scopeUnitId", "scopeNamespaceId", "canonicalPath"]
-													},
-													"avatar": {
-														"nullable": true,
-														"anyOf": [
-															{
-																"anyOf": [
-																	{
-																		"additionalProperties": false,
-																		"type": "object",
-																		"properties": {
-																			"type": { "type": "string", "const": "image" },
-																			"image": {
-																				"type": "object",
-																				"properties": {
-																					"id": { "type": "string", "format": "uuid" },
-																					"url": { "type": "string" }
-																				},
-																				"required": ["id", "url"]
-																			}
-																		},
-																		"required": ["type", "image"]
-																	},
-																	{
-																		"additionalProperties": false,
-																		"type": "object",
-																		"properties": {
-																			"type": { "type": "string", "const": "emoji" },
-																			"emoji": { "maxLength": 64, "type": "string" }
-																		},
-																		"required": ["type", "emoji"]
-																	},
-																	{
-																		"additionalProperties": false,
-																		"type": "object",
-																		"properties": {
-																			"type": { "type": "string", "const": "icon" },
-																			"icon": {
-																				"additionalProperties": false,
-																				"type": "object",
-																				"properties": {
-																					"provider": { "type": "string", "const": "font-awesome" },
-																					"prefix": { "enum": ["fas", "fab"], "type": "string" },
-																					"name": {
-																						"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-																						"maxLength": 128,
-																						"type": "string"
-																					}
-																				},
-																				"required": ["provider", "prefix", "name"]
-																			}
-																		},
-																		"required": ["type", "icon"]
-																	}
-																]
-															},
-															{ "type": "null" }
-														]
-													},
-													"isOwner": { "type": "boolean" },
-													"state": {
-														"default": "active",
-														"enum": ["active", "pending", "muted", "removed", "banned"],
-														"type": "string"
-													},
-													"joinedAt": { "type": "string", "format": "date-time" }
-												},
-												"required": [
-													"profileId",
-													"language",
-													"name",
-													"slugAddress",
-													"avatar",
-													"isOwner",
-													"state",
-													"joinedAt"
-												]
-											}
-										},
-										"nextCursor": { "nullable": true, "type": ["string", "null"], "format": "uuid" }
-									},
-									"required": ["items", "nextCursor"]
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"properties": {
-										"error": {
-											"type": "object",
-											"properties": {
-												"code": {
-													"default": "RealmCapabilityRequired",
-													"enum": [
-														"RealmCapabilityRequired",
-														"ParticipationDenied",
-														"AccountRestricted",
-														"AccountSuspended",
-														"AccountClosed"
-													],
-													"type": "string"
-												},
-												"message": { "type": "string" },
-												"details": {}
-											},
-											"required": ["code", "message"]
-										},
-										"requestId": { "type": "string" }
-									},
-									"required": ["error", "requestId"]
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Request validation failed",
-						"content": {
-							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
-						}
-					},
-					"429": {
-						"description": "API quota exceeded",
-						"headers": {
-							"Retry-After": {
-								"description": "Seconds until this request can be retried",
-								"schema": { "type": "integer", "minimum": 1 }
-							}
-						},
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"type": "string",
-													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
-												},
-												"message": { "type": "string" },
-												"details": { "$ref": "#/components/schemas/JsonValue" }
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
-						}
-					}
-				},
-				"operationId": "getApiRealmsByRealmIdMembers",
-				"x-rezics-quota-route-operation-id": "getApiRealmsByRealmIdMembers",
-				"x-rezics-quota-operation-id": "*",
-				"x-rezics-quota-cost-units": 1
-			}
-		},
-		"/api/v1/realms/{realmId}/members/{profileId}": {
-			"patch": {
-				"summary": "Update Realm member",
-				"tags": ["Realms"],
-				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
-				"parameters": [
-					{
-						"name": "realmId",
-						"in": "path",
-						"required": true,
-						"schema": { "type": "string", "format": "uuid" }
-					},
-					{
-						"name": "profileId",
-						"in": "path",
-						"required": true,
-						"schema": { "type": "string", "format": "uuid" }
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"additionalProperties": false,
-								"type": "object",
-								"properties": {
-									"state": {
-										"type": "string",
-										"enum": ["active", "pending", "muted", "removed", "banned"]
-									}
-								},
-								"required": ["state"]
-							}
-						}
-					}
-				},
-				"responses": {
-					"200": {
-						"description": "Response for status 200",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"properties": {
-										"realmId": { "type": "string", "format": "uuid" },
-										"profileId": { "type": "string", "format": "uuid" },
-										"isOwner": { "type": "boolean" },
-										"state": {
-											"default": "active",
-											"enum": ["active", "pending", "muted", "removed", "banned"],
-											"type": "string"
-										},
-										"joinedAt": { "type": "string", "format": "date-time" },
-										"updatedAt": { "type": "string", "format": "date-time" }
-									},
-									"required": ["realmId", "profileId", "isOwner", "state", "joinedAt", "updatedAt"]
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Request body could not be parsed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
-							}
-						}
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"properties": {
-										"error": {
-											"type": "object",
-											"properties": {
-												"code": {
-													"default": "RealmCapabilityRequired",
-													"enum": [
-														"RealmCapabilityRequired",
-														"ParticipationDenied",
-														"AccountRestricted",
-														"AccountSuspended",
-														"AccountClosed"
-													],
-													"type": "string"
-												},
-												"message": { "type": "string" },
-												"details": {}
-											},
-											"required": ["code", "message"]
-										},
-										"requestId": { "type": "string" }
-									},
-									"required": ["error", "requestId"]
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Response for status 404",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"properties": {
-										"error": {
-											"type": "object",
-											"properties": {
-												"code": {
-													"default": "RealmMemberNotFound",
-													"enum": ["RealmMemberNotFound"],
-													"type": "string"
-												},
-												"message": { "type": "string" },
-												"details": {}
-											},
-											"required": ["code", "message"]
-										},
-										"requestId": { "type": "string" }
-									},
-									"required": ["error", "requestId"]
-								}
-							}
-						}
-					},
-					"409": {
-						"description": "Response for status 409",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"properties": {
-										"error": {
-											"type": "object",
-											"properties": {
-												"code": {
-													"default": "RealmOwnerLeaveForbidden",
-													"enum": ["RealmOwnerLeaveForbidden"],
-													"type": "string"
-												},
-												"message": { "type": "string" },
-												"details": {}
-											},
-											"required": ["code", "message"]
-										},
-										"requestId": { "type": "string" }
-									},
-									"required": ["error", "requestId"]
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Request validation failed",
-						"content": {
-							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
-						}
-					},
-					"429": {
-						"description": "API quota exceeded",
-						"headers": {
-							"Retry-After": {
-								"description": "Seconds until this request can be retried",
-								"schema": { "type": "integer", "minimum": 1 }
-							}
-						},
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"type": "string",
-													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
-												},
-												"message": { "type": "string" },
-												"details": { "$ref": "#/components/schemas/JsonValue" }
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
-						}
-					}
-				},
-				"operationId": "patchApiRealmsByRealmIdMembersByProfileId",
-				"x-rezics-quota-route-operation-id": "patchApiRealmsByRealmIdMembersByProfileId",
-				"x-rezics-quota-operation-id": "*",
-				"x-rezics-quota-cost-units": 1
-			}
-		},
 		"/api/v1/realms/{realmId}/rules": {
 			"put": {
 				"summary": "Update Realm rules",
@@ -159582,158 +162497,6 @@
 				},
 				"operationId": "getApiRealmsByRealmIdRulesAuthoring",
 				"x-rezics-quota-route-operation-id": "getApiRealmsByRealmIdRulesAuthoring",
-				"x-rezics-quota-operation-id": "*",
-				"x-rezics-quota-cost-units": 1
-			}
-		},
-		"/api/v1/realms/{realmId}/rules/{revisionId}/acknowledgement": {
-			"put": {
-				"summary": "Acknowledge current Realm rules",
-				"tags": ["Realms"],
-				"responses": {
-					"204": { "description": "Response for status 204" },
-					"400": {
-						"description": "Request body could not be parsed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
-							}
-						}
-					},
-					"404": {
-						"description": "Response for status 404",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"properties": {
-										"error": {
-											"type": "object",
-											"properties": {
-												"code": {
-													"default": "RealmNotFound",
-													"enum": ["RealmNotFound"],
-													"type": "string"
-												},
-												"message": { "type": "string" },
-												"details": {}
-											},
-											"required": ["code", "message"]
-										},
-										"requestId": { "type": "string" }
-									},
-									"required": ["error", "requestId"]
-								}
-							}
-						}
-					},
-					"409": {
-						"description": "Response for status 409",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"properties": {
-										"error": {
-											"type": "object",
-											"properties": {
-												"code": {
-													"default": "RealmRuleRevisionChanged",
-													"enum": ["RealmRuleRevisionChanged"],
-													"type": "string"
-												},
-												"message": { "type": "string" },
-												"details": {}
-											},
-											"required": ["code", "message"]
-										},
-										"requestId": { "type": "string" }
-									},
-									"required": ["error", "requestId"]
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Request validation failed",
-						"content": {
-							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
-						}
-					},
-					"429": {
-						"description": "API quota exceeded",
-						"headers": {
-							"Retry-After": {
-								"description": "Seconds until this request can be retried",
-								"schema": { "type": "integer", "minimum": 1 }
-							}
-						},
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"type": "string",
-													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
-												},
-												"message": { "type": "string" },
-												"details": { "$ref": "#/components/schemas/JsonValue" }
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
-						}
-					}
-				},
-				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
-				"parameters": [
-					{
-						"name": "realmId",
-						"in": "path",
-						"required": true,
-						"schema": { "type": "string", "format": "uuid" }
-					},
-					{
-						"name": "revisionId",
-						"in": "path",
-						"required": true,
-						"schema": { "type": "string", "format": "uuid" }
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"additionalProperties": false,
-								"type": "object",
-								"properties": {
-									"language": {
-										"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"],
-										"type": "string"
-									}
-								},
-								"required": ["language"]
-							}
-						}
-					}
-				},
-				"operationId": "putApiRealmsByRealmIdRulesByRevisionIdAcknowledgement",
-				"x-rezics-quota-route-operation-id": "putApiRealmsByRealmIdRulesByRevisionIdAcknowledgement",
 				"x-rezics-quota-operation-id": "*",
 				"x-rezics-quota-cost-units": 1
 			}

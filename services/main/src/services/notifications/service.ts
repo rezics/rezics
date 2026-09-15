@@ -77,7 +77,7 @@ export type NotificationInput = NotificationBase &
 		  }
 		| {
 				kind: "realm";
-				actorProfileId: string;
+				actorProfileId: string | null;
 				subjectUnitId: string;
 				payload: { type: "realm_event"; event: "membership_updated" };
 		  }
@@ -144,7 +144,10 @@ export function notificationTranslationKey(
 }
 
 /** @internal Resolve current personal inboxes, with the Entity controller bound enforced. */
-export async function resolveNotificationRecipients(tx: DatabaseTransaction, input: NotificationBase) {
+export async function resolveNotificationRecipients(
+	tx: DatabaseTransaction,
+	input: NotificationBase,
+) {
 	const [self] = input.recipientEntityId
 		? await tx
 				.select({ authUserId: authEntity.authUserId })
@@ -197,9 +200,15 @@ export async function createNotification(tx: DatabaseTransaction, input: Notific
 	if (!recipients.length) return;
 	if (input.kind === "moderation" && input.payload.publicNoticePostId) {
 		const postId = input.payload.publicNoticePostId;
-		await tx.insert(governanceNoticeRecipient).values(recipients.map(recipient => ({
-			postId, authUserId: recipient.id,
-		}))).onConflictDoNothing();
+		await tx
+			.insert(governanceNoticeRecipient)
+			.values(
+				recipients.map((recipient) => ({
+					postId,
+					authUserId: recipient.id,
+				})),
+			)
+			.onConflictDoNothing();
 	}
 	const preferences = await tx
 		.select()

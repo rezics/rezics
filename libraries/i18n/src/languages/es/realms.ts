@@ -337,7 +337,22 @@ export default {
 		ownerMarker: "Propiedad",
 		unitOwner: "Propietario de la Unit",
 	},
+	membershipIdentityRequired:
+		"Selecciona una identidad pública que controles antes de gestionar la membresía.",
+	memberActions: {
+		approve: "Aprobar",
+		reject: "Rechazar",
+		remove: "Eliminar",
+		mute: "Silenciar",
+		ban: "Bloquear",
+		clear: "Quitar restricción",
+	},
 	memberStates: {
+		open: "Sin inscribirse",
+		invited: "Invitado",
+		rejected: "Rechazado",
+		left: "Ha salido",
+
 		active: "Activo",
 		pending: "Pendiente",
 		muted: "Silenciado",
@@ -347,11 +362,11 @@ export default {
 	requireOnJoin: "Exigir aceptación para unirse",
 	requireOnPost: "Exigir aceptación antes de publicar contenido",
 	ruleAcknowledgementHint:
-		"Solo es necesario aceptar una vez cada versión de las reglas. Después de publicar una nueva versión, los miembros deberán volver a aceptarla antes de la siguiente acción seleccionada.",
+		"La confirmación corresponde a una versión de las reglas y una inscripción. Una nueva versión puede requerir otra confirmación.",
 	ruleAcknowledgementMode: "Aceptación de reglas",
 	ruleAcknowledgementModes: {
 		explicit: "Pedir confirmación explícita",
-		implicitOnFollow: `Aceptar de forma silenciosa al iniciar el ${followTerms.gerund}`,
+		implicitOnFollow: "Confirmar al inscribirse",
 	},
 	ruleLanguage: "Idioma de la regla",
 	ruleTitle: "Título de la regla",

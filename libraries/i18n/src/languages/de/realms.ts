@@ -339,7 +339,22 @@ export default {
 		ownerMarker: "Eigentum",
 		unitOwner: "Unit-Eigentümer",
 	},
+	membershipIdentityRequired:
+		"Wähle vor der Mitgliederverwaltung eine öffentliche Identität, die du kontrollierst.",
+	memberActions: {
+		approve: "Genehmigen",
+		reject: "Ablehnen",
+		remove: "Entfernen",
+		mute: "Stummschalten",
+		ban: "Sperren",
+		clear: "Einschränkung aufheben",
+	},
 	memberStates: {
+		open: "Nicht beigetreten",
+		invited: "Eingeladen",
+		rejected: "Abgelehnt",
+		left: "Ausgetreten",
+
 		active: "Aktiv",
 		pending: "Ausstehend",
 		muted: "Stummgeschaltet",
@@ -349,11 +364,11 @@ export default {
 	requireOnJoin: "Bestätigung für den Beitritt verlangen",
 	requireOnPost: "Bestätigung vor dem Veröffentlichen von Inhalten verlangen",
 	ruleAcknowledgementHint:
-		"Jede Regelversion muss nur einmal bestätigt werden. Nach der Veröffentlichung einer neuen Version müssen Mitglieder sie vor der nächsten ausgewählten Aktion erneut bestätigen.",
+		"Die Bestätigung gilt für eine Regelversion und einen Beitritt. Eine neue Version kann eine erneute Bestätigung erfordern.",
 	ruleAcknowledgementMode: "Regelbestätigung",
 	ruleAcknowledgementModes: {
 		explicit: "Ausdrückliche Bestätigung anfordern",
-		implicitOnFollow: `Beim ${followTerms.gerund} stillschweigend bestätigen`,
+		implicitOnFollow: "Beim Beitritt bestätigen",
 	},
 	ruleLanguage: "Regelsprache",
 	ruleTitle: "Regeltitel",

@@ -74,7 +74,7 @@ DECLARE final_version bigint; receipt public.access_membership_event%ROWTYPE;
 BEGIN
  IF TG_TABLE_NAME='access_membership' THEN
   SELECT version INTO final_version FROM public.access_membership WHERE id=NEW.id;
-  IF final_version=0 THEN RAISE EXCEPTION 'An initial membership identity must complete its admission' USING ERRCODE='23514'; END IF;
+  -- Reserved identities carry no authority; applications may precede their first admission.
   IF NEW.version>0 THEN
    SELECT * INTO receipt FROM public.access_membership_event WHERE membership_id=NEW.id AND version=NEW.version;
    IF NOT FOUND OR ROW(receipt.last_generation,receipt.active_generation) IS DISTINCT FROM ROW(NEW.last_generation,NEW.active_generation) THEN RAISE EXCEPTION 'Every membership head transition requires its snapshot' USING ERRCODE='23514'; END IF;

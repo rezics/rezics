@@ -1,3 +1,4 @@
+import { lockAccessMembershipScopePolicy } from "./memberships";
 import { readMixedRealmAccessManager } from "./mixed-realm-access-manager";
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import { AccessManagementPermissionDefinitions, PlatformCapabilityDefinitions, UnitPermissionDefinitions, isUnitPermissionApplicable, isUnitPermissionDelegable, scopeCovers, type AccessManagementPermission } from "@rezics/access";
@@ -140,12 +141,15 @@ export async function readGroupImpactCurrentPolicy(tx: DatabaseTransaction, effe
 					}
 					const realmScope = realmScopes.get(row.realmId);
 					if (!realmScope) { unavailable("realm-member-policy"); continue; }
+					await lockAccessMembershipScopePolicy(tx,[realmScope]);
 					const key = `${realmScope}:${effect.subjectId}`;
 					if (!realmMembers.has(key)) {
 						if (realmMembers.size >= 256) throw new GroupImpactDeltaUnavailable("budget");
 						await tx.execute(sql`select public.lock_access_membership_keys(array[${realmScope}::uuid],${effect.subjectId}::uuid,false)`);
 						const [member] = await tx.select().from(accessMembership).where(and(eq(accessMembership.scopeId,realmScope),eq(accessMembership.subjectId,effect.subjectId))).for("share");
-						realmMembers.set(key,member !== undefined && member.activeGeneration !== null);
+						const eligibility=member?(await tx.execute<{eligible:boolean|null}>(sql`select public.access_membership_is_eligible(${member.id}::uuid) as eligible`)).rows[0]?.eligible:false;
+      if(eligibility==null) throw new GroupImpactDeltaUnavailable("missing");
+      realmMembers.set(key,eligibility);
 					}
 					matches = realmMembers.get(key) === true;
 				}

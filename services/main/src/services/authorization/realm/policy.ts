@@ -5,12 +5,13 @@ export type RealmCapability = RealmPermission;
 export function isRealmVisible(status: string, visibility: string, membershipState?: string) {
 	return (
 		status.toLowerCase() === "published" &&
-		(visibility.toLowerCase() !== "private" || membershipState?.toLowerCase() === "active")
+		(visibility.toLowerCase() !== "private" ||
+			["active", "muted"].includes(membershipState?.toLowerCase() ?? ""))
 	);
 }
 
 export function isRealmJoinable(status: string, visibility: string, membershipState?: string) {
-	if (["banned", "removed"].includes(membershipState?.toLowerCase() ?? "")) return false;
+	if (["banned"].includes(membershipState?.toLowerCase() ?? "")) return false;
 	return (
 		status.toLowerCase() === "published" &&
 		(visibility.toLowerCase() !== "private" ||

@@ -1,3 +1,8 @@
+import { currentRealmRuleRevisionReadLock } from "../../realms/rule-revision-lock";
+import {
+	lockRealmEntityEnrollment,
+	realmEntityContributionCondition,
+} from "../../realms/authorization";
 import type { RealmUnitCreatePermission } from "@rezics/access";
 import { and, eq } from "drizzle-orm";
 
@@ -97,6 +102,7 @@ export class RealmAuthorization<ProfileId extends string | undefined> {
 		realmId: string,
 		capability: RealmCapability,
 	): Promise<RealmMembership | undefined> {
+		await lockRealmEntityEnrollment(tx, realmId, this.profileId);
 		const current = await findRealmMembership(realmId, this.profileId, tx);
 		const decision = await this.unit.decideInTransaction(tx, realmId, capability);
 		if (decision.allowed || (await this.platform.hasCapability(capability, tx))) return current;
@@ -140,6 +146,18 @@ export class RealmAuthorization<ProfileId extends string | undefined> {
 	): Promise<void> {
 		const normalizedRealmIds = [...new Set(realmIds)].sort();
 		for (const realmId of normalizedRealmIds) {
+			await tx.execute(currentRealmRuleRevisionReadLock(realmId));
+			await lockRealmEntityEnrollment(tx, realmId, this.profileId);
+			const [eligible] = await tx
+				.select({ id: realmTable.id })
+				.from(realmTable)
+				.where(
+					and(
+						eq(realmTable.id, realmId),
+						realmEntityContributionCondition(realmId, this.profileId),
+					),
+				);
+			if (!eligible) throw new RealmCapabilityRequired();
 			await this.ensureCapabilityInTransaction(tx, realmId, permission);
 			const requirement = await findRequiredRulesAcceptance(realmId, this.profileId, tx);
 			if (requirement) throw new RealmRulesAcceptanceRequired({ realms: [requirement] });
