@@ -240,6 +240,22 @@ rotation/retirement. Exact matching of redirects, PKCE S256, issuer/audience/tok
 validation, refresh replay protection and scope reduction need allowed/denied tests.
 Keep OIDC identity tokens separate from API access credentials.
 
+Native `oauth_grant_context` records freeze the admitted client, private principal,
+consent or installation revision, approval capabilities and revocation epochs.
+Provider access/refresh inserts require a transaction-local selected context and
+receive immutable native links; the database rejects changed identities, audiences,
+scopes or lifetimes. A refresh generation retains its original context rather than
+recapturing current defaults. One private client/user family epoch invalidates all
+of that family's contexts in constant work. Authorization-code replay invalidates
+its exact client-bound context. These are invalidation operations, not synchronous
+token deletion. Native token readers retain current dependency fences; DPoP proof,
+resource authorization and quota remain separate obligations. Runtime provider
+integration and qualification of these primitives are still pending.
+
+Account erasure drains access tokens, refresh tokens, protocol consent, native grant
+contexts and families in that order before native consent/preferences. Each batch
+deletes at most 64 rows and distinguishes locked work from an empty owner.
+
 Webhooks subscribe within the installation's approved resources and events. Commit
 event intent with the domain operation, then use signed, retryable, idempotently
 identified deliveries. Recheck current authorization before disclosing payloads;

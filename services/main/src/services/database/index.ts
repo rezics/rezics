@@ -78,6 +78,17 @@ export type DatabaseExecutor = typeof rootDatabase | DatabaseTransaction;
 const databaseExecutorStorage = new AsyncLocalStorage<DatabaseTransaction>();
 
 /**
+ * Run provider/service calls on an already admitted owner transaction.
+ * @internal
+ * @remarks Await all work before returning. This scope neither starts nor commits
+ * a transaction; it keeps adapters that use the shared database proxy inside the
+ * caller's authorization, protocol and native-context atomic boundary.
+ */
+export function withDatabaseTransactionContext<T>(tx: DatabaseTransaction, work: () => Promise<T>): Promise<T> {
+	return databaseExecutorStorage.run(tx, work);
+}
+
+/**
  * Route existing service calls through a request-local transaction when one is
  * installed. Outside that narrow scope this is the ordinary pooled database.
  */

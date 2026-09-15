@@ -102,3 +102,4 @@ export * from "./oauth-client-secret-policy";
 export * from "./oauth-discovery-fetch";
 export * from "./connected-installation";
 export * from "./connected-user-authorization";
+export * from "./oauth-grant-context";

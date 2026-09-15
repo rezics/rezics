@@ -5,9 +5,7 @@ import type { DatabaseTransaction } from "../database";
 import { oauthClients } from "../database/schema/auth-oauth.generated";
 import { oauthClientAuthority } from "../database/schema/oauth-client-authority";
 import { ApiPermissionValues } from "./api-permissions";
-
-/** Protocol identity/offline scopes accompany explicit API entry scopes; private profile/email claims are not implicitly enabled. @internal */
-export const SupportedOAuthScopes = ["openid", "offline_access", ...ApiPermissionValues] as const;
+import { SupportedOAuthScopes } from "./oauth-profile-values";
 const scopes = z.array(z.enum(SupportedOAuthScopes)).max(SupportedOAuthScopes.length)
 	.refine(values => new Set(values).size === values.length);
 const grantTypes = z.array(z.enum(["authorization_code", "refresh_token", "client_credentials"])).max(3)

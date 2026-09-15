@@ -20,6 +20,7 @@ export const PostgreSqlSchemaFileNames = [
 	"oauth-client-secret-policy.sql",
 	"connected-installation.sql",
 	"connected-user-authorization.sql",
+	"oauth-grant-context.sql",
 	"access-subject-policy.sql",
 	"access-role.sql",
 	"access-role-binding.sql",
@@ -111,6 +112,13 @@ export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly 
 };
 
 export const PostgreSqlSchemaFunctionNames = [
+	"guard_oauth_refresh_family",
+	"oauth_grant_context_payload_is_current",
+	"oauth_grant_context_is_current",
+	"guard_oauth_grant_context",
+	"attach_oauth_grant_context",
+	"guard_oauth_token_context_link",
+	"guard_oauth_token_identity",
 	"connected_user_consent_owner",
 	"require_connected_user_erasure",
 	"guard_connected_user_connection",
@@ -506,6 +514,14 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "oauth_refresh_family", name: "oauth_refresh_family_guard" },
+	{ table: "oauth_grant_context", name: "oauth_grant_context_guard" },
+	{ table: "oauth_access_token", name: "oauth_access_token_native_context" },
+	{ table: "oauth_refresh_token", name: "oauth_refresh_token_native_context" },
+	{ table: "oauth_access_context", name: "oauth_access_context_guard" },
+	{ table: "oauth_refresh_context", name: "oauth_refresh_context_guard" },
+	{ table: "oauth_access_token", name: "oauth_access_token_identity_guard" },
+	{ table: "oauth_refresh_token", name: "oauth_refresh_token_identity_guard" },
 	{ table: "connected_user_connection", name: "connected_user_connection_guard" },
 	{ table: "connected_user_connection_event", name: "connected_user_connection_event_guard" },
 	{ table: "connected_user_consent", name: "connected_user_consent_guard" },

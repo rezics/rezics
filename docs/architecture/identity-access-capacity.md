@@ -264,6 +264,17 @@ Server JWKS and registered API resource definitions are configuration inventory,
 not one row per account or selected Realm/content resource. Cleanup must preserve
 live token dependencies and use bounded child-before-parent work.
 
+Native OAuth context adds one immutable record per original grant and one small
+link per stored access/refresh token. Rotation reuses the original context; it does
+not copy consent resources or representation graphs per generation. Contexts hold
+at most four audience URIs (8 KiB total), the finite protocol scope vocabulary and
+fixed revision/epoch references. Families have one unique client/private-user key.
+Replay invalidation updates one family epoch or one unique authorization-code
+context; cleanup is deferred. Owner erasure drains these wider protocol records in
+64-row batches. Include these relations and indexes separately in the 500M-row
+baseline and 3B-row estimate; measured width and live-dependency query costs remain
+pending verification.
+
 ## Private registry cost
 
 The subject and scope registries have independent allocation density: one subject

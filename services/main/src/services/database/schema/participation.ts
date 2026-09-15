@@ -106,6 +106,7 @@ export const AccountErasureStageValues = [
 	"api_tokens",
 	"verification",
 	"auth_mail",
+	"oauth_credentials",
 	"preferences",
 	"notifications",
 	"notification_preferences",

@@ -23,6 +23,7 @@ import { accountPreference } from "../database/schema/account-preference";
 import { eraseIdentityPreferenceBatch } from "../authorization/identity-preferences";
 import { eraseAccountIdentityAdmissionBatch } from "../authorization/create-account-identity";
 import { eraseUserAuthorizationBatch } from "../connected-apps/user-authorizations";
+import { eraseOAuthUserCredentialBatch } from "../auth/oauth-erasure";
 import {
 	notification,
 	notificationPreference,
@@ -298,6 +299,9 @@ export async function dispatchAccountErasureBatch(
 					emailOutbox,
 					eq(emailOutbox.recipientEmail, job.priorEmail),
 				);
+				break;
+			case "oauth_credentials":
+				result = await eraseOAuthUserCredentialBatch(tx, authId);
 				break;
 			case "preferences":
 				result = await eraseUserAuthorizationBatch(tx, authId);
