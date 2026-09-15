@@ -275,6 +275,25 @@ context without scanning its access-token descendants. Login-session expiry does
 not withdraw an approved offline consent; native grant lifetime and revocation own
 post-issuance validity. A live login session is still required for code exchange.
 
+`OAuthResourceCredential` admits only local opaque access-token records and retains
+private state inside the owner transaction. It checks the requested audience,
+current native context and API scope, then uses the provider's DPoP binding helper
+with native verification reservations and a 60-second proof age. Reservations use
+the first 128 bits of a namespaced SHA-256 digest as the UUID primary key and
+[`ON CONFLICT DO NOTHING`](https://www.postgresql.org/docs/current/sql-insert.html#SQL-ON-CONFLICT)
+inside the retained transaction. Source inspection of Better Auth 1.7.3 found that
+its UUID adapter replaces the provider reservation's base64 ID, losing replay
+identity; its duplicate-insert catch also cannot recover an aborted PostgreSQL
+transaction. Native insertion preserves the fixed key and returns a replay denial
+without triggering that SQL error. Concurrent replay qualification remains pending.
+Method, trusted public URL, token hash, key thumbprint and replay all participate. Unsupported
+confirmation shapes remain unavailable rather than becoming bearer tokens. The
+authorization method then resolves the exact user/installation subject and invokes
+the resource owner's read-only policy resolver before its final SQL admission.
+It never pools operator rights into represented authority. Resource transport
+mounting, public-URL configuration and account/installation quota are still required
+integration work; this class alone does not activate an API surface.
+
 Account erasure drains access tokens, refresh tokens, protocol consent, native grant
 contexts and families in that order before native consent/preferences. Each batch
 deletes at most 64 rows and distinguishes locked work from an empty owner.

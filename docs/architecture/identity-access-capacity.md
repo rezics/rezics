@@ -282,6 +282,12 @@ eight representation references and the finite capability vocabulary, verifying
 the sealed counts/digests. Revocation updates one owner-fenced head and receipt;
 it does not synchronously enumerate issued credentials.
 
+The native resource verifier caps Authorization at 1,024 characters, DPoP proofs at
+16 KiB and trusted request URLs at 8 KiB before parsing/cryptography. Persistent
+DPoP replay uses one native UUID-keyed verification reservation per accepted proof
+with a 60-second proof age; include this short-lived write/expiry stream separately
+from token issuance and retained grant contexts at the stated corpus baselines.
+
 ## Private registry cost
 
 The subject and scope registries have independent allocation density: one subject
