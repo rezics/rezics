@@ -5,6 +5,7 @@ import { RequestedAuthoritySelectionSchema } from "../../authorization/authority
 import { getMainIdentityPreference, resolveMainIdentityPreference, setMainIdentityPreference } from "../../authorization/main-identity";
 import { CreateAccountIdentitySchema, createAccountIdentity } from "../../authorization/create-account-identity";
 import { IdentityPreferenceRepresentationsSchema } from "../../authorization/identity-preferences";
+import connections from "./connections";
 
 const version = z.number().int().nonnegative().safe();
 const mainIdentity = z.strictObject({ version, entityId: z.uuid().nullable() });
@@ -26,6 +27,7 @@ const resolvedMainIdentity = z.discriminatedUnion("status", [
 
 /** Private account-owned settings are independent from the selected public identity. @alpha */
 export default new Elysia({ prefix: "/account", name: "private-account-api" }).use(principalSession)
+	.use(connections)
 	.post("/identities", {
 		principalAccess: { permission: "account:update", fresh: false, write: true }, body: CreateAccountIdentitySchema, response: createdIdentity,
 		detail: { operationId: "createAccountIdentity", tags: ["Account"],

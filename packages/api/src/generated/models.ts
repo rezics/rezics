@@ -4049,6 +4049,718 @@ export type ReviseAccessRoleResponse =
 	| ReviseAccessRoleStatus429
 	| ReviseAccessRoleStatus500;
 
+export type ListOwnAppConnectionsQuery = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	afterId?: string;
+};
+
+export const ListOwnAppConnectionsStatus200ItemsStateEnum = {
+	active: "active",
+	disconnected: "disconnected",
+} as const;
+
+export type ListOwnAppConnectionsStatus200ItemsStateEnum =
+	(typeof ListOwnAppConnectionsStatus200ItemsStateEnum)[keyof typeof ListOwnAppConnectionsStatus200ItemsStateEnum];
+
+export type ListOwnAppConnectionsStatus200 = {
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		version: number;
+		state: ListOwnAppConnectionsStatus200ItemsStateEnum;
+		clientId: string;
+		subject:
+			| {
+					kind: "direct";
+			  }
+			| {
+					kind: "entity";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					entityId: string;
+			  };
+	}[];
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	nextAfterId: string | null;
+};
+
+export type ListOwnAppConnectionsStatus422 = ValidationError;
+
+export const ListOwnAppConnectionsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ListOwnAppConnectionsStatus429ErrorCodeEnum =
+	(typeof ListOwnAppConnectionsStatus429ErrorCodeEnum)[keyof typeof ListOwnAppConnectionsStatus429ErrorCodeEnum];
+
+export type ListOwnAppConnectionsStatus429 = {
+	error: {
+		code: ListOwnAppConnectionsStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type ListOwnAppConnectionsStatus500 = InternalError;
+
+export type ListOwnAppConnectionsOptions = {
+	body?: never;
+	path?: never;
+	query?: ListOwnAppConnectionsQuery;
+	headers?: never;
+};
+
+export type ListOwnAppConnectionsResponses = {
+	"200": ListOwnAppConnectionsStatus200;
+	"422": ListOwnAppConnectionsStatus422;
+	"429": ListOwnAppConnectionsStatus429;
+	"500": ListOwnAppConnectionsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ListOwnAppConnectionsResponse =
+	| ListOwnAppConnectionsStatus200
+	| ListOwnAppConnectionsStatus422
+	| ListOwnAppConnectionsStatus429
+	| ListOwnAppConnectionsStatus500;
+
+export type DisconnectOwnAppConnectionPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	connectionId: string;
+};
+
+export const DisconnectOwnAppConnectionStatus200StateEnum = {
+	active: "active",
+	disconnected: "disconnected",
+} as const;
+
+export type DisconnectOwnAppConnectionStatus200StateEnum =
+	(typeof DisconnectOwnAppConnectionStatus200StateEnum)[keyof typeof DisconnectOwnAppConnectionStatus200StateEnum];
+
+export type DisconnectOwnAppConnectionStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	connectionId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	version: number;
+	state: DisconnectOwnAppConnectionStatus200StateEnum;
+};
+
+export type DisconnectOwnAppConnectionStatus400 = MalformedRequestBody;
+
+export type DisconnectOwnAppConnectionStatus422 = ValidationError;
+
+export const DisconnectOwnAppConnectionStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DisconnectOwnAppConnectionStatus429ErrorCodeEnum =
+	(typeof DisconnectOwnAppConnectionStatus429ErrorCodeEnum)[keyof typeof DisconnectOwnAppConnectionStatus429ErrorCodeEnum];
+
+export type DisconnectOwnAppConnectionStatus429 = {
+	error: {
+		code: DisconnectOwnAppConnectionStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type DisconnectOwnAppConnectionStatus500 = InternalError;
+
+export type DisconnectOwnAppConnectionBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	expectedVersion: number;
+};
+
+export type DisconnectOwnAppConnectionOptions = {
+	body: DisconnectOwnAppConnectionBody;
+	path: DisconnectOwnAppConnectionPath;
+	query?: never;
+	headers?: never;
+};
+
+export type DisconnectOwnAppConnectionResponses = {
+	"200": DisconnectOwnAppConnectionStatus200;
+	"400": DisconnectOwnAppConnectionStatus400;
+	"422": DisconnectOwnAppConnectionStatus422;
+	"429": DisconnectOwnAppConnectionStatus429;
+	"500": DisconnectOwnAppConnectionStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DisconnectOwnAppConnectionResponse =
+	| DisconnectOwnAppConnectionStatus200
+	| DisconnectOwnAppConnectionStatus400
+	| DisconnectOwnAppConnectionStatus422
+	| DisconnectOwnAppConnectionStatus429
+	| DisconnectOwnAppConnectionStatus500;
+
+export type ListOwnAppConsentsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	connectionId: string;
+};
+
+export type ListOwnAppConsentsQuery = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	afterId?: string;
+};
+
+export const ListOwnAppConsentsStatus200ItemsStateEnum = {
+	active: "active",
+	revoked: "revoked",
+} as const;
+
+export type ListOwnAppConsentsStatus200ItemsStateEnum =
+	(typeof ListOwnAppConsentsStatus200ItemsStateEnum)[keyof typeof ListOwnAppConsentsStatus200ItemsStateEnum];
+
+export type ListOwnAppConsentsStatus200 = {
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		version: number;
+		state: ListOwnAppConsentsStatus200ItemsStateEnum;
+		/**
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		termsRevision: number;
+	}[];
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	nextAfterId: string | null;
+};
+
+export type ListOwnAppConsentsStatus422 = ValidationError;
+
+export const ListOwnAppConsentsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ListOwnAppConsentsStatus429ErrorCodeEnum =
+	(typeof ListOwnAppConsentsStatus429ErrorCodeEnum)[keyof typeof ListOwnAppConsentsStatus429ErrorCodeEnum];
+
+export type ListOwnAppConsentsStatus429 = {
+	error: {
+		code: ListOwnAppConsentsStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type ListOwnAppConsentsStatus500 = InternalError;
+
+export type ListOwnAppConsentsOptions = {
+	body?: never;
+	path: ListOwnAppConsentsPath;
+	query?: ListOwnAppConsentsQuery;
+	headers?: never;
+};
+
+export type ListOwnAppConsentsResponses = {
+	"200": ListOwnAppConsentsStatus200;
+	"422": ListOwnAppConsentsStatus422;
+	"429": ListOwnAppConsentsStatus429;
+	"500": ListOwnAppConsentsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ListOwnAppConsentsResponse =
+	| ListOwnAppConsentsStatus200
+	| ListOwnAppConsentsStatus422
+	| ListOwnAppConsentsStatus429
+	| ListOwnAppConsentsStatus500;
+
+export type GetOwnAppConsentPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	connectionId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	consentId: string;
+};
+
+export type GetOwnAppConsentQuery = {
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer | undefined
+	 */
+	revision?: number;
+};
+
+export const GetOwnAppConsentStatus200StateEnum = {
+	active: "active",
+	revoked: "revoked",
+} as const;
+
+export type GetOwnAppConsentStatus200StateEnum =
+	(typeof GetOwnAppConsentStatus200StateEnum)[keyof typeof GetOwnAppConsentStatus200StateEnum];
+
+export const GetOwnAppConsentStatus200TermsCapabilitiesKeyEnum = {
+	"unit:read": "unit:read",
+	"unit:create": "unit:create",
+	"unit:update": "unit:update",
+	"account:read": "account:read",
+	"account:update": "account:update",
+	"access:read": "access:read",
+	"access:manage": "access:manage",
+	"app:read": "app:read",
+	"app:manage": "app:manage",
+	"interaction:read": "interaction:read",
+	"interaction:write": "interaction:write",
+	"realm:read": "realm:read",
+	"realm:manage": "realm:manage",
+	"message:read": "message:read",
+	"message:write": "message:write",
+	"notification:read": "notification:read",
+	"notification:write": "notification:write",
+	"recommendation:read": "recommendation:read",
+	"recommendation:write": "recommendation:write",
+	"upload:read": "upload:read",
+	"upload:write": "upload:write",
+	"report:write": "report:write",
+} as const;
+
+export type GetOwnAppConsentStatus200TermsCapabilitiesKeyEnum =
+	(typeof GetOwnAppConsentStatus200TermsCapabilitiesKeyEnum)[keyof typeof GetOwnAppConsentStatus200TermsCapabilitiesKeyEnum];
+
+export type GetOwnAppConsentStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	version: number;
+	state: GetOwnAppConsentStatus200StateEnum;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	termsRevision: number;
+	terms: {
+		/**
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		revision: number;
+		/**
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		clientTermsRevision: number;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		validFrom: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		validUntil: string;
+		offlineAccess: boolean;
+		entityDisclosure: boolean;
+		capabilities: (
+			| {
+					family: "unit";
+					key: GetOwnAppConsentStatus200TermsCapabilitiesKeyEnum;
+			  }
+			| {
+					family: "platform";
+					key: GetOwnAppConsentStatus200TermsCapabilitiesKeyEnum;
+			  }
+			| {
+					family: "management";
+					key: GetOwnAppConsentStatus200TermsCapabilitiesKeyEnum;
+			  }
+			| {
+					family: "api";
+					key: GetOwnAppConsentStatus200TermsCapabilitiesKeyEnum;
+			  }
+		)[];
+		resources:
+			| {
+					kind: "all-scopes";
+			  }
+			| {
+					kind: "selected";
+					values: {
+						scope: string;
+						path: string[];
+					}[];
+			  };
+		representations: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @maxLength 9007199254740991
+			 * @type integer
+			 */
+			revision: number;
+		}[];
+	};
+};
+
+export type GetOwnAppConsentStatus422 = ValidationError;
+
+export const GetOwnAppConsentStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetOwnAppConsentStatus429ErrorCodeEnum =
+	(typeof GetOwnAppConsentStatus429ErrorCodeEnum)[keyof typeof GetOwnAppConsentStatus429ErrorCodeEnum];
+
+export type GetOwnAppConsentStatus429 = {
+	error: {
+		code: GetOwnAppConsentStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type GetOwnAppConsentStatus500 = InternalError;
+
+export type GetOwnAppConsentOptions = {
+	body?: never;
+	path: GetOwnAppConsentPath;
+	query?: GetOwnAppConsentQuery;
+	headers?: never;
+};
+
+export type GetOwnAppConsentResponses = {
+	"200": GetOwnAppConsentStatus200;
+	"422": GetOwnAppConsentStatus422;
+	"429": GetOwnAppConsentStatus429;
+	"500": GetOwnAppConsentStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetOwnAppConsentResponse =
+	| GetOwnAppConsentStatus200
+	| GetOwnAppConsentStatus422
+	| GetOwnAppConsentStatus429
+	| GetOwnAppConsentStatus500;
+
+export type ListOwnAppConsentHistoryPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	connectionId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	consentId: string;
+};
+
+export type ListOwnAppConsentHistoryQuery = {
+	/**
+	 * @minLength -9007199254740991
+	 * @maxLength 9007199254740991
+	 * @type integer | undefined
+	 */
+	afterVersion?: number;
+};
+
+export const ListOwnAppConsentHistoryStatus200ItemsOperationEnum = {
+	grant: "grant",
+	revise: "revise",
+	revoke: "revoke",
+} as const;
+
+export type ListOwnAppConsentHistoryStatus200ItemsOperationEnum =
+	(typeof ListOwnAppConsentHistoryStatus200ItemsOperationEnum)[keyof typeof ListOwnAppConsentHistoryStatus200ItemsOperationEnum];
+
+export const ListOwnAppConsentHistoryStatus200ItemsStateEnum = {
+	active: "active",
+	revoked: "revoked",
+} as const;
+
+export type ListOwnAppConsentHistoryStatus200ItemsStateEnum =
+	(typeof ListOwnAppConsentHistoryStatus200ItemsStateEnum)[keyof typeof ListOwnAppConsentHistoryStatus200ItemsStateEnum];
+
+export type ListOwnAppConsentHistoryStatus200 = {
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		operationId: string;
+		/**
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		version: number;
+		operation: ListOwnAppConsentHistoryStatus200ItemsOperationEnum;
+		state: ListOwnAppConsentHistoryStatus200ItemsStateEnum;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+	}[];
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	nextAfterVersion: number | null;
+};
+
+export type ListOwnAppConsentHistoryStatus422 = ValidationError;
+
+export const ListOwnAppConsentHistoryStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ListOwnAppConsentHistoryStatus429ErrorCodeEnum =
+	(typeof ListOwnAppConsentHistoryStatus429ErrorCodeEnum)[keyof typeof ListOwnAppConsentHistoryStatus429ErrorCodeEnum];
+
+export type ListOwnAppConsentHistoryStatus429 = {
+	error: {
+		code: ListOwnAppConsentHistoryStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type ListOwnAppConsentHistoryStatus500 = InternalError;
+
+export type ListOwnAppConsentHistoryOptions = {
+	body?: never;
+	path: ListOwnAppConsentHistoryPath;
+	query?: ListOwnAppConsentHistoryQuery;
+	headers?: never;
+};
+
+export type ListOwnAppConsentHistoryResponses = {
+	"200": ListOwnAppConsentHistoryStatus200;
+	"422": ListOwnAppConsentHistoryStatus422;
+	"429": ListOwnAppConsentHistoryStatus429;
+	"500": ListOwnAppConsentHistoryStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ListOwnAppConsentHistoryResponse =
+	| ListOwnAppConsentHistoryStatus200
+	| ListOwnAppConsentHistoryStatus422
+	| ListOwnAppConsentHistoryStatus429
+	| ListOwnAppConsentHistoryStatus500;
+
+export type RevokeOwnAppConsentPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	connectionId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	consentId: string;
+};
+
+export const RevokeOwnAppConsentStatus200StateEnum = {
+	active: "active",
+	revoked: "revoked",
+} as const;
+
+export type RevokeOwnAppConsentStatus200StateEnum =
+	(typeof RevokeOwnAppConsentStatus200StateEnum)[keyof typeof RevokeOwnAppConsentStatus200StateEnum];
+
+export type RevokeOwnAppConsentStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	consentId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	version: number;
+	state: RevokeOwnAppConsentStatus200StateEnum;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	termsRevision: number;
+};
+
+export type RevokeOwnAppConsentStatus400 = MalformedRequestBody;
+
+export type RevokeOwnAppConsentStatus422 = ValidationError;
+
+export const RevokeOwnAppConsentStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type RevokeOwnAppConsentStatus429ErrorCodeEnum =
+	(typeof RevokeOwnAppConsentStatus429ErrorCodeEnum)[keyof typeof RevokeOwnAppConsentStatus429ErrorCodeEnum];
+
+export type RevokeOwnAppConsentStatus429 = {
+	error: {
+		code: RevokeOwnAppConsentStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type RevokeOwnAppConsentStatus500 = InternalError;
+
+export type RevokeOwnAppConsentBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	expectedVersion: number;
+};
+
+export type RevokeOwnAppConsentOptions = {
+	body: RevokeOwnAppConsentBody;
+	path: RevokeOwnAppConsentPath;
+	query?: never;
+	headers?: never;
+};
+
+export type RevokeOwnAppConsentResponses = {
+	"200": RevokeOwnAppConsentStatus200;
+	"400": RevokeOwnAppConsentStatus400;
+	"422": RevokeOwnAppConsentStatus422;
+	"429": RevokeOwnAppConsentStatus429;
+	"500": RevokeOwnAppConsentStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type RevokeOwnAppConsentResponse =
+	| RevokeOwnAppConsentStatus200
+	| RevokeOwnAppConsentStatus400
+	| RevokeOwnAppConsentStatus422
+	| RevokeOwnAppConsentStatus429
+	| RevokeOwnAppConsentStatus500;
+
 export type CreateAccountIdentityStatus200 = {
 	/**
 	 * @description

@@ -6691,6 +6691,1068 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
+		"/api/v1/account/connections": {
+			"get": {
+				"operationId": "listOwnAppConnections",
+				"tags": ["Account"],
+				"description": "List your fixed client connections, including disconnected connections. The selected subject does not follow your current default identity.",
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "afterId",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"items": {
+											"maxItems": 50,
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"id": {
+														"type": "string",
+														"format": "uuid",
+														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+													},
+													"version": {
+														"type": "integer",
+														"exclusiveMinimum": 0,
+														"maximum": 9007199254740991
+													},
+													"state": { "type": "string", "enum": ["active", "disconnected"] },
+													"clientId": { "type": "string" },
+													"subject": {
+														"oneOf": [
+															{
+																"type": "object",
+																"properties": { "kind": { "type": "string", "const": "direct" } },
+																"required": ["kind"],
+																"additionalProperties": false
+															},
+															{
+																"type": "object",
+																"properties": {
+																	"kind": { "type": "string", "const": "entity" },
+																	"entityId": {
+																		"type": "string",
+																		"format": "uuid",
+																		"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+																	}
+																},
+																"required": ["kind", "entityId"],
+																"additionalProperties": false
+															}
+														]
+													}
+												},
+												"required": ["id", "version", "state", "clientId", "subject"],
+												"additionalProperties": false
+											}
+										},
+										"nextAfterId": {
+											"type": ["string", "null"],
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										}
+									},
+									"required": ["items", "nextAfterId"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until this request can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "getApiAccountConnections",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/account/connections/{connectionId}/disconnect": {
+			"post": {
+				"operationId": "disconnectOwnAppConnection",
+				"tags": ["Account"],
+				"description": "End future use of this connection and its consents. Existing content keeps its attribution. Retrying the same operation returns the original receipt.",
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "connectionId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"type": "object",
+								"properties": {
+									"operationId": {
+										"type": "string",
+										"format": "uuid",
+										"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+									},
+									"expectedVersion": {
+										"type": "integer",
+										"exclusiveMinimum": 0,
+										"maximum": 9007199254740991
+									}
+								},
+								"required": ["operationId", "expectedVersion"],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"connectionId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"operationId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"version": {
+											"type": "integer",
+											"exclusiveMinimum": 0,
+											"maximum": 9007199254740991
+										},
+										"state": { "type": "string", "enum": ["active", "disconnected"] }
+									},
+									"required": ["connectionId", "operationId", "version", "state"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until this request can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "postApiAccountConnectionsByConnectionIdDisconnect",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/account/connections/{connectionId}/consents": {
+			"get": {
+				"operationId": "listOwnAppConsents",
+				"tags": ["Account"],
+				"description": "List active and revoked approvals for your connection.",
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "connectionId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					},
+					{
+						"name": "afterId",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"items": {
+											"maxItems": 50,
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"id": {
+														"type": "string",
+														"format": "uuid",
+														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+													},
+													"version": {
+														"type": "integer",
+														"exclusiveMinimum": 0,
+														"maximum": 9007199254740991
+													},
+													"state": { "type": "string", "enum": ["active", "revoked"] },
+													"termsRevision": {
+														"type": "integer",
+														"exclusiveMinimum": 0,
+														"maximum": 9007199254740991
+													}
+												},
+												"required": ["id", "version", "state", "termsRevision"],
+												"additionalProperties": false
+											}
+										},
+										"nextAfterId": {
+											"type": ["string", "null"],
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										}
+									},
+									"required": ["items", "nextAfterId"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until this request can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "getApiAccountConnectionsByConnectionIdConsents",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/account/connections/{connectionId}/consents/{consentId}": {
+			"get": {
+				"operationId": "getOwnAppConsent",
+				"tags": ["Account"],
+				"description": "Read a captured approval revision. Resource locators are bound to your current credential and expire after 15 minutes; they grant no resource access.",
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "connectionId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					},
+					{
+						"name": "consentId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					},
+					{
+						"name": "revision",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "integer", "exclusiveMinimum": 0, "maximum": 9007199254740991 }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"version": {
+											"type": "integer",
+											"exclusiveMinimum": 0,
+											"maximum": 9007199254740991
+										},
+										"state": { "type": "string", "enum": ["active", "revoked"] },
+										"termsRevision": {
+											"type": "integer",
+											"exclusiveMinimum": 0,
+											"maximum": 9007199254740991
+										},
+										"terms": {
+											"type": "object",
+											"properties": {
+												"revision": {
+													"type": "integer",
+													"exclusiveMinimum": 0,
+													"maximum": 9007199254740991
+												},
+												"clientTermsRevision": {
+													"type": "integer",
+													"exclusiveMinimum": 0,
+													"maximum": 9007199254740991
+												},
+												"validFrom": {
+													"type": "string",
+													"format": "date-time",
+													"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+												},
+												"validUntil": {
+													"type": "string",
+													"format": "date-time",
+													"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+												},
+												"offlineAccess": { "type": "boolean" },
+												"entityDisclosure": { "type": "boolean" },
+												"capabilities": {
+													"maxItems": 111,
+													"type": "array",
+													"items": {
+														"oneOf": [
+															{
+																"type": "object",
+																"properties": {
+																	"family": { "type": "string", "const": "unit" },
+																	"key": {
+																		"type": "string",
+																		"enum": [
+																			"unit.read",
+																			"unit.update",
+																			"unit.metadata-only.update",
+																			"unit.status.update",
+																			"unit.history.restore",
+																			"unit.access.manage",
+																			"unit.ownership.transfer",
+																			"unit.association.manage",
+																			"unit.tag-curation.manage",
+																			"unit.reference-curation.manage",
+																			"unit.realm-publication.manage",
+																			"zone.pages.manage",
+																			"zone.theme.manage",
+																			"realm.contribute",
+																			"realm.units.create",
+																			"realm.post.replies.create",
+																			"realm.settings.update",
+																			"realm.members.read",
+																			"realm.members.manage",
+																			"realm.rules.update",
+																			"realm.pins.manage",
+																			"realm.tags.manage",
+																			"realm.tag-voting.update",
+																			"realm.tag-contexts.manage",
+																			"realm.units.moderate",
+																			"entity.association.credit.request",
+																			"entity.association.credit.direct",
+																			"entity.association.subject.request",
+																			"entity.association.subject.direct"
+																		]
+																	}
+																},
+																"required": ["family", "key"],
+																"additionalProperties": false
+															},
+															{
+																"type": "object",
+																"properties": {
+																	"family": { "type": "string", "const": "platform" },
+																	"key": {
+																		"type": "string",
+																		"enum": [
+																			"platform.access.read",
+																			"platform.access.manage",
+																			"platform.audit.read",
+																			"platform.user.read",
+																			"platform.user.status.update",
+																			"platform.session.read",
+																			"platform.session.revoke",
+																			"entity.associations.override",
+																			"catalog.definition.manage",
+																			"unit.edit",
+																			"platform.development_preview.access",
+																			"platform.custom_theme.external_live.access",
+																			"platform.custom_theme.external_live.access.manage",
+																			"platform.custom_theme.review",
+																			"platform.custom_theme.kill",
+																			"unit.governance.read",
+																			"unit.merge.propose",
+																			"unit.merge.review",
+																			"unit.merge",
+																			"unit.ownership.override",
+																			"unit.license.manage",
+																			"unit.delete",
+																			"unit.restore",
+																			"unit.slug.manage",
+																			"unit.slug.namespace.manage",
+																			"unit.slug.redirect.release",
+																			"platform.api_quota_policy.read",
+																			"platform.api_quota_policy.update",
+																			"platform.user.api_quota.read",
+																			"platform.user.api_quota.update",
+																			"platform.user.api_token.api_quota.read",
+																			"platform.user.api_token.api_quota.update",
+																			"platform.moderate",
+																			"platform.suppress",
+																			"realm.contribute",
+																			"realm.units.create",
+																			"realm.post.replies.create",
+																			"realm.settings.update",
+																			"realm.members.read",
+																			"realm.members.manage",
+																			"realm.rules.update",
+																			"realm.pins.manage",
+																			"realm.tags.manage",
+																			"realm.tag-voting.update",
+																			"realm.tag-contexts.manage",
+																			"realm.units.moderate"
+																		]
+																	}
+																},
+																"required": ["family", "key"],
+																"additionalProperties": false
+															},
+															{
+																"type": "object",
+																"properties": {
+																	"family": { "type": "string", "const": "management" },
+																	"key": {
+																		"type": "string",
+																		"enum": [
+																			"access.identity.select",
+																			"access.role.read",
+																			"access.role.create",
+																			"access.role.update",
+																			"access.role.activate",
+																			"access.role.retire",
+																			"access.role-binding.manage",
+																			"access.assignment-ceiling.manage",
+																			"app.read",
+																			"app.create",
+																			"app.update",
+																			"app.disable",
+																			"app.retire",
+																			"app.trust.manage"
+																		]
+																	}
+																},
+																"required": ["family", "key"],
+																"additionalProperties": false
+															},
+															{
+																"type": "object",
+																"properties": {
+																	"family": { "type": "string", "const": "api" },
+																	"key": {
+																		"type": "string",
+																		"enum": [
+																			"unit:read",
+																			"unit:create",
+																			"unit:update",
+																			"account:read",
+																			"account:update",
+																			"access:read",
+																			"access:manage",
+																			"app:read",
+																			"app:manage",
+																			"interaction:read",
+																			"interaction:write",
+																			"realm:read",
+																			"realm:manage",
+																			"message:read",
+																			"message:write",
+																			"notification:read",
+																			"notification:write",
+																			"recommendation:read",
+																			"recommendation:write",
+																			"upload:read",
+																			"upload:write",
+																			"report:write"
+																		]
+																	}
+																},
+																"required": ["family", "key"],
+																"additionalProperties": false
+															}
+														]
+													}
+												},
+												"resources": {
+													"oneOf": [
+														{
+															"type": "object",
+															"properties": { "kind": { "type": "string", "const": "all-scopes" } },
+															"required": ["kind"],
+															"additionalProperties": false
+														},
+														{
+															"type": "object",
+															"properties": {
+																"kind": { "type": "string", "const": "selected" },
+																"values": {
+																	"minItems": 1,
+																	"maxItems": 64,
+																	"type": "array",
+																	"items": {
+																		"type": "object",
+																		"properties": {
+																			"scope": { "type": "string" },
+																			"path": {
+																				"maxItems": 8,
+																				"type": "array",
+																				"items": { "type": "string" }
+																			}
+																		},
+																		"required": ["scope", "path"],
+																		"additionalProperties": false
+																	}
+																}
+															},
+															"required": ["kind", "values"],
+															"additionalProperties": false
+														}
+													]
+												},
+												"representations": {
+													"maxItems": 8,
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"id": {
+																"type": "string",
+																"format": "uuid",
+																"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+															},
+															"revision": {
+																"type": "integer",
+																"exclusiveMinimum": 0,
+																"maximum": 9007199254740991
+															}
+														},
+														"required": ["id", "revision"],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"revision",
+												"clientTermsRevision",
+												"validFrom",
+												"validUntil",
+												"offlineAccess",
+												"entityDisclosure",
+												"capabilities",
+												"resources",
+												"representations"
+											],
+											"additionalProperties": false
+										}
+									},
+									"required": ["id", "version", "state", "termsRevision", "terms"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until this request can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "getApiAccountConnectionsByConnectionIdConsentsByConsentId",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/account/connections/{connectionId}/consents/{consentId}/history": {
+			"get": {
+				"operationId": "listOwnAppConsentHistory",
+				"tags": ["Account"],
+				"description": "Read the approval's change receipts in version order.",
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "connectionId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					},
+					{
+						"name": "consentId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					},
+					{
+						"name": "afterVersion",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "integer",
+							"minimum": -9007199254740991,
+							"maximum": 9007199254740991
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"items": {
+											"maxItems": 50,
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"operationId": {
+														"type": "string",
+														"format": "uuid",
+														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+													},
+													"version": {
+														"type": "integer",
+														"exclusiveMinimum": 0,
+														"maximum": 9007199254740991
+													},
+													"operation": { "type": "string", "enum": ["grant", "revise", "revoke"] },
+													"state": { "type": "string", "enum": ["active", "revoked"] },
+													"createdAt": {
+														"type": "string",
+														"format": "date-time",
+														"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+													}
+												},
+												"required": ["operationId", "version", "operation", "state", "createdAt"],
+												"additionalProperties": false
+											}
+										},
+										"nextAfterVersion": {
+											"type": ["integer", "null"],
+											"exclusiveMinimum": 0,
+											"maximum": 9007199254740991
+										}
+									},
+									"required": ["items", "nextAfterVersion"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until this request can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "getApiAccountConnectionsByConnectionIdConsentsByConsentIdHistory",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/account/connections/{connectionId}/consents/{consentId}/revoke": {
+			"post": {
+				"operationId": "revokeOwnAppConsent",
+				"tags": ["Account"],
+				"description": "Withdraw this approval, including when the client is disabled or you no longer control the selected identity or resources.",
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "connectionId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					},
+					{
+						"name": "consentId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"type": "object",
+								"properties": {
+									"operationId": {
+										"type": "string",
+										"format": "uuid",
+										"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+									},
+									"expectedVersion": {
+										"type": "integer",
+										"exclusiveMinimum": 0,
+										"maximum": 9007199254740991
+									}
+								},
+								"required": ["operationId", "expectedVersion"],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"consentId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"operationId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"version": {
+											"type": "integer",
+											"exclusiveMinimum": 0,
+											"maximum": 9007199254740991
+										},
+										"state": { "type": "string", "enum": ["active", "revoked"] },
+										"termsRevision": {
+											"type": "integer",
+											"exclusiveMinimum": 0,
+											"maximum": 9007199254740991
+										}
+									},
+									"required": ["consentId", "operationId", "version", "state", "termsRevision"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until this request can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "postApiAccountConnectionsByConnectionIdConsentsByConsentIdRevoke",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
 		"/api/v1/account/identities": {
 			"post": {
 				"operationId": "createAccountIdentity",

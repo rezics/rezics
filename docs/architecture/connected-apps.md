@@ -81,6 +81,16 @@ subject. It never borrows the principal's grants in represented mode. Credential
 authentication, token scope/expiry/quota and that subject's resource rights and
 restrictions remain additional required checks.
 
+The private `/account/connections` API lists fixed connections and their active or
+revoked consent heads in 50-item keyset pages. One consent read exposes a selected
+immutable approval revision; history has a separate 50-receipt page. Resource roots
+are encoded as credential-bound, 15-minute locators rather than private principal
+identifiers. Read APIs require direct private-account authority and `account:read`;
+disconnect/revoke require current direct ownership and `account:update`, an exact
+version and an operation ID. They do not require the old client, Entity or selected
+resource to remain usable. Withdrawal invalidates future use without rewriting
+content attribution, and a matching retry returns the original receipt.
+
 Account erasure invalidates use immediately through the account fence, then removes
 private consent members, revisions, receipts and connections in bounded batches.
 Only an erased owner's consent can enter internal `erasing` state to detach its

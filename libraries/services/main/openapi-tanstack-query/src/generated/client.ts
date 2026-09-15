@@ -29,6 +29,18 @@ import type {
 	ListAccessRoleHistoryResponses,
 	ReviseAccessRoleOptions,
 	ReviseAccessRoleResponses,
+	ListOwnAppConnectionsOptions,
+	ListOwnAppConnectionsResponses,
+	DisconnectOwnAppConnectionOptions,
+	DisconnectOwnAppConnectionResponses,
+	ListOwnAppConsentsOptions,
+	ListOwnAppConsentsResponses,
+	GetOwnAppConsentOptions,
+	GetOwnAppConsentResponses,
+	ListOwnAppConsentHistoryOptions,
+	ListOwnAppConsentHistoryResponses,
+	RevokeOwnAppConsentOptions,
+	RevokeOwnAppConsentResponses,
 	CreateAccountIdentityOptions,
 	CreateAccountIdentityResponses,
 	GetMainIdentityPreferenceOptions,
@@ -1329,6 +1341,138 @@ export function reviseAccessRole<ThrowOnError extends boolean = true>(
 			],
 			...config,
 		}) as Promise<RequestResult<ReviseAccessRoleResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * @description List your fixed client connections, including disconnected connections. The selected subject does not follow your current default identity.
+ * {@link /api/v1/account/connections}
+ */
+export function listOwnAppConnections<ThrowOnError extends boolean = true>(
+	options: Options<ListOwnAppConnectionsOptions, ThrowOnError> = {},
+): Unwrappable<RequestResult<ListOwnAppConnectionsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/account/connections",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ListOwnAppConnectionsResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * @description End future use of this connection and its consents. Existing content keeps its attribution. Retrying the same operation returns the original receipt.
+ * {@link /api/v1/account/connections/:connectionId/disconnect}
+ */
+export function disconnectOwnAppConnection<ThrowOnError extends boolean = true>(
+	options: Options<DisconnectOwnAppConnectionOptions, ThrowOnError>,
+): Unwrappable<RequestResult<DisconnectOwnAppConnectionResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/account/connections/{connectionId}/disconnect",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<DisconnectOwnAppConnectionResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * @description List active and revoked approvals for your connection.
+ * {@link /api/v1/account/connections/:connectionId/consents}
+ */
+export function listOwnAppConsents<ThrowOnError extends boolean = true>(
+	options: Options<ListOwnAppConsentsOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ListOwnAppConsentsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/account/connections/{connectionId}/consents",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ListOwnAppConsentsResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * @description Read a captured approval revision. Resource locators are bound to your current credential and expire after 15 minutes; they grant no resource access.
+ * {@link /api/v1/account/connections/:connectionId/consents/:consentId}
+ */
+export function getOwnAppConsent<ThrowOnError extends boolean = true>(
+	options: Options<GetOwnAppConsentOptions, ThrowOnError>,
+): Unwrappable<RequestResult<GetOwnAppConsentResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/account/connections/{connectionId}/consents/{consentId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetOwnAppConsentResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * @description Read the approval's change receipts in version order.
+ * {@link /api/v1/account/connections/:connectionId/consents/:consentId/history}
+ */
+export function listOwnAppConsentHistory<ThrowOnError extends boolean = true>(
+	options: Options<ListOwnAppConsentHistoryOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ListOwnAppConsentHistoryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/account/connections/{connectionId}/consents/{consentId}/history",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ListOwnAppConsentHistoryResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * @description Withdraw this approval, including when the client is disabled or you no longer control the selected identity or resources.
+ * {@link /api/v1/account/connections/:connectionId/consents/:consentId/revoke}
+ */
+export function revokeOwnAppConsent<ThrowOnError extends boolean = true>(
+	options: Options<RevokeOwnAppConsentOptions, ThrowOnError>,
+): Unwrappable<RequestResult<RevokeOwnAppConsentResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/account/connections/{connectionId}/consents/{consentId}/revoke",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<RevokeOwnAppConsentResponses, ThrowOnError>>,
 	);
 }
 

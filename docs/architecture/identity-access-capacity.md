@@ -275,6 +275,13 @@ context; cleanup is deferred. Owner erasure drains these wider protocol records 
 baseline and 3B-row estimate; measured width and live-dependency query costs remain
 pending verification.
 
+Private connection, consent-head and receipt-history APIs fetch at most 51 rows
+for 50-item keyset pages, using their account/connection/version indexes. Lists do
+not hydrate consent snapshots. A single snapshot read loads at most 64 resources,
+eight representation references and the finite capability vocabulary, verifying
+the sealed counts/digests. Revocation updates one owner-fenced head and receipt;
+it does not synchronously enumerate issued credentials.
+
 ## Private registry cost
 
 The subject and scope registries have independent allocation density: one subject

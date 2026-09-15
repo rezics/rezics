@@ -89,6 +89,7 @@ import {
 	deleteApiZonesByZoneIdNavigationByNavigationId,
 	deleteApiZonesByZoneIdPagesByPageIdPlacement,
 	disableConnectedApp,
+	disconnectOwnAppConnection,
 	enableConnectedApp,
 	eraseOwnAccount,
 	findSoftwareReleases,
@@ -247,6 +248,7 @@ import {
 	getImageAssetsByIdContent,
 	getImageAssetsByIdPresentationsByRoleContent,
 	getMainIdentityPreference,
+	getOwnAppConsent,
 	getPublicUnitSeoProjection,
 	getPublicUnitSlugAddress,
 	getUnitReference,
@@ -302,6 +304,9 @@ import {
 	listMusicTracks,
 	listNativeMergeReconciliation,
 	listNativeMergeRequests,
+	listOwnAppConnections,
+	listOwnAppConsentHistory,
+	listOwnAppConsents,
 	listOwnOrganizationMembershipInvitations,
 	listOwnOrganizationMemberships,
 	listParticipationGrants,
@@ -577,6 +582,7 @@ import {
 	reviseSoftwareCredit,
 	reviseSoftwareDetails,
 	reviseSoftwareParticipationContext,
+	revokeOwnAppConsent,
 	revokeParticipationGrant,
 	revokeServicePrincipal,
 	saveProgramContentDraft,
@@ -1107,6 +1113,12 @@ import type {
 	DisableConnectedAppStatus422,
 	DisableConnectedAppStatus429,
 	DisableConnectedAppStatus500,
+	DisconnectOwnAppConnectionOptions,
+	DisconnectOwnAppConnectionStatus200,
+	DisconnectOwnAppConnectionStatus400,
+	DisconnectOwnAppConnectionStatus422,
+	DisconnectOwnAppConnectionStatus429,
+	DisconnectOwnAppConnectionStatus500,
 	EnableConnectedAppOptions,
 	EnableConnectedAppStatus200,
 	EnableConnectedAppStatus400,
@@ -1940,6 +1952,11 @@ import type {
 	GetMainIdentityPreferenceStatus200,
 	GetMainIdentityPreferenceStatus429,
 	GetMainIdentityPreferenceStatus500,
+	GetOwnAppConsentOptions,
+	GetOwnAppConsentStatus200,
+	GetOwnAppConsentStatus422,
+	GetOwnAppConsentStatus429,
+	GetOwnAppConsentStatus500,
 	GetPublicUnitSeoProjectionOptions,
 	GetPublicUnitSeoProjectionStatus200,
 	GetPublicUnitSeoProjectionStatus404,
@@ -2199,6 +2216,21 @@ import type {
 	ListNativeMergeRequestsStatus200,
 	ListNativeMergeRequestsStatus422,
 	ListNativeMergeRequestsStatus500,
+	ListOwnAppConnectionsOptions,
+	ListOwnAppConnectionsStatus200,
+	ListOwnAppConnectionsStatus422,
+	ListOwnAppConnectionsStatus429,
+	ListOwnAppConnectionsStatus500,
+	ListOwnAppConsentHistoryOptions,
+	ListOwnAppConsentHistoryStatus200,
+	ListOwnAppConsentHistoryStatus422,
+	ListOwnAppConsentHistoryStatus429,
+	ListOwnAppConsentHistoryStatus500,
+	ListOwnAppConsentsOptions,
+	ListOwnAppConsentsStatus200,
+	ListOwnAppConsentsStatus422,
+	ListOwnAppConsentsStatus429,
+	ListOwnAppConsentsStatus500,
 	ListOwnOrganizationMembershipInvitationsOptions,
 	ListOwnOrganizationMembershipInvitationsStatus200,
 	ListOwnOrganizationMembershipInvitationsStatus403,
@@ -4132,6 +4164,12 @@ import type {
 	ReviseSoftwareParticipationContextStatus422,
 	ReviseSoftwareParticipationContextStatus429,
 	ReviseSoftwareParticipationContextStatus500,
+	RevokeOwnAppConsentOptions,
+	RevokeOwnAppConsentStatus200,
+	RevokeOwnAppConsentStatus400,
+	RevokeOwnAppConsentStatus422,
+	RevokeOwnAppConsentStatus429,
+	RevokeOwnAppConsentStatus500,
 	RevokeParticipationGrantOptions,
 	RevokeParticipationGrantStatus200,
 	RevokeParticipationGrantStatus400,
@@ -4975,6 +5013,572 @@ export function useReviseAccessRole<TContext>(
 			| ReviseAccessRoleStatus500
 		>,
 		ReviseAccessRoleOptions,
+		TContext
+	>;
+}
+
+export const listOwnAppConnectionsQueryKey = ({
+	query,
+}: Omit<ListOwnAppConnectionsOptions, "headers"> = {}) =>
+	[{ url: "/api/v1/account/connections" }, ...(query ? [query] : [])] as const;
+
+type ListOwnAppConnectionsQueryKey = ReturnType<typeof listOwnAppConnectionsQueryKey>;
+
+export function listOwnAppConnectionsQueryOptions(
+	{ query }: ListOwnAppConnectionsOptions = {},
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listOwnAppConnectionsQueryKey({ query });
+	return queryOptions<
+		ListOwnAppConnectionsStatus200,
+		ResponseErrorConfig<
+			| ListOwnAppConnectionsStatus422
+			| ListOwnAppConnectionsStatus429
+			| ListOwnAppConnectionsStatus500
+		>,
+		ListOwnAppConnectionsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return listOwnAppConnections({
+				...config,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * @description List your fixed client connections, including disconnected connections. The selected subject does not follow your current default identity.
+ * {@link /api/v1/account/connections}
+ */
+export function useListOwnAppConnections<
+	TData = ListOwnAppConnectionsStatus200,
+	TQueryData = ListOwnAppConnectionsStatus200,
+	TQueryKey extends QueryKey = ListOwnAppConnectionsQueryKey,
+>(
+	{
+		query,
+	}: {
+		query?: ListOwnAppConnectionsOptions["query"] | (() => ListOwnAppConnectionsOptions["query"]);
+	} = {},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListOwnAppConnectionsStatus200,
+				ResponseErrorConfig<
+					| ListOwnAppConnectionsStatus422
+					| ListOwnAppConnectionsStatus429
+					| ListOwnAppConnectionsStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { query: typeof query === "function" ? query() : query };
+	const queryKey = resolvedOptions?.queryKey ?? listOwnAppConnectionsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listOwnAppConnectionsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| ListOwnAppConnectionsStatus422
+			| ListOwnAppConnectionsStatus429
+			| ListOwnAppConnectionsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const disconnectOwnAppConnectionMutationKey = () =>
+	[{ url: "/api/v1/account/connections/:connectionId/disconnect" }] as const;
+
+export function disconnectOwnAppConnectionMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = disconnectOwnAppConnectionMutationKey();
+	return mutationOptions<
+		DisconnectOwnAppConnectionStatus200,
+		ResponseErrorConfig<
+			| DisconnectOwnAppConnectionStatus400
+			| DisconnectOwnAppConnectionStatus422
+			| DisconnectOwnAppConnectionStatus429
+			| DisconnectOwnAppConnectionStatus500
+		>,
+		DisconnectOwnAppConnectionOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return disconnectOwnAppConnection({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * @description End future use of this connection and its consents. Existing content keeps its attribution. Retrying the same operation returns the original receipt.
+ * {@link /api/v1/account/connections/:connectionId/disconnect}
+ */
+export function useDisconnectOwnAppConnection<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DisconnectOwnAppConnectionStatus200,
+			ResponseErrorConfig<
+				| DisconnectOwnAppConnectionStatus400
+				| DisconnectOwnAppConnectionStatus422
+				| DisconnectOwnAppConnectionStatus429
+				| DisconnectOwnAppConnectionStatus500
+			>,
+			DisconnectOwnAppConnectionOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? disconnectOwnAppConnectionMutationKey();
+
+	const baseOptions = disconnectOwnAppConnectionMutationOptions(config) as UseMutationOptions<
+		DisconnectOwnAppConnectionStatus200,
+		ResponseErrorConfig<
+			| DisconnectOwnAppConnectionStatus400
+			| DisconnectOwnAppConnectionStatus422
+			| DisconnectOwnAppConnectionStatus429
+			| DisconnectOwnAppConnectionStatus500
+		>,
+		DisconnectOwnAppConnectionOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DisconnectOwnAppConnectionStatus200,
+		ResponseErrorConfig<
+			| DisconnectOwnAppConnectionStatus400
+			| DisconnectOwnAppConnectionStatus422
+			| DisconnectOwnAppConnectionStatus429
+			| DisconnectOwnAppConnectionStatus500
+		>,
+		DisconnectOwnAppConnectionOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DisconnectOwnAppConnectionStatus200,
+		ResponseErrorConfig<
+			| DisconnectOwnAppConnectionStatus400
+			| DisconnectOwnAppConnectionStatus422
+			| DisconnectOwnAppConnectionStatus429
+			| DisconnectOwnAppConnectionStatus500
+		>,
+		DisconnectOwnAppConnectionOptions,
+		TContext
+	>;
+}
+
+export const listOwnAppConsentsQueryKey = ({
+	path,
+	query,
+}: Omit<ListOwnAppConsentsOptions, "headers">) =>
+	[
+		{ url: "/api/v1/account/connections/:connectionId/consents", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type ListOwnAppConsentsQueryKey = ReturnType<typeof listOwnAppConsentsQueryKey>;
+
+export function listOwnAppConsentsQueryOptions(
+	{ path, query }: ListOwnAppConsentsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listOwnAppConsentsQueryKey({ path, query });
+	return queryOptions<
+		ListOwnAppConsentsStatus200,
+		ResponseErrorConfig<
+			ListOwnAppConsentsStatus422 | ListOwnAppConsentsStatus429 | ListOwnAppConsentsStatus500
+		>,
+		ListOwnAppConsentsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return listOwnAppConsents({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * @description List active and revoked approvals for your connection.
+ * {@link /api/v1/account/connections/:connectionId/consents}
+ */
+export function useListOwnAppConsents<
+	TData = ListOwnAppConsentsStatus200,
+	TQueryData = ListOwnAppConsentsStatus200,
+	TQueryKey extends QueryKey = ListOwnAppConsentsQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path: ListOwnAppConsentsOptions["path"] | (() => ListOwnAppConsentsOptions["path"]);
+		query?: ListOwnAppConsentsOptions["query"] | (() => ListOwnAppConsentsOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListOwnAppConsentsStatus200,
+				ResponseErrorConfig<
+					ListOwnAppConsentsStatus422 | ListOwnAppConsentsStatus429 | ListOwnAppConsentsStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey = resolvedOptions?.queryKey ?? listOwnAppConsentsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listOwnAppConsentsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			ListOwnAppConsentsStatus422 | ListOwnAppConsentsStatus429 | ListOwnAppConsentsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getOwnAppConsentQueryKey = ({
+	path,
+	query,
+}: Omit<GetOwnAppConsentOptions, "headers">) =>
+	[
+		{ url: "/api/v1/account/connections/:connectionId/consents/:consentId", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type GetOwnAppConsentQueryKey = ReturnType<typeof getOwnAppConsentQueryKey>;
+
+export function getOwnAppConsentQueryOptions(
+	{ path, query }: GetOwnAppConsentOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getOwnAppConsentQueryKey({ path, query });
+	return queryOptions<
+		GetOwnAppConsentStatus200,
+		ResponseErrorConfig<
+			GetOwnAppConsentStatus422 | GetOwnAppConsentStatus429 | GetOwnAppConsentStatus500
+		>,
+		GetOwnAppConsentStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return getOwnAppConsent({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * @description Read a captured approval revision. Resource locators are bound to your current credential and expire after 15 minutes; they grant no resource access.
+ * {@link /api/v1/account/connections/:connectionId/consents/:consentId}
+ */
+export function useGetOwnAppConsent<
+	TData = GetOwnAppConsentStatus200,
+	TQueryData = GetOwnAppConsentStatus200,
+	TQueryKey extends QueryKey = GetOwnAppConsentQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path: GetOwnAppConsentOptions["path"] | (() => GetOwnAppConsentOptions["path"]);
+		query?: GetOwnAppConsentOptions["query"] | (() => GetOwnAppConsentOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetOwnAppConsentStatus200,
+				ResponseErrorConfig<
+					GetOwnAppConsentStatus422 | GetOwnAppConsentStatus429 | GetOwnAppConsentStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey = resolvedOptions?.queryKey ?? getOwnAppConsentQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getOwnAppConsentQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			GetOwnAppConsentStatus422 | GetOwnAppConsentStatus429 | GetOwnAppConsentStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const listOwnAppConsentHistoryQueryKey = ({
+	path,
+	query,
+}: Omit<ListOwnAppConsentHistoryOptions, "headers">) =>
+	[
+		{ url: "/api/v1/account/connections/:connectionId/consents/:consentId/history", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type ListOwnAppConsentHistoryQueryKey = ReturnType<typeof listOwnAppConsentHistoryQueryKey>;
+
+export function listOwnAppConsentHistoryQueryOptions(
+	{ path, query }: ListOwnAppConsentHistoryOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listOwnAppConsentHistoryQueryKey({ path, query });
+	return queryOptions<
+		ListOwnAppConsentHistoryStatus200,
+		ResponseErrorConfig<
+			| ListOwnAppConsentHistoryStatus422
+			| ListOwnAppConsentHistoryStatus429
+			| ListOwnAppConsentHistoryStatus500
+		>,
+		ListOwnAppConsentHistoryStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return listOwnAppConsentHistory({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * @description Read the approval's change receipts in version order.
+ * {@link /api/v1/account/connections/:connectionId/consents/:consentId/history}
+ */
+export function useListOwnAppConsentHistory<
+	TData = ListOwnAppConsentHistoryStatus200,
+	TQueryData = ListOwnAppConsentHistoryStatus200,
+	TQueryKey extends QueryKey = ListOwnAppConsentHistoryQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path: ListOwnAppConsentHistoryOptions["path"] | (() => ListOwnAppConsentHistoryOptions["path"]);
+		query?:
+			| ListOwnAppConsentHistoryOptions["query"]
+			| (() => ListOwnAppConsentHistoryOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListOwnAppConsentHistoryStatus200,
+				ResponseErrorConfig<
+					| ListOwnAppConsentHistoryStatus422
+					| ListOwnAppConsentHistoryStatus429
+					| ListOwnAppConsentHistoryStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey = resolvedOptions?.queryKey ?? listOwnAppConsentHistoryQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listOwnAppConsentHistoryQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| ListOwnAppConsentHistoryStatus422
+			| ListOwnAppConsentHistoryStatus429
+			| ListOwnAppConsentHistoryStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const revokeOwnAppConsentMutationKey = () =>
+	[{ url: "/api/v1/account/connections/:connectionId/consents/:consentId/revoke" }] as const;
+
+export function revokeOwnAppConsentMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = revokeOwnAppConsentMutationKey();
+	return mutationOptions<
+		RevokeOwnAppConsentStatus200,
+		ResponseErrorConfig<
+			| RevokeOwnAppConsentStatus400
+			| RevokeOwnAppConsentStatus422
+			| RevokeOwnAppConsentStatus429
+			| RevokeOwnAppConsentStatus500
+		>,
+		RevokeOwnAppConsentOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return revokeOwnAppConsent({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * @description Withdraw this approval, including when the client is disabled or you no longer control the selected identity or resources.
+ * {@link /api/v1/account/connections/:connectionId/consents/:consentId/revoke}
+ */
+export function useRevokeOwnAppConsent<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			RevokeOwnAppConsentStatus200,
+			ResponseErrorConfig<
+				| RevokeOwnAppConsentStatus400
+				| RevokeOwnAppConsentStatus422
+				| RevokeOwnAppConsentStatus429
+				| RevokeOwnAppConsentStatus500
+			>,
+			RevokeOwnAppConsentOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? revokeOwnAppConsentMutationKey();
+
+	const baseOptions = revokeOwnAppConsentMutationOptions(config) as UseMutationOptions<
+		RevokeOwnAppConsentStatus200,
+		ResponseErrorConfig<
+			| RevokeOwnAppConsentStatus400
+			| RevokeOwnAppConsentStatus422
+			| RevokeOwnAppConsentStatus429
+			| RevokeOwnAppConsentStatus500
+		>,
+		RevokeOwnAppConsentOptions,
+		TContext
+	>;
+
+	return useMutation<
+		RevokeOwnAppConsentStatus200,
+		ResponseErrorConfig<
+			| RevokeOwnAppConsentStatus400
+			| RevokeOwnAppConsentStatus422
+			| RevokeOwnAppConsentStatus429
+			| RevokeOwnAppConsentStatus500
+		>,
+		RevokeOwnAppConsentOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		RevokeOwnAppConsentStatus200,
+		ResponseErrorConfig<
+			| RevokeOwnAppConsentStatus400
+			| RevokeOwnAppConsentStatus422
+			| RevokeOwnAppConsentStatus429
+			| RevokeOwnAppConsentStatus500
+		>,
+		RevokeOwnAppConsentOptions,
 		TContext
 	>;
 }
