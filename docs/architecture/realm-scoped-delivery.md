@@ -7,14 +7,26 @@ No runtime, query benchmark or deployed site is qualified by this document.
 [Subscribe](subscriptions.md) owns plans and independent grant sources;
 [capacity](subscriptions-capacity.md#scoped-reply-read-envelope) owns workload bounds.
 
-## Decision and first site
+## Decision and first release
 
-The first product can deploy independently at `https://pro.rezics.com` while using
-the same native identities, application capabilities and backend. Its server-side
-site profile fixes the ordinary Rezics Pro Realm as its content context. Frontend
-features consume one configured API client/context provider; they do not each
-implement Pro filtering or duplicate authorization. This is a selected deployment
-shape, not an assertion that DNS, hosting or authentication is configured today.
+The first release deploys both `https://rezics.com` and `https://pro.rezics.com`
+from one frontend codebase and release version in `apps/web`, sharing native
+identities, application capabilities and backend. Main is part of the first launch,
+not a later rollout. Site configuration selects the origin, branding/navigation
+and content boundary; do not copy routes, pages, components, hooks, SDK integration
+or permission presentation into a separate Pro application or long-lived branch.
+
+| First-release site | Server-selected behavior |
+| --- | --- |
+| Main: `https://rezics.com` | Explicit general site profile; retain ordinary discovery and user-selected Realm scopes under current authorization, without an imposed Pro-only predicate. |
+| Pro: `https://pro.rezics.com` | Fixed Pro site profile; add the ordinary Rezics Pro Realm's accepted-publication boundary to all relevant content operations. |
+
+Both sites consume the same configured API client/context provider and site-adapter
+implementation. An explicit general profile is different from an unknown/missing
+profile: resolution failure never defaults to Main. Separate deployment instances
+may use different configuration while keeping the same frontend source/release.
+This is the selected launch contract, not a claim that DNS, hosting or authentication
+has been configured or either site has been deployed by this documentation task.
 
 Reply publications can have several explicit Realm acceptances while retaining one
 utterance identity, original response targets and shared content lineage. Each Realm
@@ -49,8 +61,8 @@ cannot erase an enforced boundary. Preserve existing Filter cardinality and sema
 
 ## Same-origin site adapter
 
-For the first independent deployment, browser and SSR content requests use the
-site's same-origin API entry. A thin, allowlisted site adapter selects the configured
+For both first-release sites, browser and SSR content requests use that site's
+same-origin API entry. A thin, allowlisted site adapter selects the configured
 profile and forwards to the shared domain handlers with the end user's validated
 authority. It owns context propagation and origin/session boundaries, not a second
 implementation of posts, billing or membership. The backend executes scoped queries;

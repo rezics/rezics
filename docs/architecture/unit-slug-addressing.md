@@ -155,8 +155,9 @@ cache keys.
 ### Fixed site origins
 
 The selected [fixed-site delivery contract](realm-scoped-delivery.md#same-origin-site-adapter)
-can serve the same native IDs/route families at an independently configured origin,
-initially `pro.rezics.com`. Keep site/content context through resolution, redirects,
+serves the same native IDs/route families from one frontend codebase at both
+`rezics.com` and `pro.rezics.com` in the first release, with different site profiles.
+Keep site/content context through resolution, redirects,
 query keys and share links without adding a second slug store. Validate contextual
 availability before emitting a canonical redirect or private metadata. Frontend
 routing receives the registered site origin; backend presenters still return native

@@ -31,7 +31,9 @@ Subscribe surface. A higher gift cannot hide a lower-plan purchase, change its
 price/upgrade baseline or imply altered renewal. Preserve exact Pro scope and
 accepted versions through Feed/details, review/appeal and notification behavior;
 ordinary drafts and general community experiences retain their own scope.
-The first Pro deployment uses the [fixed-site adapter and common content context](../architecture/realm-scoped-delivery.md#same-origin-site-adapter).
+The first release deploys both `rezics.com` and `pro.rezics.com` from one `apps/web`
+codebase/release, using general and fixed-Pro profiles through the same
+[site adapter and common content context](../architecture/realm-scoped-delivery.md#same-origin-site-adapter).
 Browser/SSR features consume one configured client; reply views support bounded
 parent connections, explicit unknown/partial progress and deferred long bodies.
 Do not infer child existence from a global count or automatically fetch unlimited

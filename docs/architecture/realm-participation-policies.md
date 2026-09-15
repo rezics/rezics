@@ -198,10 +198,13 @@ feature-specific identity and deduplication semantics; reuse must not duplicate 
 
 ## Pro query and experience contract
 
-The first independently deployed entrance is `https://pro.rezics.com`, using the
-[same-origin site adapter](realm-scoped-delivery.md#same-origin-site-adapter) and
-shared domain APIs. Its server profile fixes the Pro Realm; a browser preference
-cannot disable that scope. A future general-site Pro toggle uses the same resolver.
+The first release deploys Main at `https://rezics.com` and Pro at
+`https://pro.rezics.com` together from the same frontend codebase/release. Both use
+the [same-origin site adapter](realm-scoped-delivery.md#same-origin-site-adapter)
+and shared domain APIs with different registered site profiles. Main retains its
+ordinary scope; Pro fixes the Pro Realm, which a browser preference cannot disable.
+Any main-site Pro filter uses the same resolver rather than a second feature
+implementation.
 The [common context contract](realm-scoped-delivery.md#three-independent-contexts)
 owns fixed-predicate conjunction, accepted-version selection and cursor/cache
 propagation. A Pro author's general post stays outside Pro; an author's subscription

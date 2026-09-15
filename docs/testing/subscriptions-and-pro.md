@@ -98,8 +98,9 @@ connection metadata or a fixed-origin deployment.
 
 ## Scoped site and reply cases
 
-Use the configured Pro site, an ordinary general context, Realm A, independently
-readable/private replies and the same reply accepted into multiple Realms. Native
+Use Main at `rezics.com` and Pro at `pro.rezics.com` from the same frontend release,
+Realm A, independently readable/private replies and the same reply accepted into
+multiple Realms. Both sites are required in the first-release acceptance. Native
 IDs, parent placements and operation handles come from prior admitted commands.
 These specifications do not require live DNS or authorize a deployment now.
 
@@ -108,7 +109,7 @@ These specifications do not require live DNS or authorize a deployment now.
 | SITE01 | Resolve Pro from an allowlisted deployment/adapter binding. Forged internal headers and untrusted Host/forwarded-host/Origin values cannot widen scope or supply user authority. |
 | SITE02 | Route discovery, details, writes, delivery, account/commerce and public-reference operations through the site adapter. Each uses its registered scope behavior; an unknown operation is not exposed as an unrestricted passthrough. Gifts and purchase eligibility remain independent of Pro filtering. |
 | SITE03 | Compose fixed Pro, optional Zone and user Realm A/OR/NOT filters. Require the server conjunction and matching active/visible Pro association; client omission or an empty predicate cannot remove it. |
-| SITE04 | Compare SSR and browser calls across Feed, Search, Work discussion, reply connections and direct details. They preserve the same context/accepted versions; no API or renderer obtains general bodies and filters them only afterward. |
+| SITE04 | Run Main and Pro concurrently from one frontend codebase/release with the same routes/features/SDK integration and different site configuration. Compare SSR and browser calls across Feed, Search, Work discussion, replies and details. Main preserves ordinary scope, Pro enforces its accepted-version boundary, and neither filters globally hydrated bodies afterward. A Pro-only rollout does not qualify the first release. |
 | SITE05 | Exercise login/logout, provider return, same-origin cookies, CSRF and any elected cross-origin API path. Exact callbacks/origins and end-user authority remain enforced; no wildcard trust or shared admin-service substitution. |
 | SITE06 | Reuse caches/cursors across sites, viewers, languages and accepted selections; change another tab's preference. Reject incompatible reuse, isolate private state and preserve a draft's captured destination. Ordinary new replies do not invalidate every cursor. |
 | SITE07 | Remove or change a site profile during a request/rebuild, then retry. Invalid/stale configuration is explicit, never global fallback; rollback preserves compatible native identities without reviving stale permissions. |

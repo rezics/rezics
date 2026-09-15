@@ -201,7 +201,7 @@ Use these limits together, not as independent budgets multiplied by previews:
 | Aggregate raw reply candidates | At most 4,096 per HTTP request, including parent, children and all lookahead |
 | Authorization/hydration batch | At most 128 candidate identities per batch; group by native owner and reuse current subject/context resolution |
 | Inline reply body | At most 8 KiB each and 1 MiB total serialized reply response; otherwise explicit deferred body/reference, not silently truncated Portable Text |
-| Site configuration | At most 64 registered profiles and 8 allowlisted origins per profile per deployment; first Pro uses one profile. Not an automatically generated row per Realm. |
+| Site configuration | At most 64 registered profiles and 8 allowlisted origins per profile per deployment; the first release uses explicit Main and Pro profiles. Not an automatically generated row per Realm. |
 
 Assign child windows from the remaining request budget before running a LATERAL
 batch: 50*128+512 exceeds 4,096 and is not admissible. Partially inspected connections
@@ -235,6 +235,9 @@ count fallback inside Pro.
 
 Add scoped reply traffic to the existing 200 normal / 2,000 peak deployment-wide
 read-request envelope below; target 200 ms p95 for the admitted default reply page.
+Main and Pro run concurrently in the first release. This is a combined envelope,
+not a separate full allowance for each hostname. Record the traffic mix and measure
+both sites under concurrent load rather than against an otherwise idle backend.
 Also measure maximum preview shape and p99. These are unqualified targets. Keep
 the eligible Pro reply set fixed while adding unrelated siblings under the same
 hot root/parent, including 0.1%, 1% and 50% Pro fractions. Compare cold/warm caches,

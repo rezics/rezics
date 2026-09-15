@@ -21,9 +21,11 @@ First runtime activation delivers the generic Subscribe core and ordinary offici
 Rezics Pro Realm with its complete participation/discovery behavior. Pro is the first
 operated offering. Person and non-Pro Realm examples must qualify generic boundaries;
 opening self-service sales for every operator is a separate rollout choice.
-The first frontend may deploy independently at `https://pro.rezics.com` with a
-server-bound Pro site profile and same-origin adapter over the common API. This
-does not activate hosting/DNS changes or a separate backend/data fork.
+The first release deploys Main at `https://rezics.com` and Pro at
+`https://pro.rezics.com` together from one `apps/web` codebase/release version.
+Their general and fixed-Pro profiles use the same site adapter and shared APIs;
+there is no separate Pro frontend fork. This documentation selection does not
+itself activate hosting/DNS changes or runtime deployment.
 
 ## Remaining deliverables and order
 
@@ -51,6 +53,8 @@ does not activate hosting/DNS changes or a separate backend/data fork.
    appeal states, and a Pro scope carried through shared discovery/detail surfaces.
    Implement the shared site/content-context resolver for browser and SSR, classified
    API operations, exact origin/session configuration and scoped link/cache handling.
+   Prepare both first-release origins from the same frontend version, with explicit
+   general and fixed-Pro profiles; neither site is deferred to a later product phase.
    Preserve normal Realm/catalog behavior and the full community relationship journey.
 6. Qualify SUB01-SUB24, PRO01-PRO24 and CAPSUB01-CAPSUB08 with relevant existing
    IAM/composition/governance cases, plus SITE01-SITE08 and RPLY01-RPLY16. Then
@@ -73,6 +77,8 @@ fall back to general content. Local Pro decisions preserve other authorized uses
 Native reply plans bound scanned candidates as well as returned nodes; per-reply
 authorization and scoped counts prevent a readable root or stale projection from
 disclosing another reply. Fixed-site requests cannot silently become general ones.
+First-release acceptance covers both Main and Pro using the same frontend code;
+qualifying or deploying only Pro does not complete that launch scope.
 
 Metering, provider/review retries, source compensation, privacy and restoration are
 qualified under concurrency and recorded 500M/3B capacity obligations. No live sale
@@ -83,6 +89,6 @@ opens while the chosen provider/fulfillment path is unavailable or unqualified.
 Third-party seller onboarding/payouts, corporate seats, buying transferable gifts,
 arbitrary recursive bundles, cross-database operation and multi-resource commercial
 partnerships require their own elected contracts. They are not needed to represent
-multiple native plans or operate the first Pro Realm. Existing ordinary communities
-remain available; opening wider general-community operations does not turn Pro
-content public or add a global paid-author filter.
+multiple native plans or operate the first Pro Realm. Main and its ordinary
+community experience are in the first release alongside Pro; later operational
+expansion does not turn Pro content public or add a global paid-author filter.
