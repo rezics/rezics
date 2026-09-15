@@ -109,9 +109,12 @@ Online assumptions are 10,000 Search requests per second platform-wide, a
 20-item median page, a 100-item maximum page, 95% Zone Filter cache hits after
 warm-up, and a skewed head in which 1% of Zones receive 80% of reads. A Filter
 document is bounded by ten categories, 50 control overrides, and the
-100-node predicate limit. Zone lookup and compilation are therefore O(1) in
-corpus cardinality. Hot Zone IDs should be cached by immutable serialized
-document identity; cache misses remain one indexed row read. Backpressure is
+100-node predicate limit. Compilation is bounded by document size, independently
+of corpus cardinality; an uncached Zone lookup still requires an indexed
+`O(log Z)` seek for Z Zone rows. Expected constant-time cache lookup does not
+remove the miss cost. Cache hot Zone IDs by immutable serialized document
+identity. These preparation bounds do not bound execution of the resulting
+Search/filter query. Backpressure is
 the database pool plus the candidate, postings, result-window, facet, and
 statement budgets above. Alert when Search p95 exceeds 1.5 seconds, pool wait
 exceeds 100 ms, rejected work estimates exceed 1%, or one Zone key exceeds 10%

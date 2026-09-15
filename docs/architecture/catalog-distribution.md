@@ -83,7 +83,11 @@ One new member writes one heap row and three indexes. The eight nullable target
 indexes are partial: only its selected target index is populated. Prefix updates
 occur once per batch and can be HOT; sealing/head publication is constant-sized.
 New full edits cost O(M) writes for M members, but each transaction remains bounded
-to 128 rows. Historical retention amplifies storage by revisions; restore is O(1).
+to 128 rows. Historical retention amplifies storage by revisions. Selecting an
+already retained, sealed manifest for restoration changes a constant number of
+head/history rows with indexed lookups and current validation; this does not
+make backup restore, missing-data reconstruction or manifest export O(1). Those
+operations still process the members/bytes they restore or emit.
 No automatic full-manifest rewrite, recursive traversal or corpus-sized worker is
 scheduled. Explicit cancellation/retention of abandoned staging is future operator
 maintenance; do not run automatic unbounded cleanup. Observe staged bytes and age.

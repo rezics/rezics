@@ -245,21 +245,27 @@ candidate and hydration budgets are independent of `T` and `Q`:
 - presentation hydration receives at most 160 Expression IDs and 80 Path IDs,
   with at most `80 * 16 = 1,280` Path-member rows. It is batched and never N+1.
 
-At both 500,000,000 and 3,000,000,000 corpus rows the request therefore retains
-fixed application memory, result-network size, and database fan-out. Exact
+At both 500,000,000 and 3,000,000,000 corpus rows these limits bound application
+candidate/hydration memory, result-network size and relational branch fan-out.
+They do not prove bounded PGroonga posting/ranking work before its LIMIT:
+`estimated_size` is a frequency estimate, not an executed-visit ceiling. Compare
+estimates with observed work and qualify engine-side timeout/cancellation using
+the [shared search remedies](information-indexing-and-verification.md#selected-performance-remedies).
+Exact
 classification covers every supported localization and alias language instead
 of depending on the title chosen for presentation. This
 change adds no persisted row, index, write amplification, maintenance job, or
 migration backfill. Score calculation stays inside the existing partitionable
 PGroonga document index; relational expansion stays left-key routed from the
-bounded Tag candidate set. A hot or overly broad query whose estimated postings
-exceed 5,000 is the explicit limiting case. If more than 1% of non-empty
+bounded Tag candidate set. Queries estimated above 5,000 are rejected at admission;
+underestimated queries remain a separate execution-cost risk. If more than 1% of non-empty
 suggestion requests hit that ceiling, warm p95 exceeds 100 ms, or one PGroonga
 shard cannot keep the active prefix set resident, the cutover is a normalized
 prefix cache partitioned by language and query hash, populated from the same
-bounded scorer and invalidated by Tag search-document revision. Admission and
-cache-fill concurrency must remain bounded; the request path must not raise the
-posting ceiling or fall back to a corpus scan.
+scorer and invalidated by Tag search-document revision. Cache misses/fills still
+need the same execution budgets; caching does not make the underlying scorer
+bounded. Admission and cache-fill concurrency remain finite; the request path
+must not raise the estimate threshold or fall back to a corpus scan.
 
 ## Query complexity and plan acceptance
 

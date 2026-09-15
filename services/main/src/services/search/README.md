@@ -71,10 +71,11 @@ cursor fingerprint, so changing OpenCC data or rules invalidates old cursors saf
 
 The privileged `search_text_candidates` function accepts one to three variants, escapes each
 variant independently, and submits one parenthesized `OR` query to PGroonga. Posting estimation
-sums the bounded keyword estimates across the same query, so the existing 50,000-posting budget,
-4,096 candidate scan limit, and dense fallback remain in force. Request work is therefore bounded
-by three conversions plus the existing `O(T(q) + P(q) + k log k)` sparse path; it does not create
-additional indexes, scan the corpus, or multiply the candidate window. At both the 500-million
+sums the bounded keyword estimates across the same query, so the existing 50,000-estimated-posting
+threshold, 4,096 candidate scan limit, and dense fallback remain in force. Expansion
+adds at most three conversions and does not create additional indexes or multiply
+the candidate window. The posting threshold is an admission estimate, not a proven
+bound on actual engine work; see the distinction below. At both the 500-million
 Unit planning baseline and the 3-billion forward estimate, expansion changes only constant query
 fan-out; the existing shard-before-limit cutover remains the capacity path.
 
@@ -119,11 +120,27 @@ single composite search-after key. Higher-cost queries seek a bounded window fro
 `unit_public_updated_at_desc_idx` and test only that window against the projected document. A
 dense fallback never expands repeatedly inside one request: if filtering under-fills the page,
 Search returns the partial page and a cursor after the last scanned Unit. Both paths have exactly
-the same total order, so changing plans between pages cannot invalidate the cursor. Sparse work
-is `O(T(q) + P(q) + k log k)` with `P(q) <= 50,000`; dense work per request is
-`O(T(q) + log N + S * matchCost)`, where `T(q)` is the bounded lexicon-estimation work and the
-candidate window `S` is bounded by policy. There is no corpus-wide score materialization,
-unbounded exact hit count, offset scan, or query-time sort over every match.
+the same total order, so changing plans between pages cannot invalidate the cursor.
+Sparse work includes lexicon estimation, actual posting/filter work and the
+engine's sorting work before LIMIT. The admission condition is
+`P_estimated(q) <= 50,000`, not a proven `P_actual(q) <= 50,000`. Groonga describes
+[`estimated_size`](https://groonga.org/docs/reference/commands/table_tokenize.html)
+as estimated token frequency. The current command bounds returned records; it does
+not expose a counter that aborts after 50,000 actual posting visits. Its internal
+sort/filter work is not bounded solely by the returned candidate count.
+
+Dense work per request is `O(T(q) + log N + S * matchCost)`, where T(q) is
+lexicon-estimation work and S is the bounded raw candidate window. There is no
+explicit whole-corpus score materialization or offset/count request, but the
+sparse-path estimate is not a demonstrated hard execution ceiling. Qualification
+must compare estimates with observed engine/buffer/time costs, including
+correlated/dense terms and expansion. The selected remedy is an engine-cancellable
+deadline plus scope-aware selective/ordered paths; Groonga's
+[`request_timeout`](https://groonga.org/docs/reference/command/request_timeout.html)
+is available, but its pinned PGroonga integration and cancellation behavior remain
+to be qualified. A client timeout alone does not stop server work. See the
+[information-index performance design](../../../../../docs/architecture/information-indexing-and-verification.md#selected-performance-remedies)
+for the target extension; no runtime change is claimed by this documentation fix.
 
 Global facets reuse one request-scoped bounded candidate stream across categories. They do not
 rerun ranking once per category.

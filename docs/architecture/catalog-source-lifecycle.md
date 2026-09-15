@@ -201,7 +201,10 @@ large-source skew still need measurement. All source-record operations use its
 ID; mapping/proposal/history pages use composite keyset indexes. Due plans use a
 DB-checked 0..1023 bucket in the primary key, allowing the scheduler's bucket
 predicate to prune its partition and use `(bucket,state,next_check_at,record)`.
-No operation scans the source corpus or all target history. Hot source fan-out is
+Interactive lookups and ordinary due-work polls do not scan the source corpus or
+all target history. Bootstrap, reconciliation and explicit rebuilds still have
+work proportional to their covered records; paging bounds memory, not total work.
+Hot source fan-out is
 serialized per record, with pages of 32; increasing concurrency for unrelated
 sources does not increase a single target's authority.
 

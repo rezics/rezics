@@ -99,6 +99,13 @@ For a Realm-A/Pro intersection, use a selective indexed seed and current-state
 probes or a measured common-query projection. Do not precompute every Realm pair
 or materialize all candidate intersections on each request.
 
+Candidate work is a separate quantity from returned rows. For uniformly distributed
+residual matches at 0.1%, 50 results require about 50,000 probes on average, and
+skew can be worse. Frequent scope/quality combinations need an appropriate
+scope-leading projection; independent bitmap indexes lose their ordering and may
+still require a large sort. Apply the [researched query strategies](information-indexing-and-verification.md#selected-performance-remedies)
+without assuming that a small LIMIT bounds internal posting or sorting work.
+
 Existing Search has a 4,096 candidate window and 50,000 estimated text-posting
 budget. Retain them until qualified replacement. A sparse Pro filter falling back
 to global order is not sufficient evidence of acceptable Realm retrieval. Elect
@@ -152,7 +159,10 @@ when exceeded; never silently truncate a security proof or expand query scope.
   at most 50 private rows per indexed family per batch. Backfills process at most
   1,000 selected publication mappings per batch with a committed continuation.
 
-DB memory follows page/benefit/candidate bounds. A 4,096-candidate metadata window
+Application candidate-buffer memory follows page/benefit/candidate bounds; this
+does not bound database bitmap/sort/hash memory, parallel workers or concurrent
+requests. Those operator budgets and spill costs need their own accounting.
+A 4,096-candidate metadata window
 at a provisional 256 bytes per candidate is about 1 MiB before runtime overhead;
 do not hydrate 4,096 bodies. A maximum 50-item Feed with 2,000-character summaries
 can approach 400 KB of UTF-8 summary text before metadata. Model input/output and
@@ -266,12 +276,17 @@ profiles must retain request-work bounds at these loads and under larger backlog
 | Publication/meter commits | 50 / 500 | 200 ms |
 | AI review intake | 5 / 50 | 200 ms durable admission; completion separately measured |
 
-AI throughput and cost are independent gates. For intake rate lambda, mean attempts
-a and mean call duration t, minimum average in-flight calls are lambda*a*t.
-For example, 5 submissions/s, 1.2 attempts and 8 seconds requires about 48 concurrent
-calls before headroom; none of these are measurements. Daily token demand is
-86,400*lambda*a*mean input/output tokens, priced using the elected provider at
-activation. A locally fast queue cannot qualify affordability or reviewer quality.
+AI throughput and cost are independent gates. For intake rate lambda, mean total
+model calls per admitted execution m (including retries) and call-weighted mean
+duration t, average in-flight call demand is lambda*m*t. Counting attempts alone
+misses multiple calls within an attempt. For 5 executions/s and 8 seconds/call,
+m=1.2 requires 48 average in-flight calls; m=3 requires 120. Daily calls are
+518,400 / 1,296,000. The three-call admission ceiling applies across the execution;
+retries do not get another three-call allowance. Daily token demand is
+86,400*lambda*m*mean input/output tokens per call, priced at activation. These
+are assumptions, not measurements or safely provisioned concurrency; reserve
+headroom and separately account for peak traffic and audit work. A locally fast
+queue cannot qualify affordability or reviewer quality.
 
 Measure raw source candidates, examined rows/buffers, page fill, p50/p95/p99,
 locks, WAL bytes/effect, queue oldest age, grant freshness, expired-source cleanup,

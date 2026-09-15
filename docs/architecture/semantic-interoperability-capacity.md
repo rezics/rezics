@@ -92,6 +92,15 @@ progress; expired generations return an explicit restart outcome. Graph reads
 add explicit node/edge/depth budgets. Arbitrary joins, closure and exact global
 counts require separately admitted background work.
 
+Returned rows and the candidate ceiling do not bound posting-list intersections,
+sorts or per-operator database memory before candidate production. Apply the
+[selected performance remedies](information-indexing-and-verification.md#selected-performance-remedies):
+scope-aware serving projections, selective versus ordered plans, explicit engine
+deadlines and bounded shard/segment fan-out. A token-frequency estimate is a plan
+heuristic, not a proven maximum actual scan. Record estimated/actual work and
+partial rates; keeping supported operators queryable does not promise all arbitrary
+combinations finish interactively with a full page.
+
 Initial qualification workload: 100 mixed source reads/s, 20 foreground native
 writes/s, 50 source-subject refreshes/s, 32 clients and a 5x burst, consistent with
 the native planning profile. These are test inputs, not a production forecast.
@@ -127,6 +136,13 @@ least 19.9/119.5 hours, before index construction, objects, WAL replay or integr
 checks. This is a transfer lower bound, not an RTO. Record baseline installation,
 checkpoint catch-up and restore RPO/RTO against the actual retained event window.
 Buffer changes durably during long baselines and reconcile missing coverage.
+
+Add history, bootstrap output, changed segments awaiting compaction and retirement
+to the live-data envelope. A bounded staging worker does not bound the total disk
+or wall time of a corpus rebuild. Record the active/next/retiring generations and
+the rate at which old bytes can be removed. PGroonga-serving projections must be
+split before their actual Groonga record, term, key or index limits; PostgreSQL
+source-table partitions alone do not partition one separate global search index.
 
 Measure working-set/cache misses, partition pruning, value-hash recheck bytes,
 locks, WAL/checkpoints, vacuum lag, disk reserve, replica lag and per-source queue

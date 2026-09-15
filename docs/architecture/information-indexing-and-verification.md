@@ -386,10 +386,12 @@ Source bytes and existing claims are accounted for in their source/native owners
 the [interoperability envelope](semantic-interoperability-capacity.md) must be
 combined without counting shared records twice.
 
-Let C be claim revisions, a retained assessments per claim, e evidence edges per
-assessment and p materialized profile memberships per claim. Additional rows are
-`C*a` assessment headers, `C*a*e` evidence edges and `C*p` memberships. At illustrative
-`a=2`, `e=3`, `p=2`, that is `10*C`: 5B rows for 500M claims or 30B for 3B claims.
+Let R be retained claim revisions, a retained assessments per revision, e evidence
+edges per assessment and p retained materialized memberships per revision.
+Additional rows are `R*a` assessment headers, `R*a*e` evidence edges and `R*p`
+memberships. At illustrative `a=2`, `e=3`, `p=2`, that is `10*R`: 5B rows for
+500M retained revisions or 30B for 3B. Count retained changed index segments in p,
+not just live profiles; shared unchanged segments are counted once.
 Policy, correspondence, reverse-dependency, receipt and manifest rows are additional.
 Never interpret 500M source subjects as 500M claims without a claim-expansion model.
 
@@ -403,27 +405,231 @@ Never interpret 500M source subjects as 500M claims without a claim-expansion mo
 
 Decimal units; widths require measurement with actual keys, values and indexes.
 The illustrative assessment/edge/membership expansion alone is 1.472 TB / 8.832 TB
-at C=500M/3B. One replica plus 2x provisioning per copy makes 5.888 TB / 35.328 TB,
+at R=500M/3B. One replica plus 2x provisioning per copy makes 5.888 TB / 35.328 TB,
 excluding the additional families, source storage, backups and WAL. At 8 KiB of
 retained artifacts per assessment, `a=2` adds 8.192 TB / 49.152 TB before object
 replication/retention policy. Independent family baselines are not another sum to
 add to this scenario.
 
-For daily changed-claim fraction d, assessed fraction f and r assessment runs per
-eligible changed claim, assessments/day are `C*d*f*r`. Run count r is separate
-from retained-history multiplier a. At illustrative `d=0.001`, `f=0.1`, `r=2`,
-this is 100k / 600k runs/day.
+Separately let C be current claim targets, d their daily changed fraction, f the
+assessed fraction of changed targets and r runs per eligible changed target.
+Changed-target assessments/day are `C*d*f*r`; retained history R and current
+population C need not be equal. Run count r is separate from history multiplier a.
+At illustrative C=500M/3B, `d=0.001`, `f=0.1`, `r=2`, this is 100k / 600k runs/day.
 At 2k input plus 500 output tokens/run, that is 250M / 1.5B tokens/day. With a
-30-second mean run time, Little's-law steady concurrency is about 35 / 209 before
-bursts, retries and headroom; three evidence fetches/run add 300k / 1.8M fetches/day.
+30-second mean run time, average in-flight demand is 34.72 / 208.33 runs, rounded
+up to 35 / 209. This is demand, not a safe worker-slot allocation. At an illustrative
+70% utilization ceiling, `ceil(runs/day * 30 / (86400 * 0.7))` requires 50 / 298
+slots even before extra traffic; slots are not necessarily processes or GPUs.
+Three evidence fetches/run add 300k / 1.8M fetches/day.
 Price token classes using the selected provider's then-current terms; these figures
 are not a provider quote, feasible concurrency commitment or accuracy prediction.
+
+The example covers changed targets only. Initial intake, freshness rechecks of
+unchanged claims, independent audits, user-requested work, retries and exceptional
+fan-out add work after deduplicating overlap. For each admitted service pool,
+stable average load requires `arrival_rate * mean_service_time < available_slots`;
+this necessary condition does not establish tail latency. A daily full recheck
+with two runs/target instead costs 1B / 6B runs and 2.5T / 15T tokens/day at the
+same token assumptions, 10,000 times the changed-target example.
 
 Every completed run also writes result, evidence, dependency and receipt rows;
 measure resulting WAL, storage, model/network cost and hot-origin invalidation.
 Common-source fan-out can exceed ordinary update rates by orders of magnitude.
 Admission therefore reserves bounded work rather than promising to deep-verify
 every indexed claim or periodically call a model over the whole corpus.
+
+### Time complexity and work bounds
+
+The following analysis establishes conditional work bounds, not wall-clock latency.
+N is the size of the relevant lookup/posting index, B examined candidates, K
+returned items, L processed input bytes, W emitted/written rows, b entity-match
+candidates, D changed inputs and F affected dependency edges. Different operations
+have different N; source subjects, claims, assessment rows and postings are not
+interchangeable denominators. Logarithmic lookup also assumes a suitable maintained
+index. Bounds count logical operations; storage misses and model calls have
+different physical costs.
+
+| Path | Work bound under the stated strategy | Failure mode and required design condition |
+| --- | --- | --- |
+| Streaming source extraction and indexed writes | Target `O(L + W log N)` for a bounded parser/mapping profile and a fixed number of maintained indexes | Charge expanded contexts, emitted rows and large values separately; source payload size alone does not bound expansion. Bulk index building may use a different qualified cost model. |
+| Entity matching for one new description | Selective exact/blocking lookup `O(log N + b)`, plus `b * T_pair` for pair evaluation | Unrestricted pair generation is `Theta(N^2)` across the corpus. Bound candidate evaluation and report dense-block ambiguity. ANN search needs its own algorithm/distribution-specific bound; top-b output does not establish logarithmic search work. |
+| One evidence assessment | Retrieval work plus inspected bytes plus the sum of model/tool execution costs | Bounded model calls remove direct dependence on total corpus size, not their substantial constant cost. Retrieval itself can still scan dense postings; no claim that token processing is universally linear. |
+| Ordered lookup satisfying all selection predicates | `O(log N + B)` candidate work; B approaches K when there are no residual rejects, plus bounded returned payload bytes | Requires the actual filter and requested order to be served together by the access path. A keyset and `LIMIT K` alone do not establish B=K. |
+| Intersection of m posting lists | A merge may visit `O(sum(list_lengths))`; probing a shortest list costs up to `O(shortest_length * sum(log(other_lengths)))` with indexed membership tests | Small output does not bound intermediate work. Select a driving predicate and budget posting visits and routed partitions as well as hydrated candidates. |
+| Ad hoc ranking over B matches | Top-K heap `O(B log K)` work and `O(K)` heap memory; sorting all matches `O(B log B)` | A heap saves sorting/memory but still scans B. Common rankings need maintained ordered projections; arbitrary dense ranking is background work. |
+| Incremental dependency repair | Reverse seeks `O(D log N + F)` to enumerate affected edges, plus affected projection writes | A popular source can affect most of the index. Paging bounds each chunk, not total F; admit/coalesce large repair jobs. |
+| Generation refresh/rebuild | Reused segments plus changed rows; full rebuild has at least `Omega(N)` record work | Do not copy the full index on every update. Bound retained delta segments and compaction; J independent segments can multiply seek work by J. |
+| Query/export across H routed shards | Includes H route/seek/merge costs; every emitted export byte must be processed | Partitioning alone does not make a global query local. Use routing and finite fan-out; checkpoint large exports. |
+
+For a uniform independent residual match probability s, fetching K results requires
+approximately `K/s` examined candidates when the population is sufficiently large.
+This is an expectation under that assumption, not a worst-case bound; clustered
+matches or no matches can require the entire remaining range.
+
+| Residual match probability | Expected candidates for K=50 |
+| --- | ---: |
+| 10% | 500 |
+| 1% | 5,000 |
+| 0.1% | 50,000 |
+| 0.0001% | 50,000,000 |
+
+At the existing source-query budget of 5,000 candidates, 0.1% residual matches
+yield only five expected results. Common policy/scope/quality predicates therefore
+need an access path that selects the eligible population before expensive ranking
+and hydration. For example, a maintained policy-pass set with scope and the requested
+order can avoid scanning the general corpus. An arbitrary score range plus an
+unrelated sort order is not automatically solved by placing both in one composite
+index; its access strategy needs explicit selection or a budgeted partial result.
+Exact uncached counts/facets can require scanning all matches despite a small page.
+
+The following quantities were calculated on September 15, 2026:
+
+| Illustrative calculation | 500M indexed candidates | 3B indexed candidates |
+| --- | ---: | ---: |
+| Unordered all-pairs comparisons, `N*(N-1)/2` | 124,999,999,750,000,000 | 4,499,999,998,500,000,000 |
+| Pair evaluations at b=50 per description, `N*b` | 25B | 150B |
+| `ceil(log2(N))`, comparison-growth illustration only | 29 | 32 |
+| One uncompressed full-population bitmap, `ceil(N/8)` | 62.5 MB | 375 MB |
+| 32 such request-local bitmaps | 2 GB | 12 GB |
+
+Even bounded candidate matching needs an independently budgeted bootstrap; 25B
+pair evaluations are not a cheap interactive job. The logarithm example is not a
+B-tree I/O count, and bitmap arithmetic does not assume the search engine always
+uses that representation. It demonstrates why a per-query full-population working
+set is unsafe to assume cheap. Streaming/selective/compressed representations need
+their own distribution-aware costs.
+
+For F=1M dependent rows and 256 rows/page, repair still takes 3,907 pages; the
+total enumeration is linear in F. If a pool processes mu rows/s, `F/mu` is only a
+processing-time lower bound before other work. Precomputing every combination of
+20 binary filters creates 1,048,576 profiles; keep a finite operated profile set
+and support other combinations through explicit query strategies rather than an
+exponential materialization or a per-user corpus copy.
+
+Analytical conclusion: no quadratic matching or recurring whole-corpus model pass
+is required by the selected architecture. The unresolved performance risks are
+dense residual filters/posting intersections, model workload, hot-source fan-out,
+bootstrap and compaction. They have explicit work bounds and admission strategies,
+but their throughput and latency remain unmeasured. See the
+[recalculation record](../testing/information-verification.md#analytical-performance-review)
+for the executed arithmetic and its narrow scope.
+
+### Selected performance remedies
+
+The September 15 review followed the computed bottlenecks into PostgreSQL 18,
+PGroonga/Groonga documentation and semantic-processing research. The selected
+mechanisms below refine this target; they do not install a new search engine or
+claim the current Unit-only search projection implements verified-answer indexes.
+
+**Maintain common answer populations and orders.** Use the existing index
+definition as an operated, reusable profile. Store its selected-result membership
+and sort key in a read projection, with an equality-leading B-tree shape such as
+`(index_revision, segment_id, semantic_scope_key, sort_key DESC, result_id DESC)`.
+An active manifest routes a bounded set of segment IDs; seek and merge those
+segments instead of filtering all historical generations after retrieval. Reuse
+unchanged segments and admit compaction so their number stays bounded. This is a
+key-shape contract, not executable DDL or a native fact writer. Common profile
+rules are evaluated on changes, not on every page read.
+
+This lets the common page seek its eligible population and order directly. It does
+not make arbitrary score ranges plus unrelated ordering equally cheap. PostgreSQL
+documents the [leading-equality/range rule](https://www.postgresql.org/docs/18/indexes-multicolumn.html)
+and the benefit of an [order-matching index with LIMIT](https://www.postgresql.org/docs/18/indexes-ordering.html).
+Maintain only declared common orderings; price their write/storage amplification
+instead of indexing all filter combinations or users.
+
+**Select a plan for mixed filters and text.** Reuse the current Search pattern of
+bounded selective candidates versus an ordered dense fallback, but drive it from
+the requested verification profile/scope rather than global Unit order. Put the
+exact text revision and indexable scope/profile/quality signals in the serving
+projection so the search engine can evaluate the conjunction before returning
+candidates. This is derived data; no copied evidence bodies per subscriber.
+
+Use a selective text/posting stream when its estimated cost is small; otherwise
+seek a bounded window from the profile's ordered member stream and test the text
+and residual conditions within that window. Plans must preserve the same declared
+sort/cursor meaning. Query-dependent relevance ranking is a separate admitted
+plan; a recency fallback cannot silently stand in for exact relevance. On partial
+pages expose continuation, and turn sustained high-cost recurring queries into
+explicitly budgeted maintained profiles when worthwhile.
+
+PostgreSQL [bitmap index combinations lose ordering](https://www.postgresql.org/docs/18/indexes-bitmap-scans.html),
+so neither separate indexes nor a small final LIMIT proves cheap top-K delivery.
+Use [extended statistics](https://www.postgresql.org/docs/18/sql-createstatistics.html)
+for correlated scalar columns of the serving projection where applicable; they
+are not currently a general solution for join selectivity or PGroonga internals.
+PGroonga supports [multiple indexed columns and cross-column query syntax](https://pgroonga.github.io/reference/create-index-using-pgroonga.html),
+but its documented examples also include non-indexed operations. Compile only
+qualified operators through the owning query adapter; syntax support alone does
+not qualify a physical plan.
+
+**Keep estimates distinct from execution budgets.** Groonga's
+[`table_tokenize` estimated_size](https://groonga.org/docs/reference/commands/table_tokenize.html)
+is a frequency estimate. Existing Search uses it to choose a path; a 50,000
+estimate threshold does not prove actual postings visited are at most 50,000.
+Record estimated versus observed work, retain candidate/byte ceilings and an
+engine-cancellable deadline. Groonga provides
+[`request_timeout`](https://groonga.org/docs/reference/command/request_timeout.html);
+passing it through the pinned PGroonga command path and verifying cancellation is
+a runtime qualification requirement. A client timer alone cannot establish that
+database/engine work stops. Correctly return timeout/unavailable if a call cannot
+complete; never report an incomplete engine result as exhaustive.
+
+**Shard before engine limits.** Count actual serving documents, dictionary terms,
+key bytes and posting bytes per physical index. Groonga documents
+[type-specific record and index limits](https://groonga.org/docs/limitations.html);
+PGroonga LARGE flags address particular key/index capacities, not every limit.
+A single 3B-document Groonga table is not the target. Route by source/domain or
+other selected search scope, subdivide hot ranges and merge bounded local pages.
+
+As an arithmetic example only, a 100M-document shard budget implies at least
+5 / 30 shards for 500M / 3B serving documents, before skew, replicas, versions and
+other tighter limits. A globally comparable scalar top-50 order needs at most
+250 / 1,500 returned local candidate rows if each shard supplies its exact local
+top 50. This bounds merge input, not local search work; residual rejection can
+require continuation. Full-text scores may need cross-shard normalization and
+cannot inherit this exact-order claim automatically. Routing and fan-out remain
+part of the request budget. The 100M assumption is not a qualified per-shard SLO.
+
+**Separate candidate generation from expensive matching.** Normalize reusable
+keys with code, use identifier/name/context blocking and optional embedding
+retrieval for candidate discovery, then evaluate the bounded candidates with a
+qualified matcher. Retain unresolved pairs outside the matching budget rather than
+claiming complete correspondence. The [2026 integration study](https://arxiv.org/html/2603.10547v1)
+uses embedding blocking and active learning to label informative pairs instead
+of calling an LLM on every pair. Adopt the separation and budgeted sampling;
+its specific k, classifiers and accuracy are not REZICS defaults. Blocking recall
+must be evaluated separately, since no downstream verifier recovers unseen pairs.
+
+**Reuse assessments and qualify a cost-aware cascade.** The execution order is
+exact reusable-result lookup -> applicable deterministic checks -> qualified cheap
+method -> expensive evidence work for unresolved cases. Batch homogeneous work
+where the provider/runtime supports it, retaining per-item receipts and input
+limits. A cheap negative cannot suppress a claim from broad source discovery;
+it affects only a qualified assessment/acceptance path. Calibration and independent
+audits remain in the budget. [LOTUS, PVLDB 2025](https://www.vldb.org/pvldb/vol18/p4171-patel.pdf)
+studies proxy/oracle cascades and selective semantic joins. Its statistical
+guarantees are relative to a reference algorithm/model, not proof of world truth;
+use independently adjudicated quality evaluation for this product.
+
+For Q requested evaluations, cache-hit fraction h, escalation fraction u of misses
+and per-operation costs clookup, ccheap and cdeep, use
+`Q*clookup + Q*(1-h)*(ccheap + u*cdeep) + calibration/audit cost`.
+With Q=100k, h=80%, u=10%, normalized costs 0.001/0.02/1 and 1k additional
+deep audits, this is 3,500 cost units versus 100k all-deep units: 20k cheap
+evaluations, 2k escalations and 1k audits. This 3.5% ratio is a sensitivity example,
+not a predicted saving. If hit rate or proxy quality is poor, the cascade can cost
+more; enable it only when measured cost and quality both meet the chosen contract.
+
+**Budget total maintenance, not only its page size.** Coalesce changed claims,
+maintain reverse dependencies and reuse unchanged index segments. A correction
+affecting F distinct outputs still requires proportional eventual work; short
+requests do not remove it. Bound pending bytes and segment count, schedule repair,
+compaction and bootstrap separately from interactive reads, and track their drain
+rate against arrivals. Do not reuse the current ranking system's whole-snapshot
+scan as the default refresh algorithm for every verification profile. Ordinary
+refresh should update changed memberships; a full rebuild is an explicit bulk job.
 
 ### Query and rebuild strategy
 
