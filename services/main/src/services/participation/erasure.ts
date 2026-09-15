@@ -22,6 +22,7 @@ import {
 import { accountPreference } from "../database/schema/account-preference";
 import { eraseIdentityPreferenceBatch } from "../authorization/identity-preferences";
 import { eraseAccountIdentityAdmissionBatch } from "../authorization/create-account-identity";
+import { eraseUserAuthorizationBatch } from "../connected-apps/user-authorizations";
 import {
 	notification,
 	notificationPreference,
@@ -299,6 +300,8 @@ export async function dispatchAccountErasureBatch(
 				);
 				break;
 			case "preferences":
+				result = await eraseUserAuthorizationBatch(tx, authId);
+				if (!result.empty) break;
 				result = await eraseAccountIdentityAdmissionBatch(tx, authId);
 				if (!result.empty) break;
 				result = await eraseIdentityPreferenceBatch(tx, authId);

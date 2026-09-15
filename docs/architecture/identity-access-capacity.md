@@ -122,6 +122,16 @@ only approved matching paths, not hydrate an entire roster. Subject eligibility
 adds at most one installation/App per active installation workload and retains
 the existing combined 256 concrete account/Entity/Realm and 512 enforcement bounds.
 
+Private user connections and consents have separate heads and control histories.
+Each consent revision adds literal capability rows, 0-64 selected resource paths
+and 0-8 representation references. Preserve 500,000,000-row baseline and
+3,000,000,000-row inventories for each population; use the existing 224-384-byte
+indexed-reference estimate for narrow links and measure resource paths separately
+at their 2,048-byte maximum. Account/connection, connection/consent and exact
+consent/revision indexes bound reads and cleanup. Erasure detaches only the current
+head cycle and drains at most 500 child/history rows per batch; it never deletes
+all consent history in an unbounded account statement.
+
 Role definitions and permission dictionaries may be scope-bounded, but the total
 scope count is not globally bounded. Inventory scope heads, definition revisions,
 role-permission entries and retirement history separately using measured width

@@ -56,6 +56,41 @@ but removes subsequent use of that connection's authority.
 
 ## Two execution modes
 
+### Private user connections and consent
+
+A native user connection fixes one human account, user-delegation client and
+authority subject. Direct subject selection can name only that account; represented
+selection names a separately admitted Entity. Disconnect is terminal. Multiple
+connections are not collapsed by matching names or public Entity IDs, and Org
+approval cannot create personal consent for its members.
+
+Consent has its own identity and immutable approved revisions under a connection.
+Each revision captures a finite lifetime of at most 365 days, literal API/domain
+capabilities within an exact client ceiling, offline/Entity-disclosure choices,
+and an explicit all-scopes choice or up to 64 root/path selections. Represented
+consent retains up to eight exact representation references; direct consent retains
+none and cannot disclose an Entity merely by using a default. Count/digest and
+concrete FK checks seal each collection. These are permission ceilings, not new
+resource grants or a proof that the representation works for every operation.
+
+Current admission checks the actual private credential owner, connection/client
+binding, active consent revision, lifetime and selected subject. The per-operation
+reader then checks both client and consent ceilings, the selected resource path,
+current subject policy and current representation, preserving the same authority
+subject. It never borrows the principal's grants in represented mode. Credential
+authentication, token scope/expiry/quota and that subject's resource rights and
+restrictions remain additional required checks.
+
+Account erasure invalidates use immediately through the account fence, then removes
+private consent members, revisions, receipts and connections in bounded batches.
+Only an erased owner's consent can enter internal `erasing` state to detach its
+selected-revision cycle. Credential/context children must be drained first. This
+cleanup neither revokes independent Entity grants nor deletes permitted published
+attribution. Runtime OAuth approval, external-account binding and complete erasure
+ordering remain part of the pending integration/qualification work.
+
+### Delegated and autonomous execution
+
 In user delegation, authenticate the operator and evaluate the selected direct or
 represented authority context under the identity contract. Intersect that context's
 current authority with the client capability ceiling, user consent, token scope,

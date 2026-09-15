@@ -19,6 +19,7 @@ export const PostgreSqlSchemaFileNames = [
 	"connected-app-client.sql",
 	"oauth-client-secret-policy.sql",
 	"connected-installation.sql",
+	"connected-user-authorization.sql",
 	"access-subject-policy.sql",
 	"access-role.sql",
 	"access-role-binding.sql",
@@ -110,6 +111,15 @@ export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly 
 };
 
 export const PostgreSqlSchemaFunctionNames = [
+	"connected_user_consent_owner",
+	"require_connected_user_erasure",
+	"guard_connected_user_connection",
+	"guard_connected_user_connection_event",
+	"guard_connected_user_consent",
+	"guard_connected_user_consent_event",
+	"guard_connected_user_consent_revision",
+	"guard_connected_user_consent_member",
+	"complete_connected_user_authorization",
 	"guard_connected_installation_head",
 	"guard_connected_installation_event",
 	"guard_connected_installation_revision",
@@ -496,6 +506,19 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "connected_user_connection", name: "connected_user_connection_guard" },
+	{ table: "connected_user_connection_event", name: "connected_user_connection_event_guard" },
+	{ table: "connected_user_consent", name: "connected_user_consent_guard" },
+	{ table: "connected_user_consent_event", name: "connected_user_consent_event_guard" },
+	{ table: "connected_user_consent_revision", name: "connected_user_consent_revision_guard" },
+	{ table: "connected_user_consent_capability", name: "connected_user_consent_capability_guard" },
+	{ table: "connected_user_consent_resource", name: "connected_user_consent_resource_guard" },
+	{ table: "connected_user_consent_representation", name: "connected_user_consent_representation_guard" },
+	{ table: "connected_user_connection", name: "connected_user_connection_complete" },
+	{ table: "connected_user_connection_event", name: "connected_user_connection_event_complete" },
+	{ table: "connected_user_consent", name: "connected_user_consent_complete" },
+	{ table: "connected_user_consent_event", name: "connected_user_consent_event_complete" },
+	{ table: "connected_user_consent_revision", name: "connected_user_consent_revision_complete" },
 	{ table: "connected_installation", name: "connected_installation_head_guard" },
 	{ table: "connected_installation_event", name: "connected_installation_event_guard" },
 	{ table: "connected_installation_event", name: "connected_installation_event_immutable" },
