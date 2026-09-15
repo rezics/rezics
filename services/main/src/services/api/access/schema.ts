@@ -71,3 +71,23 @@ export const ManagedGroup = AccessGroupPresentationSchema.extend({ groupId: id, 
 export const ManagedGroups = z.strictObject({ items: z.array(ManagedGroup).max(100), nextCursor: id.nullable() });
 /** Immutable presentation and command history, omitting private audit identities. @alpha */
 export const ManagedGroupHistory = z.strictObject({ items: z.array(ManagedGroup.omit({ groupId: true }).extend({ operationId: id, operation: z.enum(["create", "update", "reparent", "retire"]), createdAt: z.iso.datetime() })).max(100), nextCursor: positiveVersion.nullable() });
+
+/** Version-bound proposal to inspect; successful discovery grants no mutation authority. @alpha */
+export { GroupImpactProposalSchema as StartGroupImpactBody } from "../../authorization/group-impact-discovery";
+/** Current optimistic preconditions for the selected Group. @alpha */
+export const GroupImpactContext = z.strictObject({ groupVersion: version, treeVersion: version, state });
+/** Review identity remains private and confers no authority by possession. @alpha */
+export const GroupImpactParams = GroupParams.extend({ reviewId: id });
+/** Retry identity for one server-owned discovery page. @alpha */
+export const AdvanceGroupImpactBody = z.strictObject({ expectedPageVersion: version.max(65536) });
+/** Inspection is paginated independently from discovery execution. @alpha */
+export const GroupImpactQuery = z.strictObject({ afterOrdinal: z.coerce.number().int().min(0).max(32768).optional() });
+/** Completeness and validity are distinct from ceiling/recovery approval. @alpha */
+export const GroupImpactSummary = z.strictObject({ reviewId: id, operation: z.enum(["reparent", "retire"]),
+	expectedGroupVersion: positiveVersion, expectedTreeVersion: version, proposedParentId: id.nullable(),
+	status: z.enum(["discovering", "complete", "invalidated", "unavailable"]), reason: z.enum(["changed", "expired", "budget", "missing"]).nullable(),
+	pageVersion: version, discoveredItems: version, validUntil: z.iso.datetime(), admission: z.literal("not-evaluated") });
+/** Facts use opaque review-local identifiers; private recipient mappings and external target ids are omitted. @alpha */
+export const GroupImpactInspection = GroupImpactSummary.extend({ items: z.array(z.strictObject({ itemId: id,
+	ordinal: positiveVersion, kind: z.string(), version: version.nullable(), termsRevision: version.nullable(), state: z.string().nullable() })).max(100),
+	nextCursor: positiveVersion.nullable() });

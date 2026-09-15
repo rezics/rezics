@@ -1,3 +1,5 @@
+import type { z } from "zod";
+import { beginGroupImpactDiscovery, advanceGroupImpactDiscovery, inspectGroupImpactDiscovery, lockGroupImpactReview, groupImpactSummary, type GroupImpactProposalSchema } from "./group-impact-discovery";
 import { and, eq, gt, sql, type SQL } from "drizzle-orm";
 import type { PrincipalRequestContext } from "../auth/principal-session";
 import type { DatabaseTransaction } from "../database";
@@ -8,6 +10,8 @@ import { readManagementAuthority, ManagementAuthorityUnavailable } from "./manag
 import { scopeLifecycleAdmission } from "./scope-policy";
 import { requireAccessAdmission, runAccessTransaction } from "./transaction";
 import { AccessRecordUnavailable } from "./http-errors";
+
+type GroupImpactProposal = z.infer<typeof GroupImpactProposalSchema>;
 
 /** Private attribution comes exclusively from live server-owned authority. @internal */
 export type ManagedGroupCommand = AccessGroupCommand extends infer Command
@@ -120,5 +124,55 @@ export async function listManagedGroupHistory(context: PrincipalRequestContext, 
 		const page = rows.slice(0, 100);
 		return { items: page.map(row => ({ ...row, createdAt: row.createdAt.toISOString() })),
 			nextCursor: rows.length > 100 ? page.at(-1)?.version ?? null : null };
+	});
+}
+
+/** Live Group/tree preconditions for starting a private impact review. @internal */
+export async function getManagedGroupImpactContext(context: PrincipalRequestContext, scopeId: string, groupId: string) {
+	return runAccessTransaction(async tx => {
+		const authority = await groupAuthority(tx, context, scopeId, groupId, "read");
+		const [group] = await tx.select({ groupVersion: accessGroup.version, state: accessGroup.state }).from(accessGroup)
+			.where(and(eq(accessGroup.id, groupId), eq(accessGroup.scopeId, scopeId)));
+		const [tree] = await tx.select({ treeVersion: accessGroupTree.version }).from(accessGroupTree).where(eq(accessGroupTree.scopeId, scopeId));
+		await requireAccessAdmission(tx, authority.admission);
+		if (!group || !tree) throw new AccessRecordUnavailable();
+		return { ...group, ...tree };
+	});
+}
+
+/** Private structural discovery; each request reauthorizes the original reviewer and selected subject. @internal */
+export async function startManagedGroupImpact(context: PrincipalRequestContext, input: GroupImpactProposal & { scopeId: string; groupId: string }) {
+	return runAccessTransaction(async tx => {
+		const authority = await groupAuthority(tx, context, input.scopeId, input.groupId, "read");
+		const review = await beginGroupImpactDiscovery(tx, { ...input, principalId: authority.principalId, subjectId: authority.subjectId,
+			reviewerSources: { bindingId: authority.sourceBindingId, representationIds: authority.representationPath.map(reference => reference.id), validUntil: authority.validUntil } });
+		await requireAccessAdmission(tx, authority.admission);
+		return groupImpactSummary(review);
+	});
+}
+
+/** Advance a bounded page without accepting a client-supplied dependency cursor or approval. @internal */
+export async function advanceManagedGroupImpact(context: PrincipalRequestContext, input: {
+	scopeId: string; groupId: string; reviewId: string; expectedPageVersion: number;
+}) {
+	return runAccessTransaction(async tx => {
+		const authority = await groupAuthority(tx, context, input.scopeId, input.groupId, "read");
+		const review = await lockGroupImpactReview(tx, { ...input, principalId: authority.principalId, subjectId: authority.subjectId });
+		await advanceGroupImpactDiscovery(tx, review, input.expectedPageVersion);
+		await requireAccessAdmission(tx, authority.admission);
+		return groupImpactSummary(review);
+	});
+}
+
+/** Read one currently authorized, redacted inspection page; terminal discovery states remain visible. @internal */
+export async function inspectManagedGroupImpact(context: PrincipalRequestContext, input: {
+	scopeId: string; groupId: string; reviewId: string; afterOrdinal?: number;
+}) {
+	return runAccessTransaction(async tx => {
+		const authority = await groupAuthority(tx, context, input.scopeId, input.groupId, "read");
+		const review = await lockGroupImpactReview(tx, { ...input, principalId: authority.principalId, subjectId: authority.subjectId });
+		const result = await inspectGroupImpactDiscovery(tx, review, input.afterOrdinal);
+		await requireAccessAdmission(tx, authority.admission);
+		return result;
 	});
 }

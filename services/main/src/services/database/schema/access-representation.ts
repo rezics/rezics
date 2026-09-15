@@ -102,6 +102,9 @@ export const accessRepresentation = pgTable(
 			and (${table.parentSelectionGroupId} is null)=(${table.parentSelectionVersion} is null)
 			and (${table.parentMembershipId} is null or (${table.parentSubjectId} is not null and ${table.parentMembershipGeneration} between 1 and 9007199254740991))
 			and (${table.parentSelectionGroupId} is null or (${table.parentMembershipId} is not null and ${table.parentSelectionVersion} between 1 and 9007199254740991))`),
+		index("access_representation_group_page_idx").on(table.recipientGroupId, table.id).where(sql`${table.recipientGroupId} is not null`),
+		index("access_representation_child_page_idx").on(table.parentGrantId, table.id).where(sql`${table.parentGrantId} is not null`),
+		index("access_representation_parent_selection_page_idx").on(table.parentSelectionGroupId, table.id).where(sql`${table.parentSelectionGroupId} is not null`),
 		index("access_representation_parent_subject_idx").on(table.parentSubjectId, table.id).where(sql`${table.parentSubjectId} is not null`),
 		index("access_representation_parent_admission_idx").on(table.parentMembershipId, table.parentMembershipGeneration, table.id).where(sql`${table.parentMembershipId} is not null`),
 		check("access_representation_parent_check", sql`(${table.parentGrantId} is null and ${table.parentRevision} is null) or (${table.parentGrantId} is not null and ${table.parentGrantId}<>${table.id} and ${table.parentRevision} is not null and ${table.parentRevision} between 1 and 9007199254740991)`),
@@ -209,6 +212,7 @@ export const accessRepresentationRevision = pgTable(
 			columns: [table.membershipId, table.membershipGeneration, table.selectionGroupId, table.selectionVersion],
 			foreignColumns: [accessGroupMembershipEvent.membershipId, accessGroupMembershipEvent.generation, accessGroupMembershipEvent.groupId, accessGroupMembershipEvent.version],
 		}).onDelete("restrict"),
+		index("access_representation_selection_page_idx").on(table.selectionGroupId, table.grantId, table.revision).where(sql`${table.selectionGroupId} is not null`),
 		index("access_representation_revision_admission_idx")
 			.on(table.membershipId, table.membershipGeneration, table.grantId, table.revision)
 			.where(sql`${table.membershipId} is not null`),

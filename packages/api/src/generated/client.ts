@@ -13,6 +13,8 @@ import type {
 	AddCatalogNameResponses,
 	AddMusicMediumOptions,
 	AddMusicMediumResponses,
+	AdvanceAccessGroupImpactOptions,
+	AdvanceAccessGroupImpactResponses,
 	CreateAccessGroupOptions,
 	CreateAccessGroupResponses,
 	CreateAccessRoleOptions,
@@ -37,6 +39,12 @@ import type {
 	GetAccessGroupResponses,
 	ListAccessGroupHistoryOptions,
 	ListAccessGroupHistoryResponses,
+	GetAccessGroupImpactContextOptions,
+	GetAccessGroupImpactContextResponses,
+	StartAccessGroupImpactOptions,
+	StartAccessGroupImpactResponses,
+	InspectAccessGroupImpactOptions,
+	InspectAccessGroupImpactResponses,
 	UpdateAccessGroupPresentationOptions,
 	UpdateAccessGroupPresentationResponses,
 	ReparentAccessGroupOptions,
@@ -1439,6 +1447,90 @@ export function listAccessGroupHistory<ThrowOnError extends boolean = true>(
 			],
 			...config,
 		}) as Promise<RequestResult<ListAccessGroupHistoryResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/impact-context}
+ */
+export function getAccessGroupImpactContext<ThrowOnError extends boolean = true>(
+	options: Options<GetAccessGroupImpactContextOptions, ThrowOnError>,
+): Unwrappable<RequestResult<GetAccessGroupImpactContextResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/access/{scope}/groups/{groupId}/impact-context",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetAccessGroupImpactContextResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/impact-reviews}
+ */
+export function startAccessGroupImpact<ThrowOnError extends boolean = true>(
+	options: Options<StartAccessGroupImpactOptions, ThrowOnError>,
+): Unwrappable<RequestResult<StartAccessGroupImpactResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/access/{scope}/groups/{groupId}/impact-reviews",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<StartAccessGroupImpactResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/impact-reviews/:reviewId/pages}
+ */
+export function advanceAccessGroupImpact<ThrowOnError extends boolean = true>(
+	options: Options<AdvanceAccessGroupImpactOptions, ThrowOnError>,
+): Unwrappable<RequestResult<AdvanceAccessGroupImpactResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/access/{scope}/groups/{groupId}/impact-reviews/{reviewId}/pages",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<AdvanceAccessGroupImpactResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/impact-reviews/:reviewId}
+ */
+export function inspectAccessGroupImpact<ThrowOnError extends boolean = true>(
+	options: Options<InspectAccessGroupImpactOptions, ThrowOnError>,
+): Unwrappable<RequestResult<InspectAccessGroupImpactResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/access/{scope}/groups/{groupId}/impact-reviews/{reviewId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<InspectAccessGroupImpactResponses, ThrowOnError>>,
 	);
 }
 

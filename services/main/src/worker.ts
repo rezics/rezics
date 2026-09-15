@@ -18,6 +18,7 @@ const [
 	emailDispatcher,
 	imageAssetCleanup,
 	apiQuotaCleanup,
+	{ pruneExpiredGroupImpactReview },
 	accountErasureWorker,
 	studioCandidateCleanup,
 	unitMergeWorker,
@@ -36,6 +37,7 @@ const [
 	import("./services/email/dispatcher"),
 	import("./services/image-assets/cleanup"),
 	import("./services/auth/api-quota/cleanup"),
+	import("./services/authorization/group-impact-retention"),
 	import("./services/participation/erasure"),
 	import("./services/studio/cleanup"),
 	import("./services/units/merge/worker"),
@@ -123,6 +125,7 @@ const lanes = {
 		},
 	],
 	maintenance: [
+		{ name: "access.group_impact_retention", intervalMs: 10_000, run: pruneExpiredGroupImpactReview },
 		{ name: "governance.delivery_cleanup", intervalMs: 10_000, run: async () => { await purgeCompletedGovernanceReportDeliveries(); } },
 		{ name: "recommendation.retention", intervalMs: 10_000, run: purgeRecommendationData },
 		{

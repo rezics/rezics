@@ -34,6 +34,7 @@ export const accessAssignmentCeiling = pgTable("access_assignment_ceiling", {
 }, table => [
 	foreignKey({ name: "access_assignment_ceiling_manager_terms_fk", columns: [table.managerBindingId, table.managerTermsRevision], foreignColumns: [accessRoleBindingRevision.bindingId, accessRoleBindingRevision.revision] }).onDelete("restrict"),
 	foreignKey({ name: "access_assignment_ceiling_group_fk", columns: [table.recipientGroupId, table.recipientScopeId], foreignColumns: [accessGroup.id, accessGroup.scopeId] }).onDelete("restrict"),
+	index("access_assignment_ceiling_binding_page_idx").on(table.managerBindingId, table.id),
 	index("access_assignment_ceiling_manager_idx").on(table.scopeId, table.managerBindingId, table.roleId, table.id),
 	index("access_assignment_ceiling_role_idx").on(table.roleId, table.scopeId, table.id),
 	index("access_assignment_ceiling_subject_idx").on(table.recipientSubjectId, table.id).where(sql`${table.recipientSubjectId} is not null`),

@@ -45,6 +45,7 @@ export const accessGroup = pgTable(
 	},
 	(table): PgTableExtraConfigValue[] => [
 		uniqueIndex("access_group_id_scope_key").on(table.id, table.scopeId),
+		index("access_group_children_page_idx").on(table.scopeId, table.parentId, table.id).where(sql`${table.state}='active'`),
 		index("access_group_scope_id_idx").on(table.scopeId, table.id),
 		index("access_group_parent_height_idx")
 			.on(table.scopeId, table.parentId, table.subtreeHeight.desc(), table.id)

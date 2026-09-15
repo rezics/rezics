@@ -19,6 +19,7 @@ import {
 	addCatalogName,
 	addMusicMedium,
 	addMusicTrack,
+	advanceAccessGroupImpact,
 	assignGroupingClass,
 	attachMusicDiscToc,
 	cancelOrganizationMembershipInvitation,
@@ -95,6 +96,7 @@ import {
 	eraseOwnAccount,
 	findSoftwareReleases,
 	getAccessGroup,
+	getAccessGroupImpactContext,
 	getAccessRole,
 	getActingEntityPresentationRevision,
 	getApiAccountMe,
@@ -259,6 +261,7 @@ import {
 	getZonePageAddressById,
 	getZoneRenderProjection,
 	headApiHealth,
+	inspectAccessGroupImpact,
 	intakeCatalogSource,
 	inviteOrganizationMember,
 	issueParticipationGrant,
@@ -596,6 +599,7 @@ import {
 	selectParticipation,
 	setConnectedAppTrust,
 	setMainIdentityPreference,
+	startAccessGroupImpact,
 	transitionCatalogSemanticState,
 	updateAccessGroupPresentation,
 	updateActingEntityPresentation,
@@ -642,6 +646,17 @@ import type {
 	AddMusicTrackStatus422,
 	AddMusicTrackStatus429,
 	AddMusicTrackStatus500,
+	AdvanceAccessGroupImpactOptions,
+	AdvanceAccessGroupImpactStatus200,
+	AdvanceAccessGroupImpactStatus400,
+	AdvanceAccessGroupImpactStatus401,
+	AdvanceAccessGroupImpactStatus403,
+	AdvanceAccessGroupImpactStatus404,
+	AdvanceAccessGroupImpactStatus409,
+	AdvanceAccessGroupImpactStatus422,
+	AdvanceAccessGroupImpactStatus429,
+	AdvanceAccessGroupImpactStatus500,
+	AdvanceAccessGroupImpactStatus503,
 	AssignGroupingClassOptions,
 	AssignGroupingClassStatus200,
 	AssignGroupingClassStatus400,
@@ -1149,6 +1164,17 @@ import type {
 	FindSoftwareReleasesStatus200,
 	FindSoftwareReleasesStatus422,
 	FindSoftwareReleasesStatus500,
+	GetAccessGroupImpactContextOptions,
+	GetAccessGroupImpactContextStatus200,
+	GetAccessGroupImpactContextStatus400,
+	GetAccessGroupImpactContextStatus401,
+	GetAccessGroupImpactContextStatus403,
+	GetAccessGroupImpactContextStatus404,
+	GetAccessGroupImpactContextStatus409,
+	GetAccessGroupImpactContextStatus422,
+	GetAccessGroupImpactContextStatus429,
+	GetAccessGroupImpactContextStatus500,
+	GetAccessGroupImpactContextStatus503,
 	GetAccessGroupOptions,
 	GetAccessGroupStatus200,
 	GetAccessGroupStatus400,
@@ -2027,6 +2053,17 @@ import type {
 	HeadApiHealthStatus422,
 	HeadApiHealthStatus429,
 	HeadApiHealthStatus500,
+	InspectAccessGroupImpactOptions,
+	InspectAccessGroupImpactStatus200,
+	InspectAccessGroupImpactStatus400,
+	InspectAccessGroupImpactStatus401,
+	InspectAccessGroupImpactStatus403,
+	InspectAccessGroupImpactStatus404,
+	InspectAccessGroupImpactStatus409,
+	InspectAccessGroupImpactStatus422,
+	InspectAccessGroupImpactStatus429,
+	InspectAccessGroupImpactStatus500,
+	InspectAccessGroupImpactStatus503,
 	IntakeCatalogSourceOptions,
 	IntakeCatalogSourceStatus200,
 	IntakeCatalogSourceStatus400,
@@ -4285,6 +4322,17 @@ import type {
 	SetMainIdentityPreferenceStatus422,
 	SetMainIdentityPreferenceStatus429,
 	SetMainIdentityPreferenceStatus500,
+	StartAccessGroupImpactOptions,
+	StartAccessGroupImpactStatus200,
+	StartAccessGroupImpactStatus400,
+	StartAccessGroupImpactStatus401,
+	StartAccessGroupImpactStatus403,
+	StartAccessGroupImpactStatus404,
+	StartAccessGroupImpactStatus409,
+	StartAccessGroupImpactStatus422,
+	StartAccessGroupImpactStatus429,
+	StartAccessGroupImpactStatus500,
+	StartAccessGroupImpactStatus503,
 	TransitionCatalogSemanticStateOptions,
 	TransitionCatalogSemanticStateStatus200,
 	TransitionCatalogSemanticStateStatus400,
@@ -5554,6 +5602,466 @@ export function useListAccessGroupHistory<
 			| ListAccessGroupHistoryStatus429
 			| ListAccessGroupHistoryStatus500
 			| ListAccessGroupHistoryStatus503
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getAccessGroupImpactContextQueryKey = ({
+	path,
+}: Omit<GetAccessGroupImpactContextOptions, "headers">) =>
+	[{ url: "/api/v1/access/:scope/groups/:groupId/impact-context", params: path }] as const;
+
+type GetAccessGroupImpactContextQueryKey = ReturnType<typeof getAccessGroupImpactContextQueryKey>;
+
+export function getAccessGroupImpactContextQueryOptions(
+	{ path }: GetAccessGroupImpactContextOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getAccessGroupImpactContextQueryKey({ path });
+	return queryOptions<
+		GetAccessGroupImpactContextStatus200,
+		ResponseErrorConfig<
+			| GetAccessGroupImpactContextStatus400
+			| GetAccessGroupImpactContextStatus401
+			| GetAccessGroupImpactContextStatus403
+			| GetAccessGroupImpactContextStatus404
+			| GetAccessGroupImpactContextStatus409
+			| GetAccessGroupImpactContextStatus422
+			| GetAccessGroupImpactContextStatus429
+			| GetAccessGroupImpactContextStatus500
+			| GetAccessGroupImpactContextStatus503
+		>,
+		GetAccessGroupImpactContextStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return getAccessGroupImpactContext({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/impact-context}
+ */
+export function useGetAccessGroupImpactContext<
+	TData = GetAccessGroupImpactContextStatus200,
+	TQueryData = GetAccessGroupImpactContextStatus200,
+	TQueryKey extends QueryKey = GetAccessGroupImpactContextQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetAccessGroupImpactContextOptions["path"]
+			| (() => GetAccessGroupImpactContextOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetAccessGroupImpactContextStatus200,
+				ResponseErrorConfig<
+					| GetAccessGroupImpactContextStatus400
+					| GetAccessGroupImpactContextStatus401
+					| GetAccessGroupImpactContextStatus403
+					| GetAccessGroupImpactContextStatus404
+					| GetAccessGroupImpactContextStatus409
+					| GetAccessGroupImpactContextStatus422
+					| GetAccessGroupImpactContextStatus429
+					| GetAccessGroupImpactContextStatus500
+					| GetAccessGroupImpactContextStatus503
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey = resolvedOptions?.queryKey ?? getAccessGroupImpactContextQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getAccessGroupImpactContextQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetAccessGroupImpactContextStatus400
+			| GetAccessGroupImpactContextStatus401
+			| GetAccessGroupImpactContextStatus403
+			| GetAccessGroupImpactContextStatus404
+			| GetAccessGroupImpactContextStatus409
+			| GetAccessGroupImpactContextStatus422
+			| GetAccessGroupImpactContextStatus429
+			| GetAccessGroupImpactContextStatus500
+			| GetAccessGroupImpactContextStatus503
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const startAccessGroupImpactMutationKey = () =>
+	[{ url: "/api/v1/access/:scope/groups/:groupId/impact-reviews" }] as const;
+
+export function startAccessGroupImpactMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = startAccessGroupImpactMutationKey();
+	return mutationOptions<
+		StartAccessGroupImpactStatus200,
+		ResponseErrorConfig<
+			| StartAccessGroupImpactStatus400
+			| StartAccessGroupImpactStatus401
+			| StartAccessGroupImpactStatus403
+			| StartAccessGroupImpactStatus404
+			| StartAccessGroupImpactStatus409
+			| StartAccessGroupImpactStatus422
+			| StartAccessGroupImpactStatus429
+			| StartAccessGroupImpactStatus500
+			| StartAccessGroupImpactStatus503
+		>,
+		StartAccessGroupImpactOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return startAccessGroupImpact({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/impact-reviews}
+ */
+export function useStartAccessGroupImpact<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			StartAccessGroupImpactStatus200,
+			ResponseErrorConfig<
+				| StartAccessGroupImpactStatus400
+				| StartAccessGroupImpactStatus401
+				| StartAccessGroupImpactStatus403
+				| StartAccessGroupImpactStatus404
+				| StartAccessGroupImpactStatus409
+				| StartAccessGroupImpactStatus422
+				| StartAccessGroupImpactStatus429
+				| StartAccessGroupImpactStatus500
+				| StartAccessGroupImpactStatus503
+			>,
+			StartAccessGroupImpactOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? startAccessGroupImpactMutationKey();
+
+	const baseOptions = startAccessGroupImpactMutationOptions(config) as UseMutationOptions<
+		StartAccessGroupImpactStatus200,
+		ResponseErrorConfig<
+			| StartAccessGroupImpactStatus400
+			| StartAccessGroupImpactStatus401
+			| StartAccessGroupImpactStatus403
+			| StartAccessGroupImpactStatus404
+			| StartAccessGroupImpactStatus409
+			| StartAccessGroupImpactStatus422
+			| StartAccessGroupImpactStatus429
+			| StartAccessGroupImpactStatus500
+			| StartAccessGroupImpactStatus503
+		>,
+		StartAccessGroupImpactOptions,
+		TContext
+	>;
+
+	return useMutation<
+		StartAccessGroupImpactStatus200,
+		ResponseErrorConfig<
+			| StartAccessGroupImpactStatus400
+			| StartAccessGroupImpactStatus401
+			| StartAccessGroupImpactStatus403
+			| StartAccessGroupImpactStatus404
+			| StartAccessGroupImpactStatus409
+			| StartAccessGroupImpactStatus422
+			| StartAccessGroupImpactStatus429
+			| StartAccessGroupImpactStatus500
+			| StartAccessGroupImpactStatus503
+		>,
+		StartAccessGroupImpactOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		StartAccessGroupImpactStatus200,
+		ResponseErrorConfig<
+			| StartAccessGroupImpactStatus400
+			| StartAccessGroupImpactStatus401
+			| StartAccessGroupImpactStatus403
+			| StartAccessGroupImpactStatus404
+			| StartAccessGroupImpactStatus409
+			| StartAccessGroupImpactStatus422
+			| StartAccessGroupImpactStatus429
+			| StartAccessGroupImpactStatus500
+			| StartAccessGroupImpactStatus503
+		>,
+		StartAccessGroupImpactOptions,
+		TContext
+	>;
+}
+
+export const advanceAccessGroupImpactMutationKey = () =>
+	[{ url: "/api/v1/access/:scope/groups/:groupId/impact-reviews/:reviewId/pages" }] as const;
+
+export function advanceAccessGroupImpactMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = advanceAccessGroupImpactMutationKey();
+	return mutationOptions<
+		AdvanceAccessGroupImpactStatus200,
+		ResponseErrorConfig<
+			| AdvanceAccessGroupImpactStatus400
+			| AdvanceAccessGroupImpactStatus401
+			| AdvanceAccessGroupImpactStatus403
+			| AdvanceAccessGroupImpactStatus404
+			| AdvanceAccessGroupImpactStatus409
+			| AdvanceAccessGroupImpactStatus422
+			| AdvanceAccessGroupImpactStatus429
+			| AdvanceAccessGroupImpactStatus500
+			| AdvanceAccessGroupImpactStatus503
+		>,
+		AdvanceAccessGroupImpactOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return advanceAccessGroupImpact({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/impact-reviews/:reviewId/pages}
+ */
+export function useAdvanceAccessGroupImpact<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			AdvanceAccessGroupImpactStatus200,
+			ResponseErrorConfig<
+				| AdvanceAccessGroupImpactStatus400
+				| AdvanceAccessGroupImpactStatus401
+				| AdvanceAccessGroupImpactStatus403
+				| AdvanceAccessGroupImpactStatus404
+				| AdvanceAccessGroupImpactStatus409
+				| AdvanceAccessGroupImpactStatus422
+				| AdvanceAccessGroupImpactStatus429
+				| AdvanceAccessGroupImpactStatus500
+				| AdvanceAccessGroupImpactStatus503
+			>,
+			AdvanceAccessGroupImpactOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? advanceAccessGroupImpactMutationKey();
+
+	const baseOptions = advanceAccessGroupImpactMutationOptions(config) as UseMutationOptions<
+		AdvanceAccessGroupImpactStatus200,
+		ResponseErrorConfig<
+			| AdvanceAccessGroupImpactStatus400
+			| AdvanceAccessGroupImpactStatus401
+			| AdvanceAccessGroupImpactStatus403
+			| AdvanceAccessGroupImpactStatus404
+			| AdvanceAccessGroupImpactStatus409
+			| AdvanceAccessGroupImpactStatus422
+			| AdvanceAccessGroupImpactStatus429
+			| AdvanceAccessGroupImpactStatus500
+			| AdvanceAccessGroupImpactStatus503
+		>,
+		AdvanceAccessGroupImpactOptions,
+		TContext
+	>;
+
+	return useMutation<
+		AdvanceAccessGroupImpactStatus200,
+		ResponseErrorConfig<
+			| AdvanceAccessGroupImpactStatus400
+			| AdvanceAccessGroupImpactStatus401
+			| AdvanceAccessGroupImpactStatus403
+			| AdvanceAccessGroupImpactStatus404
+			| AdvanceAccessGroupImpactStatus409
+			| AdvanceAccessGroupImpactStatus422
+			| AdvanceAccessGroupImpactStatus429
+			| AdvanceAccessGroupImpactStatus500
+			| AdvanceAccessGroupImpactStatus503
+		>,
+		AdvanceAccessGroupImpactOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		AdvanceAccessGroupImpactStatus200,
+		ResponseErrorConfig<
+			| AdvanceAccessGroupImpactStatus400
+			| AdvanceAccessGroupImpactStatus401
+			| AdvanceAccessGroupImpactStatus403
+			| AdvanceAccessGroupImpactStatus404
+			| AdvanceAccessGroupImpactStatus409
+			| AdvanceAccessGroupImpactStatus422
+			| AdvanceAccessGroupImpactStatus429
+			| AdvanceAccessGroupImpactStatus500
+			| AdvanceAccessGroupImpactStatus503
+		>,
+		AdvanceAccessGroupImpactOptions,
+		TContext
+	>;
+}
+
+export const inspectAccessGroupImpactQueryKey = ({
+	path,
+	query,
+}: Omit<InspectAccessGroupImpactOptions, "headers">) =>
+	[
+		{ url: "/api/v1/access/:scope/groups/:groupId/impact-reviews/:reviewId", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type InspectAccessGroupImpactQueryKey = ReturnType<typeof inspectAccessGroupImpactQueryKey>;
+
+export function inspectAccessGroupImpactQueryOptions(
+	{ path, query }: InspectAccessGroupImpactOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = inspectAccessGroupImpactQueryKey({ path, query });
+	return queryOptions<
+		InspectAccessGroupImpactStatus200,
+		ResponseErrorConfig<
+			| InspectAccessGroupImpactStatus400
+			| InspectAccessGroupImpactStatus401
+			| InspectAccessGroupImpactStatus403
+			| InspectAccessGroupImpactStatus404
+			| InspectAccessGroupImpactStatus409
+			| InspectAccessGroupImpactStatus422
+			| InspectAccessGroupImpactStatus429
+			| InspectAccessGroupImpactStatus500
+			| InspectAccessGroupImpactStatus503
+		>,
+		InspectAccessGroupImpactStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return inspectAccessGroupImpact({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/impact-reviews/:reviewId}
+ */
+export function useInspectAccessGroupImpact<
+	TData = InspectAccessGroupImpactStatus200,
+	TQueryData = InspectAccessGroupImpactStatus200,
+	TQueryKey extends QueryKey = InspectAccessGroupImpactQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path: InspectAccessGroupImpactOptions["path"] | (() => InspectAccessGroupImpactOptions["path"]);
+		query?:
+			| InspectAccessGroupImpactOptions["query"]
+			| (() => InspectAccessGroupImpactOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				InspectAccessGroupImpactStatus200,
+				ResponseErrorConfig<
+					| InspectAccessGroupImpactStatus400
+					| InspectAccessGroupImpactStatus401
+					| InspectAccessGroupImpactStatus403
+					| InspectAccessGroupImpactStatus404
+					| InspectAccessGroupImpactStatus409
+					| InspectAccessGroupImpactStatus422
+					| InspectAccessGroupImpactStatus429
+					| InspectAccessGroupImpactStatus500
+					| InspectAccessGroupImpactStatus503
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey = resolvedOptions?.queryKey ?? inspectAccessGroupImpactQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...inspectAccessGroupImpactQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| InspectAccessGroupImpactStatus400
+			| InspectAccessGroupImpactStatus401
+			| InspectAccessGroupImpactStatus403
+			| InspectAccessGroupImpactStatus404
+			| InspectAccessGroupImpactStatus409
+			| InspectAccessGroupImpactStatus422
+			| InspectAccessGroupImpactStatus429
+			| InspectAccessGroupImpactStatus500
+			| InspectAccessGroupImpactStatus503
 		>
 	> & { queryKey: TQueryKey };
 

@@ -4989,6 +4989,1057 @@ export type ListAccessGroupHistoryResponse =
 	| ListAccessGroupHistoryStatus500
 	| ListAccessGroupHistoryStatus503;
 
+export type GetAccessGroupImpactContextPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	groupId: string;
+};
+
+export const GetAccessGroupImpactContextStatus200StateEnum = {
+	draft: "draft",
+	active: "active",
+	retired: "retired",
+} as const;
+
+export type GetAccessGroupImpactContextStatus200StateEnum =
+	(typeof GetAccessGroupImpactContextStatus200StateEnum)[keyof typeof GetAccessGroupImpactContextStatus200StateEnum];
+
+export type GetAccessGroupImpactContextStatus200 = {
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	groupVersion: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	treeVersion: number;
+	state: GetAccessGroupImpactContextStatus200StateEnum;
+};
+
+export type GetAccessGroupImpactContextStatus400 = {
+	error: {
+		/**
+		 * @default 'AccessInputInvalid'
+		 * @type string
+		 */
+		code: "AccessInputInvalid";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const GetAccessGroupImpactContextStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type GetAccessGroupImpactContextStatus401ErrorCodeEnum =
+	(typeof GetAccessGroupImpactContextStatus401ErrorCodeEnum)[keyof typeof GetAccessGroupImpactContextStatus401ErrorCodeEnum];
+
+export type GetAccessGroupImpactContextStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: GetAccessGroupImpactContextStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const GetAccessGroupImpactContextStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type GetAccessGroupImpactContextStatus403ErrorCodeEnum =
+	(typeof GetAccessGroupImpactContextStatus403ErrorCodeEnum)[keyof typeof GetAccessGroupImpactContextStatus403ErrorCodeEnum];
+
+export type GetAccessGroupImpactContextStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: GetAccessGroupImpactContextStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetAccessGroupImpactContextStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetAccessGroupImpactContextStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetAccessGroupImpactContextStatus422 = ValidationError;
+
+export const GetAccessGroupImpactContextStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetAccessGroupImpactContextStatus429ErrorCodeEnum =
+	(typeof GetAccessGroupImpactContextStatus429ErrorCodeEnum)[keyof typeof GetAccessGroupImpactContextStatus429ErrorCodeEnum];
+
+export type GetAccessGroupImpactContextStatus429 = {
+	error: {
+		code: GetAccessGroupImpactContextStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type GetAccessGroupImpactContextStatus500 = InternalError;
+
+export type GetAccessGroupImpactContextStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetAccessGroupImpactContextOptions = {
+	body?: never;
+	path: GetAccessGroupImpactContextPath;
+	query?: never;
+	headers?: never;
+};
+
+export type GetAccessGroupImpactContextResponses = {
+	"200": GetAccessGroupImpactContextStatus200;
+	"400": GetAccessGroupImpactContextStatus400;
+	"401": GetAccessGroupImpactContextStatus401;
+	"403": GetAccessGroupImpactContextStatus403;
+	"404": GetAccessGroupImpactContextStatus404;
+	"409": GetAccessGroupImpactContextStatus409;
+	"422": GetAccessGroupImpactContextStatus422;
+	"429": GetAccessGroupImpactContextStatus429;
+	"500": GetAccessGroupImpactContextStatus500;
+	"503": GetAccessGroupImpactContextStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetAccessGroupImpactContextResponse =
+	| GetAccessGroupImpactContextStatus200
+	| GetAccessGroupImpactContextStatus400
+	| GetAccessGroupImpactContextStatus401
+	| GetAccessGroupImpactContextStatus403
+	| GetAccessGroupImpactContextStatus404
+	| GetAccessGroupImpactContextStatus409
+	| GetAccessGroupImpactContextStatus422
+	| GetAccessGroupImpactContextStatus429
+	| GetAccessGroupImpactContextStatus500
+	| GetAccessGroupImpactContextStatus503;
+
+export type StartAccessGroupImpactPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	groupId: string;
+};
+
+export const StartAccessGroupImpactStatus200OperationEnum = {
+	reparent: "reparent",
+	retire: "retire",
+} as const;
+
+export type StartAccessGroupImpactStatus200OperationEnum =
+	(typeof StartAccessGroupImpactStatus200OperationEnum)[keyof typeof StartAccessGroupImpactStatus200OperationEnum];
+
+export const StartAccessGroupImpactStatus200StatusEnum = {
+	discovering: "discovering",
+	complete: "complete",
+	invalidated: "invalidated",
+	unavailable: "unavailable",
+} as const;
+
+export type StartAccessGroupImpactStatus200StatusEnum =
+	(typeof StartAccessGroupImpactStatus200StatusEnum)[keyof typeof StartAccessGroupImpactStatus200StatusEnum];
+
+export const StartAccessGroupImpactStatus200ReasonEnum = {
+	changed: "changed",
+	expired: "expired",
+	budget: "budget",
+	missing: "missing",
+} as const;
+
+export type StartAccessGroupImpactStatus200ReasonEnum =
+	(typeof StartAccessGroupImpactStatus200ReasonEnum)[keyof typeof StartAccessGroupImpactStatus200ReasonEnum];
+
+export type StartAccessGroupImpactStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+	operation: StartAccessGroupImpactStatus200OperationEnum;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	expectedGroupVersion: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	expectedTreeVersion: number;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	proposedParentId: string | null;
+	status: StartAccessGroupImpactStatus200StatusEnum;
+	reason: StartAccessGroupImpactStatus200ReasonEnum | null;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	pageVersion: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	discoveredItems: number;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	validUntil: string;
+	admission: "not-evaluated";
+};
+
+export type StartAccessGroupImpactStatus400 =
+	| {
+			error: {
+				/**
+				 * @default 'AccessInputInvalid'
+				 * @type string
+				 */
+				code: "AccessInputInvalid";
+				message: string;
+				details?: void;
+			};
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const StartAccessGroupImpactStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type StartAccessGroupImpactStatus401ErrorCodeEnum =
+	(typeof StartAccessGroupImpactStatus401ErrorCodeEnum)[keyof typeof StartAccessGroupImpactStatus401ErrorCodeEnum];
+
+export type StartAccessGroupImpactStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: StartAccessGroupImpactStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const StartAccessGroupImpactStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type StartAccessGroupImpactStatus403ErrorCodeEnum =
+	(typeof StartAccessGroupImpactStatus403ErrorCodeEnum)[keyof typeof StartAccessGroupImpactStatus403ErrorCodeEnum];
+
+export type StartAccessGroupImpactStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: StartAccessGroupImpactStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type StartAccessGroupImpactStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type StartAccessGroupImpactStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type StartAccessGroupImpactStatus422 = ValidationError;
+
+export const StartAccessGroupImpactStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type StartAccessGroupImpactStatus429ErrorCodeEnum =
+	(typeof StartAccessGroupImpactStatus429ErrorCodeEnum)[keyof typeof StartAccessGroupImpactStatus429ErrorCodeEnum];
+
+export type StartAccessGroupImpactStatus429 = {
+	error: {
+		code: StartAccessGroupImpactStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type StartAccessGroupImpactStatus500 = InternalError;
+
+export type StartAccessGroupImpactStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type StartAccessGroupImpactBody =
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			reviewId: string;
+			operation: "reparent";
+			/**
+			 * @minLength 1
+			 * @maxLength 9007199254740991
+			 * @type integer
+			 */
+			expectedGroupVersion: number;
+			/**
+			 * @minLength 0
+			 * @maxLength 9007199254740991
+			 * @type integer
+			 */
+			expectedTreeVersion: number;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			proposedParentId: string | null;
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			reviewId: string;
+			operation: "retire";
+			/**
+			 * @minLength 1
+			 * @maxLength 9007199254740991
+			 * @type integer
+			 */
+			expectedGroupVersion: number;
+			/**
+			 * @minLength 0
+			 * @maxLength 9007199254740991
+			 * @type integer
+			 */
+			expectedTreeVersion: number;
+			proposedParentId: null;
+	  };
+
+export type StartAccessGroupImpactOptions = {
+	body: StartAccessGroupImpactBody;
+	path: StartAccessGroupImpactPath;
+	query?: never;
+	headers?: never;
+};
+
+export type StartAccessGroupImpactResponses = {
+	"200": StartAccessGroupImpactStatus200;
+	"400": StartAccessGroupImpactStatus400;
+	"401": StartAccessGroupImpactStatus401;
+	"403": StartAccessGroupImpactStatus403;
+	"404": StartAccessGroupImpactStatus404;
+	"409": StartAccessGroupImpactStatus409;
+	"422": StartAccessGroupImpactStatus422;
+	"429": StartAccessGroupImpactStatus429;
+	"500": StartAccessGroupImpactStatus500;
+	"503": StartAccessGroupImpactStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type StartAccessGroupImpactResponse =
+	| StartAccessGroupImpactStatus200
+	| StartAccessGroupImpactStatus400
+	| StartAccessGroupImpactStatus401
+	| StartAccessGroupImpactStatus403
+	| StartAccessGroupImpactStatus404
+	| StartAccessGroupImpactStatus409
+	| StartAccessGroupImpactStatus422
+	| StartAccessGroupImpactStatus429
+	| StartAccessGroupImpactStatus500
+	| StartAccessGroupImpactStatus503;
+
+export type AdvanceAccessGroupImpactPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	groupId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+};
+
+export const AdvanceAccessGroupImpactStatus200OperationEnum = {
+	reparent: "reparent",
+	retire: "retire",
+} as const;
+
+export type AdvanceAccessGroupImpactStatus200OperationEnum =
+	(typeof AdvanceAccessGroupImpactStatus200OperationEnum)[keyof typeof AdvanceAccessGroupImpactStatus200OperationEnum];
+
+export const AdvanceAccessGroupImpactStatus200StatusEnum = {
+	discovering: "discovering",
+	complete: "complete",
+	invalidated: "invalidated",
+	unavailable: "unavailable",
+} as const;
+
+export type AdvanceAccessGroupImpactStatus200StatusEnum =
+	(typeof AdvanceAccessGroupImpactStatus200StatusEnum)[keyof typeof AdvanceAccessGroupImpactStatus200StatusEnum];
+
+export const AdvanceAccessGroupImpactStatus200ReasonEnum = {
+	changed: "changed",
+	expired: "expired",
+	budget: "budget",
+	missing: "missing",
+} as const;
+
+export type AdvanceAccessGroupImpactStatus200ReasonEnum =
+	(typeof AdvanceAccessGroupImpactStatus200ReasonEnum)[keyof typeof AdvanceAccessGroupImpactStatus200ReasonEnum];
+
+export type AdvanceAccessGroupImpactStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+	operation: AdvanceAccessGroupImpactStatus200OperationEnum;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	expectedGroupVersion: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	expectedTreeVersion: number;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	proposedParentId: string | null;
+	status: AdvanceAccessGroupImpactStatus200StatusEnum;
+	reason: AdvanceAccessGroupImpactStatus200ReasonEnum | null;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	pageVersion: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	discoveredItems: number;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	validUntil: string;
+	admission: "not-evaluated";
+};
+
+export type AdvanceAccessGroupImpactStatus400 =
+	| {
+			error: {
+				/**
+				 * @default 'AccessInputInvalid'
+				 * @type string
+				 */
+				code: "AccessInputInvalid";
+				message: string;
+				details?: void;
+			};
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const AdvanceAccessGroupImpactStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type AdvanceAccessGroupImpactStatus401ErrorCodeEnum =
+	(typeof AdvanceAccessGroupImpactStatus401ErrorCodeEnum)[keyof typeof AdvanceAccessGroupImpactStatus401ErrorCodeEnum];
+
+export type AdvanceAccessGroupImpactStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: AdvanceAccessGroupImpactStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const AdvanceAccessGroupImpactStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type AdvanceAccessGroupImpactStatus403ErrorCodeEnum =
+	(typeof AdvanceAccessGroupImpactStatus403ErrorCodeEnum)[keyof typeof AdvanceAccessGroupImpactStatus403ErrorCodeEnum];
+
+export type AdvanceAccessGroupImpactStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: AdvanceAccessGroupImpactStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type AdvanceAccessGroupImpactStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type AdvanceAccessGroupImpactStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type AdvanceAccessGroupImpactStatus422 = ValidationError;
+
+export const AdvanceAccessGroupImpactStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type AdvanceAccessGroupImpactStatus429ErrorCodeEnum =
+	(typeof AdvanceAccessGroupImpactStatus429ErrorCodeEnum)[keyof typeof AdvanceAccessGroupImpactStatus429ErrorCodeEnum];
+
+export type AdvanceAccessGroupImpactStatus429 = {
+	error: {
+		code: AdvanceAccessGroupImpactStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type AdvanceAccessGroupImpactStatus500 = InternalError;
+
+export type AdvanceAccessGroupImpactStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type AdvanceAccessGroupImpactBody = {
+	/**
+	 * @minLength 0
+	 * @maxLength 65536
+	 * @type integer
+	 */
+	expectedPageVersion: number;
+};
+
+export type AdvanceAccessGroupImpactOptions = {
+	body: AdvanceAccessGroupImpactBody;
+	path: AdvanceAccessGroupImpactPath;
+	query?: never;
+	headers?: never;
+};
+
+export type AdvanceAccessGroupImpactResponses = {
+	"200": AdvanceAccessGroupImpactStatus200;
+	"400": AdvanceAccessGroupImpactStatus400;
+	"401": AdvanceAccessGroupImpactStatus401;
+	"403": AdvanceAccessGroupImpactStatus403;
+	"404": AdvanceAccessGroupImpactStatus404;
+	"409": AdvanceAccessGroupImpactStatus409;
+	"422": AdvanceAccessGroupImpactStatus422;
+	"429": AdvanceAccessGroupImpactStatus429;
+	"500": AdvanceAccessGroupImpactStatus500;
+	"503": AdvanceAccessGroupImpactStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type AdvanceAccessGroupImpactResponse =
+	| AdvanceAccessGroupImpactStatus200
+	| AdvanceAccessGroupImpactStatus400
+	| AdvanceAccessGroupImpactStatus401
+	| AdvanceAccessGroupImpactStatus403
+	| AdvanceAccessGroupImpactStatus404
+	| AdvanceAccessGroupImpactStatus409
+	| AdvanceAccessGroupImpactStatus422
+	| AdvanceAccessGroupImpactStatus429
+	| AdvanceAccessGroupImpactStatus500
+	| AdvanceAccessGroupImpactStatus503;
+
+export type InspectAccessGroupImpactPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	groupId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+};
+
+export type InspectAccessGroupImpactQuery = {
+	/**
+	 * @minLength 0
+	 * @maxLength 32768
+	 * @type integer | undefined
+	 */
+	afterOrdinal?: number;
+};
+
+export const InspectAccessGroupImpactStatus200OperationEnum = {
+	reparent: "reparent",
+	retire: "retire",
+} as const;
+
+export type InspectAccessGroupImpactStatus200OperationEnum =
+	(typeof InspectAccessGroupImpactStatus200OperationEnum)[keyof typeof InspectAccessGroupImpactStatus200OperationEnum];
+
+export const InspectAccessGroupImpactStatus200StatusEnum = {
+	discovering: "discovering",
+	complete: "complete",
+	invalidated: "invalidated",
+	unavailable: "unavailable",
+} as const;
+
+export type InspectAccessGroupImpactStatus200StatusEnum =
+	(typeof InspectAccessGroupImpactStatus200StatusEnum)[keyof typeof InspectAccessGroupImpactStatus200StatusEnum];
+
+export const InspectAccessGroupImpactStatus200ReasonEnum = {
+	changed: "changed",
+	expired: "expired",
+	budget: "budget",
+	missing: "missing",
+} as const;
+
+export type InspectAccessGroupImpactStatus200ReasonEnum =
+	(typeof InspectAccessGroupImpactStatus200ReasonEnum)[keyof typeof InspectAccessGroupImpactStatus200ReasonEnum];
+
+export type InspectAccessGroupImpactStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+	operation: InspectAccessGroupImpactStatus200OperationEnum;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	expectedGroupVersion: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	expectedTreeVersion: number;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	proposedParentId: string | null;
+	status: InspectAccessGroupImpactStatus200StatusEnum;
+	reason: InspectAccessGroupImpactStatus200ReasonEnum | null;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	pageVersion: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	discoveredItems: number;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	validUntil: string;
+	admission: "not-evaluated";
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		itemId: string;
+		/**
+		 * @minLength 1
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		ordinal: number;
+		kind: string;
+		/**
+		 * @minLength 0
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		version: number | null;
+		/**
+		 * @minLength 0
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		termsRevision: number | null;
+		state: string | null;
+	}[];
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	nextCursor: number | null;
+};
+
+export type InspectAccessGroupImpactStatus400 = {
+	error: {
+		/**
+		 * @default 'AccessInputInvalid'
+		 * @type string
+		 */
+		code: "AccessInputInvalid";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const InspectAccessGroupImpactStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type InspectAccessGroupImpactStatus401ErrorCodeEnum =
+	(typeof InspectAccessGroupImpactStatus401ErrorCodeEnum)[keyof typeof InspectAccessGroupImpactStatus401ErrorCodeEnum];
+
+export type InspectAccessGroupImpactStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: InspectAccessGroupImpactStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const InspectAccessGroupImpactStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type InspectAccessGroupImpactStatus403ErrorCodeEnum =
+	(typeof InspectAccessGroupImpactStatus403ErrorCodeEnum)[keyof typeof InspectAccessGroupImpactStatus403ErrorCodeEnum];
+
+export type InspectAccessGroupImpactStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: InspectAccessGroupImpactStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type InspectAccessGroupImpactStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type InspectAccessGroupImpactStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type InspectAccessGroupImpactStatus422 = ValidationError;
+
+export const InspectAccessGroupImpactStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type InspectAccessGroupImpactStatus429ErrorCodeEnum =
+	(typeof InspectAccessGroupImpactStatus429ErrorCodeEnum)[keyof typeof InspectAccessGroupImpactStatus429ErrorCodeEnum];
+
+export type InspectAccessGroupImpactStatus429 = {
+	error: {
+		code: InspectAccessGroupImpactStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type InspectAccessGroupImpactStatus500 = InternalError;
+
+export type InspectAccessGroupImpactStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type InspectAccessGroupImpactOptions = {
+	body?: never;
+	path: InspectAccessGroupImpactPath;
+	query?: InspectAccessGroupImpactQuery;
+	headers?: never;
+};
+
+export type InspectAccessGroupImpactResponses = {
+	"200": InspectAccessGroupImpactStatus200;
+	"400": InspectAccessGroupImpactStatus400;
+	"401": InspectAccessGroupImpactStatus401;
+	"403": InspectAccessGroupImpactStatus403;
+	"404": InspectAccessGroupImpactStatus404;
+	"409": InspectAccessGroupImpactStatus409;
+	"422": InspectAccessGroupImpactStatus422;
+	"429": InspectAccessGroupImpactStatus429;
+	"500": InspectAccessGroupImpactStatus500;
+	"503": InspectAccessGroupImpactStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type InspectAccessGroupImpactResponse =
+	| InspectAccessGroupImpactStatus200
+	| InspectAccessGroupImpactStatus400
+	| InspectAccessGroupImpactStatus401
+	| InspectAccessGroupImpactStatus403
+	| InspectAccessGroupImpactStatus404
+	| InspectAccessGroupImpactStatus409
+	| InspectAccessGroupImpactStatus422
+	| InspectAccessGroupImpactStatus429
+	| InspectAccessGroupImpactStatus500
+	| InspectAccessGroupImpactStatus503;
+
 export type UpdateAccessGroupPresentationPath = {
 	/**
 	 * @maxLength 512

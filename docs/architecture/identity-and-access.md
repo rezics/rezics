@@ -441,10 +441,10 @@ preserved, but this does not certify that the scope already has a valid protecte
 recovery path. Receipt replay still requires live management authority, but does
 not rerun new-effect impact against an already-applied transition.
 
-Nonempty impact remains unavailable until Group assignment-impact and protected
-recovery management are implemented. That owner must discover old/new ancestors,
-affected Group recipients and exact-selection/representation lineage dependencies,
-retain/promote their complete target/Entity/tree/enrollment/selection/role fences,
+Populated mutations remain unavailable until assignment-impact admission and protected
+recovery management are implemented. Discovery below supplies old/new ancestors,
+affected Group recipients and exact-selection/representation lineage dependencies.
+The admission owner must retain/promote complete target/Entity/tree/enrollment/selection/role fences,
 admit all proposed permissions and recipient changes against explicit ceilings,
 and prove protected continuity from the pre-change state. Empty roster alone may
 never bypass these requirements. The API's unavailable response is an unfinished
@@ -459,6 +459,134 @@ such ceiling insertion adds one index write. Group page presentation is bounded 
 100 × 4,608 payload bytes before JSON/identity overhead. Hot-scope tree contention,
 index installation cost and actual query plans remain verification obligations;
 no new runtime, concurrency or capacity evidence is claimed for this boundary.
+
+### Staged Group assignment-impact discovery
+
+`authorization/group-impact-discovery.ts` owns private structural discovery for one
+exact scope/Group, reparent-or-retire operation, expected Group/tree versions and
+explicit proposed parent (null for retirement). Retirement continues to require a
+leaf; nonleaf retirement has no selected child disposition. The production API
+reads these preconditions through `GET .../groups/:groupId/impact-context`, creates
+an idempotent caller-named review at `POST .../impact-reviews`, advances server-owned
+keysets at `POST .../impact-reviews/:reviewId/pages`, and reads facts at
+`GET .../impact-reviews/:reviewId?afterOrdinal=...`. The page version prevents a
+retried advance from executing twice; inspection pagination is independent, so an
+empty current fact page while discovery is running is not completeness.
+
+Every request checks current `access.group.read` at the exact Group path and the
+credential's `access:read` permission. Reviews belong to their original private
+principal and selected authority subject; another selection cannot reuse them.
+Cross-scope dependency details stay private in the server fact store. Inspection
+exposes random review-local item ids, kinds, versions and state, without raw
+principal/subject/recipient/target identifiers, permission sets or private audit
+attribution. The proposed Group parent remains an explicitly selected Group id.
+This restricted structural inspection is separate from permission to administer a
+roster, confer a role, operate another target or execute the proposed transition.
+
+The durable queue starts with the bounded old/new ancestor paths and the moved
+subtree, plus the original management binding and selected representation sources.
+The review deadline also retains their initial authority deadline. Each affected Group visits child, selected direct admission, Group binding,
+ceiling, representation, exact-selection terms and retained parent-selection reverse
+indexes in keyset pages. Ancestors visit their assignment dependencies without
+expanding unrelated descendant rosters. Binding snapshots retain current role
+activation/permission terms, frozen permission approvals and manager ceilings.
+Representation snapshots retain current and exact parent revisions, their literal
+permission approvals, exact admission/selection bases and dependent child lineage.
+Membership evidence retains the current admission head, exact selected historical
+admissions and current direct selections; supporting Group paths are loaded without
+expanding their unrelated recipients. Dormant records and historical selection
+references are conservative candidates, not a claim of current effective authority.
+Deduplication applies to owner work; edge facts retain their exact selection versions.
+
+`access_impact_fence` is a change witness, not a universal entity/identity table.
+Source triggers update the appropriate per-Group, tree, membership, binding, role,
+ceiling or representation witness on insert/update/delete, including both old and
+new reverse keys. They cover native heads, terms, permission members, admissions
+and selection-set writers. This makes newly inserted and removed dependencies
+visible even after an empty reverse-index page. There is no per-review invalidation
+fanout or global authorization epoch. Witness tombstones are retained; source
+TRUNCATE and witness reset/deletion are rejected rather than admitting an ABA reuse.
+Installing the triggers requires no population backfill: existing rows receive a
+lazy zero witness under a conflicting upsert/reader lock before their first read.
+
+The review also retains a bounded (64 KiB) `pg_current_snapshot()` value; each
+writer witness stores `pg_current_xact_id()` as a full-width top-level xid8 value.
+Revalidation requires that writer to be visible in the original snapshot, including
+when a dependent bucket is first reached on a later page. A transaction started
+before review creation but committed afterwards is therefore rejected as well.
+This stores a transaction visibility boundary, without holding an exported MVCC
+snapshot, vacuum horizon or transaction open across HTTP requests. Witness versions
+still detect every later change and retain locking through the current page.
+
+Every page runs in READ COMMITTED, records its positive and negative witnesses
+before reading, and locks/recompares the entire bounded retained witness set before
+commit. The same revalidation runs for inspection and complete-review consumption.
+The changed witness, including insertion/deletion or binding, ceiling, representation
+or admission revocation, makes the review `invalidated/changed`; crossing any observed start/expiry/grant deadline
+or the fifteen-minute review lifetime makes it `invalidated/expired`. The earliest
+boundary after review creation is retained even if first discovered after it passed.
+Current management revocation denies inspection and consumption independently.
+Missing source evidence or exceeded discovery budgets produce unavailable, never a
+complete subset. Partial page effects roll back before recording terminal failure.
+Deadlocks retry the whole page through the existing access transaction owner.
+
+`complete` means complete structural discovery for the retained revision set. Every
+response still says `admission: not-evaluated`. The next owner must use
+`lockCompleteGroupImpactDiscovery` with the exact proposal and original attribution
+inside the mutation transaction, after discovering/promoting all live authority
+fences; `readGroupImpactFacts` supplies bounded private facts in that transaction.
+Complete-review consumption also checks retained fact/node counts and an empty
+work queue under the review lock. It must decode owner facts, compute the complete
+before/after recipient/permission delta, resolve current subject/resource restrictions and credential/representation
+eligibility, obtain explicit assignment ceilings, and prove protected recovery from
+the pre-change state. It must recheck all time boundaries in the final mutation.
+The discovery owner returns no boolean or SQL admission predicate. Existing populated
+reparent/retire remain unavailable; empty-leaf admission retains its independent proof.
+
+Operational budgets are 100 edges per keyset page (101 with lookahead), at most
+eight queue steps and 512 edge/head candidates per advance, 4,096 queued owners,
+32,768 retained facts, 65,536 queue steps and 16 MiB encoded fact payload per review.
+Permission members remain bounded by the action vocabulary, admission selections
+by 64, and ancestor depth by eight; those point-read costs are additional to the
+edge-page budget. Revalidation locks at most 8,193 owner/scope witnesses; it performs
+indexed seeks over the bounded review, never over a corpus or full ACL matrix.
+Final admission input consumption additionally counts the bounded stored facts and nodes to detect missing artifacts.
+These finite initial budgets may make a larger change unavailable; completing a
+partial review, raising evaluation limits or silently clipping impact is forbidden.
+Sixteen retained reviews per principal over the twenty-four-hour retention window
+bound intake through a principal-local advisory lock and expiry index. The worker
+prunes expired reviews after a day in at most 100 facts, 100 nodes and 100 witnesses
+per tick, deleting the empty header last. Pruning retains terminal invalidity and
+never removes reusable source witnesses. Cleanup lag remains an operational capacity
+obligation, not permission to make evidence appear complete.
+
+Keep the 500,000,000-row baseline and 3,000,000,000-row estimate for every potentially
+large source, witness and reverse index. At an estimated 64-96 bytes per added
+reverse entry, each all-row index costs 32-48 GB / 192-288 GB respectively; multiply
+by the Group/selection/dependent fraction for partial indexes. At 160-256 bytes per
+witness including its key index, one witness population costs 80-128 GB / 480-768 GB,
+excluding replicas, WAL, bloat and reserves. Source writes add O(1) fixed witness
+upserts (at most five distinct keys per representation head with immutable
+references); they never
+rewrite a roster or fan out to reviews. Fact payload caps do not include row/index,
+WAL or duplicate key overhead. Hot Group/parent witness contention, index rollout,
+cleanup throughput, storage and actual query plans require later verification.
+
+Mechanism evidence reviewed 2026-09-15: PostgreSQL documents
+[READ COMMITTED statement snapshots](https://www.postgresql.org/docs/current/transaction-iso.html)
+and [conflicting row locks](https://www.postgresql.org/docs/current/explicit-locking.html).
+Its [snapshot visibility functions](https://www.postgresql.org/docs/current/functions-info.html#FUNCTIONS-PG-SNAPSHOT)
+distinguish top-level transaction visibility without commit-timestamp retention;
+together these motivate retained change witnesses instead of trusting independent page
+snapshots or an exported long-lived transaction. Its
+[multicolumn B-tree guidance](https://www.postgresql.org/docs/current/indexes-multicolumn.html)
+supports equality reverse keys followed by complete ordering keys. The chosen
+composition and capacity estimates are design deductions, not measured production
+results. Large continuously changing owners can repeatedly invalidate reviews;
+this is explicit unavailability, not optimistic approval. Source/diff inspection
+and production generation are the only evidence in the implementation phase;
+concurrency, privacy, expiry, rejected-state, installation and capacity acceptance
+remain deferred under the execution workflow.
 
 ### Direct and inherited Group membership
 

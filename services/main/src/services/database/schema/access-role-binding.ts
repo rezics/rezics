@@ -76,6 +76,7 @@ export const accessRoleBinding = pgTable(
 			columns: [table.id, table.termsRevision],
 			foreignColumns: [accessRoleBindingRevision.bindingId, accessRoleBindingRevision.revision],
 		}).onDelete("restrict"),
+		index("access_role_binding_group_page_idx").on(table.recipientGroupId, table.id).where(sql`${table.recipientGroupId} is not null`),
 		index("access_role_binding_target_idx").on(table.targetScopeId, table.id),
 		index("access_role_binding_recipient_scope_idx")
 			.on(table.targetScopeId, table.recipientScopeId, table.id)
@@ -175,6 +176,7 @@ export const accessRoleBindingRevision = pgTable(
 			columns: [table.membershipId, table.membershipGeneration, table.selectionGroupId, table.selectionVersion],
 			foreignColumns: [accessGroupMembershipEvent.membershipId, accessGroupMembershipEvent.generation, accessGroupMembershipEvent.groupId, accessGroupMembershipEvent.version],
 		}).onDelete("restrict"),
+		index("access_role_binding_selection_page_idx").on(table.selectionGroupId, table.bindingId, table.revision).where(sql`${table.selectionGroupId} is not null`),
 		index("access_role_binding_revision_admission_idx")
 			.on(table.membershipId, table.membershipGeneration, table.bindingId, table.revision)
 			.where(sql`${table.membershipId} is not null`),
