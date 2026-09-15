@@ -8,6 +8,11 @@ Read [the dictionary](data-dictionary.md), [native Work](native-work.md), [catal
 
 Dependency policy: a clean Git checkout contains every local design/reproduction input. Temporary directories and machine-local attachments are not dependencies. Public HTTPS references support research; inventory/calculation reproduction needs no network. The [dependency manifest](../../testing/database/dependency-manifest.json) lists local documents, schema inputs, API-owner directories and public sources.
 
+[Schema.org and Wikidata interoperability](../semantic-interoperability.md) is a
+required full-index contract. Source-model preservation and queryability cover
+subjects before native domain mapping; its [additional capacity envelope](../semantic-interoperability-capacity.md)
+is not included in the generated native workbook.
+
 ## 1. Selected architecture and scope
 
 Use one PostgreSQL write authority initially, in the public schema, with owner-local identity tables and typed domain structures. Separate authored content, publication, content selection, discussion, knowledge assertions, moderation, identity control, and personal activity. Preserve real foreign keys. Keep searchable/current projections rebuildable. Keep large binary payloads in object storage and durable transport in the existing NATS JetStream direction. There is no mandatory graph database, universal Edition, global content table, or all-purpose event-sourced aggregate.
@@ -203,7 +208,21 @@ Large applications stage immutable parts and dependency outcomes. Each page reco
 
 Source redirects are evidence about source records. They neither merge native identities nor transfer human claims, access grants or previous application journals. A persistent resolution record keeps original and resolved source keys and cycle/unknown states.
 
-Current elected conformance families are MusicBrainz, VNDB, Bangumi and book sources including Open Library. Coverage must pin provider contract, native meaning, write operation, query, export and positive/negative fixture. Raw retention, statistics-only, intentionally excluded and unresolved are explicit dispositions. Source account IDs, individual upstream votes, credentials and private profiles never become native users/votes. Public source ratings remain dated source statistics. Bangumi archive relationships and API-only fields need separate inventory; Open Library's API catalog is an acquisition reference, not full translation/serialization proof. [Bangumi archive](https://github.com/bangumi/Archive/blob/master/README.md), [Open Library APIs](https://openlibrary.org/developers/api)
+Current elected conformance families are MusicBrainz, Cover Art Archive, VNDB,
+Bangumi, book sources including Open Library, Schema.org document profiles and
+Wikidata. [Semantic interoperability](../semantic-interoperability.md) requires
+complete source statements and queryable external descriptions, including those
+without a native domain mapping. Schema.org vocabulary coverage is separate from
+web acquisition coverage; Wikidata namespaces and full-statement surfaces need
+explicit inventories. Coverage pins source contract, preservation/query/native/
+export disposition and positive/negative cases. Raw retention, statistics-only,
+intentionally excluded and unresolved outcomes remain visible. Source account IDs,
+individual upstream votes, credentials and private profiles never become native
+users/votes. Public source ratings remain dated source statistics. Bangumi archive
+relationships and API-only fields need separate inventory; Open Library's API
+catalog is an acquisition reference, not full translation/serialization proof.
+[Bangumi archive](https://github.com/bangumi/Archive/blob/master/README.md),
+[Open Library APIs](https://openlibrary.org/developers/api)
 
 The current convergence report's missing generic source journal, source redirects, VNDB dump joins, secondary MusicBrainz families and complete semantic export are explicitly addressed by these target protocols. No claim is made that their thousands of source declarations were implemented or exhaustively mapped in this design task.
 
@@ -327,6 +346,14 @@ Search candidates are generated from dedicated indexed projections carrying owne
 Keep provider-neutral query semantics and bounded native execution. Ordinary lookup uses owner/PK indexes. Lists use keysets with a stable tie-breaker. Relation queries bind participant roles to one association revision. Filtered full-text queries use indexed candidate plans with a work budget and continuation; they cannot scan indefinitely to fill a page. Filter-before-top-k and approximate retrieval have different recall contracts. Exact total counts are background aggregates or explicitly expensive operations.
 
 Dynamic schema acceptance and query acceptance are separate. A new property can be stored before it is elected for global equality, range, sort or full-text operations. Each supported operation names its typed authoritative field or effective-fact projection, scope/contract, index, continuation and work bound. A typical numeric projection orders property contract/scope/value/subject with a stable tie-breaker; text, dates and references need their own typed semantics. Index only elected predicates, preserve pending/conflicted/no-selection states and pin the source decision/revision. Do not index every raw claim as accepted truth or promise arbitrary unindexed combinations.
+
+The [external source-query profile](../semantic-interoperability.md#minimum-query-and-export-contract)
+elects identity, subject/property, existence, exact typed-value, reverse-reference,
+statement-detail and multilingual-name operations across every supported source
+property. This is a source-qualified view with its own bounded postings, not a
+waiver of native acceptance or arbitrary range/sort/join indexing. Source-only
+results use external handles and cannot masquerade as native REF. Independent
+coverage dimensions distinguish an archived value from an indexed one.
 
 The elected [event-date operations](event-time.md#elected-query-operations) use typed start-order and range candidate indexes with explicit certainty, actual/planned role and Tag/participant correlation. [Rating distributions](ratings.md#time-distributions-and-drill-down) expose policy, rater/observation counts, generation and contributing revisions. Non-additive per-rater range reductions use sufficient state and bounded materialized jobs. Both follow the [temporal workload envelope](temporal-capacity.md); arbitrary scans, averaging daily global means and unsafe stale counts are not accepted implementations.
 

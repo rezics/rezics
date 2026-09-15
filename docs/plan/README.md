@@ -50,6 +50,15 @@ Include affected cross-module cases in each scope's verification when dependenci
 
 The [native Work](../architecture/database/native-work.md), [logical Unit](../architecture/database/README.md#34-unit-capabilities-across-owner-tables) and composition contracts govern all modules. Cross-database operation and unresolved Hub execution remain separate activations.
 
+[Schema.org and Wikidata interoperability](../architecture/semantic-interoperability.md)
+is required for the full-index target. Its dependency order is M02 value/identity
+contracts -> M07 preserved source representations with M09 minimum queries -> M04
+native mappings and M09 exports -> combined update/recovery/capacity qualification.
+First inventory all required profiles, then implement JSON-LD and full Wikidata
+statements as initial milestones; Microdata/RDFa and lexical/shape coverage remain
+required before full acceptance. Source indexing can precede native domain mapping.
+This follow-on sequence does not change the active IAM scope or phase above.
+
 ## Modules and current target qualification
 
 This is the sole progress table. Module files detail remaining work; linked test owners retain the exact scope and revision of earlier evidence. Partial evidence does not qualify the complete replacement target.
@@ -57,11 +66,11 @@ This is the sole progress table. Module files detail remaining work; linked test
 | ID | Module | Dependencies | Design | Implementation | Verification |
 | --- | --- | --- | --- | --- | --- |
 | M01 | [Foundation](modules/foundation.md) | None | Identity/access and adapter contracts selected | RoleBinding/representation/workload persistence, native subject/path evaluation, assignment ceilings, identity/default-context APIs, scope/role-definition APIs and App declaration/lifecycle APIs implemented; OAuth client/consent/installation/context storage, live readers and bounded credential erasure implemented; remaining management and protocol integration, consumer/onboarding migration and recovery pending | G2 partial; new IAM/OAuth/default/ceiling/API work and artifact generators remain unqualified. Remaining [foundation](../testing/foundation.md) and [IAM/APP](../testing/identity-and-access.md) qualification pending. |
-| M02 | [Knowledge and graph](modules/knowledge-and-graph.md) | M01 | Graph, Tag classification and Event temporal facts selected | Pending target completion | Pending |
+| M02 | [Knowledge and graph](modules/knowledge-and-graph.md) | M01 | Graph, Tag classification, Event temporal facts and source interoperability semantics selected | Pending target completion | Pending |
 | M03 | [Content and media](modules/content-and-media.md) | M01, M02 contracts | Defined | Pending target completion | Pending |
 | M04 | [Catalog](modules/catalog.md) | M01-M03 contracts | Cross-domain Work/releases and event-time adapters selected; domain mappings/source-free cases required | Pending target completion | Pending |
 | M05 | [Creation and reading](modules/creation-and-reading.md) | M02-M04 | Composition selected; Book is the first journey | Pending target completion | Pending |
 | M06 | [Community and governance](modules/community-and-governance.md) | M01-M03 | Membership, wiki composition and complete rating contexts selected; Dynamic Collections optional | In progress | G2 partial; [wiki evidence](../testing/wiki-composition.md), remaining content revisions, authority/history/capacity and community contracts pending. |
-| M07 | [Sources and converters](modules/sources-and-converters.md) | M01-M04 native commands | Defined; field conformance pending | Pending target completion | Pending |
+| M07 | [Sources and converters](modules/sources-and-converters.md) | M01/M02 source contracts; M01-M04 native adoption | Schema.org/Wikidata full-index profiles selected alongside catalog sources; field conformance pending | Pending target completion | Pending |
 | M08 | [Skill, Prompt and MCP Hub](modules/ai-hub.md) | M01-M04 | Catalog defined; execution/hosting open | Pending target completion | Pending |
-| M09 | [Search and operations](modules/search-and-operations.md) | M01 and participating events | Rating distributions and event-date indexes selected | In progress | G2 partial; [recommendation evidence](../testing/recommendations.md), [native diagnostics](../../services/main/performance/README.md#native-failure-artifacts) and [open failures](../testing/known-failures.md); disclosure, delivery, capacity and restoration pending. |
+| M09 | [Search and operations](modules/search-and-operations.md) | M01 and participating events | Rating distributions, event-date indexes and source-query/export profiles selected | In progress | G2 partial; [recommendation evidence](../testing/recommendations.md), [native diagnostics](../../services/main/performance/README.md#native-failure-artifacts) and [open failures](../testing/known-failures.md); source interoperability, disclosure, delivery, capacity and restoration pending. |

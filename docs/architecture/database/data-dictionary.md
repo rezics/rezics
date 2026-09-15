@@ -99,6 +99,14 @@ Independent catalog intake and participant construction retain separate admissio
 
 Semantic class definitions/adapters resolve the governed Tag/Expression vocabulary and accepted Application evidence in D11; they do not create another independently editable classification truth. Typed property, predicate, role and structural-capability definitions retain their own meaning and validation. The [event-time contract](event-time.md) binds named-event topic Tags to one accepted native event referent through a versioned `denotes` fact. Date facts live on that referent or its authoritative native occurrence, never on a second editable copy attached to the topic Tag.
 
+[External semantic representations](#d141-source-semantic-representations) retain
+source statements before native adoption. A native mapping must preserve or
+explicitly leave unmapped qualifiers, reference groups and value states; source
+rank never supplies an acceptance decision. Existential unknown (`somevalue`),
+explicit no-value (`novalue`) and unobserved are distinct. Typed native conversion
+pins unit, bounds, precision, calendar/globe and language rules where applicable;
+retaining an unconverted source value does not qualify native range queries.
+
 For temporal single-value results, either use exclusion constraints on exact effective intervals or stage and validate a non-overlapping accepted timeline under the slot lock. Uncertain intervals are not silently coerced into exact ranges. Ordinary current-head queries are separate from historical valid-time queries.
 
 Participant targets may span registered catalog and platform owners when the predicate's role contract permits them. The current catalog-only target set is not the target Graph API's full admission contract. Valid REF existence, compatible structural capability and current authority must each be established. [Selected query indexes](README.md#13-search-recommendation-export-and-derived-state) distinguish subject-local fact reads from global property/value search; a typed value node is not evidence that every such search is indexed.
@@ -337,12 +345,54 @@ Global, Realm and account applications share the logical Unit target contract, n
 | api_quota_policy/revision/binding/override | Policy id/revision; account/token binding; periods/caps | Versioned policy; canonical token/account scope; no plaintext token |
 | api_quota_rate_state / daily_usage / request_lease / creation_reservation | Account/token/bucket/window keys, consumed/reserved units, lease operation | Concurrent reservations bounded; completion and expiry idempotent; account-erasure indexes |
 
+### D14.1. Source semantic representations
+
+[Semantic interoperability](../semantic-interoperability.md) owns Schema.org and
+Wikidata meaning. These families belong to the source owner, with concrete keys
+to D14 records/observations. They introduce no global native identity parent.
+Names specify logical responsibilities; physical representation and generated DDL
+remain implementation work. A representation key includes its source record,
+observation and parser/profile revision. All child FKs include that complete key.
+
+| Relation family | Keys / fields | Contract / access |
+| --- | --- | --- |
+| source_semantic_representation / part | Exact observation FK, parser/profile revision, part key, input digest, sealed manifest | Immutable parsed source model; staging cannot become a queryable complete head; observation/representation/part keysets |
+| source_semantic_node | Representation/node key; named IRI or observation-scoped anonymous identity, source entity kind | Exactly one identity form; unknown native target stays external; original external key and collision-checked lookup |
+| source_statement | Representation/statement key, subject node FK, default/named graph discriminator and graph node FK, property IRI, main snak state/datatype/value, source ID/rank where required by profile, evidence pointer | Source IDs opaque; repeated subject/property/value claims remain distinct; exact graph scope; subject/property/statement pages |
+| source_qualifier / source_reference_snak | Exact statement key, occurrence key, property IRI, snak state/datatype/value; reference snak also has exact group FK | Typed value required only for value snaks; repeated properties legal; qualifiers correlate to one statement, reference snaks to one group |
+| source_reference_group | Statement/group key, original hash/order metadata | Membership preserved; hash is not global identity or proof of uniqueness; statement/group pages |
+| source_semantic_value | Representation/value key; typed alternative, original lexical form, comparison contract/key, availability | Distinguish references, language/direction text, JSON literals, exact decimal/unit/bounds, calendar/precision, globe/coordinates and typed resource/notation values; raw unsupported payload has unresolved state |
+| source_collection_member / source_lexical_member | Representation/container/member key, membership kind, exactly one complete source node or typed-value FK, ordinal where meaningful | Lists admit literal and node values; sets/containers retain declared semantics; lexical parentage requires eligible node kinds; no dedupe of repeated ordered uses |
+| source_description_term / source_sitelink / source_vocabulary_term / source_shape_document | Representation/node/field occurrence; typed language/text, site/title/badge members, term declarations or shape-text receipt | Preserve namespace-specific fields and child memberships; Properties and EntitySchemas have independent source descriptions; large bodies use payload receipts |
+| source_term_mapping_revision | Source term/profile and mapping revision; native definition REV or governed classification citation, correspondence kind, conversion/coverage | Versioned semantic mapping, not imported native authority; identity mappings reuse source_mapping_claim/binding_revision |
+| source_semantic_coverage | Dataset/profile/representation/construct key; preservation/query/native/export outcomes and reasons | Independent coverage dimensions; rejected/withheld/unresolved inputs remain in scoped denominator; generation-bound inventory |
+
+Original IRI spelling and alias policy remain available; anonymous identity does
+not cross observations without correspondence evidence. Ordered-source metadata
+does not invent order for unordered source properties. References to source nodes
+and references to native REF are distinct validated alternatives at mapping/API
+boundaries. A source node cannot be used where a native structural FK is required.
+
+Profile validation distinguishes default graph from named/anonymous graph identity,
+requires Wikidata rank/main-snak fields where applicable and keeps missing values
+separate from explicit no-value. Source lexical syntax such as a discarded JSON-LD
+null does not manufacture a semantic statement. Source structures and value alternatives
+have concrete typed FKs and seal-time completeness checks, not unchecked key strings.
+
+Corpus-size and child amplification follow the
+[interoperability capacity envelope](../semantic-interoperability-capacity.md).
+External terms and shape documents are growing source data, not implicitly bounded
+native definition configuration. Separate physical value rows, relation keys and
+extra postings must be counted before persistence qualification.
+
 ## D15. Search, recommendations and other projections
 
 | Relation family | Keys / fields | Authority / access |
 | --- | --- | --- |
 | unit_search_document / candidate / language index | Target REF, scope, language, current content/semantic REV, generation, searchable fields | Rebuildable; policy filter at disclosure; selected inverted and typed indexes only |
 | named-form / identifier / effective-fact search | Native keys + source REV/generation and normalized predicate | One semantic source; projection never edited as a fact |
+| source_semantic_generation / manifest | Dataset/profile/generation, exact representation membership, source watermark vector, state | Complete activation after staged manifest checks; retain old generation on failure; incremental manifests reuse unchanged observations |
+| source_semantic_posting / name index | Source/generation/subject/property/statement or property/value/statement or target/property/subject; role/group key where applicable | Rebuildable minimum source-query operations for every supported property; exact typed-value recheck, keyset/partition continuation and current disclosure; never accepted native truth |
 | recommendation_snapshot / partition | Snapshot/partition, input cut, algorithm version, cursor, completeness | Atomic active generation switch only after all partitions validate |
 | recommendation_event/exclusion/metric | Account/REF/time event; private exclusions; aggregate inputs | Request/REF/type event dedupe; private event erasure preserves references and aggregate inputs; source scores kept identifiable |
 | unit_best_score / ranking | Target/scope/algorithm generation; deterministic tie breaker | Display ranking does not change native score history |

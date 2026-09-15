@@ -7,6 +7,7 @@
 - [Connected applications](architecture/connected-apps.md): third-party Entity connections, OAuth, installations and REZICS MCP access.
 - [Identity and access experience](architecture/identity-and-access-experience.md): ordinary-user defaults and progressively disclosed collaboration/administration.
 - [Database architecture](architecture/database/README.md): target schema, meaning and capacity.
+- [Schema.org and Wikidata interoperability](architecture/semantic-interoperability.md): complete source models, queryable external descriptions, native mappings, export fidelity and coverage; [capacity](architecture/semantic-interoperability-capacity.md) includes source/index amplification.
 - [Native Work and release](architecture/database/native-work.md): shared product meaning across creative domains and applicable properties.
 - [Content composition](architecture/database/content-composition.md): explicit occurrences, import/refresh, published selections and read models.
 - [Rating contexts and history](architecture/database/ratings.md): standing/daily/per-experience observations, explicit context transitions, latest/history aggregation and time distributions.

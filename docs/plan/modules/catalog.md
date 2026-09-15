@@ -14,6 +14,7 @@ Dependencies: M01-M03 contracts. Owner: [catalog model](../../architecture/datab
 - Test repeated targets, incomplete contents, large staged structures, foreign-owner reuse and world/canon/series memberships.
 - Replace publication/target-pair content keys with parent/manifest/occurrence keys and update histories, source correspondence, exact references and consumers together. Account for changed key widths and repeated-use amplification using the existing 500M/3B capacity model before persistence acceptance.
 - Build APIs and semantic exports with their native commands; source adapters use the same commands.
+- Qualify [Schema.org/Wikidata mappings](../../architecture/semantic-interoperability.md) for elected native domains with SIO11/SIO15: multi-type descriptions, external editions, classification and identity correspondence retain exact evidence and source residuals. An unmapped external subject remains indexed without a fabricated native parent or new business service.
 
 ## Acceptance
 

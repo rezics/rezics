@@ -5,6 +5,13 @@ and records reversible correspondence with independently owned catalog objects.
 Provider adapters write native domain structures. An archive or a generic JSON
 tree is not evidence that a field has native semantics.
 
+[Schema.org and Wikidata interoperability](semantic-interoperability.md) also
+requires an immutable parsed source representation and rebuildable semantic
+indexes before native adoption. Their external descriptions remain queryable
+without creating native identities. Parsed/indexed completeness, native mapping
+and publication have separate states; current source rank or an upstream redirect
+cannot replace the adoption and authority protocols below.
+
 The [system flow](database/README.md#21-system-flow-and-consistency) separates a
 new observation, native adoption and publication of a selected version. A source
 record can inform several native scopes; neither source class names nor IDs

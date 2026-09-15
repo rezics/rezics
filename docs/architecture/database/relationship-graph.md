@@ -1,6 +1,6 @@
 # Relationship Graph API and Block contract
 
-The Graph API is a bounded read projection of native identities, associations, participants, accepted claims and evidence. It introduces no second graph authority. Existing relation/participant CRUD is a foundation, not proof of graph-query completion.
+The native Graph API is a bounded read projection of native identities, associations, participants, accepted claims and evidence. It introduces no second graph authority. Existing relation/participant CRUD is a foundation, not proof of graph-query completion.
 
 ## Generic participants and capability admission
 
@@ -14,7 +14,14 @@ The present catalog participant tables provide a narrower catalog-only foundatio
 
 ## Query contract
 
-A request names root references, allowed predicates/participant roles, semantic context/canon/work, governance scope, valid-time or exact historical cut, viewer spoiler policy, depth, node/relation budgets and continuation. The server derives authority from the authenticated caller; request scope is not permission.
+The [source semantic view](../semantic-interoperability.md#minimum-query-and-export-contract)
+adds separately typed external node/statement handles, pinned dataset generations
+and source-qualified results. It may reuse traversal machinery; it does not widen
+native participant REF admission. A source graph can be queried before native
+mapping. An optional correspondence overlay preserves original source identity,
+mapping revision and current visibility of both source and native targets.
+
+A native-view request names root references, allowed predicates/participant roles, semantic context/canon/work, governance scope, valid-time or exact historical cut, viewer spoiler policy, depth, node/relation budgets and continuation. The server derives authority from the authenticated caller; request scope is not permission.
 
 The cursor pins normalized query, relevant policy/definition/topology generation and scan progress. Changing semantic context or a query-defining filter cannot reuse an incompatible cursor. Large graph exploration is explicit bounded continuation; there is no promise to load a complete connected component synchronously.
 

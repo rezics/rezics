@@ -8,6 +8,7 @@ This matrix defines G4 evidence. See the [plan's gates](README.md#acceptance-gat
 | Logical Unit separation | Qualified generic references, owner adapters and shared Tag/relation/participation capabilities; logical table changes do not require per-kind feature rewrites or a universal parent. |
 | APIs | Eager route compilation, OpenAPI/SDK parity, allowed/denied cases and producer-to-consumer requests. |
 | Sources | Elected provider/surface roundtrips, updates/withdrawal/reapply, partial coverage, cross-source and human-override tests. |
+| Semantic interoperability | [SIO01-SIO18](../testing/source-conformance.md#schemaorg-and-wikidata-acceptance): required Schema.org syntaxes and full Wikidata model, source-query coverage before native mapping, complete statements, export fidelity, pinned datasets, incremental gap recovery and additional capacity evidence. |
 | Native Work/release | Common cross-domain scope/continuity, applicable properties, virtual/actual releases and source mappings; Book is not a substitute for music, audiovisual, game/software and mixed-media cases. |
 | Composition | Complete local occurrences, exact published selections, staged import/refresh, source/local conflicts, child pagination, measurements and progress with retry/revocation/recovery. |
 | Creation | Full Book journey plus cross-domain original/community contribution and consumption cases through shared capabilities. |

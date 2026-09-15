@@ -11,6 +11,12 @@ owns progressive disclosure. These owners distinguish adopted semantics from
 adapter, SQL, workload and human-usability qualification without copying a second
 evidence matrix here.
 
+[Schema.org and Wikidata interoperability](../semantic-interoperability.md) owns
+the primary specifications reviewed September 15, 2026, the selected source-model
+and native-mapping distinction, and export limits. Its
+[capacity envelope](../semantic-interoperability-capacity.md) is a separate planning
+estimate; no runtime or full-provider qualification follows from those sources.
+
 ## Native Work and classification
 
 | Primary source | Evidence and selected use | Limit / REZICS obligation |

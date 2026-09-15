@@ -80,6 +80,13 @@ UI locale, metadata localization, original/translation language and consumption 
 
 ## Conformance and growth
 
+[Schema.org and Wikidata interoperability](../semantic-interoperability.md) extends
+full indexing beyond currently implemented native domains. Queryable external
+descriptions may exist without native adoption; native owners retain their own
+identity, structural admission and commands. External classes, Q IDs and shared
+names do not create Work/release parents, account participation or automatic
+identity merges. Mapping coverage and source-query coverage are separate gates.
+
 Every selected distinction requires source-free commands plus appropriate cross-provider fixtures, exact evidence, query and export. [Source conformance](../../testing/source-conformance.md) owns provider coverage. Unknown/partial/unobserved/withdrawn/private values survive roundtrips. No source account/vote becomes native authority or participation.
 
 Use owner/aggregate-local keys, bounded manifests and keyset pages. Estimate every growing relation at 500M/3B rows and account for member/history/evidence amplification. [Capacity](capacity.md) contains recalculable scenarios; they do not prove runtime capacity.

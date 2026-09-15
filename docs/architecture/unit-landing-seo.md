@@ -70,6 +70,12 @@ main entity.
 
 ## Workload and capacity
 
+The [full interoperability target](semantic-interoperability.md) adds versioned
+source ingestion, querying and export independently of this implemented SEO slice.
+Future vocabulary projections must preserve this public disclosure boundary and
+use accepted native facts. Existing JSON-LD output does not qualify Schema.org
+input profiles, complete vocabulary mappings or Wikidata source compatibility.
+
 The sizing baseline is 500,000,000 Units and the planning estimate is 3,000,000,000 Units. The SEO
 request path does no corpus scan, count, deep offset, recursive lookup, or unbounded fan-out.
 

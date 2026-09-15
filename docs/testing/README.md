@@ -9,7 +9,7 @@ This directory owns test scenarios and evidence. Follow the [active scope](../pl
 | [Identity, access and connected apps](identity-and-access.md) | Pending mixed-principal/Entity, groups/roles/representation, OAuth/MCP, privacy, revocation and layered-GUI acceptance; older Self fixtures are not qualification. |
 | [Native Work and release](native-work.md) | Cross-domain identity/continuity, virtual/actual releases, applicable properties and source mappings. |
 | [Content composition](content-composition.md) | Explicit local occurrences, exact selections, staged import/refresh, metrics, progress and recovery. |
-| [Source conformance](source-conformance.md) | Provider data -> converter -> native writes -> API/export -> update/withdraw/replay. |
+| [Source conformance](source-conformance.md) | Provider data -> source queries -> reviewed native writes -> API/export -> update/withdraw/replay; SIO01-SIO18 cover Schema.org/Wikidata preservation, indexing, mapping and recovery. |
 | [Book and creation](book-and-creation.md) | Complete Book, original and AO3-derived native workflows. |
 | [Relationship Graph](relationship-graph.md) | Subgraph semantics, permissions, budgets and Block descriptor contracts. |
 | [Ratings and event time](ratings-and-event-time.md) | Context/observation/revision identity, latest/history aggregation, time histograms, event-date queries and explicit user actions. |
