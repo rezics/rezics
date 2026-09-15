@@ -1,11 +1,12 @@
 import { z } from "zod";
 import { AccessManagementPermissionValues } from "@rezics/access";
 import { UnitReferenceSchema } from "@rezics/reference";
+import { AccessGroupPresentationSchema } from "../../authorization/groups";
 import { AccessRoleDefinitionSchema } from "../../authorization/roles";
 
 const id = z.uuid().toLowerCase();
-const version = z.number().int().nonnegative().safe();
-const positiveVersion = version.refine(value => value > 0);
+const version = z.number().int().safe().min(0);
+const positiveVersion = version.min(1);
 const state = z.enum(["draft", "active", "retired"]);
 const scope = z.string().startsWith("rzs1.").max(512);
 /** Public management root requests never accept another account's private identifier. @alpha */
@@ -45,3 +46,28 @@ export const ManagedRoles = z.strictObject({ items: z.array(z.strictObject({ id,
 export const ManagedRoleHistory = z.strictObject({ items: z.array(z.strictObject({ version: positiveVersion,
 	operationId: id, operation: z.enum(["create", "revise", "activate", "retire"]), state,
 	activeRevision: positiveVersion.nullable(), createdAt: z.iso.datetime() })).max(100), nextCursor: positiveVersion.nullable() });
+
+/** Selected private Group at a credential-bound management root. @alpha */
+export const GroupParams = ScopeParams.extend({ groupId: id });
+/** Bounded Group directory continuation. @alpha */
+export const GroupListQuery = z.strictObject({ afterId: id.optional() });
+/** Exact historical version, omitted for the current head. @alpha */
+export const GroupQuery = z.strictObject({ version: z.coerce.number().int().safe().min(1).optional() });
+/** Bounded Group snapshot history continuation. @alpha */
+export const GroupHistoryQuery = z.strictObject({ afterVersion: z.coerce.number().int().safe().min(0).optional() });
+/** Create one Group with an explicit parent selection and retry identity. @alpha */
+export const CreateGroupBody = z.strictObject({ operationId: id, expectedVersion: z.literal(0), parentId: id.nullable(), presentation: AccessGroupPresentationSchema });
+/** Complete presentation replacement preserves topology and membership. @alpha */
+export const UpdateGroupBody = z.strictObject({ operationId: id, expectedVersion: positiveVersion, presentation: AccessGroupPresentationSchema });
+/** Move one Group; populated assignment impact is currently unavailable. @alpha */
+export const ReparentGroupBody = z.strictObject({ operationId: id, expectedVersion: positiveVersion, parentId: id.nullable() });
+/** Retire one Group; dependent authority requires pending recovery admission. @alpha */
+export const RetireGroupBody = z.strictObject({ operationId: id, expectedVersion: positiveVersion });
+/** Original command outcome, never a continuing authority proof. @alpha */
+export const GroupReceipt = z.strictObject({ groupId: id, operationId: id, version: positiveVersion, state: z.enum(["active", "retired"]), parentId: id.nullable() });
+/** Private Group presentation snapshot without principal/subject attribution. @alpha */
+export const ManagedGroup = AccessGroupPresentationSchema.extend({ groupId: id, version: positiveVersion, state: z.enum(["active", "retired"]), parentId: id.nullable() });
+/** Scope/id keyset directory; current authority is rechecked on every page. @alpha */
+export const ManagedGroups = z.strictObject({ items: z.array(ManagedGroup).max(100), nextCursor: id.nullable() });
+/** Immutable presentation and command history, omitting private audit identities. @alpha */
+export const ManagedGroupHistory = z.strictObject({ items: z.array(ManagedGroup.omit({ groupId: true }).extend({ operationId: id, operation: z.enum(["create", "update", "reparent", "retire"]), createdAt: z.iso.datetime() })).max(100), nextCursor: positiveVersion.nullable() });

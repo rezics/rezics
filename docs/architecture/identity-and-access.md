@@ -416,6 +416,50 @@ support the maximum-child access path without scanning every sibling. Native
 cycle/depth/shrink/width and two-connection tests qualify this mechanism; they do
 not establish live role assignment impact, inherited roster privacy or throughput.
 
+### Private Group management boundary
+
+The native `/access/:scope/groups` API uses credential-bound opaque scope selectors
+and current server-owned authority at `groups` or `groups/<group-id>`. Directory
+reads require the broad path; detail and immutable history require the exact path.
+Each page is an ascending keyset of at most 100 records (101 candidates), using
+scope/Group and Group/version indexes. Historical reads retain current disclosure
+checks and return no private operator or authority-subject identifiers. Mutations
+record both private identities from live authority, preserve operation receipts
+and require exact control versions. Reparent and retire additionally require a
+fresh interactive session. Creation and presentation update confer no membership.
+
+The current topology API admits only dependency-free empty leaves for reparent and
+retire. This is a sufficient no-impact proof, not the complete populated-topology
+contract: the exclusive tree fence excludes child/selection changes; the exclusive
+Group head excludes new Group-referencing FK inserts. Under both fences, admission
+requires height one, no physically selected direct memberships (including stale
+admissions), and no Group-targeted RoleBinding, representation or assignment-ceiling
+records, including dormant records. Exact-selection dependent authority is already
+ineffective when no selection is active. No authority or recovery dependency can
+be removed or gained by the admitted transition. Existing recovery authority is
+preserved, but this does not certify that the scope already has a valid protected
+recovery path. Receipt replay still requires live management authority, but does
+not rerun new-effect impact against an already-applied transition.
+
+Nonempty impact remains unavailable until Group assignment-impact and protected
+recovery management are implemented. That owner must discover old/new ancestors,
+affected Group recipients and exact-selection/representation lineage dependencies,
+retain/promote their complete target/Entity/tree/enrollment/selection/role fences,
+admit all proposed permissions and recipient changes against explicit ceilings,
+and prove protected continuity from the pre-change state. Empty roster alone may
+never bypass these requirements. The API's unavailable response is an unfinished
+prerequisite, not a permanent unsupported operation or a denied-policy decision.
+
+The no-impact proof uses bounded existence seeks, never a descendant or subject
+scan. A partial `(recipient_group_id,id)` ceiling index adds one entry per
+Group-targeted ceiling. At an estimated 64 bytes/entry, the conservative all-Group
+case adds 32 GB at 500M ceilings or 192 GB at 3B, excluding bloat, WAL, replicas and
+reserves; multiply by the Group-recipient fraction for a mixed population. Each
+such ceiling insertion adds one index write. Group page presentation is bounded by
+100 × 4,608 payload bytes before JSON/identity overhead. Hot-scope tree contention,
+index installation cost and actual query plans remain verification obligations;
+no new runtime, concurrency or capacity evidence is claimed for this boundary.
+
 ### Direct and inherited Group membership
 
 A direct Group selection belongs to one exact membership admission and one Group

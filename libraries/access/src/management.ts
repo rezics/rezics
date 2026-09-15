@@ -8,6 +8,11 @@ import {
 /** Canonical management actions for the mixed IAM target; transport activation is separately gated. @alpha */
 export const AccessManagementPermissionValues = [
 	"access.identity.select",
+	"access.group.read",
+	"access.group.create",
+	"access.group.update",
+	"access.group.reparent",
+	"access.group.retire",
 	"access.role.read",
 	"access.role.create",
 	"access.role.update",
@@ -39,6 +44,11 @@ export const AccessManagementPermissionDefinitions = {
 		rationale:
 			"Selecting a controlled Entity as a private default requires current representation for this action on that Entity's identity path; it grants no data access or account administration.",
 	},
+	"access.group.read": { resource: "access.group", action: "read" },
+	"access.group.create": { resource: "access.group", action: "create" },
+	"access.group.update": { resource: "access.group", action: "update", rationale: "Presentation editing preserves topology and membership; it confers no enrollment or assignment power." },
+	"access.group.reparent": { resource: "access.group", action: "reparent", rationale: "Changing inherited recipients requires separate assignment-impact and recovery admission; presentation editing cannot move a Group." },
+	"access.group.retire": { resource: "access.group", action: "retire", rationale: "Terminal retirement ends Group effectiveness while retaining private history and requires recovery continuity." },
 	"access.role.read": { resource: "access.role", action: "read" },
 	"access.role.create": { resource: "access.role", action: "create" },
 	"access.role.update": { resource: "access.role", action: "update" },

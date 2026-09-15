@@ -37,6 +37,7 @@ export const accessAssignmentCeiling = pgTable("access_assignment_ceiling", {
 	index("access_assignment_ceiling_manager_idx").on(table.scopeId, table.managerBindingId, table.roleId, table.id),
 	index("access_assignment_ceiling_role_idx").on(table.roleId, table.scopeId, table.id),
 	index("access_assignment_ceiling_subject_idx").on(table.recipientSubjectId, table.id).where(sql`${table.recipientSubjectId} is not null`),
+	index("access_assignment_ceiling_group_idx").on(table.recipientGroupId, table.id).where(sql`${table.recipientGroupId} is not null`),
 	index("access_assignment_ceiling_recipient_scope_idx").on(table.recipientScopeId, table.id).where(sql`${table.recipientScopeId} is not null`),
 	check("access_assignment_ceiling_version_check", sql`${table.version} between 0 and 2 and ${table.managerTermsRevision} between 1 and 9007199254740991`),
 	check("access_assignment_ceiling_state_check", sql`(${table.version}=0 and ${table.state}='draft' and not ${table.sealed}) or (${table.version}=1 and ${table.state}='active' and ${table.sealed}) or (${table.version}=2 and ${table.state}='revoked' and ${table.sealed})`),

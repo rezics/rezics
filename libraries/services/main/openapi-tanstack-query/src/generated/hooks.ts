@@ -23,6 +23,7 @@ import {
 	attachMusicDiscToc,
 	cancelOrganizationMembershipInvitation,
 	controlCatalogSourceJob,
+	createAccessGroup,
 	createAccessRole,
 	createAccountIdentity,
 	createCatalogDefinition,
@@ -93,6 +94,7 @@ import {
 	enableConnectedApp,
 	eraseOwnAccount,
 	findSoftwareReleases,
+	getAccessGroup,
 	getAccessRole,
 	getActingEntityPresentationRevision,
 	getApiAccountMe,
@@ -261,6 +263,8 @@ import {
 	inviteOrganizationMember,
 	issueParticipationGrant,
 	leaveOrganizationMembership,
+	listAccessGroupHistory,
+	listAccessGroups,
 	listAccessRoleHistory,
 	listAccessRoles,
 	listActingEntityPresentationHistory,
@@ -543,6 +547,7 @@ import {
 	removeProgramOccurrence,
 	removePublishingComponent,
 	renameGroupingOrderProfile,
+	reparentAccessGroup,
 	replaceCatalogContentLanguageSupport,
 	replaceRealmSlugAddress,
 	replaceUnitSlugAddressWithPlatformAccess,
@@ -568,6 +573,7 @@ import {
 	restoreSoftwareCredit,
 	restoreSoftwareDetails,
 	restoreSoftwareParticipationContext,
+	retireAccessGroup,
 	retireConnectedApp,
 	retryNativeMerge,
 	reviewNativeMerge,
@@ -591,6 +597,7 @@ import {
 	setConnectedAppTrust,
 	setMainIdentityPreference,
 	transitionCatalogSemanticState,
+	updateAccessGroupPresentation,
 	updateActingEntityPresentation,
 	updateCatalogLifecycle,
 	updateCurrentUserPrivacy,
@@ -661,6 +668,17 @@ import type {
 	ControlCatalogSourceJobStatus422,
 	ControlCatalogSourceJobStatus429,
 	ControlCatalogSourceJobStatus500,
+	CreateAccessGroupOptions,
+	CreateAccessGroupStatus200,
+	CreateAccessGroupStatus400,
+	CreateAccessGroupStatus401,
+	CreateAccessGroupStatus403,
+	CreateAccessGroupStatus404,
+	CreateAccessGroupStatus409,
+	CreateAccessGroupStatus422,
+	CreateAccessGroupStatus429,
+	CreateAccessGroupStatus500,
+	CreateAccessGroupStatus503,
 	CreateAccessRoleOptions,
 	CreateAccessRoleStatus200,
 	CreateAccessRoleStatus400,
@@ -1131,6 +1149,17 @@ import type {
 	FindSoftwareReleasesStatus200,
 	FindSoftwareReleasesStatus422,
 	FindSoftwareReleasesStatus500,
+	GetAccessGroupOptions,
+	GetAccessGroupStatus200,
+	GetAccessGroupStatus400,
+	GetAccessGroupStatus401,
+	GetAccessGroupStatus403,
+	GetAccessGroupStatus404,
+	GetAccessGroupStatus409,
+	GetAccessGroupStatus422,
+	GetAccessGroupStatus429,
+	GetAccessGroupStatus500,
+	GetAccessGroupStatus503,
 	GetAccessRoleOptions,
 	GetAccessRoleStatus200,
 	GetAccessRoleStatus422,
@@ -2025,6 +2054,28 @@ import type {
 	LeaveOrganizationMembershipStatus409,
 	LeaveOrganizationMembershipStatus422,
 	LeaveOrganizationMembershipStatus500,
+	ListAccessGroupHistoryOptions,
+	ListAccessGroupHistoryStatus200,
+	ListAccessGroupHistoryStatus400,
+	ListAccessGroupHistoryStatus401,
+	ListAccessGroupHistoryStatus403,
+	ListAccessGroupHistoryStatus404,
+	ListAccessGroupHistoryStatus409,
+	ListAccessGroupHistoryStatus422,
+	ListAccessGroupHistoryStatus429,
+	ListAccessGroupHistoryStatus500,
+	ListAccessGroupHistoryStatus503,
+	ListAccessGroupsOptions,
+	ListAccessGroupsStatus200,
+	ListAccessGroupsStatus400,
+	ListAccessGroupsStatus401,
+	ListAccessGroupsStatus403,
+	ListAccessGroupsStatus404,
+	ListAccessGroupsStatus409,
+	ListAccessGroupsStatus422,
+	ListAccessGroupsStatus429,
+	ListAccessGroupsStatus500,
+	ListAccessGroupsStatus503,
 	ListAccessRoleHistoryOptions,
 	ListAccessRoleHistoryStatus200,
 	ListAccessRoleHistoryStatus422,
@@ -3931,6 +3982,16 @@ import type {
 	RenameGroupingOrderProfileStatus422,
 	RenameGroupingOrderProfileStatus429,
 	RenameGroupingOrderProfileStatus500,
+	ReparentAccessGroupOptions,
+	ReparentAccessGroupStatus200,
+	ReparentAccessGroupStatus400,
+	ReparentAccessGroupStatus401,
+	ReparentAccessGroupStatus403,
+	ReparentAccessGroupStatus404,
+	ReparentAccessGroupStatus409,
+	ReparentAccessGroupStatus422,
+	ReparentAccessGroupStatus500,
+	ReparentAccessGroupStatus503,
 	ReplaceCatalogContentLanguageSupportOptions,
 	ReplaceCatalogContentLanguageSupportStatus200,
 	ReplaceCatalogContentLanguageSupportStatus400,
@@ -4085,6 +4146,16 @@ import type {
 	RestoreSoftwareParticipationContextStatus422,
 	RestoreSoftwareParticipationContextStatus429,
 	RestoreSoftwareParticipationContextStatus500,
+	RetireAccessGroupOptions,
+	RetireAccessGroupStatus200,
+	RetireAccessGroupStatus400,
+	RetireAccessGroupStatus401,
+	RetireAccessGroupStatus403,
+	RetireAccessGroupStatus404,
+	RetireAccessGroupStatus409,
+	RetireAccessGroupStatus422,
+	RetireAccessGroupStatus500,
+	RetireAccessGroupStatus503,
 	RetireConnectedAppOptions,
 	RetireConnectedAppStatus200,
 	RetireConnectedAppStatus400,
@@ -4220,6 +4291,17 @@ import type {
 	TransitionCatalogSemanticStateStatus422,
 	TransitionCatalogSemanticStateStatus429,
 	TransitionCatalogSemanticStateStatus500,
+	UpdateAccessGroupPresentationOptions,
+	UpdateAccessGroupPresentationStatus200,
+	UpdateAccessGroupPresentationStatus400,
+	UpdateAccessGroupPresentationStatus401,
+	UpdateAccessGroupPresentationStatus403,
+	UpdateAccessGroupPresentationStatus404,
+	UpdateAccessGroupPresentationStatus409,
+	UpdateAccessGroupPresentationStatus422,
+	UpdateAccessGroupPresentationStatus429,
+	UpdateAccessGroupPresentationStatus500,
+	UpdateAccessGroupPresentationStatus503,
 	UpdateActingEntityPresentationOptions,
 	UpdateActingEntityPresentationStatus200,
 	UpdateActingEntityPresentationStatus400,
@@ -5013,6 +5095,804 @@ export function useReviseAccessRole<TContext>(
 			| ReviseAccessRoleStatus500
 		>,
 		ReviseAccessRoleOptions,
+		TContext
+	>;
+}
+
+export const listAccessGroupsQueryKey = ({
+	path,
+	query,
+}: Omit<ListAccessGroupsOptions, "headers">) =>
+	[{ url: "/api/v1/access/:scope/groups", params: path }, ...(query ? [query] : [])] as const;
+
+type ListAccessGroupsQueryKey = ReturnType<typeof listAccessGroupsQueryKey>;
+
+export function listAccessGroupsQueryOptions(
+	{ path, query }: ListAccessGroupsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listAccessGroupsQueryKey({ path, query });
+	return queryOptions<
+		ListAccessGroupsStatus200,
+		ResponseErrorConfig<
+			| ListAccessGroupsStatus400
+			| ListAccessGroupsStatus401
+			| ListAccessGroupsStatus403
+			| ListAccessGroupsStatus404
+			| ListAccessGroupsStatus409
+			| ListAccessGroupsStatus422
+			| ListAccessGroupsStatus429
+			| ListAccessGroupsStatus500
+			| ListAccessGroupsStatus503
+		>,
+		ListAccessGroupsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return listAccessGroups({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups}
+ */
+export function useListAccessGroups<
+	TData = ListAccessGroupsStatus200,
+	TQueryData = ListAccessGroupsStatus200,
+	TQueryKey extends QueryKey = ListAccessGroupsQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path: ListAccessGroupsOptions["path"] | (() => ListAccessGroupsOptions["path"]);
+		query?: ListAccessGroupsOptions["query"] | (() => ListAccessGroupsOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListAccessGroupsStatus200,
+				ResponseErrorConfig<
+					| ListAccessGroupsStatus400
+					| ListAccessGroupsStatus401
+					| ListAccessGroupsStatus403
+					| ListAccessGroupsStatus404
+					| ListAccessGroupsStatus409
+					| ListAccessGroupsStatus422
+					| ListAccessGroupsStatus429
+					| ListAccessGroupsStatus500
+					| ListAccessGroupsStatus503
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey = resolvedOptions?.queryKey ?? listAccessGroupsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listAccessGroupsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| ListAccessGroupsStatus400
+			| ListAccessGroupsStatus401
+			| ListAccessGroupsStatus403
+			| ListAccessGroupsStatus404
+			| ListAccessGroupsStatus409
+			| ListAccessGroupsStatus422
+			| ListAccessGroupsStatus429
+			| ListAccessGroupsStatus500
+			| ListAccessGroupsStatus503
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getAccessGroupQueryKey = ({ path, query }: Omit<GetAccessGroupOptions, "headers">) =>
+	[
+		{ url: "/api/v1/access/:scope/groups/:groupId", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type GetAccessGroupQueryKey = ReturnType<typeof getAccessGroupQueryKey>;
+
+export function getAccessGroupQueryOptions(
+	{ path, query }: GetAccessGroupOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getAccessGroupQueryKey({ path, query });
+	return queryOptions<
+		GetAccessGroupStatus200,
+		ResponseErrorConfig<
+			| GetAccessGroupStatus400
+			| GetAccessGroupStatus401
+			| GetAccessGroupStatus403
+			| GetAccessGroupStatus404
+			| GetAccessGroupStatus409
+			| GetAccessGroupStatus422
+			| GetAccessGroupStatus429
+			| GetAccessGroupStatus500
+			| GetAccessGroupStatus503
+		>,
+		GetAccessGroupStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return getAccessGroup({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId}
+ */
+export function useGetAccessGroup<
+	TData = GetAccessGroupStatus200,
+	TQueryData = GetAccessGroupStatus200,
+	TQueryKey extends QueryKey = GetAccessGroupQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path: GetAccessGroupOptions["path"] | (() => GetAccessGroupOptions["path"]);
+		query?: GetAccessGroupOptions["query"] | (() => GetAccessGroupOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetAccessGroupStatus200,
+				ResponseErrorConfig<
+					| GetAccessGroupStatus400
+					| GetAccessGroupStatus401
+					| GetAccessGroupStatus403
+					| GetAccessGroupStatus404
+					| GetAccessGroupStatus409
+					| GetAccessGroupStatus422
+					| GetAccessGroupStatus429
+					| GetAccessGroupStatus500
+					| GetAccessGroupStatus503
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey = resolvedOptions?.queryKey ?? getAccessGroupQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getAccessGroupQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetAccessGroupStatus400
+			| GetAccessGroupStatus401
+			| GetAccessGroupStatus403
+			| GetAccessGroupStatus404
+			| GetAccessGroupStatus409
+			| GetAccessGroupStatus422
+			| GetAccessGroupStatus429
+			| GetAccessGroupStatus500
+			| GetAccessGroupStatus503
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const createAccessGroupMutationKey = () =>
+	[{ url: "/api/v1/access/:scope/groups/:groupId" }] as const;
+
+export function createAccessGroupMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = createAccessGroupMutationKey();
+	return mutationOptions<
+		CreateAccessGroupStatus200,
+		ResponseErrorConfig<
+			| CreateAccessGroupStatus400
+			| CreateAccessGroupStatus401
+			| CreateAccessGroupStatus403
+			| CreateAccessGroupStatus404
+			| CreateAccessGroupStatus409
+			| CreateAccessGroupStatus422
+			| CreateAccessGroupStatus429
+			| CreateAccessGroupStatus500
+			| CreateAccessGroupStatus503
+		>,
+		CreateAccessGroupOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return createAccessGroup({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId}
+ */
+export function useCreateAccessGroup<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			CreateAccessGroupStatus200,
+			ResponseErrorConfig<
+				| CreateAccessGroupStatus400
+				| CreateAccessGroupStatus401
+				| CreateAccessGroupStatus403
+				| CreateAccessGroupStatus404
+				| CreateAccessGroupStatus409
+				| CreateAccessGroupStatus422
+				| CreateAccessGroupStatus429
+				| CreateAccessGroupStatus500
+				| CreateAccessGroupStatus503
+			>,
+			CreateAccessGroupOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? createAccessGroupMutationKey();
+
+	const baseOptions = createAccessGroupMutationOptions(config) as UseMutationOptions<
+		CreateAccessGroupStatus200,
+		ResponseErrorConfig<
+			| CreateAccessGroupStatus400
+			| CreateAccessGroupStatus401
+			| CreateAccessGroupStatus403
+			| CreateAccessGroupStatus404
+			| CreateAccessGroupStatus409
+			| CreateAccessGroupStatus422
+			| CreateAccessGroupStatus429
+			| CreateAccessGroupStatus500
+			| CreateAccessGroupStatus503
+		>,
+		CreateAccessGroupOptions,
+		TContext
+	>;
+
+	return useMutation<
+		CreateAccessGroupStatus200,
+		ResponseErrorConfig<
+			| CreateAccessGroupStatus400
+			| CreateAccessGroupStatus401
+			| CreateAccessGroupStatus403
+			| CreateAccessGroupStatus404
+			| CreateAccessGroupStatus409
+			| CreateAccessGroupStatus422
+			| CreateAccessGroupStatus429
+			| CreateAccessGroupStatus500
+			| CreateAccessGroupStatus503
+		>,
+		CreateAccessGroupOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		CreateAccessGroupStatus200,
+		ResponseErrorConfig<
+			| CreateAccessGroupStatus400
+			| CreateAccessGroupStatus401
+			| CreateAccessGroupStatus403
+			| CreateAccessGroupStatus404
+			| CreateAccessGroupStatus409
+			| CreateAccessGroupStatus422
+			| CreateAccessGroupStatus429
+			| CreateAccessGroupStatus500
+			| CreateAccessGroupStatus503
+		>,
+		CreateAccessGroupOptions,
+		TContext
+	>;
+}
+
+export const listAccessGroupHistoryQueryKey = ({
+	path,
+	query,
+}: Omit<ListAccessGroupHistoryOptions, "headers">) =>
+	[
+		{ url: "/api/v1/access/:scope/groups/:groupId/history", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type ListAccessGroupHistoryQueryKey = ReturnType<typeof listAccessGroupHistoryQueryKey>;
+
+export function listAccessGroupHistoryQueryOptions(
+	{ path, query }: ListAccessGroupHistoryOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listAccessGroupHistoryQueryKey({ path, query });
+	return queryOptions<
+		ListAccessGroupHistoryStatus200,
+		ResponseErrorConfig<
+			| ListAccessGroupHistoryStatus400
+			| ListAccessGroupHistoryStatus401
+			| ListAccessGroupHistoryStatus403
+			| ListAccessGroupHistoryStatus404
+			| ListAccessGroupHistoryStatus409
+			| ListAccessGroupHistoryStatus422
+			| ListAccessGroupHistoryStatus429
+			| ListAccessGroupHistoryStatus500
+			| ListAccessGroupHistoryStatus503
+		>,
+		ListAccessGroupHistoryStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return listAccessGroupHistory({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/history}
+ */
+export function useListAccessGroupHistory<
+	TData = ListAccessGroupHistoryStatus200,
+	TQueryData = ListAccessGroupHistoryStatus200,
+	TQueryKey extends QueryKey = ListAccessGroupHistoryQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path: ListAccessGroupHistoryOptions["path"] | (() => ListAccessGroupHistoryOptions["path"]);
+		query?: ListAccessGroupHistoryOptions["query"] | (() => ListAccessGroupHistoryOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListAccessGroupHistoryStatus200,
+				ResponseErrorConfig<
+					| ListAccessGroupHistoryStatus400
+					| ListAccessGroupHistoryStatus401
+					| ListAccessGroupHistoryStatus403
+					| ListAccessGroupHistoryStatus404
+					| ListAccessGroupHistoryStatus409
+					| ListAccessGroupHistoryStatus422
+					| ListAccessGroupHistoryStatus429
+					| ListAccessGroupHistoryStatus500
+					| ListAccessGroupHistoryStatus503
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey = resolvedOptions?.queryKey ?? listAccessGroupHistoryQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listAccessGroupHistoryQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| ListAccessGroupHistoryStatus400
+			| ListAccessGroupHistoryStatus401
+			| ListAccessGroupHistoryStatus403
+			| ListAccessGroupHistoryStatus404
+			| ListAccessGroupHistoryStatus409
+			| ListAccessGroupHistoryStatus422
+			| ListAccessGroupHistoryStatus429
+			| ListAccessGroupHistoryStatus500
+			| ListAccessGroupHistoryStatus503
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const updateAccessGroupPresentationMutationKey = () =>
+	[{ url: "/api/v1/access/:scope/groups/:groupId/presentation" }] as const;
+
+export function updateAccessGroupPresentationMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = updateAccessGroupPresentationMutationKey();
+	return mutationOptions<
+		UpdateAccessGroupPresentationStatus200,
+		ResponseErrorConfig<
+			| UpdateAccessGroupPresentationStatus400
+			| UpdateAccessGroupPresentationStatus401
+			| UpdateAccessGroupPresentationStatus403
+			| UpdateAccessGroupPresentationStatus404
+			| UpdateAccessGroupPresentationStatus409
+			| UpdateAccessGroupPresentationStatus422
+			| UpdateAccessGroupPresentationStatus429
+			| UpdateAccessGroupPresentationStatus500
+			| UpdateAccessGroupPresentationStatus503
+		>,
+		UpdateAccessGroupPresentationOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return updateAccessGroupPresentation({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/presentation}
+ */
+export function useUpdateAccessGroupPresentation<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			UpdateAccessGroupPresentationStatus200,
+			ResponseErrorConfig<
+				| UpdateAccessGroupPresentationStatus400
+				| UpdateAccessGroupPresentationStatus401
+				| UpdateAccessGroupPresentationStatus403
+				| UpdateAccessGroupPresentationStatus404
+				| UpdateAccessGroupPresentationStatus409
+				| UpdateAccessGroupPresentationStatus422
+				| UpdateAccessGroupPresentationStatus429
+				| UpdateAccessGroupPresentationStatus500
+				| UpdateAccessGroupPresentationStatus503
+			>,
+			UpdateAccessGroupPresentationOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? updateAccessGroupPresentationMutationKey();
+
+	const baseOptions = updateAccessGroupPresentationMutationOptions(config) as UseMutationOptions<
+		UpdateAccessGroupPresentationStatus200,
+		ResponseErrorConfig<
+			| UpdateAccessGroupPresentationStatus400
+			| UpdateAccessGroupPresentationStatus401
+			| UpdateAccessGroupPresentationStatus403
+			| UpdateAccessGroupPresentationStatus404
+			| UpdateAccessGroupPresentationStatus409
+			| UpdateAccessGroupPresentationStatus422
+			| UpdateAccessGroupPresentationStatus429
+			| UpdateAccessGroupPresentationStatus500
+			| UpdateAccessGroupPresentationStatus503
+		>,
+		UpdateAccessGroupPresentationOptions,
+		TContext
+	>;
+
+	return useMutation<
+		UpdateAccessGroupPresentationStatus200,
+		ResponseErrorConfig<
+			| UpdateAccessGroupPresentationStatus400
+			| UpdateAccessGroupPresentationStatus401
+			| UpdateAccessGroupPresentationStatus403
+			| UpdateAccessGroupPresentationStatus404
+			| UpdateAccessGroupPresentationStatus409
+			| UpdateAccessGroupPresentationStatus422
+			| UpdateAccessGroupPresentationStatus429
+			| UpdateAccessGroupPresentationStatus500
+			| UpdateAccessGroupPresentationStatus503
+		>,
+		UpdateAccessGroupPresentationOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		UpdateAccessGroupPresentationStatus200,
+		ResponseErrorConfig<
+			| UpdateAccessGroupPresentationStatus400
+			| UpdateAccessGroupPresentationStatus401
+			| UpdateAccessGroupPresentationStatus403
+			| UpdateAccessGroupPresentationStatus404
+			| UpdateAccessGroupPresentationStatus409
+			| UpdateAccessGroupPresentationStatus422
+			| UpdateAccessGroupPresentationStatus429
+			| UpdateAccessGroupPresentationStatus500
+			| UpdateAccessGroupPresentationStatus503
+		>,
+		UpdateAccessGroupPresentationOptions,
+		TContext
+	>;
+}
+
+export const reparentAccessGroupMutationKey = () =>
+	[{ url: "/api/v1/access/:scope/groups/:groupId/reparent" }] as const;
+
+export function reparentAccessGroupMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = reparentAccessGroupMutationKey();
+	return mutationOptions<
+		ReparentAccessGroupStatus200,
+		ResponseErrorConfig<
+			| ReparentAccessGroupStatus400
+			| ReparentAccessGroupStatus401
+			| ReparentAccessGroupStatus403
+			| ReparentAccessGroupStatus404
+			| ReparentAccessGroupStatus409
+			| ReparentAccessGroupStatus422
+			| ReparentAccessGroupStatus500
+			| ReparentAccessGroupStatus503
+		>,
+		ReparentAccessGroupOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return reparentAccessGroup({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/reparent}
+ */
+export function useReparentAccessGroup<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			ReparentAccessGroupStatus200,
+			ResponseErrorConfig<
+				| ReparentAccessGroupStatus400
+				| ReparentAccessGroupStatus401
+				| ReparentAccessGroupStatus403
+				| ReparentAccessGroupStatus404
+				| ReparentAccessGroupStatus409
+				| ReparentAccessGroupStatus422
+				| ReparentAccessGroupStatus500
+				| ReparentAccessGroupStatus503
+			>,
+			ReparentAccessGroupOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? reparentAccessGroupMutationKey();
+
+	const baseOptions = reparentAccessGroupMutationOptions(config) as UseMutationOptions<
+		ReparentAccessGroupStatus200,
+		ResponseErrorConfig<
+			| ReparentAccessGroupStatus400
+			| ReparentAccessGroupStatus401
+			| ReparentAccessGroupStatus403
+			| ReparentAccessGroupStatus404
+			| ReparentAccessGroupStatus409
+			| ReparentAccessGroupStatus422
+			| ReparentAccessGroupStatus500
+			| ReparentAccessGroupStatus503
+		>,
+		ReparentAccessGroupOptions,
+		TContext
+	>;
+
+	return useMutation<
+		ReparentAccessGroupStatus200,
+		ResponseErrorConfig<
+			| ReparentAccessGroupStatus400
+			| ReparentAccessGroupStatus401
+			| ReparentAccessGroupStatus403
+			| ReparentAccessGroupStatus404
+			| ReparentAccessGroupStatus409
+			| ReparentAccessGroupStatus422
+			| ReparentAccessGroupStatus500
+			| ReparentAccessGroupStatus503
+		>,
+		ReparentAccessGroupOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		ReparentAccessGroupStatus200,
+		ResponseErrorConfig<
+			| ReparentAccessGroupStatus400
+			| ReparentAccessGroupStatus401
+			| ReparentAccessGroupStatus403
+			| ReparentAccessGroupStatus404
+			| ReparentAccessGroupStatus409
+			| ReparentAccessGroupStatus422
+			| ReparentAccessGroupStatus500
+			| ReparentAccessGroupStatus503
+		>,
+		ReparentAccessGroupOptions,
+		TContext
+	>;
+}
+
+export const retireAccessGroupMutationKey = () =>
+	[{ url: "/api/v1/access/:scope/groups/:groupId/retire" }] as const;
+
+export function retireAccessGroupMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = retireAccessGroupMutationKey();
+	return mutationOptions<
+		RetireAccessGroupStatus200,
+		ResponseErrorConfig<
+			| RetireAccessGroupStatus400
+			| RetireAccessGroupStatus401
+			| RetireAccessGroupStatus403
+			| RetireAccessGroupStatus404
+			| RetireAccessGroupStatus409
+			| RetireAccessGroupStatus422
+			| RetireAccessGroupStatus500
+			| RetireAccessGroupStatus503
+		>,
+		RetireAccessGroupOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return retireAccessGroup({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/retire}
+ */
+export function useRetireAccessGroup<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			RetireAccessGroupStatus200,
+			ResponseErrorConfig<
+				| RetireAccessGroupStatus400
+				| RetireAccessGroupStatus401
+				| RetireAccessGroupStatus403
+				| RetireAccessGroupStatus404
+				| RetireAccessGroupStatus409
+				| RetireAccessGroupStatus422
+				| RetireAccessGroupStatus500
+				| RetireAccessGroupStatus503
+			>,
+			RetireAccessGroupOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? retireAccessGroupMutationKey();
+
+	const baseOptions = retireAccessGroupMutationOptions(config) as UseMutationOptions<
+		RetireAccessGroupStatus200,
+		ResponseErrorConfig<
+			| RetireAccessGroupStatus400
+			| RetireAccessGroupStatus401
+			| RetireAccessGroupStatus403
+			| RetireAccessGroupStatus404
+			| RetireAccessGroupStatus409
+			| RetireAccessGroupStatus422
+			| RetireAccessGroupStatus500
+			| RetireAccessGroupStatus503
+		>,
+		RetireAccessGroupOptions,
+		TContext
+	>;
+
+	return useMutation<
+		RetireAccessGroupStatus200,
+		ResponseErrorConfig<
+			| RetireAccessGroupStatus400
+			| RetireAccessGroupStatus401
+			| RetireAccessGroupStatus403
+			| RetireAccessGroupStatus404
+			| RetireAccessGroupStatus409
+			| RetireAccessGroupStatus422
+			| RetireAccessGroupStatus500
+			| RetireAccessGroupStatus503
+		>,
+		RetireAccessGroupOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		RetireAccessGroupStatus200,
+		ResponseErrorConfig<
+			| RetireAccessGroupStatus400
+			| RetireAccessGroupStatus401
+			| RetireAccessGroupStatus403
+			| RetireAccessGroupStatus404
+			| RetireAccessGroupStatus409
+			| RetireAccessGroupStatus422
+			| RetireAccessGroupStatus500
+			| RetireAccessGroupStatus503
+		>,
+		RetireAccessGroupOptions,
 		TContext
 	>;
 }

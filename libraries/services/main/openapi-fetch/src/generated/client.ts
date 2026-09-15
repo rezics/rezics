@@ -13,6 +13,8 @@ import type {
 	AddCatalogNameResponses,
 	AddMusicMediumOptions,
 	AddMusicMediumResponses,
+	CreateAccessGroupOptions,
+	CreateAccessGroupResponses,
 	CreateAccessRoleOptions,
 	CreateAccessRoleResponses,
 	GetAccessRoleOptions,
@@ -29,6 +31,18 @@ import type {
 	ListAccessRoleHistoryResponses,
 	ReviseAccessRoleOptions,
 	ReviseAccessRoleResponses,
+	ListAccessGroupsOptions,
+	ListAccessGroupsResponses,
+	GetAccessGroupOptions,
+	GetAccessGroupResponses,
+	ListAccessGroupHistoryOptions,
+	ListAccessGroupHistoryResponses,
+	UpdateAccessGroupPresentationOptions,
+	UpdateAccessGroupPresentationResponses,
+	ReparentAccessGroupOptions,
+	ReparentAccessGroupResponses,
+	RetireAccessGroupOptions,
+	RetireAccessGroupResponses,
 	ListOwnAppConnectionsOptions,
 	ListOwnAppConnectionsResponses,
 	DisconnectOwnAppConnectionOptions,
@@ -1341,6 +1355,147 @@ export function reviseAccessRole<ThrowOnError extends boolean = true>(
 			],
 			...config,
 		}) as Promise<RequestResult<ReviseAccessRoleResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups}
+ */
+export function listAccessGroups<ThrowOnError extends boolean = true>(
+	options: Options<ListAccessGroupsOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ListAccessGroupsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/access/{scope}/groups",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ListAccessGroupsResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId}
+ */
+export function getAccessGroup<ThrowOnError extends boolean = true>(
+	options: Options<GetAccessGroupOptions, ThrowOnError>,
+): Unwrappable<RequestResult<GetAccessGroupResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/access/{scope}/groups/{groupId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetAccessGroupResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId}
+ */
+export function createAccessGroup<ThrowOnError extends boolean = true>(
+	options: Options<CreateAccessGroupOptions, ThrowOnError>,
+): Unwrappable<RequestResult<CreateAccessGroupResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/access/{scope}/groups/{groupId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<CreateAccessGroupResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/history}
+ */
+export function listAccessGroupHistory<ThrowOnError extends boolean = true>(
+	options: Options<ListAccessGroupHistoryOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ListAccessGroupHistoryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/access/{scope}/groups/{groupId}/history",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ListAccessGroupHistoryResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/presentation}
+ */
+export function updateAccessGroupPresentation<ThrowOnError extends boolean = true>(
+	options: Options<UpdateAccessGroupPresentationOptions, ThrowOnError>,
+): Unwrappable<RequestResult<UpdateAccessGroupPresentationResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/access/{scope}/groups/{groupId}/presentation",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<UpdateAccessGroupPresentationResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/reparent}
+ */
+export function reparentAccessGroup<ThrowOnError extends boolean = true>(
+	options: Options<ReparentAccessGroupOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ReparentAccessGroupResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/access/{scope}/groups/{groupId}/reparent",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ReparentAccessGroupResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/retire}
+ */
+export function retireAccessGroup<ThrowOnError extends boolean = true>(
+	options: Options<RetireAccessGroupOptions, ThrowOnError>,
+): Unwrappable<RequestResult<RetireAccessGroupResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/access/{scope}/groups/{groupId}/retire",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<RetireAccessGroupResponses, ThrowOnError>>,
 	);
 }
 

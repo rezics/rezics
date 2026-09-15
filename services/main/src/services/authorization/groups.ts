@@ -5,12 +5,13 @@ import type { DatabaseTransaction } from "../database";
 import { accessGroup, accessGroupEvent, accessGroupTree } from "../database/schema/access-group";
 
 const versionSchema = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
-const presentationSchema = z.strictObject({
+/** Bounded Group presentation shared by persistence and management transport. @alpha */
+export const AccessGroupPresentationSchema = z.strictObject({
 	label: z
-		.string()
+		.string().min(1).max(512)
 		.refine((value) => value.trim().length > 0 && Buffer.byteLength(value, "utf8") <= 512),
 	description: z
-		.string()
+		.string().max(4096)
 		.refine((value) => Buffer.byteLength(value, "utf8") <= 4096)
 		.nullable(),
 });
@@ -27,9 +28,9 @@ const commandSchema = z.discriminatedUnion("operation", [
 		...base,
 		operation: z.literal("create"),
 		parentId: z.uuid().toLowerCase().nullable(),
-		presentation: presentationSchema,
+		presentation: AccessGroupPresentationSchema,
 	}),
-	z.strictObject({ ...base, operation: z.literal("update"), presentation: presentationSchema }),
+	z.strictObject({ ...base, operation: z.literal("update"), presentation: AccessGroupPresentationSchema }),
 	z.strictObject({ ...base, operation: z.literal("reparent"), parentId: z.uuid().toLowerCase().nullable() }),
 	z.strictObject({ ...base, operation: z.literal("retire") }),
 ]);
@@ -82,12 +83,15 @@ function receipt(row: typeof accessGroupEvent.$inferSelect): AccessGroupReceipt 
  * tree fence upfront when also used by its authority. Admission includes current
  * management, assignment ceilings and the reviewed topology impact. It is a
  * side-effect-free SQL predicate evaluated before provisional writes, after waits
- * and in the final mutation. This store proves neither authority nor roster disclosure.
+ * and in the final mutation. A separate transition predicate may prove impact only
+ * for new effects; exact receipt replay still requires current management authority.
+ * This store proves neither authority nor roster disclosure.
  */
 export async function applyAccessGroupCommand(
 	tx: DatabaseTransaction,
 	input: AccessGroupCommand,
 	admission: SQL<boolean | null>,
+	transitionAdmission: SQL<boolean | null> = admission,
 ): Promise<AccessGroupReceipt> {
 	const command = commandSchema.parse(input),
 		requestDigest = createHash("sha256").update(JSON.stringify(command)).digest("hex");
@@ -97,6 +101,9 @@ export async function applyAccessGroupCommand(
 				(await work.execute<{ admitted: boolean | null }>(sql`select (${admission}) as admitted`))
 					.rows[0]?.admitted,
 			);
+		const requireTransitionAdmission = async () => requireAdmission(
+			(await work.execute<{ admitted: boolean | null }>(sql`select (${transitionAdmission}) as admitted`)).rows[0]?.admitted,
+		);
 		await authorize();
 		await work.insert(accessGroupTree).values({ scopeId: command.scopeId }).onConflictDoNothing();
 		const [tree] = await work
@@ -135,10 +142,12 @@ export async function applyAccessGroupCommand(
 				prior.authoritySubjectId !== command.authoritySubjectId
 			)
 				throw new AccessGroupConflict();
+			await authorize();
 			return receipt(prior);
 		}
 		if (
 			head.version !== command.expectedVersion ||
+			head.version === Number.MAX_SAFE_INTEGER ||
 			head.state === "retired" ||
 			(command.operation === "create") !== (head.state === "draft")
 		)
@@ -189,7 +198,19 @@ export async function applyAccessGroupCommand(
 				.limit(1);
 			if (!parent || parent.state !== "active") throw new AccessGroupConflict();
 		}
+		if (command.operation === "retire" && head.subtreeHeight !== 1) throw new AccessGroupConflict();
+		if (parentId !== null) {
+			const ancestors = (await work.execute<{ id: string; parent_id: string | null; depth: number }>(sql`
+			 with recursive path(id,parent_id,depth) as (
+			  select id,parent_id,1 from public.access_group where id=${parentId}::uuid and scope_id=${command.scopeId}::uuid and state='active'
+			  union all select g.id,g.parent_id,p.depth+1 from path p join public.access_group g on g.id=p.parent_id
+			  where g.scope_id=${command.scopeId}::uuid and g.state='active' and p.depth<8
+			 ) select * from path order by depth`)).rows;
+			if (!ancestors.length || ancestors.at(-1)?.parent_id !== null ||
+				ancestors.length + head.subtreeHeight > 8 || ancestors.some(row => row.id === head.id)) throw new AccessGroupConflict();
+		}
 		await authorize();
+		await requireTransitionAdmission();
 		const version = head.version + 1,
 			state = command.operation === "retire" ? ("retired" as const) : ("active" as const);
 		const [event] = await work
@@ -210,7 +231,7 @@ export async function applyAccessGroupCommand(
 			.returning();
 		if (!event) throw Error("Group receipt was not written");
 		const result = await work.execute<{ admitted: boolean | null; changed: string | null }>(sql`
-   with admission as materialized(select (${admission}) as admitted),changed as(
+   with admission as materialized(select ((${admission}) and (${transitionAdmission})) as admitted),changed as(
     update public.access_group set version=${version},state=${state},parent_id=${parentId}::uuid
     where id=${head.id}::uuid and version=${head.version} and(select admitted from admission) is true returning id
    ) select(select admitted from admission) as admitted,(select id from changed) as changed`);

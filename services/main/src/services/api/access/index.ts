@@ -1,15 +1,27 @@
 import Elysia from "elysia";
+import { toApiErrorResponse } from "../schema/error-response";
 import principalSession from "../../auth/principal-session";
 import { env } from "../../config";
 import { createScopeSelectors } from "../../authorization/scope-selectors";
 import { resolveManagedScope } from "../../authorization/scope-management";
 import { getManagedRole, listManagedRoleHistory, listManagedRoles, writeRoleDefinition } from "../../authorization/role-management";
+import { getManagedGroup, listManagedGroupHistory, listManagedGroups, writeManagedGroup } from "../../authorization/group-management";
+import { CreateGroupBody, GroupHistoryQuery, GroupListQuery, GroupParams, GroupQuery, GroupReceipt,
+	ManagedGroup, ManagedGroupHistory, ManagedGroups, ReparentGroupBody, RetireGroupBody, UpdateGroupBody } from "./schema";
 import { CreateRoleBody, ManagedRole, ManagedRoleHistory, ManagedRoles, ResolvedScope, ResolveScopeBody,
 	ReviseRoleBody, RoleHistoryQuery, RoleListQuery, RoleParams, RoleQuery, RoleReceipt, ScopeParams } from "./schema";
 
 const selectors = createScopeSelectors(env.BETTER_AUTH_SECRET);
 const read = { permission: "access:read", fresh: false, write: false } as const;
 const manage = { permission: "access:manage", fresh: false, write: true } as const;
+const groupErrors = {
+	400: toApiErrorResponse(["AccessInputInvalid"]),
+	401: toApiErrorResponse(["AuthenticationRequired", "InteractiveSessionRequired"]),
+	403: toApiErrorResponse(["AccessDenied", "ApiTokenPermissionRequired", "FreshSessionRequired", "EmailVerificationRequired", "AccountSuspended", "AccountClosed"]),
+	404: toApiErrorResponse(["AccessRecordUnavailable"]),
+	409: toApiErrorResponse(["AccessChanged"]),
+	503: toApiErrorResponse(["AccessUnavailable"]),
+};
 
 /** Native mixed-subject access management, independent from public presentation. @alpha */
 export default new Elysia({ prefix: "/access", name: "access-management-api" }).use(principalSession)
@@ -45,4 +57,39 @@ export default new Elysia({ prefix: "/access", name: "access-management-api" }).
 		principalAccess: manage, params: RoleParams, body: ReviseRoleBody, response: RoleReceipt,
 		detail: { operationId: "reviseAccessRole", tags: ["Access management"] },
 	}, ({ principalContext, params, body }) => writeRoleDefinition(principalContext, { ...body, roleId: params.roleId,
-		scopeId: selectors.resolve(params.scope, principalContext.credentialProof(), Date.now()), operation: "revise" }));
+		scopeId: selectors.resolve(params.scope, principalContext.credentialProof(), Date.now()), operation: "revise" }))
+	.get("/:scope/groups", {
+		principalAccess: read, params: ScopeParams, query: GroupListQuery, response: { 200: ManagedGroups, ...groupErrors },
+		detail: { operationId: "listAccessGroups", tags: ["Access management"] },
+	}, ({ principalContext, params, query }) => listManagedGroups(principalContext,
+		selectors.resolve(params.scope, principalContext.credentialProof(), Date.now()), query.afterId))
+	.get("/:scope/groups/:groupId", {
+		principalAccess: read, params: GroupParams, query: GroupQuery, response: { 200: ManagedGroup, ...groupErrors },
+		detail: { operationId: "getAccessGroup", tags: ["Access management"] },
+	}, ({ principalContext, params, query }) => getManagedGroup(principalContext,
+		selectors.resolve(params.scope, principalContext.credentialProof(), Date.now()), params.groupId, query.version))
+	.get("/:scope/groups/:groupId/history", {
+		principalAccess: read, params: GroupParams, query: GroupHistoryQuery, response: { 200: ManagedGroupHistory, ...groupErrors },
+		detail: { operationId: "listAccessGroupHistory", tags: ["Access management"] },
+	}, ({ principalContext, params, query }) => listManagedGroupHistory(principalContext,
+		selectors.resolve(params.scope, principalContext.credentialProof(), Date.now()), params.groupId, query.afterVersion))
+	.put("/:scope/groups/:groupId", {
+		principalAccess: manage, params: GroupParams, body: CreateGroupBody, response: { 200: GroupReceipt, ...groupErrors },
+		detail: { operationId: "createAccessGroup", tags: ["Access management"] },
+	}, ({ principalContext, params, body }) => writeManagedGroup(principalContext, { ...body, groupId: params.groupId,
+		scopeId: selectors.resolve(params.scope, principalContext.credentialProof(), Date.now()), operation: "create" }))
+	.patch("/:scope/groups/:groupId/presentation", {
+		principalAccess: manage, params: GroupParams, body: UpdateGroupBody, response: { 200: GroupReceipt, ...groupErrors },
+		detail: { operationId: "updateAccessGroupPresentation", tags: ["Access management"] },
+	}, ({ principalContext, params, body }) => writeManagedGroup(principalContext, { ...body, groupId: params.groupId,
+		scopeId: selectors.resolve(params.scope, principalContext.credentialProof(), Date.now()), operation: "update" }))
+	.post("/:scope/groups/:groupId/reparent", {
+		principalAccess: { ...manage, fresh: true }, params: GroupParams, body: ReparentGroupBody, response: { 200: GroupReceipt, ...groupErrors },
+		detail: { operationId: "reparentAccessGroup", tags: ["Access management"] },
+	}, ({ principalContext, params, body }) => writeManagedGroup(principalContext, { ...body, groupId: params.groupId,
+		scopeId: selectors.resolve(params.scope, principalContext.credentialProof(), Date.now()), operation: "reparent" }))
+	.post("/:scope/groups/:groupId/retire", {
+		principalAccess: { ...manage, fresh: true }, params: GroupParams, body: RetireGroupBody, response: { 200: GroupReceipt, ...groupErrors },
+		detail: { operationId: "retireAccessGroup", tags: ["Access management"] },
+	}, ({ principalContext, params, body }) => writeManagedGroup(principalContext, { ...body, groupId: params.groupId,
+		scopeId: selectors.resolve(params.scope, principalContext.credentialProof(), Date.now()), operation: "retire" }));
