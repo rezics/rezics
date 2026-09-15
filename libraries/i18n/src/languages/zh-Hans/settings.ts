@@ -27,10 +27,10 @@ export default {
 		emptyMembers: "还没有成员。",
 		emptyOrganizations: "你尚未加入组织。",
 		emptyManagement: "你目前没有成员名单管理权限。",
-		acceptPrompt: "接受后，你的公开身份将加入此组织的成员名单，成员管理者可以查看。",
+		acceptPrompt: "接受后，当前登录的账户将作为此组织的私人成员加入。",
 		removePrompt: "移除成员关系不会更改另行授予的发布、安全或管理权限。",
 		leavePrompt: "退出后将移除你的成员关系，另行授予的权限保持不变。",
-		recipientHint: "请使用已有账户的公开身份。",
+		recipientHint: `请输入要邀请的${zhHansTerminology.entity.forms.label}的 ${verbatimTerms.id.value}。`,
 		states: {
 			pending: "待处理",
 			accepted: "已接受",

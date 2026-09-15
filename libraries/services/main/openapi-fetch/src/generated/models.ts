@@ -3295,6 +3295,10 @@ export type ResolveAccessManagementScopeRequestTargetReferenceOwnerEnum =
 
 export const ResolveAccessManagementScopeRequestPermissionEnum = {
 	"access.identity.select": "access.identity.select",
+	"access.membership.read": "access.membership.read",
+	"access.membership.recover": "access.membership.recover",
+	"access.membership.manage": "access.membership.manage",
+	"access.membership.participate": "access.membership.participate",
 	"access.representation.manage": "access.representation.manage",
 	"access.group.read": "access.group.read",
 	"access.group.create": "access.group.create",
@@ -3511,6 +3515,10 @@ export type GetAccessRoleStatus200StateEnum =
 
 export const GetAccessRoleStatus200DefinitionPermissionsKeyEnum = {
 	"access.identity.select": "access.identity.select",
+	"access.membership.read": "access.membership.read",
+	"access.membership.recover": "access.membership.recover",
+	"access.membership.manage": "access.membership.manage",
+	"access.membership.participate": "access.membership.participate",
 	"access.representation.manage": "access.representation.manage",
 	"access.group.read": "access.group.read",
 	"access.group.create": "access.group.create",
@@ -3709,6 +3717,10 @@ export type CreateAccessRoleStatus500 = InternalError;
 
 export const CreateAccessRoleRequestDefinitionPermissionsKeyEnum = {
 	"access.identity.select": "access.identity.select",
+	"access.membership.read": "access.membership.read",
+	"access.membership.recover": "access.membership.recover",
+	"access.membership.manage": "access.membership.manage",
+	"access.membership.participate": "access.membership.participate",
 	"access.representation.manage": "access.representation.manage",
 	"access.group.read": "access.group.read",
 	"access.group.create": "access.group.create",
@@ -3994,6 +4006,10 @@ export type ReviseAccessRoleStatus500 = InternalError;
 
 export const ReviseAccessRoleRequestDefinitionPermissionsKeyEnum = {
 	"access.identity.select": "access.identity.select",
+	"access.membership.read": "access.membership.read",
+	"access.membership.recover": "access.membership.recover",
+	"access.membership.manage": "access.membership.manage",
+	"access.membership.participate": "access.membership.participate",
 	"access.representation.manage": "access.representation.manage",
 	"access.group.read": "access.group.read",
 	"access.group.create": "access.group.create",
@@ -69737,6 +69753,647 @@ export type DeleteApiAccountBlocksByIdResponse =
 	| DeleteApiAccountBlocksByIdStatus429
 	| DeleteApiAccountBlocksByIdStatus500;
 
+export type ListMembershipManagedOrganizationsQuery = {
+	/**
+	 * @minLength 1
+	 * @maxLength 512
+	 * @type string | undefined
+	 */
+	afterId?: string;
+};
+
+export type ListMembershipManagedOrganizationsStatus200 = {
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		key: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		entityId: string;
+		name: string | null;
+		selection:
+			| {
+					mode: "direct";
+			  }
+			| {
+					mode: "represented";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					entityId: string;
+					representations: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @maxLength 9007199254740991
+						 * @type integer
+						 */
+						revision: number;
+					}[];
+			  };
+	}[];
+	/**
+	 * @maxLength 512
+	 * @type string
+	 */
+	nextCursor: string | null;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	unavailable: number;
+};
+
+export type ListMembershipManagedOrganizationsStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: "AccessDenied";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ListMembershipManagedOrganizationsStatus404ErrorCodeEnum = {
+	AccessRecordUnavailable: "AccessRecordUnavailable",
+	OrganizationMembershipNotFound: "OrganizationMembershipNotFound",
+} as const;
+
+export type ListMembershipManagedOrganizationsStatus404ErrorCodeEnum =
+	(typeof ListMembershipManagedOrganizationsStatus404ErrorCodeEnum)[keyof typeof ListMembershipManagedOrganizationsStatus404ErrorCodeEnum];
+
+export type ListMembershipManagedOrganizationsStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: ListMembershipManagedOrganizationsStatus404ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ListMembershipManagedOrganizationsStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
+	OrganizationMembershipConflict: "OrganizationMembershipConflict",
+	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
+} as const;
+
+export type ListMembershipManagedOrganizationsStatus409ErrorCodeEnum =
+	(typeof ListMembershipManagedOrganizationsStatus409ErrorCodeEnum)[keyof typeof ListMembershipManagedOrganizationsStatus409ErrorCodeEnum];
+
+export type ListMembershipManagedOrganizationsStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: ListMembershipManagedOrganizationsStatus409ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListMembershipManagedOrganizationsStatus422 = ValidationError;
+
+export const ListMembershipManagedOrganizationsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ListMembershipManagedOrganizationsStatus429ErrorCodeEnum =
+	(typeof ListMembershipManagedOrganizationsStatus429ErrorCodeEnum)[keyof typeof ListMembershipManagedOrganizationsStatus429ErrorCodeEnum];
+
+export type ListMembershipManagedOrganizationsStatus429 = {
+	error: {
+		code: ListMembershipManagedOrganizationsStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type ListMembershipManagedOrganizationsStatus500 = InternalError;
+
+export type ListMembershipManagedOrganizationsStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListMembershipManagedOrganizationsOptions = {
+	body?: never;
+	path?: never;
+	query?: ListMembershipManagedOrganizationsQuery;
+	headers?: never;
+};
+
+export type ListMembershipManagedOrganizationsResponses = {
+	"200": ListMembershipManagedOrganizationsStatus200;
+	"403": ListMembershipManagedOrganizationsStatus403;
+	"404": ListMembershipManagedOrganizationsStatus404;
+	"409": ListMembershipManagedOrganizationsStatus409;
+	"422": ListMembershipManagedOrganizationsStatus422;
+	"429": ListMembershipManagedOrganizationsStatus429;
+	"500": ListMembershipManagedOrganizationsStatus500;
+	"503": ListMembershipManagedOrganizationsStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ListMembershipManagedOrganizationsResponse =
+	| ListMembershipManagedOrganizationsStatus200
+	| ListMembershipManagedOrganizationsStatus403
+	| ListMembershipManagedOrganizationsStatus404
+	| ListMembershipManagedOrganizationsStatus409
+	| ListMembershipManagedOrganizationsStatus422
+	| ListMembershipManagedOrganizationsStatus429
+	| ListMembershipManagedOrganizationsStatus500
+	| ListMembershipManagedOrganizationsStatus503;
+
+export type CreateNativeOrganizationStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	entityId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	scopeId: string;
+	representation: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		revision: number;
+	};
+};
+
+export type CreateNativeOrganizationStatus400 = MalformedRequestBody;
+
+export type CreateNativeOrganizationStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: "AccessDenied";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const CreateNativeOrganizationStatus404ErrorCodeEnum = {
+	AccessRecordUnavailable: "AccessRecordUnavailable",
+	OrganizationMembershipNotFound: "OrganizationMembershipNotFound",
+} as const;
+
+export type CreateNativeOrganizationStatus404ErrorCodeEnum =
+	(typeof CreateNativeOrganizationStatus404ErrorCodeEnum)[keyof typeof CreateNativeOrganizationStatus404ErrorCodeEnum];
+
+export type CreateNativeOrganizationStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: CreateNativeOrganizationStatus404ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const CreateNativeOrganizationStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
+	OrganizationMembershipConflict: "OrganizationMembershipConflict",
+	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
+} as const;
+
+export type CreateNativeOrganizationStatus409ErrorCodeEnum =
+	(typeof CreateNativeOrganizationStatus409ErrorCodeEnum)[keyof typeof CreateNativeOrganizationStatus409ErrorCodeEnum];
+
+export type CreateNativeOrganizationStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: CreateNativeOrganizationStatus409ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type CreateNativeOrganizationStatus422 = ValidationError;
+
+export type CreateNativeOrganizationStatus500 = InternalError;
+
+export type CreateNativeOrganizationStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type CreateNativeOrganizationBody = {
+	/**
+	 * @minLength 1
+	 * @maxLength 120
+	 * @type string
+	 */
+	name: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 255
+	 * @type string
+	 */
+	language: string;
+};
+
+export type CreateNativeOrganizationOptions = {
+	body: CreateNativeOrganizationBody;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+export type CreateNativeOrganizationResponses = {
+	"200": CreateNativeOrganizationStatus200;
+	"400": CreateNativeOrganizationStatus400;
+	"403": CreateNativeOrganizationStatus403;
+	"404": CreateNativeOrganizationStatus404;
+	"409": CreateNativeOrganizationStatus409;
+	"422": CreateNativeOrganizationStatus422;
+	"500": CreateNativeOrganizationStatus500;
+	"503": CreateNativeOrganizationStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type CreateNativeOrganizationResponse =
+	| CreateNativeOrganizationStatus200
+	| CreateNativeOrganizationStatus400
+	| CreateNativeOrganizationStatus403
+	| CreateNativeOrganizationStatus404
+	| CreateNativeOrganizationStatus409
+	| CreateNativeOrganizationStatus422
+	| CreateNativeOrganizationStatus500
+	| CreateNativeOrganizationStatus503;
+
+export type SelectOrganizationRecoveryRecipientPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	organizationEntityId: string;
+};
+
+export type SelectOrganizationRecoveryRecipientStatus200 = {
+	selector: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expiresAt: string;
+};
+
+export type SelectOrganizationRecoveryRecipientStatus400 = MalformedRequestBody;
+
+export type SelectOrganizationRecoveryRecipientStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: "AccessDenied";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const SelectOrganizationRecoveryRecipientStatus404ErrorCodeEnum = {
+	AccessRecordUnavailable: "AccessRecordUnavailable",
+	OrganizationMembershipNotFound: "OrganizationMembershipNotFound",
+} as const;
+
+export type SelectOrganizationRecoveryRecipientStatus404ErrorCodeEnum =
+	(typeof SelectOrganizationRecoveryRecipientStatus404ErrorCodeEnum)[keyof typeof SelectOrganizationRecoveryRecipientStatus404ErrorCodeEnum];
+
+export type SelectOrganizationRecoveryRecipientStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: SelectOrganizationRecoveryRecipientStatus404ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const SelectOrganizationRecoveryRecipientStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
+	OrganizationMembershipConflict: "OrganizationMembershipConflict",
+	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
+} as const;
+
+export type SelectOrganizationRecoveryRecipientStatus409ErrorCodeEnum =
+	(typeof SelectOrganizationRecoveryRecipientStatus409ErrorCodeEnum)[keyof typeof SelectOrganizationRecoveryRecipientStatus409ErrorCodeEnum];
+
+export type SelectOrganizationRecoveryRecipientStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: SelectOrganizationRecoveryRecipientStatus409ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type SelectOrganizationRecoveryRecipientStatus422 = ValidationError;
+
+export type SelectOrganizationRecoveryRecipientStatus500 = InternalError;
+
+export type SelectOrganizationRecoveryRecipientStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type SelectOrganizationRecoveryRecipientBody = {
+	/**
+	 * @pattern ^[A-Za-z0-9_-]{43}$
+	 * @type string
+	 */
+	contact: string;
+};
+
+export type SelectOrganizationRecoveryRecipientOptions = {
+	body: SelectOrganizationRecoveryRecipientBody;
+	path: SelectOrganizationRecoveryRecipientPath;
+	query?: never;
+	headers?: never;
+};
+
+export type SelectOrganizationRecoveryRecipientResponses = {
+	"200": SelectOrganizationRecoveryRecipientStatus200;
+	"400": SelectOrganizationRecoveryRecipientStatus400;
+	"403": SelectOrganizationRecoveryRecipientStatus403;
+	"404": SelectOrganizationRecoveryRecipientStatus404;
+	"409": SelectOrganizationRecoveryRecipientStatus409;
+	"422": SelectOrganizationRecoveryRecipientStatus422;
+	"500": SelectOrganizationRecoveryRecipientStatus500;
+	"503": SelectOrganizationRecoveryRecipientStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type SelectOrganizationRecoveryRecipientResponse =
+	| SelectOrganizationRecoveryRecipientStatus200
+	| SelectOrganizationRecoveryRecipientStatus400
+	| SelectOrganizationRecoveryRecipientStatus403
+	| SelectOrganizationRecoveryRecipientStatus404
+	| SelectOrganizationRecoveryRecipientStatus409
+	| SelectOrganizationRecoveryRecipientStatus422
+	| SelectOrganizationRecoveryRecipientStatus500
+	| SelectOrganizationRecoveryRecipientStatus503;
+
+export type RecoverNativeOrganizationPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	organizationEntityId: string;
+};
+
+export type RecoverNativeOrganizationStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	entityId: string;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	revision: number;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	scopeId: string;
+	representation: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		revision: number;
+	};
+};
+
+export type RecoverNativeOrganizationStatus400 = MalformedRequestBody;
+
+export type RecoverNativeOrganizationStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: "AccessDenied";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const RecoverNativeOrganizationStatus404ErrorCodeEnum = {
+	AccessRecordUnavailable: "AccessRecordUnavailable",
+	OrganizationMembershipNotFound: "OrganizationMembershipNotFound",
+} as const;
+
+export type RecoverNativeOrganizationStatus404ErrorCodeEnum =
+	(typeof RecoverNativeOrganizationStatus404ErrorCodeEnum)[keyof typeof RecoverNativeOrganizationStatus404ErrorCodeEnum];
+
+export type RecoverNativeOrganizationStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: RecoverNativeOrganizationStatus404ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const RecoverNativeOrganizationStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
+	OrganizationMembershipConflict: "OrganizationMembershipConflict",
+	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
+} as const;
+
+export type RecoverNativeOrganizationStatus409ErrorCodeEnum =
+	(typeof RecoverNativeOrganizationStatus409ErrorCodeEnum)[keyof typeof RecoverNativeOrganizationStatus409ErrorCodeEnum];
+
+export type RecoverNativeOrganizationStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: RecoverNativeOrganizationStatus409ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RecoverNativeOrganizationStatus422 = ValidationError;
+
+export type RecoverNativeOrganizationStatus500 = InternalError;
+
+export type RecoverNativeOrganizationStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RecoverNativeOrganizationBody = {
+	/**
+	 * @minLength 1
+	 * @maxLength 512
+	 * @type string
+	 */
+	selector: string;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	expectedRevision: number;
+	/**
+	 * @minLength 1
+	 * @maxLength 16384
+	 * @type string
+	 */
+	evidence: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+};
+
+export type RecoverNativeOrganizationOptions = {
+	body: RecoverNativeOrganizationBody;
+	path: RecoverNativeOrganizationPath;
+	query?: never;
+	headers?: never;
+};
+
+export type RecoverNativeOrganizationResponses = {
+	"200": RecoverNativeOrganizationStatus200;
+	"400": RecoverNativeOrganizationStatus400;
+	"403": RecoverNativeOrganizationStatus403;
+	"404": RecoverNativeOrganizationStatus404;
+	"409": RecoverNativeOrganizationStatus409;
+	"422": RecoverNativeOrganizationStatus422;
+	"500": RecoverNativeOrganizationStatus500;
+	"503": RecoverNativeOrganizationStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type RecoverNativeOrganizationResponse =
+	| RecoverNativeOrganizationStatus200
+	| RecoverNativeOrganizationStatus400
+	| RecoverNativeOrganizationStatus403
+	| RecoverNativeOrganizationStatus404
+	| RecoverNativeOrganizationStatus409
+	| RecoverNativeOrganizationStatus422
+	| RecoverNativeOrganizationStatus500
+	| RecoverNativeOrganizationStatus503;
+
 export type ListManagedOrganizationMembersPath = {
 	/**
 	 * @description
@@ -69748,12 +70405,21 @@ export type ListManagedOrganizationMembersPath = {
 
 export type ListManagedOrganizationMembersQuery = {
 	/**
-	 * @description
-	 * Format: `uuid`
+	 * @minLength 1
+	 * @maxLength 512
 	 * @type string | undefined
 	 */
 	afterId?: string;
 };
+
+export const ListManagedOrganizationMembersStatus200ItemsAvailabilityEnum = {
+	allow: "allow",
+	deny: "deny",
+	unavailable: "unavailable",
+} as const;
+
+export type ListManagedOrganizationMembersStatus200ItemsAvailabilityEnum =
+	(typeof ListManagedOrganizationMembersStatus200ItemsAvailabilityEnum)[keyof typeof ListManagedOrganizationMembersStatus200ItemsAvailabilityEnum];
 
 export type ListManagedOrganizationMembersStatus200 = {
 	items: {
@@ -69762,71 +70428,89 @@ export type ListManagedOrganizationMembersStatus200 = {
 		 * Format: `uuid`
 		 * @type string
 		 */
-		organizationEntityId: string;
-		organizationName: string | null;
+		membershipId: string;
 		/**
 		 * @description
 		 * Format: `uuid`
 		 * @type string
 		 */
-		memberEntityId: string;
+		organizationEntityId: string;
+		organizationName: string | null;
 		memberName: string | null;
+		recipient:
+			| {
+					kind: "entity";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					entityId: string;
+			  }
+			| {
+					kind: "principal";
+					/**
+					 * @minLength 1
+					 * @maxLength 512
+					 * @type string
+					 */
+					selector: string;
+			  };
 		/**
-		 * @maxLength 9007199254740991
+		 * @minLength 0
+		 * @maxLength 9007199254740990
 		 * @type integer
 		 */
-		revision: number;
+		version: number;
 		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
+		 * @minLength 0
+		 * @maxLength 9007199254740990
+		 * @type integer
 		 */
-		joinedAt: string;
+		activeGeneration: number | null;
 		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
+		 * @minLength 0
+		 * @maxLength 9007199254740990
+		 * @type integer
 		 */
-		removedAt: string | null;
+		lastGeneration: number;
+		availability: ListManagedOrganizationMembersStatus200ItemsAvailabilityEnum;
 	}[];
 	/**
-	 * @description
-	 * Format: `uuid`
+	 * @maxLength 512
 	 * @type string
 	 */
 	nextCursor: string | null;
 };
 
-export const ListManagedOrganizationMembersStatus403ErrorCodeEnum = {
-	ParticipationDenied: "ParticipationDenied",
-	AccountRestricted: "AccountRestricted",
-	AccountSuspended: "AccountSuspended",
-	AccountClosed: "AccountClosed",
-} as const;
-
-export type ListManagedOrganizationMembersStatus403ErrorCodeEnum =
-	(typeof ListManagedOrganizationMembersStatus403ErrorCodeEnum)[keyof typeof ListManagedOrganizationMembersStatus403ErrorCodeEnum];
-
 export type ListManagedOrganizationMembersStatus403 = {
 	error: {
 		/**
-		 * @default 'ParticipationDenied'
+		 * @default 'AccessDenied'
 		 * @type string
 		 */
-		code: ListManagedOrganizationMembersStatus403ErrorCodeEnum;
+		code: "AccessDenied";
 		message: string;
 		details?: void;
 	};
 	requestId: string;
 };
 
+export const ListManagedOrganizationMembersStatus404ErrorCodeEnum = {
+	AccessRecordUnavailable: "AccessRecordUnavailable",
+	OrganizationMembershipNotFound: "OrganizationMembershipNotFound",
+} as const;
+
+export type ListManagedOrganizationMembersStatus404ErrorCodeEnum =
+	(typeof ListManagedOrganizationMembersStatus404ErrorCodeEnum)[keyof typeof ListManagedOrganizationMembersStatus404ErrorCodeEnum];
+
 export type ListManagedOrganizationMembersStatus404 = {
 	error: {
 		/**
-		 * @default 'OrganizationMembershipNotFound'
+		 * @default 'AccessRecordUnavailable'
 		 * @type string
 		 */
-		code: "OrganizationMembershipNotFound";
+		code: ListManagedOrganizationMembersStatus404ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
@@ -69834,6 +70518,7 @@ export type ListManagedOrganizationMembersStatus404 = {
 };
 
 export const ListManagedOrganizationMembersStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
 	OrganizationMembershipConflict: "OrganizationMembershipConflict",
 	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
 } as const;
@@ -69844,7 +70529,7 @@ export type ListManagedOrganizationMembersStatus409ErrorCodeEnum =
 export type ListManagedOrganizationMembersStatus409 = {
 	error: {
 		/**
-		 * @default 'OrganizationMembershipConflict'
+		 * @default 'AccessChanged'
 		 * @type string
 		 */
 		code: ListManagedOrganizationMembersStatus409ErrorCodeEnum;
@@ -69856,7 +70541,37 @@ export type ListManagedOrganizationMembersStatus409 = {
 
 export type ListManagedOrganizationMembersStatus422 = ValidationError;
 
+export const ListManagedOrganizationMembersStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ListManagedOrganizationMembersStatus429ErrorCodeEnum =
+	(typeof ListManagedOrganizationMembersStatus429ErrorCodeEnum)[keyof typeof ListManagedOrganizationMembersStatus429ErrorCodeEnum];
+
+export type ListManagedOrganizationMembersStatus429 = {
+	error: {
+		code: ListManagedOrganizationMembersStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
 export type ListManagedOrganizationMembersStatus500 = InternalError;
+
+export type ListManagedOrganizationMembersStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
 
 export type ListManagedOrganizationMembersOptions = {
 	body?: never;
@@ -69871,7 +70586,9 @@ export type ListManagedOrganizationMembersResponses = {
 	"404": ListManagedOrganizationMembersStatus404;
 	"409": ListManagedOrganizationMembersStatus409;
 	"422": ListManagedOrganizationMembersStatus422;
+	"429": ListManagedOrganizationMembersStatus429;
 	"500": ListManagedOrganizationMembersStatus500;
+	"503": ListManagedOrganizationMembersStatus503;
 };
 
 /**
@@ -69883,7 +70600,216 @@ export type ListManagedOrganizationMembersResponse =
 	| ListManagedOrganizationMembersStatus404
 	| ListManagedOrganizationMembersStatus409
 	| ListManagedOrganizationMembersStatus422
-	| ListManagedOrganizationMembersStatus500;
+	| ListManagedOrganizationMembersStatus429
+	| ListManagedOrganizationMembersStatus500
+	| ListManagedOrganizationMembersStatus503;
+
+export type ListOrganizationMembershipHistoryPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	organizationEntityId: string;
+};
+
+export const ListOrganizationMembershipHistoryStatus200ItemsOperationEnum = {
+	admit: "admit",
+	leave: "leave",
+	remove: "remove",
+} as const;
+
+export type ListOrganizationMembershipHistoryStatus200ItemsOperationEnum =
+	(typeof ListOrganizationMembershipHistoryStatus200ItemsOperationEnum)[keyof typeof ListOrganizationMembershipHistoryStatus200ItemsOperationEnum];
+
+export type ListOrganizationMembershipHistoryStatus200 = {
+	items: {
+		/**
+		 * @minLength 0
+		 * @maxLength 9007199254740990
+		 * @type integer
+		 */
+		version: number;
+		operation: ListOrganizationMembershipHistoryStatus200ItemsOperationEnum;
+		/**
+		 * @minLength 0
+		 * @maxLength 9007199254740990
+		 * @type integer
+		 */
+		lastGeneration: number;
+		/**
+		 * @minLength 0
+		 * @maxLength 9007199254740990
+		 * @type integer
+		 */
+		activeGeneration: number | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+	}[];
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	nextCursor: number | null;
+};
+
+export type ListOrganizationMembershipHistoryStatus400 = MalformedRequestBody;
+
+export type ListOrganizationMembershipHistoryStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: "AccessDenied";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ListOrganizationMembershipHistoryStatus404ErrorCodeEnum = {
+	AccessRecordUnavailable: "AccessRecordUnavailable",
+	OrganizationMembershipNotFound: "OrganizationMembershipNotFound",
+} as const;
+
+export type ListOrganizationMembershipHistoryStatus404ErrorCodeEnum =
+	(typeof ListOrganizationMembershipHistoryStatus404ErrorCodeEnum)[keyof typeof ListOrganizationMembershipHistoryStatus404ErrorCodeEnum];
+
+export type ListOrganizationMembershipHistoryStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: ListOrganizationMembershipHistoryStatus404ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ListOrganizationMembershipHistoryStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
+	OrganizationMembershipConflict: "OrganizationMembershipConflict",
+	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
+} as const;
+
+export type ListOrganizationMembershipHistoryStatus409ErrorCodeEnum =
+	(typeof ListOrganizationMembershipHistoryStatus409ErrorCodeEnum)[keyof typeof ListOrganizationMembershipHistoryStatus409ErrorCodeEnum];
+
+export type ListOrganizationMembershipHistoryStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: ListOrganizationMembershipHistoryStatus409ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListOrganizationMembershipHistoryStatus422 = ValidationError;
+
+export const ListOrganizationMembershipHistoryStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ListOrganizationMembershipHistoryStatus429ErrorCodeEnum =
+	(typeof ListOrganizationMembershipHistoryStatus429ErrorCodeEnum)[keyof typeof ListOrganizationMembershipHistoryStatus429ErrorCodeEnum];
+
+export type ListOrganizationMembershipHistoryStatus429 = {
+	error: {
+		code: ListOrganizationMembershipHistoryStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type ListOrganizationMembershipHistoryStatus500 = InternalError;
+
+export type ListOrganizationMembershipHistoryStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListOrganizationMembershipHistoryBody = {
+	recipient:
+		| {
+				kind: "entity";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				entityId: string;
+		  }
+		| {
+				kind: "principal";
+				/**
+				 * @minLength 1
+				 * @maxLength 512
+				 * @type string
+				 */
+				selector: string;
+		  };
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer | undefined
+	 */
+	afterVersion?: number;
+};
+
+export type ListOrganizationMembershipHistoryOptions = {
+	body: ListOrganizationMembershipHistoryBody;
+	path: ListOrganizationMembershipHistoryPath;
+	query?: never;
+	headers?: never;
+};
+
+export type ListOrganizationMembershipHistoryResponses = {
+	"200": ListOrganizationMembershipHistoryStatus200;
+	"400": ListOrganizationMembershipHistoryStatus400;
+	"403": ListOrganizationMembershipHistoryStatus403;
+	"404": ListOrganizationMembershipHistoryStatus404;
+	"409": ListOrganizationMembershipHistoryStatus409;
+	"422": ListOrganizationMembershipHistoryStatus422;
+	"429": ListOrganizationMembershipHistoryStatus429;
+	"500": ListOrganizationMembershipHistoryStatus500;
+	"503": ListOrganizationMembershipHistoryStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ListOrganizationMembershipHistoryResponse =
+	| ListOrganizationMembershipHistoryStatus200
+	| ListOrganizationMembershipHistoryStatus400
+	| ListOrganizationMembershipHistoryStatus403
+	| ListOrganizationMembershipHistoryStatus404
+	| ListOrganizationMembershipHistoryStatus409
+	| ListOrganizationMembershipHistoryStatus422
+	| ListOrganizationMembershipHistoryStatus429
+	| ListOrganizationMembershipHistoryStatus500
+	| ListOrganizationMembershipHistoryStatus503;
 
 export type ListManagedOrganizationInvitationsPath = {
 	/**
@@ -69896,24 +70822,41 @@ export type ListManagedOrganizationInvitationsPath = {
 
 export type ListManagedOrganizationInvitationsQuery = {
 	/**
-	 * @description
-	 * Format: `uuid`
+	 * @minLength 1
+	 * @maxLength 512
 	 * @type string | undefined
 	 */
 	afterId?: string;
 };
 
+export const ListManagedOrganizationInvitationsStatus200ItemsKindEnum = {
+	entity: "entity",
+	principal: "principal",
+} as const;
+
+export type ListManagedOrganizationInvitationsStatus200ItemsKindEnum =
+	(typeof ListManagedOrganizationInvitationsStatus200ItemsKindEnum)[keyof typeof ListManagedOrganizationInvitationsStatus200ItemsKindEnum];
+
 export const ListManagedOrganizationInvitationsStatus200ItemsStateEnum = {
 	pending: "pending",
 	accepted: "accepted",
 	declined: "declined",
-	cancelled: "cancelled",
+	revoked: "revoked",
 	expired: "expired",
 	invalidated: "invalidated",
 } as const;
 
 export type ListManagedOrganizationInvitationsStatus200ItemsStateEnum =
 	(typeof ListManagedOrganizationInvitationsStatus200ItemsStateEnum)[keyof typeof ListManagedOrganizationInvitationsStatus200ItemsStateEnum];
+
+export const ListManagedOrganizationInvitationsStatus200ItemsAvailabilityEnum = {
+	allow: "allow",
+	deny: "deny",
+	unavailable: "unavailable",
+} as const;
+
+export type ListManagedOrganizationInvitationsStatus200ItemsAvailabilityEnum =
+	(typeof ListManagedOrganizationInvitationsStatus200ItemsAvailabilityEnum)[keyof typeof ListManagedOrganizationInvitationsStatus200ItemsAvailabilityEnum];
 
 export type ListManagedOrganizationInvitationsStatus200 = {
 	items: {
@@ -69930,19 +70873,28 @@ export type ListManagedOrganizationInvitationsStatus200 = {
 		 */
 		organizationEntityId: string;
 		organizationName: string | null;
+		recipientName: string | null;
+		kind: ListManagedOrganizationInvitationsStatus200ItemsKindEnum;
 		/**
 		 * @description
 		 * Format: `uuid`
 		 * @type string
 		 */
-		recipientEntityId: string;
-		recipientName: string | null;
+		entityId: string | null;
 		state: ListManagedOrganizationInvitationsStatus200ItemsStateEnum;
 		/**
-		 * @maxLength 9007199254740991
+		 * @minLength 1
+		 * @maxLength 9007199254740990
 		 * @type integer
 		 */
 		revision: number;
+		availability: ListManagedOrganizationInvitationsStatus200ItemsAvailabilityEnum;
+		/**
+		 * @minLength 0
+		 * @maxLength 9007199254740990
+		 * @type integer
+		 */
+		membershipVersion: number;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -69963,43 +70915,40 @@ export type ListManagedOrganizationInvitationsStatus200 = {
 		resolvedAt: string | null;
 	}[];
 	/**
-	 * @description
-	 * Format: `uuid`
+	 * @maxLength 512
 	 * @type string
 	 */
 	nextCursor: string | null;
 };
 
-export const ListManagedOrganizationInvitationsStatus403ErrorCodeEnum = {
-	ParticipationDenied: "ParticipationDenied",
-	AccountRestricted: "AccountRestricted",
-	AccountSuspended: "AccountSuspended",
-	AccountClosed: "AccountClosed",
-} as const;
-
-export type ListManagedOrganizationInvitationsStatus403ErrorCodeEnum =
-	(typeof ListManagedOrganizationInvitationsStatus403ErrorCodeEnum)[keyof typeof ListManagedOrganizationInvitationsStatus403ErrorCodeEnum];
-
 export type ListManagedOrganizationInvitationsStatus403 = {
 	error: {
 		/**
-		 * @default 'ParticipationDenied'
+		 * @default 'AccessDenied'
 		 * @type string
 		 */
-		code: ListManagedOrganizationInvitationsStatus403ErrorCodeEnum;
+		code: "AccessDenied";
 		message: string;
 		details?: void;
 	};
 	requestId: string;
 };
 
+export const ListManagedOrganizationInvitationsStatus404ErrorCodeEnum = {
+	AccessRecordUnavailable: "AccessRecordUnavailable",
+	OrganizationMembershipNotFound: "OrganizationMembershipNotFound",
+} as const;
+
+export type ListManagedOrganizationInvitationsStatus404ErrorCodeEnum =
+	(typeof ListManagedOrganizationInvitationsStatus404ErrorCodeEnum)[keyof typeof ListManagedOrganizationInvitationsStatus404ErrorCodeEnum];
+
 export type ListManagedOrganizationInvitationsStatus404 = {
 	error: {
 		/**
-		 * @default 'OrganizationMembershipNotFound'
+		 * @default 'AccessRecordUnavailable'
 		 * @type string
 		 */
-		code: "OrganizationMembershipNotFound";
+		code: ListManagedOrganizationInvitationsStatus404ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
@@ -70007,6 +70956,7 @@ export type ListManagedOrganizationInvitationsStatus404 = {
 };
 
 export const ListManagedOrganizationInvitationsStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
 	OrganizationMembershipConflict: "OrganizationMembershipConflict",
 	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
 } as const;
@@ -70017,7 +70967,7 @@ export type ListManagedOrganizationInvitationsStatus409ErrorCodeEnum =
 export type ListManagedOrganizationInvitationsStatus409 = {
 	error: {
 		/**
-		 * @default 'OrganizationMembershipConflict'
+		 * @default 'AccessChanged'
 		 * @type string
 		 */
 		code: ListManagedOrganizationInvitationsStatus409ErrorCodeEnum;
@@ -70029,7 +70979,37 @@ export type ListManagedOrganizationInvitationsStatus409 = {
 
 export type ListManagedOrganizationInvitationsStatus422 = ValidationError;
 
+export const ListManagedOrganizationInvitationsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ListManagedOrganizationInvitationsStatus429ErrorCodeEnum =
+	(typeof ListManagedOrganizationInvitationsStatus429ErrorCodeEnum)[keyof typeof ListManagedOrganizationInvitationsStatus429ErrorCodeEnum];
+
+export type ListManagedOrganizationInvitationsStatus429 = {
+	error: {
+		code: ListManagedOrganizationInvitationsStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
 export type ListManagedOrganizationInvitationsStatus500 = InternalError;
+
+export type ListManagedOrganizationInvitationsStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
 
 export type ListManagedOrganizationInvitationsOptions = {
 	body?: never;
@@ -70044,7 +71024,9 @@ export type ListManagedOrganizationInvitationsResponses = {
 	"404": ListManagedOrganizationInvitationsStatus404;
 	"409": ListManagedOrganizationInvitationsStatus409;
 	"422": ListManagedOrganizationInvitationsStatus422;
+	"429": ListManagedOrganizationInvitationsStatus429;
 	"500": ListManagedOrganizationInvitationsStatus500;
+	"503": ListManagedOrganizationInvitationsStatus503;
 };
 
 /**
@@ -70056,7 +71038,9 @@ export type ListManagedOrganizationInvitationsResponse =
 	| ListManagedOrganizationInvitationsStatus404
 	| ListManagedOrganizationInvitationsStatus409
 	| ListManagedOrganizationInvitationsStatus422
-	| ListManagedOrganizationInvitationsStatus500;
+	| ListManagedOrganizationInvitationsStatus429
+	| ListManagedOrganizationInvitationsStatus500
+	| ListManagedOrganizationInvitationsStatus503;
 
 export type InviteOrganizationMemberPath = {
 	/**
@@ -70071,7 +71055,7 @@ export const InviteOrganizationMemberStatus200StateEnum = {
 	pending: "pending",
 	accepted: "accepted",
 	declined: "declined",
-	cancelled: "cancelled",
+	revoked: "revoked",
 	expired: "expired",
 	invalidated: "invalidated",
 } as const;
@@ -70083,81 +71067,72 @@ export type InviteOrganizationMemberStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
-	 * @type string
+	 * @type string | undefined
 	 */
-	id: string;
+	invitationId?: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740990
+	 * @type integer | undefined
+	 */
+	revision?: number;
+	state?: InviteOrganizationMemberStatus200StateEnum;
 	/**
 	 * @description
 	 * Format: `uuid`
-	 * @type string
+	 * @type string | undefined
 	 */
-	organizationEntityId: string;
-	organizationName: string | null;
+	membershipId?: string;
 	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer | undefined
 	 */
-	recipientEntityId: string;
-	recipientName: string | null;
-	state: InviteOrganizationMemberStatus200StateEnum;
+	version?: number;
 	/**
-	 * @maxLength 9007199254740991
-	 * @type integer
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer | undefined
 	 */
-	revision: number;
+	activeGeneration?: number | null;
 	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer | undefined
 	 */
-	expiresAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	resolvedAt: string | null;
+	lastGeneration?: number;
 };
 
 export type InviteOrganizationMemberStatus400 = MalformedRequestBody;
 
-export const InviteOrganizationMemberStatus403ErrorCodeEnum = {
-	ParticipationDenied: "ParticipationDenied",
-	AccountRestricted: "AccountRestricted",
-	AccountSuspended: "AccountSuspended",
-	AccountClosed: "AccountClosed",
-} as const;
-
-export type InviteOrganizationMemberStatus403ErrorCodeEnum =
-	(typeof InviteOrganizationMemberStatus403ErrorCodeEnum)[keyof typeof InviteOrganizationMemberStatus403ErrorCodeEnum];
-
 export type InviteOrganizationMemberStatus403 = {
 	error: {
 		/**
-		 * @default 'ParticipationDenied'
+		 * @default 'AccessDenied'
 		 * @type string
 		 */
-		code: InviteOrganizationMemberStatus403ErrorCodeEnum;
+		code: "AccessDenied";
 		message: string;
 		details?: void;
 	};
 	requestId: string;
 };
 
+export const InviteOrganizationMemberStatus404ErrorCodeEnum = {
+	AccessRecordUnavailable: "AccessRecordUnavailable",
+	OrganizationMembershipNotFound: "OrganizationMembershipNotFound",
+} as const;
+
+export type InviteOrganizationMemberStatus404ErrorCodeEnum =
+	(typeof InviteOrganizationMemberStatus404ErrorCodeEnum)[keyof typeof InviteOrganizationMemberStatus404ErrorCodeEnum];
+
 export type InviteOrganizationMemberStatus404 = {
 	error: {
 		/**
-		 * @default 'OrganizationMembershipNotFound'
+		 * @default 'AccessRecordUnavailable'
 		 * @type string
 		 */
-		code: "OrganizationMembershipNotFound";
+		code: InviteOrganizationMemberStatus404ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
@@ -70165,6 +71140,7 @@ export type InviteOrganizationMemberStatus404 = {
 };
 
 export const InviteOrganizationMemberStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
 	OrganizationMembershipConflict: "OrganizationMembershipConflict",
 	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
 } as const;
@@ -70175,7 +71151,7 @@ export type InviteOrganizationMemberStatus409ErrorCodeEnum =
 export type InviteOrganizationMemberStatus409 = {
 	error: {
 		/**
-		 * @default 'OrganizationMembershipConflict'
+		 * @default 'AccessChanged'
 		 * @type string
 		 */
 		code: InviteOrganizationMemberStatus409ErrorCodeEnum;
@@ -70189,13 +71165,45 @@ export type InviteOrganizationMemberStatus422 = ValidationError;
 
 export type InviteOrganizationMemberStatus500 = InternalError;
 
+export type InviteOrganizationMemberStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
 export type InviteOrganizationMemberBody = {
+	recipient:
+		| {
+				kind: "entity";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				entityId: string;
+		  }
+		| {
+				kind: "principal";
+				/**
+				 * @minLength 1
+				 * @maxLength 512
+				 * @type string
+				 */
+				selector: string;
+		  };
 	/**
 	 * @description
 	 * Format: `uuid`
 	 * @type string
 	 */
-	recipientEntityId: string;
+	operationId: string;
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -70219,6 +71227,7 @@ export type InviteOrganizationMemberResponses = {
 	"409": InviteOrganizationMemberStatus409;
 	"422": InviteOrganizationMemberStatus422;
 	"500": InviteOrganizationMemberStatus500;
+	"503": InviteOrganizationMemberStatus503;
 };
 
 /**
@@ -70231,9 +71240,10 @@ export type InviteOrganizationMemberResponse =
 	| InviteOrganizationMemberStatus404
 	| InviteOrganizationMemberStatus409
 	| InviteOrganizationMemberStatus422
-	| InviteOrganizationMemberStatus500;
+	| InviteOrganizationMemberStatus500
+	| InviteOrganizationMemberStatus503;
 
-export type CancelOrganizationMembershipInvitationPath = {
+export type RevokeOrganizationMembershipInvitationPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -70248,164 +71258,178 @@ export type CancelOrganizationMembershipInvitationPath = {
 	invitationId: string;
 };
 
-export const CancelOrganizationMembershipInvitationStatus200StateEnum = {
+export const RevokeOrganizationMembershipInvitationStatus200StateEnum = {
 	pending: "pending",
 	accepted: "accepted",
 	declined: "declined",
-	cancelled: "cancelled",
+	revoked: "revoked",
 	expired: "expired",
 	invalidated: "invalidated",
 } as const;
 
-export type CancelOrganizationMembershipInvitationStatus200StateEnum =
-	(typeof CancelOrganizationMembershipInvitationStatus200StateEnum)[keyof typeof CancelOrganizationMembershipInvitationStatus200StateEnum];
+export type RevokeOrganizationMembershipInvitationStatus200StateEnum =
+	(typeof RevokeOrganizationMembershipInvitationStatus200StateEnum)[keyof typeof RevokeOrganizationMembershipInvitationStatus200StateEnum];
 
-export type CancelOrganizationMembershipInvitationStatus200 = {
+export type RevokeOrganizationMembershipInvitationStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
-	 * @type string
+	 * @type string | undefined
 	 */
-	id: string;
+	invitationId?: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740990
+	 * @type integer | undefined
+	 */
+	revision?: number;
+	state?: RevokeOrganizationMembershipInvitationStatus200StateEnum;
 	/**
 	 * @description
 	 * Format: `uuid`
-	 * @type string
+	 * @type string | undefined
 	 */
-	organizationEntityId: string;
-	organizationName: string | null;
+	membershipId?: string;
 	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer | undefined
 	 */
-	recipientEntityId: string;
-	recipientName: string | null;
-	state: CancelOrganizationMembershipInvitationStatus200StateEnum;
+	version?: number;
 	/**
-	 * @maxLength 9007199254740991
-	 * @type integer
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer | undefined
 	 */
-	revision: number;
+	activeGeneration?: number | null;
 	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer | undefined
 	 */
-	expiresAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	resolvedAt: string | null;
+	lastGeneration?: number;
 };
 
-export type CancelOrganizationMembershipInvitationStatus400 = MalformedRequestBody;
+export type RevokeOrganizationMembershipInvitationStatus400 = MalformedRequestBody;
 
-export const CancelOrganizationMembershipInvitationStatus403ErrorCodeEnum = {
-	ParticipationDenied: "ParticipationDenied",
-	AccountRestricted: "AccountRestricted",
-	AccountSuspended: "AccountSuspended",
-	AccountClosed: "AccountClosed",
+export type RevokeOrganizationMembershipInvitationStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: "AccessDenied";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const RevokeOrganizationMembershipInvitationStatus404ErrorCodeEnum = {
+	AccessRecordUnavailable: "AccessRecordUnavailable",
+	OrganizationMembershipNotFound: "OrganizationMembershipNotFound",
 } as const;
 
-export type CancelOrganizationMembershipInvitationStatus403ErrorCodeEnum =
-	(typeof CancelOrganizationMembershipInvitationStatus403ErrorCodeEnum)[keyof typeof CancelOrganizationMembershipInvitationStatus403ErrorCodeEnum];
+export type RevokeOrganizationMembershipInvitationStatus404ErrorCodeEnum =
+	(typeof RevokeOrganizationMembershipInvitationStatus404ErrorCodeEnum)[keyof typeof RevokeOrganizationMembershipInvitationStatus404ErrorCodeEnum];
 
-export type CancelOrganizationMembershipInvitationStatus403 = {
+export type RevokeOrganizationMembershipInvitationStatus404 = {
 	error: {
 		/**
-		 * @default 'ParticipationDenied'
+		 * @default 'AccessRecordUnavailable'
 		 * @type string
 		 */
-		code: CancelOrganizationMembershipInvitationStatus403ErrorCodeEnum;
+		code: RevokeOrganizationMembershipInvitationStatus404ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
 	requestId: string;
 };
 
-export type CancelOrganizationMembershipInvitationStatus404 = {
-	error: {
-		/**
-		 * @default 'OrganizationMembershipNotFound'
-		 * @type string
-		 */
-		code: "OrganizationMembershipNotFound";
-		message: string;
-		details?: void;
-	};
-	requestId: string;
-};
-
-export const CancelOrganizationMembershipInvitationStatus409ErrorCodeEnum = {
+export const RevokeOrganizationMembershipInvitationStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
 	OrganizationMembershipConflict: "OrganizationMembershipConflict",
 	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
 } as const;
 
-export type CancelOrganizationMembershipInvitationStatus409ErrorCodeEnum =
-	(typeof CancelOrganizationMembershipInvitationStatus409ErrorCodeEnum)[keyof typeof CancelOrganizationMembershipInvitationStatus409ErrorCodeEnum];
+export type RevokeOrganizationMembershipInvitationStatus409ErrorCodeEnum =
+	(typeof RevokeOrganizationMembershipInvitationStatus409ErrorCodeEnum)[keyof typeof RevokeOrganizationMembershipInvitationStatus409ErrorCodeEnum];
 
-export type CancelOrganizationMembershipInvitationStatus409 = {
+export type RevokeOrganizationMembershipInvitationStatus409 = {
 	error: {
 		/**
-		 * @default 'OrganizationMembershipConflict'
+		 * @default 'AccessChanged'
 		 * @type string
 		 */
-		code: CancelOrganizationMembershipInvitationStatus409ErrorCodeEnum;
+		code: RevokeOrganizationMembershipInvitationStatus409ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
 	requestId: string;
 };
 
-export type CancelOrganizationMembershipInvitationStatus422 = ValidationError;
+export type RevokeOrganizationMembershipInvitationStatus422 = ValidationError;
 
-export type CancelOrganizationMembershipInvitationStatus500 = InternalError;
+export type RevokeOrganizationMembershipInvitationStatus500 = InternalError;
 
-export type CancelOrganizationMembershipInvitationBody = {
+export type RevokeOrganizationMembershipInvitationStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RevokeOrganizationMembershipInvitationBody = {
 	/**
+	 * @minLength 1
 	 * @maxLength 9007199254740990
 	 * @type integer
 	 */
 	expectedRevision: number;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
 };
 
-export type CancelOrganizationMembershipInvitationOptions = {
-	body: CancelOrganizationMembershipInvitationBody;
-	path: CancelOrganizationMembershipInvitationPath;
+export type RevokeOrganizationMembershipInvitationOptions = {
+	body: RevokeOrganizationMembershipInvitationBody;
+	path: RevokeOrganizationMembershipInvitationPath;
 	query?: never;
 	headers?: never;
 };
 
-export type CancelOrganizationMembershipInvitationResponses = {
-	"200": CancelOrganizationMembershipInvitationStatus200;
-	"400": CancelOrganizationMembershipInvitationStatus400;
-	"403": CancelOrganizationMembershipInvitationStatus403;
-	"404": CancelOrganizationMembershipInvitationStatus404;
-	"409": CancelOrganizationMembershipInvitationStatus409;
-	"422": CancelOrganizationMembershipInvitationStatus422;
-	"500": CancelOrganizationMembershipInvitationStatus500;
+export type RevokeOrganizationMembershipInvitationResponses = {
+	"200": RevokeOrganizationMembershipInvitationStatus200;
+	"400": RevokeOrganizationMembershipInvitationStatus400;
+	"403": RevokeOrganizationMembershipInvitationStatus403;
+	"404": RevokeOrganizationMembershipInvitationStatus404;
+	"409": RevokeOrganizationMembershipInvitationStatus409;
+	"422": RevokeOrganizationMembershipInvitationStatus422;
+	"500": RevokeOrganizationMembershipInvitationStatus500;
+	"503": RevokeOrganizationMembershipInvitationStatus503;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type CancelOrganizationMembershipInvitationResponse =
-	| CancelOrganizationMembershipInvitationStatus200
-	| CancelOrganizationMembershipInvitationStatus400
-	| CancelOrganizationMembershipInvitationStatus403
-	| CancelOrganizationMembershipInvitationStatus404
-	| CancelOrganizationMembershipInvitationStatus409
-	| CancelOrganizationMembershipInvitationStatus422
-	| CancelOrganizationMembershipInvitationStatus500;
+export type RevokeOrganizationMembershipInvitationResponse =
+	| RevokeOrganizationMembershipInvitationStatus200
+	| RevokeOrganizationMembershipInvitationStatus400
+	| RevokeOrganizationMembershipInvitationStatus403
+	| RevokeOrganizationMembershipInvitationStatus404
+	| RevokeOrganizationMembershipInvitationStatus409
+	| RevokeOrganizationMembershipInvitationStatus422
+	| RevokeOrganizationMembershipInvitationStatus500
+	| RevokeOrganizationMembershipInvitationStatus503;
 
 export type RemoveOrganizationMemberPath = {
 	/**
@@ -70414,80 +71438,90 @@ export type RemoveOrganizationMemberPath = {
 	 * @type string
 	 */
 	organizationEntityId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	memberEntityId: string;
 };
+
+export const RemoveOrganizationMemberStatus200StateEnum = {
+	pending: "pending",
+	accepted: "accepted",
+	declined: "declined",
+	revoked: "revoked",
+	expired: "expired",
+	invalidated: "invalidated",
+} as const;
+
+export type RemoveOrganizationMemberStatus200StateEnum =
+	(typeof RemoveOrganizationMemberStatus200StateEnum)[keyof typeof RemoveOrganizationMemberStatus200StateEnum];
 
 export type RemoveOrganizationMemberStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
-	 * @type string
+	 * @type string | undefined
 	 */
-	organizationEntityId: string;
-	organizationName: string | null;
+	invitationId?: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740990
+	 * @type integer | undefined
+	 */
+	revision?: number;
+	state?: RemoveOrganizationMemberStatus200StateEnum;
 	/**
 	 * @description
 	 * Format: `uuid`
-	 * @type string
+	 * @type string | undefined
 	 */
-	memberEntityId: string;
-	memberName: string | null;
+	membershipId?: string;
 	/**
-	 * @maxLength 9007199254740991
-	 * @type integer
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer | undefined
 	 */
-	revision: number;
+	version?: number;
 	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer | undefined
 	 */
-	joinedAt: string;
+	activeGeneration?: number | null;
 	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer | undefined
 	 */
-	removedAt: string | null;
+	lastGeneration?: number;
 };
 
 export type RemoveOrganizationMemberStatus400 = MalformedRequestBody;
 
-export const RemoveOrganizationMemberStatus403ErrorCodeEnum = {
-	ParticipationDenied: "ParticipationDenied",
-	AccountRestricted: "AccountRestricted",
-	AccountSuspended: "AccountSuspended",
-	AccountClosed: "AccountClosed",
-} as const;
-
-export type RemoveOrganizationMemberStatus403ErrorCodeEnum =
-	(typeof RemoveOrganizationMemberStatus403ErrorCodeEnum)[keyof typeof RemoveOrganizationMemberStatus403ErrorCodeEnum];
-
 export type RemoveOrganizationMemberStatus403 = {
 	error: {
 		/**
-		 * @default 'ParticipationDenied'
+		 * @default 'AccessDenied'
 		 * @type string
 		 */
-		code: RemoveOrganizationMemberStatus403ErrorCodeEnum;
+		code: "AccessDenied";
 		message: string;
 		details?: void;
 	};
 	requestId: string;
 };
 
+export const RemoveOrganizationMemberStatus404ErrorCodeEnum = {
+	AccessRecordUnavailable: "AccessRecordUnavailable",
+	OrganizationMembershipNotFound: "OrganizationMembershipNotFound",
+} as const;
+
+export type RemoveOrganizationMemberStatus404ErrorCodeEnum =
+	(typeof RemoveOrganizationMemberStatus404ErrorCodeEnum)[keyof typeof RemoveOrganizationMemberStatus404ErrorCodeEnum];
+
 export type RemoveOrganizationMemberStatus404 = {
 	error: {
 		/**
-		 * @default 'OrganizationMembershipNotFound'
+		 * @default 'AccessRecordUnavailable'
 		 * @type string
 		 */
-		code: "OrganizationMembershipNotFound";
+		code: RemoveOrganizationMemberStatus404ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
@@ -70495,6 +71529,7 @@ export type RemoveOrganizationMemberStatus404 = {
 };
 
 export const RemoveOrganizationMemberStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
 	OrganizationMembershipConflict: "OrganizationMembershipConflict",
 	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
 } as const;
@@ -70505,7 +71540,7 @@ export type RemoveOrganizationMemberStatus409ErrorCodeEnum =
 export type RemoveOrganizationMemberStatus409 = {
 	error: {
 		/**
-		 * @default 'OrganizationMembershipConflict'
+		 * @default 'AccessChanged'
 		 * @type string
 		 */
 		code: RemoveOrganizationMemberStatus409ErrorCodeEnum;
@@ -70519,12 +71554,51 @@ export type RemoveOrganizationMemberStatus422 = ValidationError;
 
 export type RemoveOrganizationMemberStatus500 = InternalError;
 
+export type RemoveOrganizationMemberStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
 export type RemoveOrganizationMemberBody = {
 	/**
+	 * @minLength 1
 	 * @maxLength 9007199254740990
 	 * @type integer
 	 */
-	expectedRevision: number;
+	expectedMembershipVersion: number;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	recipient:
+		| {
+				kind: "entity";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				entityId: string;
+		  }
+		| {
+				kind: "principal";
+				/**
+				 * @minLength 1
+				 * @maxLength 512
+				 * @type string
+				 */
+				selector: string;
+		  };
 };
 
 export type RemoveOrganizationMemberOptions = {
@@ -70542,6 +71616,7 @@ export type RemoveOrganizationMemberResponses = {
 	"409": RemoveOrganizationMemberStatus409;
 	"422": RemoveOrganizationMemberStatus422;
 	"500": RemoveOrganizationMemberStatus500;
+	"503": RemoveOrganizationMemberStatus503;
 };
 
 /**
@@ -70554,28 +71629,46 @@ export type RemoveOrganizationMemberResponse =
 	| RemoveOrganizationMemberStatus404
 	| RemoveOrganizationMemberStatus409
 	| RemoveOrganizationMemberStatus422
-	| RemoveOrganizationMemberStatus500;
+	| RemoveOrganizationMemberStatus500
+	| RemoveOrganizationMemberStatus503;
 
 export type ListOwnOrganizationMembershipInvitationsQuery = {
 	/**
-	 * @description
-	 * Format: `uuid`
+	 * @minLength 1
+	 * @maxLength 512
 	 * @type string | undefined
 	 */
 	afterId?: string;
 };
 
+export const ListOwnOrganizationMembershipInvitationsStatus200ItemsKindEnum = {
+	entity: "entity",
+	principal: "principal",
+} as const;
+
+export type ListOwnOrganizationMembershipInvitationsStatus200ItemsKindEnum =
+	(typeof ListOwnOrganizationMembershipInvitationsStatus200ItemsKindEnum)[keyof typeof ListOwnOrganizationMembershipInvitationsStatus200ItemsKindEnum];
+
 export const ListOwnOrganizationMembershipInvitationsStatus200ItemsStateEnum = {
 	pending: "pending",
 	accepted: "accepted",
 	declined: "declined",
-	cancelled: "cancelled",
+	revoked: "revoked",
 	expired: "expired",
 	invalidated: "invalidated",
 } as const;
 
 export type ListOwnOrganizationMembershipInvitationsStatus200ItemsStateEnum =
 	(typeof ListOwnOrganizationMembershipInvitationsStatus200ItemsStateEnum)[keyof typeof ListOwnOrganizationMembershipInvitationsStatus200ItemsStateEnum];
+
+export const ListOwnOrganizationMembershipInvitationsStatus200ItemsAvailabilityEnum = {
+	allow: "allow",
+	deny: "deny",
+	unavailable: "unavailable",
+} as const;
+
+export type ListOwnOrganizationMembershipInvitationsStatus200ItemsAvailabilityEnum =
+	(typeof ListOwnOrganizationMembershipInvitationsStatus200ItemsAvailabilityEnum)[keyof typeof ListOwnOrganizationMembershipInvitationsStatus200ItemsAvailabilityEnum];
 
 export type ListOwnOrganizationMembershipInvitationsStatus200 = {
 	items: {
@@ -70592,19 +71685,28 @@ export type ListOwnOrganizationMembershipInvitationsStatus200 = {
 		 */
 		organizationEntityId: string;
 		organizationName: string | null;
+		recipientName: string | null;
+		kind: ListOwnOrganizationMembershipInvitationsStatus200ItemsKindEnum;
 		/**
 		 * @description
 		 * Format: `uuid`
 		 * @type string
 		 */
-		recipientEntityId: string;
-		recipientName: string | null;
+		entityId: string | null;
 		state: ListOwnOrganizationMembershipInvitationsStatus200ItemsStateEnum;
 		/**
-		 * @maxLength 9007199254740991
+		 * @minLength 1
+		 * @maxLength 9007199254740990
 		 * @type integer
 		 */
 		revision: number;
+		availability: ListOwnOrganizationMembershipInvitationsStatus200ItemsAvailabilityEnum;
+		/**
+		 * @minLength 0
+		 * @maxLength 9007199254740990
+		 * @type integer
+		 */
+		membershipVersion: number;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -70625,43 +71727,40 @@ export type ListOwnOrganizationMembershipInvitationsStatus200 = {
 		resolvedAt: string | null;
 	}[];
 	/**
-	 * @description
-	 * Format: `uuid`
+	 * @maxLength 512
 	 * @type string
 	 */
 	nextCursor: string | null;
 };
 
-export const ListOwnOrganizationMembershipInvitationsStatus403ErrorCodeEnum = {
-	ParticipationDenied: "ParticipationDenied",
-	AccountRestricted: "AccountRestricted",
-	AccountSuspended: "AccountSuspended",
-	AccountClosed: "AccountClosed",
-} as const;
-
-export type ListOwnOrganizationMembershipInvitationsStatus403ErrorCodeEnum =
-	(typeof ListOwnOrganizationMembershipInvitationsStatus403ErrorCodeEnum)[keyof typeof ListOwnOrganizationMembershipInvitationsStatus403ErrorCodeEnum];
-
 export type ListOwnOrganizationMembershipInvitationsStatus403 = {
 	error: {
 		/**
-		 * @default 'ParticipationDenied'
+		 * @default 'AccessDenied'
 		 * @type string
 		 */
-		code: ListOwnOrganizationMembershipInvitationsStatus403ErrorCodeEnum;
+		code: "AccessDenied";
 		message: string;
 		details?: void;
 	};
 	requestId: string;
 };
 
+export const ListOwnOrganizationMembershipInvitationsStatus404ErrorCodeEnum = {
+	AccessRecordUnavailable: "AccessRecordUnavailable",
+	OrganizationMembershipNotFound: "OrganizationMembershipNotFound",
+} as const;
+
+export type ListOwnOrganizationMembershipInvitationsStatus404ErrorCodeEnum =
+	(typeof ListOwnOrganizationMembershipInvitationsStatus404ErrorCodeEnum)[keyof typeof ListOwnOrganizationMembershipInvitationsStatus404ErrorCodeEnum];
+
 export type ListOwnOrganizationMembershipInvitationsStatus404 = {
 	error: {
 		/**
-		 * @default 'OrganizationMembershipNotFound'
+		 * @default 'AccessRecordUnavailable'
 		 * @type string
 		 */
-		code: "OrganizationMembershipNotFound";
+		code: ListOwnOrganizationMembershipInvitationsStatus404ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
@@ -70669,6 +71768,7 @@ export type ListOwnOrganizationMembershipInvitationsStatus404 = {
 };
 
 export const ListOwnOrganizationMembershipInvitationsStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
 	OrganizationMembershipConflict: "OrganizationMembershipConflict",
 	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
 } as const;
@@ -70679,7 +71779,7 @@ export type ListOwnOrganizationMembershipInvitationsStatus409ErrorCodeEnum =
 export type ListOwnOrganizationMembershipInvitationsStatus409 = {
 	error: {
 		/**
-		 * @default 'OrganizationMembershipConflict'
+		 * @default 'AccessChanged'
 		 * @type string
 		 */
 		code: ListOwnOrganizationMembershipInvitationsStatus409ErrorCodeEnum;
@@ -70691,7 +71791,37 @@ export type ListOwnOrganizationMembershipInvitationsStatus409 = {
 
 export type ListOwnOrganizationMembershipInvitationsStatus422 = ValidationError;
 
+export const ListOwnOrganizationMembershipInvitationsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ListOwnOrganizationMembershipInvitationsStatus429ErrorCodeEnum =
+	(typeof ListOwnOrganizationMembershipInvitationsStatus429ErrorCodeEnum)[keyof typeof ListOwnOrganizationMembershipInvitationsStatus429ErrorCodeEnum];
+
+export type ListOwnOrganizationMembershipInvitationsStatus429 = {
+	error: {
+		code: ListOwnOrganizationMembershipInvitationsStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
 export type ListOwnOrganizationMembershipInvitationsStatus500 = InternalError;
+
+export type ListOwnOrganizationMembershipInvitationsStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
 
 export type ListOwnOrganizationMembershipInvitationsOptions = {
 	body?: never;
@@ -70706,7 +71836,9 @@ export type ListOwnOrganizationMembershipInvitationsResponses = {
 	"404": ListOwnOrganizationMembershipInvitationsStatus404;
 	"409": ListOwnOrganizationMembershipInvitationsStatus409;
 	"422": ListOwnOrganizationMembershipInvitationsStatus422;
+	"429": ListOwnOrganizationMembershipInvitationsStatus429;
 	"500": ListOwnOrganizationMembershipInvitationsStatus500;
+	"503": ListOwnOrganizationMembershipInvitationsStatus503;
 };
 
 /**
@@ -70718,16 +71850,27 @@ export type ListOwnOrganizationMembershipInvitationsResponse =
 	| ListOwnOrganizationMembershipInvitationsStatus404
 	| ListOwnOrganizationMembershipInvitationsStatus409
 	| ListOwnOrganizationMembershipInvitationsStatus422
-	| ListOwnOrganizationMembershipInvitationsStatus500;
+	| ListOwnOrganizationMembershipInvitationsStatus429
+	| ListOwnOrganizationMembershipInvitationsStatus500
+	| ListOwnOrganizationMembershipInvitationsStatus503;
 
 export type ListOwnOrganizationMembershipsQuery = {
 	/**
-	 * @description
-	 * Format: `uuid`
+	 * @minLength 1
+	 * @maxLength 512
 	 * @type string | undefined
 	 */
 	afterId?: string;
 };
+
+export const ListOwnOrganizationMembershipsStatus200ItemsAvailabilityEnum = {
+	allow: "allow",
+	deny: "deny",
+	unavailable: "unavailable",
+} as const;
+
+export type ListOwnOrganizationMembershipsStatus200ItemsAvailabilityEnum =
+	(typeof ListOwnOrganizationMembershipsStatus200ItemsAvailabilityEnum)[keyof typeof ListOwnOrganizationMembershipsStatus200ItemsAvailabilityEnum];
 
 export type ListOwnOrganizationMembershipsStatus200 = {
 	items: {
@@ -70736,71 +71879,89 @@ export type ListOwnOrganizationMembershipsStatus200 = {
 		 * Format: `uuid`
 		 * @type string
 		 */
-		organizationEntityId: string;
-		organizationName: string | null;
+		membershipId: string;
 		/**
 		 * @description
 		 * Format: `uuid`
 		 * @type string
 		 */
-		memberEntityId: string;
+		organizationEntityId: string;
+		organizationName: string | null;
 		memberName: string | null;
+		recipient:
+			| {
+					kind: "entity";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					entityId: string;
+			  }
+			| {
+					kind: "principal";
+					/**
+					 * @minLength 1
+					 * @maxLength 512
+					 * @type string
+					 */
+					selector: string;
+			  };
 		/**
-		 * @maxLength 9007199254740991
+		 * @minLength 0
+		 * @maxLength 9007199254740990
 		 * @type integer
 		 */
-		revision: number;
+		version: number;
 		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
+		 * @minLength 0
+		 * @maxLength 9007199254740990
+		 * @type integer
 		 */
-		joinedAt: string;
+		activeGeneration: number | null;
 		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
+		 * @minLength 0
+		 * @maxLength 9007199254740990
+		 * @type integer
 		 */
-		removedAt: string | null;
+		lastGeneration: number;
+		availability: ListOwnOrganizationMembershipsStatus200ItemsAvailabilityEnum;
 	}[];
 	/**
-	 * @description
-	 * Format: `uuid`
+	 * @maxLength 512
 	 * @type string
 	 */
 	nextCursor: string | null;
 };
 
-export const ListOwnOrganizationMembershipsStatus403ErrorCodeEnum = {
-	ParticipationDenied: "ParticipationDenied",
-	AccountRestricted: "AccountRestricted",
-	AccountSuspended: "AccountSuspended",
-	AccountClosed: "AccountClosed",
-} as const;
-
-export type ListOwnOrganizationMembershipsStatus403ErrorCodeEnum =
-	(typeof ListOwnOrganizationMembershipsStatus403ErrorCodeEnum)[keyof typeof ListOwnOrganizationMembershipsStatus403ErrorCodeEnum];
-
 export type ListOwnOrganizationMembershipsStatus403 = {
 	error: {
 		/**
-		 * @default 'ParticipationDenied'
+		 * @default 'AccessDenied'
 		 * @type string
 		 */
-		code: ListOwnOrganizationMembershipsStatus403ErrorCodeEnum;
+		code: "AccessDenied";
 		message: string;
 		details?: void;
 	};
 	requestId: string;
 };
 
+export const ListOwnOrganizationMembershipsStatus404ErrorCodeEnum = {
+	AccessRecordUnavailable: "AccessRecordUnavailable",
+	OrganizationMembershipNotFound: "OrganizationMembershipNotFound",
+} as const;
+
+export type ListOwnOrganizationMembershipsStatus404ErrorCodeEnum =
+	(typeof ListOwnOrganizationMembershipsStatus404ErrorCodeEnum)[keyof typeof ListOwnOrganizationMembershipsStatus404ErrorCodeEnum];
+
 export type ListOwnOrganizationMembershipsStatus404 = {
 	error: {
 		/**
-		 * @default 'OrganizationMembershipNotFound'
+		 * @default 'AccessRecordUnavailable'
 		 * @type string
 		 */
-		code: "OrganizationMembershipNotFound";
+		code: ListOwnOrganizationMembershipsStatus404ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
@@ -70808,6 +71969,7 @@ export type ListOwnOrganizationMembershipsStatus404 = {
 };
 
 export const ListOwnOrganizationMembershipsStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
 	OrganizationMembershipConflict: "OrganizationMembershipConflict",
 	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
 } as const;
@@ -70818,7 +71980,7 @@ export type ListOwnOrganizationMembershipsStatus409ErrorCodeEnum =
 export type ListOwnOrganizationMembershipsStatus409 = {
 	error: {
 		/**
-		 * @default 'OrganizationMembershipConflict'
+		 * @default 'AccessChanged'
 		 * @type string
 		 */
 		code: ListOwnOrganizationMembershipsStatus409ErrorCodeEnum;
@@ -70830,7 +71992,37 @@ export type ListOwnOrganizationMembershipsStatus409 = {
 
 export type ListOwnOrganizationMembershipsStatus422 = ValidationError;
 
+export const ListOwnOrganizationMembershipsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ListOwnOrganizationMembershipsStatus429ErrorCodeEnum =
+	(typeof ListOwnOrganizationMembershipsStatus429ErrorCodeEnum)[keyof typeof ListOwnOrganizationMembershipsStatus429ErrorCodeEnum];
+
+export type ListOwnOrganizationMembershipsStatus429 = {
+	error: {
+		code: ListOwnOrganizationMembershipsStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
 export type ListOwnOrganizationMembershipsStatus500 = InternalError;
+
+export type ListOwnOrganizationMembershipsStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
 
 export type ListOwnOrganizationMembershipsOptions = {
 	body?: never;
@@ -70845,7 +72037,9 @@ export type ListOwnOrganizationMembershipsResponses = {
 	"404": ListOwnOrganizationMembershipsStatus404;
 	"409": ListOwnOrganizationMembershipsStatus409;
 	"422": ListOwnOrganizationMembershipsStatus422;
+	"429": ListOwnOrganizationMembershipsStatus429;
 	"500": ListOwnOrganizationMembershipsStatus500;
+	"503": ListOwnOrganizationMembershipsStatus503;
 };
 
 /**
@@ -70857,7 +72051,9 @@ export type ListOwnOrganizationMembershipsResponse =
 	| ListOwnOrganizationMembershipsStatus404
 	| ListOwnOrganizationMembershipsStatus409
 	| ListOwnOrganizationMembershipsStatus422
-	| ListOwnOrganizationMembershipsStatus500;
+	| ListOwnOrganizationMembershipsStatus429
+	| ListOwnOrganizationMembershipsStatus500
+	| ListOwnOrganizationMembershipsStatus503;
 
 export type AcceptOrganizationMembershipInvitationPath = {
 	/**
@@ -70872,7 +72068,7 @@ export const AcceptOrganizationMembershipInvitationStatus200StateEnum = {
 	pending: "pending",
 	accepted: "accepted",
 	declined: "declined",
-	cancelled: "cancelled",
+	revoked: "revoked",
 	expired: "expired",
 	invalidated: "invalidated",
 } as const;
@@ -70884,81 +72080,72 @@ export type AcceptOrganizationMembershipInvitationStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
-	 * @type string
+	 * @type string | undefined
 	 */
-	id: string;
+	invitationId?: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740990
+	 * @type integer | undefined
+	 */
+	revision?: number;
+	state?: AcceptOrganizationMembershipInvitationStatus200StateEnum;
 	/**
 	 * @description
 	 * Format: `uuid`
-	 * @type string
+	 * @type string | undefined
 	 */
-	organizationEntityId: string;
-	organizationName: string | null;
+	membershipId?: string;
 	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer | undefined
 	 */
-	recipientEntityId: string;
-	recipientName: string | null;
-	state: AcceptOrganizationMembershipInvitationStatus200StateEnum;
+	version?: number;
 	/**
-	 * @maxLength 9007199254740991
-	 * @type integer
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer | undefined
 	 */
-	revision: number;
+	activeGeneration?: number | null;
 	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer | undefined
 	 */
-	expiresAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	resolvedAt: string | null;
+	lastGeneration?: number;
 };
 
 export type AcceptOrganizationMembershipInvitationStatus400 = MalformedRequestBody;
 
-export const AcceptOrganizationMembershipInvitationStatus403ErrorCodeEnum = {
-	ParticipationDenied: "ParticipationDenied",
-	AccountRestricted: "AccountRestricted",
-	AccountSuspended: "AccountSuspended",
-	AccountClosed: "AccountClosed",
-} as const;
-
-export type AcceptOrganizationMembershipInvitationStatus403ErrorCodeEnum =
-	(typeof AcceptOrganizationMembershipInvitationStatus403ErrorCodeEnum)[keyof typeof AcceptOrganizationMembershipInvitationStatus403ErrorCodeEnum];
-
 export type AcceptOrganizationMembershipInvitationStatus403 = {
 	error: {
 		/**
-		 * @default 'ParticipationDenied'
+		 * @default 'AccessDenied'
 		 * @type string
 		 */
-		code: AcceptOrganizationMembershipInvitationStatus403ErrorCodeEnum;
+		code: "AccessDenied";
 		message: string;
 		details?: void;
 	};
 	requestId: string;
 };
 
+export const AcceptOrganizationMembershipInvitationStatus404ErrorCodeEnum = {
+	AccessRecordUnavailable: "AccessRecordUnavailable",
+	OrganizationMembershipNotFound: "OrganizationMembershipNotFound",
+} as const;
+
+export type AcceptOrganizationMembershipInvitationStatus404ErrorCodeEnum =
+	(typeof AcceptOrganizationMembershipInvitationStatus404ErrorCodeEnum)[keyof typeof AcceptOrganizationMembershipInvitationStatus404ErrorCodeEnum];
+
 export type AcceptOrganizationMembershipInvitationStatus404 = {
 	error: {
 		/**
-		 * @default 'OrganizationMembershipNotFound'
+		 * @default 'AccessRecordUnavailable'
 		 * @type string
 		 */
-		code: "OrganizationMembershipNotFound";
+		code: AcceptOrganizationMembershipInvitationStatus404ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
@@ -70966,6 +72153,7 @@ export type AcceptOrganizationMembershipInvitationStatus404 = {
 };
 
 export const AcceptOrganizationMembershipInvitationStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
 	OrganizationMembershipConflict: "OrganizationMembershipConflict",
 	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
 } as const;
@@ -70976,7 +72164,7 @@ export type AcceptOrganizationMembershipInvitationStatus409ErrorCodeEnum =
 export type AcceptOrganizationMembershipInvitationStatus409 = {
 	error: {
 		/**
-		 * @default 'OrganizationMembershipConflict'
+		 * @default 'AccessChanged'
 		 * @type string
 		 */
 		code: AcceptOrganizationMembershipInvitationStatus409ErrorCodeEnum;
@@ -70990,12 +72178,39 @@ export type AcceptOrganizationMembershipInvitationStatus422 = ValidationError;
 
 export type AcceptOrganizationMembershipInvitationStatus500 = InternalError;
 
+export type AcceptOrganizationMembershipInvitationStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
 export type AcceptOrganizationMembershipInvitationBody = {
 	/**
+	 * @minLength 1
 	 * @maxLength 9007199254740990
 	 * @type integer
 	 */
 	expectedRevision: number;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	expectedMembershipVersion: number;
+	consent: true;
 };
 
 export type AcceptOrganizationMembershipInvitationOptions = {
@@ -71013,6 +72228,7 @@ export type AcceptOrganizationMembershipInvitationResponses = {
 	"409": AcceptOrganizationMembershipInvitationStatus409;
 	"422": AcceptOrganizationMembershipInvitationStatus422;
 	"500": AcceptOrganizationMembershipInvitationStatus500;
+	"503": AcceptOrganizationMembershipInvitationStatus503;
 };
 
 /**
@@ -71025,7 +72241,8 @@ export type AcceptOrganizationMembershipInvitationResponse =
 	| AcceptOrganizationMembershipInvitationStatus404
 	| AcceptOrganizationMembershipInvitationStatus409
 	| AcceptOrganizationMembershipInvitationStatus422
-	| AcceptOrganizationMembershipInvitationStatus500;
+	| AcceptOrganizationMembershipInvitationStatus500
+	| AcceptOrganizationMembershipInvitationStatus503;
 
 export type DeclineOrganizationMembershipInvitationPath = {
 	/**
@@ -71040,7 +72257,7 @@ export const DeclineOrganizationMembershipInvitationStatus200StateEnum = {
 	pending: "pending",
 	accepted: "accepted",
 	declined: "declined",
-	cancelled: "cancelled",
+	revoked: "revoked",
 	expired: "expired",
 	invalidated: "invalidated",
 } as const;
@@ -71052,81 +72269,72 @@ export type DeclineOrganizationMembershipInvitationStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
-	 * @type string
+	 * @type string | undefined
 	 */
-	id: string;
+	invitationId?: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740990
+	 * @type integer | undefined
+	 */
+	revision?: number;
+	state?: DeclineOrganizationMembershipInvitationStatus200StateEnum;
 	/**
 	 * @description
 	 * Format: `uuid`
-	 * @type string
+	 * @type string | undefined
 	 */
-	organizationEntityId: string;
-	organizationName: string | null;
+	membershipId?: string;
 	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer | undefined
 	 */
-	recipientEntityId: string;
-	recipientName: string | null;
-	state: DeclineOrganizationMembershipInvitationStatus200StateEnum;
+	version?: number;
 	/**
-	 * @maxLength 9007199254740991
-	 * @type integer
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer | undefined
 	 */
-	revision: number;
+	activeGeneration?: number | null;
 	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer | undefined
 	 */
-	expiresAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	resolvedAt: string | null;
+	lastGeneration?: number;
 };
 
 export type DeclineOrganizationMembershipInvitationStatus400 = MalformedRequestBody;
 
-export const DeclineOrganizationMembershipInvitationStatus403ErrorCodeEnum = {
-	ParticipationDenied: "ParticipationDenied",
-	AccountRestricted: "AccountRestricted",
-	AccountSuspended: "AccountSuspended",
-	AccountClosed: "AccountClosed",
-} as const;
-
-export type DeclineOrganizationMembershipInvitationStatus403ErrorCodeEnum =
-	(typeof DeclineOrganizationMembershipInvitationStatus403ErrorCodeEnum)[keyof typeof DeclineOrganizationMembershipInvitationStatus403ErrorCodeEnum];
-
 export type DeclineOrganizationMembershipInvitationStatus403 = {
 	error: {
 		/**
-		 * @default 'ParticipationDenied'
+		 * @default 'AccessDenied'
 		 * @type string
 		 */
-		code: DeclineOrganizationMembershipInvitationStatus403ErrorCodeEnum;
+		code: "AccessDenied";
 		message: string;
 		details?: void;
 	};
 	requestId: string;
 };
 
+export const DeclineOrganizationMembershipInvitationStatus404ErrorCodeEnum = {
+	AccessRecordUnavailable: "AccessRecordUnavailable",
+	OrganizationMembershipNotFound: "OrganizationMembershipNotFound",
+} as const;
+
+export type DeclineOrganizationMembershipInvitationStatus404ErrorCodeEnum =
+	(typeof DeclineOrganizationMembershipInvitationStatus404ErrorCodeEnum)[keyof typeof DeclineOrganizationMembershipInvitationStatus404ErrorCodeEnum];
+
 export type DeclineOrganizationMembershipInvitationStatus404 = {
 	error: {
 		/**
-		 * @default 'OrganizationMembershipNotFound'
+		 * @default 'AccessRecordUnavailable'
 		 * @type string
 		 */
-		code: "OrganizationMembershipNotFound";
+		code: DeclineOrganizationMembershipInvitationStatus404ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
@@ -71134,6 +72342,7 @@ export type DeclineOrganizationMembershipInvitationStatus404 = {
 };
 
 export const DeclineOrganizationMembershipInvitationStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
 	OrganizationMembershipConflict: "OrganizationMembershipConflict",
 	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
 } as const;
@@ -71144,7 +72353,7 @@ export type DeclineOrganizationMembershipInvitationStatus409ErrorCodeEnum =
 export type DeclineOrganizationMembershipInvitationStatus409 = {
 	error: {
 		/**
-		 * @default 'OrganizationMembershipConflict'
+		 * @default 'AccessChanged'
 		 * @type string
 		 */
 		code: DeclineOrganizationMembershipInvitationStatus409ErrorCodeEnum;
@@ -71158,12 +72367,32 @@ export type DeclineOrganizationMembershipInvitationStatus422 = ValidationError;
 
 export type DeclineOrganizationMembershipInvitationStatus500 = InternalError;
 
+export type DeclineOrganizationMembershipInvitationStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
 export type DeclineOrganizationMembershipInvitationBody = {
 	/**
+	 * @minLength 1
 	 * @maxLength 9007199254740990
 	 * @type integer
 	 */
 	expectedRevision: number;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
 };
 
 export type DeclineOrganizationMembershipInvitationOptions = {
@@ -71181,6 +72410,7 @@ export type DeclineOrganizationMembershipInvitationResponses = {
 	"409": DeclineOrganizationMembershipInvitationStatus409;
 	"422": DeclineOrganizationMembershipInvitationStatus422;
 	"500": DeclineOrganizationMembershipInvitationStatus500;
+	"503": DeclineOrganizationMembershipInvitationStatus503;
 };
 
 /**
@@ -71193,7 +72423,8 @@ export type DeclineOrganizationMembershipInvitationResponse =
 	| DeclineOrganizationMembershipInvitationStatus404
 	| DeclineOrganizationMembershipInvitationStatus409
 	| DeclineOrganizationMembershipInvitationStatus422
-	| DeclineOrganizationMembershipInvitationStatus500;
+	| DeclineOrganizationMembershipInvitationStatus500
+	| DeclineOrganizationMembershipInvitationStatus503;
 
 export type LeaveOrganizationMembershipPath = {
 	/**
@@ -71204,72 +72435,88 @@ export type LeaveOrganizationMembershipPath = {
 	organizationEntityId: string;
 };
 
+export const LeaveOrganizationMembershipStatus200StateEnum = {
+	pending: "pending",
+	accepted: "accepted",
+	declined: "declined",
+	revoked: "revoked",
+	expired: "expired",
+	invalidated: "invalidated",
+} as const;
+
+export type LeaveOrganizationMembershipStatus200StateEnum =
+	(typeof LeaveOrganizationMembershipStatus200StateEnum)[keyof typeof LeaveOrganizationMembershipStatus200StateEnum];
+
 export type LeaveOrganizationMembershipStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
-	 * @type string
+	 * @type string | undefined
 	 */
-	organizationEntityId: string;
-	organizationName: string | null;
+	invitationId?: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740990
+	 * @type integer | undefined
+	 */
+	revision?: number;
+	state?: LeaveOrganizationMembershipStatus200StateEnum;
 	/**
 	 * @description
 	 * Format: `uuid`
-	 * @type string
+	 * @type string | undefined
 	 */
-	memberEntityId: string;
-	memberName: string | null;
+	membershipId?: string;
 	/**
-	 * @maxLength 9007199254740991
-	 * @type integer
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer | undefined
 	 */
-	revision: number;
+	version?: number;
 	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer | undefined
 	 */
-	joinedAt: string;
+	activeGeneration?: number | null;
 	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
+	 * @minLength 0
+	 * @maxLength 9007199254740990
+	 * @type integer | undefined
 	 */
-	removedAt: string | null;
+	lastGeneration?: number;
 };
 
 export type LeaveOrganizationMembershipStatus400 = MalformedRequestBody;
 
-export const LeaveOrganizationMembershipStatus403ErrorCodeEnum = {
-	ParticipationDenied: "ParticipationDenied",
-	AccountRestricted: "AccountRestricted",
-	AccountSuspended: "AccountSuspended",
-	AccountClosed: "AccountClosed",
-} as const;
-
-export type LeaveOrganizationMembershipStatus403ErrorCodeEnum =
-	(typeof LeaveOrganizationMembershipStatus403ErrorCodeEnum)[keyof typeof LeaveOrganizationMembershipStatus403ErrorCodeEnum];
-
 export type LeaveOrganizationMembershipStatus403 = {
 	error: {
 		/**
-		 * @default 'ParticipationDenied'
+		 * @default 'AccessDenied'
 		 * @type string
 		 */
-		code: LeaveOrganizationMembershipStatus403ErrorCodeEnum;
+		code: "AccessDenied";
 		message: string;
 		details?: void;
 	};
 	requestId: string;
 };
 
+export const LeaveOrganizationMembershipStatus404ErrorCodeEnum = {
+	AccessRecordUnavailable: "AccessRecordUnavailable",
+	OrganizationMembershipNotFound: "OrganizationMembershipNotFound",
+} as const;
+
+export type LeaveOrganizationMembershipStatus404ErrorCodeEnum =
+	(typeof LeaveOrganizationMembershipStatus404ErrorCodeEnum)[keyof typeof LeaveOrganizationMembershipStatus404ErrorCodeEnum];
+
 export type LeaveOrganizationMembershipStatus404 = {
 	error: {
 		/**
-		 * @default 'OrganizationMembershipNotFound'
+		 * @default 'AccessRecordUnavailable'
 		 * @type string
 		 */
-		code: "OrganizationMembershipNotFound";
+		code: LeaveOrganizationMembershipStatus404ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
@@ -71277,6 +72524,7 @@ export type LeaveOrganizationMembershipStatus404 = {
 };
 
 export const LeaveOrganizationMembershipStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
 	OrganizationMembershipConflict: "OrganizationMembershipConflict",
 	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
 } as const;
@@ -71287,7 +72535,7 @@ export type LeaveOrganizationMembershipStatus409ErrorCodeEnum =
 export type LeaveOrganizationMembershipStatus409 = {
 	error: {
 		/**
-		 * @default 'OrganizationMembershipConflict'
+		 * @default 'AccessChanged'
 		 * @type string
 		 */
 		code: LeaveOrganizationMembershipStatus409ErrorCodeEnum;
@@ -71301,12 +72549,32 @@ export type LeaveOrganizationMembershipStatus422 = ValidationError;
 
 export type LeaveOrganizationMembershipStatus500 = InternalError;
 
+export type LeaveOrganizationMembershipStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
 export type LeaveOrganizationMembershipBody = {
 	/**
+	 * @minLength 1
 	 * @maxLength 9007199254740990
 	 * @type integer
 	 */
-	expectedRevision: number;
+	expectedMembershipVersion: number;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
 };
 
 export type LeaveOrganizationMembershipOptions = {
@@ -71324,6 +72592,7 @@ export type LeaveOrganizationMembershipResponses = {
 	"409": LeaveOrganizationMembershipStatus409;
 	"422": LeaveOrganizationMembershipStatus422;
 	"500": LeaveOrganizationMembershipStatus500;
+	"503": LeaveOrganizationMembershipStatus503;
 };
 
 /**
@@ -71336,11 +72605,417 @@ export type LeaveOrganizationMembershipResponse =
 	| LeaveOrganizationMembershipStatus404
 	| LeaveOrganizationMembershipStatus409
 	| LeaveOrganizationMembershipStatus422
-	| LeaveOrganizationMembershipStatus500;
+	| LeaveOrganizationMembershipStatus500
+	| LeaveOrganizationMembershipStatus503;
+
+export type CreateOrganizationEnrollmentContactPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	organizationEntityId: string;
+};
+
+export type CreateOrganizationEnrollmentContactStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	version: number;
+	contact: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expiresAt: string;
+};
+
+export type CreateOrganizationEnrollmentContactStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: "AccessDenied";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const CreateOrganizationEnrollmentContactStatus404ErrorCodeEnum = {
+	AccessRecordUnavailable: "AccessRecordUnavailable",
+	OrganizationMembershipNotFound: "OrganizationMembershipNotFound",
+} as const;
+
+export type CreateOrganizationEnrollmentContactStatus404ErrorCodeEnum =
+	(typeof CreateOrganizationEnrollmentContactStatus404ErrorCodeEnum)[keyof typeof CreateOrganizationEnrollmentContactStatus404ErrorCodeEnum];
+
+export type CreateOrganizationEnrollmentContactStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: CreateOrganizationEnrollmentContactStatus404ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const CreateOrganizationEnrollmentContactStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
+	OrganizationMembershipConflict: "OrganizationMembershipConflict",
+	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
+} as const;
+
+export type CreateOrganizationEnrollmentContactStatus409ErrorCodeEnum =
+	(typeof CreateOrganizationEnrollmentContactStatus409ErrorCodeEnum)[keyof typeof CreateOrganizationEnrollmentContactStatus409ErrorCodeEnum];
+
+export type CreateOrganizationEnrollmentContactStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: CreateOrganizationEnrollmentContactStatus409ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type CreateOrganizationEnrollmentContactStatus422 = ValidationError;
+
+export type CreateOrganizationEnrollmentContactStatus500 = InternalError;
+
+export type CreateOrganizationEnrollmentContactStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type CreateOrganizationEnrollmentContactOptions = {
+	body?: never;
+	path: CreateOrganizationEnrollmentContactPath;
+	query?: never;
+	headers?: never;
+};
+
+export type CreateOrganizationEnrollmentContactResponses = {
+	"200": CreateOrganizationEnrollmentContactStatus200;
+	"403": CreateOrganizationEnrollmentContactStatus403;
+	"404": CreateOrganizationEnrollmentContactStatus404;
+	"409": CreateOrganizationEnrollmentContactStatus409;
+	"422": CreateOrganizationEnrollmentContactStatus422;
+	"500": CreateOrganizationEnrollmentContactStatus500;
+	"503": CreateOrganizationEnrollmentContactStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type CreateOrganizationEnrollmentContactResponse =
+	| CreateOrganizationEnrollmentContactStatus200
+	| CreateOrganizationEnrollmentContactStatus403
+	| CreateOrganizationEnrollmentContactStatus404
+	| CreateOrganizationEnrollmentContactStatus409
+	| CreateOrganizationEnrollmentContactStatus422
+	| CreateOrganizationEnrollmentContactStatus500
+	| CreateOrganizationEnrollmentContactStatus503;
+
+export type RevokeOrganizationEnrollmentContactPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+};
+
+export type RevokeOrganizationEnrollmentContactStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	version: 2;
+	revoked: boolean;
+};
+
+export type RevokeOrganizationEnrollmentContactStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: "AccessDenied";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const RevokeOrganizationEnrollmentContactStatus404ErrorCodeEnum = {
+	AccessRecordUnavailable: "AccessRecordUnavailable",
+	OrganizationMembershipNotFound: "OrganizationMembershipNotFound",
+} as const;
+
+export type RevokeOrganizationEnrollmentContactStatus404ErrorCodeEnum =
+	(typeof RevokeOrganizationEnrollmentContactStatus404ErrorCodeEnum)[keyof typeof RevokeOrganizationEnrollmentContactStatus404ErrorCodeEnum];
+
+export type RevokeOrganizationEnrollmentContactStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: RevokeOrganizationEnrollmentContactStatus404ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const RevokeOrganizationEnrollmentContactStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
+	OrganizationMembershipConflict: "OrganizationMembershipConflict",
+	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
+} as const;
+
+export type RevokeOrganizationEnrollmentContactStatus409ErrorCodeEnum =
+	(typeof RevokeOrganizationEnrollmentContactStatus409ErrorCodeEnum)[keyof typeof RevokeOrganizationEnrollmentContactStatus409ErrorCodeEnum];
+
+export type RevokeOrganizationEnrollmentContactStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: RevokeOrganizationEnrollmentContactStatus409ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RevokeOrganizationEnrollmentContactStatus422 = ValidationError;
+
+export type RevokeOrganizationEnrollmentContactStatus500 = InternalError;
+
+export type RevokeOrganizationEnrollmentContactStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RevokeOrganizationEnrollmentContactOptions = {
+	body?: never;
+	path: RevokeOrganizationEnrollmentContactPath;
+	query?: never;
+	headers?: never;
+};
+
+export type RevokeOrganizationEnrollmentContactResponses = {
+	"200": RevokeOrganizationEnrollmentContactStatus200;
+	"403": RevokeOrganizationEnrollmentContactStatus403;
+	"404": RevokeOrganizationEnrollmentContactStatus404;
+	"409": RevokeOrganizationEnrollmentContactStatus409;
+	"422": RevokeOrganizationEnrollmentContactStatus422;
+	"500": RevokeOrganizationEnrollmentContactStatus500;
+	"503": RevokeOrganizationEnrollmentContactStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type RevokeOrganizationEnrollmentContactResponse =
+	| RevokeOrganizationEnrollmentContactStatus200
+	| RevokeOrganizationEnrollmentContactStatus403
+	| RevokeOrganizationEnrollmentContactStatus404
+	| RevokeOrganizationEnrollmentContactStatus409
+	| RevokeOrganizationEnrollmentContactStatus422
+	| RevokeOrganizationEnrollmentContactStatus500
+	| RevokeOrganizationEnrollmentContactStatus503;
+
+export type ResolveOrganizationEnrollmentContactPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	organizationEntityId: string;
+};
+
+export type ResolveOrganizationEnrollmentContactStatus200 = {
+	recipient:
+		| {
+				kind: "entity";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				entityId: string;
+		  }
+		| {
+				kind: "principal";
+				/**
+				 * @minLength 1
+				 * @maxLength 512
+				 * @type string
+				 */
+				selector: string;
+		  };
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expiresAt: string;
+};
+
+export type ResolveOrganizationEnrollmentContactStatus400 = MalformedRequestBody;
+
+export type ResolveOrganizationEnrollmentContactStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: "AccessDenied";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ResolveOrganizationEnrollmentContactStatus404ErrorCodeEnum = {
+	AccessRecordUnavailable: "AccessRecordUnavailable",
+	OrganizationMembershipNotFound: "OrganizationMembershipNotFound",
+} as const;
+
+export type ResolveOrganizationEnrollmentContactStatus404ErrorCodeEnum =
+	(typeof ResolveOrganizationEnrollmentContactStatus404ErrorCodeEnum)[keyof typeof ResolveOrganizationEnrollmentContactStatus404ErrorCodeEnum];
+
+export type ResolveOrganizationEnrollmentContactStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: ResolveOrganizationEnrollmentContactStatus404ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ResolveOrganizationEnrollmentContactStatus409ErrorCodeEnum = {
+	AccessChanged: "AccessChanged",
+	OrganizationMembershipConflict: "OrganizationMembershipConflict",
+	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
+} as const;
+
+export type ResolveOrganizationEnrollmentContactStatus409ErrorCodeEnum =
+	(typeof ResolveOrganizationEnrollmentContactStatus409ErrorCodeEnum)[keyof typeof ResolveOrganizationEnrollmentContactStatus409ErrorCodeEnum];
+
+export type ResolveOrganizationEnrollmentContactStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: ResolveOrganizationEnrollmentContactStatus409ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ResolveOrganizationEnrollmentContactStatus422 = ValidationError;
+
+export type ResolveOrganizationEnrollmentContactStatus500 = InternalError;
+
+export type ResolveOrganizationEnrollmentContactStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ResolveOrganizationEnrollmentContactBody = {
+	/**
+	 * @pattern ^[A-Za-z0-9_-]{43}$
+	 * @type string
+	 */
+	contact: string;
+};
+
+export type ResolveOrganizationEnrollmentContactOptions = {
+	body: ResolveOrganizationEnrollmentContactBody;
+	path: ResolveOrganizationEnrollmentContactPath;
+	query?: never;
+	headers?: never;
+};
+
+export type ResolveOrganizationEnrollmentContactResponses = {
+	"200": ResolveOrganizationEnrollmentContactStatus200;
+	"400": ResolveOrganizationEnrollmentContactStatus400;
+	"403": ResolveOrganizationEnrollmentContactStatus403;
+	"404": ResolveOrganizationEnrollmentContactStatus404;
+	"409": ResolveOrganizationEnrollmentContactStatus409;
+	"422": ResolveOrganizationEnrollmentContactStatus422;
+	"500": ResolveOrganizationEnrollmentContactStatus500;
+	"503": ResolveOrganizationEnrollmentContactStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ResolveOrganizationEnrollmentContactResponse =
+	| ResolveOrganizationEnrollmentContactStatus200
+	| ResolveOrganizationEnrollmentContactStatus400
+	| ResolveOrganizationEnrollmentContactStatus403
+	| ResolveOrganizationEnrollmentContactStatus404
+	| ResolveOrganizationEnrollmentContactStatus409
+	| ResolveOrganizationEnrollmentContactStatus422
+	| ResolveOrganizationEnrollmentContactStatus500
+	| ResolveOrganizationEnrollmentContactStatus503;
 
 export const ListManagedOrganizationsCapability = {
 	"entity.publish": "entity.publish",
-	"entity.membership": "entity.membership",
 	"entity.security": "entity.security",
 } as const;
 
@@ -71415,7 +73090,6 @@ export const CreateManagedOrganizationStatus200GrantsCapabilityEnum = {
 	"catalog.read": "catalog.read",
 	"catalog.edit": "catalog.edit",
 	"entity.publish": "entity.publish",
-	"entity.membership": "entity.membership",
 	"entity.security": "entity.security",
 	"proposal.adopt": "proposal.adopt",
 } as const;
@@ -71424,6 +73098,27 @@ export type CreateManagedOrganizationStatus200GrantsCapabilityEnum =
 	(typeof CreateManagedOrganizationStatus200GrantsCapabilityEnum)[keyof typeof CreateManagedOrganizationStatus200GrantsCapabilityEnum];
 
 export type CreateManagedOrganizationStatus200 = {
+	native: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		scopeId: string;
+		representation: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @maxLength 9007199254740991
+			 * @type integer
+			 */
+			revision: number;
+		};
+	} | null;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -71979,7 +73674,6 @@ export const ListParticipationGrantsStatus200ItemsCapabilityEnum = {
 	"catalog.read": "catalog.read",
 	"catalog.edit": "catalog.edit",
 	"entity.publish": "entity.publish",
-	"entity.membership": "entity.membership",
 	"entity.security": "entity.security",
 	"proposal.adopt": "proposal.adopt",
 } as const;
@@ -72120,7 +73814,6 @@ export const IssueParticipationGrantRequestCapabilityEnum = {
 	"catalog.read": "catalog.read",
 	"catalog.edit": "catalog.edit",
 	"entity.publish": "entity.publish",
-	"entity.membership": "entity.membership",
 	"entity.security": "entity.security",
 	"proposal.adopt": "proposal.adopt",
 } as const;
@@ -72245,7 +73938,6 @@ export const ListManagedEntityGrantsStatus200ItemsCapabilityEnum = {
 	"catalog.read": "catalog.read",
 	"catalog.edit": "catalog.edit",
 	"entity.publish": "entity.publish",
-	"entity.membership": "entity.membership",
 	"entity.security": "entity.security",
 	"proposal.adopt": "proposal.adopt",
 } as const;
@@ -72422,7 +74114,6 @@ export const SelectParticipationRequestCapabilityEnum = {
 	"catalog.read": "catalog.read",
 	"catalog.edit": "catalog.edit",
 	"entity.publish": "entity.publish",
-	"entity.membership": "entity.membership",
 	"entity.security": "entity.security",
 	"proposal.adopt": "proposal.adopt",
 } as const;

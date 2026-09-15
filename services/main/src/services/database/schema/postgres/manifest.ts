@@ -98,6 +98,8 @@ export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number
  * PostgreSQL definitions remain split by responsibility for review and drift checks.
  */
 export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly PostgreSqlSchemaFileName[]>> = {
+ organization_membership_directory: ["access-current-policy.sql", "access-role-binding.sql", "access-representation.sql", "organization-membership.sql"],
+ organization_membership: ["access-current-policy.sql", "access-role-binding.sql", "access-representation.sql", "organization-membership.sql"],
 	connected_installations: ["connected-installation.sql", "connected-app-client.sql", "access-current-policy.sql"],
 	connected_app_clients: ["connected-app.sql", "connected-app-client.sql"],
 	workload_principals: ["workload-principal.sql", "access-current-policy.sql", "participation-integrity.sql"],
@@ -114,6 +116,13 @@ export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly 
 };
 
 export const PostgreSqlSchemaFunctionNames = [
+ "schedule_organization_enrollment_review",
+	"access_membership_scope_is_eligible",
+	"organization_enrollment_lock_admission",
+	"guard_organization_enrollment_contact",
+	"guard_organization_enrollment_invitation",
+	"guard_organization_enrollment_operation",
+	"require_organization_enrollment_admission",
 	"guard_access_group_approval",
 	"guard_access_recovery_path",
 	"touch_access_impact_fences",
@@ -318,12 +327,6 @@ export const PostgreSqlSchemaFunctionNames = [
 	"read_unit_state",
 	"maintain_platform_identity",
 	"require_zone_page_post",
-	"organization_membership_lock_admission",
-	"organization_membership_assert_invitation_authority",
-	"organization_membership_guard_invitation",
-	"organization_membership_guard_member",
-	"organization_membership_guard_event",
-	"organization_membership_record_event",
 	"catalog_structure_source_projection_valid",
 	"catalog_structure_source_guard_occurrence",
 	"catalog_structure_source_guard_application",
@@ -520,6 +523,11 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+ { table: "organization_enrollment_invitation", name: "organization_enrollment_review_schedule" },
+	{ table: "organization_enrollment_contact", name: "organization_enrollment_contact_guard" },
+	{ table: "organization_enrollment_invitation", name: "organization_enrollment_invitation_guard" },
+	{ table: "organization_enrollment_operation", name: "organization_enrollment_operation_guard" },
+	{ table: "access_membership_event", name: "organization_enrollment_admission_required" },
  { table: "access_group_approval", name: "access_group_approval_guard" },
  { table: "access_recovery_path", name: "access_recovery_path_guard" },
  { table: "access_recovery_policy", name: "access_recovery_policy_immutable" },
@@ -858,10 +866,6 @@ export const PostgreSqlSchemaTriggers = [
 	{ table: "user_account_state", name: "user_account_state_decision_required" },
 	{ table: "zone_page", name: "zone_page_post_required" },
 	{ table: "post", name: "post_zone_page_required" },
-	{ table: "organization_membership_invitation", name: "organization_membership_invitation_guard" },
-	{ table: "organization_membership", name: "organization_membership_guard" },
-	{ table: "organization_membership_event", name: "organization_membership_event_guard" },
-	{ table: "organization_membership", name: "organization_membership_event_record" },
 	{ table: "music_artist_credit", name: "music_credit_creation_context" },
 	{ table: "catalog_source_proposal_dependency", name: "catalog_source_dependency_guard" },
 	{

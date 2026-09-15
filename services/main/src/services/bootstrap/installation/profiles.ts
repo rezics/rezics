@@ -1,4 +1,5 @@
-import { and, eq } from "drizzle-orm";
+import { establishOrganizationEnrollmentControl } from "../../participation/organization-control";
+import { and, eq, sql } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../../database";
 import {
@@ -93,13 +94,15 @@ export async function ensureBootstrapProfiles(
 			.limit(1);
 		const shape = value.key === "platformAdministrator" ? "person" : "organization";
 		if (stored) assertFields(`Entity ${value.key}`, stored, { id: value.profileId, shape });
-		else
+		else {
 			await createParticipantIdentity(tx, {
 				id: value.profileId,
 				shape,
 				operatorAuthUserId: operator.authUserId,
 				names: value.localizations.map((name) => ({ language: name.language, value: name.title })),
 			});
+ if (shape=== "organization") await establishOrganizationEnrollmentControl(tx,{ entityId: value.profileId,recipientAuthUserId: operator.authUserId,operatorAuthUserId: operator.authUserId },sql`exists(select 1 from public.users where id=${operator.authUserId}::uuid and erased_at is null)`);
+ }
 	}
 	await tx
 		.insert(authEntity)
@@ -116,7 +119,7 @@ export async function ensureBootstrapProfiles(
 		.onConflictDoNothing();
 	for (const value of BootstrapProfileManifest) {
 		if (value.key === "platformAdministrator") continue;
-		for (const capability of ["entity.publish", "entity.membership", "entity.security"] as const) {
+		for (const capability of ["entity.publish", "entity.security"] as const) {
 			const [existing] = await tx
 				.select({ id: participationGrant.id })
 				.from(participationGrant)

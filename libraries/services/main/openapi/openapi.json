@@ -5448,6 +5448,10 @@
 										"type": "string",
 										"enum": [
 											"access.identity.select",
+											"access.membership.read",
+											"access.membership.recover",
+											"access.membership.manage",
+											"access.membership.participate",
 											"access.representation.manage",
 											"access.group.read",
 											"access.group.create",
@@ -5752,7 +5756,7 @@
 												"label": { "type": "string" },
 												"description": { "type": ["string", "null"] },
 												"permissions": {
-													"maxItems": 96,
+													"maxItems": 100,
 													"type": "array",
 													"items": {
 														"oneOf": [
@@ -5865,6 +5869,10 @@
 																		"type": "string",
 																		"enum": [
 																			"access.identity.select",
+																			"access.membership.read",
+																			"access.membership.recover",
+																			"access.membership.manage",
+																			"access.membership.participate",
 																			"access.representation.manage",
 																			"access.group.read",
 																			"access.group.create",
@@ -5997,7 +6005,7 @@
 											"label": { "type": "string" },
 											"description": { "type": ["string", "null"] },
 											"permissions": {
-												"maxItems": 96,
+												"maxItems": 100,
 												"type": "array",
 												"items": {
 													"oneOf": [
@@ -6110,6 +6118,10 @@
 																	"type": "string",
 																	"enum": [
 																		"access.identity.select",
+																		"access.membership.read",
+																		"access.membership.recover",
+																		"access.membership.manage",
+																		"access.membership.participate",
 																		"access.representation.manage",
 																		"access.group.read",
 																		"access.group.create",
@@ -6447,7 +6459,7 @@
 											"label": { "type": "string" },
 											"description": { "type": ["string", "null"] },
 											"permissions": {
-												"maxItems": 96,
+												"maxItems": 100,
 												"type": "array",
 												"items": {
 													"oneOf": [
@@ -6560,6 +6572,10 @@
 																	"type": "string",
 																	"enum": [
 																		"access.identity.select",
+																		"access.membership.read",
+																		"access.membership.recover",
+																		"access.membership.manage",
+																		"access.membership.participate",
 																		"access.representation.manage",
 																		"access.group.read",
 																		"access.group.create",
@@ -14476,7 +14492,7 @@
 												"offlineAccess": { "type": "boolean" },
 												"entityDisclosure": { "type": "boolean" },
 												"capabilities": {
-													"maxItems": 118,
+													"maxItems": 122,
 													"type": "array",
 													"items": {
 														"oneOf": [
@@ -14589,6 +14605,10 @@
 																		"type": "string",
 																		"enum": [
 																			"access.identity.select",
+																			"access.membership.read",
+																			"access.membership.recover",
+																			"access.membership.manage",
+																			"access.membership.participate",
 																			"access.representation.manage",
 																			"access.group.read",
 																			"access.group.create",
@@ -15806,7 +15826,7 @@
 												"label": { "type": "string", "minLength": 1, "maxLength": 512 },
 												"description": { "type": ["string", "null"], "maxLength": 4096 },
 												"capabilities": {
-													"maxItems": 118,
+													"maxItems": 122,
 													"type": "array",
 													"items": {
 														"oneOf": [
@@ -15919,6 +15939,10 @@
 																		"type": "string",
 																		"enum": [
 																			"access.identity.select",
+																			"access.membership.read",
+																			"access.membership.recover",
+																			"access.membership.manage",
+																			"access.membership.participate",
 																			"access.representation.manage",
 																			"access.group.read",
 																			"access.group.create",
@@ -16100,7 +16124,7 @@
 											"label": { "type": "string", "minLength": 1, "maxLength": 512 },
 											"description": { "type": ["string", "null"], "maxLength": 4096 },
 											"capabilities": {
-												"maxItems": 118,
+												"maxItems": 122,
 												"type": "array",
 												"items": {
 													"oneOf": [
@@ -16213,6 +16237,10 @@
 																	"type": "string",
 																	"enum": [
 																		"access.identity.select",
+																		"access.membership.read",
+																		"access.membership.recover",
+																		"access.membership.manage",
+																		"access.membership.participate",
 																		"access.representation.manage",
 																		"access.group.read",
 																		"access.group.create",
@@ -16599,7 +16627,7 @@
 											"label": { "type": "string", "minLength": 1, "maxLength": 512 },
 											"description": { "type": ["string", "null"], "maxLength": 4096 },
 											"capabilities": {
-												"maxItems": 118,
+												"maxItems": 122,
 												"type": "array",
 												"items": {
 													"oneOf": [
@@ -16712,6 +16740,10 @@
 																	"type": "string",
 																	"enum": [
 																		"access.identity.select",
+																		"access.membership.read",
+																		"access.membership.recover",
+																		"access.membership.manage",
+																		"access.membership.participate",
 																		"access.representation.manage",
 																		"access.group.read",
 																		"access.group.create",
@@ -87199,31 +87231,17 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/v1/participation/membership/organizations/{organizationEntityId}/members": {
+		"/api/v1/participation/membership/managed-organizations": {
 			"get": {
-				"operationId": "listManagedOrganizationMembers",
+				"operationId": "listMembershipManagedOrganizations",
 				"tags": ["Participation"],
-				"security": [{ "SessionCookie": [] }],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
-					{
-						"name": "organizationEntityId",
-						"in": "path",
-						"required": true,
-						"schema": {
-							"type": "string",
-							"format": "uuid",
-							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-						}
-					},
 					{
 						"name": "afterId",
 						"in": "query",
 						"required": false,
-						"schema": {
-							"type": "string",
-							"format": "uuid",
-							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-						}
+						"schema": { "type": "string", "minLength": 1, "maxLength": 512 }
 					}
 				],
 				"responses": {
@@ -87236,58 +87254,76 @@
 									"type": "object",
 									"properties": {
 										"items": {
-											"maxItems": 100,
+											"maxItems": 50,
 											"type": "array",
 											"items": {
 												"type": "object",
 												"properties": {
-													"organizationEntityId": {
+													"key": {
 														"type": "string",
 														"format": "uuid",
 														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 													},
-													"organizationName": { "type": ["string", "null"] },
-													"memberEntityId": {
+													"entityId": {
 														"type": "string",
 														"format": "uuid",
 														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 													},
-													"memberName": { "type": ["string", "null"] },
-													"revision": {
-														"type": "integer",
-														"exclusiveMinimum": 0,
-														"maximum": 9007199254740991
-													},
-													"joinedAt": {
-														"type": "string",
-														"format": "date-time",
-														"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-													},
-													"removedAt": {
-														"type": ["string", "null"],
-														"format": "date-time",
-														"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+													"name": { "type": ["string", "null"] },
+													"selection": {
+														"oneOf": [
+															{
+																"type": "object",
+																"properties": { "mode": { "type": "string", "const": "direct" } },
+																"required": ["mode"],
+																"additionalProperties": false
+															},
+															{
+																"type": "object",
+																"properties": {
+																	"mode": { "type": "string", "const": "represented" },
+																	"entityId": {
+																		"type": "string",
+																		"format": "uuid",
+																		"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+																	},
+																	"representations": {
+																		"minItems": 1,
+																		"maxItems": 64,
+																		"type": "array",
+																		"items": {
+																			"type": "object",
+																			"properties": {
+																				"id": {
+																					"type": "string",
+																					"format": "uuid",
+																					"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+																				},
+																				"revision": {
+																					"type": "integer",
+																					"exclusiveMinimum": 0,
+																					"maximum": 9007199254740991
+																				}
+																			},
+																			"required": ["id", "revision"],
+																			"additionalProperties": false
+																		}
+																	}
+																},
+																"required": ["mode", "entityId", "representations"],
+																"additionalProperties": false
+															}
+														]
 													}
 												},
-												"required": [
-													"organizationEntityId",
-													"organizationName",
-													"memberEntityId",
-													"memberName",
-													"revision",
-													"joinedAt",
-													"removedAt"
-												],
+												"required": ["key", "entityId", "name", "selection"],
 												"additionalProperties": false
 											}
 										},
-										"nextCursor": {
-											"type": ["string", "null"],
-											"format": "uuid",
-											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-										}
+										"nextCursor": { "type": ["string", "null"], "maxLength": 512 },
+										"unavailable": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 }
 									},
-									"required": ["items", "nextCursor"],
+									"required": ["items", "nextCursor", "unavailable"],
 									"additionalProperties": false
 								}
 							}
@@ -87304,13 +87340,8 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "ParticipationDenied",
-													"enum": [
-														"ParticipationDenied",
-														"AccountRestricted",
-														"AccountSuspended",
-														"AccountClosed"
-													],
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -87336,8 +87367,8 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "OrganizationMembershipNotFound",
-													"enum": ["OrganizationMembershipNotFound"],
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable", "OrganizationMembershipNotFound"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -87363,8 +87394,244 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "OrganizationMembershipConflict",
+													"default": "AccessChanged",
 													"enum": [
+														"AccessChanged",
+														"OrganizationMembershipConflict",
+														"OrganizationMembershipCapacityExceeded"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until this request can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "getApiParticipationMembershipManaged-organizations",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/participation/membership/organizations": {
+			"post": {
+				"operationId": "createNativeOrganization",
+				"tags": ["Participation"],
+				"security": [{ "SessionCookie": [] }],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"type": "object",
+								"properties": {
+									"name": { "type": "string", "minLength": 1, "maxLength": 120 },
+									"language": { "type": "string", "minLength": 1, "maxLength": 255 }
+								},
+								"required": ["name", "language"],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"entityId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"scopeId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"representation": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string",
+													"format": "uuid",
+													"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+												},
+												"revision": {
+													"type": "integer",
+													"exclusiveMinimum": 0,
+													"maximum": 9007199254740991
+												}
+											},
+											"required": ["id", "revision"],
+											"additionalProperties": false
+										}
+									},
+									"required": ["entityId", "scopeId", "representation"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable", "OrganizationMembershipNotFound"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": [
+														"AccessChanged",
 														"OrganizationMembershipConflict",
 														"OrganizationMembershipCapacityExceeded"
 													],
@@ -87393,18 +87660,466 @@
 						"content": {
 							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
 						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
 					}
 				},
-				"x-rezics-quota-route-operation-id": "getApiParticipationMembershipOrganizationsByOrganizationEntityIdMembers",
+				"x-rezics-quota-route-operation-id": "postApiParticipationMembershipOrganizations",
 				"x-rezics-quota-operation-id": "*",
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/v1/participation/membership/organizations/{organizationEntityId}/invitations": {
-			"get": {
-				"operationId": "listManagedOrganizationInvitations",
+		"/api/v1/participation/membership/organizations/{organizationEntityId}/recovery-recipient": {
+			"post": {
+				"operationId": "selectOrganizationRecoveryRecipient",
 				"tags": ["Participation"],
 				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "organizationEntityId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"type": "object",
+								"properties": { "contact": { "type": "string", "pattern": "^[A-Za-z0-9_-]{43}$" } },
+								"required": ["contact"],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"selector": { "type": "string" },
+										"expiresAt": {
+											"type": "string",
+											"format": "date-time",
+											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+										}
+									},
+									"required": ["selector", "expiresAt"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable", "OrganizationMembershipNotFound"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": [
+														"AccessChanged",
+														"OrganizationMembershipConflict",
+														"OrganizationMembershipCapacityExceeded"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "postApiParticipationMembershipOrganizationsByOrganizationEntityIdRecovery-recipient",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/participation/membership/organizations/{organizationEntityId}/recover": {
+			"post": {
+				"operationId": "recoverNativeOrganization",
+				"tags": ["Participation"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "organizationEntityId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"type": "object",
+								"properties": {
+									"selector": { "type": "string", "minLength": 1, "maxLength": 512 },
+									"expectedRevision": {
+										"type": "integer",
+										"exclusiveMinimum": 0,
+										"maximum": 9007199254740991
+									},
+									"evidence": { "type": "string", "minLength": 1, "maxLength": 16384 },
+									"operationId": {
+										"type": "string",
+										"format": "uuid",
+										"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+									}
+								},
+								"required": ["selector", "expectedRevision", "evidence", "operationId"],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"entityId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"revision": {
+											"type": "integer",
+											"exclusiveMinimum": 0,
+											"maximum": 9007199254740991
+										},
+										"scopeId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"representation": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string",
+													"format": "uuid",
+													"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+												},
+												"revision": {
+													"type": "integer",
+													"exclusiveMinimum": 0,
+													"maximum": 9007199254740991
+												}
+											},
+											"required": ["id", "revision"],
+											"additionalProperties": false
+										}
+									},
+									"required": ["entityId", "revision", "scopeId", "representation"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable", "OrganizationMembershipNotFound"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": [
+														"AccessChanged",
+														"OrganizationMembershipConflict",
+														"OrganizationMembershipCapacityExceeded"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "postApiParticipationMembershipOrganizationsByOrganizationEntityIdRecover",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/participation/membership/organizations/{organizationEntityId}/members": {
+			"get": {
+				"operationId": "listManagedOrganizationMembers",
+				"tags": ["Participation"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
 					{
 						"name": "organizationEntityId",
@@ -87420,11 +88135,7 @@
 						"name": "afterId",
 						"in": "query",
 						"required": false,
-						"schema": {
-							"type": "string",
-							"format": "uuid",
-							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-						}
+						"schema": { "type": "string", "minLength": 1, "maxLength": 512 }
 					}
 				],
 				"responses": {
@@ -87437,7 +88148,575 @@
 									"type": "object",
 									"properties": {
 										"items": {
-											"maxItems": 100,
+											"maxItems": 50,
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"membershipId": {
+														"type": "string",
+														"format": "uuid",
+														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+													},
+													"organizationEntityId": {
+														"type": "string",
+														"format": "uuid",
+														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+													},
+													"organizationName": { "type": ["string", "null"] },
+													"memberName": { "type": ["string", "null"] },
+													"recipient": {
+														"oneOf": [
+															{
+																"type": "object",
+																"properties": {
+																	"kind": { "type": "string", "const": "entity" },
+																	"entityId": {
+																		"type": "string",
+																		"format": "uuid",
+																		"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+																	}
+																},
+																"required": ["kind", "entityId"],
+																"additionalProperties": false
+															},
+															{
+																"type": "object",
+																"properties": {
+																	"kind": { "type": "string", "const": "principal" },
+																	"selector": { "type": "string", "minLength": 1, "maxLength": 512 }
+																},
+																"required": ["kind", "selector"],
+																"additionalProperties": false
+															}
+														]
+													},
+													"version": {
+														"type": "integer",
+														"minimum": 0,
+														"maximum": 9007199254740990
+													},
+													"activeGeneration": {
+														"type": ["integer", "null"],
+														"minimum": 0,
+														"maximum": 9007199254740990
+													},
+													"lastGeneration": {
+														"type": "integer",
+														"minimum": 0,
+														"maximum": 9007199254740990
+													},
+													"availability": {
+														"type": "string",
+														"enum": ["allow", "deny", "unavailable"]
+													}
+												},
+												"required": [
+													"membershipId",
+													"organizationEntityId",
+													"organizationName",
+													"memberName",
+													"recipient",
+													"version",
+													"activeGeneration",
+													"lastGeneration",
+													"availability"
+												],
+												"additionalProperties": false
+											}
+										},
+										"nextCursor": { "type": ["string", "null"], "maxLength": 512 }
+									},
+									"required": ["items", "nextCursor"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable", "OrganizationMembershipNotFound"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": [
+														"AccessChanged",
+														"OrganizationMembershipConflict",
+														"OrganizationMembershipCapacityExceeded"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until this request can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "getApiParticipationMembershipOrganizationsByOrganizationEntityIdMembers",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/participation/membership/organizations/{organizationEntityId}/history": {
+			"post": {
+				"operationId": "listOrganizationMembershipHistory",
+				"tags": ["Participation"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "organizationEntityId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"type": "object",
+								"properties": {
+									"recipient": {
+										"oneOf": [
+											{
+												"type": "object",
+												"properties": {
+													"kind": { "type": "string", "const": "entity" },
+													"entityId": {
+														"type": "string",
+														"format": "uuid",
+														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+													}
+												},
+												"required": ["kind", "entityId"],
+												"additionalProperties": false
+											},
+											{
+												"type": "object",
+												"properties": {
+													"kind": { "type": "string", "const": "principal" },
+													"selector": { "type": "string", "minLength": 1, "maxLength": 512 }
+												},
+												"required": ["kind", "selector"],
+												"additionalProperties": false
+											}
+										]
+									},
+									"afterVersion": { "type": "integer", "minimum": 0, "maximum": 9007199254740990 }
+								},
+								"required": ["recipient"],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"items": {
+											"maxItems": 50,
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"version": {
+														"type": "integer",
+														"minimum": 0,
+														"maximum": 9007199254740990
+													},
+													"operation": { "type": "string", "enum": ["admit", "leave", "remove"] },
+													"lastGeneration": {
+														"type": "integer",
+														"minimum": 0,
+														"maximum": 9007199254740990
+													},
+													"activeGeneration": {
+														"type": ["integer", "null"],
+														"minimum": 0,
+														"maximum": 9007199254740990
+													},
+													"createdAt": {
+														"type": "string",
+														"format": "date-time",
+														"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+													}
+												},
+												"required": [
+													"version",
+													"operation",
+													"lastGeneration",
+													"activeGeneration",
+													"createdAt"
+												],
+												"additionalProperties": false
+											}
+										},
+										"nextCursor": {
+											"type": ["integer", "null"],
+											"minimum": 0,
+											"maximum": 9007199254740990
+										}
+									},
+									"required": ["items", "nextCursor"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable", "OrganizationMembershipNotFound"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": [
+														"AccessChanged",
+														"OrganizationMembershipConflict",
+														"OrganizationMembershipCapacityExceeded"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until this request can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "postApiParticipationMembershipOrganizationsByOrganizationEntityIdHistory",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/participation/membership/organizations/{organizationEntityId}/invitations": {
+			"get": {
+				"operationId": "listManagedOrganizationInvitations",
+				"tags": ["Participation"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "organizationEntityId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					},
+					{
+						"name": "afterId",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "string", "minLength": 1, "maxLength": 512 }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"items": {
+											"maxItems": 50,
 											"type": "array",
 											"items": {
 												"type": "object",
@@ -87453,27 +88732,37 @@
 														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 													},
 													"organizationName": { "type": ["string", "null"] },
-													"recipientEntityId": {
-														"type": "string",
+													"recipientName": { "type": ["string", "null"] },
+													"kind": { "type": "string", "enum": ["entity", "principal"] },
+													"entityId": {
+														"type": ["string", "null"],
 														"format": "uuid",
 														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 													},
-													"recipientName": { "type": ["string", "null"] },
 													"state": {
 														"type": "string",
 														"enum": [
 															"pending",
 															"accepted",
 															"declined",
-															"cancelled",
+															"revoked",
 															"expired",
 															"invalidated"
 														]
 													},
 													"revision": {
 														"type": "integer",
-														"exclusiveMinimum": 0,
-														"maximum": 9007199254740991
+														"minimum": 1,
+														"maximum": 9007199254740990
+													},
+													"availability": {
+														"type": "string",
+														"enum": ["allow", "deny", "unavailable"]
+													},
+													"membershipVersion": {
+														"type": "integer",
+														"minimum": 0,
+														"maximum": 9007199254740990
 													},
 													"expiresAt": {
 														"type": "string",
@@ -87495,10 +88784,13 @@
 													"id",
 													"organizationEntityId",
 													"organizationName",
-													"recipientEntityId",
 													"recipientName",
+													"kind",
+													"entityId",
 													"state",
 													"revision",
+													"availability",
+													"membershipVersion",
 													"expiresAt",
 													"createdAt",
 													"resolvedAt"
@@ -87506,11 +88798,7 @@
 												"additionalProperties": false
 											}
 										},
-										"nextCursor": {
-											"type": ["string", "null"],
-											"format": "uuid",
-											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-										}
+										"nextCursor": { "type": ["string", "null"], "maxLength": 512 }
 									},
 									"required": ["items", "nextCursor"],
 									"additionalProperties": false
@@ -87529,13 +88817,8 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "ParticipationDenied",
-													"enum": [
-														"ParticipationDenied",
-														"AccountRestricted",
-														"AccountSuspended",
-														"AccountClosed"
-													],
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -87561,8 +88844,8 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "OrganizationMembershipNotFound",
-													"enum": ["OrganizationMembershipNotFound"],
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable", "OrganizationMembershipNotFound"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -87588,8 +88871,9 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "OrganizationMembershipConflict",
+													"default": "AccessChanged",
 													"enum": [
+														"AccessChanged",
 														"OrganizationMembershipConflict",
 														"OrganizationMembershipCapacityExceeded"
 													],
@@ -87613,10 +88897,69 @@
 							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
 						}
 					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until this request can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"500": {
 						"description": "Unexpected internal failure",
 						"content": {
 							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
 						}
 					}
 				},
@@ -87648,7 +88991,33 @@
 								"$schema": "https://json-schema.org/draft/2020-12/schema",
 								"type": "object",
 								"properties": {
-									"recipientEntityId": {
+									"recipient": {
+										"oneOf": [
+											{
+												"type": "object",
+												"properties": {
+													"kind": { "type": "string", "const": "entity" },
+													"entityId": {
+														"type": "string",
+														"format": "uuid",
+														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+													}
+												},
+												"required": ["kind", "entityId"],
+												"additionalProperties": false
+											},
+											{
+												"type": "object",
+												"properties": {
+													"kind": { "type": "string", "const": "principal" },
+													"selector": { "type": "string", "minLength": 1, "maxLength": 512 }
+												},
+												"required": ["kind", "selector"],
+												"additionalProperties": false
+											}
+										]
+									},
+									"operationId": {
 										"type": "string",
 										"format": "uuid",
 										"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
@@ -87659,7 +89028,7 @@
 										"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
 									}
 								},
-								"required": ["recipientEntityId"],
+								"required": ["recipient", "operationId"],
 								"additionalProperties": false
 							}
 						}
@@ -87674,67 +89043,40 @@
 									"$schema": "https://json-schema.org/draft/2020-12/schema",
 									"type": "object",
 									"properties": {
-										"id": {
+										"invitationId": {
 											"type": "string",
 											"format": "uuid",
 											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 										},
-										"organizationEntityId": {
-											"type": "string",
-											"format": "uuid",
-											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-										},
-										"organizationName": { "type": ["string", "null"] },
-										"recipientEntityId": {
-											"type": "string",
-											"format": "uuid",
-											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-										},
-										"recipientName": { "type": ["string", "null"] },
+										"revision": { "type": "integer", "minimum": 1, "maximum": 9007199254740990 },
 										"state": {
 											"type": "string",
 											"enum": [
 												"pending",
 												"accepted",
 												"declined",
-												"cancelled",
+												"revoked",
 												"expired",
 												"invalidated"
 											]
 										},
-										"revision": {
+										"membershipId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"version": { "type": "integer", "minimum": 0, "maximum": 9007199254740990 },
+										"activeGeneration": {
+											"type": ["integer", "null"],
+											"minimum": 0,
+											"maximum": 9007199254740990
+										},
+										"lastGeneration": {
 											"type": "integer",
-											"exclusiveMinimum": 0,
-											"maximum": 9007199254740991
-										},
-										"expiresAt": {
-											"type": "string",
-											"format": "date-time",
-											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-										},
-										"createdAt": {
-											"type": "string",
-											"format": "date-time",
-											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-										},
-										"resolvedAt": {
-											"type": ["string", "null"],
-											"format": "date-time",
-											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+											"minimum": 0,
+											"maximum": 9007199254740990
 										}
 									},
-									"required": [
-										"id",
-										"organizationEntityId",
-										"organizationName",
-										"recipientEntityId",
-										"recipientName",
-										"state",
-										"revision",
-										"expiresAt",
-										"createdAt",
-										"resolvedAt"
-									],
 									"additionalProperties": false
 								}
 							}
@@ -87759,13 +89101,8 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "ParticipationDenied",
-													"enum": [
-														"ParticipationDenied",
-														"AccountRestricted",
-														"AccountSuspended",
-														"AccountClosed"
-													],
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -87791,8 +89128,8 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "OrganizationMembershipNotFound",
-													"enum": ["OrganizationMembershipNotFound"],
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable", "OrganizationMembershipNotFound"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -87818,8 +89155,9 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "OrganizationMembershipConflict",
+													"default": "AccessChanged",
 													"enum": [
+														"AccessChanged",
 														"OrganizationMembershipConflict",
 														"OrganizationMembershipCapacityExceeded"
 													],
@@ -87848,6 +89186,33 @@
 						"content": {
 							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
 						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
 					}
 				},
 				"x-rezics-quota-route-operation-id": "postApiParticipationMembershipOrganizationsByOrganizationEntityIdInvitations",
@@ -87855,9 +89220,9 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/v1/participation/membership/organizations/{organizationEntityId}/invitations/{invitationId}/cancel": {
+		"/api/v1/participation/membership/organizations/{organizationEntityId}/invitations/{invitationId}/revoke": {
 			"post": {
-				"operationId": "cancelOrganizationMembershipInvitation",
+				"operationId": "revokeOrganizationMembershipInvitation",
 				"tags": ["Participation"],
 				"security": [{ "SessionCookie": [] }],
 				"parameters": [
@@ -87892,11 +89257,16 @@
 								"properties": {
 									"expectedRevision": {
 										"type": "integer",
-										"exclusiveMinimum": 0,
+										"minimum": 1,
 										"maximum": 9007199254740990
+									},
+									"operationId": {
+										"type": "string",
+										"format": "uuid",
+										"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 									}
 								},
-								"required": ["expectedRevision"],
+								"required": ["expectedRevision", "operationId"],
 								"additionalProperties": false
 							}
 						}
@@ -87911,67 +89281,40 @@
 									"$schema": "https://json-schema.org/draft/2020-12/schema",
 									"type": "object",
 									"properties": {
-										"id": {
+										"invitationId": {
 											"type": "string",
 											"format": "uuid",
 											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 										},
-										"organizationEntityId": {
-											"type": "string",
-											"format": "uuid",
-											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-										},
-										"organizationName": { "type": ["string", "null"] },
-										"recipientEntityId": {
-											"type": "string",
-											"format": "uuid",
-											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-										},
-										"recipientName": { "type": ["string", "null"] },
+										"revision": { "type": "integer", "minimum": 1, "maximum": 9007199254740990 },
 										"state": {
 											"type": "string",
 											"enum": [
 												"pending",
 												"accepted",
 												"declined",
-												"cancelled",
+												"revoked",
 												"expired",
 												"invalidated"
 											]
 										},
-										"revision": {
+										"membershipId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"version": { "type": "integer", "minimum": 0, "maximum": 9007199254740990 },
+										"activeGeneration": {
+											"type": ["integer", "null"],
+											"minimum": 0,
+											"maximum": 9007199254740990
+										},
+										"lastGeneration": {
 											"type": "integer",
-											"exclusiveMinimum": 0,
-											"maximum": 9007199254740991
-										},
-										"expiresAt": {
-											"type": "string",
-											"format": "date-time",
-											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-										},
-										"createdAt": {
-											"type": "string",
-											"format": "date-time",
-											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-										},
-										"resolvedAt": {
-											"type": ["string", "null"],
-											"format": "date-time",
-											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+											"minimum": 0,
+											"maximum": 9007199254740990
 										}
 									},
-									"required": [
-										"id",
-										"organizationEntityId",
-										"organizationName",
-										"recipientEntityId",
-										"recipientName",
-										"state",
-										"revision",
-										"expiresAt",
-										"createdAt",
-										"resolvedAt"
-									],
 									"additionalProperties": false
 								}
 							}
@@ -87996,13 +89339,8 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "ParticipationDenied",
-													"enum": [
-														"ParticipationDenied",
-														"AccountRestricted",
-														"AccountSuspended",
-														"AccountClosed"
-													],
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -88028,8 +89366,8 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "OrganizationMembershipNotFound",
-													"enum": ["OrganizationMembershipNotFound"],
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable", "OrganizationMembershipNotFound"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -88055,8 +89393,9 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "OrganizationMembershipConflict",
+													"default": "AccessChanged",
 													"enum": [
+														"AccessChanged",
 														"OrganizationMembershipConflict",
 														"OrganizationMembershipCapacityExceeded"
 													],
@@ -88085,14 +89424,41 @@
 						"content": {
 							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
 						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
 					}
 				},
-				"x-rezics-quota-route-operation-id": "postApiParticipationMembershipOrganizationsByOrganizationEntityIdInvitationsByInvitationIdCancel",
+				"x-rezics-quota-route-operation-id": "postApiParticipationMembershipOrganizationsByOrganizationEntityIdInvitationsByInvitationIdRevoke",
 				"x-rezics-quota-operation-id": "*",
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/v1/participation/membership/organizations/{organizationEntityId}/members/{memberEntityId}/remove": {
+		"/api/v1/participation/membership/organizations/{organizationEntityId}/members/remove": {
 			"post": {
 				"operationId": "removeOrganizationMember",
 				"tags": ["Participation"],
@@ -88100,16 +89466,6 @@
 				"parameters": [
 					{
 						"name": "organizationEntityId",
-						"in": "path",
-						"required": true,
-						"schema": {
-							"type": "string",
-							"format": "uuid",
-							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-						}
-					},
-					{
-						"name": "memberEntityId",
 						"in": "path",
 						"required": true,
 						"schema": {
@@ -88127,13 +89483,44 @@
 								"$schema": "https://json-schema.org/draft/2020-12/schema",
 								"type": "object",
 								"properties": {
-									"expectedRevision": {
+									"expectedMembershipVersion": {
 										"type": "integer",
-										"exclusiveMinimum": 0,
+										"minimum": 1,
 										"maximum": 9007199254740990
+									},
+									"operationId": {
+										"type": "string",
+										"format": "uuid",
+										"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+									},
+									"recipient": {
+										"oneOf": [
+											{
+												"type": "object",
+												"properties": {
+													"kind": { "type": "string", "const": "entity" },
+													"entityId": {
+														"type": "string",
+														"format": "uuid",
+														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+													}
+												},
+												"required": ["kind", "entityId"],
+												"additionalProperties": false
+											},
+											{
+												"type": "object",
+												"properties": {
+													"kind": { "type": "string", "const": "principal" },
+													"selector": { "type": "string", "minLength": 1, "maxLength": 512 }
+												},
+												"required": ["kind", "selector"],
+												"additionalProperties": false
+											}
+										]
 									}
 								},
-								"required": ["expectedRevision"],
+								"required": ["expectedMembershipVersion", "operationId", "recipient"],
 								"additionalProperties": false
 							}
 						}
@@ -88148,43 +89535,40 @@
 									"$schema": "https://json-schema.org/draft/2020-12/schema",
 									"type": "object",
 									"properties": {
-										"organizationEntityId": {
+										"invitationId": {
 											"type": "string",
 											"format": "uuid",
 											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 										},
-										"organizationName": { "type": ["string", "null"] },
-										"memberEntityId": {
+										"revision": { "type": "integer", "minimum": 1, "maximum": 9007199254740990 },
+										"state": {
+											"type": "string",
+											"enum": [
+												"pending",
+												"accepted",
+												"declined",
+												"revoked",
+												"expired",
+												"invalidated"
+											]
+										},
+										"membershipId": {
 											"type": "string",
 											"format": "uuid",
 											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 										},
-										"memberName": { "type": ["string", "null"] },
-										"revision": {
+										"version": { "type": "integer", "minimum": 0, "maximum": 9007199254740990 },
+										"activeGeneration": {
+											"type": ["integer", "null"],
+											"minimum": 0,
+											"maximum": 9007199254740990
+										},
+										"lastGeneration": {
 											"type": "integer",
-											"exclusiveMinimum": 0,
-											"maximum": 9007199254740991
-										},
-										"joinedAt": {
-											"type": "string",
-											"format": "date-time",
-											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-										},
-										"removedAt": {
-											"type": ["string", "null"],
-											"format": "date-time",
-											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+											"minimum": 0,
+											"maximum": 9007199254740990
 										}
 									},
-									"required": [
-										"organizationEntityId",
-										"organizationName",
-										"memberEntityId",
-										"memberName",
-										"revision",
-										"joinedAt",
-										"removedAt"
-									],
 									"additionalProperties": false
 								}
 							}
@@ -88209,13 +89593,8 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "ParticipationDenied",
-													"enum": [
-														"ParticipationDenied",
-														"AccountRestricted",
-														"AccountSuspended",
-														"AccountClosed"
-													],
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -88241,8 +89620,8 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "OrganizationMembershipNotFound",
-													"enum": ["OrganizationMembershipNotFound"],
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable", "OrganizationMembershipNotFound"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -88268,8 +89647,9 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "OrganizationMembershipConflict",
+													"default": "AccessChanged",
 													"enum": [
+														"AccessChanged",
 														"OrganizationMembershipConflict",
 														"OrganizationMembershipCapacityExceeded"
 													],
@@ -88298,9 +89678,36 @@
 						"content": {
 							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
 						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
 					}
 				},
-				"x-rezics-quota-route-operation-id": "postApiParticipationMembershipOrganizationsByOrganizationEntityIdMembersByMemberEntityIdRemove",
+				"x-rezics-quota-route-operation-id": "postApiParticipationMembershipOrganizationsByOrganizationEntityIdMembersRemove",
 				"x-rezics-quota-operation-id": "*",
 				"x-rezics-quota-cost-units": 1
 			}
@@ -88309,17 +89716,13 @@
 			"get": {
 				"operationId": "listOwnOrganizationMembershipInvitations",
 				"tags": ["Participation"],
-				"security": [{ "SessionCookie": [] }],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
 					{
 						"name": "afterId",
 						"in": "query",
 						"required": false,
-						"schema": {
-							"type": "string",
-							"format": "uuid",
-							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-						}
+						"schema": { "type": "string", "minLength": 1, "maxLength": 512 }
 					}
 				],
 				"responses": {
@@ -88332,7 +89735,7 @@
 									"type": "object",
 									"properties": {
 										"items": {
-											"maxItems": 100,
+											"maxItems": 50,
 											"type": "array",
 											"items": {
 												"type": "object",
@@ -88348,27 +89751,37 @@
 														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 													},
 													"organizationName": { "type": ["string", "null"] },
-													"recipientEntityId": {
-														"type": "string",
+													"recipientName": { "type": ["string", "null"] },
+													"kind": { "type": "string", "enum": ["entity", "principal"] },
+													"entityId": {
+														"type": ["string", "null"],
 														"format": "uuid",
 														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 													},
-													"recipientName": { "type": ["string", "null"] },
 													"state": {
 														"type": "string",
 														"enum": [
 															"pending",
 															"accepted",
 															"declined",
-															"cancelled",
+															"revoked",
 															"expired",
 															"invalidated"
 														]
 													},
 													"revision": {
 														"type": "integer",
-														"exclusiveMinimum": 0,
-														"maximum": 9007199254740991
+														"minimum": 1,
+														"maximum": 9007199254740990
+													},
+													"availability": {
+														"type": "string",
+														"enum": ["allow", "deny", "unavailable"]
+													},
+													"membershipVersion": {
+														"type": "integer",
+														"minimum": 0,
+														"maximum": 9007199254740990
 													},
 													"expiresAt": {
 														"type": "string",
@@ -88390,10 +89803,13 @@
 													"id",
 													"organizationEntityId",
 													"organizationName",
-													"recipientEntityId",
 													"recipientName",
+													"kind",
+													"entityId",
 													"state",
 													"revision",
+													"availability",
+													"membershipVersion",
 													"expiresAt",
 													"createdAt",
 													"resolvedAt"
@@ -88401,11 +89817,7 @@
 												"additionalProperties": false
 											}
 										},
-										"nextCursor": {
-											"type": ["string", "null"],
-											"format": "uuid",
-											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-										}
+										"nextCursor": { "type": ["string", "null"], "maxLength": 512 }
 									},
 									"required": ["items", "nextCursor"],
 									"additionalProperties": false
@@ -88424,13 +89836,8 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "ParticipationDenied",
-													"enum": [
-														"ParticipationDenied",
-														"AccountRestricted",
-														"AccountSuspended",
-														"AccountClosed"
-													],
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -88456,8 +89863,8 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "OrganizationMembershipNotFound",
-													"enum": ["OrganizationMembershipNotFound"],
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable", "OrganizationMembershipNotFound"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -88483,8 +89890,9 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "OrganizationMembershipConflict",
+													"default": "AccessChanged",
 													"enum": [
+														"AccessChanged",
 														"OrganizationMembershipConflict",
 														"OrganizationMembershipCapacityExceeded"
 													],
@@ -88508,10 +89916,69 @@
 							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
 						}
 					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until this request can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"500": {
 						"description": "Unexpected internal failure",
 						"content": {
 							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
 						}
 					}
 				},
@@ -88524,17 +89991,13 @@
 			"get": {
 				"operationId": "listOwnOrganizationMemberships",
 				"tags": ["Participation"],
-				"security": [{ "SessionCookie": [] }],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
 					{
 						"name": "afterId",
 						"in": "query",
 						"required": false,
-						"schema": {
-							"type": "string",
-							"format": "uuid",
-							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-						}
+						"schema": { "type": "string", "minLength": 1, "maxLength": 512 }
 					}
 				],
 				"responses": {
@@ -88547,56 +90010,84 @@
 									"type": "object",
 									"properties": {
 										"items": {
-											"maxItems": 100,
+											"maxItems": 50,
 											"type": "array",
 											"items": {
 												"type": "object",
 												"properties": {
+													"membershipId": {
+														"type": "string",
+														"format": "uuid",
+														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+													},
 													"organizationEntityId": {
 														"type": "string",
 														"format": "uuid",
 														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 													},
 													"organizationName": { "type": ["string", "null"] },
-													"memberEntityId": {
-														"type": "string",
-														"format": "uuid",
-														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-													},
 													"memberName": { "type": ["string", "null"] },
-													"revision": {
+													"recipient": {
+														"oneOf": [
+															{
+																"type": "object",
+																"properties": {
+																	"kind": { "type": "string", "const": "entity" },
+																	"entityId": {
+																		"type": "string",
+																		"format": "uuid",
+																		"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+																	}
+																},
+																"required": ["kind", "entityId"],
+																"additionalProperties": false
+															},
+															{
+																"type": "object",
+																"properties": {
+																	"kind": { "type": "string", "const": "principal" },
+																	"selector": { "type": "string", "minLength": 1, "maxLength": 512 }
+																},
+																"required": ["kind", "selector"],
+																"additionalProperties": false
+															}
+														]
+													},
+													"version": {
 														"type": "integer",
-														"exclusiveMinimum": 0,
-														"maximum": 9007199254740991
+														"minimum": 0,
+														"maximum": 9007199254740990
 													},
-													"joinedAt": {
+													"activeGeneration": {
+														"type": ["integer", "null"],
+														"minimum": 0,
+														"maximum": 9007199254740990
+													},
+													"lastGeneration": {
+														"type": "integer",
+														"minimum": 0,
+														"maximum": 9007199254740990
+													},
+													"availability": {
 														"type": "string",
-														"format": "date-time",
-														"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-													},
-													"removedAt": {
-														"type": ["string", "null"],
-														"format": "date-time",
-														"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+														"enum": ["allow", "deny", "unavailable"]
 													}
 												},
 												"required": [
+													"membershipId",
 													"organizationEntityId",
 													"organizationName",
-													"memberEntityId",
 													"memberName",
-													"revision",
-													"joinedAt",
-													"removedAt"
+													"recipient",
+													"version",
+													"activeGeneration",
+													"lastGeneration",
+													"availability"
 												],
 												"additionalProperties": false
 											}
 										},
-										"nextCursor": {
-											"type": ["string", "null"],
-											"format": "uuid",
-											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-										}
+										"nextCursor": { "type": ["string", "null"], "maxLength": 512 }
 									},
 									"required": ["items", "nextCursor"],
 									"additionalProperties": false
@@ -88615,13 +90106,8 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "ParticipationDenied",
-													"enum": [
-														"ParticipationDenied",
-														"AccountRestricted",
-														"AccountSuspended",
-														"AccountClosed"
-													],
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -88647,8 +90133,8 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "OrganizationMembershipNotFound",
-													"enum": ["OrganizationMembershipNotFound"],
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable", "OrganizationMembershipNotFound"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -88674,8 +90160,9 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "OrganizationMembershipConflict",
+													"default": "AccessChanged",
 													"enum": [
+														"AccessChanged",
 														"OrganizationMembershipConflict",
 														"OrganizationMembershipCapacityExceeded"
 													],
@@ -88699,10 +90186,69 @@
 							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
 						}
 					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until this request can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"500": {
 						"description": "Unexpected internal failure",
 						"content": {
 							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
 						}
 					}
 				},
@@ -88738,11 +90284,27 @@
 								"properties": {
 									"expectedRevision": {
 										"type": "integer",
-										"exclusiveMinimum": 0,
+										"minimum": 1,
 										"maximum": 9007199254740990
-									}
+									},
+									"operationId": {
+										"type": "string",
+										"format": "uuid",
+										"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+									},
+									"expectedMembershipVersion": {
+										"type": "integer",
+										"minimum": 0,
+										"maximum": 9007199254740990
+									},
+									"consent": { "type": "boolean", "const": true }
 								},
-								"required": ["expectedRevision"],
+								"required": [
+									"expectedRevision",
+									"operationId",
+									"expectedMembershipVersion",
+									"consent"
+								],
 								"additionalProperties": false
 							}
 						}
@@ -88757,67 +90319,40 @@
 									"$schema": "https://json-schema.org/draft/2020-12/schema",
 									"type": "object",
 									"properties": {
-										"id": {
+										"invitationId": {
 											"type": "string",
 											"format": "uuid",
 											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 										},
-										"organizationEntityId": {
-											"type": "string",
-											"format": "uuid",
-											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-										},
-										"organizationName": { "type": ["string", "null"] },
-										"recipientEntityId": {
-											"type": "string",
-											"format": "uuid",
-											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-										},
-										"recipientName": { "type": ["string", "null"] },
+										"revision": { "type": "integer", "minimum": 1, "maximum": 9007199254740990 },
 										"state": {
 											"type": "string",
 											"enum": [
 												"pending",
 												"accepted",
 												"declined",
-												"cancelled",
+												"revoked",
 												"expired",
 												"invalidated"
 											]
 										},
-										"revision": {
+										"membershipId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"version": { "type": "integer", "minimum": 0, "maximum": 9007199254740990 },
+										"activeGeneration": {
+											"type": ["integer", "null"],
+											"minimum": 0,
+											"maximum": 9007199254740990
+										},
+										"lastGeneration": {
 											"type": "integer",
-											"exclusiveMinimum": 0,
-											"maximum": 9007199254740991
-										},
-										"expiresAt": {
-											"type": "string",
-											"format": "date-time",
-											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-										},
-										"createdAt": {
-											"type": "string",
-											"format": "date-time",
-											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-										},
-										"resolvedAt": {
-											"type": ["string", "null"],
-											"format": "date-time",
-											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+											"minimum": 0,
+											"maximum": 9007199254740990
 										}
 									},
-									"required": [
-										"id",
-										"organizationEntityId",
-										"organizationName",
-										"recipientEntityId",
-										"recipientName",
-										"state",
-										"revision",
-										"expiresAt",
-										"createdAt",
-										"resolvedAt"
-									],
 									"additionalProperties": false
 								}
 							}
@@ -88842,13 +90377,8 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "ParticipationDenied",
-													"enum": [
-														"ParticipationDenied",
-														"AccountRestricted",
-														"AccountSuspended",
-														"AccountClosed"
-													],
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -88874,8 +90404,8 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "OrganizationMembershipNotFound",
-													"enum": ["OrganizationMembershipNotFound"],
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable", "OrganizationMembershipNotFound"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -88901,8 +90431,9 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "OrganizationMembershipConflict",
+													"default": "AccessChanged",
 													"enum": [
+														"AccessChanged",
 														"OrganizationMembershipConflict",
 														"OrganizationMembershipCapacityExceeded"
 													],
@@ -88930,6 +90461,33 @@
 						"description": "Unexpected internal failure",
 						"content": {
 							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
 						}
 					}
 				},
@@ -88965,11 +90523,16 @@
 								"properties": {
 									"expectedRevision": {
 										"type": "integer",
-										"exclusiveMinimum": 0,
+										"minimum": 1,
 										"maximum": 9007199254740990
+									},
+									"operationId": {
+										"type": "string",
+										"format": "uuid",
+										"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 									}
 								},
-								"required": ["expectedRevision"],
+								"required": ["expectedRevision", "operationId"],
 								"additionalProperties": false
 							}
 						}
@@ -88984,67 +90547,40 @@
 									"$schema": "https://json-schema.org/draft/2020-12/schema",
 									"type": "object",
 									"properties": {
-										"id": {
+										"invitationId": {
 											"type": "string",
 											"format": "uuid",
 											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 										},
-										"organizationEntityId": {
-											"type": "string",
-											"format": "uuid",
-											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-										},
-										"organizationName": { "type": ["string", "null"] },
-										"recipientEntityId": {
-											"type": "string",
-											"format": "uuid",
-											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-										},
-										"recipientName": { "type": ["string", "null"] },
+										"revision": { "type": "integer", "minimum": 1, "maximum": 9007199254740990 },
 										"state": {
 											"type": "string",
 											"enum": [
 												"pending",
 												"accepted",
 												"declined",
-												"cancelled",
+												"revoked",
 												"expired",
 												"invalidated"
 											]
 										},
-										"revision": {
+										"membershipId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"version": { "type": "integer", "minimum": 0, "maximum": 9007199254740990 },
+										"activeGeneration": {
+											"type": ["integer", "null"],
+											"minimum": 0,
+											"maximum": 9007199254740990
+										},
+										"lastGeneration": {
 											"type": "integer",
-											"exclusiveMinimum": 0,
-											"maximum": 9007199254740991
-										},
-										"expiresAt": {
-											"type": "string",
-											"format": "date-time",
-											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-										},
-										"createdAt": {
-											"type": "string",
-											"format": "date-time",
-											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-										},
-										"resolvedAt": {
-											"type": ["string", "null"],
-											"format": "date-time",
-											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+											"minimum": 0,
+											"maximum": 9007199254740990
 										}
 									},
-									"required": [
-										"id",
-										"organizationEntityId",
-										"organizationName",
-										"recipientEntityId",
-										"recipientName",
-										"state",
-										"revision",
-										"expiresAt",
-										"createdAt",
-										"resolvedAt"
-									],
 									"additionalProperties": false
 								}
 							}
@@ -89069,13 +90605,8 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "ParticipationDenied",
-													"enum": [
-														"ParticipationDenied",
-														"AccountRestricted",
-														"AccountSuspended",
-														"AccountClosed"
-													],
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -89101,8 +90632,8 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "OrganizationMembershipNotFound",
-													"enum": ["OrganizationMembershipNotFound"],
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable", "OrganizationMembershipNotFound"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -89128,8 +90659,9 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "OrganizationMembershipConflict",
+													"default": "AccessChanged",
 													"enum": [
+														"AccessChanged",
 														"OrganizationMembershipConflict",
 														"OrganizationMembershipCapacityExceeded"
 													],
@@ -89157,6 +90689,33 @@
 						"description": "Unexpected internal failure",
 						"content": {
 							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
 						}
 					}
 				},
@@ -89190,13 +90749,18 @@
 								"$schema": "https://json-schema.org/draft/2020-12/schema",
 								"type": "object",
 								"properties": {
-									"expectedRevision": {
+									"expectedMembershipVersion": {
 										"type": "integer",
-										"exclusiveMinimum": 0,
+										"minimum": 1,
 										"maximum": 9007199254740990
+									},
+									"operationId": {
+										"type": "string",
+										"format": "uuid",
+										"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 									}
 								},
-								"required": ["expectedRevision"],
+								"required": ["expectedMembershipVersion", "operationId"],
 								"additionalProperties": false
 							}
 						}
@@ -89211,43 +90775,40 @@
 									"$schema": "https://json-schema.org/draft/2020-12/schema",
 									"type": "object",
 									"properties": {
-										"organizationEntityId": {
+										"invitationId": {
 											"type": "string",
 											"format": "uuid",
 											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 										},
-										"organizationName": { "type": ["string", "null"] },
-										"memberEntityId": {
+										"revision": { "type": "integer", "minimum": 1, "maximum": 9007199254740990 },
+										"state": {
+											"type": "string",
+											"enum": [
+												"pending",
+												"accepted",
+												"declined",
+												"revoked",
+												"expired",
+												"invalidated"
+											]
+										},
+										"membershipId": {
 											"type": "string",
 											"format": "uuid",
 											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 										},
-										"memberName": { "type": ["string", "null"] },
-										"revision": {
+										"version": { "type": "integer", "minimum": 0, "maximum": 9007199254740990 },
+										"activeGeneration": {
+											"type": ["integer", "null"],
+											"minimum": 0,
+											"maximum": 9007199254740990
+										},
+										"lastGeneration": {
 											"type": "integer",
-											"exclusiveMinimum": 0,
-											"maximum": 9007199254740991
-										},
-										"joinedAt": {
-											"type": "string",
-											"format": "date-time",
-											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-										},
-										"removedAt": {
-											"type": ["string", "null"],
-											"format": "date-time",
-											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+											"minimum": 0,
+											"maximum": 9007199254740990
 										}
 									},
-									"required": [
-										"organizationEntityId",
-										"organizationName",
-										"memberEntityId",
-										"memberName",
-										"revision",
-										"joinedAt",
-										"removedAt"
-									],
 									"additionalProperties": false
 								}
 							}
@@ -89272,13 +90833,8 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "ParticipationDenied",
-													"enum": [
-														"ParticipationDenied",
-														"AccountRestricted",
-														"AccountSuspended",
-														"AccountClosed"
-													],
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -89304,8 +90860,8 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "OrganizationMembershipNotFound",
-													"enum": ["OrganizationMembershipNotFound"],
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable", "OrganizationMembershipNotFound"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -89331,8 +90887,9 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "OrganizationMembershipConflict",
+													"default": "AccessChanged",
 													"enum": [
+														"AccessChanged",
 														"OrganizationMembershipConflict",
 														"OrganizationMembershipCapacityExceeded"
 													],
@@ -89361,9 +90918,597 @@
 						"content": {
 							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
 						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
 					}
 				},
 				"x-rezics-quota-route-operation-id": "postApiParticipationMembershipMeOrganizationsByOrganizationEntityIdLeave",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/participation/membership/organizations/{organizationEntityId}/contacts": {
+			"post": {
+				"operationId": "createOrganizationEnrollmentContact",
+				"tags": ["Participation"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "organizationEntityId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"version": { "type": "integer", "minimum": 1, "maximum": 9007199254740990 },
+										"contact": { "type": "string" },
+										"expiresAt": {
+											"type": "string",
+											"format": "date-time",
+											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+										}
+									},
+									"required": ["id", "version", "contact", "expiresAt"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable", "OrganizationMembershipNotFound"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": [
+														"AccessChanged",
+														"OrganizationMembershipConflict",
+														"OrganizationMembershipCapacityExceeded"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "postApiParticipationMembershipOrganizationsByOrganizationEntityIdContacts",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/participation/membership/contacts/{id}/revoke": {
+			"post": {
+				"operationId": "revokeOrganizationEnrollmentContact",
+				"tags": ["Participation"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"version": { "type": "number", "const": 2 },
+										"revoked": { "type": "boolean" }
+									},
+									"required": ["id", "version", "revoked"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable", "OrganizationMembershipNotFound"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": [
+														"AccessChanged",
+														"OrganizationMembershipConflict",
+														"OrganizationMembershipCapacityExceeded"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "postApiParticipationMembershipContactsByIdRevoke",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/participation/membership/organizations/{organizationEntityId}/recipients": {
+			"post": {
+				"operationId": "resolveOrganizationEnrollmentContact",
+				"tags": ["Participation"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "organizationEntityId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"type": "object",
+								"properties": { "contact": { "type": "string", "pattern": "^[A-Za-z0-9_-]{43}$" } },
+								"required": ["contact"],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"recipient": {
+											"oneOf": [
+												{
+													"type": "object",
+													"properties": {
+														"kind": { "type": "string", "const": "entity" },
+														"entityId": {
+															"type": "string",
+															"format": "uuid",
+															"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+														}
+													},
+													"required": ["kind", "entityId"],
+													"additionalProperties": false
+												},
+												{
+													"type": "object",
+													"properties": {
+														"kind": { "type": "string", "const": "principal" },
+														"selector": { "type": "string", "minLength": 1, "maxLength": 512 }
+													},
+													"required": ["kind", "selector"],
+													"additionalProperties": false
+												}
+											]
+										},
+										"expiresAt": {
+											"type": "string",
+											"format": "date-time",
+											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+										}
+									},
+									"required": ["recipient", "expiresAt"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": ["AccessDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable", "OrganizationMembershipNotFound"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": [
+														"AccessChanged",
+														"OrganizationMembershipConflict",
+														"OrganizationMembershipCapacityExceeded"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "postApiParticipationMembershipOrganizationsByOrganizationEntityIdRecipients",
 				"x-rezics-quota-operation-id": "*",
 				"x-rezics-quota-cost-units": 1
 			}
@@ -89388,10 +91533,7 @@
 						"name": "capability",
 						"in": "query",
 						"required": false,
-						"schema": {
-							"type": "string",
-							"enum": ["entity.publish", "entity.membership", "entity.security"]
-						}
+						"schema": { "type": "string", "enum": ["entity.publish", "entity.security"] }
 					}
 				],
 				"responses": {
@@ -89488,6 +91630,35 @@
 									"$schema": "https://json-schema.org/draft/2020-12/schema",
 									"type": "object",
 									"properties": {
+										"native": {
+											"type": ["object", "null"],
+											"properties": {
+												"scopeId": {
+													"type": "string",
+													"format": "uuid",
+													"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+												},
+												"representation": {
+													"type": "object",
+													"properties": {
+														"id": {
+															"type": "string",
+															"format": "uuid",
+															"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+														},
+														"revision": {
+															"type": "integer",
+															"exclusiveMinimum": 0,
+															"maximum": 9007199254740991
+														}
+													},
+													"required": ["id", "revision"],
+													"additionalProperties": false
+												}
+											},
+											"required": ["scopeId", "representation"],
+											"additionalProperties": false
+										},
 										"entityId": {
 											"type": "string",
 											"format": "uuid",
@@ -89514,7 +91685,6 @@
 															"catalog.read",
 															"catalog.edit",
 															"entity.publish",
-															"entity.membership",
 															"entity.security",
 															"proposal.adopt"
 														]
@@ -89525,7 +91695,7 @@
 											}
 										}
 									},
-									"required": ["entityId", "grants"],
+									"required": ["native", "entityId", "grants"],
 									"additionalProperties": false
 								}
 							}
@@ -90177,7 +92347,6 @@
 															"catalog.read",
 															"catalog.edit",
 															"entity.publish",
-															"entity.membership",
 															"entity.security",
 															"proposal.adopt"
 														]
@@ -90336,7 +92505,6 @@
 											"catalog.read",
 											"catalog.edit",
 											"entity.publish",
-											"entity.membership",
 											"entity.security",
 											"proposal.adopt"
 										]
@@ -90509,7 +92677,6 @@
 															"catalog.read",
 															"catalog.edit",
 															"entity.publish",
-															"entity.membership",
 															"entity.security",
 															"proposal.adopt"
 														]
@@ -90695,7 +92862,6 @@
 											"catalog.read",
 											"catalog.edit",
 											"entity.publish",
-											"entity.membership",
 											"entity.security",
 											"proposal.adopt"
 										]

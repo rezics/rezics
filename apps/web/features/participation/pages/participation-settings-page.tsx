@@ -186,7 +186,7 @@ export function ParticipationSettingsPage() {
 }
 
 type ManagedGrant = ListManagedEntityGrantsStatus200["items"][number];
-const EntityPermissions = ["entity.publish", "entity.membership", "entity.security"] as const;
+const EntityPermissions = ["entity.publish", "entity.security"] as const;
 type EntityPermission = (typeof EntityPermissions)[number];
 
 function ManagedIdentity({
@@ -202,9 +202,7 @@ function ManagedIdentity({
 	const [afterId, setAfterId] = useState<string>();
 	const [recipient, setRecipient] = useState("");
 	const [capability, setCapability] = useState<EntityPermission>("entity.publish");
-	const permissionChoices = selection.grant
-		? EntityPermissions
-		: EntityPermissions.filter((value) => value !== "entity.membership");
+	const permissionChoices = EntityPermissions;
 	const [expiresAt, setExpiresAt] = useState("");
 	const [revoking, setRevoking] = useState<ManagedGrant>();
 	const [editSelection, setEditSelection] = useState<ParticipationSelection>();

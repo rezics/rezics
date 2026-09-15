@@ -1,3 +1,4 @@
+import { entityIdentity } from "../database/schema/catalog-identity";
 import { and, eq, isNull, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
@@ -160,7 +161,9 @@ export async function recoverEntityController(
 		.for("share");
 	if (!platformGrant)
 		throw new ParticipationDenied("Platform security management authority is required");
-	const control = await lockEntityControl(tx, authority, input.entityId);
+	const [targetIdentity] = await tx.select().from(entityIdentity).where(eq(entityIdentity.id,input.entityId)).for("share");
+ if (targetIdentity?.shape=== "organization") throw new ParticipationDenied("Org recovery requires the native context-bound recipient flow");
+ const control = await lockEntityControl(tx, authority, input.entityId);
 	if (
 		control.revision !== input.expectedRevision ||
 		(await hasEntityController(tx, input.entityId))

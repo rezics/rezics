@@ -64,6 +64,15 @@ RETURNS boolean LANGUAGE sql VOLATILE SET search_path=pg_catalog,public AS $$
  FROM public.access_subject s WHERE s.id=p_subject
 $$;
 
+-- Org admission remains institutional, but a disabled/recovery-required scope supplies no live member-set authority.
+CREATE OR REPLACE FUNCTION public.access_membership_scope_is_eligible(p_scope uuid)
+RETURNS boolean LANGUAGE sql VOLATILE SET search_path=pg_catalog,public AS $$
+ SELECT CASE WHEN e.shape='organization' THEN e.deleted_at IS NULL AND coalesce(p.state='active',false) ELSE true END
+ FROM public.access_scope s LEFT JOIN public.reference_value r ON r.id=s.unit_ref
+ LEFT JOIN public.entity_identity e ON e.id=r.target_entity_id LEFT JOIN public.entity_participation p ON p.entity_id=e.id
+ WHERE s.id=p_scope
+$$;
+
 CREATE OR REPLACE FUNCTION public.access_subject_matches_recipient(p_subject uuid,p_kind text,p_recipient uuid,p_scope uuid,p_group uuid)
 RETURNS boolean LANGUAGE plpgsql SET search_path=pg_catalog,public AS $$
 DECLARE member public.access_membership%ROWTYPE; selected_count integer; matched boolean; broken boolean;
@@ -71,6 +80,8 @@ BEGIN
  IF p_subject IS NULL OR p_kind IS NULL THEN RETURN NULL; END IF;
  IF p_kind='subject' THEN RETURN p_subject=p_recipient; END IF;
  IF p_kind NOT IN ('group','all-members') OR p_scope IS NULL THEN RETURN NULL; END IF;
+ IF public.access_membership_scope_is_eligible(p_scope) IS NULL THEN RETURN NULL; END IF;
+ IF NOT public.access_membership_scope_is_eligible(p_scope) THEN RETURN false; END IF;
  SELECT * INTO member FROM public.access_membership WHERE subject_id=p_subject AND scope_id=p_scope;
  IF NOT FOUND OR member.active_generation IS NULL THEN RETURN false; END IF;
  IF p_kind='all-members' THEN RETURN true; END IF;

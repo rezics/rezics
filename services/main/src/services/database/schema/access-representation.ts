@@ -111,10 +111,12 @@ export const accessRepresentation = pgTable(
 		index("access_representation_active_controller_idx").on(table.entityId,table.id).where(sql`${table.state}='active'`),
 		index("access_representation_entity_idx").on(table.entityId, table.targetScopeId, table.id),
 		index("access_representation_target_idx").on(table.targetScopeId, table.entityId, table.id),
+		index("access_representation_recipient_scope_page_idx").on(table.recipientScopeId, table.id).where(sql`${table.recipientScopeId} is not null`),
 		index("access_representation_recipient_scope_idx")
 			.on(table.targetScopeId, table.recipientScopeId, table.id)
 			.where(sql`${table.state}='active' and ${table.recipientScopeId} is not null`),
 		index("access_representation_parent_idx").on(table.parentGrantId, table.parentRevision, table.id).where(sql`${table.parentGrantId} is not null`),
+		index("access_representation_subject_page_idx").on(table.recipientSubjectId,table.id).where(sql`${table.recipientSubjectId} is not null`),
 		index("access_representation_subject_idx")
 			.on(table.recipientSubjectId, table.targetScopeId, table.id)
 			.where(sql`${table.recipientSubjectId} is not null`),

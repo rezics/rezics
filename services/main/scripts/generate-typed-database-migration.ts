@@ -54,7 +54,27 @@ async function main() {
 	if (beforeCanonicalOverlay && !canonicalSql) throw new Error("Before-canonical overlay requires canonical SQL");
 	// The same Drizzle compiler and partition adapters used for the full schema export
 	// produce incremental DDL. No database is opened, replayed or checked here.
-	const statements = applyOperationalPartitions(applySourcePartitions(await generateMigration(previous.snapshot, next), false), false)
+	// The pinned Drizzle API cannot accept rename hints without a TTY. An owning
+	// replacement declaration selects two explicit compiler diffs (drop, then
+	// create), never a heuristic rename or hand-authored structural SQL.
+	const replacements = await optional(join(overlays, `${name}.replace-tables.json`));
+	let migrationStatements: string[];
+	if (replacements) {
+		const declared: unknown = JSON.parse(replacements);
+		if (!Array.isArray(declared) || declared.some(value => typeof value !== "string" || !/^[a-z][a-z0-9_]*$/.test(value)) || new Set(declared).size !== declared.length)
+			throw new Error("Table replacement declaration must contain distinct physical table names");
+		const nextTables = new Set(next.ddl.filter(entity => entity.entityType === "tables").map(entity => entity.name));
+		const removed = previous.snapshot.ddl.filter(entity => entity.entityType === "tables" && !nextTables.has(entity.name)).map(entity => entity.name).sort();
+		if (JSON.stringify([...declared].sort()) !== JSON.stringify(removed))
+			throw new Error("Explicit table replacements must match all and only removed tables");
+		const dropping = new Set(removed);
+		if (previous.snapshot.ddl.some(entity => entity.entityType === "fks" && dropping.has(entity.tableTo) && !dropping.has(entity.table)))
+			throw new Error("Table replacement has a retained inbound FK; its owning migration must handle that contract explicitly");
+		const intermediate = { ...previous.snapshot, ddl: previous.snapshot.ddl.filter(entity =>
+			!(entity.entityType === "tables" && dropping.has(entity.name)) && !("table" in entity && dropping.has(entity.table))) };
+		migrationStatements = [...await generateMigration(previous.snapshot, intermediate), ...await generateMigration(intermediate, next)];
+	} else migrationStatements = await generateMigration(previous.snapshot, next);
+	const statements = applyOperationalPartitions(applySourcePartitions(migrationStatements, false), false)
 		.filter(statement => !MigrationOwnedExpressionIndexes.some(index => statement.includes(index)));
 	if (!statements.length && !canonicalSql && !preOverlay && !postOverlay)
 		throw new Error("No production DDL or canonical SQL was selected for this migration");

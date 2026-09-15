@@ -1,10 +1,6 @@
 import { accountFollowPreference } from "../database/schema/follow";
 import { governanceNoticeRecipient } from "../database/schema/governance-delivery";
-import {
-	organizationMembership,
-	organizationMembershipEvent,
-	organizationMembershipInvitation,
-} from "../database/schema/organization-membership";
+import { eraseOrganizationEnrollmentBatch } from "./membership-worker";
 import { invalidateErasedMembershipInvitations } from "./membership";
 import { erasePrivateImageBatch, type ImageErasureArchive } from "../image-assets/erasure";
 import { and, eq, isNull, lte, sql, type SQL } from "drizzle-orm";
@@ -434,25 +430,13 @@ export async function dispatchAccountErasureBatch(
 				result = await invalidateErasedMembershipInvitations(tx, authId);
 				break;
 			case "organization_memberships":
-				result = await deletePrivateBatch(
-					tx,
-					organizationMembership,
-					eq(organizationMembership.memberAuthUserId, authId),
-				);
+				result = await eraseOrganizationEnrollmentBatch(tx, authId, "memberships");
 				break;
 			case "organization_membership_events":
-				result = await deletePrivateBatch(
-					tx,
-					organizationMembershipEvent,
-					eq(organizationMembershipEvent.memberAuthUserId, authId),
-				);
+				result = await eraseOrganizationEnrollmentBatch(tx, authId, "receipts");
 				break;
 			case "membership_received_invitations":
-				result = await deletePrivateBatch(
-					tx,
-					organizationMembershipInvitation,
-					eq(organizationMembershipInvitation.recipientAuthUserId, authId),
-				);
+				result = await eraseOrganizationEnrollmentBatch(tx, authId, "invitations");
 				break;
 			case "favorite_history":
 				result = await deletePrivateBatch(

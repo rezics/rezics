@@ -23,7 +23,7 @@ import {
 	QueryPending,
 } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AppLink } from "@/features/application-shell/components/app-link";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -46,14 +46,35 @@ export function OwnMemberships() {
 	const decline = useDeclineOrganizationMembershipInvitation();
 	const leave = useLeaveOrganizationMembership();
 	const pending = accept.isPending || decline.isPending || leave.isPending;
+	const operations = useRef(new Map<string, string>());
+	function operation(key: string) {
+		const prior = operations.current.get(key);
+		if (prior) return prior;
+		const id = crypto.randomUUID();
+		operations.current.set(key, id);
+		return id;
+	}
 	async function respond(
 		invitationId: string,
 		expectedRevision: number,
 		action: "accept" | "decline",
+		membershipVersion: number,
 	) {
 		try {
-			const input = { path: { invitationId }, body: { expectedRevision } };
-			if (action === "accept") await accept.mutateAsync(input);
+			const input = {
+				path: { invitationId },
+				body: {
+					expectedRevision,
+					operationId: operation(
+						`${action}:${invitationId}:${expectedRevision}:${membershipVersion}`,
+					),
+				},
+			};
+			if (action === "accept")
+				await accept.mutateAsync({
+					...input,
+					body: { ...input.body, expectedMembershipVersion: membershipVersion, consent: true },
+				});
 			else await decline.mutateAsync(input);
 			setInvitationCursors([]);
 			setMemberCursors([]);
@@ -67,7 +88,10 @@ export function OwnMemberships() {
 		try {
 			await leave.mutateAsync({
 				path: { organizationEntityId: leaving.organizationEntityId },
-				body: { expectedRevision: leaving.revision },
+				body: {
+					expectedMembershipVersion: leaving.version,
+					operationId: operation(`leave:${leaving.membershipId}:${leaving.version}`),
+				},
 			});
 			setLeaving(undefined);
 			setMemberCursors([]);
@@ -99,7 +123,13 @@ export function OwnMemberships() {
 										<AppLink href={`/user/${invitation.organizationEntityId}`}>
 											{invitation.organizationName ?? t.ui.unnamed}
 										</AppLink>
-										<span>{t.settings.memberships.states[invitation.state]}</span>
+										<span>
+											{
+												t.settings.memberships.states[
+													invitation.state === "revoked" ? "cancelled" : invitation.state
+												]
+											}
+										</span>
 										<time className="text-sm text-muted-foreground" dateTime={invitation.expiresAt}>
 											{new Intl.DateTimeFormat(locale.target, {
 												dateStyle: "medium",
@@ -110,16 +140,30 @@ export function OwnMemberships() {
 									<div className="flex gap-2">
 										{invitation.state === "pending" ? (
 											<Button
-												disabled={pending}
-												onClick={() => void respond(invitation.id, invitation.revision, "accept")}
+												disabled={pending || invitation.state !== "pending"}
+												onClick={() =>
+													void respond(
+														invitation.id,
+														invitation.revision,
+														"accept",
+														invitation.membershipVersion,
+													)
+												}
 											>
 												{t.settings.memberships.accept}
 											</Button>
 										) : null}
 										<Button
 											variant="outline"
-											disabled={pending}
-											onClick={() => void respond(invitation.id, invitation.revision, "decline")}
+											disabled={pending || invitation.state !== "pending"}
+											onClick={() =>
+												void respond(
+													invitation.id,
+													invitation.revision,
+													"decline",
+													invitation.membershipVersion,
+												)
+											}
 										>
 											{t.settings.memberships.decline}
 										</Button>
@@ -170,7 +214,11 @@ export function OwnMemberships() {
 								<AppLink href={`/user/${membership.organizationEntityId}`}>
 									{membership.organizationName ?? t.ui.unnamed}
 								</AppLink>
-								<Button variant="outline" disabled={pending} onClick={() => setLeaving(membership)}>
+								<Button
+									variant="outline"
+									disabled={pending || membership.activeGeneration === null}
+									onClick={() => setLeaving(membership)}
+								>
 									{t.settings.memberships.leave}
 								</Button>
 							</div>

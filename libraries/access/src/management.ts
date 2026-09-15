@@ -8,6 +8,10 @@ import {
 /** Canonical management actions for the mixed IAM target; transport activation is separately gated. @alpha */
 export const AccessManagementPermissionValues = [
 	"access.identity.select",
+	"access.membership.read",
+	"access.membership.recover",
+	"access.membership.manage",
+	"access.membership.participate",
 	"access.representation.manage",
 	"access.group.read",
 	"access.group.create",
@@ -34,6 +38,10 @@ export type AccessManagementPermission = (typeof AccessManagementPermissionValue
 
 /** Semantic boundaries used by scope policy and future API metadata. @alpha */
 export const AccessManagementPermissionDefinitions = {
+ "access.membership.recover": { resource: "access.membership",action: "manage",rationale: "Platform evidence-reviewed Org recovery is separate from ordinary invitation and roster management." },
+	"access.membership.read": { resource: "access.membership", action: "read", rationale: "Private enrollment roster and invitation disclosure require current owner authority." },
+	"access.membership.manage": { resource: "access.membership", action: "manage", rationale: "Invite and remove admitted subjects independently from assigning privileged Groups or security authority." },
+	"access.membership.participate": { resource: "access.membership", action: "manage", rationale: "Consent and departure for an Entity require explicit representation of that Entity, never its operator membership." },
 	"access.representation.manage": { resource: "access.representation", action: "manage", rationale: "Confer authority at the represented Entity is separate from exercising its resource permissions." },
 	"app.read": { resource: "app", action: "read" },
 	"app.create": { resource: "app", action: "create" },

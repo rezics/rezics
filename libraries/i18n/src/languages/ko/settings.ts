@@ -29,10 +29,10 @@ export default {
 		emptyMembers: "아직 구성원이 없습니다.",
 		emptyOrganizations: "가입한 조직이 없습니다.",
 		emptyManagement: "현재 구성원 목록을 관리할 권한이 없습니다.",
-		acceptPrompt: "수락하면 공개 신원이 이 조직의 구성원 목록에 추가되며 구성원 관리자가 볼 수 있습니다.",
+		acceptPrompt: "수락하면 로그인한 계정이 이 조직의 비공개 구성원으로 가입합니다.",
 		removePrompt: "구성원에서 제거해도 별도로 부여된 게시, 보안, 관리 권한은 변경되지 않습니다.",
 		leavePrompt: "탈퇴하면 소속이 해제됩니다. 별도로 부여된 권한은 유지됩니다.",
-		recipientHint: "기존 계정의 공개 신원을 사용하세요.",
+		recipientHint: `초대할 ${koTerminology.entity.forms.label}의 ${verbatimTerms.id.value}를 입력하세요.`,
 		states: {
 			pending: "대기 중",
 			accepted: "수락됨",

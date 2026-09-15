@@ -4,6 +4,7 @@ import {
 	check,
 	foreignKey,
 	index,
+	jsonb,
 	primaryKey,
 	text,
 	uniqueIndex,
@@ -11,242 +12,203 @@ import {
 } from "drizzle-orm/pg-core";
 import { pgTable } from "./base";
 import { users } from "./auth";
-import { entityIdentity } from "./catalog-identity";
-import { entityParticipation, participationGrantEvent } from "./participation";
-import {
-	createCreatedAtColumn,
-	createTimestampMsColumn,
-	createUpdatedAtColumn,
-	createUuidv7PrimaryKey,
-} from "./columns";
+import { entityParticipation } from "./participation";
+import { accessSubject, accessScope } from "./access-identity";
+import { accessMembership, accessMembershipAdmission } from "./access-membership";
+import { createCreatedAtColumn, createTimestampMsColumn, createUuidv7PrimaryKey } from "./columns";
+import type { RequestedAuthoritySelection } from "@rezics/access";
+import type { FirstPartyCredentialProof } from "../../auth/credential-authority";
 
 export const OrganizationMembershipInvitationStateValues = [
 	"pending",
 	"accepted",
 	"declined",
-	"cancelled",
+	"revoked",
 	"expired",
 	"invalidated",
 ] as const;
-
-/** Private operational invitation. Its exact original authority is retained independently of public catalog affiliations. */
-export const organizationMembershipInvitation = pgTable(
-	"organization_membership_invitation",
+/** Private original authority, revalidated at acceptance; never a transport value. @internal */
+export interface EnrollmentAuthorityEvidence {
+	principalId: string;
+	selection: RequestedAuthoritySelection;
+	proof: FirstPartyCredentialProof;
+	sourceDigest: string;
+}
+/** Scope-specific recipient consent to disclosure; a contact secret only locates this revocable row. @internal */
+export const organizationEnrollmentContact = pgTable(
+	"organization_enrollment_contact",
+	{
+		id: createUuidv7PrimaryKey(),
+		scopeId: uuid()
+			.notNull()
+			.references(() => accessScope.id),
+		subjectId: uuid()
+			.notNull()
+			.references(() => accessSubject.id),
+		secretDigest: text().notNull(),
+		version: bigint({ mode: "number" }).notNull().default(1),
+		expiresAt: createTimestampMsColumn().notNull(),
+		revokedAt: createTimestampMsColumn(),
+		createdAt: createCreatedAtColumn(),
+	},
+	(t) => [
+		uniqueIndex("org_enrollment_contact_secret_key").on(t.secretDigest),
+		index("org_enrollment_contact_subject_idx").on(t.subjectId, t.id),
+		index("org_enrollment_contact_active_subject_idx")
+			.on(t.subjectId, t.id)
+			.where(sql`${t.revokedAt} is null`),
+		index("org_enrollment_contact_expiry_idx")
+			.on(t.expiresAt, t.id)
+			.where(sql`${t.revokedAt} is null`),
+		check("org_enrollment_contact_digest_check", sql`${t.secretDigest} ~ '^[0-9a-f]{64}$'`),
+		check(
+			"org_enrollment_contact_time_check",
+			sql`${t.expiresAt}>${t.createdAt} and ${t.expiresAt}<=${t.createdAt}+interval '30 days'`,
+		),
+		check(
+			"org_enrollment_contact_version_check",
+			sql`${t.version} in (1,2) and ((${t.version}=1 and ${t.revokedAt} is null) or (${t.version}=2 and ${t.revokedAt} is not null))`,
+		),
+	],
+);
+/** Org policy inputs; the accepted generation lives exclusively in access_membership. @internal */
+export const organizationEnrollmentInvitation = pgTable(
+	"organization_enrollment_invitation",
 	{
 		id: createUuidv7PrimaryKey(),
 		organizationEntityId: uuid()
 			.notNull()
-			.references(() => entityParticipation.entityId, { onDelete: "restrict" }),
+			.references(() => entityParticipation.entityId),
+		scopeId: uuid()
+			.notNull()
+			.references(() => accessScope.id),
 		organizationRevision: bigint({ mode: "number" }).notNull(),
-		recipientAuthUserId: uuid()
+		recipientSubjectId: uuid()
 			.notNull()
-			.references(() => users.id, { onDelete: "restrict" }),
-		recipientEntityId: uuid()
-			.notNull()
-			.references(() => entityIdentity.id, { onDelete: "restrict" }),
+			.references(() => accessSubject.id),
+		contactId: uuid().references(() => organizationEnrollmentContact.id),
 		invitedByAuthUserId: uuid()
 			.notNull()
-			.references(() => users.id, { onDelete: "restrict" }),
-		inviterAuthorizationRevision: bigint({ mode: "number" }).notNull(),
-		authorizationGrantId: uuid().notNull(),
-		authorizationGrantRevision: bigint({ mode: "number" }).notNull(),
+			.references(() => users.id),
+		authoritySubjectId: uuid()
+			.notNull()
+			.references(() => accessSubject.id),
+		authority: jsonb().$type<EnrollmentAuthorityEvidence>(),
 		state: text()
 			.$type<(typeof OrganizationMembershipInvitationStateValues)[number]>()
 			.notNull()
 			.default("pending"),
 		revision: bigint({ mode: "number" }).notNull().default(1),
+		membershipId: uuid(),
+		generation: bigint({ mode: "number" }),
 		expiresAt: createTimestampMsColumn().notNull(),
 		resolvedAt: createTimestampMsColumn(),
-		resolvedByAuthUserId: uuid().references(() => users.id, { onDelete: "restrict" }),
 		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
 	},
-	(table) => [
-		uniqueIndex("organization_membership_invitation_scope_key").on(
-			table.id,
-			table.organizationEntityId,
-			table.recipientAuthUserId,
-			table.recipientEntityId,
-		),
-		uniqueIndex("organization_membership_invitation_pending_pair_key")
-			.on(table.organizationEntityId, table.recipientAuthUserId)
-			.where(sql`${table.state} = 'pending'`),
-		index("organization_membership_invitation_org_page_idx").on(
-			table.organizationEntityId,
-			table.id,
-		),
-		index("organization_membership_invitation_recipient_state_idx").on(
-			table.recipientAuthUserId,
-			table.state,
-			table.id,
-		),
-		index("organization_membership_invitation_sender_state_idx").on(
-			table.invitedByAuthUserId,
-			table.state,
-			table.id,
-		),
-		index("organization_membership_invitation_recipient_entity_idx").on(
-			table.recipientEntityId,
-			table.id,
-		),
-		index("organization_membership_invitation_grant_idx").on(
-			table.authorizationGrantId,
-			table.authorizationGrantRevision,
-		),
-		index("organization_membership_invitation_resolver_idx")
-			.on(table.resolvedByAuthUserId, table.id)
-			.where(sql`${table.resolvedByAuthUserId} is not null`),
+	(t) => [
+		uniqueIndex("org_enrollment_pending_pair_key")
+			.on(t.scopeId, t.recipientSubjectId)
+			.where(sql`${t.state}='pending'`),
+		index("org_enrollment_scope_page_idx").on(t.scopeId, t.id),
+		index("org_enrollment_pending_scope_idx").on(t.scopeId, t.id).where(sql`${t.state}='pending'`),
+		index("org_enrollment_subject_page_idx").on(t.recipientSubjectId, t.id),
+		index("org_enrollment_pending_subject_idx")
+			.on(t.recipientSubjectId, t.id)
+			.where(sql`${t.state}='pending'`),
+		index("org_enrollment_sender_pending_idx")
+			.on(t.invitedByAuthUserId, t.id)
+			.where(sql`${t.state}='pending'`),
+		index("org_enrollment_expiry_idx").on(t.expiresAt, t.id).where(sql`${t.state}='pending'`),
+		index("org_enrollment_contact_idx").on(t.contactId, t.id),
+		index("org_enrollment_membership_generation_idx")
+			.on(t.membershipId, t.generation)
+			.where(sql`${t.membershipId} is not null`),
 		foreignKey({
-			name: "organization_membership_invitation_grant_event_fk",
-			columns: [table.authorizationGrantId, table.authorizationGrantRevision],
-			foreignColumns: [participationGrantEvent.grantId, participationGrantEvent.revision],
-		}).onDelete("restrict"),
-		check(
-			"organization_membership_invitation_state_check",
-			sql`${table.state} in ('pending','accepted','declined','cancelled','expired','invalidated')`,
-		),
-		check(
-			"organization_membership_invitation_revision_check",
-			sql`${table.revision} between 1 and 9007199254740991 and ${table.organizationRevision} between 1 and 9007199254740991 and ${table.inviterAuthorizationRevision} between 1 and 9007199254740991 and ${table.authorizationGrantRevision} between 1 and 9007199254740991`,
-		),
-		check(
-			"organization_membership_invitation_expiry_check",
-			sql`${table.expiresAt} > ${table.createdAt} and ${table.expiresAt} <= ${table.createdAt} + interval '30 days'`,
-		),
-		check(
-			"organization_membership_invitation_resolution_check",
-			sql`(${table.state} = 'pending' and ${table.resolvedAt} is null and ${table.resolvedByAuthUserId} is null) or (${table.state} <> 'pending' and ${table.resolvedAt} is not null and ${table.resolvedAt} >= ${table.createdAt} and ((${table.state} in ('accepted','declined') and ${table.resolvedByAuthUserId} is not null and ${table.resolvedByAuthUserId} = ${table.recipientAuthUserId}) or (${table.state} = 'cancelled' and ${table.resolvedByAuthUserId} is not null) or (${table.state} in ('expired','invalidated') and ${table.resolvedByAuthUserId} is null)))`,
-		),
-	],
-);
-
-/** Accepted operational membership is not a publication, security or catalog-editing grant. */
-export const organizationMembership = pgTable(
-	"organization_membership",
-	{
-		organizationEntityId: uuid()
-			.notNull()
-			.references(() => entityParticipation.entityId, { onDelete: "restrict" }),
-		memberAuthUserId: uuid()
-			.notNull()
-			.references(() => users.id, { onDelete: "restrict" }),
-		memberEntityId: uuid()
-			.notNull()
-			.references(() => entityIdentity.id, { onDelete: "restrict" }),
-		acceptedInvitationId: uuid().notNull(),
-		revision: bigint({ mode: "number" }).notNull().default(1),
-		joinedAt: createTimestampMsColumn().notNull(),
-		removedAt: createTimestampMsColumn(),
-		removedByAuthUserId: uuid().references(() => users.id, { onDelete: "restrict" }),
-		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
-	},
-	(table) => [
-		primaryKey({ columns: [table.organizationEntityId, table.memberAuthUserId] }),
-		uniqueIndex("organization_membership_public_member_key").on(
-			table.organizationEntityId,
-			table.memberEntityId,
-		),
-		index("organization_membership_active_roster_idx")
-			.on(table.organizationEntityId, table.memberEntityId)
-			.where(sql`${table.removedAt} is null`),
-		index("organization_membership_auth_state_idx").on(
-			table.memberAuthUserId,
-			table.removedAt,
-			table.organizationEntityId,
-		),
-		index("organization_membership_entity_idx").on(
-			table.memberEntityId,
-			table.organizationEntityId,
-		),
-		index("organization_membership_invitation_idx").on(table.acceptedInvitationId),
-		index("organization_membership_removed_by_idx")
-			.on(table.removedByAuthUserId)
-			.where(sql`${table.removedByAuthUserId} is not null`),
+			name: "org_enrollment_exact_member_fk",
+			columns: [t.membershipId, t.scopeId, t.recipientSubjectId],
+			foreignColumns: [accessMembership.id, accessMembership.scopeId, accessMembership.subjectId],
+		}),
 		foreignKey({
-			name: "organization_membership_accepted_invitation_fk",
-			columns: [
-				table.acceptedInvitationId,
-				table.organizationEntityId,
-				table.memberAuthUserId,
-				table.memberEntityId,
-			],
+			name: "org_enrollment_admission_fk",
+			columns: [t.membershipId, t.generation],
 			foreignColumns: [
-				organizationMembershipInvitation.id,
-				organizationMembershipInvitation.organizationEntityId,
-				organizationMembershipInvitation.recipientAuthUserId,
-				organizationMembershipInvitation.recipientEntityId,
+				accessMembershipAdmission.membershipId,
+				accessMembershipAdmission.generation,
 			],
-		}).onDelete("restrict"),
+		}),
 		check(
-			"organization_membership_revision_check",
-			sql`${table.revision} between 1 and 9007199254740991`,
+			"org_enrollment_revision_check",
+			sql`${t.revision} between 1 and 9007199254740991 and ${t.organizationRevision}>0`,
 		),
 		check(
-			"organization_membership_removal_check",
-			sql`(${table.removedAt} is null and ${table.removedByAuthUserId} is null) or (${table.removedAt} is not null and ${table.removedByAuthUserId} is not null and ${table.removedAt} >= ${table.joinedAt})`,
+			"org_enrollment_state_check",
+			sql`${t.state} in ('pending','accepted','declined','revoked','expired','invalidated')`,
 		),
 		check(
-			"organization_membership_time_check",
-			sql`${table.updatedAt} >= ${table.createdAt} and ${table.updatedAt} >= ${table.joinedAt} and (${table.removedAt} is null or ${table.updatedAt} >= ${table.removedAt})`,
+			"org_enrollment_expiry_check",
+			sql`${t.expiresAt}>${t.createdAt} and ${t.expiresAt}<=${t.createdAt}+interval '30 days'`,
+		),
+		check(
+			"org_enrollment_resolution_check",
+			sql`(${t.state}='pending')=(${t.resolvedAt} is null) and ((${t.state}='accepted' and ${t.membershipId} is not null and ${t.generation}>0) or (${t.state}<>'accepted' and ${t.membershipId} is null and ${t.generation} is null))`,
+		),
+		check(
+			"org_enrollment_evidence_budget",
+			sql`(${t.state}<>'pending' or ${t.authority} is not null) and octet_length(${t.authority}::text)<=32768`,
 		),
 	],
 );
-
-/** Private immutable membership transition evidence; the member's erasure drains this before current rows. */
-export const organizationMembershipEvent = pgTable(
-	"organization_membership_event",
+/** Exact command receipts retain outcomes, not current authorization or expiring selectors. @internal */
+export const organizationEnrollmentOperation = pgTable(
+	"organization_enrollment_operation",
 	{
-		organizationEntityId: uuid().notNull(),
-		memberAuthUserId: uuid()
+		scopeId: uuid()
 			.notNull()
-			.references(() => users.id, { onDelete: "restrict" }),
-		memberEntityId: uuid()
-			.notNull()
-			.references(() => entityIdentity.id, { onDelete: "restrict" }),
-		revision: bigint({ mode: "number" }).notNull(),
-		operation: text().$type<"join" | "remove" | "leave">().notNull(),
+			.references(() => accessScope.id),
+		operationId: uuid().notNull(),
 		operatorAuthUserId: uuid()
 			.notNull()
-			.references(() => users.id, { onDelete: "restrict" }),
-		acceptedInvitationId: uuid()
+			.references(() => users.id),
+		authoritySubjectId: uuid()
 			.notNull()
-			.references(() => organizationMembershipInvitation.id, { onDelete: "restrict" }),
+			.references(() => accessSubject.id),
+		requestDigest: text().notNull(),
+		invitationId: uuid().references(() => organizationEnrollmentInvitation.id),
+		recipientSubjectId: uuid()
+			.notNull()
+			.references(() => accessSubject.id),
+		result: jsonb()
+			.$type<{
+				entityId?: string;
+				scopeId?: string;
+				representation?: { id: string; revision: number };
+				invitationId?: string;
+				revision?: number;
+				state?: (typeof OrganizationMembershipInvitationStateValues)[number];
+				membershipId?: string;
+				version?: number;
+				activeGeneration?: number | null;
+				lastGeneration?: number;
+			}>()
+			.notNull(),
 		createdAt: createCreatedAtColumn(),
 	},
-	(table) => [
-		primaryKey({ columns: [table.organizationEntityId, table.memberAuthUserId, table.revision] }),
-		foreignKey({
-			name: "organization_membership_event_member_fk",
-			columns: [table.organizationEntityId, table.memberAuthUserId],
-			foreignColumns: [
-				organizationMembership.organizationEntityId,
-				organizationMembership.memberAuthUserId,
-			],
-		}).onDelete("restrict"),
-		index("organization_membership_event_account_idx").on(
-			table.memberAuthUserId,
-			table.organizationEntityId,
-			table.revision,
-		),
-		index("organization_membership_event_entity_idx").on(
-			table.memberEntityId,
-			table.organizationEntityId,
-			table.revision,
-		),
-		index("organization_membership_event_operator_idx").on(
-			table.operatorAuthUserId,
-			table.organizationEntityId,
-			table.revision,
-		),
-		index("organization_membership_event_invitation_idx").on(table.acceptedInvitationId),
-		check(
-			"organization_membership_event_revision_check",
-			sql`${table.revision} between 1 and 9007199254740991`,
-		),
-		check(
-			"organization_membership_event_operation_check",
-			sql`${table.operation} in ('join','remove','leave')`,
-		),
+	(t) => [
+		primaryKey({ columns: [t.scopeId, t.operationId] }),
+		index("org_enrollment_operation_subject_idx").on(t.recipientSubjectId, t.operationId),
+		index("org_enrollment_operation_invitation_idx").on(t.invitationId),
+		check("org_enrollment_operation_digest_check", sql`${t.requestDigest} ~ '^[0-9a-f]{64}$'`),
+		check("org_enrollment_operation_result_budget", sql`octet_length(${t.result}::text)<=2048`),
 	],
+);
+/** Due-indexed policy reconciliation for pending invitations; unavailable is retried without invalidation. @internal */
+export const organizationEnrollmentReview = pgTable(
+	"organization_enrollment_review",
+	{
+		invitationId: uuid()
+			.primaryKey()
+			.references(() => organizationEnrollmentInvitation.id, { onDelete: "cascade" }),
+		dueAt: createTimestampMsColumn().notNull().defaultNow(),
+	},
+	(t) => [index("org_enrollment_review_due_idx").on(t.dueAt, t.invitationId)],
 );

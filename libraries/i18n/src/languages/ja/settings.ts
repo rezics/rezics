@@ -30,10 +30,10 @@ export default {
 		emptyMembers: "まだメンバーがいません。",
 		emptyOrganizations: "所属する組織はありません。",
 		emptyManagement: "現在、メンバー一覧の管理権限はありません。",
-		acceptPrompt: "承認すると公開名義がこの組織のメンバー一覧に追加され、メンバー管理者が閲覧できます。",
+		acceptPrompt: "承認すると、ログイン中のアカウントがこの組織の非公開メンバーとして登録されます。",
 		removePrompt: "所属を解除しても、別途付与された公開、セキュリティ、管理の権限は変わりません。",
 		leavePrompt: "脱退すると所属は解除されます。別途付与された権限は変わりません。",
-		recipientHint: "既存のアカウントの公開名義を指定してください。",
+		recipientHint: `招待する${jaTerminology.entity.forms.label}の${verbatimTerms.id.value}を入力してください。`,
 		states: {
 			pending: "未処理",
 			accepted: "承認済み",

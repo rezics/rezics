@@ -6,7 +6,7 @@ RETURNS boolean LANGUAGE sql VOLATILE SET search_path=pg_catalog,public AS $$
   ELSE head.recipient_kind='subject' AND EXISTS(
    SELECT 1 FROM public.access_membership m
    WHERE m.id=terms.membership_id AND m.subject_id=head.recipient_subject_id
-    AND m.active_generation=terms.membership_generation
+    AND m.active_generation=terms.membership_generation AND public.access_membership_scope_is_eligible(m.scope_id) IS TRUE
     AND (terms.selection_group_id IS NULL OR EXISTS(
      SELECT 1 FROM public.access_group_membership selected
      JOIN public.access_group g ON g.id=selected.group_id AND g.scope_id=selected.scope_id
@@ -34,7 +34,7 @@ BEGIN
  END IF;
  IF child.parent_membership_id IS NOT NULL THEN
   SELECT * INTO member FROM public.access_membership WHERE id=child.parent_membership_id;
-  IF NOT FOUND OR member.subject_id<>child.parent_subject_id OR member.active_generation IS DISTINCT FROM child.parent_membership_generation OR (parent.recipient_kind<>'subject' AND member.scope_id<>parent.recipient_scope_id) THEN RETURN false; END IF;
+  IF NOT FOUND OR public.access_membership_scope_is_eligible(member.scope_id) IS DISTINCT FROM true OR member.subject_id<>child.parent_subject_id OR member.active_generation IS DISTINCT FROM child.parent_membership_generation OR (parent.recipient_kind<>'subject' AND member.scope_id<>parent.recipient_scope_id) THEN RETURN false; END IF;
  END IF;
  IF child.parent_selection_group_id IS NOT NULL THEN
   IF NOT EXISTS(SELECT 1 FROM public.access_group_membership selected JOIN public.access_group g ON g.id=selected.group_id AND g.scope_id=selected.scope_id

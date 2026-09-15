@@ -8,7 +8,7 @@ const contextSchema = z.strictObject({
 	audience: z.string().min(1).max(512),
 	selection: RequestedAuthoritySelectionSchema,
 	scopeId: z.uuid().toLowerCase(),
-	purpose: z.enum(["group-membership", "membership", "role-binding", "representation", "account-administration", "moderation-actor"]),
+	purpose: z.enum(["group-membership", "membership", "organization-recovery", "role-binding", "representation", "account-administration", "moderation-actor"]),
 });
 const payloadSchema = z.strictObject({
 	subjectId: z.uuid().toLowerCase(),

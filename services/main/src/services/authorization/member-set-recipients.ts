@@ -60,7 +60,13 @@ export async function readAccessMemberSetRecipients(
 	const memberships = await tx.select().from(accessMembership)
 		.where(inArray(accessMembership.id, candidates.map(member => member.id))).orderBy(accessMembership.id).for("share");
 	if (memberships.length !== candidates.length) throw new AccessGroupMembershipUnavailable();
-	const active = memberships.filter(member => member.activeGeneration !== null);
+	await tx.execute(sql`select e.id from public.access_scope s join public.reference_value r on r.id=s.unit_ref
+  join public.entity_identity e on e.id=r.target_entity_id join public.entity_participation p on p.entity_id=e.id
+  where s.id in (${sql.join(treeIds.map(id => sql`${id}::uuid`),sql`, `)}) and e.shape='organization' order by e.id for share of e,p`);
+ const lifecycle = (await tx.execute<{ id: string; eligible: boolean | null }>(sql`select id,public.access_membership_scope_is_eligible(id) as eligible from public.access_scope where id in (${sql.join(treeIds.map(id => sql`${id}::uuid`),sql`, `)})`)).rows;
+ if (lifecycle.length!==treeIds.length || lifecycle.some(row => row.eligible===null)) throw new AccessGroupMembershipUnavailable();
+ const admittedScopes = new Set(lifecycle.filter(row => row.eligible).map(row => row.id));
+ const active = memberships.filter(member => member.activeGeneration !== null && admittedScopes.has(member.scopeId));
 	if (!active.length) return { subjectId: request.subjectId, memberships, selections: [], recipients: [] };
 	const sets = await tx.select().from(accessGroupMembershipSet).where(or(...active.map(member =>
 		and(eq(accessGroupMembershipSet.membershipId, member.id), eq(accessGroupMembershipSet.generation, member.activeGeneration!)))))

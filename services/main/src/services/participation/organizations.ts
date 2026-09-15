@@ -1,4 +1,5 @@
-import { and, eq, gt, isNull, or } from "drizzle-orm";
+import { establishOrganizationEnrollmentControl } from "./organization-control";
+import { and, eq, gt, isNull, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { parseContentLanguageTag } from "@rezics/content-language";
 import type { DatabaseTransaction } from "../database";
@@ -11,7 +12,6 @@ import { publicEntityName } from "./presentation";
 
 export const ManagedOrganizationCapabilityValues = [
 	"entity.publish",
-	"entity.membership",
 	"entity.security",
 ] as const;
 
@@ -36,7 +36,7 @@ export async function createManagedOrganization(
 		id: authority.actingEntityId,
 	});
 	const authUserId = authority.principal.authUserId;
-	await reserveParticipationGrantCapacity(tx, { kind: "auth", id: authUserId }, 3);
+	await reserveParticipationGrantCapacity(tx, { kind: "auth", id: authUserId }, 2);
 	const identity = await createParticipantIdentity(tx, {
 		shape: "organization",
 		operatorAuthUserId: authUserId,
@@ -45,7 +45,7 @@ export async function createManagedOrganization(
 	const grants = await tx
 		.insert(participationGrant)
 		.values(
-			(["entity.security", "entity.membership", "entity.publish"] as const).map((capability) => ({
+			(["entity.security", "entity.publish"] as const).map((capability) => ({
 				authUserId,
 				actingEntityId: identity.id,
 				entityId: identity.id,
@@ -66,7 +66,9 @@ export async function createManagedOrganization(
 			operatorAuthUserId: authUserId,
 		})),
 	);
-	return { entityId: identity.id, grants };
+	const native = await establishOrganizationEnrollmentControl(tx,{ entityId: identity.id,recipientAuthUserId: authUserId,operatorAuthUserId: authUserId },
+  sql`public.access_subject_is_eligible((select id from public.access_subject where auth_user_id=${authUserId}::uuid),'write')`);
+ return { entityId: identity.id, grants, native };
 }
 
 /** Indexed, bounded list of organizations with the requested explicit human capability. */

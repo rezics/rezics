@@ -2,14 +2,14 @@
 
 import {
 	useGetApiEntitiesByIdProfile,
-	useListManagedOrganizations,
+	useListMembershipManagedOrganizations,
 	useListManagedOrganizationMembers,
 	useListManagedOrganizationInvitations,
 	useInviteOrganizationMember,
-	useCancelOrganizationMembershipInvitation,
+	useRevokeOrganizationMembershipInvitation,
 	useRemoveOrganizationMember,
-	useSelectParticipation,
 	type ListManagedOrganizationMembersStatus200,
+	type ListMembershipManagedOrganizationsStatus200,
 } from "@rezics/openapi-tanstack-query";
 import {
 	AlertDialog,
@@ -29,43 +29,23 @@ import {
 	QueryPending,
 } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState, type FormEvent } from "react";
+import { useMemo, useRef, useState, type FormEvent } from "react";
 import { AppLink } from "@/features/application-shell/components/app-link";
 import { isUnitId } from "@/features/units/model/unit-id";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
-import {
-	createParticipationClient,
-	type ParticipationSelection,
-} from "../data/participation-client";
+import { createMembershipClient } from "../data/participation-client";
 
-type NamedSelection = ParticipationSelection & { name: string };
+type NamedSelection = ListMembershipManagedOrganizationsStatus200["items"][number];
 type Member = ListManagedOrganizationMembersStatus200["items"][number];
 
 export function OrganizationMembershipManager() {
 	const { t } = useTranslation(["settings", "ui"]);
 	const [cursors, setCursors] = useState<string[]>([]);
 	const [selected, setSelected] = useState<NamedSelection>();
-	const organizations = useListManagedOrganizations({
-		query: { capability: "entity.membership", afterId: cursors.at(-1) },
+	const organizations = useListMembershipManagedOrganizations({
+		query: { afterId: cursors.at(-1) },
 	});
-	const select = useSelectParticipation();
-	async function choose(selection: NamedSelection) {
-		if (!selection.grant) return;
-		try {
-			const result = await select.mutateAsync({
-				body: {
-					actingEntityId: selection.actingEntityId,
-					grant: selection.grant,
-					capability: "entity.membership",
-					target: { owner: "entity", id: selection.actingEntityId },
-				},
-			});
-			setSelected({ ...result, name: selection.name });
-		} catch {
-			/* Invalid authority never opens the manager's scoped client. */
-		}
-	}
 	return (
 		<Card>
 			<CardContent className="grid gap-4 p-5">
@@ -78,21 +58,11 @@ export function OrganizationMembershipManager() {
 					<p>{t.settings.memberships.emptyManagement}</p>
 				) : (
 					organizations.data.items.map((organization) => (
-						<div className="flex items-center justify-between gap-3" key={organization.grantId}>
+						<div className="flex items-center justify-between gap-3" key={organization.key}>
 							<AppLink href={`/user/${organization.entityId}`}>
 								{organization.name ?? t.ui.unnamed}
 							</AppLink>
-							<Button
-								variant="outline"
-								isLoading={select.isPending}
-								onClick={() =>
-									void choose({
-										actingEntityId: organization.entityId,
-										name: organization.name ?? t.ui.unnamed,
-										grant: { id: organization.grantId, revision: organization.revision },
-									})
-								}
-							>
+							<Button variant="outline" onClick={() => setSelected(organization)}>
 								{t.settings.memberships.members}
 							</Button>
 						</div>
@@ -116,13 +86,7 @@ export function OrganizationMembershipManager() {
 						</Button>
 					) : null}
 				</div>
-				<RequestFailure error={select.error} />
-				{selected ? (
-					<MembershipManager
-						key={`${selected.actingEntityId}:${selected.grant?.id}:${selected.grant?.revision}`}
-						selection={selected}
-					/>
-				) : null}
+				{selected ? <MembershipManager key={selected.key} selection={selected} /> : null}
 			</CardContent>
 		</Card>
 	);
@@ -131,7 +95,7 @@ export function OrganizationMembershipManager() {
 function MembershipManager({ selection }: { selection: NamedSelection }) {
 	const { t, locale } = useTranslation(["settings", "collections", "ui"]);
 	const cache = useQueryClient();
-	const client = useMemo(() => createParticipationClient(selection), [selection]);
+	const client = useMemo(() => createMembershipClient(selection), [selection]);
 	const [memberCursors, setMemberCursors] = useState<string[]>([]);
 	const [invitationCursors, setInvitationCursors] = useState<string[]>([]);
 	const [recipient, setRecipient] = useState("");
@@ -143,7 +107,7 @@ function MembershipManager({ selection }: { selection: NamedSelection }) {
 			.toISOString()
 			.slice(0, 16);
 	});
-	const path = { organizationEntityId: selection.actingEntityId };
+	const path = { organizationEntityId: selection.entityId };
 	const members = useListManagedOrganizationMembers(
 		{ path, query: { afterId: memberCursors.at(-1) } },
 		{
@@ -165,9 +129,17 @@ function MembershipManager({ selection }: { selection: NamedSelection }) {
 		{ query: { enabled: isUnitId(recipient) } },
 	);
 	const invite = useInviteOrganizationMember({ client: { client } });
-	const cancel = useCancelOrganizationMembershipInvitation({ client: { client } });
+	const cancel = useRevokeOrganizationMembershipInvitation({ client: { client } });
 	const remove = useRemoveOrganizationMember({ client: { client } });
 	const pending = invite.isPending || cancel.isPending || remove.isPending;
+	const operations = useRef(new Map<string, string>());
+	function operation(key: string) {
+		const prior = operations.current.get(key);
+		if (prior) return prior;
+		const id = crypto.randomUUID();
+		operations.current.set(key, id);
+		return id;
+	}
 	async function submit(event: FormEvent) {
 		event.preventDefault();
 		const deadline = new Date(expiresAt);
@@ -180,8 +152,13 @@ function MembershipManager({ selection }: { selection: NamedSelection }) {
 		try {
 			await invite.mutateAsync({
 				path,
-				body: { recipientEntityId: recipient, expiresAt: deadline.toISOString() },
+				body: {
+					recipient: { kind: "entity", entityId: recipient },
+					expiresAt: deadline.toISOString(),
+					operationId: operation(`invite:${recipient}:${deadline.toISOString()}`),
+				},
 			});
+			operations.current.delete(`invite:${recipient}:${deadline.toISOString()}`);
 			setRecipient("");
 			setInvitationCursors([]);
 			await cache.invalidateQueries();
@@ -191,7 +168,13 @@ function MembershipManager({ selection }: { selection: NamedSelection }) {
 	}
 	async function cancelInvitation(invitationId: string, expectedRevision: number) {
 		try {
-			await cancel.mutateAsync({ path: { ...path, invitationId }, body: { expectedRevision } });
+			await cancel.mutateAsync({
+				path: { ...path, invitationId },
+				body: {
+					expectedRevision,
+					operationId: operation(`revoke:${invitationId}:${expectedRevision}`),
+				},
+			});
 			await cache.invalidateQueries();
 		} catch {
 			await cache.invalidateQueries();
@@ -201,8 +184,14 @@ function MembershipManager({ selection }: { selection: NamedSelection }) {
 		if (!removing) return;
 		try {
 			await remove.mutateAsync({
-				path: { ...path, memberEntityId: removing.memberEntityId },
-				body: { expectedRevision: removing.revision },
+				path,
+				body: {
+					recipient:
+						members.data?.items.find((member) => member.membershipId === removing.membershipId)
+							?.recipient ?? removing.recipient,
+					expectedMembershipVersion: removing.version,
+					operationId: operation(`remove:${removing.membershipId}:${removing.version}`),
+				},
 			});
 			setRemoving(undefined);
 			setMemberCursors([]);
@@ -213,7 +202,7 @@ function MembershipManager({ selection }: { selection: NamedSelection }) {
 	}
 	return (
 		<div className="grid gap-5 border-t pt-5">
-			<h3 className="font-semibold">{selection.name}</h3>
+			<h3 className="font-semibold">{selection.name ?? t.ui.unnamed}</h3>
 			{members.isPending ? (
 				<QueryPending />
 			) : members.isError ? (
@@ -222,11 +211,19 @@ function MembershipManager({ selection }: { selection: NamedSelection }) {
 				<p>{t.settings.memberships.emptyMembers}</p>
 			) : (
 				members.data.items.map((member) => (
-					<div className="flex items-center justify-between gap-3" key={member.memberEntityId}>
-						<AppLink href={`/user/${member.memberEntityId}`}>
-							{member.memberName ?? t.ui.unnamed}
-						</AppLink>
-						<Button variant="outline" disabled={pending} onClick={() => setRemoving(member)}>
+					<div className="flex items-center justify-between gap-3" key={member.membershipId}>
+						{member.recipient.kind === "entity" ? (
+							<AppLink href={`/user/${member.recipient.entityId}`}>
+								{member.memberName ?? t.ui.unnamed}
+							</AppLink>
+						) : (
+							<span>{t.ui.unnamed}</span>
+						)}
+						<Button
+							variant="outline"
+							disabled={pending || member.activeGeneration === null}
+							onClick={() => setRemoving(member)}
+						>
 							{t.settings.memberships.remove}
 						</Button>
 					</div>
@@ -300,10 +297,20 @@ function MembershipManager({ selection }: { selection: NamedSelection }) {
 						key={invitation.id}
 					>
 						<div className="grid gap-1">
-							<AppLink href={`/user/${invitation.recipientEntityId}`}>
-								{invitation.recipientName ?? t.ui.unnamed}
-							</AppLink>
-							<span>{t.settings.memberships.states[invitation.state]}</span>
+							{invitation.entityId ? (
+								<AppLink href={`/user/${invitation.entityId}`}>
+									{invitation.recipientName ?? t.ui.unnamed}
+								</AppLink>
+							) : (
+								<span>{t.ui.unnamed}</span>
+							)}
+							<span>
+								{
+									t.settings.memberships.states[
+										invitation.state === "revoked" ? "cancelled" : invitation.state
+									]
+								}
+							</span>
 							<time className="text-sm text-muted-foreground" dateTime={invitation.expiresAt}>
 								{new Intl.DateTimeFormat(locale.target, {
 									dateStyle: "medium",

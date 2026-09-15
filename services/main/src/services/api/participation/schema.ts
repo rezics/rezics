@@ -73,7 +73,9 @@ export const ManagedOrganizationsSchema = z.strictObject({
 	),
 	nextCursor: z.uuid().nullable(),
 });
+const NativeOrganizationControlSchema = z.strictObject({ scopeId: z.uuid(),representation: GrantSelectionSchema }).nullable();
 export const CreatedOrganizationSchema = z.strictObject({
+ native: NativeOrganizationControlSchema,
 	entityId: z.uuid(),
 	grants: z.array(
 		GrantSelectionSchema.extend({ capability: z.enum(ParticipationCapabilityValues) }),

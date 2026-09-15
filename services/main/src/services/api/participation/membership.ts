@@ -1,77 +1,184 @@
+import {
+	listMembershipManagedOrganizations,
+	MembershipOrganizationDirectorySchema,
+} from "../../participation/membership-directory";
+import { createNativeOrganization } from "../../participation/organization-control";
+import {
+	RecoverNativeOrganizationSchema,
+	recoverNativeOrganization,
+	selectOrganizationRecoveryRecipient,
+} from "../../participation/organization-recovery";
+import { CreateManagedOrganizationSchema } from "../../participation/organizations";
 import Elysia from "elysia";
 import { z } from "zod";
-import session from "../../auth/session";
-import { runParticipationTransaction } from "../../participation/transaction";
+import principalSession from "../../auth/principal-session";
+import { runAccessTransaction } from "../../authorization/transaction";
+import { toApiErrorResponse } from "../schema/response";
 import {
+	AcceptMembershipInvitationSchema,
 	CreateMembershipInvitationSchema,
+	MembershipContactSchema,
+	MembershipDepartureSchema,
 	MembershipExpectedRevisionSchema,
+	MembershipHistoryQuerySchema,
+	MembershipHistorySchema,
 	MembershipInvitationPageSchema,
-	MembershipInvitationSchema,
 	MembershipPageQuerySchema,
+	MembershipReceiptSchema,
+	MembershipRecipientSchema,
 	OrganizationMemberPageSchema,
-	OrganizationMemberSchema,
+	RemoveMembershipSchema,
 } from "../../participation/membership-contracts";
 import {
 	acceptMembershipInvitation,
 	cancelMembershipInvitation,
+	createOrganizationEnrollmentContact,
 	declineMembershipInvitation,
 	inviteOrganizationMember,
 	leaveOrganization,
 	listOrganizationMembers,
+	listOrganizationMembershipHistory,
 	listOrganizationMembershipInvitations,
 	listOwnMembershipInvitations,
 	listOwnOrganizationMemberships,
 	removeOrganizationMember,
+	resolveOrganizationEnrollmentContact,
+	revokeOrganizationEnrollmentContact,
 } from "../../participation/membership";
-import { toApiErrorResponse } from "../schema/response";
-
-const organizationParams = z.strictObject({ organizationEntityId: z.uuid() });
-const invitationParams = z.strictObject({ invitationId: z.uuid() });
+const org = z.strictObject({ organizationEntityId: z.uuid() }),
+	invitation = z.strictObject({ invitationId: z.uuid() });
+const read = { permission: "access:read", fresh: false, write: false } as const;
+const write = { permission: "access:manage", fresh: true, write: true } as const;
 const failures = {
-	403: toApiErrorResponse([
-		"ParticipationDenied",
-		"AccountRestricted",
-		"AccountSuspended",
-		"AccountClosed",
-	]),
-	404: toApiErrorResponse(["OrganizationMembershipNotFound"]),
+	403: toApiErrorResponse(["AccessDenied"]),
+	404: toApiErrorResponse(["AccessRecordUnavailable", "OrganizationMembershipNotFound"]),
 	409: toApiErrorResponse([
+		"AccessChanged",
 		"OrganizationMembershipConflict",
 		"OrganizationMembershipCapacityExceeded",
 	]),
+	503: toApiErrorResponse(["AccessUnavailable"]),
 };
-
-/** Human operational membership; accepting never issues representation or security grants. @alpha */
+/** Org native enrollment for explicitly consenting private principals and represented Entities. @alpha */
 export default new Elysia({ prefix: "/membership", name: "organization-membership-api" })
-	.use(session)
+	.use(principalSession)
+	.get(
+		"/managed-organizations",
+		{
+			principalAccess: read,
+			query: MembershipPageQuerySchema,
+			response: { 200: MembershipOrganizationDirectorySchema, ...failures },
+			detail: { operationId: "listMembershipManagedOrganizations", tags: ["Participation"] },
+		},
+		({ principalContext, query }) =>
+			runAccessTransaction((tx) =>
+				listMembershipManagedOrganizations(tx, principalContext, query.afterId),
+			),
+	)
+	.post(
+		"/organizations",
+		{
+			principalAccess: { permission: "account:update", fresh: true, write: true },
+			body: CreateManagedOrganizationSchema,
+			response: {
+				200: z.strictObject({
+					entityId: z.uuid(),
+					scopeId: z.uuid(),
+					representation: z.strictObject({ id: z.uuid(), revision: z.number().int().positive() }),
+				}),
+				...failures,
+			},
+			detail: { operationId: "createNativeOrganization", tags: ["Participation"] },
+		},
+		({ principalContext, body }) => createNativeOrganization(principalContext, body),
+	)
+	.post(
+		"/organizations/:organizationEntityId/recovery-recipient",
+		{
+			principalAccess: write,
+			params: org,
+			body: z.strictObject({ contact: z.string().regex(/^[A-Za-z0-9_-]{43}$/) }),
+			response: {
+				200: z.strictObject({ selector: z.string(), expiresAt: z.iso.datetime() }),
+				...failures,
+			},
+			detail: { operationId: "selectOrganizationRecoveryRecipient", tags: ["Participation"] },
+		},
+		({ principalContext, params, body }) =>
+			selectOrganizationRecoveryRecipient(
+				principalContext,
+				params.organizationEntityId,
+				body.contact,
+			),
+	)
+	.post(
+		"/organizations/:organizationEntityId/recover",
+		{
+			principalAccess: write,
+			params: org,
+			body: RecoverNativeOrganizationSchema,
+			response: {
+				200: z.strictObject({
+					entityId: z.uuid(),
+					revision: z.number().int().positive(),
+					scopeId: z.uuid(),
+					representation: z.strictObject({ id: z.uuid(), revision: z.number().int().positive() }),
+				}),
+				...failures,
+			},
+			detail: { operationId: "recoverNativeOrganization", tags: ["Participation"] },
+		},
+		({ principalContext, params, body }) =>
+			recoverNativeOrganization(principalContext, params.organizationEntityId, body),
+	)
 	.get(
 		"/organizations/:organizationEntityId/members",
 		{
-			access: "session-only",
-			params: organizationParams,
+			principalAccess: read,
+			params: org,
 			query: MembershipPageQuerySchema,
 			response: { 200: OrganizationMemberPageSchema, ...failures },
 			detail: { operationId: "listManagedOrganizationMembers", tags: ["Participation"] },
 		},
-		({ participation, params, query }) =>
-			runParticipationTransaction((tx) =>
-				listOrganizationMembers(tx, participation, params.organizationEntityId, query),
+		({ principalContext, params, query }) =>
+			runAccessTransaction((tx) =>
+				listOrganizationMembers(tx, principalContext, params.organizationEntityId, query),
+			),
+	)
+	.post(
+		"/organizations/:organizationEntityId/history",
+		{
+			principalAccess: read,
+			params: org,
+			body: MembershipHistoryQuerySchema,
+			response: { 200: MembershipHistorySchema, ...failures },
+			detail: { operationId: "listOrganizationMembershipHistory", tags: ["Participation"] },
+		},
+		({ principalContext, params, body }) =>
+			runAccessTransaction((tx) =>
+				listOrganizationMembershipHistory(
+					tx,
+					principalContext,
+					params.organizationEntityId,
+					body.recipient,
+					body.afterVersion,
+				),
 			),
 	)
 	.get(
 		"/organizations/:organizationEntityId/invitations",
 		{
-			access: "session-only",
-			params: organizationParams,
+			principalAccess: read,
+			params: org,
 			query: MembershipPageQuerySchema,
 			response: { 200: MembershipInvitationPageSchema, ...failures },
 			detail: { operationId: "listManagedOrganizationInvitations", tags: ["Participation"] },
 		},
-		({ participation, params, query }) =>
-			runParticipationTransaction((tx) =>
+		({ principalContext, params, query }) =>
+			runAccessTransaction((tx) =>
 				listOrganizationMembershipInvitations(
 					tx,
-					participation,
+					principalContext,
 					params.organizationEntityId,
 					query,
 				),
@@ -80,118 +187,163 @@ export default new Elysia({ prefix: "/membership", name: "organization-membershi
 	.post(
 		"/organizations/:organizationEntityId/invitations",
 		{
-			access: "session-only",
-			params: organizationParams,
+			principalAccess: write,
+			params: org,
 			body: CreateMembershipInvitationSchema,
-			response: { 200: MembershipInvitationSchema, ...failures },
+			response: { 200: MembershipReceiptSchema, ...failures },
 			detail: { operationId: "inviteOrganizationMember", tags: ["Participation"] },
 		},
-		({ participation, params, body }) =>
-			runParticipationTransaction((tx) =>
-				inviteOrganizationMember(tx, participation, params.organizationEntityId, body),
+		({ principalContext, params, body }) =>
+			runAccessTransaction((tx) =>
+				inviteOrganizationMember(tx, principalContext, params.organizationEntityId, body),
 			),
 	)
 	.post(
-		"/organizations/:organizationEntityId/invitations/:invitationId/cancel",
+		"/organizations/:organizationEntityId/invitations/:invitationId/revoke",
 		{
-			access: "session-only",
-			params: organizationParams.merge(invitationParams),
+			principalAccess: write,
+			params: org.merge(invitation),
 			body: MembershipExpectedRevisionSchema,
-			response: { 200: MembershipInvitationSchema, ...failures },
-			detail: { operationId: "cancelOrganizationMembershipInvitation", tags: ["Participation"] },
+			response: { 200: MembershipReceiptSchema, ...failures },
+			detail: { operationId: "revokeOrganizationMembershipInvitation", tags: ["Participation"] },
 		},
-		({ participation, params, body }) =>
-			runParticipationTransaction((tx) =>
+		({ principalContext, params, body }) =>
+			runAccessTransaction((tx) =>
 				cancelMembershipInvitation(
 					tx,
-					participation,
+					principalContext,
 					params.organizationEntityId,
 					params.invitationId,
-					body.expectedRevision,
+					body,
 				),
 			),
 	)
 	.post(
-		"/organizations/:organizationEntityId/members/:memberEntityId/remove",
+		"/organizations/:organizationEntityId/members/remove",
 		{
-			access: "session-only",
-			params: organizationParams.extend({ memberEntityId: z.uuid() }),
-			body: MembershipExpectedRevisionSchema,
-			response: { 200: OrganizationMemberSchema, ...failures },
+			principalAccess: write,
+			params: org,
+			body: RemoveMembershipSchema,
+			response: { 200: MembershipReceiptSchema, ...failures },
 			detail: { operationId: "removeOrganizationMember", tags: ["Participation"] },
 		},
-		({ participation, params, body }) =>
-			runParticipationTransaction((tx) =>
-				removeOrganizationMember(
-					tx,
-					participation,
-					params.organizationEntityId,
-					params.memberEntityId,
-					body.expectedRevision,
-				),
+		({ principalContext, params, body }) =>
+			runAccessTransaction((tx) =>
+				removeOrganizationMember(tx, principalContext, params.organizationEntityId, body),
 			),
 	)
 	.get(
 		"/me/invitations",
 		{
-			access: "session-only",
+			principalAccess: read,
 			query: MembershipPageQuerySchema,
 			response: { 200: MembershipInvitationPageSchema, ...failures },
 			detail: { operationId: "listOwnOrganizationMembershipInvitations", tags: ["Participation"] },
 		},
-		({ participation, query }) =>
-			runParticipationTransaction((tx) => listOwnMembershipInvitations(tx, participation, query)),
+		({ principalContext, query }) =>
+			runAccessTransaction((tx) => listOwnMembershipInvitations(tx, principalContext, query)),
 	)
 	.get(
 		"/me/organizations",
 		{
-			access: "session-only",
+			principalAccess: read,
 			query: MembershipPageQuerySchema,
 			response: { 200: OrganizationMemberPageSchema, ...failures },
 			detail: { operationId: "listOwnOrganizationMemberships", tags: ["Participation"] },
 		},
-		({ participation, query }) =>
-			runParticipationTransaction((tx) => listOwnOrganizationMemberships(tx, participation, query)),
+		({ principalContext, query }) =>
+			runAccessTransaction((tx) => listOwnOrganizationMemberships(tx, principalContext, query)),
 	)
 	.post(
 		"/invitations/:invitationId/accept",
 		{
-			access: "session-only",
-			params: invitationParams,
-			body: MembershipExpectedRevisionSchema,
-			response: { 200: MembershipInvitationSchema, ...failures },
+			principalAccess: write,
+			params: invitation,
+			body: AcceptMembershipInvitationSchema,
+			response: { 200: MembershipReceiptSchema, ...failures },
 			detail: { operationId: "acceptOrganizationMembershipInvitation", tags: ["Participation"] },
 		},
-		({ participation, params, body }) =>
-			runParticipationTransaction((tx) =>
-				acceptMembershipInvitation(tx, participation, params.invitationId, body.expectedRevision),
+		({ principalContext, params, body }) =>
+			runAccessTransaction((tx) =>
+				acceptMembershipInvitation(tx, principalContext, params.invitationId, body),
 			),
 	)
 	.post(
 		"/invitations/:invitationId/decline",
 		{
-			access: "session-only",
-			params: invitationParams,
+			principalAccess: write,
+			params: invitation,
 			body: MembershipExpectedRevisionSchema,
-			response: { 200: MembershipInvitationSchema, ...failures },
+			response: { 200: MembershipReceiptSchema, ...failures },
 			detail: { operationId: "declineOrganizationMembershipInvitation", tags: ["Participation"] },
 		},
-		({ participation, params, body }) =>
-			runParticipationTransaction((tx) =>
-				declineMembershipInvitation(tx, participation, params.invitationId, body.expectedRevision),
+		({ principalContext, params, body }) =>
+			runAccessTransaction((tx) =>
+				declineMembershipInvitation(tx, principalContext, params.invitationId, body),
 			),
 	)
 	.post(
 		"/me/organizations/:organizationEntityId/leave",
 		{
-			access: "session-only",
-			params: organizationParams,
-			body: MembershipExpectedRevisionSchema,
-			response: { 200: OrganizationMemberSchema, ...failures },
+			principalAccess: write,
+			params: org,
+			body: MembershipDepartureSchema,
+			response: { 200: MembershipReceiptSchema, ...failures },
 			detail: { operationId: "leaveOrganizationMembership", tags: ["Participation"] },
 		},
-		({ participation, params, body }) =>
-			runParticipationTransaction((tx) =>
-				leaveOrganization(tx, participation, params.organizationEntityId, body.expectedRevision),
+		({ principalContext, params, body }) =>
+			runAccessTransaction((tx) =>
+				leaveOrganization(tx, principalContext, params.organizationEntityId, body),
+			),
+	)
+	.post(
+		"/organizations/:organizationEntityId/contacts",
+		{
+			principalAccess: write,
+			params: org,
+			response: { 200: MembershipContactSchema, ...failures },
+			detail: { operationId: "createOrganizationEnrollmentContact", tags: ["Participation"] },
+		},
+		({ principalContext, params }) =>
+			runAccessTransaction((tx) =>
+				createOrganizationEnrollmentContact(tx, principalContext, params.organizationEntityId),
+			),
+	)
+	.post(
+		"/contacts/:id/revoke",
+		{
+			principalAccess: write,
+			params: z.strictObject({ id: z.uuid() }),
+			response: {
+				200: z.strictObject({ id: z.uuid(), version: z.literal(2), revoked: z.boolean() }),
+				...failures,
+			},
+			detail: { operationId: "revokeOrganizationEnrollmentContact", tags: ["Participation"] },
+		},
+		({ principalContext, params }) =>
+			runAccessTransaction((tx) =>
+				revokeOrganizationEnrollmentContact(tx, principalContext, params.id),
+			),
+	)
+	.post(
+		"/organizations/:organizationEntityId/recipients",
+		{
+			principalAccess: write,
+			params: org,
+			body: z.strictObject({ contact: z.string().regex(/^[A-Za-z0-9_-]{43}$/) }),
+			response: {
+				200: z.strictObject({ recipient: MembershipRecipientSchema, expiresAt: z.iso.datetime() }),
+				...failures,
+			},
+			detail: { operationId: "resolveOrganizationEnrollmentContact", tags: ["Participation"] },
+		},
+		({ principalContext, params, body }) =>
+			runAccessTransaction((tx) =>
+				resolveOrganizationEnrollmentContact(
+					tx,
+					principalContext,
+					params.organizationEntityId,
+					body.contact,
+				),
 			),
 	);

@@ -78,10 +78,12 @@ export const accessRoleBinding = pgTable(
 		}).onDelete("restrict"),
 		index("access_role_binding_group_page_idx").on(table.recipientGroupId, table.id).where(sql`${table.recipientGroupId} is not null`),
 		index("access_role_binding_target_idx").on(table.targetScopeId, table.id),
+		index("access_role_binding_recipient_scope_page_idx").on(table.recipientScopeId, table.id).where(sql`${table.recipientScopeId} is not null`),
 		index("access_role_binding_recipient_scope_idx")
 			.on(table.targetScopeId, table.recipientScopeId, table.id)
 			.where(sql`${table.state}='active' and ${table.recipientScopeId} is not null`),
 		index("access_role_binding_role_idx").on(table.roleId, table.targetScopeId, table.id),
+		index("access_role_binding_subject_page_idx").on(table.recipientSubjectId,table.id).where(sql`${table.recipientSubjectId} is not null`),
 		index("access_role_binding_subject_idx")
 			.on(table.recipientSubjectId, table.targetScopeId, table.id)
 			.where(sql`${table.recipientSubjectId} is not null`),

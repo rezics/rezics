@@ -18,7 +18,12 @@ export async function scopeLifecycleAdmission(tx: DatabaseTransaction, scopeId: 
 	}
 	const reference = await resolveReferenceValue(tx, target.referenceValueId);
 	if (!reference) throw new AccessRecordUnavailable();
-	const table = unitOwnerTable(reference.owner);
+	if (reference.owner === "entity") {
+  await tx.execute(sql`select p.entity_id from public.entity_participation p join public.entity_identity e on e.id=p.entity_id where e.id=${reference.id}::uuid and e.shape='organization' for share of e,p`);
+  const [kind] = (await tx.execute<{ shape: string }>(sql`select shape from public.entity_identity where id=${reference.id}::uuid`)).rows;
+  if (kind?.shape === "organization") return sql<boolean>`public.access_membership_scope_is_eligible(${scopeId}::uuid)`;
+ }
+ const table = unitOwnerTable(reference.owner);
 	const [row] = await tx.select({ id: table.id, deleted: table.deletedAt }).from(table).where(eq(table.id, reference.id)).for("share");
 	if (!row || (change && row.deleted !== null)) throw new AccessRecordUnavailable();
 	return sql<boolean>`exists(select 1 from ${table} where ${table.id}=${reference.id}::uuid ${change ? sql`and ${table.deletedAt} is null` : sql``})`;

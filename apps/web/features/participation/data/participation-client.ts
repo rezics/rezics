@@ -1,4 +1,8 @@
-import { createClient, type SelectParticipationStatus200 } from "@rezics/openapi-tanstack-query";
+import {
+	createClient,
+	type SelectParticipationStatus200,
+	type ListMembershipManagedOrganizationsStatus200,
+} from "@rezics/openapi-tanstack-query";
 
 export type ParticipationSelection = Pick<SelectParticipationStatus200, "actingEntityId" | "grant">;
 
@@ -16,5 +20,15 @@ export function createParticipationClient(selection: ParticipationSelection) {
 					},
 				}
 			: {}),
+	});
+}
+
+/** Org membership requests use explicit native authority without mutating the account's default. */
+export function createMembershipClient(
+	value: Pick<ListMembershipManagedOrganizationsStatus200["items"][number], "selection">,
+) {
+	return createClient({
+		options: { credentials: "include" },
+		headers: { "X-Rezics-Authority": JSON.stringify(value.selection) },
 	});
 }

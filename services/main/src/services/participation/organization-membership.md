@@ -1,124 +1,200 @@
-# Controlled organization membership
+# Native organization enrollment
 
-This is the implemented human-account invitation/roster contract and its recorded
-evidence. The selected [membership and mixed-authority target](../../../../../docs/architecture/identity-and-access.md#membership-groups-and-teams)
-adds typed Entity/private operational enrollments, admission generations, multiple
-Groups/Teams and custom role bindings. It retains explicit consent and no authority
-from sourced affiliations. Current Self-addressing and exact direct manager grants
-below are not a restriction on the new grantee model; target work is in
-[M01](../../../../../docs/plan/modules/foundation.md) and
-[M06](../../../../../docs/plan/modules/community-and-governance.md).
+Org enrollment uses the canonical Entity resource `access_scope`, typed
+`access_subject`, and the same `access_membership` head/admission/event consumed
+by Groups, member sets, bindings and representation. The old Self/account roster
+and invitation tables are replaced by forward migrations, without transfer or
+parallel writes. The completed installation baseline and released SQL remain
+unchanged. This is implementation evidence only; native acceptance remains deferred
+under the [execution workflow](../../../../../docs/plan/execution-workflow.md).
 
-This owner is operational participation, separate from sourced catalog
-affiliations. A roster entry records a human account's explicitly accepted
-membership in a controlled organization. It grants no publication, security,
-catalog editing, voting multiplier or private-data access. The initial creator
-receives explicit management grants; creation does not silently enroll anyone.
+## Authority and identity
 
-Invitations address a recipient's public Self Entity and bind it privately to
-the current Auth account. Creating or cancelling an invitation and removing a
-member require the exact `entity.membership` grant for that organization.
-Acceptance/decline and voluntary departure use the actual authenticated human,
-independently of an unrelated selected acting identity. No email or message
-delivery is implicit in this lifecycle.
+An active controlled organization admits eligible Entities and human private
+AuthPrincipals. Public catalog affiliation, an operator's Self, metadata ownership,
+Org membership, and Realm association never supply consent or representation.
+Service-principal enrollment is deliberately not an eligible Org recipient type.
 
-An invitation captures the issuer's Auth revision, exact immutable grant event,
-and the organization's participation revision. Acceptance locks and revalidates
-all three in the same transaction as the membership write. Revoked/expired
-authority, erased/suspended accounts and a recovered organization generation
-cannot revive a pending invitation. Current-controller and invitation-source
-expiry predicates use current-statement time. Recovery rechecks a locked
-platform grant after obtaining the organization control row, before changing
-control history; waiting past its deadline does not admit a stale recovery. Already accepted membership survives an
-issuer's later grant revocation; removal and the member's own account erasure
-are separate effects. This follows the separation between membership and
-provider-defined authorization in [SCIM RFC 7643](https://www.rfc-editor.org/rfc/rfc7643.html#section-4.2),
-and the per-request validation rule in the [OWASP Authorization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html#validate-the-permissions-on-every-request).
+`access.membership.read` discloses the private roster/history; separately,
+`access.membership.manage` admits invitations/revocations/removal at the Org's
+`memberships` path. Entity consent/inbox/leave selects that Entity explicitly and
+requires `access.membership.participate` representation at its own `memberships`
+path. Direct mode selects only the authenticated private principal. All commands
+use current first-party credential policy, human actor eligibility and fresh
+interactive sessions for mutation. Account enforcement remains independent:
+write bans block writes, while silence remains contribution policy. No command
+clears mute/ban/enforcement state or creates Realm enrollment.
 
-Membership mutations also apply the current account write policy to the human
-performing the change. Acceptance revalidates the inviter's write eligibility.
-Active bans and enforcement suspensions block invitation creation, cancellation,
-acceptance/decline, removal and departure. Silence blocks contributions rather
-than these membership writes. Enforcement expiry and explicit reversal restore
-eligibility; enforcement alone does not delete an already accepted membership.
-Private inbox and authorized roster reads retain their read policy. These
-account-enforcement effects are separate from sign-in suspension/closure and
-from the Auth-to-Self binding state.
+Creation issues an explicit, institutional, scope-bounded native governance
+representation. It enrolls nobody. The retained managed-organization constructor
+and fresh installation constructor issue the same native relation; they no longer
+issue the obsolete `entity.membership` capability. The private-account constructor
+needs no public Self. Released installations are not backfilled by an implicit
+compatibility path.
 
-Pending invitations become accepted, declined, cancelled, expired or invalidated;
-terminal invitations never reopen. Rejoining requires a new accepted invitation
-and advances the existing membership revision. An immutable account-owned event
-records every join, removal and voluntary departure with the actual operator;
-rejoining cannot overwrite prior removal evidence. Concrete composite foreign keys
-bind a roster entry to its exact recipient/organization invitation and bind the
-invitation to immutable grant evidence. Database guards reject wrong self pairs,
-uncontrolled/non-organization targets, stale admissions and revision rollback.
+## Invitation protocol
 
-Erasure immediately fences acceptance via Auth/grant admission. Bounded worker
-stages invalidate pending invitations sent by the erased operator, delete the
-erased member's transition events and roster rows, then delete received invitations. Accepted
-invitations owned by another recipient retain the PII-free operator reference;
-deleting an inviter never removes another person's accepted membership.
+Private principals explicitly create a scope-specific contact capability, share it
+outside this protocol, and may revoke it. Only its digest is stored. A currently
+authorized Org manager exchanges that capability for an opaque recipient selector.
+Selectors bind the exact verified credential, selected authority, Org scope and
+purpose for five minutes. They disclose no global account/subject ID, account name,
+email or Self association. Entity recipients instead use their actual Entity ID;
+that ID never resolves implicitly to an account. No email/message is sent.
 
-## Workload and scale
+An invitation captures the Org participation revision, recipient subject, contact
+consent when applicable, original inviter credential/selection, and the exact
+`groupAuthoritySourceDigest` of owner/binding/terms/role/representation/member-set
+sources. Acceptance re-reads and compares those sources. Replacing revoked source
+A with grant B does not revive the invitation. A pending invitation also ends
+when its original session/credential is no longer admitted; signing in again does
+not substitute new proof. Fresh-session age is required when issuing, but the
+inviter's session need not remain *fresh* while the invitation is pending.
 
-Potential membership/invitation relations use the 500M-row baseline and 3B-row
-estimate. Assumptions: 10M active organizations, median 20 and heavy-tail 1M
-members, 100 membership changes/second normally and 2,000/second globally at
-peak, 10,000 roster/inbox pages/second, pages of at most 100 rows. Local target
-budgets are 100 ms p95 for reads and 200 ms p95 for admission excluding client
-transport. These are targets and workload assumptions, not measured production
-qualification.
+States are pending, accepted, declined, revoked, expired and invalidated. Pending
+confers nothing. Acceptance requires an exact invitation revision, expected shared
+membership version, operation ID and explicit consent. One transaction writes the
+shared admission, resolves the invitation and records the exact result. Accepted
+membership is independent from the inviter's subsequent departure, revocation or
+erasure. Ending membership clears `active_generation`; rejoin advances
+`last_generation`. Old Group selections and declared admission dependencies cannot
+follow the new generation. SQL guards require accepted Org consent to match the
+exact shared event and concrete scope/subject/admission FKs.
 
-There are at most 1,000 pending invitations per organization and per recipient.
-Two scoped advisory locks serialize admission and capacity checks; they do not
-lock every roster member. Expired/invalidated pending rows are drained within
-the union of those two proven 1,000-row sets (at most 2,000 rows) before admission.
-Accepted history is unbounded but is never part of a request-path count. Member
-and manager pages use composite seeks/keyset cursors; issuer/recipient cleanup
-uses indexed 500-row batches. No operation loads a whole organization's roster.
+Receipts bind the operator, selected authority, canonical target and command digest.
+Retries under current authorization return the original outcome, without renewing
+an invitation or repeating a membership transition. Refreshed private selectors
+resolve to the same canonical request target. Terminal invitation proof payloads
+are scrubbed; the receipt and PII-free audit references remain separate evidence.
 
-Estimated membership storage is 180-240 bytes heap plus 250-400 bytes across
-primary/member/active/account/invitation/operator indexes: 215-320 GB at 500M
-rows or 1.29-1.92 TB at 3B. Invitations are about 240-320 bytes heap and 350-500
-bytes indexed, including the explicit four-column membership FK target and grant
-evidence key: 295-410 GB at 500M or 1.77-2.46 TB at 3B. Width, fillfactor, bloat,
-WAL, backups and replication must be measured separately. A transition event
-including its five indexes is estimated at 300-450 bytes: 150-225 GB at 500M or
-900 GB-1.35 TB at 3B events. Acceptance writes the invitation, current membership
-and one event; rejoin updates the same roster identity and adds an event. At
-2,000 acceptances/second, roughly 2-3 MB/second of logical writes precede WAL and
-replica amplification. Responses are bounded metadata, with no invitation body
-or copied biography.
+## Recovery, reads and cleanup
 
-Hot organization invitations serialize only admission; recipients targeted by
-many organizations serialize on their inbox admission lock. This deliberately
-backpressures invitation floods. Observe lock wait, pending-bound failures,
-oldest erasure job, dead tuples/WAL, and p95/p99 page/admission latency. A sustained
-200 ms admission p95 or five-minute erasure backlog triggers capacity review.
-Organization-hash roster shards and Auth-routed inbox/erasure ownership are the
-growth direction. Cross-owner routing, concrete FK preservation and a committed
-membership/inbox cutover must be qualified before sharding; no unchecked
-polymorphic relation replaces these constraints. The expiry correction adds no rows or indexes at either scale. A recovery
-using an expiring platform grant adds one scalar SQL deadline check after its
-locks; current-controller probes retain their existing selective keys and
-32-controller bound. No 500M/3B throughput claim is made from local fixtures.
+Before a membership transition that may affect configured authority, bounded
+physical binding/representation/ceiling/dependency candidates identify repair
+roots. For every affected root, one existing registered native recovery path must
+remain exercisable through the same pre-change sources after the effect. Explicit
+all-scope representation is repaired at its represented Entity root; the protocol
+does not enumerate the resource corpus. Candidate overflow or missing recovery
+policy is unavailable, never a guessed subset. Existing Group recovery registration
+APIs supply those paths. Leaving may consume its own manager source, so the final
+check retains credential, actor/selected-subject eligibility and scope admission
+without demanding the authority it just ended.
 
-The [foundation fixture workflow](../../../../../docs/testing/foundation.md#controlled-organization-membership)
-records executable lifecycle/API/race evidence and its qualification boundaries.
-Use the installed native baseline and forward migrations; generated contracts
-remain owned by their existing OpenAPI/SDK tasks.
+Platform evidence-reviewed Org recovery uses `access.membership.recover` at the
+platform `organization-recovery` path. Recipient contact is exchanged for a
+separate recovery-purpose opaque selector. Recovery requires exact control revision,
+current platform authority, eligible recipient/contact and no currently eligible
+native controller; non-subject controller sources remain unavailable for this
+narrow recovery route. It revokes old native root representation grants, advances
+the Org control revision and installs an explicit replacement. It does not enroll
+the recipient. The older raw-account recovery route rejects Org targets.
 
-The pending-admission fixture in the linked foundation workflow verifies both
-1,000-row limits through domain commands and direct SQL, slot reclamation, and
-competing last-slot admissions on independent connections. It does not replace
-sustained workload or migration/sharding qualification.
+Roster and inbox select indexed candidate pages of at most 50 before hydration.
+Inbox includes terminal history; pending denied/unavailable entries remain present,
+and expiry is presented separately from stored revision. Roster returns shared
+head/version/generation plus current availability, including departed identities.
+History is a membership/version seek over shared events. Missing enrollment is
+404, while policy unavailability remains 503 or an explicit row availability.
+Private roster cursors/selectors are encrypted; names/links are returned only for
+actual Entities, never synthesized from private principal enrollment. The retained
+manager chooser pages direct representation and direct binding candidates under
+current native authority; it fails unavailable rather than publishing a partial or falsely empty directory. Broader
+Group-derived administration discovery is not inferred from a direct directory.
 
-The account-policy integration adds one indexed account-enforcement probe per
-acting account on a membership write, plus the account authorizer's existing row-lock
-probe. Acceptance checks both recipient and inviter; other membership changes
-check one operator. Read queries and storage do not change. At the 2,000-change/s
-peak assumption, acceptance adds up to 4,000 enforcement probes/s and 4,000
-account-key lock probes/s in the uncached admission path. This is a workload estimate,
-not a measured capacity result. Long enforcement histories and lock contention
-remain part of the 500M/3B load qualification.
+Shared member-set readers and native current-recipient predicates also apply Org
+scope lifecycle. A disabled/deleted/recovery-required scope contributes no current
+member-set rights, without deleting institutional enrollment or enforcement.
+
+Worker lanes `organization.enrollment_expiry` and
+`organization.enrollment_reconcile` process indexed deadlines. Reconciliation
+invalidates known-denied pending invitations and retries unavailable evidence.
+Acceptance checks revocation immediately; background lag cannot authorize it.
+Account erasure invalidates sent pending invitations, erases private operation
+receipts, clears active shared generations, then removes received invitations and
+contacts. The shared immutable admission/Group audit keys retain PII-free account
+anchors; another recipient's accepted membership is not deleted with its inviter.
+
+## Production entry points
+
+All enrollment routes are under `/api/v1/participation/membership`:
+
+| Operation | Route/input |
+| --- | --- |
+| Create Org without Self | `POST /organizations` with name/language; returns Entity, scope and native representation |
+| Native manager directory | `GET /managed-organizations` with optional opaque `afterId` |
+| Share private contact | `POST /organizations/:organizationEntityId/contacts`; `POST /contacts/:id/revoke` |
+| Resolve private recipient | `POST /organizations/:organizationEntityId/recipients` with contact secret |
+| Invite | `POST /organizations/:organizationEntityId/invitations`, typed recipient, operationId, optional expiresAt |
+| Accept/decline | `POST /invitations/:invitationId/accept` or `/decline`, expectedRevision/operationId; accept also expectedMembershipVersion/consent |
+| Revoke invitation | `POST /organizations/:organizationEntityId/invitations/:invitationId/revoke` |
+| Leave/remove | `POST /me/organizations/:organizationEntityId/leave` or `/organizations/:organizationEntityId/members/remove`, exact shared version/operationId; remove adds typed recipient |
+| Roster/inbox | `GET /organizations/:organizationEntityId/members`, `/organizations/:organizationEntityId/invitations`, `/me/invitations`, `/me/organizations` |
+| History | `POST /organizations/:organizationEntityId/history` with typed recipient and optional afterVersion |
+| Recovery | `POST /organizations/:organizationEntityId/recovery-recipient`, then `/recover` with selector/control revision/evidence/operationId |
+
+Requests select representation with `X-Rezics-Authority`; no public/default
+presentation header supplies authority. Native Org management requires a currently
+usable explicit representation or management binding. Protected membership changes
+also require pre-existing registered repair paths for every discovered root.
+Platform recovery requires its separately provisioned native permission. Native
+credential/authority provisioning and actual sessions must exist before API use.
+
+The two retained web consumers use native transport inputs and stable command IDs.
+Their existing Entity invitation form remains Entity-only. New private-contact
+initiation/sharing and Entity-selected inbox experiences remain frontend work;
+private-principal invitations/acceptance and represented Entity enrollment are
+available through the production API. No full frontend experience is claimed.
+
+## Workload and capacity assumptions
+
+Retain the **500,000,000-row baseline** and **3,000,000,000-row estimate** for
+membership, invitation, receipt, contact and event relations. Assume 10M active
+Orgs, median 20/heavy-tail 1M members, 100 mutations/s typical and 2,000/s global
+peak, and 10,000 roster/inbox pages/s. Read/admission targets remain 100/200 ms p95,
+not measured results. Native authority hydration is bounded per candidate and
+may require up to 50 native checks per page; its high fan-out is explicitly
+unqualified at these rates. Measure lock wait, SQL visits, response bytes and
+p95/p99 before capacity acceptance.
+
+Each Org and recipient has at most 1,000 physical pending invitations, including
+expired slots, and each principal at most 64 unrevoked contacts. Scoped advisory
+locks serialize these admission counters; request expiry cleanup touches only the
+two bounded pending index ranges. Contact history is not counted. Pending reviews
+are a separate one-row-per-pending deadline queue. Global expiry batches are 100;
+policy reconciliation takes 20 due candidates, each in its own transaction, every
+10 seconds per worker. Unavailable candidates move five minutes forward. At the
+2,000 invitations/s peak a single lane cannot keep up: partition due work by Org
+hash and add workers (SKIP LOCKED prevents duplicate effects); alert on five-minute
+oldest-due lag. No request depends on that backlog for revocation correctness.
+
+Pages use scope/subject, subject/scope, scope/invitation ID, subject/invitation ID,
+private direct-subject source ID, or membership/version index ranges. Reverse
+recovery discovery uses recipient-scope/ID indexes including dormant and every
+recipient kind, then admission dependency indexes. It caps physical sources at
+256 before deduplication and roots at 64, with up to eight registered recovery
+candidates/root. This is a workload boundary, not an empirical safe throughput.
+Erasure reads 100 private receipts/invitations or 20 active heads per batch through
+subject indexes; the active-subject partial index excludes departed history.
+
+Planning widths: shared head plus its indexes 400–650 B/identity (200–325 GB at
+500M; 1.2–1.95 TB at 3B); invitation heap/indexes excluding bounded JSON authority
+500–900 B (250–450 GB; 1.5–2.7 TB), plus commonly 1–8 KiB private proof while
+pending, hard maximum 32 KiB. Operation receipts 450–900 B (225–450 GB; 1.35–2.7 TB),
+contacts 250–450 B (125–225 GB; 0.75–1.35 TB), pending review row/indexes 100–180 B
+(50–90 GB; 300–540 GB if the entire baseline were pending). Each added private
+source or active-head reverse index is approximately 50–90 B/entry (25–45 GB;
+150–270 GB). Shared event/admission/Group-set amplification remains in the owning
+IAM schema, not a duplicate Org roster. Acceptance writes one invitation, one
+operation receipt, shared head/event/admission and its Group-set initialization;
+terminal resolution deletes one review queue row. WAL, replicas, backups, TOAST,
+bloat, index maintenance and erasure contention remain unmeasured.
+
+Growth direction is Org-hash admission/roster routing with subject-routed private
+inbox/erasure ownership, preserving concrete FK and atomic admission semantics.
+Forward replacement DDL is generated with the typed anchor workflow's explicit
+no-rename table replacement declaration. Required future qualification includes
+native SQL/API transitions and concurrency, exact source replacement, erasure,
+permission/credential expiry during lock waits, recovery continuity, retained web
+TypeScript/localization checks and scoped Storybook screenshots. No tests,
+test-authoring, fixtures, typecheck, lint validation, build, DB replay, benchmarks
+or browser QA ran during implementation.

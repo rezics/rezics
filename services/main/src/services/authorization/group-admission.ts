@@ -51,7 +51,8 @@ function continuityDigest(sources: Authority[], review: GroupImpactReview, after
   } });
  }));
 }
-function storedContext(row: { principalId: string; proof: unknown; selection: unknown }) {
+/** Decode a retained native recovery/approval proof; no caller-supplied identity is trusted. @internal */
+export function recoveryPathContext(row: { principalId: string; proof: unknown; selection: unknown }) {
  const proof = proofSchema.parse(row.proof);
  if (row.principalId !== proof.principalId) throw new AccessUnavailable();
  return new PrincipalRequestContext(row.principalId, RequestedAuthoritySelectionSchema.parse(row.selection), proof);
@@ -325,7 +326,8 @@ export async function revokeGroupApproval(context: PrincipalRequestContext, inpu
  });
 }
 
-async function repairAuthorities(tx: DatabaseTransaction, context: PrincipalRequestContext, scopeId: string) {
+/** Current native repair authority shared by Group and enrollment continuity. @internal */
+export async function readNativeRecoveryAuthorities(tx: DatabaseTransaction, context: PrincipalRequestContext, scopeId: string) {
  const required = [...repairPermissions];
  const [scope] = (await tx.execute<{ entity: string | null }>(sql`select r.target_entity_id as entity from public.access_scope s
   left join public.reference_value r on r.id=s.unit_ref where s.id=${scopeId}::uuid`)).rows;
@@ -342,7 +344,7 @@ export async function registerRecoveryPath(context: PrincipalRequestContext, inp
   await tx.insert(policies).values({ scopeId: input.scopeId }).onConflictDoNothing();
   const [policy] = await tx.select().from(policies).where(eq(policies.scopeId,input.scopeId)).for("update");
   if (!policy || policy.policy !== "native-repair-v1") throw new AccessUnavailable();
-  const sources = await repairAuthorities(tx,context,input.scopeId), actor = sources[0]!;
+  const sources = await readNativeRecoveryAuthorities(tx,context,input.scopeId), actor = sources[0]!;
   const requestDigest = hash({ scopeId: input.scopeId,principalId: actor.principalId,subjectId: actor.subjectId,selection: context.selection });
   const [prior] = await tx.select().from(paths).where(eq(paths.id,input.pathId)).for("update");
   if (prior) {
@@ -385,7 +387,7 @@ async function validApprovals(tx: DatabaseTransaction, review: GroupImpactReview
  for (const row of rows) {
   if (row.revokedAt || row.validUntil <= now || row.proposalDigest !== proposalDigest(review) || row.effectDigest !== evidence.effectDigest || row.witnessDigest !== witness) continue;
   try {
-   const context = storedContext(row), sources = await reviewAuthorities(tx,context,review,evidence);
+   const context = recoveryPathContext(row), sources = await reviewAuthorities(tx,context,review,evidence);
    if (sources[1]!.subjectId !== row.subjectId || sourcesDigest(sources) !== row.sourceDigest) continue;
    await independent(tx,review,evidence.effects,sources[1]!); rejectChangedBasis(evidence.effects,sources);
    for (const source of sources) await requireAccessAdmission(tx,source.admission);
@@ -434,7 +436,7 @@ async function selectRecovery(tx: DatabaseTransaction, review: GroupImpactReview
    // A newly established route cannot retrospectively become this review's old-state proof.
    if (row.createdAt > review.createdAt) continue;
    try {
-    const sources = await repairAuthorities(tx,storedContext(row),scopeId);
+    const sources = await readNativeRecoveryAuthorities(tx,recoveryPathContext(row),scopeId);
     if (sources[0]!.subjectId !== row.subjectId || sourcesDigest(sources) !== row.sourceDigest) continue;
     requireRecoveryPaths(effects,sources,review);
     for (const source of sources) await requireAccessAdmission(tx,source.admission);
@@ -495,7 +497,7 @@ export async function prepareGroupAdmission(tx: DatabaseTransaction, context: Pr
   // Native evaluation in the actual proposed topology, not a source-delta ACL union.
   const after: Authority[] = [];
   for (const path of recovery) {
-   const sources = await repairAuthorities(work,storedContext(path.row),path.row.scopeId);
+   const sources = await readNativeRecoveryAuthorities(work,recoveryPathContext(path.row),path.row.scopeId);
    if (continuityDigest(sources,review,true) !== continuityDigest(path.sources,review)) throw new AccessDenied();
    after.push(...sources);
   }

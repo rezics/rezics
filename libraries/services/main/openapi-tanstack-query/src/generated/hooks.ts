@@ -24,7 +24,6 @@ import {
 	approveAccessGroupImpact,
 	assignGroupingClass,
 	attachMusicDiscToc,
-	cancelOrganizationMembershipInvitation,
 	controlCatalogSourceJob,
 	createAccessGroup,
 	createAccessRole,
@@ -34,6 +33,8 @@ import {
 	createConnectedApp,
 	createGroupingOrderProfile,
 	createManagedOrganization,
+	createNativeOrganization,
+	createOrganizationEnrollmentContact,
 	createServicePrincipal,
 	createSoftwareCredit,
 	createSoftwareParticipationContext,
@@ -312,6 +313,7 @@ import {
 	listManagedOrganizationInvitations,
 	listManagedOrganizationMembers,
 	listManagedOrganizations,
+	listMembershipManagedOrganizations,
 	listMergedCatalogSources,
 	listMusicDiscTocs,
 	listMusicHistory,
@@ -319,6 +321,7 @@ import {
 	listMusicTracks,
 	listNativeMergeReconciliation,
 	listNativeMergeRequests,
+	listOrganizationMembershipHistory,
 	listOwnAppConnections,
 	listOwnAppConsentHistory,
 	listOwnAppConsents,
@@ -548,6 +551,7 @@ import {
 	readTextVersionChapterNode,
 	recordCurrentUserStudioVisit,
 	recoverEntityController,
+	recoverNativeOrganization,
 	registerAccessRecoveryPath,
 	releaseSlugRedirectWithPlatformAccess,
 	removeCatalogEntityProfile,
@@ -569,6 +573,7 @@ import {
 	resolveMainIdentityPreference,
 	resolveNamespaceSlugAddress,
 	resolveNativeMergeReconciliation,
+	resolveOrganizationEnrollmentContact,
 	resolveScopedUnitSlugAddress,
 	resolveUnitSlugAddress,
 	resolveZonePageAddressBySlug,
@@ -602,11 +607,14 @@ import {
 	reviseSoftwareParticipationContext,
 	revokeAccessGroupApproval,
 	revokeAccessRecoveryPath,
+	revokeOrganizationEnrollmentContact,
+	revokeOrganizationMembershipInvitation,
 	revokeOwnAppConsent,
 	revokeParticipationGrant,
 	revokeServicePrincipal,
 	saveProgramContentDraft,
 	saveTextVersionContentDraft,
+	selectOrganizationRecoveryRecipient,
 	selectParticipation,
 	setConnectedAppTrust,
 	setMainIdentityPreference,
@@ -635,6 +643,7 @@ import type {
 	AcceptOrganizationMembershipInvitationStatus409,
 	AcceptOrganizationMembershipInvitationStatus422,
 	AcceptOrganizationMembershipInvitationStatus500,
+	AcceptOrganizationMembershipInvitationStatus503,
 	AddCatalogIdentifierOptions,
 	AddCatalogIdentifierStatus200,
 	AddCatalogIdentifierStatus400,
@@ -702,14 +711,6 @@ import type {
 	AttachMusicDiscTocStatus422,
 	AttachMusicDiscTocStatus429,
 	AttachMusicDiscTocStatus500,
-	CancelOrganizationMembershipInvitationOptions,
-	CancelOrganizationMembershipInvitationStatus200,
-	CancelOrganizationMembershipInvitationStatus400,
-	CancelOrganizationMembershipInvitationStatus403,
-	CancelOrganizationMembershipInvitationStatus404,
-	CancelOrganizationMembershipInvitationStatus409,
-	CancelOrganizationMembershipInvitationStatus422,
-	CancelOrganizationMembershipInvitationStatus500,
 	ControlCatalogSourceJobOptions,
 	ControlCatalogSourceJobStatus200,
 	ControlCatalogSourceJobStatus400,
@@ -767,6 +768,23 @@ import type {
 	CreateManagedOrganizationStatus400,
 	CreateManagedOrganizationStatus422,
 	CreateManagedOrganizationStatus500,
+	CreateNativeOrganizationOptions,
+	CreateNativeOrganizationStatus200,
+	CreateNativeOrganizationStatus400,
+	CreateNativeOrganizationStatus403,
+	CreateNativeOrganizationStatus404,
+	CreateNativeOrganizationStatus409,
+	CreateNativeOrganizationStatus422,
+	CreateNativeOrganizationStatus500,
+	CreateNativeOrganizationStatus503,
+	CreateOrganizationEnrollmentContactOptions,
+	CreateOrganizationEnrollmentContactStatus200,
+	CreateOrganizationEnrollmentContactStatus403,
+	CreateOrganizationEnrollmentContactStatus404,
+	CreateOrganizationEnrollmentContactStatus409,
+	CreateOrganizationEnrollmentContactStatus422,
+	CreateOrganizationEnrollmentContactStatus500,
+	CreateOrganizationEnrollmentContactStatus503,
 	CreateServicePrincipalOptions,
 	CreateServicePrincipalStatus200,
 	CreateServicePrincipalStatus400,
@@ -798,6 +816,7 @@ import type {
 	DeclineOrganizationMembershipInvitationStatus409,
 	DeclineOrganizationMembershipInvitationStatus422,
 	DeclineOrganizationMembershipInvitationStatus500,
+	DeclineOrganizationMembershipInvitationStatus503,
 	DeleteApiAccountBlocksByIdOptions,
 	DeleteApiAccountBlocksByIdStatus200,
 	DeleteApiAccountBlocksByIdStatus422,
@@ -2152,6 +2171,7 @@ import type {
 	InviteOrganizationMemberStatus409,
 	InviteOrganizationMemberStatus422,
 	InviteOrganizationMemberStatus500,
+	InviteOrganizationMemberStatus503,
 	IssueParticipationGrantOptions,
 	IssueParticipationGrantStatus200,
 	IssueParticipationGrantStatus400,
@@ -2165,6 +2185,7 @@ import type {
 	LeaveOrganizationMembershipStatus409,
 	LeaveOrganizationMembershipStatus422,
 	LeaveOrganizationMembershipStatus500,
+	LeaveOrganizationMembershipStatus503,
 	ListAccessGroupApprovalsOptions,
 	ListAccessGroupApprovalsStatus200,
 	ListAccessGroupApprovalsStatus400,
@@ -2358,18 +2379,31 @@ import type {
 	ListManagedOrganizationInvitationsStatus404,
 	ListManagedOrganizationInvitationsStatus409,
 	ListManagedOrganizationInvitationsStatus422,
+	ListManagedOrganizationInvitationsStatus429,
 	ListManagedOrganizationInvitationsStatus500,
+	ListManagedOrganizationInvitationsStatus503,
 	ListManagedOrganizationMembersOptions,
 	ListManagedOrganizationMembersStatus200,
 	ListManagedOrganizationMembersStatus403,
 	ListManagedOrganizationMembersStatus404,
 	ListManagedOrganizationMembersStatus409,
 	ListManagedOrganizationMembersStatus422,
+	ListManagedOrganizationMembersStatus429,
 	ListManagedOrganizationMembersStatus500,
+	ListManagedOrganizationMembersStatus503,
 	ListManagedOrganizationsOptions,
 	ListManagedOrganizationsStatus200,
 	ListManagedOrganizationsStatus422,
 	ListManagedOrganizationsStatus500,
+	ListMembershipManagedOrganizationsOptions,
+	ListMembershipManagedOrganizationsStatus200,
+	ListMembershipManagedOrganizationsStatus403,
+	ListMembershipManagedOrganizationsStatus404,
+	ListMembershipManagedOrganizationsStatus409,
+	ListMembershipManagedOrganizationsStatus422,
+	ListMembershipManagedOrganizationsStatus429,
+	ListMembershipManagedOrganizationsStatus500,
+	ListMembershipManagedOrganizationsStatus503,
 	ListMergedCatalogSourcesOptions,
 	ListMergedCatalogSourcesStatus200,
 	ListMergedCatalogSourcesStatus422,
@@ -2399,6 +2433,16 @@ import type {
 	ListNativeMergeRequestsStatus200,
 	ListNativeMergeRequestsStatus422,
 	ListNativeMergeRequestsStatus500,
+	ListOrganizationMembershipHistoryOptions,
+	ListOrganizationMembershipHistoryStatus200,
+	ListOrganizationMembershipHistoryStatus400,
+	ListOrganizationMembershipHistoryStatus403,
+	ListOrganizationMembershipHistoryStatus404,
+	ListOrganizationMembershipHistoryStatus409,
+	ListOrganizationMembershipHistoryStatus422,
+	ListOrganizationMembershipHistoryStatus429,
+	ListOrganizationMembershipHistoryStatus500,
+	ListOrganizationMembershipHistoryStatus503,
 	ListOwnAppConnectionsOptions,
 	ListOwnAppConnectionsStatus200,
 	ListOwnAppConnectionsStatus422,
@@ -2420,14 +2464,18 @@ import type {
 	ListOwnOrganizationMembershipInvitationsStatus404,
 	ListOwnOrganizationMembershipInvitationsStatus409,
 	ListOwnOrganizationMembershipInvitationsStatus422,
+	ListOwnOrganizationMembershipInvitationsStatus429,
 	ListOwnOrganizationMembershipInvitationsStatus500,
+	ListOwnOrganizationMembershipInvitationsStatus503,
 	ListOwnOrganizationMembershipsOptions,
 	ListOwnOrganizationMembershipsStatus200,
 	ListOwnOrganizationMembershipsStatus403,
 	ListOwnOrganizationMembershipsStatus404,
 	ListOwnOrganizationMembershipsStatus409,
 	ListOwnOrganizationMembershipsStatus422,
+	ListOwnOrganizationMembershipsStatus429,
 	ListOwnOrganizationMembershipsStatus500,
+	ListOwnOrganizationMembershipsStatus503,
 	ListParticipationGrantsOptions,
 	ListParticipationGrantsStatus200,
 	ListParticipationGrantsStatus422,
@@ -4049,6 +4097,15 @@ import type {
 	RecoverEntityControllerStatus400,
 	RecoverEntityControllerStatus422,
 	RecoverEntityControllerStatus500,
+	RecoverNativeOrganizationOptions,
+	RecoverNativeOrganizationStatus200,
+	RecoverNativeOrganizationStatus400,
+	RecoverNativeOrganizationStatus403,
+	RecoverNativeOrganizationStatus404,
+	RecoverNativeOrganizationStatus409,
+	RecoverNativeOrganizationStatus422,
+	RecoverNativeOrganizationStatus500,
+	RecoverNativeOrganizationStatus503,
 	RegisterAccessRecoveryPathOptions,
 	RegisterAccessRecoveryPathStatus200,
 	RegisterAccessRecoveryPathStatus400,
@@ -4106,6 +4163,7 @@ import type {
 	RemoveOrganizationMemberStatus409,
 	RemoveOrganizationMemberStatus422,
 	RemoveOrganizationMemberStatus500,
+	RemoveOrganizationMemberStatus503,
 	RemoveProgramOccurrenceOptions,
 	RemoveProgramOccurrenceStatus200,
 	RemoveProgramOccurrenceStatus400,
@@ -4193,6 +4251,15 @@ import type {
 	ResolveNativeMergeReconciliationStatus400,
 	ResolveNativeMergeReconciliationStatus422,
 	ResolveNativeMergeReconciliationStatus500,
+	ResolveOrganizationEnrollmentContactOptions,
+	ResolveOrganizationEnrollmentContactStatus200,
+	ResolveOrganizationEnrollmentContactStatus400,
+	ResolveOrganizationEnrollmentContactStatus403,
+	ResolveOrganizationEnrollmentContactStatus404,
+	ResolveOrganizationEnrollmentContactStatus409,
+	ResolveOrganizationEnrollmentContactStatus422,
+	ResolveOrganizationEnrollmentContactStatus500,
+	ResolveOrganizationEnrollmentContactStatus503,
 	ResolveScopedUnitSlugAddressOptions,
 	ResolveScopedUnitSlugAddressStatus200,
 	ResolveScopedUnitSlugAddressStatus400,
@@ -4397,6 +4464,23 @@ import type {
 	RevokeAccessRecoveryPathStatus422,
 	RevokeAccessRecoveryPathStatus500,
 	RevokeAccessRecoveryPathStatus503,
+	RevokeOrganizationEnrollmentContactOptions,
+	RevokeOrganizationEnrollmentContactStatus200,
+	RevokeOrganizationEnrollmentContactStatus403,
+	RevokeOrganizationEnrollmentContactStatus404,
+	RevokeOrganizationEnrollmentContactStatus409,
+	RevokeOrganizationEnrollmentContactStatus422,
+	RevokeOrganizationEnrollmentContactStatus500,
+	RevokeOrganizationEnrollmentContactStatus503,
+	RevokeOrganizationMembershipInvitationOptions,
+	RevokeOrganizationMembershipInvitationStatus200,
+	RevokeOrganizationMembershipInvitationStatus400,
+	RevokeOrganizationMembershipInvitationStatus403,
+	RevokeOrganizationMembershipInvitationStatus404,
+	RevokeOrganizationMembershipInvitationStatus409,
+	RevokeOrganizationMembershipInvitationStatus422,
+	RevokeOrganizationMembershipInvitationStatus500,
+	RevokeOrganizationMembershipInvitationStatus503,
 	RevokeOwnAppConsentOptions,
 	RevokeOwnAppConsentStatus200,
 	RevokeOwnAppConsentStatus400,
@@ -4431,6 +4515,15 @@ import type {
 	SaveTextVersionContentDraftStatus422,
 	SaveTextVersionContentDraftStatus429,
 	SaveTextVersionContentDraftStatus500,
+	SelectOrganizationRecoveryRecipientOptions,
+	SelectOrganizationRecoveryRecipientStatus200,
+	SelectOrganizationRecoveryRecipientStatus400,
+	SelectOrganizationRecoveryRecipientStatus403,
+	SelectOrganizationRecoveryRecipientStatus404,
+	SelectOrganizationRecoveryRecipientStatus409,
+	SelectOrganizationRecoveryRecipientStatus422,
+	SelectOrganizationRecoveryRecipientStatus500,
+	SelectOrganizationRecoveryRecipientStatus503,
 	SelectParticipationOptions,
 	SelectParticipationStatus200,
 	SelectParticipationStatus400,
@@ -34286,6 +34379,445 @@ export function useDeleteApiAccountBlocksById<TContext>(
 	>;
 }
 
+export const listMembershipManagedOrganizationsQueryKey = ({
+	query,
+}: Omit<ListMembershipManagedOrganizationsOptions, "headers"> = {}) =>
+	[
+		{ url: "/api/v1/participation/membership/managed-organizations" },
+		...(query ? [query] : []),
+	] as const;
+
+type ListMembershipManagedOrganizationsQueryKey = ReturnType<
+	typeof listMembershipManagedOrganizationsQueryKey
+>;
+
+export function listMembershipManagedOrganizationsQueryOptions(
+	{ query }: ListMembershipManagedOrganizationsOptions = {},
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listMembershipManagedOrganizationsQueryKey({ query });
+	return queryOptions<
+		ListMembershipManagedOrganizationsStatus200,
+		ResponseErrorConfig<
+			| ListMembershipManagedOrganizationsStatus403
+			| ListMembershipManagedOrganizationsStatus404
+			| ListMembershipManagedOrganizationsStatus409
+			| ListMembershipManagedOrganizationsStatus422
+			| ListMembershipManagedOrganizationsStatus429
+			| ListMembershipManagedOrganizationsStatus500
+			| ListMembershipManagedOrganizationsStatus503
+		>,
+		ListMembershipManagedOrganizationsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return listMembershipManagedOrganizations({
+				...config,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/membership/managed-organizations}
+ */
+export function useListMembershipManagedOrganizations<
+	TData = ListMembershipManagedOrganizationsStatus200,
+	TQueryData = ListMembershipManagedOrganizationsStatus200,
+	TQueryKey extends QueryKey = ListMembershipManagedOrganizationsQueryKey,
+>(
+	{
+		query,
+	}: {
+		query?:
+			| ListMembershipManagedOrganizationsOptions["query"]
+			| (() => ListMembershipManagedOrganizationsOptions["query"]);
+	} = {},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListMembershipManagedOrganizationsStatus200,
+				ResponseErrorConfig<
+					| ListMembershipManagedOrganizationsStatus403
+					| ListMembershipManagedOrganizationsStatus404
+					| ListMembershipManagedOrganizationsStatus409
+					| ListMembershipManagedOrganizationsStatus422
+					| ListMembershipManagedOrganizationsStatus429
+					| ListMembershipManagedOrganizationsStatus500
+					| ListMembershipManagedOrganizationsStatus503
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { query: typeof query === "function" ? query() : query };
+	const queryKey =
+		resolvedOptions?.queryKey ?? listMembershipManagedOrganizationsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listMembershipManagedOrganizationsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| ListMembershipManagedOrganizationsStatus403
+			| ListMembershipManagedOrganizationsStatus404
+			| ListMembershipManagedOrganizationsStatus409
+			| ListMembershipManagedOrganizationsStatus422
+			| ListMembershipManagedOrganizationsStatus429
+			| ListMembershipManagedOrganizationsStatus500
+			| ListMembershipManagedOrganizationsStatus503
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const createNativeOrganizationMutationKey = () =>
+	[{ url: "/api/v1/participation/membership/organizations" }] as const;
+
+export function createNativeOrganizationMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = createNativeOrganizationMutationKey();
+	return mutationOptions<
+		CreateNativeOrganizationStatus200,
+		ResponseErrorConfig<
+			| CreateNativeOrganizationStatus400
+			| CreateNativeOrganizationStatus403
+			| CreateNativeOrganizationStatus404
+			| CreateNativeOrganizationStatus409
+			| CreateNativeOrganizationStatus422
+			| CreateNativeOrganizationStatus500
+			| CreateNativeOrganizationStatus503
+		>,
+		CreateNativeOrganizationOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			return createNativeOrganization({ ...config, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/membership/organizations}
+ */
+export function useCreateNativeOrganization<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			CreateNativeOrganizationStatus200,
+			ResponseErrorConfig<
+				| CreateNativeOrganizationStatus400
+				| CreateNativeOrganizationStatus403
+				| CreateNativeOrganizationStatus404
+				| CreateNativeOrganizationStatus409
+				| CreateNativeOrganizationStatus422
+				| CreateNativeOrganizationStatus500
+				| CreateNativeOrganizationStatus503
+			>,
+			CreateNativeOrganizationOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? createNativeOrganizationMutationKey();
+
+	const baseOptions = createNativeOrganizationMutationOptions(config) as UseMutationOptions<
+		CreateNativeOrganizationStatus200,
+		ResponseErrorConfig<
+			| CreateNativeOrganizationStatus400
+			| CreateNativeOrganizationStatus403
+			| CreateNativeOrganizationStatus404
+			| CreateNativeOrganizationStatus409
+			| CreateNativeOrganizationStatus422
+			| CreateNativeOrganizationStatus500
+			| CreateNativeOrganizationStatus503
+		>,
+		CreateNativeOrganizationOptions,
+		TContext
+	>;
+
+	return useMutation<
+		CreateNativeOrganizationStatus200,
+		ResponseErrorConfig<
+			| CreateNativeOrganizationStatus400
+			| CreateNativeOrganizationStatus403
+			| CreateNativeOrganizationStatus404
+			| CreateNativeOrganizationStatus409
+			| CreateNativeOrganizationStatus422
+			| CreateNativeOrganizationStatus500
+			| CreateNativeOrganizationStatus503
+		>,
+		CreateNativeOrganizationOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		CreateNativeOrganizationStatus200,
+		ResponseErrorConfig<
+			| CreateNativeOrganizationStatus400
+			| CreateNativeOrganizationStatus403
+			| CreateNativeOrganizationStatus404
+			| CreateNativeOrganizationStatus409
+			| CreateNativeOrganizationStatus422
+			| CreateNativeOrganizationStatus500
+			| CreateNativeOrganizationStatus503
+		>,
+		CreateNativeOrganizationOptions,
+		TContext
+	>;
+}
+
+export const selectOrganizationRecoveryRecipientMutationKey = () =>
+	[
+		{
+			url: "/api/v1/participation/membership/organizations/:organizationEntityId/recovery-recipient",
+		},
+	] as const;
+
+export function selectOrganizationRecoveryRecipientMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = selectOrganizationRecoveryRecipientMutationKey();
+	return mutationOptions<
+		SelectOrganizationRecoveryRecipientStatus200,
+		ResponseErrorConfig<
+			| SelectOrganizationRecoveryRecipientStatus400
+			| SelectOrganizationRecoveryRecipientStatus403
+			| SelectOrganizationRecoveryRecipientStatus404
+			| SelectOrganizationRecoveryRecipientStatus409
+			| SelectOrganizationRecoveryRecipientStatus422
+			| SelectOrganizationRecoveryRecipientStatus500
+			| SelectOrganizationRecoveryRecipientStatus503
+		>,
+		SelectOrganizationRecoveryRecipientOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return selectOrganizationRecoveryRecipient({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/membership/organizations/:organizationEntityId/recovery-recipient}
+ */
+export function useSelectOrganizationRecoveryRecipient<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			SelectOrganizationRecoveryRecipientStatus200,
+			ResponseErrorConfig<
+				| SelectOrganizationRecoveryRecipientStatus400
+				| SelectOrganizationRecoveryRecipientStatus403
+				| SelectOrganizationRecoveryRecipientStatus404
+				| SelectOrganizationRecoveryRecipientStatus409
+				| SelectOrganizationRecoveryRecipientStatus422
+				| SelectOrganizationRecoveryRecipientStatus500
+				| SelectOrganizationRecoveryRecipientStatus503
+			>,
+			SelectOrganizationRecoveryRecipientOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? selectOrganizationRecoveryRecipientMutationKey();
+
+	const baseOptions = selectOrganizationRecoveryRecipientMutationOptions(
+		config,
+	) as UseMutationOptions<
+		SelectOrganizationRecoveryRecipientStatus200,
+		ResponseErrorConfig<
+			| SelectOrganizationRecoveryRecipientStatus400
+			| SelectOrganizationRecoveryRecipientStatus403
+			| SelectOrganizationRecoveryRecipientStatus404
+			| SelectOrganizationRecoveryRecipientStatus409
+			| SelectOrganizationRecoveryRecipientStatus422
+			| SelectOrganizationRecoveryRecipientStatus500
+			| SelectOrganizationRecoveryRecipientStatus503
+		>,
+		SelectOrganizationRecoveryRecipientOptions,
+		TContext
+	>;
+
+	return useMutation<
+		SelectOrganizationRecoveryRecipientStatus200,
+		ResponseErrorConfig<
+			| SelectOrganizationRecoveryRecipientStatus400
+			| SelectOrganizationRecoveryRecipientStatus403
+			| SelectOrganizationRecoveryRecipientStatus404
+			| SelectOrganizationRecoveryRecipientStatus409
+			| SelectOrganizationRecoveryRecipientStatus422
+			| SelectOrganizationRecoveryRecipientStatus500
+			| SelectOrganizationRecoveryRecipientStatus503
+		>,
+		SelectOrganizationRecoveryRecipientOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		SelectOrganizationRecoveryRecipientStatus200,
+		ResponseErrorConfig<
+			| SelectOrganizationRecoveryRecipientStatus400
+			| SelectOrganizationRecoveryRecipientStatus403
+			| SelectOrganizationRecoveryRecipientStatus404
+			| SelectOrganizationRecoveryRecipientStatus409
+			| SelectOrganizationRecoveryRecipientStatus422
+			| SelectOrganizationRecoveryRecipientStatus500
+			| SelectOrganizationRecoveryRecipientStatus503
+		>,
+		SelectOrganizationRecoveryRecipientOptions,
+		TContext
+	>;
+}
+
+export const recoverNativeOrganizationMutationKey = () =>
+	[
+		{ url: "/api/v1/participation/membership/organizations/:organizationEntityId/recover" },
+	] as const;
+
+export function recoverNativeOrganizationMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = recoverNativeOrganizationMutationKey();
+	return mutationOptions<
+		RecoverNativeOrganizationStatus200,
+		ResponseErrorConfig<
+			| RecoverNativeOrganizationStatus400
+			| RecoverNativeOrganizationStatus403
+			| RecoverNativeOrganizationStatus404
+			| RecoverNativeOrganizationStatus409
+			| RecoverNativeOrganizationStatus422
+			| RecoverNativeOrganizationStatus500
+			| RecoverNativeOrganizationStatus503
+		>,
+		RecoverNativeOrganizationOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return recoverNativeOrganization({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/membership/organizations/:organizationEntityId/recover}
+ */
+export function useRecoverNativeOrganization<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			RecoverNativeOrganizationStatus200,
+			ResponseErrorConfig<
+				| RecoverNativeOrganizationStatus400
+				| RecoverNativeOrganizationStatus403
+				| RecoverNativeOrganizationStatus404
+				| RecoverNativeOrganizationStatus409
+				| RecoverNativeOrganizationStatus422
+				| RecoverNativeOrganizationStatus500
+				| RecoverNativeOrganizationStatus503
+			>,
+			RecoverNativeOrganizationOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? recoverNativeOrganizationMutationKey();
+
+	const baseOptions = recoverNativeOrganizationMutationOptions(config) as UseMutationOptions<
+		RecoverNativeOrganizationStatus200,
+		ResponseErrorConfig<
+			| RecoverNativeOrganizationStatus400
+			| RecoverNativeOrganizationStatus403
+			| RecoverNativeOrganizationStatus404
+			| RecoverNativeOrganizationStatus409
+			| RecoverNativeOrganizationStatus422
+			| RecoverNativeOrganizationStatus500
+			| RecoverNativeOrganizationStatus503
+		>,
+		RecoverNativeOrganizationOptions,
+		TContext
+	>;
+
+	return useMutation<
+		RecoverNativeOrganizationStatus200,
+		ResponseErrorConfig<
+			| RecoverNativeOrganizationStatus400
+			| RecoverNativeOrganizationStatus403
+			| RecoverNativeOrganizationStatus404
+			| RecoverNativeOrganizationStatus409
+			| RecoverNativeOrganizationStatus422
+			| RecoverNativeOrganizationStatus500
+			| RecoverNativeOrganizationStatus503
+		>,
+		RecoverNativeOrganizationOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		RecoverNativeOrganizationStatus200,
+		ResponseErrorConfig<
+			| RecoverNativeOrganizationStatus400
+			| RecoverNativeOrganizationStatus403
+			| RecoverNativeOrganizationStatus404
+			| RecoverNativeOrganizationStatus409
+			| RecoverNativeOrganizationStatus422
+			| RecoverNativeOrganizationStatus500
+			| RecoverNativeOrganizationStatus503
+		>,
+		RecoverNativeOrganizationOptions,
+		TContext
+	>;
+}
+
 export const listManagedOrganizationMembersQueryKey = ({
 	path,
 	query,
@@ -34314,7 +34846,9 @@ export function listManagedOrganizationMembersQueryOptions(
 			| ListManagedOrganizationMembersStatus404
 			| ListManagedOrganizationMembersStatus409
 			| ListManagedOrganizationMembersStatus422
+			| ListManagedOrganizationMembersStatus429
 			| ListManagedOrganizationMembersStatus500
+			| ListManagedOrganizationMembersStatus503
 		>,
 		ListManagedOrganizationMembersStatus200,
 		typeof queryKey
@@ -34360,7 +34894,9 @@ export function useListManagedOrganizationMembers<
 					| ListManagedOrganizationMembersStatus404
 					| ListManagedOrganizationMembersStatus409
 					| ListManagedOrganizationMembersStatus422
+					| ListManagedOrganizationMembersStatus429
 					| ListManagedOrganizationMembersStatus500
+					| ListManagedOrganizationMembersStatus503
 				>,
 				TData,
 				TQueryData,
@@ -34393,13 +34929,134 @@ export function useListManagedOrganizationMembers<
 			| ListManagedOrganizationMembersStatus404
 			| ListManagedOrganizationMembersStatus409
 			| ListManagedOrganizationMembersStatus422
+			| ListManagedOrganizationMembersStatus429
 			| ListManagedOrganizationMembersStatus500
+			| ListManagedOrganizationMembersStatus503
 		>
 	> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;
 
 	return queryResult;
+}
+
+export const listOrganizationMembershipHistoryMutationKey = () =>
+	[
+		{ url: "/api/v1/participation/membership/organizations/:organizationEntityId/history" },
+	] as const;
+
+export function listOrganizationMembershipHistoryMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = listOrganizationMembershipHistoryMutationKey();
+	return mutationOptions<
+		ListOrganizationMembershipHistoryStatus200,
+		ResponseErrorConfig<
+			| ListOrganizationMembershipHistoryStatus400
+			| ListOrganizationMembershipHistoryStatus403
+			| ListOrganizationMembershipHistoryStatus404
+			| ListOrganizationMembershipHistoryStatus409
+			| ListOrganizationMembershipHistoryStatus422
+			| ListOrganizationMembershipHistoryStatus429
+			| ListOrganizationMembershipHistoryStatus500
+			| ListOrganizationMembershipHistoryStatus503
+		>,
+		ListOrganizationMembershipHistoryOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return listOrganizationMembershipHistory({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/membership/organizations/:organizationEntityId/history}
+ */
+export function useListOrganizationMembershipHistory<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			ListOrganizationMembershipHistoryStatus200,
+			ResponseErrorConfig<
+				| ListOrganizationMembershipHistoryStatus400
+				| ListOrganizationMembershipHistoryStatus403
+				| ListOrganizationMembershipHistoryStatus404
+				| ListOrganizationMembershipHistoryStatus409
+				| ListOrganizationMembershipHistoryStatus422
+				| ListOrganizationMembershipHistoryStatus429
+				| ListOrganizationMembershipHistoryStatus500
+				| ListOrganizationMembershipHistoryStatus503
+			>,
+			ListOrganizationMembershipHistoryOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? listOrganizationMembershipHistoryMutationKey();
+
+	const baseOptions = listOrganizationMembershipHistoryMutationOptions(
+		config,
+	) as UseMutationOptions<
+		ListOrganizationMembershipHistoryStatus200,
+		ResponseErrorConfig<
+			| ListOrganizationMembershipHistoryStatus400
+			| ListOrganizationMembershipHistoryStatus403
+			| ListOrganizationMembershipHistoryStatus404
+			| ListOrganizationMembershipHistoryStatus409
+			| ListOrganizationMembershipHistoryStatus422
+			| ListOrganizationMembershipHistoryStatus429
+			| ListOrganizationMembershipHistoryStatus500
+			| ListOrganizationMembershipHistoryStatus503
+		>,
+		ListOrganizationMembershipHistoryOptions,
+		TContext
+	>;
+
+	return useMutation<
+		ListOrganizationMembershipHistoryStatus200,
+		ResponseErrorConfig<
+			| ListOrganizationMembershipHistoryStatus400
+			| ListOrganizationMembershipHistoryStatus403
+			| ListOrganizationMembershipHistoryStatus404
+			| ListOrganizationMembershipHistoryStatus409
+			| ListOrganizationMembershipHistoryStatus422
+			| ListOrganizationMembershipHistoryStatus429
+			| ListOrganizationMembershipHistoryStatus500
+			| ListOrganizationMembershipHistoryStatus503
+		>,
+		ListOrganizationMembershipHistoryOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		ListOrganizationMembershipHistoryStatus200,
+		ResponseErrorConfig<
+			| ListOrganizationMembershipHistoryStatus400
+			| ListOrganizationMembershipHistoryStatus403
+			| ListOrganizationMembershipHistoryStatus404
+			| ListOrganizationMembershipHistoryStatus409
+			| ListOrganizationMembershipHistoryStatus422
+			| ListOrganizationMembershipHistoryStatus429
+			| ListOrganizationMembershipHistoryStatus500
+			| ListOrganizationMembershipHistoryStatus503
+		>,
+		ListOrganizationMembershipHistoryOptions,
+		TContext
+	>;
 }
 
 export const listManagedOrganizationInvitationsQueryKey = ({
@@ -34430,7 +35087,9 @@ export function listManagedOrganizationInvitationsQueryOptions(
 			| ListManagedOrganizationInvitationsStatus404
 			| ListManagedOrganizationInvitationsStatus409
 			| ListManagedOrganizationInvitationsStatus422
+			| ListManagedOrganizationInvitationsStatus429
 			| ListManagedOrganizationInvitationsStatus500
+			| ListManagedOrganizationInvitationsStatus503
 		>,
 		ListManagedOrganizationInvitationsStatus200,
 		typeof queryKey
@@ -34476,7 +35135,9 @@ export function useListManagedOrganizationInvitations<
 					| ListManagedOrganizationInvitationsStatus404
 					| ListManagedOrganizationInvitationsStatus409
 					| ListManagedOrganizationInvitationsStatus422
+					| ListManagedOrganizationInvitationsStatus429
 					| ListManagedOrganizationInvitationsStatus500
+					| ListManagedOrganizationInvitationsStatus503
 				>,
 				TData,
 				TQueryData,
@@ -34509,7 +35170,9 @@ export function useListManagedOrganizationInvitations<
 			| ListManagedOrganizationInvitationsStatus404
 			| ListManagedOrganizationInvitationsStatus409
 			| ListManagedOrganizationInvitationsStatus422
+			| ListManagedOrganizationInvitationsStatus429
 			| ListManagedOrganizationInvitationsStatus500
+			| ListManagedOrganizationInvitationsStatus503
 		>
 	> & { queryKey: TQueryKey };
 
@@ -34536,6 +35199,7 @@ export function inviteOrganizationMemberMutationOptions<TContext = unknown>(
 			| InviteOrganizationMemberStatus409
 			| InviteOrganizationMemberStatus422
 			| InviteOrganizationMemberStatus500
+			| InviteOrganizationMemberStatus503
 		>,
 		InviteOrganizationMemberOptions,
 		TContext
@@ -34561,6 +35225,7 @@ export function useInviteOrganizationMember<TContext>(
 				| InviteOrganizationMemberStatus409
 				| InviteOrganizationMemberStatus422
 				| InviteOrganizationMemberStatus500
+				| InviteOrganizationMemberStatus503
 			>,
 			InviteOrganizationMemberOptions,
 			TContext
@@ -34581,6 +35246,7 @@ export function useInviteOrganizationMember<TContext>(
 			| InviteOrganizationMemberStatus409
 			| InviteOrganizationMemberStatus422
 			| InviteOrganizationMemberStatus500
+			| InviteOrganizationMemberStatus503
 		>,
 		InviteOrganizationMemberOptions,
 		TContext
@@ -34595,6 +35261,7 @@ export function useInviteOrganizationMember<TContext>(
 			| InviteOrganizationMemberStatus409
 			| InviteOrganizationMemberStatus422
 			| InviteOrganizationMemberStatus500
+			| InviteOrganizationMemberStatus503
 		>,
 		InviteOrganizationMemberOptions,
 		TContext
@@ -34614,39 +35281,41 @@ export function useInviteOrganizationMember<TContext>(
 			| InviteOrganizationMemberStatus409
 			| InviteOrganizationMemberStatus422
 			| InviteOrganizationMemberStatus500
+			| InviteOrganizationMemberStatus503
 		>,
 		InviteOrganizationMemberOptions,
 		TContext
 	>;
 }
 
-export const cancelOrganizationMembershipInvitationMutationKey = () =>
+export const revokeOrganizationMembershipInvitationMutationKey = () =>
 	[
 		{
-			url: "/api/v1/participation/membership/organizations/:organizationEntityId/invitations/:invitationId/cancel",
+			url: "/api/v1/participation/membership/organizations/:organizationEntityId/invitations/:invitationId/revoke",
 		},
 	] as const;
 
-export function cancelOrganizationMembershipInvitationMutationOptions<TContext = unknown>(
+export function revokeOrganizationMembershipInvitationMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = cancelOrganizationMembershipInvitationMutationKey();
+	const mutationKey = revokeOrganizationMembershipInvitationMutationKey();
 	return mutationOptions<
-		CancelOrganizationMembershipInvitationStatus200,
+		RevokeOrganizationMembershipInvitationStatus200,
 		ResponseErrorConfig<
-			| CancelOrganizationMembershipInvitationStatus400
-			| CancelOrganizationMembershipInvitationStatus403
-			| CancelOrganizationMembershipInvitationStatus404
-			| CancelOrganizationMembershipInvitationStatus409
-			| CancelOrganizationMembershipInvitationStatus422
-			| CancelOrganizationMembershipInvitationStatus500
+			| RevokeOrganizationMembershipInvitationStatus400
+			| RevokeOrganizationMembershipInvitationStatus403
+			| RevokeOrganizationMembershipInvitationStatus404
+			| RevokeOrganizationMembershipInvitationStatus409
+			| RevokeOrganizationMembershipInvitationStatus422
+			| RevokeOrganizationMembershipInvitationStatus500
+			| RevokeOrganizationMembershipInvitationStatus503
 		>,
-		CancelOrganizationMembershipInvitationOptions,
+		RevokeOrganizationMembershipInvitationOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			return cancelOrganizationMembershipInvitation({
+			return revokeOrganizationMembershipInvitation({
 				...config,
 				path,
 				body,
@@ -34657,21 +35326,22 @@ export function cancelOrganizationMembershipInvitationMutationOptions<TContext =
 }
 
 /**
- * {@link /api/v1/participation/membership/organizations/:organizationEntityId/invitations/:invitationId/cancel}
+ * {@link /api/v1/participation/membership/organizations/:organizationEntityId/invitations/:invitationId/revoke}
  */
-export function useCancelOrganizationMembershipInvitation<TContext>(
+export function useRevokeOrganizationMembershipInvitation<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			CancelOrganizationMembershipInvitationStatus200,
+			RevokeOrganizationMembershipInvitationStatus200,
 			ResponseErrorConfig<
-				| CancelOrganizationMembershipInvitationStatus400
-				| CancelOrganizationMembershipInvitationStatus403
-				| CancelOrganizationMembershipInvitationStatus404
-				| CancelOrganizationMembershipInvitationStatus409
-				| CancelOrganizationMembershipInvitationStatus422
-				| CancelOrganizationMembershipInvitationStatus500
+				| RevokeOrganizationMembershipInvitationStatus400
+				| RevokeOrganizationMembershipInvitationStatus403
+				| RevokeOrganizationMembershipInvitationStatus404
+				| RevokeOrganizationMembershipInvitationStatus409
+				| RevokeOrganizationMembershipInvitationStatus422
+				| RevokeOrganizationMembershipInvitationStatus500
+				| RevokeOrganizationMembershipInvitationStatus503
 			>,
-			CancelOrganizationMembershipInvitationOptions,
+			RevokeOrganizationMembershipInvitationOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -34680,35 +35350,37 @@ export function useCancelOrganizationMembershipInvitation<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ?? cancelOrganizationMembershipInvitationMutationKey();
+		mutationOptions.mutationKey ?? revokeOrganizationMembershipInvitationMutationKey();
 
-	const baseOptions = cancelOrganizationMembershipInvitationMutationOptions(
+	const baseOptions = revokeOrganizationMembershipInvitationMutationOptions(
 		config,
 	) as UseMutationOptions<
-		CancelOrganizationMembershipInvitationStatus200,
+		RevokeOrganizationMembershipInvitationStatus200,
 		ResponseErrorConfig<
-			| CancelOrganizationMembershipInvitationStatus400
-			| CancelOrganizationMembershipInvitationStatus403
-			| CancelOrganizationMembershipInvitationStatus404
-			| CancelOrganizationMembershipInvitationStatus409
-			| CancelOrganizationMembershipInvitationStatus422
-			| CancelOrganizationMembershipInvitationStatus500
+			| RevokeOrganizationMembershipInvitationStatus400
+			| RevokeOrganizationMembershipInvitationStatus403
+			| RevokeOrganizationMembershipInvitationStatus404
+			| RevokeOrganizationMembershipInvitationStatus409
+			| RevokeOrganizationMembershipInvitationStatus422
+			| RevokeOrganizationMembershipInvitationStatus500
+			| RevokeOrganizationMembershipInvitationStatus503
 		>,
-		CancelOrganizationMembershipInvitationOptions,
+		RevokeOrganizationMembershipInvitationOptions,
 		TContext
 	>;
 
 	return useMutation<
-		CancelOrganizationMembershipInvitationStatus200,
+		RevokeOrganizationMembershipInvitationStatus200,
 		ResponseErrorConfig<
-			| CancelOrganizationMembershipInvitationStatus400
-			| CancelOrganizationMembershipInvitationStatus403
-			| CancelOrganizationMembershipInvitationStatus404
-			| CancelOrganizationMembershipInvitationStatus409
-			| CancelOrganizationMembershipInvitationStatus422
-			| CancelOrganizationMembershipInvitationStatus500
+			| RevokeOrganizationMembershipInvitationStatus400
+			| RevokeOrganizationMembershipInvitationStatus403
+			| RevokeOrganizationMembershipInvitationStatus404
+			| RevokeOrganizationMembershipInvitationStatus409
+			| RevokeOrganizationMembershipInvitationStatus422
+			| RevokeOrganizationMembershipInvitationStatus500
+			| RevokeOrganizationMembershipInvitationStatus503
 		>,
-		CancelOrganizationMembershipInvitationOptions,
+		RevokeOrganizationMembershipInvitationOptions,
 		TContext
 	>(
 		{
@@ -34718,25 +35390,24 @@ export function useCancelOrganizationMembershipInvitation<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		CancelOrganizationMembershipInvitationStatus200,
+		RevokeOrganizationMembershipInvitationStatus200,
 		ResponseErrorConfig<
-			| CancelOrganizationMembershipInvitationStatus400
-			| CancelOrganizationMembershipInvitationStatus403
-			| CancelOrganizationMembershipInvitationStatus404
-			| CancelOrganizationMembershipInvitationStatus409
-			| CancelOrganizationMembershipInvitationStatus422
-			| CancelOrganizationMembershipInvitationStatus500
+			| RevokeOrganizationMembershipInvitationStatus400
+			| RevokeOrganizationMembershipInvitationStatus403
+			| RevokeOrganizationMembershipInvitationStatus404
+			| RevokeOrganizationMembershipInvitationStatus409
+			| RevokeOrganizationMembershipInvitationStatus422
+			| RevokeOrganizationMembershipInvitationStatus500
+			| RevokeOrganizationMembershipInvitationStatus503
 		>,
-		CancelOrganizationMembershipInvitationOptions,
+		RevokeOrganizationMembershipInvitationOptions,
 		TContext
 	>;
 }
 
 export const removeOrganizationMemberMutationKey = () =>
 	[
-		{
-			url: "/api/v1/participation/membership/organizations/:organizationEntityId/members/:memberEntityId/remove",
-		},
+		{ url: "/api/v1/participation/membership/organizations/:organizationEntityId/members/remove" },
 	] as const;
 
 export function removeOrganizationMemberMutationOptions<TContext = unknown>(
@@ -34752,6 +35423,7 @@ export function removeOrganizationMemberMutationOptions<TContext = unknown>(
 			| RemoveOrganizationMemberStatus409
 			| RemoveOrganizationMemberStatus422
 			| RemoveOrganizationMemberStatus500
+			| RemoveOrganizationMemberStatus503
 		>,
 		RemoveOrganizationMemberOptions,
 		TContext
@@ -34764,7 +35436,7 @@ export function removeOrganizationMemberMutationOptions<TContext = unknown>(
 }
 
 /**
- * {@link /api/v1/participation/membership/organizations/:organizationEntityId/members/:memberEntityId/remove}
+ * {@link /api/v1/participation/membership/organizations/:organizationEntityId/members/remove}
  */
 export function useRemoveOrganizationMember<TContext>(
 	options: {
@@ -34777,6 +35449,7 @@ export function useRemoveOrganizationMember<TContext>(
 				| RemoveOrganizationMemberStatus409
 				| RemoveOrganizationMemberStatus422
 				| RemoveOrganizationMemberStatus500
+				| RemoveOrganizationMemberStatus503
 			>,
 			RemoveOrganizationMemberOptions,
 			TContext
@@ -34797,6 +35470,7 @@ export function useRemoveOrganizationMember<TContext>(
 			| RemoveOrganizationMemberStatus409
 			| RemoveOrganizationMemberStatus422
 			| RemoveOrganizationMemberStatus500
+			| RemoveOrganizationMemberStatus503
 		>,
 		RemoveOrganizationMemberOptions,
 		TContext
@@ -34811,6 +35485,7 @@ export function useRemoveOrganizationMember<TContext>(
 			| RemoveOrganizationMemberStatus409
 			| RemoveOrganizationMemberStatus422
 			| RemoveOrganizationMemberStatus500
+			| RemoveOrganizationMemberStatus503
 		>,
 		RemoveOrganizationMemberOptions,
 		TContext
@@ -34830,6 +35505,7 @@ export function useRemoveOrganizationMember<TContext>(
 			| RemoveOrganizationMemberStatus409
 			| RemoveOrganizationMemberStatus422
 			| RemoveOrganizationMemberStatus500
+			| RemoveOrganizationMemberStatus503
 		>,
 		RemoveOrganizationMemberOptions,
 		TContext
@@ -34857,7 +35533,9 @@ export function listOwnOrganizationMembershipInvitationsQueryOptions(
 			| ListOwnOrganizationMembershipInvitationsStatus404
 			| ListOwnOrganizationMembershipInvitationsStatus409
 			| ListOwnOrganizationMembershipInvitationsStatus422
+			| ListOwnOrganizationMembershipInvitationsStatus429
 			| ListOwnOrganizationMembershipInvitationsStatus500
+			| ListOwnOrganizationMembershipInvitationsStatus503
 		>,
 		ListOwnOrganizationMembershipInvitationsStatus200,
 		typeof queryKey
@@ -34898,7 +35576,9 @@ export function useListOwnOrganizationMembershipInvitations<
 					| ListOwnOrganizationMembershipInvitationsStatus404
 					| ListOwnOrganizationMembershipInvitationsStatus409
 					| ListOwnOrganizationMembershipInvitationsStatus422
+					| ListOwnOrganizationMembershipInvitationsStatus429
 					| ListOwnOrganizationMembershipInvitationsStatus500
+					| ListOwnOrganizationMembershipInvitationsStatus503
 				>,
 				TData,
 				TQueryData,
@@ -34928,7 +35608,9 @@ export function useListOwnOrganizationMembershipInvitations<
 			| ListOwnOrganizationMembershipInvitationsStatus404
 			| ListOwnOrganizationMembershipInvitationsStatus409
 			| ListOwnOrganizationMembershipInvitationsStatus422
+			| ListOwnOrganizationMembershipInvitationsStatus429
 			| ListOwnOrganizationMembershipInvitationsStatus500
+			| ListOwnOrganizationMembershipInvitationsStatus503
 		>
 	> & { queryKey: TQueryKey };
 
@@ -34961,7 +35643,9 @@ export function listOwnOrganizationMembershipsQueryOptions(
 			| ListOwnOrganizationMembershipsStatus404
 			| ListOwnOrganizationMembershipsStatus409
 			| ListOwnOrganizationMembershipsStatus422
+			| ListOwnOrganizationMembershipsStatus429
 			| ListOwnOrganizationMembershipsStatus500
+			| ListOwnOrganizationMembershipsStatus503
 		>,
 		ListOwnOrganizationMembershipsStatus200,
 		typeof queryKey
@@ -35002,7 +35686,9 @@ export function useListOwnOrganizationMemberships<
 					| ListOwnOrganizationMembershipsStatus404
 					| ListOwnOrganizationMembershipsStatus409
 					| ListOwnOrganizationMembershipsStatus422
+					| ListOwnOrganizationMembershipsStatus429
 					| ListOwnOrganizationMembershipsStatus500
+					| ListOwnOrganizationMembershipsStatus503
 				>,
 				TData,
 				TQueryData,
@@ -35032,7 +35718,9 @@ export function useListOwnOrganizationMemberships<
 			| ListOwnOrganizationMembershipsStatus404
 			| ListOwnOrganizationMembershipsStatus409
 			| ListOwnOrganizationMembershipsStatus422
+			| ListOwnOrganizationMembershipsStatus429
 			| ListOwnOrganizationMembershipsStatus500
+			| ListOwnOrganizationMembershipsStatus503
 		>
 	> & { queryKey: TQueryKey };
 
@@ -35057,6 +35745,7 @@ export function acceptOrganizationMembershipInvitationMutationOptions<TContext =
 			| AcceptOrganizationMembershipInvitationStatus409
 			| AcceptOrganizationMembershipInvitationStatus422
 			| AcceptOrganizationMembershipInvitationStatus500
+			| AcceptOrganizationMembershipInvitationStatus503
 		>,
 		AcceptOrganizationMembershipInvitationOptions,
 		TContext
@@ -35087,6 +35776,7 @@ export function useAcceptOrganizationMembershipInvitation<TContext>(
 				| AcceptOrganizationMembershipInvitationStatus409
 				| AcceptOrganizationMembershipInvitationStatus422
 				| AcceptOrganizationMembershipInvitationStatus500
+				| AcceptOrganizationMembershipInvitationStatus503
 			>,
 			AcceptOrganizationMembershipInvitationOptions,
 			TContext
@@ -35110,6 +35800,7 @@ export function useAcceptOrganizationMembershipInvitation<TContext>(
 			| AcceptOrganizationMembershipInvitationStatus409
 			| AcceptOrganizationMembershipInvitationStatus422
 			| AcceptOrganizationMembershipInvitationStatus500
+			| AcceptOrganizationMembershipInvitationStatus503
 		>,
 		AcceptOrganizationMembershipInvitationOptions,
 		TContext
@@ -35124,6 +35815,7 @@ export function useAcceptOrganizationMembershipInvitation<TContext>(
 			| AcceptOrganizationMembershipInvitationStatus409
 			| AcceptOrganizationMembershipInvitationStatus422
 			| AcceptOrganizationMembershipInvitationStatus500
+			| AcceptOrganizationMembershipInvitationStatus503
 		>,
 		AcceptOrganizationMembershipInvitationOptions,
 		TContext
@@ -35143,6 +35835,7 @@ export function useAcceptOrganizationMembershipInvitation<TContext>(
 			| AcceptOrganizationMembershipInvitationStatus409
 			| AcceptOrganizationMembershipInvitationStatus422
 			| AcceptOrganizationMembershipInvitationStatus500
+			| AcceptOrganizationMembershipInvitationStatus503
 		>,
 		AcceptOrganizationMembershipInvitationOptions,
 		TContext
@@ -35165,6 +35858,7 @@ export function declineOrganizationMembershipInvitationMutationOptions<TContext 
 			| DeclineOrganizationMembershipInvitationStatus409
 			| DeclineOrganizationMembershipInvitationStatus422
 			| DeclineOrganizationMembershipInvitationStatus500
+			| DeclineOrganizationMembershipInvitationStatus503
 		>,
 		DeclineOrganizationMembershipInvitationOptions,
 		TContext
@@ -35195,6 +35889,7 @@ export function useDeclineOrganizationMembershipInvitation<TContext>(
 				| DeclineOrganizationMembershipInvitationStatus409
 				| DeclineOrganizationMembershipInvitationStatus422
 				| DeclineOrganizationMembershipInvitationStatus500
+				| DeclineOrganizationMembershipInvitationStatus503
 			>,
 			DeclineOrganizationMembershipInvitationOptions,
 			TContext
@@ -35218,6 +35913,7 @@ export function useDeclineOrganizationMembershipInvitation<TContext>(
 			| DeclineOrganizationMembershipInvitationStatus409
 			| DeclineOrganizationMembershipInvitationStatus422
 			| DeclineOrganizationMembershipInvitationStatus500
+			| DeclineOrganizationMembershipInvitationStatus503
 		>,
 		DeclineOrganizationMembershipInvitationOptions,
 		TContext
@@ -35232,6 +35928,7 @@ export function useDeclineOrganizationMembershipInvitation<TContext>(
 			| DeclineOrganizationMembershipInvitationStatus409
 			| DeclineOrganizationMembershipInvitationStatus422
 			| DeclineOrganizationMembershipInvitationStatus500
+			| DeclineOrganizationMembershipInvitationStatus503
 		>,
 		DeclineOrganizationMembershipInvitationOptions,
 		TContext
@@ -35251,6 +35948,7 @@ export function useDeclineOrganizationMembershipInvitation<TContext>(
 			| DeclineOrganizationMembershipInvitationStatus409
 			| DeclineOrganizationMembershipInvitationStatus422
 			| DeclineOrganizationMembershipInvitationStatus500
+			| DeclineOrganizationMembershipInvitationStatus503
 		>,
 		DeclineOrganizationMembershipInvitationOptions,
 		TContext
@@ -35275,6 +35973,7 @@ export function leaveOrganizationMembershipMutationOptions<TContext = unknown>(
 			| LeaveOrganizationMembershipStatus409
 			| LeaveOrganizationMembershipStatus422
 			| LeaveOrganizationMembershipStatus500
+			| LeaveOrganizationMembershipStatus503
 		>,
 		LeaveOrganizationMembershipOptions,
 		TContext
@@ -35300,6 +35999,7 @@ export function useLeaveOrganizationMembership<TContext>(
 				| LeaveOrganizationMembershipStatus409
 				| LeaveOrganizationMembershipStatus422
 				| LeaveOrganizationMembershipStatus500
+				| LeaveOrganizationMembershipStatus503
 			>,
 			LeaveOrganizationMembershipOptions,
 			TContext
@@ -35320,6 +36020,7 @@ export function useLeaveOrganizationMembership<TContext>(
 			| LeaveOrganizationMembershipStatus409
 			| LeaveOrganizationMembershipStatus422
 			| LeaveOrganizationMembershipStatus500
+			| LeaveOrganizationMembershipStatus503
 		>,
 		LeaveOrganizationMembershipOptions,
 		TContext
@@ -35334,6 +36035,7 @@ export function useLeaveOrganizationMembership<TContext>(
 			| LeaveOrganizationMembershipStatus409
 			| LeaveOrganizationMembershipStatus422
 			| LeaveOrganizationMembershipStatus500
+			| LeaveOrganizationMembershipStatus503
 		>,
 		LeaveOrganizationMembershipOptions,
 		TContext
@@ -35353,8 +36055,332 @@ export function useLeaveOrganizationMembership<TContext>(
 			| LeaveOrganizationMembershipStatus409
 			| LeaveOrganizationMembershipStatus422
 			| LeaveOrganizationMembershipStatus500
+			| LeaveOrganizationMembershipStatus503
 		>,
 		LeaveOrganizationMembershipOptions,
+		TContext
+	>;
+}
+
+export const createOrganizationEnrollmentContactMutationKey = () =>
+	[
+		{ url: "/api/v1/participation/membership/organizations/:organizationEntityId/contacts" },
+	] as const;
+
+export function createOrganizationEnrollmentContactMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = createOrganizationEnrollmentContactMutationKey();
+	return mutationOptions<
+		CreateOrganizationEnrollmentContactStatus200,
+		ResponseErrorConfig<
+			| CreateOrganizationEnrollmentContactStatus403
+			| CreateOrganizationEnrollmentContactStatus404
+			| CreateOrganizationEnrollmentContactStatus409
+			| CreateOrganizationEnrollmentContactStatus422
+			| CreateOrganizationEnrollmentContactStatus500
+			| CreateOrganizationEnrollmentContactStatus503
+		>,
+		CreateOrganizationEnrollmentContactOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			return createOrganizationEnrollmentContact({ ...config, path, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/membership/organizations/:organizationEntityId/contacts}
+ */
+export function useCreateOrganizationEnrollmentContact<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			CreateOrganizationEnrollmentContactStatus200,
+			ResponseErrorConfig<
+				| CreateOrganizationEnrollmentContactStatus403
+				| CreateOrganizationEnrollmentContactStatus404
+				| CreateOrganizationEnrollmentContactStatus409
+				| CreateOrganizationEnrollmentContactStatus422
+				| CreateOrganizationEnrollmentContactStatus500
+				| CreateOrganizationEnrollmentContactStatus503
+			>,
+			CreateOrganizationEnrollmentContactOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? createOrganizationEnrollmentContactMutationKey();
+
+	const baseOptions = createOrganizationEnrollmentContactMutationOptions(
+		config,
+	) as UseMutationOptions<
+		CreateOrganizationEnrollmentContactStatus200,
+		ResponseErrorConfig<
+			| CreateOrganizationEnrollmentContactStatus403
+			| CreateOrganizationEnrollmentContactStatus404
+			| CreateOrganizationEnrollmentContactStatus409
+			| CreateOrganizationEnrollmentContactStatus422
+			| CreateOrganizationEnrollmentContactStatus500
+			| CreateOrganizationEnrollmentContactStatus503
+		>,
+		CreateOrganizationEnrollmentContactOptions,
+		TContext
+	>;
+
+	return useMutation<
+		CreateOrganizationEnrollmentContactStatus200,
+		ResponseErrorConfig<
+			| CreateOrganizationEnrollmentContactStatus403
+			| CreateOrganizationEnrollmentContactStatus404
+			| CreateOrganizationEnrollmentContactStatus409
+			| CreateOrganizationEnrollmentContactStatus422
+			| CreateOrganizationEnrollmentContactStatus500
+			| CreateOrganizationEnrollmentContactStatus503
+		>,
+		CreateOrganizationEnrollmentContactOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		CreateOrganizationEnrollmentContactStatus200,
+		ResponseErrorConfig<
+			| CreateOrganizationEnrollmentContactStatus403
+			| CreateOrganizationEnrollmentContactStatus404
+			| CreateOrganizationEnrollmentContactStatus409
+			| CreateOrganizationEnrollmentContactStatus422
+			| CreateOrganizationEnrollmentContactStatus500
+			| CreateOrganizationEnrollmentContactStatus503
+		>,
+		CreateOrganizationEnrollmentContactOptions,
+		TContext
+	>;
+}
+
+export const revokeOrganizationEnrollmentContactMutationKey = () =>
+	[{ url: "/api/v1/participation/membership/contacts/:id/revoke" }] as const;
+
+export function revokeOrganizationEnrollmentContactMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = revokeOrganizationEnrollmentContactMutationKey();
+	return mutationOptions<
+		RevokeOrganizationEnrollmentContactStatus200,
+		ResponseErrorConfig<
+			| RevokeOrganizationEnrollmentContactStatus403
+			| RevokeOrganizationEnrollmentContactStatus404
+			| RevokeOrganizationEnrollmentContactStatus409
+			| RevokeOrganizationEnrollmentContactStatus422
+			| RevokeOrganizationEnrollmentContactStatus500
+			| RevokeOrganizationEnrollmentContactStatus503
+		>,
+		RevokeOrganizationEnrollmentContactOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			return revokeOrganizationEnrollmentContact({ ...config, path, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/membership/contacts/:id/revoke}
+ */
+export function useRevokeOrganizationEnrollmentContact<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			RevokeOrganizationEnrollmentContactStatus200,
+			ResponseErrorConfig<
+				| RevokeOrganizationEnrollmentContactStatus403
+				| RevokeOrganizationEnrollmentContactStatus404
+				| RevokeOrganizationEnrollmentContactStatus409
+				| RevokeOrganizationEnrollmentContactStatus422
+				| RevokeOrganizationEnrollmentContactStatus500
+				| RevokeOrganizationEnrollmentContactStatus503
+			>,
+			RevokeOrganizationEnrollmentContactOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? revokeOrganizationEnrollmentContactMutationKey();
+
+	const baseOptions = revokeOrganizationEnrollmentContactMutationOptions(
+		config,
+	) as UseMutationOptions<
+		RevokeOrganizationEnrollmentContactStatus200,
+		ResponseErrorConfig<
+			| RevokeOrganizationEnrollmentContactStatus403
+			| RevokeOrganizationEnrollmentContactStatus404
+			| RevokeOrganizationEnrollmentContactStatus409
+			| RevokeOrganizationEnrollmentContactStatus422
+			| RevokeOrganizationEnrollmentContactStatus500
+			| RevokeOrganizationEnrollmentContactStatus503
+		>,
+		RevokeOrganizationEnrollmentContactOptions,
+		TContext
+	>;
+
+	return useMutation<
+		RevokeOrganizationEnrollmentContactStatus200,
+		ResponseErrorConfig<
+			| RevokeOrganizationEnrollmentContactStatus403
+			| RevokeOrganizationEnrollmentContactStatus404
+			| RevokeOrganizationEnrollmentContactStatus409
+			| RevokeOrganizationEnrollmentContactStatus422
+			| RevokeOrganizationEnrollmentContactStatus500
+			| RevokeOrganizationEnrollmentContactStatus503
+		>,
+		RevokeOrganizationEnrollmentContactOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		RevokeOrganizationEnrollmentContactStatus200,
+		ResponseErrorConfig<
+			| RevokeOrganizationEnrollmentContactStatus403
+			| RevokeOrganizationEnrollmentContactStatus404
+			| RevokeOrganizationEnrollmentContactStatus409
+			| RevokeOrganizationEnrollmentContactStatus422
+			| RevokeOrganizationEnrollmentContactStatus500
+			| RevokeOrganizationEnrollmentContactStatus503
+		>,
+		RevokeOrganizationEnrollmentContactOptions,
+		TContext
+	>;
+}
+
+export const resolveOrganizationEnrollmentContactMutationKey = () =>
+	[
+		{ url: "/api/v1/participation/membership/organizations/:organizationEntityId/recipients" },
+	] as const;
+
+export function resolveOrganizationEnrollmentContactMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = resolveOrganizationEnrollmentContactMutationKey();
+	return mutationOptions<
+		ResolveOrganizationEnrollmentContactStatus200,
+		ResponseErrorConfig<
+			| ResolveOrganizationEnrollmentContactStatus400
+			| ResolveOrganizationEnrollmentContactStatus403
+			| ResolveOrganizationEnrollmentContactStatus404
+			| ResolveOrganizationEnrollmentContactStatus409
+			| ResolveOrganizationEnrollmentContactStatus422
+			| ResolveOrganizationEnrollmentContactStatus500
+			| ResolveOrganizationEnrollmentContactStatus503
+		>,
+		ResolveOrganizationEnrollmentContactOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return resolveOrganizationEnrollmentContact({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/membership/organizations/:organizationEntityId/recipients}
+ */
+export function useResolveOrganizationEnrollmentContact<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			ResolveOrganizationEnrollmentContactStatus200,
+			ResponseErrorConfig<
+				| ResolveOrganizationEnrollmentContactStatus400
+				| ResolveOrganizationEnrollmentContactStatus403
+				| ResolveOrganizationEnrollmentContactStatus404
+				| ResolveOrganizationEnrollmentContactStatus409
+				| ResolveOrganizationEnrollmentContactStatus422
+				| ResolveOrganizationEnrollmentContactStatus500
+				| ResolveOrganizationEnrollmentContactStatus503
+			>,
+			ResolveOrganizationEnrollmentContactOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? resolveOrganizationEnrollmentContactMutationKey();
+
+	const baseOptions = resolveOrganizationEnrollmentContactMutationOptions(
+		config,
+	) as UseMutationOptions<
+		ResolveOrganizationEnrollmentContactStatus200,
+		ResponseErrorConfig<
+			| ResolveOrganizationEnrollmentContactStatus400
+			| ResolveOrganizationEnrollmentContactStatus403
+			| ResolveOrganizationEnrollmentContactStatus404
+			| ResolveOrganizationEnrollmentContactStatus409
+			| ResolveOrganizationEnrollmentContactStatus422
+			| ResolveOrganizationEnrollmentContactStatus500
+			| ResolveOrganizationEnrollmentContactStatus503
+		>,
+		ResolveOrganizationEnrollmentContactOptions,
+		TContext
+	>;
+
+	return useMutation<
+		ResolveOrganizationEnrollmentContactStatus200,
+		ResponseErrorConfig<
+			| ResolveOrganizationEnrollmentContactStatus400
+			| ResolveOrganizationEnrollmentContactStatus403
+			| ResolveOrganizationEnrollmentContactStatus404
+			| ResolveOrganizationEnrollmentContactStatus409
+			| ResolveOrganizationEnrollmentContactStatus422
+			| ResolveOrganizationEnrollmentContactStatus500
+			| ResolveOrganizationEnrollmentContactStatus503
+		>,
+		ResolveOrganizationEnrollmentContactOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		ResolveOrganizationEnrollmentContactStatus200,
+		ResponseErrorConfig<
+			| ResolveOrganizationEnrollmentContactStatus400
+			| ResolveOrganizationEnrollmentContactStatus403
+			| ResolveOrganizationEnrollmentContactStatus404
+			| ResolveOrganizationEnrollmentContactStatus409
+			| ResolveOrganizationEnrollmentContactStatus422
+			| ResolveOrganizationEnrollmentContactStatus500
+			| ResolveOrganizationEnrollmentContactStatus503
+		>,
+		ResolveOrganizationEnrollmentContactOptions,
 		TContext
 	>;
 }

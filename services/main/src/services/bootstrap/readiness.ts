@@ -180,10 +180,10 @@ export async function isInitialInstallationBundleReady(): Promise<boolean> {
 				),
 			),
 		) &&
-		bootstrapControlGrants.length === (BootstrapProfileManifest.length - 1) * 3 &&
+		bootstrapControlGrants.length === (BootstrapProfileManifest.length - 1) * 2 &&
 		BootstrapProfileManifest.filter((entity) => entity.key !== "platformAdministrator").every(
 			(entity) =>
-				["entity.security", "entity.publish", "entity.membership"].every((capability) =>
+				["entity.security", "entity.publish"].every((capability) =>
 					bootstrapControlGrants.some(
 						(grant) =>
 							grant.actingEntityId === entity.profileId &&

@@ -1,4 +1,4 @@
-h1:esy9G2MUOTiWWAoVBHcMW+F+ECHhbqTSfzynlRB6DeU=
+h1:aBWhQwUQeb7//vdZM89L9MBuWu8RafGetHwkYpmB0Gk=
 20260908000000_operational_target_baseline.sql h1:TJA7Hsx5yrHy3qHeXTSx3Dlc9EqR+z9pQYi/4EFrx/4=
 20260910163748_reference_value.sql h1:Ypzqvw/grXpKO/5P0EyRh9cewhSK4GPFA8jqrBYHdHM=
 20260910173919_revision_reference.sql h1:KflEkT60lsDNJjWaGFenKXYY0cabUrBQerceR+bIDRQ=
@@ -50,3 +50,5 @@ h1:esy9G2MUOTiWWAoVBHcMW+F+ECHhbqTSfzynlRB6DeU=
 20260915054726_access_group_admission.sql h1:WZR4Pk6duXNFep5NokBOMGq2WtJV0C1gdySj4jVf0hw=
 20260915061437_access_group_impact.sql h1:hoexIQT06DEMSrNYGJfE6X9pJEHk4628+VNp/SaUPRM=
 20260915062047_access_group_selection_receipts.sql h1:GhCRzR+UsDGYTuwZZD74QMK4WImROePHFgiE23bXYko=
+20260915065058_organization_membership.sql h1:vrYihkaGLGePiWqAfxKn/FjHG6W316FAh87U/FEHQjc=
+20260915065726_organization_membership_directory.sql h1:z2GcYgzjA/UXP5XYYfKnsYmtRCsAPdxlWUYE/NYNosI=

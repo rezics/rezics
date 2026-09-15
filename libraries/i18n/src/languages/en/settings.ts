@@ -30,13 +30,12 @@ export default {
 		emptyMembers: "No members yet.",
 		emptyOrganizations: "You have not joined an organization.",
 		emptyManagement: "You do not currently manage any member lists.",
-		acceptPrompt:
-			"Accepting adds your public identity to this organization’s member list, visible to its membership managers.",
+		acceptPrompt: "Accepting enrolls your signed-in account as a private member of this organization.",
 		removePrompt:
 			"Removing membership leaves separately granted publishing, security and management permissions unchanged.",
 		leavePrompt:
 			"Leaving removes your membership. Any separate permissions you hold remain unchanged.",
-		recipientHint: "Use the public identity of an existing account.",
+		recipientHint: `Enter the ${verbatimTerms.id.value} of the ${enTerminology.entity.forms.label} you want to invite.`,
 		states: {
 			pending: "Pending",
 			accepted: "Accepted",

@@ -28,13 +28,12 @@ export default {
 		emptyMembers: "Noch keine Mitglieder.",
 		emptyOrganizations: `Du bist keiner ${deTerminology.entity.forms.organizationLabel} beigetreten.`,
 		emptyManagement: "Du verwaltest derzeit keine Mitgliederlisten.",
-		acceptPrompt:
-			"Wenn du annimmst, wird deine öffentliche Identität in die für Mitgliedschaftsverantwortliche sichtbare Mitgliederliste aufgenommen.",
+		acceptPrompt: "Wenn du annimmst, tritt dein angemeldetes Konto dieser Organisation als privates Mitglied bei.",
 		removePrompt:
 			"Das Entfernen der Mitgliedschaft ändert keine gesondert vergebenen Veröffentlichungs-, Sicherheits- oder Verwaltungsrechte.",
 		leavePrompt:
 			"Beim Verlassen endet deine Mitgliedschaft. Gesondert vergebene Berechtigungen bleiben unverändert.",
-		recipientHint: "Verwende die öffentliche Identität eines bestehenden Kontos.",
+		recipientHint: `Gib die ${verbatimTerms.id.value} der ${deTerminology.entity.forms.label} ein, die du einladen möchtest.`,
 		states: {
 			pending: "Offen",
 			accepted: "Angenommen",

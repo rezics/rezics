@@ -623,14 +623,24 @@ import type {
 	PutApiAccountBlocksByIdResponses,
 	DeleteApiAccountBlocksByIdOptions,
 	DeleteApiAccountBlocksByIdResponses,
+	ListMembershipManagedOrganizationsOptions,
+	ListMembershipManagedOrganizationsResponses,
+	CreateNativeOrganizationOptions,
+	CreateNativeOrganizationResponses,
+	SelectOrganizationRecoveryRecipientOptions,
+	SelectOrganizationRecoveryRecipientResponses,
+	RecoverNativeOrganizationOptions,
+	RecoverNativeOrganizationResponses,
 	ListManagedOrganizationMembersOptions,
 	ListManagedOrganizationMembersResponses,
+	ListOrganizationMembershipHistoryOptions,
+	ListOrganizationMembershipHistoryResponses,
 	ListManagedOrganizationInvitationsOptions,
 	ListManagedOrganizationInvitationsResponses,
 	InviteOrganizationMemberOptions,
 	InviteOrganizationMemberResponses,
-	CancelOrganizationMembershipInvitationOptions,
-	CancelOrganizationMembershipInvitationResponses,
+	RevokeOrganizationMembershipInvitationOptions,
+	RevokeOrganizationMembershipInvitationResponses,
 	RemoveOrganizationMemberOptions,
 	RemoveOrganizationMemberResponses,
 	ListOwnOrganizationMembershipInvitationsOptions,
@@ -641,6 +651,12 @@ import type {
 	DeclineOrganizationMembershipInvitationResponses,
 	LeaveOrganizationMembershipOptions,
 	LeaveOrganizationMembershipResponses,
+	CreateOrganizationEnrollmentContactOptions,
+	CreateOrganizationEnrollmentContactResponses,
+	RevokeOrganizationEnrollmentContactOptions,
+	RevokeOrganizationEnrollmentContactResponses,
+	ResolveOrganizationEnrollmentContactOptions,
+	ResolveOrganizationEnrollmentContactResponses,
 	ListManagedOrganizationsOptions,
 	ListManagedOrganizationsResponses,
 	CreateManagedOrganizationOptions,
@@ -7537,6 +7553,81 @@ export function deleteApiAccountBlocksById<ThrowOnError extends boolean = true>(
 }
 
 /**
+ * {@link /api/v1/participation/membership/managed-organizations}
+ */
+export function listMembershipManagedOrganizations<ThrowOnError extends boolean = true>(
+	options: Options<ListMembershipManagedOrganizationsOptions, ThrowOnError> = {},
+): Unwrappable<RequestResult<ListMembershipManagedOrganizationsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/participation/membership/managed-organizations",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ListMembershipManagedOrganizationsResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/participation/membership/organizations}
+ */
+export function createNativeOrganization<ThrowOnError extends boolean = true>(
+	options: Options<CreateNativeOrganizationOptions, ThrowOnError>,
+): Unwrappable<RequestResult<CreateNativeOrganizationResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/participation/membership/organizations",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<CreateNativeOrganizationResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/participation/membership/organizations/:organizationEntityId/recovery-recipient}
+ */
+export function selectOrganizationRecoveryRecipient<ThrowOnError extends boolean = true>(
+	options: Options<SelectOrganizationRecoveryRecipientOptions, ThrowOnError>,
+): Unwrappable<RequestResult<SelectOrganizationRecoveryRecipientResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/participation/membership/organizations/{organizationEntityId}/recovery-recipient",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<SelectOrganizationRecoveryRecipientResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/participation/membership/organizations/:organizationEntityId/recover}
+ */
+export function recoverNativeOrganization<ThrowOnError extends boolean = true>(
+	options: Options<RecoverNativeOrganizationOptions, ThrowOnError>,
+): Unwrappable<RequestResult<RecoverNativeOrganizationResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/participation/membership/organizations/{organizationEntityId}/recover",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<RecoverNativeOrganizationResponses, ThrowOnError>>,
+	);
+}
+
+/**
  * {@link /api/v1/participation/membership/organizations/:organizationEntityId/members}
  */
 export function listManagedOrganizationMembers<ThrowOnError extends boolean = true>(
@@ -7548,9 +7639,33 @@ export function listManagedOrganizationMembers<ThrowOnError extends boolean = tr
 		request({
 			method: "GET",
 			url: "/api/v1/participation/membership/organizations/{organizationEntityId}/members",
-			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
 			...config,
 		}) as Promise<RequestResult<ListManagedOrganizationMembersResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/participation/membership/organizations/:organizationEntityId/history}
+ */
+export function listOrganizationMembershipHistory<ThrowOnError extends boolean = true>(
+	options: Options<ListOrganizationMembershipHistoryOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ListOrganizationMembershipHistoryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/participation/membership/organizations/{organizationEntityId}/history",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ListOrganizationMembershipHistoryResponses, ThrowOnError>>,
 	);
 }
 
@@ -7566,7 +7681,10 @@ export function listManagedOrganizationInvitations<ThrowOnError extends boolean 
 		request({
 			method: "GET",
 			url: "/api/v1/participation/membership/organizations/{organizationEntityId}/invitations",
-			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
 			...config,
 		}) as Promise<RequestResult<ListManagedOrganizationInvitationsResponses, ThrowOnError>>,
 	);
@@ -7591,25 +7709,25 @@ export function inviteOrganizationMember<ThrowOnError extends boolean = true>(
 }
 
 /**
- * {@link /api/v1/participation/membership/organizations/:organizationEntityId/invitations/:invitationId/cancel}
+ * {@link /api/v1/participation/membership/organizations/:organizationEntityId/invitations/:invitationId/revoke}
  */
-export function cancelOrganizationMembershipInvitation<ThrowOnError extends boolean = true>(
-	options: Options<CancelOrganizationMembershipInvitationOptions, ThrowOnError>,
-): Unwrappable<RequestResult<CancelOrganizationMembershipInvitationResponses, ThrowOnError>> {
+export function revokeOrganizationMembershipInvitation<ThrowOnError extends boolean = true>(
+	options: Options<RevokeOrganizationMembershipInvitationOptions, ThrowOnError>,
+): Unwrappable<RequestResult<RevokeOrganizationMembershipInvitationResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return withUnwrap(
 		request({
 			method: "POST",
-			url: "/api/v1/participation/membership/organizations/{organizationEntityId}/invitations/{invitationId}/cancel",
+			url: "/api/v1/participation/membership/organizations/{organizationEntityId}/invitations/{invitationId}/revoke",
 			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 			...config,
-		}) as Promise<RequestResult<CancelOrganizationMembershipInvitationResponses, ThrowOnError>>,
+		}) as Promise<RequestResult<RevokeOrganizationMembershipInvitationResponses, ThrowOnError>>,
 	);
 }
 
 /**
- * {@link /api/v1/participation/membership/organizations/:organizationEntityId/members/:memberEntityId/remove}
+ * {@link /api/v1/participation/membership/organizations/:organizationEntityId/members/remove}
  */
 export function removeOrganizationMember<ThrowOnError extends boolean = true>(
 	options: Options<RemoveOrganizationMemberOptions, ThrowOnError>,
@@ -7619,7 +7737,7 @@ export function removeOrganizationMember<ThrowOnError extends boolean = true>(
 	return withUnwrap(
 		request({
 			method: "POST",
-			url: "/api/v1/participation/membership/organizations/{organizationEntityId}/members/{memberEntityId}/remove",
+			url: "/api/v1/participation/membership/organizations/{organizationEntityId}/members/remove",
 			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 			...config,
 		}) as Promise<RequestResult<RemoveOrganizationMemberResponses, ThrowOnError>>,
@@ -7638,7 +7756,10 @@ export function listOwnOrganizationMembershipInvitations<ThrowOnError extends bo
 		request({
 			method: "GET",
 			url: "/api/v1/participation/membership/me/invitations",
-			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
 			...config,
 		}) as Promise<RequestResult<ListOwnOrganizationMembershipInvitationsResponses, ThrowOnError>>,
 	);
@@ -7656,7 +7777,10 @@ export function listOwnOrganizationMemberships<ThrowOnError extends boolean = tr
 		request({
 			method: "GET",
 			url: "/api/v1/participation/membership/me/organizations",
-			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
 			...config,
 		}) as Promise<RequestResult<ListOwnOrganizationMembershipsResponses, ThrowOnError>>,
 	);
@@ -7713,6 +7837,60 @@ export function leaveOrganizationMembership<ThrowOnError extends boolean = true>
 			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 			...config,
 		}) as Promise<RequestResult<LeaveOrganizationMembershipResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/participation/membership/organizations/:organizationEntityId/contacts}
+ */
+export function createOrganizationEnrollmentContact<ThrowOnError extends boolean = true>(
+	options: Options<CreateOrganizationEnrollmentContactOptions, ThrowOnError>,
+): Unwrappable<RequestResult<CreateOrganizationEnrollmentContactResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/participation/membership/organizations/{organizationEntityId}/contacts",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<CreateOrganizationEnrollmentContactResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/participation/membership/contacts/:id/revoke}
+ */
+export function revokeOrganizationEnrollmentContact<ThrowOnError extends boolean = true>(
+	options: Options<RevokeOrganizationEnrollmentContactOptions, ThrowOnError>,
+): Unwrappable<RequestResult<RevokeOrganizationEnrollmentContactResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/participation/membership/contacts/{id}/revoke",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<RevokeOrganizationEnrollmentContactResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/participation/membership/organizations/:organizationEntityId/recipients}
+ */
+export function resolveOrganizationEnrollmentContact<ThrowOnError extends boolean = true>(
+	options: Options<ResolveOrganizationEnrollmentContactOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ResolveOrganizationEnrollmentContactResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/participation/membership/organizations/{organizationEntityId}/recipients",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ResolveOrganizationEnrollmentContactResponses, ThrowOnError>>,
 	);
 }
 

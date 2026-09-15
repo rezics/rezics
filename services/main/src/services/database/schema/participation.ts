@@ -204,7 +204,6 @@ export const ParticipationCapabilityValues = [
 	"catalog.read",
 	"catalog.edit",
 	"entity.publish",
-	"entity.membership",
 	"entity.security",
 	"proposal.adopt",
 ] as const;
