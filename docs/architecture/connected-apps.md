@@ -373,6 +373,41 @@ regressions; remove either patch only after the pinned replacement passes its ca
 
 ## CIMD network boundary
 
+### Native discovery admission
+
+The native discovery wrapper uses one qualified transport for metadata and JWKS
+and gates the resolver result on native App/client admission. The private CIMD
+registry workload creates a distinct unreviewed App for an unknown client URL;
+name, email and software identifiers never merge it into an existing publisher's
+App. Its declaration carries the server's finite prospective domain capabilities
+and the admitted protocol API scopes. These are request ceilings, not user consent
+or resource grants. Metadata-only label changes retain existing client terms when
+capabilities and protocol epochs are unchanged. Disabled/revoked clients and blocked
+Apps are never reactivated by metadata refresh.
+
+Discovery/network persistence completes before the protected OAuth transaction.
+That transaction may freeze at most four already admitted client lookups under
+native fences. The resolver then reads that stable configuration without another
+network refresh, avoiding a metadata cache update that could outlive a rolled-back
+OAuth transaction. Existing opaque-token resource validation can use current native
+admission directly; new authorization/issuance prepares discovery first. Managed
+trusted-client caching must remain disabled in the production adapter. Credentials,
+consent/installation state and each resource operation still require their own checks.
+
+Every metadata/JWKS fetch attempt passes a fleet-wide rolling 60-second gate:
+120 admitted starts globally and 30 for one origin. A nonblocking database mutex
+serializes the check over at most 121 narrow recent receipts. The reservation
+commits on a separate database session before egress; a failed OAuth transaction
+cannot refund network work. Only origin hashes are retained, and admission prunes
+at most 500 receipts older than two minutes. The wrapper bounds pending admission
+work to the transport's maximum (at most sixteen) and applies the caller/absolute
+deadline while retaining timed-out database work in that bound until it settles.
+The existing transport independently retains unresolved DNS work in its own bound.
+No network request runs while the database admission mutex is held. These native
+fleet and admission extensions remain unqualified until the verification phase.
+
+### Qualified transport
+
 [createCimdResourceFetch](../../services/main/src/services/auth/cimd-transport.ts)
 is the selected Bun network boundary for metadata and discovery-owned JWKS.
 The [isolated Linux/Bun qualification](../testing/identity-and-access.md#cimd-network-qualification)

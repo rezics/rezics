@@ -99,6 +99,18 @@ bound current reads and material-reuse checks; expiry/client keys support bounde
 maintenance without an all-client scan. A rotated secret does not allocate another
 client, workload or installation quota subject.
 
+CIMD fleet fetch admission retains at most 120 admitted starts per rolling minute,
+with 30 per origin, and reads at most 121 recent receipts under a nonblocking
+mutex. Cleanup drains at most 500 rows older than two minutes on admission. The
+normal steady population is therefore a few hundred narrow rows; origin URL paths
+are not stored. If cleanup is unavailable, admission fails rather than turning this
+into an unbounded append-only population. The process wrapper retains at most
+sixteen pending database/network calls, including timed-out database work until
+settlement; the qualified transport separately bounds unresolved DNS. Reservations
+use a separate database session so failed issuer transactions cannot refund them.
+Connection acquisition, rolling-window behavior and combined query/latency costs
+still require verification; this is an admission envelope, not measured throughput.
+
 Role definitions and permission dictionaries may be scope-bounded, but the total
 scope count is not globally bounded. Inventory scope heads, definition revisions,
 role-permission entries and retirement history separately using measured width
