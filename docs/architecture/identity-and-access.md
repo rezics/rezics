@@ -759,8 +759,19 @@ changed recipients/dependency subjects, represented
 Entities, and their potentially controlling operators cannot supply independence.
 Controller discovery conservatively follows active representation recipients through
 at most eight layers, 256 affected subjects, 256 Entities and 256 combined
-grant/recipient visits. The subtree roster query is bounded by the exact complete
-discovery store and its native selection witnesses. Dynamic
+grant/recipient visits. Subtree roster discovery first reads at most 4,097 indexed
+review-local subtree keys and rejects more than 4,096. For each admitted key it
+probes the existing `(group_id,membership_id,generation) WHERE selected` index,
+ordered by its remaining key columns, with the remaining candidate allowance plus
+one sentinel. Across all Groups it reads at most 257 physical selection rows and
+rejects the 257th **before** joins, current-generation filtering or deduplication.
+Stale generations and repeated selections for one subject consume the same budget.
+Only a complete candidate set may then hydrate at most 256 distinct membership
+heads by primary key under shared locks and retain the currently active generation.
+Complete review witnesses and the clock are rechecked before and after these reads.
+Thus each independence evaluation has at most 4,096 bounded roster index seeks and
+256 membership-head lookups, even when almost every subject is duplicated; no global
+join, DISTINCT or subject sort precedes the candidate limit. Dynamic
 Group recipients are conservatively covered by their active scope membership;
 conditions are not used to assert independence. This can reject an unaffected
 operator in a large/shared scope; overflow is unavailable. The native Entity and

@@ -49,6 +49,18 @@ import type {
 	InspectAccessGroupImpactResponses,
 	InspectAccessGroupImpactEvaluationOptions,
 	InspectAccessGroupImpactEvaluationResponses,
+	InspectAccessGroupApprovalProposalOptions,
+	InspectAccessGroupApprovalProposalResponses,
+	ApproveAccessGroupImpactOptions,
+	ApproveAccessGroupImpactResponses,
+	ListAccessGroupApprovalsOptions,
+	ListAccessGroupApprovalsResponses,
+	RevokeAccessGroupApprovalOptions,
+	RevokeAccessGroupApprovalResponses,
+	RegisterAccessRecoveryPathOptions,
+	RegisterAccessRecoveryPathResponses,
+	RevokeAccessRecoveryPathOptions,
+	RevokeAccessRecoveryPathResponses,
 	UpdateAccessGroupPresentationOptions,
 	UpdateAccessGroupPresentationResponses,
 	ReparentAccessGroupOptions,
@@ -1571,6 +1583,114 @@ export function inspectAccessGroupImpactEvaluation<ThrowOnError extends boolean 
 			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 			...config,
 		}) as Promise<RequestResult<InspectAccessGroupImpactEvaluationResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/impact-reviews/:reviewId/approval-proposal}
+ */
+export function inspectAccessGroupApprovalProposal<ThrowOnError extends boolean = true>(
+	options: Options<InspectAccessGroupApprovalProposalOptions, ThrowOnError>,
+): Unwrappable<RequestResult<InspectAccessGroupApprovalProposalResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/access/{scope}/groups/{groupId}/impact-reviews/{reviewId}/approval-proposal",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<InspectAccessGroupApprovalProposalResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/impact-reviews/:reviewId/approvals}
+ */
+export function approveAccessGroupImpact<ThrowOnError extends boolean = true>(
+	options: Options<ApproveAccessGroupImpactOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ApproveAccessGroupImpactResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/access/{scope}/groups/{groupId}/impact-reviews/{reviewId}/approvals",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ApproveAccessGroupImpactResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/impact-reviews/:reviewId/approvals}
+ */
+export function listAccessGroupApprovals<ThrowOnError extends boolean = true>(
+	options: Options<ListAccessGroupApprovalsOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ListAccessGroupApprovalsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/access/{scope}/groups/{groupId}/impact-reviews/{reviewId}/approvals",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ListAccessGroupApprovalsResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/groups/:groupId/impact-reviews/:reviewId/approvals/:approvalId/revoke}
+ */
+export function revokeAccessGroupApproval<ThrowOnError extends boolean = true>(
+	options: Options<RevokeAccessGroupApprovalOptions, ThrowOnError>,
+): Unwrappable<RequestResult<RevokeAccessGroupApprovalResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/access/{scope}/groups/{groupId}/impact-reviews/{reviewId}/approvals/{approvalId}/revoke",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<RevokeAccessGroupApprovalResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/recovery-paths}
+ */
+export function registerAccessRecoveryPath<ThrowOnError extends boolean = true>(
+	options: Options<RegisterAccessRecoveryPathOptions, ThrowOnError>,
+): Unwrappable<RequestResult<RegisterAccessRecoveryPathResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/access/{scope}/recovery-paths",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<RegisterAccessRecoveryPathResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/recovery-paths/:pathId/revoke}
+ */
+export function revokeAccessRecoveryPath<ThrowOnError extends boolean = true>(
+	options: Options<RevokeAccessRecoveryPathOptions, ThrowOnError>,
+): Unwrappable<RequestResult<RevokeAccessRecoveryPathResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/access/{scope}/recovery-paths/{pathId}/revoke",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<RevokeAccessRecoveryPathResponses, ThrowOnError>>,
 	);
 }
 

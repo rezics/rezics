@@ -5,11 +5,12 @@ import type { AccessManagementPermission } from "@rezics/access";
 import { PrincipalRequestContext } from "../auth/principal-session";
 import { readFirstPartyCredentialAuthority } from "../auth/credential-authority";
 import type { DatabaseTransaction } from "../database";
-import { accessGroupImpactReview as reviews, accessGroupImpactWitness as witnesses, accessGroupImpactEffect, accessImpactFence } from "../database/schema/access-group-impact";
+import { accessGroupImpactReview as reviews, accessGroupImpactWitness as witnesses, accessGroupImpactEffect, accessImpactFence, accessGroupImpactNode } from "../database/schema/access-group-impact";
 import { accessGroupApproval as approvals, accessRecoveryPath as paths, accessRecoveryPolicy as policies, accessGroupAdmissionReceipt as receipts } from "../database/schema/access-group-admission";
 import { accessSubject } from "../database/schema/access-identity";
 import { accessRepresentation, accessRepresentationEntity } from "../database/schema/access-representation";
 import { accessMembership } from "../database/schema/access-membership";
+import { accessGroupMembership } from "../database/schema/access-group-membership";
 import { accessGroupTree } from "../database/schema/access-group";
 import { accessRoleBindingScope } from "../database/schema/access-role-binding";
 import { RequestedAuthoritySelectionSchema } from "./authority-context";
@@ -121,15 +122,47 @@ async function reviewAuthorities(tx: DatabaseTransaction, context: PrincipalRequ
  return [reader,manager,...confer];
 }
 
+/** Read bounded physical candidates before current-admission filtering or subject deduplication. */
+async function independentSubtreeRoster(tx: DatabaseTransaction, review: GroupImpactReview) {
+ await revalidateGroupImpactDiscovery(tx,review);
+ if (review.status !== "complete") throw new AccessUnavailable();
+ const groups = await tx.select({ groupId: accessGroupImpactNode.key }).from(accessGroupImpactNode)
+  .where(and(eq(accessGroupImpactNode.reviewId,review.id),eq(accessGroupImpactNode.kind,"subtree")))
+  .orderBy(accessGroupImpactNode.key).limit(4097);
+ if (!groups.length || groups.length>4096) throw new AccessUnavailable();
+ const candidates: { membershipId: string; generation: number }[] = [];
+ for (const group of groups) {
+  // The partial roster index is (group_id,membership_id,generation) WHERE selected.
+  // LIMIT applies to this single index range, before any join/filter/dedup. Across
+  // all Groups read at most 256 candidates plus one exhaustion sentinel, including
+  // stale generations and multiple selections belonging to the same subject.
+  const rows = await tx.select({ membershipId: accessGroupMembership.membershipId,generation: accessGroupMembership.generation,
+   scopeId: accessGroupMembership.scopeId }).from(accessGroupMembership)
+   .where(and(eq(accessGroupMembership.groupId,group.groupId),sql`${accessGroupMembership.selected}`))
+   .orderBy(accessGroupMembership.membershipId,accessGroupMembership.generation).limit(257-candidates.length);
+  if (candidates.length+rows.length>256) throw new AccessUnavailable();
+  if (rows.some(row => row.scopeId!==review.scopeId)) throw new AccessUnavailable();
+  candidates.push(...rows);
+ }
+ // Only now may duplicate membership identities be collapsed for bounded PK reads.
+ const membershipIds = [...new Set(candidates.map(row => row.membershipId))].sort();
+ const memberships = membershipIds.length ? await tx.select().from(accessMembership)
+  .where(inArray(accessMembership.id,membershipIds)).orderBy(accessMembership.id).for("share") : [];
+ if (memberships.length!==membershipIds.length || memberships.some(row => row.scopeId!==review.scopeId)) throw new AccessUnavailable();
+ const byId = new Map(memberships.map(row => [row.id,row]));
+ await revalidateGroupImpactDiscovery(tx,review);
+ if (review.status !== "complete") throw new AccessUnavailable();
+ return candidates.flatMap(candidate => {
+  const member = byId.get(candidate.membershipId)!;
+  return member.activeGeneration===candidate.generation ? [member.subjectId] : [];
+ });
+}
+
 /** Conservative private accountability closure: potentially controlling a changed Entity is affectedness. */
 async function independent(tx: DatabaseTransaction, review: GroupImpactReview, effects: GroupImpactEffect[], actor: Authority) {
  if (actor.principalId === review.operatorAuthUserId || actor.subjectId === review.authoritySubjectId) throw new AccessDenied();
- const roster = (await tx.execute<{ subject_id: string }>(sql`select distinct m.subject_id
-  from public.access_group_impact_node n join public.access_group_membership s on s.group_id=n.key and s.selected
-  join public.access_membership m on m.id=s.membership_id and m.active_generation=s.generation
-  where n.review_id=${review.id}::uuid and n.kind='subtree' order by m.subject_id limit 257`)).rows;
- if (roster.length>256) throw new AccessUnavailable();
- const affected = new Set([...roster.map(row => row.subject_id),...effects.flatMap(effect => [effect.subjectId,...effect.dependencySubjectIds])]);
+ const roster = await independentSubtreeRoster(tx,review);
+ const affected = new Set([...roster,...effects.flatMap(effect => [effect.subjectId,...effect.dependencySubjectIds])]);
  const entityIds = new Set(effects.flatMap(effect => effect.entityId ? [effect.entityId] : []));
  if (affected.size > 256 || entityIds.size > 256) throw new AccessUnavailable();
  const subjects = affected.size ? await tx.select().from(accessSubject).where(inArray(accessSubject.id,[...affected])).limit(257) : [];
