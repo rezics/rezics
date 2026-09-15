@@ -89,7 +89,10 @@ delegation records before admitting execution or issuing a narrowed credential.
 
 ### Native App declaration and control
 
-An App has one immutable private account or Entity controller root. Controllers
+An App has one immutable human-account or Entity controller root. A private
+platform-duty account can own server-curated discovery records; installation
+workloads cannot own Apps through their private account roots. This keeps the
+App lifecycle independent from a recursive chain of installed App owners. Controllers
 can delegate scoped App administration through the mixed permission model; App
 ownership is not a login principal or a resource grant. Its publisher API uses
 credential-bound scope locators, `app:read`/`app:manage` entry scopes and explicit
@@ -123,6 +126,29 @@ not proof that protocol issuance already enforces it. Operation receipts bind
 expected versions and original intent; replay never repeats a lifecycle effect.
 
 ### Approval and delivery
+
+Native client admission binds the protocol client's retained UUID to exactly one
+App and one immutable usage. User clients cannot carry client-credentials grants
+or machine scopes. Installation clients must be managed confidential clients,
+pin a concrete installation workload and start disabled. At most one client is
+active for a workload; inactive history can remain while a replacement is prepared.
+Neither a public registration nor a metadata-document claim can choose a workload.
+
+Client terms seal a literal capability subset and offline/Entity-disclosure limits
+from an exact App declaration. API capability members match the corresponding
+protocol scope set, and the terms retain the protocol credential epoch. A changed
+protocol security configuration requires readmission of terms before further use.
+Broader declarations do not rewrite prior terms. Native disablement/revocation
+advance a separate client epoch; enabling retains that new epoch, and revocation
+is terminal. The native bridge must enforce these controls independently of
+the provider's `disabled` flag; updating one must never bypass the other.
+
+The current admission reader retains protocol, client, App, controller-lifecycle
+and workload fences, verifies complete saved capabilities and optional captured
+epochs/revisions, and returns a transaction-local predicate. Exact active
+installation approval, user consent, authentication, credential expiry, quota and
+resource authorization are still separate mandatory checks. Admission storage
+and a current workload alone do not qualify the installation/client adapter.
 
 An installation has pending approval, active, suspended and revoked outcomes.
 Accepted scope changes create a new approved revision. Broader App manifests,

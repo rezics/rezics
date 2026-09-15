@@ -16,6 +16,7 @@ export const PostgreSqlSchemaFileNames = [
 	"connected-app.sql",
 	"oauth-client-authority.sql",
 	"workload-principal.sql",
+	"connected-app-client.sql",
 	"access-subject-policy.sql",
 	"access-role.sql",
 	"access-role-binding.sql",
@@ -91,6 +92,7 @@ export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number
  * PostgreSQL definitions remain split by responsibility for review and drift checks.
  */
 export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly PostgreSqlSchemaFileName[]>> = {
+	connected_app_clients: ["connected-app.sql", "connected-app-client.sql"],
 	workload_principals: ["workload-principal.sql", "access-current-policy.sql", "participation-integrity.sql"],
 	management_authority: ["api-key-authority.sql", "access-current-policy.sql"],
 	access_role_binding_readers: ["access-membership.sql", "access-role-binding.sql"],
@@ -105,6 +107,12 @@ export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly 
 };
 
 export const PostgreSqlSchemaFunctionNames = [
+	"connected_app_client_terms_match_protocol",
+	"guard_connected_app_client_head",
+	"guard_connected_app_client_event",
+	"guard_connected_app_client_revision",
+	"guard_connected_app_client_capability",
+	"complete_connected_app_client",
 	"guard_workload_principal",
 	"guard_workload_principal_event",
 	"complete_workload_principal",
@@ -474,6 +482,14 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "connected_app_client", name: "connected_app_client_head_guard" },
+	{ table: "connected_app_client_event", name: "connected_app_client_event_guard" },
+	{ table: "connected_app_client_event", name: "connected_app_client_event_immutable" },
+	{ table: "connected_app_client_revision", name: "connected_app_client_revision_guard" },
+	{ table: "connected_app_client_capability", name: "connected_app_client_capability_guard" },
+	{ table: "connected_app_client", name: "connected_app_client_head_complete" },
+	{ table: "connected_app_client_event", name: "connected_app_client_event_complete" },
+	{ table: "connected_app_client_revision", name: "connected_app_client_revision_complete" },
 	{ table: "workload_principal", name: "workload_principal_guard" },
 	{ table: "workload_principal_event", name: "workload_principal_event_guard" },
 	{ table: "workload_principal_event", name: "workload_principal_event_immutable" },

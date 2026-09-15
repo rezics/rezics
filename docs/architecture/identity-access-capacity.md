@@ -80,6 +80,16 @@ owner dependencies within 256 concrete account/Entity/Realm rows, retaining the
 256-per-principal and 512-total enforcement limits. Revocation changes one workload
 head/epoch; token consumers invalidate old contexts without a synchronous fan-out.
 
+Native client admissions add a head, control events, sealed terms and literal
+capability rows separate from protocol storage. Count all four populations; do
+not hide them inside the OAuth-client estimate. Use the 224-384-byte indexed
+binding estimate for each narrow head/capability row until measured (112-192 GB
+at 500,000,000 rows; 672-1152 GB at 3,000,000,000). Wide terms/events follow their
+own measured header/detail widths. Exact client/revision keys bound capability
+reads; App/client and workload/client indexes serve inventory and invalidation.
+The partial active-workload key prevents concurrent active installation clients
+without rewriting or deleting inactive history.
+
 Role definitions and permission dictionaries may be scope-bounded, but the total
 scope count is not globally bounded. Inventory scope heads, definition revisions,
 role-permission entries and retirement history separately using measured width

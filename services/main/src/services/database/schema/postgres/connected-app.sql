@@ -7,7 +7,8 @@ BEGIN
   IF NEW.version<>0 OR NEW.authority_epoch<>0 OR NEW.state<>'draft' OR NEW.trust<>'unreviewed' OR NEW.declared_revision IS NOT NULL
   THEN RAISE EXCEPTION 'App admission starts with an unapproved empty identity' USING ERRCODE='23514'; END IF;
   IF NOT EXISTS(SELECT 1 FROM public.access_scope s LEFT JOIN public.reference_value r ON r.id=s.unit_ref
-   WHERE s.id=NEW.scope_id AND (s.auth_user_id IS NOT NULL OR r.target_entity_id IS NOT NULL))
+   LEFT JOIN public.users u ON u.id=s.auth_user_id LEFT JOIN public.workload_principal w ON w.auth_user_id=u.id
+   WHERE s.id=NEW.scope_id AND (u.principal_kind='human' OR (u.principal_kind='service' AND w.purpose='system') OR r.target_entity_id IS NOT NULL))
   THEN RAISE EXCEPTION 'An App controller must be an account or Entity root' USING ERRCODE='23514'; END IF;
   RETURN NEW;
  END IF;

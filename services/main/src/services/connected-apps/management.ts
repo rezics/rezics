@@ -2,6 +2,8 @@ import { and, eq, gt, sql, type SQL } from "drizzle-orm";
 import type { PrincipalRequestContext } from "../auth/principal-session";
 import type { DatabaseTransaction } from "../database";
 import { connectedApp, connectedAppEvent } from "../database/schema/connected-app";
+import { users } from "../database/schema/auth";
+import { workloadPrincipal } from "../database/schema/workload-principal";
 import { allocateAccessScope, resolveAccessScope } from "../authorization/identities";
 import { resolveReferenceValue } from "../units/reference-value";
 import { scopeLifecycleAdmission } from "../authorization/scope-policy";
@@ -15,6 +17,14 @@ async function controllerLifecycle(tx: DatabaseTransaction, scopeId: string, cha
 	if (!scope) throw new AccessRecordUnavailable();
 	if (scope.kind === "platform" || (scope.kind === "resource" && (await resolveReferenceValue(tx, scope.referenceValueId))?.owner !== "entity"))
 		throw new AccessInputInvalid();
+	if (scope.kind === "account") {
+		const [owner] = await tx.select({ kind: users.principalKind }).from(users).where(eq(users.id, scope.id)).for("share");
+		if (!owner) throw new AccessRecordUnavailable();
+		if (owner.kind === "service") {
+			const [workload] = await tx.select({ purpose: workloadPrincipal.purpose }).from(workloadPrincipal).where(eq(workloadPrincipal.authUserId, scope.id)).limit(1);
+			if (workload?.purpose !== "system") throw new AccessInputInvalid();
+		}
+	}
 	return scopeLifecycleAdmission(tx, scopeId, change);
 }
 type PublisherCommand = Exclude<ConnectedAppCommand, { operation: "set-trust" }> extends infer Command
