@@ -288,3 +288,6 @@ export async function readAccessRoleSnapshot(
 		permissions: decodeAccessPermissionSnapshot(permissions, snapshot.permissionCount, snapshot.permissionDigest),
 	};
 }
+
+/** Native role command decoder for retained server-owned proposals. @internal */
+export { commandSchema as AccessRoleCommandSchema };

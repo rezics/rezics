@@ -107,3 +107,4 @@ export * from "./connected-user-authorization";
 export * from "./oauth-grant-context";
 
 export * from "./realm-enrollment";
+export * from "./access-assignment-management";

@@ -1563,3 +1563,97 @@ Entity permissions was rejected because it respectively leaks unrelated rights o
 defeats delegation. Unbounded offline delegation was rejected for the selected
 revocation and work-budget requirements. These are design choices, not universal
 claims that other products cannot use those models.
+
+### Native Role and assignment management API
+
+The [assignment management owner](../../services/main/src/services/authorization/assignment-management.ts)
+implements Role activation/retirement, binding create/amend/revoke and immutable
+ceiling create/revoke through `/access/:scope/assignment-reviews` and their resource
+command endpoints. Definition preparation remains separate. A Role's catalog root
+is not its bindings' data target: an account-owned definition may contain Unit
+permissions and be reused at an appropriate resource root. Applicability is checked
+at every affected binding target. Management permission never requires possession
+of the data rights being assigned.
+
+A review retains the exact server-resolved command, private accountable operator,
+selected subject, current native source packet and full permission/recipient effect
+digests. It expires within five minutes. Every inspection page revalidates the
+complete source packet; partial pages cannot become partial approvals. Amendment
+shows the removed old terms and the new terms separately. Manager-role changes also
+capture attached institutional ceilings; amended manager terms do not renew their
+old ceiling dependencies. Inspection returns review-local recipient keys, not
+reusable private-principal selectors or a foreign roster. Direct recipient choice
+uses self, a participating public Entity, or a source roster admitted separately by
+`access.membership.read`; the target manager independently needs binding or ceiling
+management at the intended target path. Raw private principal IDs are not inputs.
+
+Each command requires a fresh interactive session and exact control/definition
+revisions. A target owner may approve applicable registered permissions at their
+own root. Account and Entity owner predicates recheck the exact native root identity;
+resource ownership retains its current concrete ownership record. Platform native
+IAM bootstrap is limited to the existing direct principal's current literal
+`platform.access.manage` grant and the explicit Role/binding/ceiling management
+actions. Neither a native management binding nor a represented operator's unrelated
+capability can manufacture that bootstrap source. Applicability uses explicit
+management-action sets and the canonical Unit grantability rules.
+
+A delegated manager needs one complete current ceiling for the named role,
+recipient, target, validity and grant-end/duration conditions. Both today's role
+closure and **all permissions persisted in a new frozen approval**, including
+currently dormant permissions, must fit the approving resource authority. A
+requested assignment is rejected if it exceeds the approval; it is never clipped
+into success. Runtime use of an existing frozen binding still constrains a later
+role head to its old immutable approval. Ceiling issuance by a delegated ceiling
+manager uses one complete parent approval with the same recipient predicate and
+no wider downstream constraints. Approval validity governs when issuance is
+permitted; institutional grants are bounded by explicit grant-end/duration terms,
+not by silently converting historical issuer authority into a live dependency.
+Replacement creates another ceiling identity and explicitly revokes the old one.
+
+Activation or retirement of a Role with active binding heads requires one currently
+revalidated, independent private operator to approve the entire review. Initial
+activation without bindings confers nothing and needs no independent approval.
+Binding and ceiling commands consume the explicit target-owner or complete-ceiling
+approval directly. All commands retain a registered, currently exercisable native
+repair path from before the review at every affected authority root. The definition
+root of a reused role is not an affected recovery root for a binding-only command.
+The original exact recovery sources must survive the actual effect; a replacement
+or newly gained path cannot certify continuity. Source selection excludes the
+binding/role being changed, while another complete unchanged source can authorize
+the operation. The existing private controller-closure and native recovery protocol
+is shared with Group management. No representation-administration API is added.
+
+Role, binding, ceiling, review, independent approval and admission receipts retain
+history. Revocation and retirement preserve their evidence. Exact retries return
+the original receipt only after fresh current management admission, and changed
+intent, resource identity or authority subject is rejected. Whole transactions retry
+on deadlock or changed role-binding discovery. Final SQL rechecks credential and
+freshness deadlines, exact manager/role/terms, current recipient dependencies,
+ceiling revocation/expiry and original recovery after all locking work.
+
+This implementation uses the existing bounded native-policy envelope: at most 256
+physical Role-binding candidates, 256 attached ceiling candidates, 256 roster
+candidates before joins/filtering/deduplication, 4,096 traversed Group candidates,
+64 affected roots, 4,096 effects and a 16 MiB complete evidence packet. Overflow is
+unavailable and creates no approvable partial result. Role scans use
+`(role_id,target_scope_id,id)`, attached ceilings use `(manager_binding_id,id)`,
+rosters use their existing scope/subject or Group/membership/generation indexes,
+and directories/history use keyset pages of 100. Tree and target-scope fences cover
+new-row and absent-recipient reads; role heads serialize new binding attachment.
+The private approval closure retains its separate 256-controller/eight-level bound.
+A principal can have at most 16 unexpired reviews, with at most 64 independent
+acknowledgements per review and one complete approval selected for execution.
+
+The 500,000,000-row baseline and 3,000,000,000-row estimate still apply to durable
+review/receipt history. At an illustrative 8 KiB packet plus 2 KiB acknowledgement
+and 0.5 KiB receipt per executed operation, payload alone is approximately 5.4 TB
+and 32.3 TB respectively, before tuple/index/TOAST/WAL/replica overhead or unused
+reviews. These are planning assumptions, not measurements. Capture performs bounded
+indexed native reads without a global ACL or per-recipient write fanout, and
+inspection trades repeated bounded revalidation for complete current evidence.
+High-fanout roles exceeding the stated native envelope remain unavailable; archival,
+partitioning and larger resumable activation require their own capacity qualification
+before increasing it. This implementation does not qualify corpus-scale history
+retention or throughput. Source/diff review and necessary generators are the only
+implementation-phase evidence; tests, fixtures, TypeScript, migration replay,
+integrity/concurrency/recovery/capacity checks and rendered acceptance remain deferred.

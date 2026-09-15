@@ -176,12 +176,14 @@ export async function findRoleAssignmentCeiling(
 	tx: DatabaseTransaction,
 	input: {
 		scopeId: string; roleId: string; targetPath: string[];
-		operation: "bind" | "activate";
+		operation: "bind" | "activate" | "ceiling";
+		ceilingConstraints?: { maximumGrantDurationSeconds: number | null; grantNotAfter: Date | null };
 		permissions: AccessPermission[];
 		validFrom: Date; validUntil: Date | null;
-		recipient: Exclude<z.infer<typeof recipient>, { kind: "scope-members" }>;
+		recipient: z.infer<typeof recipient>;
 		recipientEligibility: { membershipId: string; generation: number } | null;
 		managerSubjectId: string;
+        excludeBindingId?: string;excludeRoleId?: string;
 		/** Server-owned dynamic Group source; only that same Group approval can cover an individual path effect. */
 		recipientGroupEffect?: { scopeId: string; groupId: string } | null;
 	},
@@ -193,21 +195,22 @@ export async function findRoleAssignmentCeiling(
 	}) => Promise<void>,
 ): Promise<string | null> {
 	const request = z.strictObject({ scopeId: id, roleId: id,
-		targetPath: z.array(z.string().regex(/^[a-z0-9][a-z0-9-]{0,255}$/)).max(8), operation: z.enum(["bind", "activate"]),
+		targetPath: z.array(z.string().regex(/^[a-z0-9][a-z0-9-]{0,255}$/)).max(8), operation: z.enum(["bind", "activate", "ceiling"]),
+        ceilingConstraints: z.strictObject({ maximumGrantDurationSeconds: z.number().int().positive().nullable(),grantNotAfter: z.date().nullable() }).optional(),
 		permissions: z.array(AccessPermissionSchema).max(AccessPermissionValues.length), recipient,
-		validFrom: z.date(), validUntil: z.date().nullable(), managerSubjectId: id,
+		validFrom: z.date(), validUntil: z.date().nullable(), managerSubjectId: id,excludeBindingId: id.optional(),excludeRoleId: id.optional(),
 		recipientGroupEffect: z.strictObject({ scopeId: id, groupId: id }).nullable().default(null),
 		recipientEligibility: z.strictObject({ membershipId: id, generation: version.min(1) }).nullable(),
 	}).parse({ scopeId: input.scopeId, roleId: input.roleId, targetPath: input.targetPath, operation: input.operation,
 		permissions: input.permissions, recipient: input.recipient, recipientEligibility: input.recipientEligibility,
-		validFrom: input.validFrom, validUntil: input.validUntil, managerSubjectId: input.managerSubjectId, recipientGroupEffect: input.recipientGroupEffect });
-	if (request.recipient.kind === "scope-members") throw new AccessAssignmentCeilingUnavailable();
+		validFrom: input.validFrom, validUntil: input.validUntil, managerSubjectId: input.managerSubjectId, recipientGroupEffect: input.recipientGroupEffect,ceilingConstraints: input.ceilingConstraints,excludeBindingId: input.excludeBindingId,excludeRoleId: input.excludeRoleId });
+	if ((request.recipient.kind === "scope-members" && request.operation !== "ceiling") || (request.operation === "ceiling" && !request.ceilingConstraints)) throw new AccessAssignmentCeilingUnavailable();
 	if (request.validUntil !== null && request.validUntil <= request.validFrom) throw new AccessAssignmentCeilingConflict();
 	const managementPath = request.operation === "activate" ? ["roles", request.roleId] : request.targetPath;
 	const manager = await readSubjectRoleBindingPermissions(tx, { subjectId: request.managerSubjectId,
 		targets: [{ scopeId: request.scopeId, path: managementPath }] });
-	const required = request.operation === "bind" ? "access.role-binding.manage" : "access.role.activate";
-	const sources = manager.bindings.filter(source => source.active && source.binding.targetScopeId === request.scopeId &&
+	const required = request.operation === "bind" ? "access.role-binding.manage" : request.operation === "activate" ? "access.role.activate" : "access.assignment-ceiling.manage";
+	const sources = manager.bindings.filter(source => source.active && source.binding.id!==request.excludeBindingId && source.binding.roleId!==request.excludeRoleId && source.binding.targetScopeId === request.scopeId &&
 		scopeCovers(source.terms.targetPath, managementPath) && source.permissions.some(permission => permission.family === "management" && permission.key === required));
 	const approvals = await readAccessAssignmentCeilings(tx, { scopeId: request.scopeId, roleId: request.roleId, managerBindingIds: sources.map(source => source.binding.id) });
 	const memberScopes = [...new Set(approvals.flatMap(({ approval }) => (approval.recipientKind === "scope-members" || approval.recipientKind === "group" || approval.recipientKind === "all-members") && approval.recipientScopeId ? [approval.recipientScopeId] : []))].sort();
@@ -238,7 +241,23 @@ export async function findRoleAssignmentCeiling(
 		if (!source || source.terms.validFrom > now || (source.terms.validUntil !== null && source.terms.validUntil <= now) ||
 			approval.validFrom > now || (approval.validUntil !== null && approval.validUntil <= now) ||
 			!scopeCovers(approval.targetPath, request.targetPath) || !accessPermissionCeilingCovers(request.permissions, permissions)) continue;
-		if (approval.grantNotAfter !== null && (request.validUntil === null || request.validUntil > approval.grantNotAfter)) continue;
+		if (request.operation === "ceiling") {
+            const limits = request.ceilingConstraints!;
+            if ((approval.grantNotAfter !== null && (request.validUntil === null || request.validUntil>approval.grantNotAfter)) ||
+                (approval.maximumGrantDurationSeconds !== null && (request.validUntil === null || request.validUntil.getTime()-request.validFrom.getTime()>approval.maximumGrantDurationSeconds*1000)) ||
+                (approval.maximumGrantDurationSeconds !== null && (limits.maximumGrantDurationSeconds === null || limits.maximumGrantDurationSeconds > approval.maximumGrantDurationSeconds)) ||
+                (approval.grantNotAfter !== null && (limits.grantNotAfter === null || limits.grantNotAfter > approval.grantNotAfter))) continue;
+            // Issuing another ceiling preserves recipient identity; membership-dependent
+            // individual matching must never become an independent approval.
+            const target = request.recipient;
+            if (approval.recipientKind !== target.kind ||
+                (target.kind === "subject" && approval.recipientSubjectId !== target.subjectId) ||
+                (target.kind !== "subject" && approval.recipientScopeId !== target.scopeId) ||
+                (target.kind === "group" && approval.recipientGroupId !== target.groupId) ||
+                (target.kind === "scope-members" && approval.memberSubjectKind !== target.subjectKind)) continue;
+            return approval.id;
+        }
+        if (approval.grantNotAfter !== null && (request.validUntil === null || request.validUntil > approval.grantNotAfter)) continue;
 		if (approval.maximumGrantDurationSeconds !== null && (request.validUntil === null ||
 			request.validUntil.getTime() - request.validFrom.getTime() > approval.maximumGrantDurationSeconds * 1000)) continue;
 		const target = request.recipient;
@@ -265,3 +284,6 @@ export async function findRoleAssignmentCeiling(
 	}
 	return null;
 }
+
+/** Owning native command decoder for server-resolved proposals. @internal */
+export { schema as AccessAssignmentCeilingCommandSchema };

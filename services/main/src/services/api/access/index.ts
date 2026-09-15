@@ -1,3 +1,4 @@
+import assignmentManagement from "./assignments";
 import { getGroupReviewRecipient, listGroupRoster, getGroupSelection, startGroupSelectionReview, writeGroupSelection } from "../../authorization/group-selection-management";
 import { GroupRecipient, GroupRosterQuery, GroupRoster, GroupSelectionBody, GroupSelectionQueryBody, GroupSelectionState, GroupSelectionReceipt, StartGroupSelectionReviewBody } from "./schema";
 import { inspectGroupApproval, approveGroupImpact, revokeGroupApproval, listGroupApprovals, registerRecoveryPath, revokeRecoveryPath } from "../../authorization/group-admission";
@@ -28,7 +29,7 @@ const groupErrors = {
 };
 
 /** Native mixed-subject access management, independent from public presentation. @alpha */
-export default new Elysia({ prefix: "/access", name: "access-management-api" }).use(principalSession)
+export default new Elysia({ prefix: "/access", name: "access-management-api" }).use(principalSession).use(assignmentManagement)
 	.post("/scopes/resolve", {
 		principalAccess: read, body: ResolveScopeBody, response: ResolvedScope,
 		detail: { operationId: "resolveAccessManagementScope", tags: ["Access management"] },

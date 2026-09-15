@@ -146,3 +146,66 @@ export const GroupRoster = z.strictObject({ treeVersion: version,nextCursor: z.s
  activeGeneration: positiveVersion.nullable(),expiresAt: z.iso.datetime(),generation: positiveVersion,selectionVersion: positiveVersion.nullable(),
  setVersion: version.nullable(),path: z.array(z.strictObject({ groupId: id,version: positiveVersion })).max(8),direct: z.boolean(),terminallyStale: z.boolean(),eligible: z.boolean(),
 })).max(100) });
+
+/** Server-resolved exact Role/Binding/Ceiling proposal. @alpha */
+export { AssignmentProposalSchema as AssignmentProposalBody,AssignmentAcknowledgementSchema as AssignmentAcknowledgement } from "../../authorization/assignment-management-contracts";
+/** Private assignment recipient presentation. @alpha */
+export const AssignmentSubject = z.strictObject({ kind: z.enum(["principal","entity"]),recipient: z.string(),recipientKey: z.string(),expiresAt: z.iso.datetime() });
+/** Purpose-bound subject selection has no raw private principal alternative. @alpha */
+const recipientManagement = { management: z.enum(["binding","ceiling"]).default("binding"),targetPath: z.array(z.string().regex(/^[a-z0-9][a-z0-9-]{0,255}$/)).max(8).default([]) };
+export const SelectAssignmentRecipientBody = z.discriminatedUnion("kind",[z.strictObject({ ...recipientManagement,kind: z.literal("self") }),z.strictObject({ ...recipientManagement,kind: z.literal("entity"),entityId: id })]);
+/** Choose a disclosed enrollment root and continue its exact epoch without private IDs in URLs. @alpha */
+export const AssignmentRecipientsBody = z.strictObject({ ...recipientManagement,recipientScope: scope,cursor: z.string().startsWith("rzar1.").max(2048).optional() });
+/** Complete physical enrollment pages retain eligibility separately from recipient identity. @alpha */
+export const AssignmentRecipients = z.strictObject({ items: z.array(AssignmentSubject.extend({ membershipVersion: version,generation: positiveVersion.nullable(),eligible: z.boolean() })).max(100),treeVersion: version,membershipEpoch: version,nextCursor: z.string().nullable() });
+/** Selected native binding. @alpha */
+export const BindingParams = ScopeParams.extend({ bindingId: id });
+/** Selected immutable confer approval. @alpha */
+export const CeilingParams = ScopeParams.extend({ ceilingId: id });
+/** Exact private review, distinct from a continuing authority proof. @alpha */
+export const AssignmentReviewParams = ScopeParams.extend({ reviewId: id });
+/** Review-local immutable independent acknowledgement. @alpha */
+export const AssignmentApprovalParams = AssignmentReviewParams.extend({ approvalId: id });
+/** Stable execution references bind the resource operation to its complete inspected effect. @alpha */
+export const ExecuteAssignmentBody = z.strictObject({ reviewId: id,proposalDigest: z.string().regex(/^[0-9a-f]{64}$/),effectDigest: z.string().regex(/^[0-9a-f]{64}$/) });
+/** Independent operator acknowledgement. @alpha */
+export const ApproveAssignmentBody = ExecuteAssignmentBody.omit({ reviewId: true }).extend({ approvalId: id });
+/** Bounded impact inspection offset in an immutable complete effect set. @alpha */
+export const AssignmentImpactQuery = z.strictObject({ afterOrdinal: z.coerce.number().int().min(0).max(4096).optional() });
+/** Complete captured review; current admission is re-established before execution. @alpha */
+export const AssignmentReview = z.strictObject({ reviewId: id,proposalDigest: z.string(),effectDigest: z.string(),effectCount: version.max(4096),requiresApproval: z.boolean(),validUntil: z.iso.datetime(),status: z.literal("complete") });
+/** Recipient projection includes only a scope-bound private handle or an explicit member set. @alpha */
+export const ManagedAssignmentRecipient = z.discriminatedUnion("kind",[
+ z.strictObject({ kind: z.literal("subject"),subject: AssignmentSubject }),z.strictObject({ kind: z.literal("group"),scope,groupId: id }),
+ z.strictObject({ kind: z.literal("all-members"),scope }),z.strictObject({ kind: z.literal("scope-members"),scope,subjectKind: z.enum(["principal","entity"]) }),
+]);
+import { ManagedBindingTermsSchema } from "../../authorization/assignment-management-contracts";
+import { AccessPermissionSchema } from "../../authorization/permission";
+/** Stable binding command receipt. @alpha */
+export const BindingReceipt = z.strictObject({ bindingId: id,operationId: id,version: positiveVersion,termsRevision: positiveVersion,state: z.enum(["active","revoked"]) });
+/** Stable institutional ceiling command receipt. @alpha */
+export const CeilingReceipt = z.strictObject({ ceilingId: id,operationId: id,version: positiveVersion,state: z.enum(["active","revoked"]) });
+/** Current or selected historical binding terms; private lineage keys stay server-side. @alpha */
+export const ManagedBinding = z.strictObject({ bindingId: id,roleId: id,roleScope: scope,definitionRevision: positiveVersion.nullable(),roleState: state,version: positiveVersion,state: z.enum(["active","revoked"]),termsRevision: positiveVersion,recipient: ManagedAssignmentRecipient,terms: ManagedBindingTermsSchema });
+/** Bounded directory of binding identities. @alpha */
+export const ManagedBindings = z.strictObject({ items: z.array(z.strictObject({ bindingId: id,roleId: id,version: positiveVersion,termsRevision: positiveVersion,state: z.enum(["active","revoked"]) })).max(100),nextCursor: id.nullable() });
+/** Immutable ceiling snapshot with current lifecycle. @alpha */
+export const ManagedCeiling = z.strictObject({ ceilingId: id,roleScope: scope,definitionRevision: positiveVersion.nullable(),version: positiveVersion,state: z.enum(["active","revoked"]),managerBindingId: id,managerTermsRevision: positiveVersion,roleId: id,
+ targetPath: z.array(z.string()).max(8),recipient: ManagedAssignmentRecipient,permissions: z.array(AccessPermissionSchema),validFrom: z.iso.datetime(),validUntil: z.iso.datetime().nullable(),
+ maximumGrantDurationSeconds: positiveVersion.nullable(),grantNotAfter: z.iso.datetime().nullable() });
+/** Bounded directory of private confer identities. @alpha */
+export const ManagedCeilings = z.strictObject({ items: z.array(ManagedCeiling.pick({ ceilingId: true,roleId: true,version: true,state: true })).max(100),nextCursor: id.nullable() });
+/** Private audit history retains exact operations and receipts without identifying operators. @alpha */
+export const AssignmentHistory = z.strictObject({ items: z.array(z.strictObject({ version: positiveVersion,operationId: id,operation: z.enum(["create","amend","revoke"]),createdAt: z.iso.datetime() })).max(100),nextCursor: positiveVersion.nullable() });
+const inspectedProposal = z.union([
+ z.strictObject({ kind: z.literal("role"),operation: z.enum(["activate","retire"]),operationId: id,roleId: id,expectedVersion: positiveVersion,definitionRevision: positiveVersion.nullable() }),
+ z.strictObject({ kind: z.literal("binding"),operation: z.enum(["create","amend","revoke"]),operationId: id,bindingId: id,expectedVersion: version,
+  definitionRevision: positiveVersion.nullable(),roleScope: scope,roleId: id.nullable(),recipient: ManagedAssignmentRecipient.nullable(),terms: ManagedBindingTermsSchema.nullable() }),
+ z.strictObject({ kind: z.literal("ceiling"),operation: z.enum(["create","revoke"]),operationId: id,ceilingId: id,expectedVersion: version,
+  terms: ManagedCeiling.omit({ ceilingId: true,version: true,state: true }).extend({ definitionRevision: positiveVersion.nullable(),roleScope: scope }).nullable() }),
+]);
+/** Full per-page permission impact, scoped private recipient and unchanged full-set digests. @alpha */
+export const AssignmentInspection = AssignmentReview.extend({ proposal: inspectedProposal,items: z.array(z.strictObject({ ordinal: positiveVersion,kind: z.enum(["binding","representation","ceiling"]),itemKey: z.string(),sourceVersion: version,termsRevision: positiveVersion.nullable(),
+ targetScope: scope,targetPath: z.array(z.string()).max(8),recipient: z.strictObject({ disclosure: z.literal("review-local"),recipientKey: z.string() }),before: z.array(AccessPermissionSchema),after: z.array(AccessPermissionSchema),validFrom: z.iso.datetime(),validUntil: z.iso.datetime().nullable(),confer: z.boolean() })).max(100),nextCursor: positiveVersion.nullable() });
+/** Revalidated independent approvals without exposing their private principals. @alpha */
+export const AssignmentApprovals = z.strictObject({ reviewId: id,items: z.array(GroupApprovalReceipt.extend({ validity: z.enum(["valid","invalid","unavailable"]) })).max(64) });

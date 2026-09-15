@@ -16,18 +16,23 @@ import type { RequestConfig, ResponseErrorConfig } from "./.kubb/client";
 import {
 	acceptOrganizationMembershipInvitation,
 	acknowledgeRealmRules,
+	activateAccessRole,
 	addCatalogIdentifier,
 	addCatalogName,
 	addMusicMedium,
 	addMusicTrack,
 	advanceAccessGroupImpact,
 	advanceAccessGroupImpactEvaluation,
+	amendAccessRoleBinding,
+	approveAccessAssignmentReview,
 	approveAccessGroupImpact,
 	assignGroupingClass,
 	attachMusicDiscToc,
 	controlCatalogSourceJob,
+	createAccessAssignmentCeiling,
 	createAccessGroup,
 	createAccessRole,
+	createAccessRoleBinding,
 	createAccountIdentity,
 	createCatalogDefinition,
 	createCatalogResource,
@@ -99,11 +104,13 @@ import {
 	enableConnectedApp,
 	eraseOwnAccount,
 	findSoftwareReleases,
+	getAccessAssignmentCeiling,
 	getAccessGroup,
 	getAccessGroupImpactContext,
 	getAccessGroupReviewRecipient,
 	getAccessGroupSelection,
 	getAccessRole,
+	getAccessRoleBinding,
 	getActingEntityPresentationRevision,
 	getApiAccountMe,
 	getApiAccountMeBlocks,
@@ -270,6 +277,7 @@ import {
 	getZonePageAddressById,
 	getZoneRenderProjection,
 	headApiHealth,
+	inspectAccessAssignmentReview,
 	inspectAccessGroupApprovalProposal,
 	inspectAccessGroupImpact,
 	inspectAccessGroupImpactEvaluation,
@@ -280,10 +288,16 @@ import {
 	joinRealm,
 	leaveOrganizationMembership,
 	leaveRealm,
+	listAccessAssignmentApprovals,
+	listAccessAssignmentCeilingHistory,
+	listAccessAssignmentCeilings,
+	listAccessAssignmentRecipients,
 	listAccessGroupApprovals,
 	listAccessGroupHistory,
 	listAccessGroupRoster,
 	listAccessGroups,
+	listAccessRoleBindingHistory,
+	listAccessRoleBindings,
 	listAccessRoleHistory,
 	listAccessRoles,
 	listActingEntityPresentationHistory,
@@ -598,6 +612,7 @@ import {
 	restoreSoftwareDetails,
 	restoreSoftwareParticipationContext,
 	retireAccessGroup,
+	retireAccessRole,
 	retireConnectedApp,
 	retryNativeMerge,
 	reviewNativeMerge,
@@ -612,8 +627,11 @@ import {
 	reviseSoftwareCredit,
 	reviseSoftwareDetails,
 	reviseSoftwareParticipationContext,
+	revokeAccessAssignmentApproval,
+	revokeAccessAssignmentCeiling,
 	revokeAccessGroupApproval,
 	revokeAccessRecoveryPath,
+	revokeAccessRoleBinding,
 	revokeOrganizationEnrollmentContact,
 	revokeOrganizationMembershipInvitation,
 	revokeOwnAppConsent,
@@ -622,10 +640,12 @@ import {
 	revokeServicePrincipal,
 	saveProgramContentDraft,
 	saveTextVersionContentDraft,
+	selectAccessAssignmentRecipient,
 	selectOrganizationRecoveryRecipient,
 	selectParticipation,
 	setConnectedAppTrust,
 	setMainIdentityPreference,
+	startAccessAssignmentReview,
 	startAccessGroupImpact,
 	startAccessGroupSelectionReview,
 	transitionCatalogSemanticState,
@@ -662,6 +682,16 @@ import type {
 	AcknowledgeRealmRulesStatus422,
 	AcknowledgeRealmRulesStatus500,
 	AcknowledgeRealmRulesStatus503,
+	ActivateAccessRoleOptions,
+	ActivateAccessRoleStatus200,
+	ActivateAccessRoleStatus400,
+	ActivateAccessRoleStatus401,
+	ActivateAccessRoleStatus403,
+	ActivateAccessRoleStatus404,
+	ActivateAccessRoleStatus409,
+	ActivateAccessRoleStatus422,
+	ActivateAccessRoleStatus500,
+	ActivateAccessRoleStatus503,
 	AddCatalogIdentifierOptions,
 	AddCatalogIdentifierStatus200,
 	AddCatalogIdentifierStatus400,
@@ -707,6 +737,26 @@ import type {
 	AdvanceAccessGroupImpactStatus429,
 	AdvanceAccessGroupImpactStatus500,
 	AdvanceAccessGroupImpactStatus503,
+	AmendAccessRoleBindingOptions,
+	AmendAccessRoleBindingStatus200,
+	AmendAccessRoleBindingStatus400,
+	AmendAccessRoleBindingStatus401,
+	AmendAccessRoleBindingStatus403,
+	AmendAccessRoleBindingStatus404,
+	AmendAccessRoleBindingStatus409,
+	AmendAccessRoleBindingStatus422,
+	AmendAccessRoleBindingStatus500,
+	AmendAccessRoleBindingStatus503,
+	ApproveAccessAssignmentReviewOptions,
+	ApproveAccessAssignmentReviewStatus200,
+	ApproveAccessAssignmentReviewStatus400,
+	ApproveAccessAssignmentReviewStatus401,
+	ApproveAccessAssignmentReviewStatus403,
+	ApproveAccessAssignmentReviewStatus404,
+	ApproveAccessAssignmentReviewStatus409,
+	ApproveAccessAssignmentReviewStatus422,
+	ApproveAccessAssignmentReviewStatus500,
+	ApproveAccessAssignmentReviewStatus503,
 	ApproveAccessGroupImpactOptions,
 	ApproveAccessGroupImpactStatus200,
 	ApproveAccessGroupImpactStatus400,
@@ -735,6 +785,16 @@ import type {
 	ControlCatalogSourceJobStatus422,
 	ControlCatalogSourceJobStatus429,
 	ControlCatalogSourceJobStatus500,
+	CreateAccessAssignmentCeilingOptions,
+	CreateAccessAssignmentCeilingStatus200,
+	CreateAccessAssignmentCeilingStatus400,
+	CreateAccessAssignmentCeilingStatus401,
+	CreateAccessAssignmentCeilingStatus403,
+	CreateAccessAssignmentCeilingStatus404,
+	CreateAccessAssignmentCeilingStatus409,
+	CreateAccessAssignmentCeilingStatus422,
+	CreateAccessAssignmentCeilingStatus500,
+	CreateAccessAssignmentCeilingStatus503,
 	CreateAccessGroupOptions,
 	CreateAccessGroupStatus200,
 	CreateAccessGroupStatus400,
@@ -746,6 +806,16 @@ import type {
 	CreateAccessGroupStatus429,
 	CreateAccessGroupStatus500,
 	CreateAccessGroupStatus503,
+	CreateAccessRoleBindingOptions,
+	CreateAccessRoleBindingStatus200,
+	CreateAccessRoleBindingStatus400,
+	CreateAccessRoleBindingStatus401,
+	CreateAccessRoleBindingStatus403,
+	CreateAccessRoleBindingStatus404,
+	CreateAccessRoleBindingStatus409,
+	CreateAccessRoleBindingStatus422,
+	CreateAccessRoleBindingStatus500,
+	CreateAccessRoleBindingStatus503,
 	CreateAccessRoleOptions,
 	CreateAccessRoleStatus200,
 	CreateAccessRoleStatus400,
@@ -1234,6 +1304,17 @@ import type {
 	FindSoftwareReleasesStatus200,
 	FindSoftwareReleasesStatus422,
 	FindSoftwareReleasesStatus500,
+	GetAccessAssignmentCeilingOptions,
+	GetAccessAssignmentCeilingStatus200,
+	GetAccessAssignmentCeilingStatus400,
+	GetAccessAssignmentCeilingStatus401,
+	GetAccessAssignmentCeilingStatus403,
+	GetAccessAssignmentCeilingStatus404,
+	GetAccessAssignmentCeilingStatus409,
+	GetAccessAssignmentCeilingStatus422,
+	GetAccessAssignmentCeilingStatus429,
+	GetAccessAssignmentCeilingStatus500,
+	GetAccessAssignmentCeilingStatus503,
 	GetAccessGroupImpactContextOptions,
 	GetAccessGroupImpactContextStatus200,
 	GetAccessGroupImpactContextStatus400,
@@ -1277,6 +1358,17 @@ import type {
 	GetAccessGroupStatus429,
 	GetAccessGroupStatus500,
 	GetAccessGroupStatus503,
+	GetAccessRoleBindingOptions,
+	GetAccessRoleBindingStatus200,
+	GetAccessRoleBindingStatus400,
+	GetAccessRoleBindingStatus401,
+	GetAccessRoleBindingStatus403,
+	GetAccessRoleBindingStatus404,
+	GetAccessRoleBindingStatus409,
+	GetAccessRoleBindingStatus422,
+	GetAccessRoleBindingStatus429,
+	GetAccessRoleBindingStatus500,
+	GetAccessRoleBindingStatus503,
 	GetAccessRoleOptions,
 	GetAccessRoleStatus200,
 	GetAccessRoleStatus422,
@@ -2175,6 +2267,16 @@ import type {
 	HeadApiHealthStatus422,
 	HeadApiHealthStatus429,
 	HeadApiHealthStatus500,
+	InspectAccessAssignmentReviewOptions,
+	InspectAccessAssignmentReviewStatus200,
+	InspectAccessAssignmentReviewStatus400,
+	InspectAccessAssignmentReviewStatus401,
+	InspectAccessAssignmentReviewStatus403,
+	InspectAccessAssignmentReviewStatus404,
+	InspectAccessAssignmentReviewStatus409,
+	InspectAccessAssignmentReviewStatus422,
+	InspectAccessAssignmentReviewStatus500,
+	InspectAccessAssignmentReviewStatus503,
 	InspectAccessGroupApprovalProposalOptions,
 	InspectAccessGroupApprovalProposalStatus200,
 	InspectAccessGroupApprovalProposalStatus400,
@@ -2263,6 +2365,49 @@ import type {
 	LeaveRealmStatus422,
 	LeaveRealmStatus500,
 	LeaveRealmStatus503,
+	ListAccessAssignmentApprovalsOptions,
+	ListAccessAssignmentApprovalsStatus200,
+	ListAccessAssignmentApprovalsStatus400,
+	ListAccessAssignmentApprovalsStatus401,
+	ListAccessAssignmentApprovalsStatus403,
+	ListAccessAssignmentApprovalsStatus404,
+	ListAccessAssignmentApprovalsStatus409,
+	ListAccessAssignmentApprovalsStatus422,
+	ListAccessAssignmentApprovalsStatus500,
+	ListAccessAssignmentApprovalsStatus503,
+	ListAccessAssignmentCeilingHistoryOptions,
+	ListAccessAssignmentCeilingHistoryStatus200,
+	ListAccessAssignmentCeilingHistoryStatus400,
+	ListAccessAssignmentCeilingHistoryStatus401,
+	ListAccessAssignmentCeilingHistoryStatus403,
+	ListAccessAssignmentCeilingHistoryStatus404,
+	ListAccessAssignmentCeilingHistoryStatus409,
+	ListAccessAssignmentCeilingHistoryStatus422,
+	ListAccessAssignmentCeilingHistoryStatus429,
+	ListAccessAssignmentCeilingHistoryStatus500,
+	ListAccessAssignmentCeilingHistoryStatus503,
+	ListAccessAssignmentCeilingsOptions,
+	ListAccessAssignmentCeilingsStatus200,
+	ListAccessAssignmentCeilingsStatus400,
+	ListAccessAssignmentCeilingsStatus401,
+	ListAccessAssignmentCeilingsStatus403,
+	ListAccessAssignmentCeilingsStatus404,
+	ListAccessAssignmentCeilingsStatus409,
+	ListAccessAssignmentCeilingsStatus422,
+	ListAccessAssignmentCeilingsStatus429,
+	ListAccessAssignmentCeilingsStatus500,
+	ListAccessAssignmentCeilingsStatus503,
+	ListAccessAssignmentRecipientsOptions,
+	ListAccessAssignmentRecipientsStatus200,
+	ListAccessAssignmentRecipientsStatus400,
+	ListAccessAssignmentRecipientsStatus401,
+	ListAccessAssignmentRecipientsStatus403,
+	ListAccessAssignmentRecipientsStatus404,
+	ListAccessAssignmentRecipientsStatus409,
+	ListAccessAssignmentRecipientsStatus422,
+	ListAccessAssignmentRecipientsStatus429,
+	ListAccessAssignmentRecipientsStatus500,
+	ListAccessAssignmentRecipientsStatus503,
 	ListAccessGroupApprovalsOptions,
 	ListAccessGroupApprovalsStatus200,
 	ListAccessGroupApprovalsStatus400,
@@ -2306,6 +2451,28 @@ import type {
 	ListAccessGroupsStatus429,
 	ListAccessGroupsStatus500,
 	ListAccessGroupsStatus503,
+	ListAccessRoleBindingHistoryOptions,
+	ListAccessRoleBindingHistoryStatus200,
+	ListAccessRoleBindingHistoryStatus400,
+	ListAccessRoleBindingHistoryStatus401,
+	ListAccessRoleBindingHistoryStatus403,
+	ListAccessRoleBindingHistoryStatus404,
+	ListAccessRoleBindingHistoryStatus409,
+	ListAccessRoleBindingHistoryStatus422,
+	ListAccessRoleBindingHistoryStatus429,
+	ListAccessRoleBindingHistoryStatus500,
+	ListAccessRoleBindingHistoryStatus503,
+	ListAccessRoleBindingsOptions,
+	ListAccessRoleBindingsStatus200,
+	ListAccessRoleBindingsStatus400,
+	ListAccessRoleBindingsStatus401,
+	ListAccessRoleBindingsStatus403,
+	ListAccessRoleBindingsStatus404,
+	ListAccessRoleBindingsStatus409,
+	ListAccessRoleBindingsStatus422,
+	ListAccessRoleBindingsStatus429,
+	ListAccessRoleBindingsStatus500,
+	ListAccessRoleBindingsStatus503,
 	ListAccessRoleHistoryOptions,
 	ListAccessRoleHistoryStatus200,
 	ListAccessRoleHistoryStatus422,
@@ -4444,6 +4611,16 @@ import type {
 	RetireAccessGroupStatus422,
 	RetireAccessGroupStatus500,
 	RetireAccessGroupStatus503,
+	RetireAccessRoleOptions,
+	RetireAccessRoleStatus200,
+	RetireAccessRoleStatus400,
+	RetireAccessRoleStatus401,
+	RetireAccessRoleStatus403,
+	RetireAccessRoleStatus404,
+	RetireAccessRoleStatus409,
+	RetireAccessRoleStatus422,
+	RetireAccessRoleStatus500,
+	RetireAccessRoleStatus503,
 	RetireConnectedAppOptions,
 	RetireConnectedAppStatus200,
 	RetireConnectedAppStatus400,
@@ -4523,6 +4700,26 @@ import type {
 	ReviseSoftwareParticipationContextStatus422,
 	ReviseSoftwareParticipationContextStatus429,
 	ReviseSoftwareParticipationContextStatus500,
+	RevokeAccessAssignmentApprovalOptions,
+	RevokeAccessAssignmentApprovalStatus200,
+	RevokeAccessAssignmentApprovalStatus400,
+	RevokeAccessAssignmentApprovalStatus401,
+	RevokeAccessAssignmentApprovalStatus403,
+	RevokeAccessAssignmentApprovalStatus404,
+	RevokeAccessAssignmentApprovalStatus409,
+	RevokeAccessAssignmentApprovalStatus422,
+	RevokeAccessAssignmentApprovalStatus500,
+	RevokeAccessAssignmentApprovalStatus503,
+	RevokeAccessAssignmentCeilingOptions,
+	RevokeAccessAssignmentCeilingStatus200,
+	RevokeAccessAssignmentCeilingStatus400,
+	RevokeAccessAssignmentCeilingStatus401,
+	RevokeAccessAssignmentCeilingStatus403,
+	RevokeAccessAssignmentCeilingStatus404,
+	RevokeAccessAssignmentCeilingStatus409,
+	RevokeAccessAssignmentCeilingStatus422,
+	RevokeAccessAssignmentCeilingStatus500,
+	RevokeAccessAssignmentCeilingStatus503,
 	RevokeAccessGroupApprovalOptions,
 	RevokeAccessGroupApprovalStatus200,
 	RevokeAccessGroupApprovalStatus400,
@@ -4543,6 +4740,16 @@ import type {
 	RevokeAccessRecoveryPathStatus422,
 	RevokeAccessRecoveryPathStatus500,
 	RevokeAccessRecoveryPathStatus503,
+	RevokeAccessRoleBindingOptions,
+	RevokeAccessRoleBindingStatus200,
+	RevokeAccessRoleBindingStatus400,
+	RevokeAccessRoleBindingStatus401,
+	RevokeAccessRoleBindingStatus403,
+	RevokeAccessRoleBindingStatus404,
+	RevokeAccessRoleBindingStatus409,
+	RevokeAccessRoleBindingStatus422,
+	RevokeAccessRoleBindingStatus500,
+	RevokeAccessRoleBindingStatus503,
 	RevokeOrganizationEnrollmentContactOptions,
 	RevokeOrganizationEnrollmentContactStatus200,
 	RevokeOrganizationEnrollmentContactStatus403,
@@ -4603,6 +4810,17 @@ import type {
 	SaveTextVersionContentDraftStatus422,
 	SaveTextVersionContentDraftStatus429,
 	SaveTextVersionContentDraftStatus500,
+	SelectAccessAssignmentRecipientOptions,
+	SelectAccessAssignmentRecipientStatus200,
+	SelectAccessAssignmentRecipientStatus400,
+	SelectAccessAssignmentRecipientStatus401,
+	SelectAccessAssignmentRecipientStatus403,
+	SelectAccessAssignmentRecipientStatus404,
+	SelectAccessAssignmentRecipientStatus409,
+	SelectAccessAssignmentRecipientStatus422,
+	SelectAccessAssignmentRecipientStatus429,
+	SelectAccessAssignmentRecipientStatus500,
+	SelectAccessAssignmentRecipientStatus503,
 	SelectOrganizationRecoveryRecipientOptions,
 	SelectOrganizationRecoveryRecipientStatus200,
 	SelectOrganizationRecoveryRecipientStatus400,
@@ -4628,6 +4846,16 @@ import type {
 	SetMainIdentityPreferenceStatus422,
 	SetMainIdentityPreferenceStatus429,
 	SetMainIdentityPreferenceStatus500,
+	StartAccessAssignmentReviewOptions,
+	StartAccessAssignmentReviewStatus200,
+	StartAccessAssignmentReviewStatus400,
+	StartAccessAssignmentReviewStatus401,
+	StartAccessAssignmentReviewStatus403,
+	StartAccessAssignmentReviewStatus404,
+	StartAccessAssignmentReviewStatus409,
+	StartAccessAssignmentReviewStatus422,
+	StartAccessAssignmentReviewStatus500,
+	StartAccessAssignmentReviewStatus503,
 	StartAccessGroupImpactOptions,
 	StartAccessGroupImpactStatus200,
 	StartAccessGroupImpactStatus400,
@@ -4935,6 +5163,2289 @@ export function useGetImageAssetsByIdContent<
 	queryResult.queryKey = queryKey as TQueryKey;
 
 	return queryResult;
+}
+
+export const selectAccessAssignmentRecipientMutationKey = () =>
+	[{ url: "/api/v1/access/:scope/assignment-recipients/select" }] as const;
+
+export function selectAccessAssignmentRecipientMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = selectAccessAssignmentRecipientMutationKey();
+	return mutationOptions<
+		SelectAccessAssignmentRecipientStatus200,
+		ResponseErrorConfig<
+			| SelectAccessAssignmentRecipientStatus400
+			| SelectAccessAssignmentRecipientStatus401
+			| SelectAccessAssignmentRecipientStatus403
+			| SelectAccessAssignmentRecipientStatus404
+			| SelectAccessAssignmentRecipientStatus409
+			| SelectAccessAssignmentRecipientStatus422
+			| SelectAccessAssignmentRecipientStatus429
+			| SelectAccessAssignmentRecipientStatus500
+			| SelectAccessAssignmentRecipientStatus503
+		>,
+		SelectAccessAssignmentRecipientOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return selectAccessAssignmentRecipient({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/assignment-recipients/select}
+ */
+export function useSelectAccessAssignmentRecipient<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			SelectAccessAssignmentRecipientStatus200,
+			ResponseErrorConfig<
+				| SelectAccessAssignmentRecipientStatus400
+				| SelectAccessAssignmentRecipientStatus401
+				| SelectAccessAssignmentRecipientStatus403
+				| SelectAccessAssignmentRecipientStatus404
+				| SelectAccessAssignmentRecipientStatus409
+				| SelectAccessAssignmentRecipientStatus422
+				| SelectAccessAssignmentRecipientStatus429
+				| SelectAccessAssignmentRecipientStatus500
+				| SelectAccessAssignmentRecipientStatus503
+			>,
+			SelectAccessAssignmentRecipientOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? selectAccessAssignmentRecipientMutationKey();
+
+	const baseOptions = selectAccessAssignmentRecipientMutationOptions(config) as UseMutationOptions<
+		SelectAccessAssignmentRecipientStatus200,
+		ResponseErrorConfig<
+			| SelectAccessAssignmentRecipientStatus400
+			| SelectAccessAssignmentRecipientStatus401
+			| SelectAccessAssignmentRecipientStatus403
+			| SelectAccessAssignmentRecipientStatus404
+			| SelectAccessAssignmentRecipientStatus409
+			| SelectAccessAssignmentRecipientStatus422
+			| SelectAccessAssignmentRecipientStatus429
+			| SelectAccessAssignmentRecipientStatus500
+			| SelectAccessAssignmentRecipientStatus503
+		>,
+		SelectAccessAssignmentRecipientOptions,
+		TContext
+	>;
+
+	return useMutation<
+		SelectAccessAssignmentRecipientStatus200,
+		ResponseErrorConfig<
+			| SelectAccessAssignmentRecipientStatus400
+			| SelectAccessAssignmentRecipientStatus401
+			| SelectAccessAssignmentRecipientStatus403
+			| SelectAccessAssignmentRecipientStatus404
+			| SelectAccessAssignmentRecipientStatus409
+			| SelectAccessAssignmentRecipientStatus422
+			| SelectAccessAssignmentRecipientStatus429
+			| SelectAccessAssignmentRecipientStatus500
+			| SelectAccessAssignmentRecipientStatus503
+		>,
+		SelectAccessAssignmentRecipientOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		SelectAccessAssignmentRecipientStatus200,
+		ResponseErrorConfig<
+			| SelectAccessAssignmentRecipientStatus400
+			| SelectAccessAssignmentRecipientStatus401
+			| SelectAccessAssignmentRecipientStatus403
+			| SelectAccessAssignmentRecipientStatus404
+			| SelectAccessAssignmentRecipientStatus409
+			| SelectAccessAssignmentRecipientStatus422
+			| SelectAccessAssignmentRecipientStatus429
+			| SelectAccessAssignmentRecipientStatus500
+			| SelectAccessAssignmentRecipientStatus503
+		>,
+		SelectAccessAssignmentRecipientOptions,
+		TContext
+	>;
+}
+
+export const listAccessAssignmentRecipientsMutationKey = () =>
+	[{ url: "/api/v1/access/:scope/assignment-recipients/query" }] as const;
+
+export function listAccessAssignmentRecipientsMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = listAccessAssignmentRecipientsMutationKey();
+	return mutationOptions<
+		ListAccessAssignmentRecipientsStatus200,
+		ResponseErrorConfig<
+			| ListAccessAssignmentRecipientsStatus400
+			| ListAccessAssignmentRecipientsStatus401
+			| ListAccessAssignmentRecipientsStatus403
+			| ListAccessAssignmentRecipientsStatus404
+			| ListAccessAssignmentRecipientsStatus409
+			| ListAccessAssignmentRecipientsStatus422
+			| ListAccessAssignmentRecipientsStatus429
+			| ListAccessAssignmentRecipientsStatus500
+			| ListAccessAssignmentRecipientsStatus503
+		>,
+		ListAccessAssignmentRecipientsOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return listAccessAssignmentRecipients({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/assignment-recipients/query}
+ */
+export function useListAccessAssignmentRecipients<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			ListAccessAssignmentRecipientsStatus200,
+			ResponseErrorConfig<
+				| ListAccessAssignmentRecipientsStatus400
+				| ListAccessAssignmentRecipientsStatus401
+				| ListAccessAssignmentRecipientsStatus403
+				| ListAccessAssignmentRecipientsStatus404
+				| ListAccessAssignmentRecipientsStatus409
+				| ListAccessAssignmentRecipientsStatus422
+				| ListAccessAssignmentRecipientsStatus429
+				| ListAccessAssignmentRecipientsStatus500
+				| ListAccessAssignmentRecipientsStatus503
+			>,
+			ListAccessAssignmentRecipientsOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? listAccessAssignmentRecipientsMutationKey();
+
+	const baseOptions = listAccessAssignmentRecipientsMutationOptions(config) as UseMutationOptions<
+		ListAccessAssignmentRecipientsStatus200,
+		ResponseErrorConfig<
+			| ListAccessAssignmentRecipientsStatus400
+			| ListAccessAssignmentRecipientsStatus401
+			| ListAccessAssignmentRecipientsStatus403
+			| ListAccessAssignmentRecipientsStatus404
+			| ListAccessAssignmentRecipientsStatus409
+			| ListAccessAssignmentRecipientsStatus422
+			| ListAccessAssignmentRecipientsStatus429
+			| ListAccessAssignmentRecipientsStatus500
+			| ListAccessAssignmentRecipientsStatus503
+		>,
+		ListAccessAssignmentRecipientsOptions,
+		TContext
+	>;
+
+	return useMutation<
+		ListAccessAssignmentRecipientsStatus200,
+		ResponseErrorConfig<
+			| ListAccessAssignmentRecipientsStatus400
+			| ListAccessAssignmentRecipientsStatus401
+			| ListAccessAssignmentRecipientsStatus403
+			| ListAccessAssignmentRecipientsStatus404
+			| ListAccessAssignmentRecipientsStatus409
+			| ListAccessAssignmentRecipientsStatus422
+			| ListAccessAssignmentRecipientsStatus429
+			| ListAccessAssignmentRecipientsStatus500
+			| ListAccessAssignmentRecipientsStatus503
+		>,
+		ListAccessAssignmentRecipientsOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		ListAccessAssignmentRecipientsStatus200,
+		ResponseErrorConfig<
+			| ListAccessAssignmentRecipientsStatus400
+			| ListAccessAssignmentRecipientsStatus401
+			| ListAccessAssignmentRecipientsStatus403
+			| ListAccessAssignmentRecipientsStatus404
+			| ListAccessAssignmentRecipientsStatus409
+			| ListAccessAssignmentRecipientsStatus422
+			| ListAccessAssignmentRecipientsStatus429
+			| ListAccessAssignmentRecipientsStatus500
+			| ListAccessAssignmentRecipientsStatus503
+		>,
+		ListAccessAssignmentRecipientsOptions,
+		TContext
+	>;
+}
+
+export const startAccessAssignmentReviewMutationKey = () =>
+	[{ url: "/api/v1/access/:scope/assignment-reviews" }] as const;
+
+export function startAccessAssignmentReviewMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = startAccessAssignmentReviewMutationKey();
+	return mutationOptions<
+		StartAccessAssignmentReviewStatus200,
+		ResponseErrorConfig<
+			| StartAccessAssignmentReviewStatus400
+			| StartAccessAssignmentReviewStatus401
+			| StartAccessAssignmentReviewStatus403
+			| StartAccessAssignmentReviewStatus404
+			| StartAccessAssignmentReviewStatus409
+			| StartAccessAssignmentReviewStatus422
+			| StartAccessAssignmentReviewStatus500
+			| StartAccessAssignmentReviewStatus503
+		>,
+		StartAccessAssignmentReviewOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return startAccessAssignmentReview({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/assignment-reviews}
+ */
+export function useStartAccessAssignmentReview<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			StartAccessAssignmentReviewStatus200,
+			ResponseErrorConfig<
+				| StartAccessAssignmentReviewStatus400
+				| StartAccessAssignmentReviewStatus401
+				| StartAccessAssignmentReviewStatus403
+				| StartAccessAssignmentReviewStatus404
+				| StartAccessAssignmentReviewStatus409
+				| StartAccessAssignmentReviewStatus422
+				| StartAccessAssignmentReviewStatus500
+				| StartAccessAssignmentReviewStatus503
+			>,
+			StartAccessAssignmentReviewOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? startAccessAssignmentReviewMutationKey();
+
+	const baseOptions = startAccessAssignmentReviewMutationOptions(config) as UseMutationOptions<
+		StartAccessAssignmentReviewStatus200,
+		ResponseErrorConfig<
+			| StartAccessAssignmentReviewStatus400
+			| StartAccessAssignmentReviewStatus401
+			| StartAccessAssignmentReviewStatus403
+			| StartAccessAssignmentReviewStatus404
+			| StartAccessAssignmentReviewStatus409
+			| StartAccessAssignmentReviewStatus422
+			| StartAccessAssignmentReviewStatus500
+			| StartAccessAssignmentReviewStatus503
+		>,
+		StartAccessAssignmentReviewOptions,
+		TContext
+	>;
+
+	return useMutation<
+		StartAccessAssignmentReviewStatus200,
+		ResponseErrorConfig<
+			| StartAccessAssignmentReviewStatus400
+			| StartAccessAssignmentReviewStatus401
+			| StartAccessAssignmentReviewStatus403
+			| StartAccessAssignmentReviewStatus404
+			| StartAccessAssignmentReviewStatus409
+			| StartAccessAssignmentReviewStatus422
+			| StartAccessAssignmentReviewStatus500
+			| StartAccessAssignmentReviewStatus503
+		>,
+		StartAccessAssignmentReviewOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		StartAccessAssignmentReviewStatus200,
+		ResponseErrorConfig<
+			| StartAccessAssignmentReviewStatus400
+			| StartAccessAssignmentReviewStatus401
+			| StartAccessAssignmentReviewStatus403
+			| StartAccessAssignmentReviewStatus404
+			| StartAccessAssignmentReviewStatus409
+			| StartAccessAssignmentReviewStatus422
+			| StartAccessAssignmentReviewStatus500
+			| StartAccessAssignmentReviewStatus503
+		>,
+		StartAccessAssignmentReviewOptions,
+		TContext
+	>;
+}
+
+export const inspectAccessAssignmentReviewQueryKey = ({
+	path,
+	query,
+}: Omit<InspectAccessAssignmentReviewOptions, "headers">) =>
+	[
+		{ url: "/api/v1/access/:scope/assignment-reviews/:reviewId", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type InspectAccessAssignmentReviewQueryKey = ReturnType<
+	typeof inspectAccessAssignmentReviewQueryKey
+>;
+
+export function inspectAccessAssignmentReviewQueryOptions(
+	{ path, query }: InspectAccessAssignmentReviewOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = inspectAccessAssignmentReviewQueryKey({ path, query });
+	return queryOptions<
+		InspectAccessAssignmentReviewStatus200,
+		ResponseErrorConfig<
+			| InspectAccessAssignmentReviewStatus400
+			| InspectAccessAssignmentReviewStatus401
+			| InspectAccessAssignmentReviewStatus403
+			| InspectAccessAssignmentReviewStatus404
+			| InspectAccessAssignmentReviewStatus409
+			| InspectAccessAssignmentReviewStatus422
+			| InspectAccessAssignmentReviewStatus500
+			| InspectAccessAssignmentReviewStatus503
+		>,
+		InspectAccessAssignmentReviewStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return inspectAccessAssignmentReview({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/assignment-reviews/:reviewId}
+ */
+export function useInspectAccessAssignmentReview<
+	TData = InspectAccessAssignmentReviewStatus200,
+	TQueryData = InspectAccessAssignmentReviewStatus200,
+	TQueryKey extends QueryKey = InspectAccessAssignmentReviewQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| InspectAccessAssignmentReviewOptions["path"]
+			| (() => InspectAccessAssignmentReviewOptions["path"]);
+		query?:
+			| InspectAccessAssignmentReviewOptions["query"]
+			| (() => InspectAccessAssignmentReviewOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				InspectAccessAssignmentReviewStatus200,
+				ResponseErrorConfig<
+					| InspectAccessAssignmentReviewStatus400
+					| InspectAccessAssignmentReviewStatus401
+					| InspectAccessAssignmentReviewStatus403
+					| InspectAccessAssignmentReviewStatus404
+					| InspectAccessAssignmentReviewStatus409
+					| InspectAccessAssignmentReviewStatus422
+					| InspectAccessAssignmentReviewStatus500
+					| InspectAccessAssignmentReviewStatus503
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ?? inspectAccessAssignmentReviewQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...inspectAccessAssignmentReviewQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| InspectAccessAssignmentReviewStatus400
+			| InspectAccessAssignmentReviewStatus401
+			| InspectAccessAssignmentReviewStatus403
+			| InspectAccessAssignmentReviewStatus404
+			| InspectAccessAssignmentReviewStatus409
+			| InspectAccessAssignmentReviewStatus422
+			| InspectAccessAssignmentReviewStatus500
+			| InspectAccessAssignmentReviewStatus503
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const listAccessAssignmentApprovalsQueryKey = ({
+	path,
+}: Omit<ListAccessAssignmentApprovalsOptions, "headers">) =>
+	[{ url: "/api/v1/access/:scope/assignment-reviews/:reviewId/approvals", params: path }] as const;
+
+type ListAccessAssignmentApprovalsQueryKey = ReturnType<
+	typeof listAccessAssignmentApprovalsQueryKey
+>;
+
+export function listAccessAssignmentApprovalsQueryOptions(
+	{ path }: ListAccessAssignmentApprovalsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listAccessAssignmentApprovalsQueryKey({ path });
+	return queryOptions<
+		ListAccessAssignmentApprovalsStatus200,
+		ResponseErrorConfig<
+			| ListAccessAssignmentApprovalsStatus400
+			| ListAccessAssignmentApprovalsStatus401
+			| ListAccessAssignmentApprovalsStatus403
+			| ListAccessAssignmentApprovalsStatus404
+			| ListAccessAssignmentApprovalsStatus409
+			| ListAccessAssignmentApprovalsStatus422
+			| ListAccessAssignmentApprovalsStatus500
+			| ListAccessAssignmentApprovalsStatus503
+		>,
+		ListAccessAssignmentApprovalsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return listAccessAssignmentApprovals({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/assignment-reviews/:reviewId/approvals}
+ */
+export function useListAccessAssignmentApprovals<
+	TData = ListAccessAssignmentApprovalsStatus200,
+	TQueryData = ListAccessAssignmentApprovalsStatus200,
+	TQueryKey extends QueryKey = ListAccessAssignmentApprovalsQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| ListAccessAssignmentApprovalsOptions["path"]
+			| (() => ListAccessAssignmentApprovalsOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListAccessAssignmentApprovalsStatus200,
+				ResponseErrorConfig<
+					| ListAccessAssignmentApprovalsStatus400
+					| ListAccessAssignmentApprovalsStatus401
+					| ListAccessAssignmentApprovalsStatus403
+					| ListAccessAssignmentApprovalsStatus404
+					| ListAccessAssignmentApprovalsStatus409
+					| ListAccessAssignmentApprovalsStatus422
+					| ListAccessAssignmentApprovalsStatus500
+					| ListAccessAssignmentApprovalsStatus503
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ?? listAccessAssignmentApprovalsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listAccessAssignmentApprovalsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| ListAccessAssignmentApprovalsStatus400
+			| ListAccessAssignmentApprovalsStatus401
+			| ListAccessAssignmentApprovalsStatus403
+			| ListAccessAssignmentApprovalsStatus404
+			| ListAccessAssignmentApprovalsStatus409
+			| ListAccessAssignmentApprovalsStatus422
+			| ListAccessAssignmentApprovalsStatus500
+			| ListAccessAssignmentApprovalsStatus503
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const approveAccessAssignmentReviewMutationKey = () =>
+	[{ url: "/api/v1/access/:scope/assignment-reviews/:reviewId/approvals" }] as const;
+
+export function approveAccessAssignmentReviewMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = approveAccessAssignmentReviewMutationKey();
+	return mutationOptions<
+		ApproveAccessAssignmentReviewStatus200,
+		ResponseErrorConfig<
+			| ApproveAccessAssignmentReviewStatus400
+			| ApproveAccessAssignmentReviewStatus401
+			| ApproveAccessAssignmentReviewStatus403
+			| ApproveAccessAssignmentReviewStatus404
+			| ApproveAccessAssignmentReviewStatus409
+			| ApproveAccessAssignmentReviewStatus422
+			| ApproveAccessAssignmentReviewStatus500
+			| ApproveAccessAssignmentReviewStatus503
+		>,
+		ApproveAccessAssignmentReviewOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return approveAccessAssignmentReview({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/assignment-reviews/:reviewId/approvals}
+ */
+export function useApproveAccessAssignmentReview<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			ApproveAccessAssignmentReviewStatus200,
+			ResponseErrorConfig<
+				| ApproveAccessAssignmentReviewStatus400
+				| ApproveAccessAssignmentReviewStatus401
+				| ApproveAccessAssignmentReviewStatus403
+				| ApproveAccessAssignmentReviewStatus404
+				| ApproveAccessAssignmentReviewStatus409
+				| ApproveAccessAssignmentReviewStatus422
+				| ApproveAccessAssignmentReviewStatus500
+				| ApproveAccessAssignmentReviewStatus503
+			>,
+			ApproveAccessAssignmentReviewOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? approveAccessAssignmentReviewMutationKey();
+
+	const baseOptions = approveAccessAssignmentReviewMutationOptions(config) as UseMutationOptions<
+		ApproveAccessAssignmentReviewStatus200,
+		ResponseErrorConfig<
+			| ApproveAccessAssignmentReviewStatus400
+			| ApproveAccessAssignmentReviewStatus401
+			| ApproveAccessAssignmentReviewStatus403
+			| ApproveAccessAssignmentReviewStatus404
+			| ApproveAccessAssignmentReviewStatus409
+			| ApproveAccessAssignmentReviewStatus422
+			| ApproveAccessAssignmentReviewStatus500
+			| ApproveAccessAssignmentReviewStatus503
+		>,
+		ApproveAccessAssignmentReviewOptions,
+		TContext
+	>;
+
+	return useMutation<
+		ApproveAccessAssignmentReviewStatus200,
+		ResponseErrorConfig<
+			| ApproveAccessAssignmentReviewStatus400
+			| ApproveAccessAssignmentReviewStatus401
+			| ApproveAccessAssignmentReviewStatus403
+			| ApproveAccessAssignmentReviewStatus404
+			| ApproveAccessAssignmentReviewStatus409
+			| ApproveAccessAssignmentReviewStatus422
+			| ApproveAccessAssignmentReviewStatus500
+			| ApproveAccessAssignmentReviewStatus503
+		>,
+		ApproveAccessAssignmentReviewOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		ApproveAccessAssignmentReviewStatus200,
+		ResponseErrorConfig<
+			| ApproveAccessAssignmentReviewStatus400
+			| ApproveAccessAssignmentReviewStatus401
+			| ApproveAccessAssignmentReviewStatus403
+			| ApproveAccessAssignmentReviewStatus404
+			| ApproveAccessAssignmentReviewStatus409
+			| ApproveAccessAssignmentReviewStatus422
+			| ApproveAccessAssignmentReviewStatus500
+			| ApproveAccessAssignmentReviewStatus503
+		>,
+		ApproveAccessAssignmentReviewOptions,
+		TContext
+	>;
+}
+
+export const revokeAccessAssignmentApprovalMutationKey = () =>
+	[
+		{ url: "/api/v1/access/:scope/assignment-reviews/:reviewId/approvals/:approvalId/revoke" },
+	] as const;
+
+export function revokeAccessAssignmentApprovalMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = revokeAccessAssignmentApprovalMutationKey();
+	return mutationOptions<
+		RevokeAccessAssignmentApprovalStatus200,
+		ResponseErrorConfig<
+			| RevokeAccessAssignmentApprovalStatus400
+			| RevokeAccessAssignmentApprovalStatus401
+			| RevokeAccessAssignmentApprovalStatus403
+			| RevokeAccessAssignmentApprovalStatus404
+			| RevokeAccessAssignmentApprovalStatus409
+			| RevokeAccessAssignmentApprovalStatus422
+			| RevokeAccessAssignmentApprovalStatus500
+			| RevokeAccessAssignmentApprovalStatus503
+		>,
+		RevokeAccessAssignmentApprovalOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return revokeAccessAssignmentApproval({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/assignment-reviews/:reviewId/approvals/:approvalId/revoke}
+ */
+export function useRevokeAccessAssignmentApproval<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			RevokeAccessAssignmentApprovalStatus200,
+			ResponseErrorConfig<
+				| RevokeAccessAssignmentApprovalStatus400
+				| RevokeAccessAssignmentApprovalStatus401
+				| RevokeAccessAssignmentApprovalStatus403
+				| RevokeAccessAssignmentApprovalStatus404
+				| RevokeAccessAssignmentApprovalStatus409
+				| RevokeAccessAssignmentApprovalStatus422
+				| RevokeAccessAssignmentApprovalStatus500
+				| RevokeAccessAssignmentApprovalStatus503
+			>,
+			RevokeAccessAssignmentApprovalOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? revokeAccessAssignmentApprovalMutationKey();
+
+	const baseOptions = revokeAccessAssignmentApprovalMutationOptions(config) as UseMutationOptions<
+		RevokeAccessAssignmentApprovalStatus200,
+		ResponseErrorConfig<
+			| RevokeAccessAssignmentApprovalStatus400
+			| RevokeAccessAssignmentApprovalStatus401
+			| RevokeAccessAssignmentApprovalStatus403
+			| RevokeAccessAssignmentApprovalStatus404
+			| RevokeAccessAssignmentApprovalStatus409
+			| RevokeAccessAssignmentApprovalStatus422
+			| RevokeAccessAssignmentApprovalStatus500
+			| RevokeAccessAssignmentApprovalStatus503
+		>,
+		RevokeAccessAssignmentApprovalOptions,
+		TContext
+	>;
+
+	return useMutation<
+		RevokeAccessAssignmentApprovalStatus200,
+		ResponseErrorConfig<
+			| RevokeAccessAssignmentApprovalStatus400
+			| RevokeAccessAssignmentApprovalStatus401
+			| RevokeAccessAssignmentApprovalStatus403
+			| RevokeAccessAssignmentApprovalStatus404
+			| RevokeAccessAssignmentApprovalStatus409
+			| RevokeAccessAssignmentApprovalStatus422
+			| RevokeAccessAssignmentApprovalStatus500
+			| RevokeAccessAssignmentApprovalStatus503
+		>,
+		RevokeAccessAssignmentApprovalOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		RevokeAccessAssignmentApprovalStatus200,
+		ResponseErrorConfig<
+			| RevokeAccessAssignmentApprovalStatus400
+			| RevokeAccessAssignmentApprovalStatus401
+			| RevokeAccessAssignmentApprovalStatus403
+			| RevokeAccessAssignmentApprovalStatus404
+			| RevokeAccessAssignmentApprovalStatus409
+			| RevokeAccessAssignmentApprovalStatus422
+			| RevokeAccessAssignmentApprovalStatus500
+			| RevokeAccessAssignmentApprovalStatus503
+		>,
+		RevokeAccessAssignmentApprovalOptions,
+		TContext
+	>;
+}
+
+export const activateAccessRoleMutationKey = () =>
+	[{ url: "/api/v1/access/:scope/roles/:roleId/activate" }] as const;
+
+export function activateAccessRoleMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = activateAccessRoleMutationKey();
+	return mutationOptions<
+		ActivateAccessRoleStatus200,
+		ResponseErrorConfig<
+			| ActivateAccessRoleStatus400
+			| ActivateAccessRoleStatus401
+			| ActivateAccessRoleStatus403
+			| ActivateAccessRoleStatus404
+			| ActivateAccessRoleStatus409
+			| ActivateAccessRoleStatus422
+			| ActivateAccessRoleStatus500
+			| ActivateAccessRoleStatus503
+		>,
+		ActivateAccessRoleOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return activateAccessRole({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/roles/:roleId/activate}
+ */
+export function useActivateAccessRole<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			ActivateAccessRoleStatus200,
+			ResponseErrorConfig<
+				| ActivateAccessRoleStatus400
+				| ActivateAccessRoleStatus401
+				| ActivateAccessRoleStatus403
+				| ActivateAccessRoleStatus404
+				| ActivateAccessRoleStatus409
+				| ActivateAccessRoleStatus422
+				| ActivateAccessRoleStatus500
+				| ActivateAccessRoleStatus503
+			>,
+			ActivateAccessRoleOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? activateAccessRoleMutationKey();
+
+	const baseOptions = activateAccessRoleMutationOptions(config) as UseMutationOptions<
+		ActivateAccessRoleStatus200,
+		ResponseErrorConfig<
+			| ActivateAccessRoleStatus400
+			| ActivateAccessRoleStatus401
+			| ActivateAccessRoleStatus403
+			| ActivateAccessRoleStatus404
+			| ActivateAccessRoleStatus409
+			| ActivateAccessRoleStatus422
+			| ActivateAccessRoleStatus500
+			| ActivateAccessRoleStatus503
+		>,
+		ActivateAccessRoleOptions,
+		TContext
+	>;
+
+	return useMutation<
+		ActivateAccessRoleStatus200,
+		ResponseErrorConfig<
+			| ActivateAccessRoleStatus400
+			| ActivateAccessRoleStatus401
+			| ActivateAccessRoleStatus403
+			| ActivateAccessRoleStatus404
+			| ActivateAccessRoleStatus409
+			| ActivateAccessRoleStatus422
+			| ActivateAccessRoleStatus500
+			| ActivateAccessRoleStatus503
+		>,
+		ActivateAccessRoleOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		ActivateAccessRoleStatus200,
+		ResponseErrorConfig<
+			| ActivateAccessRoleStatus400
+			| ActivateAccessRoleStatus401
+			| ActivateAccessRoleStatus403
+			| ActivateAccessRoleStatus404
+			| ActivateAccessRoleStatus409
+			| ActivateAccessRoleStatus422
+			| ActivateAccessRoleStatus500
+			| ActivateAccessRoleStatus503
+		>,
+		ActivateAccessRoleOptions,
+		TContext
+	>;
+}
+
+export const retireAccessRoleMutationKey = () =>
+	[{ url: "/api/v1/access/:scope/roles/:roleId/retire" }] as const;
+
+export function retireAccessRoleMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = retireAccessRoleMutationKey();
+	return mutationOptions<
+		RetireAccessRoleStatus200,
+		ResponseErrorConfig<
+			| RetireAccessRoleStatus400
+			| RetireAccessRoleStatus401
+			| RetireAccessRoleStatus403
+			| RetireAccessRoleStatus404
+			| RetireAccessRoleStatus409
+			| RetireAccessRoleStatus422
+			| RetireAccessRoleStatus500
+			| RetireAccessRoleStatus503
+		>,
+		RetireAccessRoleOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return retireAccessRole({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/roles/:roleId/retire}
+ */
+export function useRetireAccessRole<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			RetireAccessRoleStatus200,
+			ResponseErrorConfig<
+				| RetireAccessRoleStatus400
+				| RetireAccessRoleStatus401
+				| RetireAccessRoleStatus403
+				| RetireAccessRoleStatus404
+				| RetireAccessRoleStatus409
+				| RetireAccessRoleStatus422
+				| RetireAccessRoleStatus500
+				| RetireAccessRoleStatus503
+			>,
+			RetireAccessRoleOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? retireAccessRoleMutationKey();
+
+	const baseOptions = retireAccessRoleMutationOptions(config) as UseMutationOptions<
+		RetireAccessRoleStatus200,
+		ResponseErrorConfig<
+			| RetireAccessRoleStatus400
+			| RetireAccessRoleStatus401
+			| RetireAccessRoleStatus403
+			| RetireAccessRoleStatus404
+			| RetireAccessRoleStatus409
+			| RetireAccessRoleStatus422
+			| RetireAccessRoleStatus500
+			| RetireAccessRoleStatus503
+		>,
+		RetireAccessRoleOptions,
+		TContext
+	>;
+
+	return useMutation<
+		RetireAccessRoleStatus200,
+		ResponseErrorConfig<
+			| RetireAccessRoleStatus400
+			| RetireAccessRoleStatus401
+			| RetireAccessRoleStatus403
+			| RetireAccessRoleStatus404
+			| RetireAccessRoleStatus409
+			| RetireAccessRoleStatus422
+			| RetireAccessRoleStatus500
+			| RetireAccessRoleStatus503
+		>,
+		RetireAccessRoleOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		RetireAccessRoleStatus200,
+		ResponseErrorConfig<
+			| RetireAccessRoleStatus400
+			| RetireAccessRoleStatus401
+			| RetireAccessRoleStatus403
+			| RetireAccessRoleStatus404
+			| RetireAccessRoleStatus409
+			| RetireAccessRoleStatus422
+			| RetireAccessRoleStatus500
+			| RetireAccessRoleStatus503
+		>,
+		RetireAccessRoleOptions,
+		TContext
+	>;
+}
+
+export const listAccessRoleBindingsQueryKey = ({
+	path,
+	query,
+}: Omit<ListAccessRoleBindingsOptions, "headers">) =>
+	[{ url: "/api/v1/access/:scope/bindings", params: path }, ...(query ? [query] : [])] as const;
+
+type ListAccessRoleBindingsQueryKey = ReturnType<typeof listAccessRoleBindingsQueryKey>;
+
+export function listAccessRoleBindingsQueryOptions(
+	{ path, query }: ListAccessRoleBindingsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listAccessRoleBindingsQueryKey({ path, query });
+	return queryOptions<
+		ListAccessRoleBindingsStatus200,
+		ResponseErrorConfig<
+			| ListAccessRoleBindingsStatus400
+			| ListAccessRoleBindingsStatus401
+			| ListAccessRoleBindingsStatus403
+			| ListAccessRoleBindingsStatus404
+			| ListAccessRoleBindingsStatus409
+			| ListAccessRoleBindingsStatus422
+			| ListAccessRoleBindingsStatus429
+			| ListAccessRoleBindingsStatus500
+			| ListAccessRoleBindingsStatus503
+		>,
+		ListAccessRoleBindingsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return listAccessRoleBindings({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/bindings}
+ */
+export function useListAccessRoleBindings<
+	TData = ListAccessRoleBindingsStatus200,
+	TQueryData = ListAccessRoleBindingsStatus200,
+	TQueryKey extends QueryKey = ListAccessRoleBindingsQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path: ListAccessRoleBindingsOptions["path"] | (() => ListAccessRoleBindingsOptions["path"]);
+		query?: ListAccessRoleBindingsOptions["query"] | (() => ListAccessRoleBindingsOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListAccessRoleBindingsStatus200,
+				ResponseErrorConfig<
+					| ListAccessRoleBindingsStatus400
+					| ListAccessRoleBindingsStatus401
+					| ListAccessRoleBindingsStatus403
+					| ListAccessRoleBindingsStatus404
+					| ListAccessRoleBindingsStatus409
+					| ListAccessRoleBindingsStatus422
+					| ListAccessRoleBindingsStatus429
+					| ListAccessRoleBindingsStatus500
+					| ListAccessRoleBindingsStatus503
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey = resolvedOptions?.queryKey ?? listAccessRoleBindingsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listAccessRoleBindingsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| ListAccessRoleBindingsStatus400
+			| ListAccessRoleBindingsStatus401
+			| ListAccessRoleBindingsStatus403
+			| ListAccessRoleBindingsStatus404
+			| ListAccessRoleBindingsStatus409
+			| ListAccessRoleBindingsStatus422
+			| ListAccessRoleBindingsStatus429
+			| ListAccessRoleBindingsStatus500
+			| ListAccessRoleBindingsStatus503
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getAccessRoleBindingQueryKey = ({
+	path,
+	query,
+}: Omit<GetAccessRoleBindingOptions, "headers">) =>
+	[
+		{ url: "/api/v1/access/:scope/bindings/:bindingId", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type GetAccessRoleBindingQueryKey = ReturnType<typeof getAccessRoleBindingQueryKey>;
+
+export function getAccessRoleBindingQueryOptions(
+	{ path, query }: GetAccessRoleBindingOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getAccessRoleBindingQueryKey({ path, query });
+	return queryOptions<
+		GetAccessRoleBindingStatus200,
+		ResponseErrorConfig<
+			| GetAccessRoleBindingStatus400
+			| GetAccessRoleBindingStatus401
+			| GetAccessRoleBindingStatus403
+			| GetAccessRoleBindingStatus404
+			| GetAccessRoleBindingStatus409
+			| GetAccessRoleBindingStatus422
+			| GetAccessRoleBindingStatus429
+			| GetAccessRoleBindingStatus500
+			| GetAccessRoleBindingStatus503
+		>,
+		GetAccessRoleBindingStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return getAccessRoleBinding({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/bindings/:bindingId}
+ */
+export function useGetAccessRoleBinding<
+	TData = GetAccessRoleBindingStatus200,
+	TQueryData = GetAccessRoleBindingStatus200,
+	TQueryKey extends QueryKey = GetAccessRoleBindingQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path: GetAccessRoleBindingOptions["path"] | (() => GetAccessRoleBindingOptions["path"]);
+		query?: GetAccessRoleBindingOptions["query"] | (() => GetAccessRoleBindingOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetAccessRoleBindingStatus200,
+				ResponseErrorConfig<
+					| GetAccessRoleBindingStatus400
+					| GetAccessRoleBindingStatus401
+					| GetAccessRoleBindingStatus403
+					| GetAccessRoleBindingStatus404
+					| GetAccessRoleBindingStatus409
+					| GetAccessRoleBindingStatus422
+					| GetAccessRoleBindingStatus429
+					| GetAccessRoleBindingStatus500
+					| GetAccessRoleBindingStatus503
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey = resolvedOptions?.queryKey ?? getAccessRoleBindingQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getAccessRoleBindingQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetAccessRoleBindingStatus400
+			| GetAccessRoleBindingStatus401
+			| GetAccessRoleBindingStatus403
+			| GetAccessRoleBindingStatus404
+			| GetAccessRoleBindingStatus409
+			| GetAccessRoleBindingStatus422
+			| GetAccessRoleBindingStatus429
+			| GetAccessRoleBindingStatus500
+			| GetAccessRoleBindingStatus503
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const createAccessRoleBindingMutationKey = () =>
+	[{ url: "/api/v1/access/:scope/bindings/:bindingId" }] as const;
+
+export function createAccessRoleBindingMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = createAccessRoleBindingMutationKey();
+	return mutationOptions<
+		CreateAccessRoleBindingStatus200,
+		ResponseErrorConfig<
+			| CreateAccessRoleBindingStatus400
+			| CreateAccessRoleBindingStatus401
+			| CreateAccessRoleBindingStatus403
+			| CreateAccessRoleBindingStatus404
+			| CreateAccessRoleBindingStatus409
+			| CreateAccessRoleBindingStatus422
+			| CreateAccessRoleBindingStatus500
+			| CreateAccessRoleBindingStatus503
+		>,
+		CreateAccessRoleBindingOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return createAccessRoleBinding({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/bindings/:bindingId}
+ */
+export function useCreateAccessRoleBinding<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			CreateAccessRoleBindingStatus200,
+			ResponseErrorConfig<
+				| CreateAccessRoleBindingStatus400
+				| CreateAccessRoleBindingStatus401
+				| CreateAccessRoleBindingStatus403
+				| CreateAccessRoleBindingStatus404
+				| CreateAccessRoleBindingStatus409
+				| CreateAccessRoleBindingStatus422
+				| CreateAccessRoleBindingStatus500
+				| CreateAccessRoleBindingStatus503
+			>,
+			CreateAccessRoleBindingOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? createAccessRoleBindingMutationKey();
+
+	const baseOptions = createAccessRoleBindingMutationOptions(config) as UseMutationOptions<
+		CreateAccessRoleBindingStatus200,
+		ResponseErrorConfig<
+			| CreateAccessRoleBindingStatus400
+			| CreateAccessRoleBindingStatus401
+			| CreateAccessRoleBindingStatus403
+			| CreateAccessRoleBindingStatus404
+			| CreateAccessRoleBindingStatus409
+			| CreateAccessRoleBindingStatus422
+			| CreateAccessRoleBindingStatus500
+			| CreateAccessRoleBindingStatus503
+		>,
+		CreateAccessRoleBindingOptions,
+		TContext
+	>;
+
+	return useMutation<
+		CreateAccessRoleBindingStatus200,
+		ResponseErrorConfig<
+			| CreateAccessRoleBindingStatus400
+			| CreateAccessRoleBindingStatus401
+			| CreateAccessRoleBindingStatus403
+			| CreateAccessRoleBindingStatus404
+			| CreateAccessRoleBindingStatus409
+			| CreateAccessRoleBindingStatus422
+			| CreateAccessRoleBindingStatus500
+			| CreateAccessRoleBindingStatus503
+		>,
+		CreateAccessRoleBindingOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		CreateAccessRoleBindingStatus200,
+		ResponseErrorConfig<
+			| CreateAccessRoleBindingStatus400
+			| CreateAccessRoleBindingStatus401
+			| CreateAccessRoleBindingStatus403
+			| CreateAccessRoleBindingStatus404
+			| CreateAccessRoleBindingStatus409
+			| CreateAccessRoleBindingStatus422
+			| CreateAccessRoleBindingStatus500
+			| CreateAccessRoleBindingStatus503
+		>,
+		CreateAccessRoleBindingOptions,
+		TContext
+	>;
+}
+
+export const listAccessRoleBindingHistoryQueryKey = ({
+	path,
+	query,
+}: Omit<ListAccessRoleBindingHistoryOptions, "headers">) =>
+	[
+		{ url: "/api/v1/access/:scope/bindings/:bindingId/history", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type ListAccessRoleBindingHistoryQueryKey = ReturnType<typeof listAccessRoleBindingHistoryQueryKey>;
+
+export function listAccessRoleBindingHistoryQueryOptions(
+	{ path, query }: ListAccessRoleBindingHistoryOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listAccessRoleBindingHistoryQueryKey({ path, query });
+	return queryOptions<
+		ListAccessRoleBindingHistoryStatus200,
+		ResponseErrorConfig<
+			| ListAccessRoleBindingHistoryStatus400
+			| ListAccessRoleBindingHistoryStatus401
+			| ListAccessRoleBindingHistoryStatus403
+			| ListAccessRoleBindingHistoryStatus404
+			| ListAccessRoleBindingHistoryStatus409
+			| ListAccessRoleBindingHistoryStatus422
+			| ListAccessRoleBindingHistoryStatus429
+			| ListAccessRoleBindingHistoryStatus500
+			| ListAccessRoleBindingHistoryStatus503
+		>,
+		ListAccessRoleBindingHistoryStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return listAccessRoleBindingHistory({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/bindings/:bindingId/history}
+ */
+export function useListAccessRoleBindingHistory<
+	TData = ListAccessRoleBindingHistoryStatus200,
+	TQueryData = ListAccessRoleBindingHistoryStatus200,
+	TQueryKey extends QueryKey = ListAccessRoleBindingHistoryQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| ListAccessRoleBindingHistoryOptions["path"]
+			| (() => ListAccessRoleBindingHistoryOptions["path"]);
+		query?:
+			| ListAccessRoleBindingHistoryOptions["query"]
+			| (() => ListAccessRoleBindingHistoryOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListAccessRoleBindingHistoryStatus200,
+				ResponseErrorConfig<
+					| ListAccessRoleBindingHistoryStatus400
+					| ListAccessRoleBindingHistoryStatus401
+					| ListAccessRoleBindingHistoryStatus403
+					| ListAccessRoleBindingHistoryStatus404
+					| ListAccessRoleBindingHistoryStatus409
+					| ListAccessRoleBindingHistoryStatus422
+					| ListAccessRoleBindingHistoryStatus429
+					| ListAccessRoleBindingHistoryStatus500
+					| ListAccessRoleBindingHistoryStatus503
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ?? listAccessRoleBindingHistoryQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listAccessRoleBindingHistoryQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| ListAccessRoleBindingHistoryStatus400
+			| ListAccessRoleBindingHistoryStatus401
+			| ListAccessRoleBindingHistoryStatus403
+			| ListAccessRoleBindingHistoryStatus404
+			| ListAccessRoleBindingHistoryStatus409
+			| ListAccessRoleBindingHistoryStatus422
+			| ListAccessRoleBindingHistoryStatus429
+			| ListAccessRoleBindingHistoryStatus500
+			| ListAccessRoleBindingHistoryStatus503
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const amendAccessRoleBindingMutationKey = () =>
+	[{ url: "/api/v1/access/:scope/bindings/:bindingId/terms" }] as const;
+
+export function amendAccessRoleBindingMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = amendAccessRoleBindingMutationKey();
+	return mutationOptions<
+		AmendAccessRoleBindingStatus200,
+		ResponseErrorConfig<
+			| AmendAccessRoleBindingStatus400
+			| AmendAccessRoleBindingStatus401
+			| AmendAccessRoleBindingStatus403
+			| AmendAccessRoleBindingStatus404
+			| AmendAccessRoleBindingStatus409
+			| AmendAccessRoleBindingStatus422
+			| AmendAccessRoleBindingStatus500
+			| AmendAccessRoleBindingStatus503
+		>,
+		AmendAccessRoleBindingOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return amendAccessRoleBinding({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/bindings/:bindingId/terms}
+ */
+export function useAmendAccessRoleBinding<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			AmendAccessRoleBindingStatus200,
+			ResponseErrorConfig<
+				| AmendAccessRoleBindingStatus400
+				| AmendAccessRoleBindingStatus401
+				| AmendAccessRoleBindingStatus403
+				| AmendAccessRoleBindingStatus404
+				| AmendAccessRoleBindingStatus409
+				| AmendAccessRoleBindingStatus422
+				| AmendAccessRoleBindingStatus500
+				| AmendAccessRoleBindingStatus503
+			>,
+			AmendAccessRoleBindingOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? amendAccessRoleBindingMutationKey();
+
+	const baseOptions = amendAccessRoleBindingMutationOptions(config) as UseMutationOptions<
+		AmendAccessRoleBindingStatus200,
+		ResponseErrorConfig<
+			| AmendAccessRoleBindingStatus400
+			| AmendAccessRoleBindingStatus401
+			| AmendAccessRoleBindingStatus403
+			| AmendAccessRoleBindingStatus404
+			| AmendAccessRoleBindingStatus409
+			| AmendAccessRoleBindingStatus422
+			| AmendAccessRoleBindingStatus500
+			| AmendAccessRoleBindingStatus503
+		>,
+		AmendAccessRoleBindingOptions,
+		TContext
+	>;
+
+	return useMutation<
+		AmendAccessRoleBindingStatus200,
+		ResponseErrorConfig<
+			| AmendAccessRoleBindingStatus400
+			| AmendAccessRoleBindingStatus401
+			| AmendAccessRoleBindingStatus403
+			| AmendAccessRoleBindingStatus404
+			| AmendAccessRoleBindingStatus409
+			| AmendAccessRoleBindingStatus422
+			| AmendAccessRoleBindingStatus500
+			| AmendAccessRoleBindingStatus503
+		>,
+		AmendAccessRoleBindingOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		AmendAccessRoleBindingStatus200,
+		ResponseErrorConfig<
+			| AmendAccessRoleBindingStatus400
+			| AmendAccessRoleBindingStatus401
+			| AmendAccessRoleBindingStatus403
+			| AmendAccessRoleBindingStatus404
+			| AmendAccessRoleBindingStatus409
+			| AmendAccessRoleBindingStatus422
+			| AmendAccessRoleBindingStatus500
+			| AmendAccessRoleBindingStatus503
+		>,
+		AmendAccessRoleBindingOptions,
+		TContext
+	>;
+}
+
+export const revokeAccessRoleBindingMutationKey = () =>
+	[{ url: "/api/v1/access/:scope/bindings/:bindingId/revoke" }] as const;
+
+export function revokeAccessRoleBindingMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = revokeAccessRoleBindingMutationKey();
+	return mutationOptions<
+		RevokeAccessRoleBindingStatus200,
+		ResponseErrorConfig<
+			| RevokeAccessRoleBindingStatus400
+			| RevokeAccessRoleBindingStatus401
+			| RevokeAccessRoleBindingStatus403
+			| RevokeAccessRoleBindingStatus404
+			| RevokeAccessRoleBindingStatus409
+			| RevokeAccessRoleBindingStatus422
+			| RevokeAccessRoleBindingStatus500
+			| RevokeAccessRoleBindingStatus503
+		>,
+		RevokeAccessRoleBindingOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return revokeAccessRoleBinding({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/bindings/:bindingId/revoke}
+ */
+export function useRevokeAccessRoleBinding<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			RevokeAccessRoleBindingStatus200,
+			ResponseErrorConfig<
+				| RevokeAccessRoleBindingStatus400
+				| RevokeAccessRoleBindingStatus401
+				| RevokeAccessRoleBindingStatus403
+				| RevokeAccessRoleBindingStatus404
+				| RevokeAccessRoleBindingStatus409
+				| RevokeAccessRoleBindingStatus422
+				| RevokeAccessRoleBindingStatus500
+				| RevokeAccessRoleBindingStatus503
+			>,
+			RevokeAccessRoleBindingOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? revokeAccessRoleBindingMutationKey();
+
+	const baseOptions = revokeAccessRoleBindingMutationOptions(config) as UseMutationOptions<
+		RevokeAccessRoleBindingStatus200,
+		ResponseErrorConfig<
+			| RevokeAccessRoleBindingStatus400
+			| RevokeAccessRoleBindingStatus401
+			| RevokeAccessRoleBindingStatus403
+			| RevokeAccessRoleBindingStatus404
+			| RevokeAccessRoleBindingStatus409
+			| RevokeAccessRoleBindingStatus422
+			| RevokeAccessRoleBindingStatus500
+			| RevokeAccessRoleBindingStatus503
+		>,
+		RevokeAccessRoleBindingOptions,
+		TContext
+	>;
+
+	return useMutation<
+		RevokeAccessRoleBindingStatus200,
+		ResponseErrorConfig<
+			| RevokeAccessRoleBindingStatus400
+			| RevokeAccessRoleBindingStatus401
+			| RevokeAccessRoleBindingStatus403
+			| RevokeAccessRoleBindingStatus404
+			| RevokeAccessRoleBindingStatus409
+			| RevokeAccessRoleBindingStatus422
+			| RevokeAccessRoleBindingStatus500
+			| RevokeAccessRoleBindingStatus503
+		>,
+		RevokeAccessRoleBindingOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		RevokeAccessRoleBindingStatus200,
+		ResponseErrorConfig<
+			| RevokeAccessRoleBindingStatus400
+			| RevokeAccessRoleBindingStatus401
+			| RevokeAccessRoleBindingStatus403
+			| RevokeAccessRoleBindingStatus404
+			| RevokeAccessRoleBindingStatus409
+			| RevokeAccessRoleBindingStatus422
+			| RevokeAccessRoleBindingStatus500
+			| RevokeAccessRoleBindingStatus503
+		>,
+		RevokeAccessRoleBindingOptions,
+		TContext
+	>;
+}
+
+export const listAccessAssignmentCeilingsQueryKey = ({
+	path,
+	query,
+}: Omit<ListAccessAssignmentCeilingsOptions, "headers">) =>
+	[
+		{ url: "/api/v1/access/:scope/assignment-ceilings", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type ListAccessAssignmentCeilingsQueryKey = ReturnType<typeof listAccessAssignmentCeilingsQueryKey>;
+
+export function listAccessAssignmentCeilingsQueryOptions(
+	{ path, query }: ListAccessAssignmentCeilingsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listAccessAssignmentCeilingsQueryKey({ path, query });
+	return queryOptions<
+		ListAccessAssignmentCeilingsStatus200,
+		ResponseErrorConfig<
+			| ListAccessAssignmentCeilingsStatus400
+			| ListAccessAssignmentCeilingsStatus401
+			| ListAccessAssignmentCeilingsStatus403
+			| ListAccessAssignmentCeilingsStatus404
+			| ListAccessAssignmentCeilingsStatus409
+			| ListAccessAssignmentCeilingsStatus422
+			| ListAccessAssignmentCeilingsStatus429
+			| ListAccessAssignmentCeilingsStatus500
+			| ListAccessAssignmentCeilingsStatus503
+		>,
+		ListAccessAssignmentCeilingsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return listAccessAssignmentCeilings({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/assignment-ceilings}
+ */
+export function useListAccessAssignmentCeilings<
+	TData = ListAccessAssignmentCeilingsStatus200,
+	TQueryData = ListAccessAssignmentCeilingsStatus200,
+	TQueryKey extends QueryKey = ListAccessAssignmentCeilingsQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| ListAccessAssignmentCeilingsOptions["path"]
+			| (() => ListAccessAssignmentCeilingsOptions["path"]);
+		query?:
+			| ListAccessAssignmentCeilingsOptions["query"]
+			| (() => ListAccessAssignmentCeilingsOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListAccessAssignmentCeilingsStatus200,
+				ResponseErrorConfig<
+					| ListAccessAssignmentCeilingsStatus400
+					| ListAccessAssignmentCeilingsStatus401
+					| ListAccessAssignmentCeilingsStatus403
+					| ListAccessAssignmentCeilingsStatus404
+					| ListAccessAssignmentCeilingsStatus409
+					| ListAccessAssignmentCeilingsStatus422
+					| ListAccessAssignmentCeilingsStatus429
+					| ListAccessAssignmentCeilingsStatus500
+					| ListAccessAssignmentCeilingsStatus503
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ?? listAccessAssignmentCeilingsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listAccessAssignmentCeilingsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| ListAccessAssignmentCeilingsStatus400
+			| ListAccessAssignmentCeilingsStatus401
+			| ListAccessAssignmentCeilingsStatus403
+			| ListAccessAssignmentCeilingsStatus404
+			| ListAccessAssignmentCeilingsStatus409
+			| ListAccessAssignmentCeilingsStatus422
+			| ListAccessAssignmentCeilingsStatus429
+			| ListAccessAssignmentCeilingsStatus500
+			| ListAccessAssignmentCeilingsStatus503
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getAccessAssignmentCeilingQueryKey = ({
+	path,
+}: Omit<GetAccessAssignmentCeilingOptions, "headers">) =>
+	[{ url: "/api/v1/access/:scope/assignment-ceilings/:ceilingId", params: path }] as const;
+
+type GetAccessAssignmentCeilingQueryKey = ReturnType<typeof getAccessAssignmentCeilingQueryKey>;
+
+export function getAccessAssignmentCeilingQueryOptions(
+	{ path }: GetAccessAssignmentCeilingOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getAccessAssignmentCeilingQueryKey({ path });
+	return queryOptions<
+		GetAccessAssignmentCeilingStatus200,
+		ResponseErrorConfig<
+			| GetAccessAssignmentCeilingStatus400
+			| GetAccessAssignmentCeilingStatus401
+			| GetAccessAssignmentCeilingStatus403
+			| GetAccessAssignmentCeilingStatus404
+			| GetAccessAssignmentCeilingStatus409
+			| GetAccessAssignmentCeilingStatus422
+			| GetAccessAssignmentCeilingStatus429
+			| GetAccessAssignmentCeilingStatus500
+			| GetAccessAssignmentCeilingStatus503
+		>,
+		GetAccessAssignmentCeilingStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return getAccessAssignmentCeiling({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/assignment-ceilings/:ceilingId}
+ */
+export function useGetAccessAssignmentCeiling<
+	TData = GetAccessAssignmentCeilingStatus200,
+	TQueryData = GetAccessAssignmentCeilingStatus200,
+	TQueryKey extends QueryKey = GetAccessAssignmentCeilingQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetAccessAssignmentCeilingOptions["path"]
+			| (() => GetAccessAssignmentCeilingOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetAccessAssignmentCeilingStatus200,
+				ResponseErrorConfig<
+					| GetAccessAssignmentCeilingStatus400
+					| GetAccessAssignmentCeilingStatus401
+					| GetAccessAssignmentCeilingStatus403
+					| GetAccessAssignmentCeilingStatus404
+					| GetAccessAssignmentCeilingStatus409
+					| GetAccessAssignmentCeilingStatus422
+					| GetAccessAssignmentCeilingStatus429
+					| GetAccessAssignmentCeilingStatus500
+					| GetAccessAssignmentCeilingStatus503
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey = resolvedOptions?.queryKey ?? getAccessAssignmentCeilingQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getAccessAssignmentCeilingQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetAccessAssignmentCeilingStatus400
+			| GetAccessAssignmentCeilingStatus401
+			| GetAccessAssignmentCeilingStatus403
+			| GetAccessAssignmentCeilingStatus404
+			| GetAccessAssignmentCeilingStatus409
+			| GetAccessAssignmentCeilingStatus422
+			| GetAccessAssignmentCeilingStatus429
+			| GetAccessAssignmentCeilingStatus500
+			| GetAccessAssignmentCeilingStatus503
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const createAccessAssignmentCeilingMutationKey = () =>
+	[{ url: "/api/v1/access/:scope/assignment-ceilings/:ceilingId" }] as const;
+
+export function createAccessAssignmentCeilingMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = createAccessAssignmentCeilingMutationKey();
+	return mutationOptions<
+		CreateAccessAssignmentCeilingStatus200,
+		ResponseErrorConfig<
+			| CreateAccessAssignmentCeilingStatus400
+			| CreateAccessAssignmentCeilingStatus401
+			| CreateAccessAssignmentCeilingStatus403
+			| CreateAccessAssignmentCeilingStatus404
+			| CreateAccessAssignmentCeilingStatus409
+			| CreateAccessAssignmentCeilingStatus422
+			| CreateAccessAssignmentCeilingStatus500
+			| CreateAccessAssignmentCeilingStatus503
+		>,
+		CreateAccessAssignmentCeilingOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return createAccessAssignmentCeiling({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/assignment-ceilings/:ceilingId}
+ */
+export function useCreateAccessAssignmentCeiling<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			CreateAccessAssignmentCeilingStatus200,
+			ResponseErrorConfig<
+				| CreateAccessAssignmentCeilingStatus400
+				| CreateAccessAssignmentCeilingStatus401
+				| CreateAccessAssignmentCeilingStatus403
+				| CreateAccessAssignmentCeilingStatus404
+				| CreateAccessAssignmentCeilingStatus409
+				| CreateAccessAssignmentCeilingStatus422
+				| CreateAccessAssignmentCeilingStatus500
+				| CreateAccessAssignmentCeilingStatus503
+			>,
+			CreateAccessAssignmentCeilingOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? createAccessAssignmentCeilingMutationKey();
+
+	const baseOptions = createAccessAssignmentCeilingMutationOptions(config) as UseMutationOptions<
+		CreateAccessAssignmentCeilingStatus200,
+		ResponseErrorConfig<
+			| CreateAccessAssignmentCeilingStatus400
+			| CreateAccessAssignmentCeilingStatus401
+			| CreateAccessAssignmentCeilingStatus403
+			| CreateAccessAssignmentCeilingStatus404
+			| CreateAccessAssignmentCeilingStatus409
+			| CreateAccessAssignmentCeilingStatus422
+			| CreateAccessAssignmentCeilingStatus500
+			| CreateAccessAssignmentCeilingStatus503
+		>,
+		CreateAccessAssignmentCeilingOptions,
+		TContext
+	>;
+
+	return useMutation<
+		CreateAccessAssignmentCeilingStatus200,
+		ResponseErrorConfig<
+			| CreateAccessAssignmentCeilingStatus400
+			| CreateAccessAssignmentCeilingStatus401
+			| CreateAccessAssignmentCeilingStatus403
+			| CreateAccessAssignmentCeilingStatus404
+			| CreateAccessAssignmentCeilingStatus409
+			| CreateAccessAssignmentCeilingStatus422
+			| CreateAccessAssignmentCeilingStatus500
+			| CreateAccessAssignmentCeilingStatus503
+		>,
+		CreateAccessAssignmentCeilingOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		CreateAccessAssignmentCeilingStatus200,
+		ResponseErrorConfig<
+			| CreateAccessAssignmentCeilingStatus400
+			| CreateAccessAssignmentCeilingStatus401
+			| CreateAccessAssignmentCeilingStatus403
+			| CreateAccessAssignmentCeilingStatus404
+			| CreateAccessAssignmentCeilingStatus409
+			| CreateAccessAssignmentCeilingStatus422
+			| CreateAccessAssignmentCeilingStatus500
+			| CreateAccessAssignmentCeilingStatus503
+		>,
+		CreateAccessAssignmentCeilingOptions,
+		TContext
+	>;
+}
+
+export const listAccessAssignmentCeilingHistoryQueryKey = ({
+	path,
+	query,
+}: Omit<ListAccessAssignmentCeilingHistoryOptions, "headers">) =>
+	[
+		{ url: "/api/v1/access/:scope/assignment-ceilings/:ceilingId/history", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type ListAccessAssignmentCeilingHistoryQueryKey = ReturnType<
+	typeof listAccessAssignmentCeilingHistoryQueryKey
+>;
+
+export function listAccessAssignmentCeilingHistoryQueryOptions(
+	{ path, query }: ListAccessAssignmentCeilingHistoryOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listAccessAssignmentCeilingHistoryQueryKey({ path, query });
+	return queryOptions<
+		ListAccessAssignmentCeilingHistoryStatus200,
+		ResponseErrorConfig<
+			| ListAccessAssignmentCeilingHistoryStatus400
+			| ListAccessAssignmentCeilingHistoryStatus401
+			| ListAccessAssignmentCeilingHistoryStatus403
+			| ListAccessAssignmentCeilingHistoryStatus404
+			| ListAccessAssignmentCeilingHistoryStatus409
+			| ListAccessAssignmentCeilingHistoryStatus422
+			| ListAccessAssignmentCeilingHistoryStatus429
+			| ListAccessAssignmentCeilingHistoryStatus500
+			| ListAccessAssignmentCeilingHistoryStatus503
+		>,
+		ListAccessAssignmentCeilingHistoryStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			return listAccessAssignmentCeilingHistory({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			}).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/assignment-ceilings/:ceilingId/history}
+ */
+export function useListAccessAssignmentCeilingHistory<
+	TData = ListAccessAssignmentCeilingHistoryStatus200,
+	TQueryData = ListAccessAssignmentCeilingHistoryStatus200,
+	TQueryKey extends QueryKey = ListAccessAssignmentCeilingHistoryQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| ListAccessAssignmentCeilingHistoryOptions["path"]
+			| (() => ListAccessAssignmentCeilingHistoryOptions["path"]);
+		query?:
+			| ListAccessAssignmentCeilingHistoryOptions["query"]
+			| (() => ListAccessAssignmentCeilingHistoryOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListAccessAssignmentCeilingHistoryStatus200,
+				ResponseErrorConfig<
+					| ListAccessAssignmentCeilingHistoryStatus400
+					| ListAccessAssignmentCeilingHistoryStatus401
+					| ListAccessAssignmentCeilingHistoryStatus403
+					| ListAccessAssignmentCeilingHistoryStatus404
+					| ListAccessAssignmentCeilingHistoryStatus409
+					| ListAccessAssignmentCeilingHistoryStatus422
+					| ListAccessAssignmentCeilingHistoryStatus429
+					| ListAccessAssignmentCeilingHistoryStatus500
+					| ListAccessAssignmentCeilingHistoryStatus503
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ?? listAccessAssignmentCeilingHistoryQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listAccessAssignmentCeilingHistoryQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| ListAccessAssignmentCeilingHistoryStatus400
+			| ListAccessAssignmentCeilingHistoryStatus401
+			| ListAccessAssignmentCeilingHistoryStatus403
+			| ListAccessAssignmentCeilingHistoryStatus404
+			| ListAccessAssignmentCeilingHistoryStatus409
+			| ListAccessAssignmentCeilingHistoryStatus422
+			| ListAccessAssignmentCeilingHistoryStatus429
+			| ListAccessAssignmentCeilingHistoryStatus500
+			| ListAccessAssignmentCeilingHistoryStatus503
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const revokeAccessAssignmentCeilingMutationKey = () =>
+	[{ url: "/api/v1/access/:scope/assignment-ceilings/:ceilingId/revoke" }] as const;
+
+export function revokeAccessAssignmentCeilingMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = revokeAccessAssignmentCeilingMutationKey();
+	return mutationOptions<
+		RevokeAccessAssignmentCeilingStatus200,
+		ResponseErrorConfig<
+			| RevokeAccessAssignmentCeilingStatus400
+			| RevokeAccessAssignmentCeilingStatus401
+			| RevokeAccessAssignmentCeilingStatus403
+			| RevokeAccessAssignmentCeilingStatus404
+			| RevokeAccessAssignmentCeilingStatus409
+			| RevokeAccessAssignmentCeilingStatus422
+			| RevokeAccessAssignmentCeilingStatus500
+			| RevokeAccessAssignmentCeilingStatus503
+		>,
+		RevokeAccessAssignmentCeilingOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			return revokeAccessAssignmentCeiling({ ...config, path, body, throwOnError: true }).unwrap();
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/access/:scope/assignment-ceilings/:ceilingId/revoke}
+ */
+export function useRevokeAccessAssignmentCeiling<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			RevokeAccessAssignmentCeilingStatus200,
+			ResponseErrorConfig<
+				| RevokeAccessAssignmentCeilingStatus400
+				| RevokeAccessAssignmentCeilingStatus401
+				| RevokeAccessAssignmentCeilingStatus403
+				| RevokeAccessAssignmentCeilingStatus404
+				| RevokeAccessAssignmentCeilingStatus409
+				| RevokeAccessAssignmentCeilingStatus422
+				| RevokeAccessAssignmentCeilingStatus500
+				| RevokeAccessAssignmentCeilingStatus503
+			>,
+			RevokeAccessAssignmentCeilingOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? revokeAccessAssignmentCeilingMutationKey();
+
+	const baseOptions = revokeAccessAssignmentCeilingMutationOptions(config) as UseMutationOptions<
+		RevokeAccessAssignmentCeilingStatus200,
+		ResponseErrorConfig<
+			| RevokeAccessAssignmentCeilingStatus400
+			| RevokeAccessAssignmentCeilingStatus401
+			| RevokeAccessAssignmentCeilingStatus403
+			| RevokeAccessAssignmentCeilingStatus404
+			| RevokeAccessAssignmentCeilingStatus409
+			| RevokeAccessAssignmentCeilingStatus422
+			| RevokeAccessAssignmentCeilingStatus500
+			| RevokeAccessAssignmentCeilingStatus503
+		>,
+		RevokeAccessAssignmentCeilingOptions,
+		TContext
+	>;
+
+	return useMutation<
+		RevokeAccessAssignmentCeilingStatus200,
+		ResponseErrorConfig<
+			| RevokeAccessAssignmentCeilingStatus400
+			| RevokeAccessAssignmentCeilingStatus401
+			| RevokeAccessAssignmentCeilingStatus403
+			| RevokeAccessAssignmentCeilingStatus404
+			| RevokeAccessAssignmentCeilingStatus409
+			| RevokeAccessAssignmentCeilingStatus422
+			| RevokeAccessAssignmentCeilingStatus500
+			| RevokeAccessAssignmentCeilingStatus503
+		>,
+		RevokeAccessAssignmentCeilingOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		RevokeAccessAssignmentCeilingStatus200,
+		ResponseErrorConfig<
+			| RevokeAccessAssignmentCeilingStatus400
+			| RevokeAccessAssignmentCeilingStatus401
+			| RevokeAccessAssignmentCeilingStatus403
+			| RevokeAccessAssignmentCeilingStatus404
+			| RevokeAccessAssignmentCeilingStatus409
+			| RevokeAccessAssignmentCeilingStatus422
+			| RevokeAccessAssignmentCeilingStatus500
+			| RevokeAccessAssignmentCeilingStatus503
+		>,
+		RevokeAccessAssignmentCeilingOptions,
+		TContext
+	>;
 }
 
 export const resolveAccessManagementScopeMutationKey = () =>

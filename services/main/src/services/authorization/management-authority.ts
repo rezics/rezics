@@ -5,6 +5,7 @@ import type { DatabaseTransaction } from "../database";
 import { accessRoleBindingScope } from "../database/schema/access-role-binding";
 import { accessGroupTree } from "../database/schema/access-group";
 import { accessSubject } from "../database/schema/access-identity";
+import { platformCapabilityGrant } from "../database/schema/realm";
 import { unitOwnership } from "../database/schema/access";
 import { unitReferenceTargetColumn } from "../database/schema/unit-reference-columns";
 import { resolveReferenceValue } from "../units/reference-value";
@@ -27,16 +28,35 @@ export class ManagementAuthorityUnavailable extends Error {
 	constructor() { super("Current management authority is unavailable"); }
 }
 
-async function ownsManagementScope(tx: DatabaseTransaction, scopeId: string, subject: AccessSubjectTarget) {
+async function ownsManagementScope(tx: DatabaseTransaction, scopeId: string, subject: AccessSubjectTarget, permission: (typeof AccessManagementPermissionValues)[number]) {
 	const scope = await resolveAccessScope(tx, scopeId);
 	if (!scope) throw new ManagementAuthorityUnavailable();
-	if (scope.kind === "account") return subject.kind === "principal" && subject.id === scope.id ? { admission: sql<boolean>`true`, identity: `account:${scope.id}` } : null;
-	if (scope.kind === "platform") return null;
+	if (scope.kind === "account") return subject.kind === "principal" && subject.id === scope.id ? {
+		admission: sql<boolean>`exists(select 1 from public.access_scope where id=${scopeId}::uuid and auth_user_id=${subject.id}::uuid)`,
+		identity: `account:${scope.id}`,
+	} : null;
+	if (scope.kind === "platform") {
+  // This explicit bridge bootstraps native IAM only. A native binding cannot mint
+  // its own root capability, and represented subjects cannot borrow the operator's.
+  if (subject.kind !== "principal" || ![
+   "access.role.read", "access.role.create", "access.role.update", "access.role.activate", "access.role.retire",
+   "access.role-binding.manage", "access.assignment-ceiling.manage",
+  ].includes(permission)) return null;
+  const [grant] = await tx.select().from(platformCapabilityGrant).where(and(eq(platformCapabilityGrant.authUserId,subject.id),
+   eq(platformCapabilityGrant.capability,"platform.access.manage"),isNull(platformCapabilityGrant.revokedAt),
+   sql`(${platformCapabilityGrant.expiresAt} is null or ${platformCapabilityGrant.expiresAt}>clock_timestamp())`)).for("share");
+  return grant ? { identity: `platform-capability:${grant.id}:${grant.expiresAt?.toISOString() ?? "durable"}`,validUntil: grant.expiresAt?.getTime() ?? null,admission: sql<boolean>`exists(select 1 from public.platform_capability_grant
+   where id=${grant.id}::uuid and auth_user_id=${subject.id}::uuid and capability='platform.access.manage' and revoked_at is null
+   and (expires_at is null or expires_at>clock_timestamp()))` } : null;
+ }
 	const reference = await resolveReferenceValue(tx, scope.referenceValueId);
 	if (!reference) throw new ManagementAuthorityUnavailable();
 	await lockUnitAccessState(tx, [reference.id], "shared");
 	// Directory metadata ownership is not control of an Entity's identity/governance.
-	if (reference.owner === "entity") return subject.kind === "entity" && subject.id === reference.id ? { admission: sql<boolean>`true`, identity: `entity:${reference.id}` } : null;
+	if (reference.owner === "entity") return subject.kind === "entity" && subject.id === reference.id ? {
+		admission: sql<boolean>`exists(select 1 from public.access_scope s join public.reference_value r on r.id=s.unit_ref
+			where s.id=${scopeId}::uuid and r.target_entity_id=${subject.id}::uuid)`, identity: `entity:${reference.id}`,
+	} : null;
 	if (subject.kind !== "entity") return null;
 	const [owner] = await tx.select({ id: unitOwnership.id }).from(unitOwnership).where(and(
 		eq(unitReferenceTargetColumn("unit", reference.owner, unitOwnership), reference.id),
@@ -69,6 +89,8 @@ export async function readManagementAuthority(
 		apiPermission: ApiPermission | null;
 		requireFreshSession: boolean;
 		mutation: boolean;
+        excludeBindingId?: string;
+        excludeRoleId?: string;
 	},
 	scopeAdmission: SQL<boolean | null>,
 ) {
@@ -90,9 +112,9 @@ export async function readManagementAuthority(
 	const fenceQuery = tx.select({ id: accessRoleBindingScope.scopeId }).from(accessRoleBindingScope).where(eq(accessRoleBindingScope.scopeId, scopeId));
 	const [fence] = input.mutation ? await fenceQuery.for("update") : await fenceQuery.for("share");
 	if (!fence) throw new ManagementAuthorityUnavailable();
-	const owner = await ownsManagementScope(tx, scopeId, subject);
+	const owner = await ownsManagementScope(tx, scopeId, subject, permission);
 	const roleSources = owner ? null : await readSubjectRoleBindingPermissions(tx, { subjectId, targets: [{ scopeId, path }] });
-	const source = roleSources?.bindings.find(binding => binding.active && binding.permissions.some(value => value.family === "management" && value.key === permission));
+	const source = roleSources?.bindings.find(binding => binding.active && binding.binding.id !== input.excludeBindingId && binding.binding.roleId !== input.excludeRoleId && binding.permissions.some(value => value.family === "management" && value.key === permission));
 	if (!owner && !source) throw new ManagementAuthorityDenied();
 	const represented = selection.mode === "represented" ? await evaluateCurrentRepresentationAuthority(tx, {
 		principalId: credential.principalId, selection, operation: { scopeId, path, permission: { family: "management", key: permission } },
@@ -110,7 +132,7 @@ export async function readManagementAuthority(
 	const subjects = await readAccessSubjectEligibility(tx, { subjectIds: [...new Set([principalSubjectId, subjectId])], action: input.mutation ? "write" : "read" });
 	if (subjects.some(value => value.outcome === "deny")) throw new ManagementAuthorityDenied();
 	if (subjects.some(value => value.outcome !== "allow")) throw new ManagementAuthorityUnavailable();
-	const deadlines = [credential.validUntil, represented?.validUntil, source?.terms.validUntil?.getTime(), ...subjects.map(value => value.validUntil)]
+	const deadlines = [credential.validUntil, owner && "validUntil" in owner ? owner.validUntil : null, represented?.validUntil, source?.terms.validUntil?.getTime(), ...subjects.map(value => value.validUntil)]
 		.filter((value): value is number => value !== undefined && value !== null);
 	const validUntil = deadlines.length ? Math.min(...deadlines) : null;
 	const actorAction = input.mutation ? "write" : "read";

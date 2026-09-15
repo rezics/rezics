@@ -7,30 +7,58 @@ import type { Options, Unwrappable, RequestResult } from "./.kubb/client";
 import type {
 	AcceptOrganizationMembershipInvitationOptions,
 	AcceptOrganizationMembershipInvitationResponses,
-	AddCatalogIdentifierOptions,
-	AddCatalogIdentifierResponses,
-	AddCatalogNameOptions,
-	AddCatalogNameResponses,
-	AddMusicMediumOptions,
-	AddMusicMediumResponses,
-	AdvanceAccessGroupImpactEvaluationOptions,
-	AdvanceAccessGroupImpactEvaluationResponses,
-	AdvanceAccessGroupImpactOptions,
-	AdvanceAccessGroupImpactResponses,
-	CreateAccessGroupOptions,
-	CreateAccessGroupResponses,
-	CreateAccessRoleOptions,
-	CreateAccessRoleResponses,
-	GetAccessRoleOptions,
-	GetAccessRoleResponses,
+	ActivateAccessRoleOptions,
+	ActivateAccessRoleResponses,
+	ApproveAccessAssignmentReviewOptions,
+	ApproveAccessAssignmentReviewResponses,
 	GetImageAssetsByIdContentOptions,
 	GetImageAssetsByIdContentResponses,
 	GetImageAssetsByIdPresentationsByRoleContentOptions,
 	GetImageAssetsByIdPresentationsByRoleContentResponses,
+	SelectAccessAssignmentRecipientOptions,
+	SelectAccessAssignmentRecipientResponses,
+	ListAccessAssignmentRecipientsOptions,
+	ListAccessAssignmentRecipientsResponses,
+	StartAccessAssignmentReviewOptions,
+	StartAccessAssignmentReviewResponses,
+	InspectAccessAssignmentReviewOptions,
+	InspectAccessAssignmentReviewResponses,
+	ListAccessAssignmentApprovalsOptions,
+	ListAccessAssignmentApprovalsResponses,
+	RevokeAccessAssignmentApprovalOptions,
+	RevokeAccessAssignmentApprovalResponses,
+	RetireAccessRoleOptions,
+	RetireAccessRoleResponses,
+	ListAccessRoleBindingsOptions,
+	ListAccessRoleBindingsResponses,
+	GetAccessRoleBindingOptions,
+	GetAccessRoleBindingResponses,
+	CreateAccessRoleBindingOptions,
+	CreateAccessRoleBindingResponses,
+	ListAccessRoleBindingHistoryOptions,
+	ListAccessRoleBindingHistoryResponses,
+	AmendAccessRoleBindingOptions,
+	AmendAccessRoleBindingResponses,
+	RevokeAccessRoleBindingOptions,
+	RevokeAccessRoleBindingResponses,
+	ListAccessAssignmentCeilingsOptions,
+	ListAccessAssignmentCeilingsResponses,
+	GetAccessAssignmentCeilingOptions,
+	GetAccessAssignmentCeilingResponses,
+	CreateAccessAssignmentCeilingOptions,
+	CreateAccessAssignmentCeilingResponses,
+	ListAccessAssignmentCeilingHistoryOptions,
+	ListAccessAssignmentCeilingHistoryResponses,
+	RevokeAccessAssignmentCeilingOptions,
+	RevokeAccessAssignmentCeilingResponses,
 	ResolveAccessManagementScopeOptions,
 	ResolveAccessManagementScopeResponses,
 	ListAccessRolesOptions,
 	ListAccessRolesResponses,
+	GetAccessRoleOptions,
+	GetAccessRoleResponses,
+	CreateAccessRoleOptions,
+	CreateAccessRoleResponses,
 	ListAccessRoleHistoryOptions,
 	ListAccessRoleHistoryResponses,
 	ReviseAccessRoleOptions,
@@ -39,14 +67,20 @@ import type {
 	ListAccessGroupsResponses,
 	GetAccessGroupOptions,
 	GetAccessGroupResponses,
+	CreateAccessGroupOptions,
+	CreateAccessGroupResponses,
 	ListAccessGroupHistoryOptions,
 	ListAccessGroupHistoryResponses,
 	GetAccessGroupImpactContextOptions,
 	GetAccessGroupImpactContextResponses,
 	StartAccessGroupImpactOptions,
 	StartAccessGroupImpactResponses,
+	AdvanceAccessGroupImpactOptions,
+	AdvanceAccessGroupImpactResponses,
 	InspectAccessGroupImpactOptions,
 	InspectAccessGroupImpactResponses,
+	AdvanceAccessGroupImpactEvaluationOptions,
+	AdvanceAccessGroupImpactEvaluationResponses,
 	InspectAccessGroupImpactEvaluationOptions,
 	InspectAccessGroupImpactEvaluationResponses,
 	InspectAccessGroupApprovalProposalOptions,
@@ -339,6 +373,8 @@ import type {
 	PatchMusicMetadataResponses,
 	ListMusicMediaOptions,
 	ListMusicMediaResponses,
+	AddMusicMediumOptions,
+	AddMusicMediumResponses,
 	PatchMusicMediumOptions,
 	PatchMusicMediumResponses,
 	RemoveMusicMediumOptions,
@@ -567,10 +603,14 @@ import type {
 	UpdateCatalogLifecycleResponses,
 	ListCatalogNamesOptions,
 	ListCatalogNamesResponses,
+	AddCatalogNameOptions,
+	AddCatalogNameResponses,
 	ReviseCatalogNameOptions,
 	ReviseCatalogNameResponses,
 	ListCatalogIdentifiersOptions,
 	ListCatalogIdentifiersResponses,
+	AddCatalogIdentifierOptions,
+	AddCatalogIdentifierResponses,
 	ReviseCatalogIdentifierOptions,
 	ReviseCatalogIdentifierResponses,
 	GetApiUnitsByIdByUnitIdDocksOptions,
@@ -1297,6 +1337,390 @@ export function getImageAssetsByIdContent<ThrowOnError extends boolean = true>(
 		request({ method: "GET", url: "/image-assets/{id}/content", ...config }) as Promise<
 			RequestResult<GetImageAssetsByIdContentResponses, ThrowOnError>
 		>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/assignment-recipients/select}
+ */
+export function selectAccessAssignmentRecipient<ThrowOnError extends boolean = true>(
+	options: Options<SelectAccessAssignmentRecipientOptions, ThrowOnError>,
+): Unwrappable<RequestResult<SelectAccessAssignmentRecipientResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/access/{scope}/assignment-recipients/select",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<SelectAccessAssignmentRecipientResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/assignment-recipients/query}
+ */
+export function listAccessAssignmentRecipients<ThrowOnError extends boolean = true>(
+	options: Options<ListAccessAssignmentRecipientsOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ListAccessAssignmentRecipientsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/access/{scope}/assignment-recipients/query",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ListAccessAssignmentRecipientsResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/assignment-reviews}
+ */
+export function startAccessAssignmentReview<ThrowOnError extends boolean = true>(
+	options: Options<StartAccessAssignmentReviewOptions, ThrowOnError>,
+): Unwrappable<RequestResult<StartAccessAssignmentReviewResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/access/{scope}/assignment-reviews",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<StartAccessAssignmentReviewResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/assignment-reviews/:reviewId}
+ */
+export function inspectAccessAssignmentReview<ThrowOnError extends boolean = true>(
+	options: Options<InspectAccessAssignmentReviewOptions, ThrowOnError>,
+): Unwrappable<RequestResult<InspectAccessAssignmentReviewResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/access/{scope}/assignment-reviews/{reviewId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<InspectAccessAssignmentReviewResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/assignment-reviews/:reviewId/approvals}
+ */
+export function listAccessAssignmentApprovals<ThrowOnError extends boolean = true>(
+	options: Options<ListAccessAssignmentApprovalsOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ListAccessAssignmentApprovalsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/access/{scope}/assignment-reviews/{reviewId}/approvals",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ListAccessAssignmentApprovalsResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/assignment-reviews/:reviewId/approvals}
+ */
+export function approveAccessAssignmentReview<ThrowOnError extends boolean = true>(
+	options: Options<ApproveAccessAssignmentReviewOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ApproveAccessAssignmentReviewResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/access/{scope}/assignment-reviews/{reviewId}/approvals",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ApproveAccessAssignmentReviewResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/assignment-reviews/:reviewId/approvals/:approvalId/revoke}
+ */
+export function revokeAccessAssignmentApproval<ThrowOnError extends boolean = true>(
+	options: Options<RevokeAccessAssignmentApprovalOptions, ThrowOnError>,
+): Unwrappable<RequestResult<RevokeAccessAssignmentApprovalResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/access/{scope}/assignment-reviews/{reviewId}/approvals/{approvalId}/revoke",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<RevokeAccessAssignmentApprovalResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/roles/:roleId/activate}
+ */
+export function activateAccessRole<ThrowOnError extends boolean = true>(
+	options: Options<ActivateAccessRoleOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ActivateAccessRoleResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/access/{scope}/roles/{roleId}/activate",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ActivateAccessRoleResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/roles/:roleId/retire}
+ */
+export function retireAccessRole<ThrowOnError extends boolean = true>(
+	options: Options<RetireAccessRoleOptions, ThrowOnError>,
+): Unwrappable<RequestResult<RetireAccessRoleResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/access/{scope}/roles/{roleId}/retire",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<RetireAccessRoleResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/bindings}
+ */
+export function listAccessRoleBindings<ThrowOnError extends boolean = true>(
+	options: Options<ListAccessRoleBindingsOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ListAccessRoleBindingsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/access/{scope}/bindings",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ListAccessRoleBindingsResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/bindings/:bindingId}
+ */
+export function getAccessRoleBinding<ThrowOnError extends boolean = true>(
+	options: Options<GetAccessRoleBindingOptions, ThrowOnError>,
+): Unwrappable<RequestResult<GetAccessRoleBindingResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/access/{scope}/bindings/{bindingId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetAccessRoleBindingResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/bindings/:bindingId}
+ */
+export function createAccessRoleBinding<ThrowOnError extends boolean = true>(
+	options: Options<CreateAccessRoleBindingOptions, ThrowOnError>,
+): Unwrappable<RequestResult<CreateAccessRoleBindingResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/access/{scope}/bindings/{bindingId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<CreateAccessRoleBindingResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/bindings/:bindingId/history}
+ */
+export function listAccessRoleBindingHistory<ThrowOnError extends boolean = true>(
+	options: Options<ListAccessRoleBindingHistoryOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ListAccessRoleBindingHistoryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/access/{scope}/bindings/{bindingId}/history",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ListAccessRoleBindingHistoryResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/bindings/:bindingId/terms}
+ */
+export function amendAccessRoleBinding<ThrowOnError extends boolean = true>(
+	options: Options<AmendAccessRoleBindingOptions, ThrowOnError>,
+): Unwrappable<RequestResult<AmendAccessRoleBindingResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/access/{scope}/bindings/{bindingId}/terms",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<AmendAccessRoleBindingResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/bindings/:bindingId/revoke}
+ */
+export function revokeAccessRoleBinding<ThrowOnError extends boolean = true>(
+	options: Options<RevokeAccessRoleBindingOptions, ThrowOnError>,
+): Unwrappable<RequestResult<RevokeAccessRoleBindingResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/access/{scope}/bindings/{bindingId}/revoke",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<RevokeAccessRoleBindingResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/assignment-ceilings}
+ */
+export function listAccessAssignmentCeilings<ThrowOnError extends boolean = true>(
+	options: Options<ListAccessAssignmentCeilingsOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ListAccessAssignmentCeilingsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/access/{scope}/assignment-ceilings",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ListAccessAssignmentCeilingsResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/assignment-ceilings/:ceilingId}
+ */
+export function getAccessAssignmentCeiling<ThrowOnError extends boolean = true>(
+	options: Options<GetAccessAssignmentCeilingOptions, ThrowOnError>,
+): Unwrappable<RequestResult<GetAccessAssignmentCeilingResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/access/{scope}/assignment-ceilings/{ceilingId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetAccessAssignmentCeilingResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/assignment-ceilings/:ceilingId}
+ */
+export function createAccessAssignmentCeiling<ThrowOnError extends boolean = true>(
+	options: Options<CreateAccessAssignmentCeilingOptions, ThrowOnError>,
+): Unwrappable<RequestResult<CreateAccessAssignmentCeilingResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/access/{scope}/assignment-ceilings/{ceilingId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<CreateAccessAssignmentCeilingResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/assignment-ceilings/:ceilingId/history}
+ */
+export function listAccessAssignmentCeilingHistory<ThrowOnError extends boolean = true>(
+	options: Options<ListAccessAssignmentCeilingHistoryOptions, ThrowOnError>,
+): Unwrappable<RequestResult<ListAccessAssignmentCeilingHistoryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/access/{scope}/assignment-ceilings/{ceilingId}/history",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ListAccessAssignmentCeilingHistoryResponses, ThrowOnError>>,
+	);
+}
+
+/**
+ * {@link /api/v1/access/:scope/assignment-ceilings/:ceilingId/revoke}
+ */
+export function revokeAccessAssignmentCeiling<ThrowOnError extends boolean = true>(
+	options: Options<RevokeAccessAssignmentCeilingOptions, ThrowOnError>,
+): Unwrappable<RequestResult<RevokeAccessAssignmentCeilingResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/access/{scope}/assignment-ceilings/{ceilingId}/revoke",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<RevokeAccessAssignmentCeilingResponses, ThrowOnError>>,
 	);
 }
 

@@ -32,6 +32,7 @@ export const PostgreSqlSchemaFileNames = [
 	"access-group-membership.sql",
 	"access-group-impact.sql",
 	"access-group-admission.sql",
+	"access-assignment-management.sql",
 	"account-tag-reference.sql",
 	"revision-reference.sql",
 	"association-proposal-authority.sql",
@@ -160,6 +161,9 @@ export const PostgreSqlSchemaMigrationBundles: Readonly<
 };
 
 export const PostgreSqlSchemaFunctionNames = [
+ "guard_access_assignment_review",
+ "guard_access_assignment_approval",
+ "guard_access_assignment_receipt",
 	"schedule_organization_enrollment_review",
 	"access_membership_scope_is_eligible",
 	"organization_enrollment_lock_admission",
@@ -581,6 +585,9 @@ export const PostgreSqlSchemaTriggers = [
 	{ table: "access_group_approval", name: "access_group_approval_guard" },
 	{ table: "access_recovery_path", name: "access_recovery_path_guard" },
 	{ table: "access_recovery_policy", name: "access_recovery_policy_immutable" },
+ { table: "access_assignment_review",name: "access_assignment_review_guard" },
+ { table: "access_assignment_approval",name: "access_assignment_approval_guard" },
+ { table: "access_assignment_receipt",name: "access_assignment_receipt_guard" },
 	{ table: "access_group_admission_receipt", name: "access_group_admission_receipt_immutable" },
 	{ table: "access_role_binding_scope", name: "access_binding_scope_impact" },
 	{ table: "access_role_binding_scope", name: "access_binding_scope_impact_truncate" },

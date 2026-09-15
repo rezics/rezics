@@ -179,8 +179,19 @@ async function independentSubtreeRoster(tx: DatabaseTransaction, review: GroupIm
 async function independent(tx: DatabaseTransaction, review: GroupImpactReview, effects: GroupImpactEffect[], actor: Authority) {
  if (actor.principalId === review.operatorAuthUserId || actor.subjectId === review.authoritySubjectId) throw new AccessDenied();
  const roster = await independentSubtreeRoster(tx,review);
- const affected = new Set([...roster,...effects.flatMap(effect => [effect.subjectId,...effect.dependencySubjectIds])]);
- const entityIds = new Set(effects.flatMap(effect => effect.entityId ? [effect.entityId] : []));
+ return requireIndependentAccessOperator(tx,{
+  principalId: review.operatorAuthUserId,subjectId: review.authoritySubjectId,
+  affectedSubjectIds: [...roster,...effects.flatMap(effect => [effect.subjectId,...effect.dependencySubjectIds])],
+  affectedEntityIds: effects.flatMap(effect => effect.entityId ? [effect.entityId] : []),
+ },actor);
+}
+
+/** Private principal/controller closure shared by exact native mutation approvals. @internal */
+export async function requireIndependentAccessOperator(tx: DatabaseTransaction, input: {
+ principalId: string; subjectId: string; affectedSubjectIds: string[]; affectedEntityIds: string[];
+}, actor: Authority) {
+ if (actor.principalId === input.principalId || actor.subjectId === input.subjectId) throw new AccessDenied();
+ const affected = new Set(input.affectedSubjectIds), entityIds = new Set(input.affectedEntityIds);
  if (affected.size > 256 || entityIds.size > 256) throw new AccessUnavailable();
  const subjects = affected.size ? await tx.select().from(accessSubject).where(inArray(accessSubject.id,[...affected])).limit(257) : [];
  if (subjects.length !== affected.size) throw new AccessUnavailable();

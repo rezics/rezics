@@ -3229,6 +3229,5528 @@ export type GetImageAssetsByIdContentResponse =
 	| GetImageAssetsByIdContentStatus422
 	| GetImageAssetsByIdContentStatus500;
 
+export type SelectAccessAssignmentRecipientPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+};
+
+export const SelectAccessAssignmentRecipientStatus200KindEnum = {
+	principal: "principal",
+	entity: "entity",
+} as const;
+
+export type SelectAccessAssignmentRecipientStatus200KindEnum =
+	(typeof SelectAccessAssignmentRecipientStatus200KindEnum)[keyof typeof SelectAccessAssignmentRecipientStatus200KindEnum];
+
+export type SelectAccessAssignmentRecipientStatus200 = {
+	kind: SelectAccessAssignmentRecipientStatus200KindEnum;
+	recipient: string;
+	recipientKey: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expiresAt: string;
+};
+
+export type SelectAccessAssignmentRecipientStatus400 =
+	| {
+			error: {
+				/**
+				 * @default 'AccessInputInvalid'
+				 * @type string
+				 */
+				code: "AccessInputInvalid";
+				message: string;
+				details?: void;
+			};
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const SelectAccessAssignmentRecipientStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type SelectAccessAssignmentRecipientStatus401ErrorCodeEnum =
+	(typeof SelectAccessAssignmentRecipientStatus401ErrorCodeEnum)[keyof typeof SelectAccessAssignmentRecipientStatus401ErrorCodeEnum];
+
+export type SelectAccessAssignmentRecipientStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: SelectAccessAssignmentRecipientStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const SelectAccessAssignmentRecipientStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type SelectAccessAssignmentRecipientStatus403ErrorCodeEnum =
+	(typeof SelectAccessAssignmentRecipientStatus403ErrorCodeEnum)[keyof typeof SelectAccessAssignmentRecipientStatus403ErrorCodeEnum];
+
+export type SelectAccessAssignmentRecipientStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: SelectAccessAssignmentRecipientStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type SelectAccessAssignmentRecipientStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type SelectAccessAssignmentRecipientStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type SelectAccessAssignmentRecipientStatus422 = ValidationError;
+
+export const SelectAccessAssignmentRecipientStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type SelectAccessAssignmentRecipientStatus429ErrorCodeEnum =
+	(typeof SelectAccessAssignmentRecipientStatus429ErrorCodeEnum)[keyof typeof SelectAccessAssignmentRecipientStatus429ErrorCodeEnum];
+
+export type SelectAccessAssignmentRecipientStatus429 = {
+	error: {
+		code: SelectAccessAssignmentRecipientStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type SelectAccessAssignmentRecipientStatus500 = InternalError;
+
+export type SelectAccessAssignmentRecipientStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const SelectAccessAssignmentRecipientRequestManagementEnum = {
+	binding: "binding",
+	ceiling: "ceiling",
+} as const;
+
+export type SelectAccessAssignmentRecipientRequestManagementEnum =
+	(typeof SelectAccessAssignmentRecipientRequestManagementEnum)[keyof typeof SelectAccessAssignmentRecipientRequestManagementEnum];
+
+export type SelectAccessAssignmentRecipientBody =
+	| {
+			/**
+			 * @default 'binding'
+			 * @type string | undefined
+			 */
+			management?: SelectAccessAssignmentRecipientRequestManagementEnum;
+			/**
+			 * @default
+			 * @type array | undefined
+			 */
+			targetPath?: string[];
+			kind: "self";
+	  }
+	| {
+			/**
+			 * @default 'binding'
+			 * @type string | undefined
+			 */
+			management?: SelectAccessAssignmentRecipientRequestManagementEnum;
+			/**
+			 * @default
+			 * @type array | undefined
+			 */
+			targetPath?: string[];
+			kind: "entity";
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			entityId: string;
+	  };
+
+export type SelectAccessAssignmentRecipientOptions = {
+	body: SelectAccessAssignmentRecipientBody;
+	path: SelectAccessAssignmentRecipientPath;
+	query?: never;
+	headers?: never;
+};
+
+export type SelectAccessAssignmentRecipientResponses = {
+	"200": SelectAccessAssignmentRecipientStatus200;
+	"400": SelectAccessAssignmentRecipientStatus400;
+	"401": SelectAccessAssignmentRecipientStatus401;
+	"403": SelectAccessAssignmentRecipientStatus403;
+	"404": SelectAccessAssignmentRecipientStatus404;
+	"409": SelectAccessAssignmentRecipientStatus409;
+	"422": SelectAccessAssignmentRecipientStatus422;
+	"429": SelectAccessAssignmentRecipientStatus429;
+	"500": SelectAccessAssignmentRecipientStatus500;
+	"503": SelectAccessAssignmentRecipientStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type SelectAccessAssignmentRecipientResponse =
+	| SelectAccessAssignmentRecipientStatus200
+	| SelectAccessAssignmentRecipientStatus400
+	| SelectAccessAssignmentRecipientStatus401
+	| SelectAccessAssignmentRecipientStatus403
+	| SelectAccessAssignmentRecipientStatus404
+	| SelectAccessAssignmentRecipientStatus409
+	| SelectAccessAssignmentRecipientStatus422
+	| SelectAccessAssignmentRecipientStatus429
+	| SelectAccessAssignmentRecipientStatus500
+	| SelectAccessAssignmentRecipientStatus503;
+
+export type ListAccessAssignmentRecipientsPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+};
+
+export const ListAccessAssignmentRecipientsStatus200ItemsKindEnum = {
+	principal: "principal",
+	entity: "entity",
+} as const;
+
+export type ListAccessAssignmentRecipientsStatus200ItemsKindEnum =
+	(typeof ListAccessAssignmentRecipientsStatus200ItemsKindEnum)[keyof typeof ListAccessAssignmentRecipientsStatus200ItemsKindEnum];
+
+export type ListAccessAssignmentRecipientsStatus200 = {
+	items: {
+		kind: ListAccessAssignmentRecipientsStatus200ItemsKindEnum;
+		recipient: string;
+		recipientKey: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		expiresAt: string;
+		/**
+		 * @minLength 0
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		membershipVersion: number;
+		/**
+		 * @minLength 1
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		generation: number | null;
+		eligible: boolean;
+	}[];
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	treeVersion: number;
+	/**
+	 * @minLength 0
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	membershipEpoch: number;
+	nextCursor: string | null;
+};
+
+export type ListAccessAssignmentRecipientsStatus400 =
+	| {
+			error: {
+				/**
+				 * @default 'AccessInputInvalid'
+				 * @type string
+				 */
+				code: "AccessInputInvalid";
+				message: string;
+				details?: void;
+			};
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const ListAccessAssignmentRecipientsStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type ListAccessAssignmentRecipientsStatus401ErrorCodeEnum =
+	(typeof ListAccessAssignmentRecipientsStatus401ErrorCodeEnum)[keyof typeof ListAccessAssignmentRecipientsStatus401ErrorCodeEnum];
+
+export type ListAccessAssignmentRecipientsStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: ListAccessAssignmentRecipientsStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ListAccessAssignmentRecipientsStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type ListAccessAssignmentRecipientsStatus403ErrorCodeEnum =
+	(typeof ListAccessAssignmentRecipientsStatus403ErrorCodeEnum)[keyof typeof ListAccessAssignmentRecipientsStatus403ErrorCodeEnum];
+
+export type ListAccessAssignmentRecipientsStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: ListAccessAssignmentRecipientsStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessAssignmentRecipientsStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessAssignmentRecipientsStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessAssignmentRecipientsStatus422 = ValidationError;
+
+export const ListAccessAssignmentRecipientsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ListAccessAssignmentRecipientsStatus429ErrorCodeEnum =
+	(typeof ListAccessAssignmentRecipientsStatus429ErrorCodeEnum)[keyof typeof ListAccessAssignmentRecipientsStatus429ErrorCodeEnum];
+
+export type ListAccessAssignmentRecipientsStatus429 = {
+	error: {
+		code: ListAccessAssignmentRecipientsStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type ListAccessAssignmentRecipientsStatus500 = InternalError;
+
+export type ListAccessAssignmentRecipientsStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ListAccessAssignmentRecipientsRequestManagementEnum = {
+	binding: "binding",
+	ceiling: "ceiling",
+} as const;
+
+export type ListAccessAssignmentRecipientsRequestManagementEnum =
+	(typeof ListAccessAssignmentRecipientsRequestManagementEnum)[keyof typeof ListAccessAssignmentRecipientsRequestManagementEnum];
+
+export type ListAccessAssignmentRecipientsBody = {
+	/**
+	 * @default 'binding'
+	 * @type string | undefined
+	 */
+	management?: ListAccessAssignmentRecipientsRequestManagementEnum;
+	/**
+	 * @default
+	 * @type array | undefined
+	 */
+	targetPath?: string[];
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	recipientScope: string;
+	/**
+	 * @maxLength 2048
+	 * @pattern ^rzar1\..*
+	 * @type string | undefined
+	 */
+	cursor?: string;
+};
+
+export type ListAccessAssignmentRecipientsOptions = {
+	body: ListAccessAssignmentRecipientsBody;
+	path: ListAccessAssignmentRecipientsPath;
+	query?: never;
+	headers?: never;
+};
+
+export type ListAccessAssignmentRecipientsResponses = {
+	"200": ListAccessAssignmentRecipientsStatus200;
+	"400": ListAccessAssignmentRecipientsStatus400;
+	"401": ListAccessAssignmentRecipientsStatus401;
+	"403": ListAccessAssignmentRecipientsStatus403;
+	"404": ListAccessAssignmentRecipientsStatus404;
+	"409": ListAccessAssignmentRecipientsStatus409;
+	"422": ListAccessAssignmentRecipientsStatus422;
+	"429": ListAccessAssignmentRecipientsStatus429;
+	"500": ListAccessAssignmentRecipientsStatus500;
+	"503": ListAccessAssignmentRecipientsStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ListAccessAssignmentRecipientsResponse =
+	| ListAccessAssignmentRecipientsStatus200
+	| ListAccessAssignmentRecipientsStatus400
+	| ListAccessAssignmentRecipientsStatus401
+	| ListAccessAssignmentRecipientsStatus403
+	| ListAccessAssignmentRecipientsStatus404
+	| ListAccessAssignmentRecipientsStatus409
+	| ListAccessAssignmentRecipientsStatus422
+	| ListAccessAssignmentRecipientsStatus429
+	| ListAccessAssignmentRecipientsStatus500
+	| ListAccessAssignmentRecipientsStatus503;
+
+export type StartAccessAssignmentReviewPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+};
+
+export type StartAccessAssignmentReviewStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+	proposalDigest: string;
+	effectDigest: string;
+	/**
+	 * @minLength 0
+	 * @maxLength 4096
+	 * @type integer
+	 */
+	effectCount: number;
+	requiresApproval: boolean;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	validUntil: string;
+	status: "complete";
+};
+
+export type StartAccessAssignmentReviewStatus400 =
+	| {
+			error: {
+				/**
+				 * @default 'AccessInputInvalid'
+				 * @type string
+				 */
+				code: "AccessInputInvalid";
+				message: string;
+				details?: void;
+			};
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const StartAccessAssignmentReviewStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type StartAccessAssignmentReviewStatus401ErrorCodeEnum =
+	(typeof StartAccessAssignmentReviewStatus401ErrorCodeEnum)[keyof typeof StartAccessAssignmentReviewStatus401ErrorCodeEnum];
+
+export type StartAccessAssignmentReviewStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: StartAccessAssignmentReviewStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const StartAccessAssignmentReviewStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type StartAccessAssignmentReviewStatus403ErrorCodeEnum =
+	(typeof StartAccessAssignmentReviewStatus403ErrorCodeEnum)[keyof typeof StartAccessAssignmentReviewStatus403ErrorCodeEnum];
+
+export type StartAccessAssignmentReviewStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: StartAccessAssignmentReviewStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type StartAccessAssignmentReviewStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type StartAccessAssignmentReviewStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type StartAccessAssignmentReviewStatus422 = ValidationError;
+
+export type StartAccessAssignmentReviewStatus500 = InternalError;
+
+export type StartAccessAssignmentReviewStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const StartAccessAssignmentReviewRequestTermsPermissionPolicyPermissionsKeyEnum = {
+	"access.identity.select": "access.identity.select",
+	"access.membership.read": "access.membership.read",
+	"access.membership.recover": "access.membership.recover",
+	"access.membership.manage": "access.membership.manage",
+	"access.membership.participate": "access.membership.participate",
+	"access.representation.manage": "access.representation.manage",
+	"access.group.read": "access.group.read",
+	"access.group.create": "access.group.create",
+	"access.group.update": "access.group.update",
+	"access.group.reparent": "access.group.reparent",
+	"access.group.retire": "access.group.retire",
+	"access.group.membership.manage": "access.group.membership.manage",
+	"access.role.read": "access.role.read",
+	"access.role.create": "access.role.create",
+	"access.role.update": "access.role.update",
+	"access.role.activate": "access.role.activate",
+	"access.role.retire": "access.role.retire",
+	"access.role-binding.manage": "access.role-binding.manage",
+	"access.assignment-ceiling.manage": "access.assignment-ceiling.manage",
+	"app.read": "app.read",
+	"app.create": "app.create",
+	"app.update": "app.update",
+	"app.disable": "app.disable",
+	"app.retire": "app.retire",
+	"app.trust.manage": "app.trust.manage",
+} as const;
+
+export type StartAccessAssignmentReviewRequestTermsPermissionPolicyPermissionsKeyEnum =
+	(typeof StartAccessAssignmentReviewRequestTermsPermissionPolicyPermissionsKeyEnum)[keyof typeof StartAccessAssignmentReviewRequestTermsPermissionPolicyPermissionsKeyEnum];
+
+export const StartAccessAssignmentReviewRequestRecipientSubjectKindEnum = {
+	principal: "principal",
+	entity: "entity",
+} as const;
+
+export type StartAccessAssignmentReviewRequestRecipientSubjectKindEnum =
+	(typeof StartAccessAssignmentReviewRequestRecipientSubjectKindEnum)[keyof typeof StartAccessAssignmentReviewRequestRecipientSubjectKindEnum];
+
+export const StartAccessAssignmentReviewRequestPermissionsKeyEnum = {
+	"access.identity.select": "access.identity.select",
+	"access.membership.read": "access.membership.read",
+	"access.membership.recover": "access.membership.recover",
+	"access.membership.manage": "access.membership.manage",
+	"access.membership.participate": "access.membership.participate",
+	"access.representation.manage": "access.representation.manage",
+	"access.group.read": "access.group.read",
+	"access.group.create": "access.group.create",
+	"access.group.update": "access.group.update",
+	"access.group.reparent": "access.group.reparent",
+	"access.group.retire": "access.group.retire",
+	"access.group.membership.manage": "access.group.membership.manage",
+	"access.role.read": "access.role.read",
+	"access.role.create": "access.role.create",
+	"access.role.update": "access.role.update",
+	"access.role.activate": "access.role.activate",
+	"access.role.retire": "access.role.retire",
+	"access.role-binding.manage": "access.role-binding.manage",
+	"access.assignment-ceiling.manage": "access.assignment-ceiling.manage",
+	"app.read": "app.read",
+	"app.create": "app.create",
+	"app.update": "app.update",
+	"app.disable": "app.disable",
+	"app.retire": "app.retire",
+	"app.trust.manage": "app.trust.manage",
+} as const;
+
+export type StartAccessAssignmentReviewRequestPermissionsKeyEnum =
+	(typeof StartAccessAssignmentReviewRequestPermissionsKeyEnum)[keyof typeof StartAccessAssignmentReviewRequestPermissionsKeyEnum];
+
+export type StartAccessAssignmentReviewBody =
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			operationId: string;
+			/**
+			 * @minLength 1
+			 * @maxLength 9007199254740991
+			 * @type integer
+			 */
+			expectedVersion: number;
+			kind: "role";
+			operation: "activate";
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			roleId: string;
+			/**
+			 * @minLength 1
+			 * @maxLength 9007199254740991
+			 * @type integer
+			 */
+			definitionRevision: number;
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			operationId: string;
+			/**
+			 * @minLength 1
+			 * @maxLength 9007199254740991
+			 * @type integer
+			 */
+			expectedVersion: number;
+			kind: "role";
+			operation: "retire";
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			roleId: string;
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			operationId: string;
+			expectedVersion: 0;
+			kind: "binding";
+			operation: "create";
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			bindingId: string;
+			role: {
+				/**
+				 * @maxLength 512
+				 * @pattern ^rzs1\..*
+				 * @type string
+				 */
+				scope: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				roleId: string;
+				/**
+				 * @minLength 1
+				 * @maxLength 9007199254740991
+				 * @type integer
+				 */
+				definitionRevision: number;
+			};
+			recipient:
+				| {
+						kind: "subject";
+						/**
+						 * @maxLength 512
+						 * @pattern ^rzr1\..*
+						 * @type string
+						 */
+						recipient: string;
+				  }
+				| {
+						kind: "group";
+						/**
+						 * @maxLength 512
+						 * @pattern ^rzs1\..*
+						 * @type string
+						 */
+						scope: string;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						groupId: string;
+				  }
+				| {
+						kind: "all-members";
+						/**
+						 * @maxLength 512
+						 * @pattern ^rzs1\..*
+						 * @type string
+						 */
+						scope: string;
+				  };
+			terms: {
+				targetPath: string[];
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				validFrom: string;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				validUntil: string | null;
+				recipientEligibility: {
+					/**
+					 * @maxLength 512
+					 * @pattern ^rzs1\..*
+					 * @type string
+					 */
+					scope: string;
+					/**
+					 * @minLength 1
+					 * @maxLength 9007199254740991
+					 * @type integer
+					 */
+					generation: number;
+					selection: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						groupId: string;
+						/**
+						 * @minLength 1
+						 * @maxLength 9007199254740991
+						 * @type integer
+						 */
+						version: number;
+					} | null;
+				} | null;
+				permissionPolicy:
+					| {
+							mode: "local-role";
+					  }
+					| {
+							mode: "frozen-ceiling";
+							permissions: (
+								| {
+										family: "unit";
+										key: StartAccessAssignmentReviewRequestTermsPermissionPolicyPermissionsKeyEnum;
+								  }
+								| {
+										family: "platform";
+										key: StartAccessAssignmentReviewRequestTermsPermissionPolicyPermissionsKeyEnum;
+								  }
+								| {
+										family: "management";
+										key: StartAccessAssignmentReviewRequestTermsPermissionPolicyPermissionsKeyEnum;
+								  }
+							)[];
+					  };
+			};
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			operationId: string;
+			/**
+			 * @minLength 1
+			 * @maxLength 9007199254740991
+			 * @type integer
+			 */
+			expectedVersion: number;
+			kind: "binding";
+			operation: "amend";
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			bindingId: string;
+			/**
+			 * @minLength 1
+			 * @maxLength 9007199254740991
+			 * @type integer
+			 */
+			definitionRevision: number;
+			terms: {
+				targetPath: string[];
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				validFrom: string;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				validUntil: string | null;
+				recipientEligibility: {
+					/**
+					 * @maxLength 512
+					 * @pattern ^rzs1\..*
+					 * @type string
+					 */
+					scope: string;
+					/**
+					 * @minLength 1
+					 * @maxLength 9007199254740991
+					 * @type integer
+					 */
+					generation: number;
+					selection: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						groupId: string;
+						/**
+						 * @minLength 1
+						 * @maxLength 9007199254740991
+						 * @type integer
+						 */
+						version: number;
+					} | null;
+				} | null;
+				permissionPolicy:
+					| {
+							mode: "local-role";
+					  }
+					| {
+							mode: "frozen-ceiling";
+							permissions: (
+								| {
+										family: "unit";
+										key: StartAccessAssignmentReviewRequestTermsPermissionPolicyPermissionsKeyEnum;
+								  }
+								| {
+										family: "platform";
+										key: StartAccessAssignmentReviewRequestTermsPermissionPolicyPermissionsKeyEnum;
+								  }
+								| {
+										family: "management";
+										key: StartAccessAssignmentReviewRequestTermsPermissionPolicyPermissionsKeyEnum;
+								  }
+							)[];
+					  };
+			};
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			operationId: string;
+			/**
+			 * @minLength 1
+			 * @maxLength 9007199254740991
+			 * @type integer
+			 */
+			expectedVersion: number;
+			kind: "binding";
+			operation: "revoke";
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			bindingId: string;
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			operationId: string;
+			expectedVersion: 0;
+			kind: "ceiling";
+			operation: "create";
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			ceilingId: string;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			managerBindingId: string;
+			/**
+			 * @minLength 1
+			 * @maxLength 9007199254740991
+			 * @type integer
+			 */
+			managerTermsRevision: number;
+			role: {
+				/**
+				 * @maxLength 512
+				 * @pattern ^rzs1\..*
+				 * @type string
+				 */
+				scope: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				roleId: string;
+				/**
+				 * @minLength 1
+				 * @maxLength 9007199254740991
+				 * @type integer
+				 */
+				definitionRevision: number;
+			};
+			targetPath: string[];
+			recipient:
+				| (
+						| {
+								kind: "subject";
+								/**
+								 * @maxLength 512
+								 * @pattern ^rzr1\..*
+								 * @type string
+								 */
+								recipient: string;
+						  }
+						| {
+								kind: "group";
+								/**
+								 * @maxLength 512
+								 * @pattern ^rzs1\..*
+								 * @type string
+								 */
+								scope: string;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								groupId: string;
+						  }
+						| {
+								kind: "all-members";
+								/**
+								 * @maxLength 512
+								 * @pattern ^rzs1\..*
+								 * @type string
+								 */
+								scope: string;
+						  }
+				  )
+				| {
+						kind: "scope-members";
+						/**
+						 * @maxLength 512
+						 * @pattern ^rzs1\..*
+						 * @type string
+						 */
+						scope: string;
+						subjectKind: StartAccessAssignmentReviewRequestRecipientSubjectKindEnum;
+				  };
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			validFrom: string;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			validUntil: string | null;
+			/**
+			 * @maxLength 2147483647
+			 * @type integer
+			 */
+			maximumGrantDurationSeconds: number | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			grantNotAfter: string | null;
+			permissions: (
+				| {
+						family: "unit";
+						key: StartAccessAssignmentReviewRequestPermissionsKeyEnum;
+				  }
+				| {
+						family: "platform";
+						key: StartAccessAssignmentReviewRequestPermissionsKeyEnum;
+				  }
+				| {
+						family: "management";
+						key: StartAccessAssignmentReviewRequestPermissionsKeyEnum;
+				  }
+			)[];
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			operationId: string;
+			/**
+			 * @minLength 1
+			 * @maxLength 9007199254740991
+			 * @type integer
+			 */
+			expectedVersion: number;
+			kind: "ceiling";
+			operation: "revoke";
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			ceilingId: string;
+	  };
+
+export type StartAccessAssignmentReviewOptions = {
+	body: StartAccessAssignmentReviewBody;
+	path: StartAccessAssignmentReviewPath;
+	query?: never;
+	headers?: never;
+};
+
+export type StartAccessAssignmentReviewResponses = {
+	"200": StartAccessAssignmentReviewStatus200;
+	"400": StartAccessAssignmentReviewStatus400;
+	"401": StartAccessAssignmentReviewStatus401;
+	"403": StartAccessAssignmentReviewStatus403;
+	"404": StartAccessAssignmentReviewStatus404;
+	"409": StartAccessAssignmentReviewStatus409;
+	"422": StartAccessAssignmentReviewStatus422;
+	"500": StartAccessAssignmentReviewStatus500;
+	"503": StartAccessAssignmentReviewStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type StartAccessAssignmentReviewResponse =
+	| StartAccessAssignmentReviewStatus200
+	| StartAccessAssignmentReviewStatus400
+	| StartAccessAssignmentReviewStatus401
+	| StartAccessAssignmentReviewStatus403
+	| StartAccessAssignmentReviewStatus404
+	| StartAccessAssignmentReviewStatus409
+	| StartAccessAssignmentReviewStatus422
+	| StartAccessAssignmentReviewStatus500
+	| StartAccessAssignmentReviewStatus503;
+
+export type InspectAccessAssignmentReviewPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+};
+
+export type InspectAccessAssignmentReviewQuery = {
+	/**
+	 * @minLength 0
+	 * @maxLength 4096
+	 * @type integer | undefined
+	 */
+	afterOrdinal?: number;
+};
+
+export const InspectAccessAssignmentReviewStatus200ProposalOperationEnum = {
+	create: "create",
+	revoke: "revoke",
+} as const;
+
+export type InspectAccessAssignmentReviewStatus200ProposalOperationEnum =
+	(typeof InspectAccessAssignmentReviewStatus200ProposalOperationEnum)[keyof typeof InspectAccessAssignmentReviewStatus200ProposalOperationEnum];
+
+export const InspectAccessAssignmentReviewStatus200ProposalRecipientSubjectKindEnum = {
+	principal: "principal",
+	entity: "entity",
+} as const;
+
+export type InspectAccessAssignmentReviewStatus200ProposalRecipientSubjectKindEnum =
+	(typeof InspectAccessAssignmentReviewStatus200ProposalRecipientSubjectKindEnum)[keyof typeof InspectAccessAssignmentReviewStatus200ProposalRecipientSubjectKindEnum];
+
+export const InspectAccessAssignmentReviewStatus200ProposalTermsPermissionPolicyPermissionsKeyEnum =
+	{
+		"access.identity.select": "access.identity.select",
+		"access.membership.read": "access.membership.read",
+		"access.membership.recover": "access.membership.recover",
+		"access.membership.manage": "access.membership.manage",
+		"access.membership.participate": "access.membership.participate",
+		"access.representation.manage": "access.representation.manage",
+		"access.group.read": "access.group.read",
+		"access.group.create": "access.group.create",
+		"access.group.update": "access.group.update",
+		"access.group.reparent": "access.group.reparent",
+		"access.group.retire": "access.group.retire",
+		"access.group.membership.manage": "access.group.membership.manage",
+		"access.role.read": "access.role.read",
+		"access.role.create": "access.role.create",
+		"access.role.update": "access.role.update",
+		"access.role.activate": "access.role.activate",
+		"access.role.retire": "access.role.retire",
+		"access.role-binding.manage": "access.role-binding.manage",
+		"access.assignment-ceiling.manage": "access.assignment-ceiling.manage",
+		"app.read": "app.read",
+		"app.create": "app.create",
+		"app.update": "app.update",
+		"app.disable": "app.disable",
+		"app.retire": "app.retire",
+		"app.trust.manage": "app.trust.manage",
+	} as const;
+
+export type InspectAccessAssignmentReviewStatus200ProposalTermsPermissionPolicyPermissionsKeyEnum =
+	(typeof InspectAccessAssignmentReviewStatus200ProposalTermsPermissionPolicyPermissionsKeyEnum)[keyof typeof InspectAccessAssignmentReviewStatus200ProposalTermsPermissionPolicyPermissionsKeyEnum];
+
+export const InspectAccessAssignmentReviewStatus200ProposalTermsRecipientSubjectKindEnum = {
+	principal: "principal",
+	entity: "entity",
+} as const;
+
+export type InspectAccessAssignmentReviewStatus200ProposalTermsRecipientSubjectKindEnum =
+	(typeof InspectAccessAssignmentReviewStatus200ProposalTermsRecipientSubjectKindEnum)[keyof typeof InspectAccessAssignmentReviewStatus200ProposalTermsRecipientSubjectKindEnum];
+
+export const InspectAccessAssignmentReviewStatus200ProposalTermsPermissionsKeyEnum = {
+	"access.identity.select": "access.identity.select",
+	"access.membership.read": "access.membership.read",
+	"access.membership.recover": "access.membership.recover",
+	"access.membership.manage": "access.membership.manage",
+	"access.membership.participate": "access.membership.participate",
+	"access.representation.manage": "access.representation.manage",
+	"access.group.read": "access.group.read",
+	"access.group.create": "access.group.create",
+	"access.group.update": "access.group.update",
+	"access.group.reparent": "access.group.reparent",
+	"access.group.retire": "access.group.retire",
+	"access.group.membership.manage": "access.group.membership.manage",
+	"access.role.read": "access.role.read",
+	"access.role.create": "access.role.create",
+	"access.role.update": "access.role.update",
+	"access.role.activate": "access.role.activate",
+	"access.role.retire": "access.role.retire",
+	"access.role-binding.manage": "access.role-binding.manage",
+	"access.assignment-ceiling.manage": "access.assignment-ceiling.manage",
+	"app.read": "app.read",
+	"app.create": "app.create",
+	"app.update": "app.update",
+	"app.disable": "app.disable",
+	"app.retire": "app.retire",
+	"app.trust.manage": "app.trust.manage",
+} as const;
+
+export type InspectAccessAssignmentReviewStatus200ProposalTermsPermissionsKeyEnum =
+	(typeof InspectAccessAssignmentReviewStatus200ProposalTermsPermissionsKeyEnum)[keyof typeof InspectAccessAssignmentReviewStatus200ProposalTermsPermissionsKeyEnum];
+
+export const InspectAccessAssignmentReviewStatus200ItemsKindEnum = {
+	binding: "binding",
+	representation: "representation",
+	ceiling: "ceiling",
+} as const;
+
+export type InspectAccessAssignmentReviewStatus200ItemsKindEnum =
+	(typeof InspectAccessAssignmentReviewStatus200ItemsKindEnum)[keyof typeof InspectAccessAssignmentReviewStatus200ItemsKindEnum];
+
+export const InspectAccessAssignmentReviewStatus200ItemsBeforeKeyEnum = {
+	"access.identity.select": "access.identity.select",
+	"access.membership.read": "access.membership.read",
+	"access.membership.recover": "access.membership.recover",
+	"access.membership.manage": "access.membership.manage",
+	"access.membership.participate": "access.membership.participate",
+	"access.representation.manage": "access.representation.manage",
+	"access.group.read": "access.group.read",
+	"access.group.create": "access.group.create",
+	"access.group.update": "access.group.update",
+	"access.group.reparent": "access.group.reparent",
+	"access.group.retire": "access.group.retire",
+	"access.group.membership.manage": "access.group.membership.manage",
+	"access.role.read": "access.role.read",
+	"access.role.create": "access.role.create",
+	"access.role.update": "access.role.update",
+	"access.role.activate": "access.role.activate",
+	"access.role.retire": "access.role.retire",
+	"access.role-binding.manage": "access.role-binding.manage",
+	"access.assignment-ceiling.manage": "access.assignment-ceiling.manage",
+	"app.read": "app.read",
+	"app.create": "app.create",
+	"app.update": "app.update",
+	"app.disable": "app.disable",
+	"app.retire": "app.retire",
+	"app.trust.manage": "app.trust.manage",
+} as const;
+
+export type InspectAccessAssignmentReviewStatus200ItemsBeforeKeyEnum =
+	(typeof InspectAccessAssignmentReviewStatus200ItemsBeforeKeyEnum)[keyof typeof InspectAccessAssignmentReviewStatus200ItemsBeforeKeyEnum];
+
+export const InspectAccessAssignmentReviewStatus200ItemsAfterKeyEnum = {
+	"access.identity.select": "access.identity.select",
+	"access.membership.read": "access.membership.read",
+	"access.membership.recover": "access.membership.recover",
+	"access.membership.manage": "access.membership.manage",
+	"access.membership.participate": "access.membership.participate",
+	"access.representation.manage": "access.representation.manage",
+	"access.group.read": "access.group.read",
+	"access.group.create": "access.group.create",
+	"access.group.update": "access.group.update",
+	"access.group.reparent": "access.group.reparent",
+	"access.group.retire": "access.group.retire",
+	"access.group.membership.manage": "access.group.membership.manage",
+	"access.role.read": "access.role.read",
+	"access.role.create": "access.role.create",
+	"access.role.update": "access.role.update",
+	"access.role.activate": "access.role.activate",
+	"access.role.retire": "access.role.retire",
+	"access.role-binding.manage": "access.role-binding.manage",
+	"access.assignment-ceiling.manage": "access.assignment-ceiling.manage",
+	"app.read": "app.read",
+	"app.create": "app.create",
+	"app.update": "app.update",
+	"app.disable": "app.disable",
+	"app.retire": "app.retire",
+	"app.trust.manage": "app.trust.manage",
+} as const;
+
+export type InspectAccessAssignmentReviewStatus200ItemsAfterKeyEnum =
+	(typeof InspectAccessAssignmentReviewStatus200ItemsAfterKeyEnum)[keyof typeof InspectAccessAssignmentReviewStatus200ItemsAfterKeyEnum];
+
+export type InspectAccessAssignmentReviewStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+	proposalDigest: string;
+	effectDigest: string;
+	/**
+	 * @minLength 0
+	 * @maxLength 4096
+	 * @type integer
+	 */
+	effectCount: number;
+	requiresApproval: boolean;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	validUntil: string;
+	status: "complete";
+	proposal:
+		| {
+				kind: "role";
+				operation: InspectAccessAssignmentReviewStatus200ProposalOperationEnum;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				operationId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				roleId: string;
+				/**
+				 * @minLength 1
+				 * @maxLength 9007199254740991
+				 * @type integer
+				 */
+				expectedVersion: number;
+				/**
+				 * @minLength 1
+				 * @maxLength 9007199254740991
+				 * @type integer
+				 */
+				definitionRevision: number | null;
+		  }
+		| {
+				kind: "binding";
+				operation: InspectAccessAssignmentReviewStatus200ProposalOperationEnum;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				operationId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				bindingId: string;
+				/**
+				 * @minLength 0
+				 * @maxLength 9007199254740991
+				 * @type integer
+				 */
+				expectedVersion: number;
+				/**
+				 * @minLength 1
+				 * @maxLength 9007199254740991
+				 * @type integer
+				 */
+				definitionRevision: number | null;
+				/**
+				 * @maxLength 512
+				 * @pattern ^rzs1\..*
+				 * @type string
+				 */
+				roleScope: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				roleId: string | null;
+				recipient:
+					| (
+							| {
+									kind: "subject";
+									subject: {
+										kind: InspectAccessAssignmentReviewStatus200ProposalRecipientSubjectKindEnum;
+										recipient: string;
+										recipientKey: string;
+										/**
+										 * @description
+										 * Format: `date-time`
+										 * @type string
+										 */
+										expiresAt: string;
+									};
+							  }
+							| {
+									kind: "group";
+									/**
+									 * @maxLength 512
+									 * @pattern ^rzs1\..*
+									 * @type string
+									 */
+									scope: string;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									groupId: string;
+							  }
+							| {
+									kind: "all-members";
+									/**
+									 * @maxLength 512
+									 * @pattern ^rzs1\..*
+									 * @type string
+									 */
+									scope: string;
+							  }
+							| {
+									kind: "scope-members";
+									/**
+									 * @maxLength 512
+									 * @pattern ^rzs1\..*
+									 * @type string
+									 */
+									scope: string;
+									subjectKind: InspectAccessAssignmentReviewStatus200ProposalRecipientSubjectKindEnum;
+							  }
+					  )
+					| null;
+				terms: {
+					targetPath: string[];
+					/**
+					 * @description
+					 * Format: `date-time`
+					 * @type string
+					 */
+					validFrom: string;
+					/**
+					 * @description
+					 * Format: `date-time`
+					 * @type string
+					 */
+					validUntil: string | null;
+					recipientEligibility: {
+						/**
+						 * @maxLength 512
+						 * @pattern ^rzs1\..*
+						 * @type string
+						 */
+						scope: string;
+						/**
+						 * @minLength 1
+						 * @maxLength 9007199254740991
+						 * @type integer
+						 */
+						generation: number;
+						selection: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							groupId: string;
+							/**
+							 * @minLength 1
+							 * @maxLength 9007199254740991
+							 * @type integer
+							 */
+							version: number;
+						} | null;
+					} | null;
+					permissionPolicy:
+						| {
+								mode: "local-role";
+						  }
+						| {
+								mode: "frozen-ceiling";
+								permissions: (
+									| {
+											family: "unit";
+											key: InspectAccessAssignmentReviewStatus200ProposalTermsPermissionPolicyPermissionsKeyEnum;
+									  }
+									| {
+											family: "platform";
+											key: InspectAccessAssignmentReviewStatus200ProposalTermsPermissionPolicyPermissionsKeyEnum;
+									  }
+									| {
+											family: "management";
+											key: InspectAccessAssignmentReviewStatus200ProposalTermsPermissionPolicyPermissionsKeyEnum;
+									  }
+								)[];
+						  };
+				} | null;
+		  }
+		| {
+				kind: "ceiling";
+				operation: InspectAccessAssignmentReviewStatus200ProposalOperationEnum;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				operationId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				ceilingId: string;
+				/**
+				 * @minLength 0
+				 * @maxLength 9007199254740991
+				 * @type integer
+				 */
+				expectedVersion: number;
+				terms: {
+					/**
+					 * @maxLength 512
+					 * @pattern ^rzs1\..*
+					 * @type string
+					 */
+					roleScope: string;
+					/**
+					 * @minLength 1
+					 * @maxLength 9007199254740991
+					 * @type integer
+					 */
+					definitionRevision: number | null;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					managerBindingId: string;
+					/**
+					 * @minLength 1
+					 * @maxLength 9007199254740991
+					 * @type integer
+					 */
+					managerTermsRevision: number;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					roleId: string;
+					targetPath: string[];
+					recipient:
+						| {
+								kind: "subject";
+								subject: {
+									kind: InspectAccessAssignmentReviewStatus200ProposalTermsRecipientSubjectKindEnum;
+									recipient: string;
+									recipientKey: string;
+									/**
+									 * @description
+									 * Format: `date-time`
+									 * @type string
+									 */
+									expiresAt: string;
+								};
+						  }
+						| {
+								kind: "group";
+								/**
+								 * @maxLength 512
+								 * @pattern ^rzs1\..*
+								 * @type string
+								 */
+								scope: string;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								groupId: string;
+						  }
+						| {
+								kind: "all-members";
+								/**
+								 * @maxLength 512
+								 * @pattern ^rzs1\..*
+								 * @type string
+								 */
+								scope: string;
+						  }
+						| {
+								kind: "scope-members";
+								/**
+								 * @maxLength 512
+								 * @pattern ^rzs1\..*
+								 * @type string
+								 */
+								scope: string;
+								subjectKind: InspectAccessAssignmentReviewStatus200ProposalTermsRecipientSubjectKindEnum;
+						  };
+					permissions: (
+						| {
+								family: "unit";
+								key: InspectAccessAssignmentReviewStatus200ProposalTermsPermissionsKeyEnum;
+						  }
+						| {
+								family: "platform";
+								key: InspectAccessAssignmentReviewStatus200ProposalTermsPermissionsKeyEnum;
+						  }
+						| {
+								family: "management";
+								key: InspectAccessAssignmentReviewStatus200ProposalTermsPermissionsKeyEnum;
+						  }
+					)[];
+					/**
+					 * @description
+					 * Format: `date-time`
+					 * @type string
+					 */
+					validFrom: string;
+					/**
+					 * @description
+					 * Format: `date-time`
+					 * @type string
+					 */
+					validUntil: string | null;
+					/**
+					 * @minLength 1
+					 * @maxLength 9007199254740991
+					 * @type integer
+					 */
+					maximumGrantDurationSeconds: number | null;
+					/**
+					 * @description
+					 * Format: `date-time`
+					 * @type string
+					 */
+					grantNotAfter: string | null;
+				} | null;
+		  };
+	items: {
+		/**
+		 * @minLength 1
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		ordinal: number;
+		kind: InspectAccessAssignmentReviewStatus200ItemsKindEnum;
+		itemKey: string;
+		/**
+		 * @minLength 0
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		sourceVersion: number;
+		/**
+		 * @minLength 1
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		termsRevision: number | null;
+		/**
+		 * @maxLength 512
+		 * @pattern ^rzs1\..*
+		 * @type string
+		 */
+		targetScope: string;
+		targetPath: string[];
+		recipient: {
+			disclosure: "review-local";
+			recipientKey: string;
+		};
+		before: (
+			| {
+					family: "unit";
+					key: InspectAccessAssignmentReviewStatus200ItemsBeforeKeyEnum;
+			  }
+			| {
+					family: "platform";
+					key: InspectAccessAssignmentReviewStatus200ItemsBeforeKeyEnum;
+			  }
+			| {
+					family: "management";
+					key: InspectAccessAssignmentReviewStatus200ItemsBeforeKeyEnum;
+			  }
+		)[];
+		after: (
+			| {
+					family: "unit";
+					key: InspectAccessAssignmentReviewStatus200ItemsAfterKeyEnum;
+			  }
+			| {
+					family: "platform";
+					key: InspectAccessAssignmentReviewStatus200ItemsAfterKeyEnum;
+			  }
+			| {
+					family: "management";
+					key: InspectAccessAssignmentReviewStatus200ItemsAfterKeyEnum;
+			  }
+		)[];
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		validFrom: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		validUntil: string | null;
+		confer: boolean;
+	}[];
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	nextCursor: number | null;
+};
+
+export type InspectAccessAssignmentReviewStatus400 = {
+	error: {
+		/**
+		 * @default 'AccessInputInvalid'
+		 * @type string
+		 */
+		code: "AccessInputInvalid";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const InspectAccessAssignmentReviewStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type InspectAccessAssignmentReviewStatus401ErrorCodeEnum =
+	(typeof InspectAccessAssignmentReviewStatus401ErrorCodeEnum)[keyof typeof InspectAccessAssignmentReviewStatus401ErrorCodeEnum];
+
+export type InspectAccessAssignmentReviewStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: InspectAccessAssignmentReviewStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const InspectAccessAssignmentReviewStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type InspectAccessAssignmentReviewStatus403ErrorCodeEnum =
+	(typeof InspectAccessAssignmentReviewStatus403ErrorCodeEnum)[keyof typeof InspectAccessAssignmentReviewStatus403ErrorCodeEnum];
+
+export type InspectAccessAssignmentReviewStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: InspectAccessAssignmentReviewStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type InspectAccessAssignmentReviewStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type InspectAccessAssignmentReviewStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type InspectAccessAssignmentReviewStatus422 = ValidationError;
+
+export type InspectAccessAssignmentReviewStatus500 = InternalError;
+
+export type InspectAccessAssignmentReviewStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type InspectAccessAssignmentReviewOptions = {
+	body?: never;
+	path: InspectAccessAssignmentReviewPath;
+	query?: InspectAccessAssignmentReviewQuery;
+	headers?: never;
+};
+
+export type InspectAccessAssignmentReviewResponses = {
+	"200": InspectAccessAssignmentReviewStatus200;
+	"400": InspectAccessAssignmentReviewStatus400;
+	"401": InspectAccessAssignmentReviewStatus401;
+	"403": InspectAccessAssignmentReviewStatus403;
+	"404": InspectAccessAssignmentReviewStatus404;
+	"409": InspectAccessAssignmentReviewStatus409;
+	"422": InspectAccessAssignmentReviewStatus422;
+	"500": InspectAccessAssignmentReviewStatus500;
+	"503": InspectAccessAssignmentReviewStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type InspectAccessAssignmentReviewResponse =
+	| InspectAccessAssignmentReviewStatus200
+	| InspectAccessAssignmentReviewStatus400
+	| InspectAccessAssignmentReviewStatus401
+	| InspectAccessAssignmentReviewStatus403
+	| InspectAccessAssignmentReviewStatus404
+	| InspectAccessAssignmentReviewStatus409
+	| InspectAccessAssignmentReviewStatus422
+	| InspectAccessAssignmentReviewStatus500
+	| InspectAccessAssignmentReviewStatus503;
+
+export type ListAccessAssignmentApprovalsPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+};
+
+export const ListAccessAssignmentApprovalsStatus200ItemsValidityEnum = {
+	valid: "valid",
+	invalid: "invalid",
+	unavailable: "unavailable",
+} as const;
+
+export type ListAccessAssignmentApprovalsStatus200ItemsValidityEnum =
+	(typeof ListAccessAssignmentApprovalsStatus200ItemsValidityEnum)[keyof typeof ListAccessAssignmentApprovalsStatus200ItemsValidityEnum];
+
+export type ListAccessAssignmentApprovalsStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		approvalId: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		validUntil: string;
+		revoked: boolean;
+		validity: ListAccessAssignmentApprovalsStatus200ItemsValidityEnum;
+	}[];
+};
+
+export type ListAccessAssignmentApprovalsStatus400 = {
+	error: {
+		/**
+		 * @default 'AccessInputInvalid'
+		 * @type string
+		 */
+		code: "AccessInputInvalid";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ListAccessAssignmentApprovalsStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type ListAccessAssignmentApprovalsStatus401ErrorCodeEnum =
+	(typeof ListAccessAssignmentApprovalsStatus401ErrorCodeEnum)[keyof typeof ListAccessAssignmentApprovalsStatus401ErrorCodeEnum];
+
+export type ListAccessAssignmentApprovalsStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: ListAccessAssignmentApprovalsStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ListAccessAssignmentApprovalsStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type ListAccessAssignmentApprovalsStatus403ErrorCodeEnum =
+	(typeof ListAccessAssignmentApprovalsStatus403ErrorCodeEnum)[keyof typeof ListAccessAssignmentApprovalsStatus403ErrorCodeEnum];
+
+export type ListAccessAssignmentApprovalsStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: ListAccessAssignmentApprovalsStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessAssignmentApprovalsStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessAssignmentApprovalsStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessAssignmentApprovalsStatus422 = ValidationError;
+
+export type ListAccessAssignmentApprovalsStatus500 = InternalError;
+
+export type ListAccessAssignmentApprovalsStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessAssignmentApprovalsOptions = {
+	body?: never;
+	path: ListAccessAssignmentApprovalsPath;
+	query?: never;
+	headers?: never;
+};
+
+export type ListAccessAssignmentApprovalsResponses = {
+	"200": ListAccessAssignmentApprovalsStatus200;
+	"400": ListAccessAssignmentApprovalsStatus400;
+	"401": ListAccessAssignmentApprovalsStatus401;
+	"403": ListAccessAssignmentApprovalsStatus403;
+	"404": ListAccessAssignmentApprovalsStatus404;
+	"409": ListAccessAssignmentApprovalsStatus409;
+	"422": ListAccessAssignmentApprovalsStatus422;
+	"500": ListAccessAssignmentApprovalsStatus500;
+	"503": ListAccessAssignmentApprovalsStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ListAccessAssignmentApprovalsResponse =
+	| ListAccessAssignmentApprovalsStatus200
+	| ListAccessAssignmentApprovalsStatus400
+	| ListAccessAssignmentApprovalsStatus401
+	| ListAccessAssignmentApprovalsStatus403
+	| ListAccessAssignmentApprovalsStatus404
+	| ListAccessAssignmentApprovalsStatus409
+	| ListAccessAssignmentApprovalsStatus422
+	| ListAccessAssignmentApprovalsStatus500
+	| ListAccessAssignmentApprovalsStatus503;
+
+export type ApproveAccessAssignmentReviewPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+};
+
+export type ApproveAccessAssignmentReviewStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	approvalId: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	validUntil: string;
+	revoked: boolean;
+};
+
+export type ApproveAccessAssignmentReviewStatus400 =
+	| {
+			error: {
+				/**
+				 * @default 'AccessInputInvalid'
+				 * @type string
+				 */
+				code: "AccessInputInvalid";
+				message: string;
+				details?: void;
+			};
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const ApproveAccessAssignmentReviewStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type ApproveAccessAssignmentReviewStatus401ErrorCodeEnum =
+	(typeof ApproveAccessAssignmentReviewStatus401ErrorCodeEnum)[keyof typeof ApproveAccessAssignmentReviewStatus401ErrorCodeEnum];
+
+export type ApproveAccessAssignmentReviewStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: ApproveAccessAssignmentReviewStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ApproveAccessAssignmentReviewStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type ApproveAccessAssignmentReviewStatus403ErrorCodeEnum =
+	(typeof ApproveAccessAssignmentReviewStatus403ErrorCodeEnum)[keyof typeof ApproveAccessAssignmentReviewStatus403ErrorCodeEnum];
+
+export type ApproveAccessAssignmentReviewStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: ApproveAccessAssignmentReviewStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ApproveAccessAssignmentReviewStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ApproveAccessAssignmentReviewStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ApproveAccessAssignmentReviewStatus422 = ValidationError;
+
+export type ApproveAccessAssignmentReviewStatus500 = InternalError;
+
+export type ApproveAccessAssignmentReviewStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ApproveAccessAssignmentReviewBody = {
+	/**
+	 * @pattern ^[0-9a-f]{64}$
+	 * @type string
+	 */
+	proposalDigest: string;
+	/**
+	 * @pattern ^[0-9a-f]{64}$
+	 * @type string
+	 */
+	effectDigest: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	approvalId: string;
+};
+
+export type ApproveAccessAssignmentReviewOptions = {
+	body: ApproveAccessAssignmentReviewBody;
+	path: ApproveAccessAssignmentReviewPath;
+	query?: never;
+	headers?: never;
+};
+
+export type ApproveAccessAssignmentReviewResponses = {
+	"200": ApproveAccessAssignmentReviewStatus200;
+	"400": ApproveAccessAssignmentReviewStatus400;
+	"401": ApproveAccessAssignmentReviewStatus401;
+	"403": ApproveAccessAssignmentReviewStatus403;
+	"404": ApproveAccessAssignmentReviewStatus404;
+	"409": ApproveAccessAssignmentReviewStatus409;
+	"422": ApproveAccessAssignmentReviewStatus422;
+	"500": ApproveAccessAssignmentReviewStatus500;
+	"503": ApproveAccessAssignmentReviewStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ApproveAccessAssignmentReviewResponse =
+	| ApproveAccessAssignmentReviewStatus200
+	| ApproveAccessAssignmentReviewStatus400
+	| ApproveAccessAssignmentReviewStatus401
+	| ApproveAccessAssignmentReviewStatus403
+	| ApproveAccessAssignmentReviewStatus404
+	| ApproveAccessAssignmentReviewStatus409
+	| ApproveAccessAssignmentReviewStatus422
+	| ApproveAccessAssignmentReviewStatus500
+	| ApproveAccessAssignmentReviewStatus503;
+
+export type RevokeAccessAssignmentApprovalPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	approvalId: string;
+};
+
+export type RevokeAccessAssignmentApprovalStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	approvalId: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	validUntil: string;
+	revoked: boolean;
+};
+
+export type RevokeAccessAssignmentApprovalStatus400 =
+	| {
+			error: {
+				/**
+				 * @default 'AccessInputInvalid'
+				 * @type string
+				 */
+				code: "AccessInputInvalid";
+				message: string;
+				details?: void;
+			};
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const RevokeAccessAssignmentApprovalStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type RevokeAccessAssignmentApprovalStatus401ErrorCodeEnum =
+	(typeof RevokeAccessAssignmentApprovalStatus401ErrorCodeEnum)[keyof typeof RevokeAccessAssignmentApprovalStatus401ErrorCodeEnum];
+
+export type RevokeAccessAssignmentApprovalStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: RevokeAccessAssignmentApprovalStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const RevokeAccessAssignmentApprovalStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type RevokeAccessAssignmentApprovalStatus403ErrorCodeEnum =
+	(typeof RevokeAccessAssignmentApprovalStatus403ErrorCodeEnum)[keyof typeof RevokeAccessAssignmentApprovalStatus403ErrorCodeEnum];
+
+export type RevokeAccessAssignmentApprovalStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: RevokeAccessAssignmentApprovalStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RevokeAccessAssignmentApprovalStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RevokeAccessAssignmentApprovalStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RevokeAccessAssignmentApprovalStatus422 = ValidationError;
+
+export type RevokeAccessAssignmentApprovalStatus500 = InternalError;
+
+export type RevokeAccessAssignmentApprovalStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RevokeAccessAssignmentApprovalBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+};
+
+export type RevokeAccessAssignmentApprovalOptions = {
+	body: RevokeAccessAssignmentApprovalBody;
+	path: RevokeAccessAssignmentApprovalPath;
+	query?: never;
+	headers?: never;
+};
+
+export type RevokeAccessAssignmentApprovalResponses = {
+	"200": RevokeAccessAssignmentApprovalStatus200;
+	"400": RevokeAccessAssignmentApprovalStatus400;
+	"401": RevokeAccessAssignmentApprovalStatus401;
+	"403": RevokeAccessAssignmentApprovalStatus403;
+	"404": RevokeAccessAssignmentApprovalStatus404;
+	"409": RevokeAccessAssignmentApprovalStatus409;
+	"422": RevokeAccessAssignmentApprovalStatus422;
+	"500": RevokeAccessAssignmentApprovalStatus500;
+	"503": RevokeAccessAssignmentApprovalStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type RevokeAccessAssignmentApprovalResponse =
+	| RevokeAccessAssignmentApprovalStatus200
+	| RevokeAccessAssignmentApprovalStatus400
+	| RevokeAccessAssignmentApprovalStatus401
+	| RevokeAccessAssignmentApprovalStatus403
+	| RevokeAccessAssignmentApprovalStatus404
+	| RevokeAccessAssignmentApprovalStatus409
+	| RevokeAccessAssignmentApprovalStatus422
+	| RevokeAccessAssignmentApprovalStatus500
+	| RevokeAccessAssignmentApprovalStatus503;
+
+export type ActivateAccessRolePath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	roleId: string;
+};
+
+export const ActivateAccessRoleStatus200StateEnum = {
+	draft: "draft",
+	active: "active",
+	retired: "retired",
+} as const;
+
+export type ActivateAccessRoleStatus200StateEnum =
+	(typeof ActivateAccessRoleStatus200StateEnum)[keyof typeof ActivateAccessRoleStatus200StateEnum];
+
+export type ActivateAccessRoleStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	roleId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	version: number;
+	state: ActivateAccessRoleStatus200StateEnum;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	activeRevision: number | null;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	definitionRevision: number | null;
+};
+
+export type ActivateAccessRoleStatus400 =
+	| {
+			error: {
+				/**
+				 * @default 'AccessInputInvalid'
+				 * @type string
+				 */
+				code: "AccessInputInvalid";
+				message: string;
+				details?: void;
+			};
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const ActivateAccessRoleStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type ActivateAccessRoleStatus401ErrorCodeEnum =
+	(typeof ActivateAccessRoleStatus401ErrorCodeEnum)[keyof typeof ActivateAccessRoleStatus401ErrorCodeEnum];
+
+export type ActivateAccessRoleStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: ActivateAccessRoleStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ActivateAccessRoleStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type ActivateAccessRoleStatus403ErrorCodeEnum =
+	(typeof ActivateAccessRoleStatus403ErrorCodeEnum)[keyof typeof ActivateAccessRoleStatus403ErrorCodeEnum];
+
+export type ActivateAccessRoleStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: ActivateAccessRoleStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ActivateAccessRoleStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ActivateAccessRoleStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ActivateAccessRoleStatus422 = ValidationError;
+
+export type ActivateAccessRoleStatus500 = InternalError;
+
+export type ActivateAccessRoleStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ActivateAccessRoleBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+	/**
+	 * @pattern ^[0-9a-f]{64}$
+	 * @type string
+	 */
+	proposalDigest: string;
+	/**
+	 * @pattern ^[0-9a-f]{64}$
+	 * @type string
+	 */
+	effectDigest: string;
+};
+
+export type ActivateAccessRoleOptions = {
+	body: ActivateAccessRoleBody;
+	path: ActivateAccessRolePath;
+	query?: never;
+	headers?: never;
+};
+
+export type ActivateAccessRoleResponses = {
+	"200": ActivateAccessRoleStatus200;
+	"400": ActivateAccessRoleStatus400;
+	"401": ActivateAccessRoleStatus401;
+	"403": ActivateAccessRoleStatus403;
+	"404": ActivateAccessRoleStatus404;
+	"409": ActivateAccessRoleStatus409;
+	"422": ActivateAccessRoleStatus422;
+	"500": ActivateAccessRoleStatus500;
+	"503": ActivateAccessRoleStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ActivateAccessRoleResponse =
+	| ActivateAccessRoleStatus200
+	| ActivateAccessRoleStatus400
+	| ActivateAccessRoleStatus401
+	| ActivateAccessRoleStatus403
+	| ActivateAccessRoleStatus404
+	| ActivateAccessRoleStatus409
+	| ActivateAccessRoleStatus422
+	| ActivateAccessRoleStatus500
+	| ActivateAccessRoleStatus503;
+
+export type RetireAccessRolePath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	roleId: string;
+};
+
+export const RetireAccessRoleStatus200StateEnum = {
+	draft: "draft",
+	active: "active",
+	retired: "retired",
+} as const;
+
+export type RetireAccessRoleStatus200StateEnum =
+	(typeof RetireAccessRoleStatus200StateEnum)[keyof typeof RetireAccessRoleStatus200StateEnum];
+
+export type RetireAccessRoleStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	roleId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	version: number;
+	state: RetireAccessRoleStatus200StateEnum;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	activeRevision: number | null;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	definitionRevision: number | null;
+};
+
+export type RetireAccessRoleStatus400 =
+	| {
+			error: {
+				/**
+				 * @default 'AccessInputInvalid'
+				 * @type string
+				 */
+				code: "AccessInputInvalid";
+				message: string;
+				details?: void;
+			};
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const RetireAccessRoleStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type RetireAccessRoleStatus401ErrorCodeEnum =
+	(typeof RetireAccessRoleStatus401ErrorCodeEnum)[keyof typeof RetireAccessRoleStatus401ErrorCodeEnum];
+
+export type RetireAccessRoleStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: RetireAccessRoleStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const RetireAccessRoleStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type RetireAccessRoleStatus403ErrorCodeEnum =
+	(typeof RetireAccessRoleStatus403ErrorCodeEnum)[keyof typeof RetireAccessRoleStatus403ErrorCodeEnum];
+
+export type RetireAccessRoleStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: RetireAccessRoleStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RetireAccessRoleStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RetireAccessRoleStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RetireAccessRoleStatus422 = ValidationError;
+
+export type RetireAccessRoleStatus500 = InternalError;
+
+export type RetireAccessRoleStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RetireAccessRoleBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+	/**
+	 * @pattern ^[0-9a-f]{64}$
+	 * @type string
+	 */
+	proposalDigest: string;
+	/**
+	 * @pattern ^[0-9a-f]{64}$
+	 * @type string
+	 */
+	effectDigest: string;
+};
+
+export type RetireAccessRoleOptions = {
+	body: RetireAccessRoleBody;
+	path: RetireAccessRolePath;
+	query?: never;
+	headers?: never;
+};
+
+export type RetireAccessRoleResponses = {
+	"200": RetireAccessRoleStatus200;
+	"400": RetireAccessRoleStatus400;
+	"401": RetireAccessRoleStatus401;
+	"403": RetireAccessRoleStatus403;
+	"404": RetireAccessRoleStatus404;
+	"409": RetireAccessRoleStatus409;
+	"422": RetireAccessRoleStatus422;
+	"500": RetireAccessRoleStatus500;
+	"503": RetireAccessRoleStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type RetireAccessRoleResponse =
+	| RetireAccessRoleStatus200
+	| RetireAccessRoleStatus400
+	| RetireAccessRoleStatus401
+	| RetireAccessRoleStatus403
+	| RetireAccessRoleStatus404
+	| RetireAccessRoleStatus409
+	| RetireAccessRoleStatus422
+	| RetireAccessRoleStatus500
+	| RetireAccessRoleStatus503;
+
+export type ListAccessRoleBindingsPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+};
+
+export type ListAccessRoleBindingsQuery = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	afterId?: string;
+};
+
+export const ListAccessRoleBindingsStatus200ItemsStateEnum = {
+	active: "active",
+	revoked: "revoked",
+} as const;
+
+export type ListAccessRoleBindingsStatus200ItemsStateEnum =
+	(typeof ListAccessRoleBindingsStatus200ItemsStateEnum)[keyof typeof ListAccessRoleBindingsStatus200ItemsStateEnum];
+
+export type ListAccessRoleBindingsStatus200 = {
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		bindingId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		roleId: string;
+		/**
+		 * @minLength 1
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		version: number;
+		/**
+		 * @minLength 1
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		termsRevision: number;
+		state: ListAccessRoleBindingsStatus200ItemsStateEnum;
+	}[];
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	nextCursor: string | null;
+};
+
+export type ListAccessRoleBindingsStatus400 = {
+	error: {
+		/**
+		 * @default 'AccessInputInvalid'
+		 * @type string
+		 */
+		code: "AccessInputInvalid";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ListAccessRoleBindingsStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type ListAccessRoleBindingsStatus401ErrorCodeEnum =
+	(typeof ListAccessRoleBindingsStatus401ErrorCodeEnum)[keyof typeof ListAccessRoleBindingsStatus401ErrorCodeEnum];
+
+export type ListAccessRoleBindingsStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: ListAccessRoleBindingsStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ListAccessRoleBindingsStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type ListAccessRoleBindingsStatus403ErrorCodeEnum =
+	(typeof ListAccessRoleBindingsStatus403ErrorCodeEnum)[keyof typeof ListAccessRoleBindingsStatus403ErrorCodeEnum];
+
+export type ListAccessRoleBindingsStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: ListAccessRoleBindingsStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessRoleBindingsStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessRoleBindingsStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessRoleBindingsStatus422 = ValidationError;
+
+export const ListAccessRoleBindingsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ListAccessRoleBindingsStatus429ErrorCodeEnum =
+	(typeof ListAccessRoleBindingsStatus429ErrorCodeEnum)[keyof typeof ListAccessRoleBindingsStatus429ErrorCodeEnum];
+
+export type ListAccessRoleBindingsStatus429 = {
+	error: {
+		code: ListAccessRoleBindingsStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type ListAccessRoleBindingsStatus500 = InternalError;
+
+export type ListAccessRoleBindingsStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessRoleBindingsOptions = {
+	body?: never;
+	path: ListAccessRoleBindingsPath;
+	query?: ListAccessRoleBindingsQuery;
+	headers?: never;
+};
+
+export type ListAccessRoleBindingsResponses = {
+	"200": ListAccessRoleBindingsStatus200;
+	"400": ListAccessRoleBindingsStatus400;
+	"401": ListAccessRoleBindingsStatus401;
+	"403": ListAccessRoleBindingsStatus403;
+	"404": ListAccessRoleBindingsStatus404;
+	"409": ListAccessRoleBindingsStatus409;
+	"422": ListAccessRoleBindingsStatus422;
+	"429": ListAccessRoleBindingsStatus429;
+	"500": ListAccessRoleBindingsStatus500;
+	"503": ListAccessRoleBindingsStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ListAccessRoleBindingsResponse =
+	| ListAccessRoleBindingsStatus200
+	| ListAccessRoleBindingsStatus400
+	| ListAccessRoleBindingsStatus401
+	| ListAccessRoleBindingsStatus403
+	| ListAccessRoleBindingsStatus404
+	| ListAccessRoleBindingsStatus409
+	| ListAccessRoleBindingsStatus422
+	| ListAccessRoleBindingsStatus429
+	| ListAccessRoleBindingsStatus500
+	| ListAccessRoleBindingsStatus503;
+
+export type GetAccessRoleBindingPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	bindingId: string;
+};
+
+export type GetAccessRoleBindingQuery = {
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer | undefined
+	 */
+	version?: number;
+};
+
+export const GetAccessRoleBindingStatus200RoleStateEnum = {
+	draft: "draft",
+	active: "active",
+	retired: "retired",
+} as const;
+
+export type GetAccessRoleBindingStatus200RoleStateEnum =
+	(typeof GetAccessRoleBindingStatus200RoleStateEnum)[keyof typeof GetAccessRoleBindingStatus200RoleStateEnum];
+
+export const GetAccessRoleBindingStatus200StateEnum = {
+	active: "active",
+	revoked: "revoked",
+} as const;
+
+export type GetAccessRoleBindingStatus200StateEnum =
+	(typeof GetAccessRoleBindingStatus200StateEnum)[keyof typeof GetAccessRoleBindingStatus200StateEnum];
+
+export const GetAccessRoleBindingStatus200RecipientSubjectKindEnum = {
+	principal: "principal",
+	entity: "entity",
+} as const;
+
+export type GetAccessRoleBindingStatus200RecipientSubjectKindEnum =
+	(typeof GetAccessRoleBindingStatus200RecipientSubjectKindEnum)[keyof typeof GetAccessRoleBindingStatus200RecipientSubjectKindEnum];
+
+export const GetAccessRoleBindingStatus200TermsPermissionPolicyPermissionsKeyEnum = {
+	"access.identity.select": "access.identity.select",
+	"access.membership.read": "access.membership.read",
+	"access.membership.recover": "access.membership.recover",
+	"access.membership.manage": "access.membership.manage",
+	"access.membership.participate": "access.membership.participate",
+	"access.representation.manage": "access.representation.manage",
+	"access.group.read": "access.group.read",
+	"access.group.create": "access.group.create",
+	"access.group.update": "access.group.update",
+	"access.group.reparent": "access.group.reparent",
+	"access.group.retire": "access.group.retire",
+	"access.group.membership.manage": "access.group.membership.manage",
+	"access.role.read": "access.role.read",
+	"access.role.create": "access.role.create",
+	"access.role.update": "access.role.update",
+	"access.role.activate": "access.role.activate",
+	"access.role.retire": "access.role.retire",
+	"access.role-binding.manage": "access.role-binding.manage",
+	"access.assignment-ceiling.manage": "access.assignment-ceiling.manage",
+	"app.read": "app.read",
+	"app.create": "app.create",
+	"app.update": "app.update",
+	"app.disable": "app.disable",
+	"app.retire": "app.retire",
+	"app.trust.manage": "app.trust.manage",
+} as const;
+
+export type GetAccessRoleBindingStatus200TermsPermissionPolicyPermissionsKeyEnum =
+	(typeof GetAccessRoleBindingStatus200TermsPermissionPolicyPermissionsKeyEnum)[keyof typeof GetAccessRoleBindingStatus200TermsPermissionPolicyPermissionsKeyEnum];
+
+export type GetAccessRoleBindingStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	bindingId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	roleId: string;
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	roleScope: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	definitionRevision: number | null;
+	roleState: GetAccessRoleBindingStatus200RoleStateEnum;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	version: number;
+	state: GetAccessRoleBindingStatus200StateEnum;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	termsRevision: number;
+	recipient:
+		| {
+				kind: "subject";
+				subject: {
+					kind: GetAccessRoleBindingStatus200RecipientSubjectKindEnum;
+					recipient: string;
+					recipientKey: string;
+					/**
+					 * @description
+					 * Format: `date-time`
+					 * @type string
+					 */
+					expiresAt: string;
+				};
+		  }
+		| {
+				kind: "group";
+				/**
+				 * @maxLength 512
+				 * @pattern ^rzs1\..*
+				 * @type string
+				 */
+				scope: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				groupId: string;
+		  }
+		| {
+				kind: "all-members";
+				/**
+				 * @maxLength 512
+				 * @pattern ^rzs1\..*
+				 * @type string
+				 */
+				scope: string;
+		  }
+		| {
+				kind: "scope-members";
+				/**
+				 * @maxLength 512
+				 * @pattern ^rzs1\..*
+				 * @type string
+				 */
+				scope: string;
+				subjectKind: GetAccessRoleBindingStatus200RecipientSubjectKindEnum;
+		  };
+	terms: {
+		targetPath: string[];
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		validFrom: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		validUntil: string | null;
+		recipientEligibility: {
+			/**
+			 * @maxLength 512
+			 * @pattern ^rzs1\..*
+			 * @type string
+			 */
+			scope: string;
+			/**
+			 * @minLength 1
+			 * @maxLength 9007199254740991
+			 * @type integer
+			 */
+			generation: number;
+			selection: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				groupId: string;
+				/**
+				 * @minLength 1
+				 * @maxLength 9007199254740991
+				 * @type integer
+				 */
+				version: number;
+			} | null;
+		} | null;
+		permissionPolicy:
+			| {
+					mode: "local-role";
+			  }
+			| {
+					mode: "frozen-ceiling";
+					permissions: (
+						| {
+								family: "unit";
+								key: GetAccessRoleBindingStatus200TermsPermissionPolicyPermissionsKeyEnum;
+						  }
+						| {
+								family: "platform";
+								key: GetAccessRoleBindingStatus200TermsPermissionPolicyPermissionsKeyEnum;
+						  }
+						| {
+								family: "management";
+								key: GetAccessRoleBindingStatus200TermsPermissionPolicyPermissionsKeyEnum;
+						  }
+					)[];
+			  };
+	};
+};
+
+export type GetAccessRoleBindingStatus400 = {
+	error: {
+		/**
+		 * @default 'AccessInputInvalid'
+		 * @type string
+		 */
+		code: "AccessInputInvalid";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const GetAccessRoleBindingStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type GetAccessRoleBindingStatus401ErrorCodeEnum =
+	(typeof GetAccessRoleBindingStatus401ErrorCodeEnum)[keyof typeof GetAccessRoleBindingStatus401ErrorCodeEnum];
+
+export type GetAccessRoleBindingStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: GetAccessRoleBindingStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const GetAccessRoleBindingStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type GetAccessRoleBindingStatus403ErrorCodeEnum =
+	(typeof GetAccessRoleBindingStatus403ErrorCodeEnum)[keyof typeof GetAccessRoleBindingStatus403ErrorCodeEnum];
+
+export type GetAccessRoleBindingStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: GetAccessRoleBindingStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetAccessRoleBindingStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetAccessRoleBindingStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetAccessRoleBindingStatus422 = ValidationError;
+
+export const GetAccessRoleBindingStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetAccessRoleBindingStatus429ErrorCodeEnum =
+	(typeof GetAccessRoleBindingStatus429ErrorCodeEnum)[keyof typeof GetAccessRoleBindingStatus429ErrorCodeEnum];
+
+export type GetAccessRoleBindingStatus429 = {
+	error: {
+		code: GetAccessRoleBindingStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type GetAccessRoleBindingStatus500 = InternalError;
+
+export type GetAccessRoleBindingStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetAccessRoleBindingOptions = {
+	body?: never;
+	path: GetAccessRoleBindingPath;
+	query?: GetAccessRoleBindingQuery;
+	headers?: never;
+};
+
+export type GetAccessRoleBindingResponses = {
+	"200": GetAccessRoleBindingStatus200;
+	"400": GetAccessRoleBindingStatus400;
+	"401": GetAccessRoleBindingStatus401;
+	"403": GetAccessRoleBindingStatus403;
+	"404": GetAccessRoleBindingStatus404;
+	"409": GetAccessRoleBindingStatus409;
+	"422": GetAccessRoleBindingStatus422;
+	"429": GetAccessRoleBindingStatus429;
+	"500": GetAccessRoleBindingStatus500;
+	"503": GetAccessRoleBindingStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetAccessRoleBindingResponse =
+	| GetAccessRoleBindingStatus200
+	| GetAccessRoleBindingStatus400
+	| GetAccessRoleBindingStatus401
+	| GetAccessRoleBindingStatus403
+	| GetAccessRoleBindingStatus404
+	| GetAccessRoleBindingStatus409
+	| GetAccessRoleBindingStatus422
+	| GetAccessRoleBindingStatus429
+	| GetAccessRoleBindingStatus500
+	| GetAccessRoleBindingStatus503;
+
+export type CreateAccessRoleBindingPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	bindingId: string;
+};
+
+export const CreateAccessRoleBindingStatus200StateEnum = {
+	active: "active",
+	revoked: "revoked",
+} as const;
+
+export type CreateAccessRoleBindingStatus200StateEnum =
+	(typeof CreateAccessRoleBindingStatus200StateEnum)[keyof typeof CreateAccessRoleBindingStatus200StateEnum];
+
+export type CreateAccessRoleBindingStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	bindingId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	version: number;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	termsRevision: number;
+	state: CreateAccessRoleBindingStatus200StateEnum;
+};
+
+export type CreateAccessRoleBindingStatus400 =
+	| {
+			error: {
+				/**
+				 * @default 'AccessInputInvalid'
+				 * @type string
+				 */
+				code: "AccessInputInvalid";
+				message: string;
+				details?: void;
+			};
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const CreateAccessRoleBindingStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type CreateAccessRoleBindingStatus401ErrorCodeEnum =
+	(typeof CreateAccessRoleBindingStatus401ErrorCodeEnum)[keyof typeof CreateAccessRoleBindingStatus401ErrorCodeEnum];
+
+export type CreateAccessRoleBindingStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: CreateAccessRoleBindingStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const CreateAccessRoleBindingStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type CreateAccessRoleBindingStatus403ErrorCodeEnum =
+	(typeof CreateAccessRoleBindingStatus403ErrorCodeEnum)[keyof typeof CreateAccessRoleBindingStatus403ErrorCodeEnum];
+
+export type CreateAccessRoleBindingStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: CreateAccessRoleBindingStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type CreateAccessRoleBindingStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type CreateAccessRoleBindingStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type CreateAccessRoleBindingStatus422 = ValidationError;
+
+export type CreateAccessRoleBindingStatus500 = InternalError;
+
+export type CreateAccessRoleBindingStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type CreateAccessRoleBindingBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+	/**
+	 * @pattern ^[0-9a-f]{64}$
+	 * @type string
+	 */
+	proposalDigest: string;
+	/**
+	 * @pattern ^[0-9a-f]{64}$
+	 * @type string
+	 */
+	effectDigest: string;
+};
+
+export type CreateAccessRoleBindingOptions = {
+	body: CreateAccessRoleBindingBody;
+	path: CreateAccessRoleBindingPath;
+	query?: never;
+	headers?: never;
+};
+
+export type CreateAccessRoleBindingResponses = {
+	"200": CreateAccessRoleBindingStatus200;
+	"400": CreateAccessRoleBindingStatus400;
+	"401": CreateAccessRoleBindingStatus401;
+	"403": CreateAccessRoleBindingStatus403;
+	"404": CreateAccessRoleBindingStatus404;
+	"409": CreateAccessRoleBindingStatus409;
+	"422": CreateAccessRoleBindingStatus422;
+	"500": CreateAccessRoleBindingStatus500;
+	"503": CreateAccessRoleBindingStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type CreateAccessRoleBindingResponse =
+	| CreateAccessRoleBindingStatus200
+	| CreateAccessRoleBindingStatus400
+	| CreateAccessRoleBindingStatus401
+	| CreateAccessRoleBindingStatus403
+	| CreateAccessRoleBindingStatus404
+	| CreateAccessRoleBindingStatus409
+	| CreateAccessRoleBindingStatus422
+	| CreateAccessRoleBindingStatus500
+	| CreateAccessRoleBindingStatus503;
+
+export type ListAccessRoleBindingHistoryPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	bindingId: string;
+};
+
+export type ListAccessRoleBindingHistoryQuery = {
+	/**
+	 * @minLength -9007199254740991
+	 * @maxLength 9007199254740991
+	 * @type integer | undefined
+	 */
+	afterVersion?: number;
+};
+
+export const ListAccessRoleBindingHistoryStatus200ItemsOperationEnum = {
+	create: "create",
+	amend: "amend",
+	revoke: "revoke",
+} as const;
+
+export type ListAccessRoleBindingHistoryStatus200ItemsOperationEnum =
+	(typeof ListAccessRoleBindingHistoryStatus200ItemsOperationEnum)[keyof typeof ListAccessRoleBindingHistoryStatus200ItemsOperationEnum];
+
+export type ListAccessRoleBindingHistoryStatus200 = {
+	items: {
+		/**
+		 * @minLength 1
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		version: number;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		operationId: string;
+		operation: ListAccessRoleBindingHistoryStatus200ItemsOperationEnum;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+	}[];
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	nextCursor: number | null;
+};
+
+export type ListAccessRoleBindingHistoryStatus400 = {
+	error: {
+		/**
+		 * @default 'AccessInputInvalid'
+		 * @type string
+		 */
+		code: "AccessInputInvalid";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ListAccessRoleBindingHistoryStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type ListAccessRoleBindingHistoryStatus401ErrorCodeEnum =
+	(typeof ListAccessRoleBindingHistoryStatus401ErrorCodeEnum)[keyof typeof ListAccessRoleBindingHistoryStatus401ErrorCodeEnum];
+
+export type ListAccessRoleBindingHistoryStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: ListAccessRoleBindingHistoryStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ListAccessRoleBindingHistoryStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type ListAccessRoleBindingHistoryStatus403ErrorCodeEnum =
+	(typeof ListAccessRoleBindingHistoryStatus403ErrorCodeEnum)[keyof typeof ListAccessRoleBindingHistoryStatus403ErrorCodeEnum];
+
+export type ListAccessRoleBindingHistoryStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: ListAccessRoleBindingHistoryStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessRoleBindingHistoryStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessRoleBindingHistoryStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessRoleBindingHistoryStatus422 = ValidationError;
+
+export const ListAccessRoleBindingHistoryStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ListAccessRoleBindingHistoryStatus429ErrorCodeEnum =
+	(typeof ListAccessRoleBindingHistoryStatus429ErrorCodeEnum)[keyof typeof ListAccessRoleBindingHistoryStatus429ErrorCodeEnum];
+
+export type ListAccessRoleBindingHistoryStatus429 = {
+	error: {
+		code: ListAccessRoleBindingHistoryStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type ListAccessRoleBindingHistoryStatus500 = InternalError;
+
+export type ListAccessRoleBindingHistoryStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessRoleBindingHistoryOptions = {
+	body?: never;
+	path: ListAccessRoleBindingHistoryPath;
+	query?: ListAccessRoleBindingHistoryQuery;
+	headers?: never;
+};
+
+export type ListAccessRoleBindingHistoryResponses = {
+	"200": ListAccessRoleBindingHistoryStatus200;
+	"400": ListAccessRoleBindingHistoryStatus400;
+	"401": ListAccessRoleBindingHistoryStatus401;
+	"403": ListAccessRoleBindingHistoryStatus403;
+	"404": ListAccessRoleBindingHistoryStatus404;
+	"409": ListAccessRoleBindingHistoryStatus409;
+	"422": ListAccessRoleBindingHistoryStatus422;
+	"429": ListAccessRoleBindingHistoryStatus429;
+	"500": ListAccessRoleBindingHistoryStatus500;
+	"503": ListAccessRoleBindingHistoryStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ListAccessRoleBindingHistoryResponse =
+	| ListAccessRoleBindingHistoryStatus200
+	| ListAccessRoleBindingHistoryStatus400
+	| ListAccessRoleBindingHistoryStatus401
+	| ListAccessRoleBindingHistoryStatus403
+	| ListAccessRoleBindingHistoryStatus404
+	| ListAccessRoleBindingHistoryStatus409
+	| ListAccessRoleBindingHistoryStatus422
+	| ListAccessRoleBindingHistoryStatus429
+	| ListAccessRoleBindingHistoryStatus500
+	| ListAccessRoleBindingHistoryStatus503;
+
+export type AmendAccessRoleBindingPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	bindingId: string;
+};
+
+export const AmendAccessRoleBindingStatus200StateEnum = {
+	active: "active",
+	revoked: "revoked",
+} as const;
+
+export type AmendAccessRoleBindingStatus200StateEnum =
+	(typeof AmendAccessRoleBindingStatus200StateEnum)[keyof typeof AmendAccessRoleBindingStatus200StateEnum];
+
+export type AmendAccessRoleBindingStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	bindingId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	version: number;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	termsRevision: number;
+	state: AmendAccessRoleBindingStatus200StateEnum;
+};
+
+export type AmendAccessRoleBindingStatus400 =
+	| {
+			error: {
+				/**
+				 * @default 'AccessInputInvalid'
+				 * @type string
+				 */
+				code: "AccessInputInvalid";
+				message: string;
+				details?: void;
+			};
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const AmendAccessRoleBindingStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type AmendAccessRoleBindingStatus401ErrorCodeEnum =
+	(typeof AmendAccessRoleBindingStatus401ErrorCodeEnum)[keyof typeof AmendAccessRoleBindingStatus401ErrorCodeEnum];
+
+export type AmendAccessRoleBindingStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: AmendAccessRoleBindingStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const AmendAccessRoleBindingStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type AmendAccessRoleBindingStatus403ErrorCodeEnum =
+	(typeof AmendAccessRoleBindingStatus403ErrorCodeEnum)[keyof typeof AmendAccessRoleBindingStatus403ErrorCodeEnum];
+
+export type AmendAccessRoleBindingStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: AmendAccessRoleBindingStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type AmendAccessRoleBindingStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type AmendAccessRoleBindingStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type AmendAccessRoleBindingStatus422 = ValidationError;
+
+export type AmendAccessRoleBindingStatus500 = InternalError;
+
+export type AmendAccessRoleBindingStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type AmendAccessRoleBindingBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+	/**
+	 * @pattern ^[0-9a-f]{64}$
+	 * @type string
+	 */
+	proposalDigest: string;
+	/**
+	 * @pattern ^[0-9a-f]{64}$
+	 * @type string
+	 */
+	effectDigest: string;
+};
+
+export type AmendAccessRoleBindingOptions = {
+	body: AmendAccessRoleBindingBody;
+	path: AmendAccessRoleBindingPath;
+	query?: never;
+	headers?: never;
+};
+
+export type AmendAccessRoleBindingResponses = {
+	"200": AmendAccessRoleBindingStatus200;
+	"400": AmendAccessRoleBindingStatus400;
+	"401": AmendAccessRoleBindingStatus401;
+	"403": AmendAccessRoleBindingStatus403;
+	"404": AmendAccessRoleBindingStatus404;
+	"409": AmendAccessRoleBindingStatus409;
+	"422": AmendAccessRoleBindingStatus422;
+	"500": AmendAccessRoleBindingStatus500;
+	"503": AmendAccessRoleBindingStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type AmendAccessRoleBindingResponse =
+	| AmendAccessRoleBindingStatus200
+	| AmendAccessRoleBindingStatus400
+	| AmendAccessRoleBindingStatus401
+	| AmendAccessRoleBindingStatus403
+	| AmendAccessRoleBindingStatus404
+	| AmendAccessRoleBindingStatus409
+	| AmendAccessRoleBindingStatus422
+	| AmendAccessRoleBindingStatus500
+	| AmendAccessRoleBindingStatus503;
+
+export type RevokeAccessRoleBindingPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	bindingId: string;
+};
+
+export const RevokeAccessRoleBindingStatus200StateEnum = {
+	active: "active",
+	revoked: "revoked",
+} as const;
+
+export type RevokeAccessRoleBindingStatus200StateEnum =
+	(typeof RevokeAccessRoleBindingStatus200StateEnum)[keyof typeof RevokeAccessRoleBindingStatus200StateEnum];
+
+export type RevokeAccessRoleBindingStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	bindingId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	version: number;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	termsRevision: number;
+	state: RevokeAccessRoleBindingStatus200StateEnum;
+};
+
+export type RevokeAccessRoleBindingStatus400 =
+	| {
+			error: {
+				/**
+				 * @default 'AccessInputInvalid'
+				 * @type string
+				 */
+				code: "AccessInputInvalid";
+				message: string;
+				details?: void;
+			};
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const RevokeAccessRoleBindingStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type RevokeAccessRoleBindingStatus401ErrorCodeEnum =
+	(typeof RevokeAccessRoleBindingStatus401ErrorCodeEnum)[keyof typeof RevokeAccessRoleBindingStatus401ErrorCodeEnum];
+
+export type RevokeAccessRoleBindingStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: RevokeAccessRoleBindingStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const RevokeAccessRoleBindingStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type RevokeAccessRoleBindingStatus403ErrorCodeEnum =
+	(typeof RevokeAccessRoleBindingStatus403ErrorCodeEnum)[keyof typeof RevokeAccessRoleBindingStatus403ErrorCodeEnum];
+
+export type RevokeAccessRoleBindingStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: RevokeAccessRoleBindingStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RevokeAccessRoleBindingStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RevokeAccessRoleBindingStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RevokeAccessRoleBindingStatus422 = ValidationError;
+
+export type RevokeAccessRoleBindingStatus500 = InternalError;
+
+export type RevokeAccessRoleBindingStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RevokeAccessRoleBindingBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+	/**
+	 * @pattern ^[0-9a-f]{64}$
+	 * @type string
+	 */
+	proposalDigest: string;
+	/**
+	 * @pattern ^[0-9a-f]{64}$
+	 * @type string
+	 */
+	effectDigest: string;
+};
+
+export type RevokeAccessRoleBindingOptions = {
+	body: RevokeAccessRoleBindingBody;
+	path: RevokeAccessRoleBindingPath;
+	query?: never;
+	headers?: never;
+};
+
+export type RevokeAccessRoleBindingResponses = {
+	"200": RevokeAccessRoleBindingStatus200;
+	"400": RevokeAccessRoleBindingStatus400;
+	"401": RevokeAccessRoleBindingStatus401;
+	"403": RevokeAccessRoleBindingStatus403;
+	"404": RevokeAccessRoleBindingStatus404;
+	"409": RevokeAccessRoleBindingStatus409;
+	"422": RevokeAccessRoleBindingStatus422;
+	"500": RevokeAccessRoleBindingStatus500;
+	"503": RevokeAccessRoleBindingStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type RevokeAccessRoleBindingResponse =
+	| RevokeAccessRoleBindingStatus200
+	| RevokeAccessRoleBindingStatus400
+	| RevokeAccessRoleBindingStatus401
+	| RevokeAccessRoleBindingStatus403
+	| RevokeAccessRoleBindingStatus404
+	| RevokeAccessRoleBindingStatus409
+	| RevokeAccessRoleBindingStatus422
+	| RevokeAccessRoleBindingStatus500
+	| RevokeAccessRoleBindingStatus503;
+
+export type ListAccessAssignmentCeilingsPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+};
+
+export type ListAccessAssignmentCeilingsQuery = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	afterId?: string;
+};
+
+export const ListAccessAssignmentCeilingsStatus200ItemsStateEnum = {
+	active: "active",
+	revoked: "revoked",
+} as const;
+
+export type ListAccessAssignmentCeilingsStatus200ItemsStateEnum =
+	(typeof ListAccessAssignmentCeilingsStatus200ItemsStateEnum)[keyof typeof ListAccessAssignmentCeilingsStatus200ItemsStateEnum];
+
+export type ListAccessAssignmentCeilingsStatus200 = {
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		ceilingId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		roleId: string;
+		/**
+		 * @minLength 1
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		version: number;
+		state: ListAccessAssignmentCeilingsStatus200ItemsStateEnum;
+	}[];
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	nextCursor: string | null;
+};
+
+export type ListAccessAssignmentCeilingsStatus400 = {
+	error: {
+		/**
+		 * @default 'AccessInputInvalid'
+		 * @type string
+		 */
+		code: "AccessInputInvalid";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ListAccessAssignmentCeilingsStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type ListAccessAssignmentCeilingsStatus401ErrorCodeEnum =
+	(typeof ListAccessAssignmentCeilingsStatus401ErrorCodeEnum)[keyof typeof ListAccessAssignmentCeilingsStatus401ErrorCodeEnum];
+
+export type ListAccessAssignmentCeilingsStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: ListAccessAssignmentCeilingsStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ListAccessAssignmentCeilingsStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type ListAccessAssignmentCeilingsStatus403ErrorCodeEnum =
+	(typeof ListAccessAssignmentCeilingsStatus403ErrorCodeEnum)[keyof typeof ListAccessAssignmentCeilingsStatus403ErrorCodeEnum];
+
+export type ListAccessAssignmentCeilingsStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: ListAccessAssignmentCeilingsStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessAssignmentCeilingsStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessAssignmentCeilingsStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessAssignmentCeilingsStatus422 = ValidationError;
+
+export const ListAccessAssignmentCeilingsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ListAccessAssignmentCeilingsStatus429ErrorCodeEnum =
+	(typeof ListAccessAssignmentCeilingsStatus429ErrorCodeEnum)[keyof typeof ListAccessAssignmentCeilingsStatus429ErrorCodeEnum];
+
+export type ListAccessAssignmentCeilingsStatus429 = {
+	error: {
+		code: ListAccessAssignmentCeilingsStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type ListAccessAssignmentCeilingsStatus500 = InternalError;
+
+export type ListAccessAssignmentCeilingsStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessAssignmentCeilingsOptions = {
+	body?: never;
+	path: ListAccessAssignmentCeilingsPath;
+	query?: ListAccessAssignmentCeilingsQuery;
+	headers?: never;
+};
+
+export type ListAccessAssignmentCeilingsResponses = {
+	"200": ListAccessAssignmentCeilingsStatus200;
+	"400": ListAccessAssignmentCeilingsStatus400;
+	"401": ListAccessAssignmentCeilingsStatus401;
+	"403": ListAccessAssignmentCeilingsStatus403;
+	"404": ListAccessAssignmentCeilingsStatus404;
+	"409": ListAccessAssignmentCeilingsStatus409;
+	"422": ListAccessAssignmentCeilingsStatus422;
+	"429": ListAccessAssignmentCeilingsStatus429;
+	"500": ListAccessAssignmentCeilingsStatus500;
+	"503": ListAccessAssignmentCeilingsStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ListAccessAssignmentCeilingsResponse =
+	| ListAccessAssignmentCeilingsStatus200
+	| ListAccessAssignmentCeilingsStatus400
+	| ListAccessAssignmentCeilingsStatus401
+	| ListAccessAssignmentCeilingsStatus403
+	| ListAccessAssignmentCeilingsStatus404
+	| ListAccessAssignmentCeilingsStatus409
+	| ListAccessAssignmentCeilingsStatus422
+	| ListAccessAssignmentCeilingsStatus429
+	| ListAccessAssignmentCeilingsStatus500
+	| ListAccessAssignmentCeilingsStatus503;
+
+export type GetAccessAssignmentCeilingPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	ceilingId: string;
+};
+
+export const GetAccessAssignmentCeilingStatus200StateEnum = {
+	active: "active",
+	revoked: "revoked",
+} as const;
+
+export type GetAccessAssignmentCeilingStatus200StateEnum =
+	(typeof GetAccessAssignmentCeilingStatus200StateEnum)[keyof typeof GetAccessAssignmentCeilingStatus200StateEnum];
+
+export const GetAccessAssignmentCeilingStatus200RecipientSubjectKindEnum = {
+	principal: "principal",
+	entity: "entity",
+} as const;
+
+export type GetAccessAssignmentCeilingStatus200RecipientSubjectKindEnum =
+	(typeof GetAccessAssignmentCeilingStatus200RecipientSubjectKindEnum)[keyof typeof GetAccessAssignmentCeilingStatus200RecipientSubjectKindEnum];
+
+export const GetAccessAssignmentCeilingStatus200PermissionsKeyEnum = {
+	"access.identity.select": "access.identity.select",
+	"access.membership.read": "access.membership.read",
+	"access.membership.recover": "access.membership.recover",
+	"access.membership.manage": "access.membership.manage",
+	"access.membership.participate": "access.membership.participate",
+	"access.representation.manage": "access.representation.manage",
+	"access.group.read": "access.group.read",
+	"access.group.create": "access.group.create",
+	"access.group.update": "access.group.update",
+	"access.group.reparent": "access.group.reparent",
+	"access.group.retire": "access.group.retire",
+	"access.group.membership.manage": "access.group.membership.manage",
+	"access.role.read": "access.role.read",
+	"access.role.create": "access.role.create",
+	"access.role.update": "access.role.update",
+	"access.role.activate": "access.role.activate",
+	"access.role.retire": "access.role.retire",
+	"access.role-binding.manage": "access.role-binding.manage",
+	"access.assignment-ceiling.manage": "access.assignment-ceiling.manage",
+	"app.read": "app.read",
+	"app.create": "app.create",
+	"app.update": "app.update",
+	"app.disable": "app.disable",
+	"app.retire": "app.retire",
+	"app.trust.manage": "app.trust.manage",
+} as const;
+
+export type GetAccessAssignmentCeilingStatus200PermissionsKeyEnum =
+	(typeof GetAccessAssignmentCeilingStatus200PermissionsKeyEnum)[keyof typeof GetAccessAssignmentCeilingStatus200PermissionsKeyEnum];
+
+export type GetAccessAssignmentCeilingStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	ceilingId: string;
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	roleScope: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	definitionRevision: number | null;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	version: number;
+	state: GetAccessAssignmentCeilingStatus200StateEnum;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	managerBindingId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	managerTermsRevision: number;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	roleId: string;
+	targetPath: string[];
+	recipient:
+		| {
+				kind: "subject";
+				subject: {
+					kind: GetAccessAssignmentCeilingStatus200RecipientSubjectKindEnum;
+					recipient: string;
+					recipientKey: string;
+					/**
+					 * @description
+					 * Format: `date-time`
+					 * @type string
+					 */
+					expiresAt: string;
+				};
+		  }
+		| {
+				kind: "group";
+				/**
+				 * @maxLength 512
+				 * @pattern ^rzs1\..*
+				 * @type string
+				 */
+				scope: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				groupId: string;
+		  }
+		| {
+				kind: "all-members";
+				/**
+				 * @maxLength 512
+				 * @pattern ^rzs1\..*
+				 * @type string
+				 */
+				scope: string;
+		  }
+		| {
+				kind: "scope-members";
+				/**
+				 * @maxLength 512
+				 * @pattern ^rzs1\..*
+				 * @type string
+				 */
+				scope: string;
+				subjectKind: GetAccessAssignmentCeilingStatus200RecipientSubjectKindEnum;
+		  };
+	permissions: (
+		| {
+				family: "unit";
+				key: GetAccessAssignmentCeilingStatus200PermissionsKeyEnum;
+		  }
+		| {
+				family: "platform";
+				key: GetAccessAssignmentCeilingStatus200PermissionsKeyEnum;
+		  }
+		| {
+				family: "management";
+				key: GetAccessAssignmentCeilingStatus200PermissionsKeyEnum;
+		  }
+	)[];
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	validFrom: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	validUntil: string | null;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	maximumGrantDurationSeconds: number | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	grantNotAfter: string | null;
+};
+
+export type GetAccessAssignmentCeilingStatus400 = {
+	error: {
+		/**
+		 * @default 'AccessInputInvalid'
+		 * @type string
+		 */
+		code: "AccessInputInvalid";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const GetAccessAssignmentCeilingStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type GetAccessAssignmentCeilingStatus401ErrorCodeEnum =
+	(typeof GetAccessAssignmentCeilingStatus401ErrorCodeEnum)[keyof typeof GetAccessAssignmentCeilingStatus401ErrorCodeEnum];
+
+export type GetAccessAssignmentCeilingStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: GetAccessAssignmentCeilingStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const GetAccessAssignmentCeilingStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type GetAccessAssignmentCeilingStatus403ErrorCodeEnum =
+	(typeof GetAccessAssignmentCeilingStatus403ErrorCodeEnum)[keyof typeof GetAccessAssignmentCeilingStatus403ErrorCodeEnum];
+
+export type GetAccessAssignmentCeilingStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: GetAccessAssignmentCeilingStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetAccessAssignmentCeilingStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetAccessAssignmentCeilingStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetAccessAssignmentCeilingStatus422 = ValidationError;
+
+export const GetAccessAssignmentCeilingStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetAccessAssignmentCeilingStatus429ErrorCodeEnum =
+	(typeof GetAccessAssignmentCeilingStatus429ErrorCodeEnum)[keyof typeof GetAccessAssignmentCeilingStatus429ErrorCodeEnum];
+
+export type GetAccessAssignmentCeilingStatus429 = {
+	error: {
+		code: GetAccessAssignmentCeilingStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type GetAccessAssignmentCeilingStatus500 = InternalError;
+
+export type GetAccessAssignmentCeilingStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetAccessAssignmentCeilingOptions = {
+	body?: never;
+	path: GetAccessAssignmentCeilingPath;
+	query?: never;
+	headers?: never;
+};
+
+export type GetAccessAssignmentCeilingResponses = {
+	"200": GetAccessAssignmentCeilingStatus200;
+	"400": GetAccessAssignmentCeilingStatus400;
+	"401": GetAccessAssignmentCeilingStatus401;
+	"403": GetAccessAssignmentCeilingStatus403;
+	"404": GetAccessAssignmentCeilingStatus404;
+	"409": GetAccessAssignmentCeilingStatus409;
+	"422": GetAccessAssignmentCeilingStatus422;
+	"429": GetAccessAssignmentCeilingStatus429;
+	"500": GetAccessAssignmentCeilingStatus500;
+	"503": GetAccessAssignmentCeilingStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetAccessAssignmentCeilingResponse =
+	| GetAccessAssignmentCeilingStatus200
+	| GetAccessAssignmentCeilingStatus400
+	| GetAccessAssignmentCeilingStatus401
+	| GetAccessAssignmentCeilingStatus403
+	| GetAccessAssignmentCeilingStatus404
+	| GetAccessAssignmentCeilingStatus409
+	| GetAccessAssignmentCeilingStatus422
+	| GetAccessAssignmentCeilingStatus429
+	| GetAccessAssignmentCeilingStatus500
+	| GetAccessAssignmentCeilingStatus503;
+
+export type CreateAccessAssignmentCeilingPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	ceilingId: string;
+};
+
+export const CreateAccessAssignmentCeilingStatus200StateEnum = {
+	active: "active",
+	revoked: "revoked",
+} as const;
+
+export type CreateAccessAssignmentCeilingStatus200StateEnum =
+	(typeof CreateAccessAssignmentCeilingStatus200StateEnum)[keyof typeof CreateAccessAssignmentCeilingStatus200StateEnum];
+
+export type CreateAccessAssignmentCeilingStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	ceilingId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	version: number;
+	state: CreateAccessAssignmentCeilingStatus200StateEnum;
+};
+
+export type CreateAccessAssignmentCeilingStatus400 =
+	| {
+			error: {
+				/**
+				 * @default 'AccessInputInvalid'
+				 * @type string
+				 */
+				code: "AccessInputInvalid";
+				message: string;
+				details?: void;
+			};
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const CreateAccessAssignmentCeilingStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type CreateAccessAssignmentCeilingStatus401ErrorCodeEnum =
+	(typeof CreateAccessAssignmentCeilingStatus401ErrorCodeEnum)[keyof typeof CreateAccessAssignmentCeilingStatus401ErrorCodeEnum];
+
+export type CreateAccessAssignmentCeilingStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: CreateAccessAssignmentCeilingStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const CreateAccessAssignmentCeilingStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type CreateAccessAssignmentCeilingStatus403ErrorCodeEnum =
+	(typeof CreateAccessAssignmentCeilingStatus403ErrorCodeEnum)[keyof typeof CreateAccessAssignmentCeilingStatus403ErrorCodeEnum];
+
+export type CreateAccessAssignmentCeilingStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: CreateAccessAssignmentCeilingStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type CreateAccessAssignmentCeilingStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type CreateAccessAssignmentCeilingStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type CreateAccessAssignmentCeilingStatus422 = ValidationError;
+
+export type CreateAccessAssignmentCeilingStatus500 = InternalError;
+
+export type CreateAccessAssignmentCeilingStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type CreateAccessAssignmentCeilingBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+	/**
+	 * @pattern ^[0-9a-f]{64}$
+	 * @type string
+	 */
+	proposalDigest: string;
+	/**
+	 * @pattern ^[0-9a-f]{64}$
+	 * @type string
+	 */
+	effectDigest: string;
+};
+
+export type CreateAccessAssignmentCeilingOptions = {
+	body: CreateAccessAssignmentCeilingBody;
+	path: CreateAccessAssignmentCeilingPath;
+	query?: never;
+	headers?: never;
+};
+
+export type CreateAccessAssignmentCeilingResponses = {
+	"200": CreateAccessAssignmentCeilingStatus200;
+	"400": CreateAccessAssignmentCeilingStatus400;
+	"401": CreateAccessAssignmentCeilingStatus401;
+	"403": CreateAccessAssignmentCeilingStatus403;
+	"404": CreateAccessAssignmentCeilingStatus404;
+	"409": CreateAccessAssignmentCeilingStatus409;
+	"422": CreateAccessAssignmentCeilingStatus422;
+	"500": CreateAccessAssignmentCeilingStatus500;
+	"503": CreateAccessAssignmentCeilingStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type CreateAccessAssignmentCeilingResponse =
+	| CreateAccessAssignmentCeilingStatus200
+	| CreateAccessAssignmentCeilingStatus400
+	| CreateAccessAssignmentCeilingStatus401
+	| CreateAccessAssignmentCeilingStatus403
+	| CreateAccessAssignmentCeilingStatus404
+	| CreateAccessAssignmentCeilingStatus409
+	| CreateAccessAssignmentCeilingStatus422
+	| CreateAccessAssignmentCeilingStatus500
+	| CreateAccessAssignmentCeilingStatus503;
+
+export type ListAccessAssignmentCeilingHistoryPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	ceilingId: string;
+};
+
+export type ListAccessAssignmentCeilingHistoryQuery = {
+	/**
+	 * @minLength -9007199254740991
+	 * @maxLength 9007199254740991
+	 * @type integer | undefined
+	 */
+	afterVersion?: number;
+};
+
+export const ListAccessAssignmentCeilingHistoryStatus200ItemsOperationEnum = {
+	create: "create",
+	amend: "amend",
+	revoke: "revoke",
+} as const;
+
+export type ListAccessAssignmentCeilingHistoryStatus200ItemsOperationEnum =
+	(typeof ListAccessAssignmentCeilingHistoryStatus200ItemsOperationEnum)[keyof typeof ListAccessAssignmentCeilingHistoryStatus200ItemsOperationEnum];
+
+export type ListAccessAssignmentCeilingHistoryStatus200 = {
+	items: {
+		/**
+		 * @minLength 1
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		version: number;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		operationId: string;
+		operation: ListAccessAssignmentCeilingHistoryStatus200ItemsOperationEnum;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+	}[];
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	nextCursor: number | null;
+};
+
+export type ListAccessAssignmentCeilingHistoryStatus400 = {
+	error: {
+		/**
+		 * @default 'AccessInputInvalid'
+		 * @type string
+		 */
+		code: "AccessInputInvalid";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ListAccessAssignmentCeilingHistoryStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type ListAccessAssignmentCeilingHistoryStatus401ErrorCodeEnum =
+	(typeof ListAccessAssignmentCeilingHistoryStatus401ErrorCodeEnum)[keyof typeof ListAccessAssignmentCeilingHistoryStatus401ErrorCodeEnum];
+
+export type ListAccessAssignmentCeilingHistoryStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: ListAccessAssignmentCeilingHistoryStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const ListAccessAssignmentCeilingHistoryStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type ListAccessAssignmentCeilingHistoryStatus403ErrorCodeEnum =
+	(typeof ListAccessAssignmentCeilingHistoryStatus403ErrorCodeEnum)[keyof typeof ListAccessAssignmentCeilingHistoryStatus403ErrorCodeEnum];
+
+export type ListAccessAssignmentCeilingHistoryStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: ListAccessAssignmentCeilingHistoryStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessAssignmentCeilingHistoryStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessAssignmentCeilingHistoryStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessAssignmentCeilingHistoryStatus422 = ValidationError;
+
+export const ListAccessAssignmentCeilingHistoryStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ListAccessAssignmentCeilingHistoryStatus429ErrorCodeEnum =
+	(typeof ListAccessAssignmentCeilingHistoryStatus429ErrorCodeEnum)[keyof typeof ListAccessAssignmentCeilingHistoryStatus429ErrorCodeEnum];
+
+export type ListAccessAssignmentCeilingHistoryStatus429 = {
+	error: {
+		code: ListAccessAssignmentCeilingHistoryStatus429ErrorCodeEnum;
+		message: string;
+		details?: JsonValue;
+	};
+	requestId: string;
+};
+
+export type ListAccessAssignmentCeilingHistoryStatus500 = InternalError;
+
+export type ListAccessAssignmentCeilingHistoryStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type ListAccessAssignmentCeilingHistoryOptions = {
+	body?: never;
+	path: ListAccessAssignmentCeilingHistoryPath;
+	query?: ListAccessAssignmentCeilingHistoryQuery;
+	headers?: never;
+};
+
+export type ListAccessAssignmentCeilingHistoryResponses = {
+	"200": ListAccessAssignmentCeilingHistoryStatus200;
+	"400": ListAccessAssignmentCeilingHistoryStatus400;
+	"401": ListAccessAssignmentCeilingHistoryStatus401;
+	"403": ListAccessAssignmentCeilingHistoryStatus403;
+	"404": ListAccessAssignmentCeilingHistoryStatus404;
+	"409": ListAccessAssignmentCeilingHistoryStatus409;
+	"422": ListAccessAssignmentCeilingHistoryStatus422;
+	"429": ListAccessAssignmentCeilingHistoryStatus429;
+	"500": ListAccessAssignmentCeilingHistoryStatus500;
+	"503": ListAccessAssignmentCeilingHistoryStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ListAccessAssignmentCeilingHistoryResponse =
+	| ListAccessAssignmentCeilingHistoryStatus200
+	| ListAccessAssignmentCeilingHistoryStatus400
+	| ListAccessAssignmentCeilingHistoryStatus401
+	| ListAccessAssignmentCeilingHistoryStatus403
+	| ListAccessAssignmentCeilingHistoryStatus404
+	| ListAccessAssignmentCeilingHistoryStatus409
+	| ListAccessAssignmentCeilingHistoryStatus422
+	| ListAccessAssignmentCeilingHistoryStatus429
+	| ListAccessAssignmentCeilingHistoryStatus500
+	| ListAccessAssignmentCeilingHistoryStatus503;
+
+export type RevokeAccessAssignmentCeilingPath = {
+	/**
+	 * @maxLength 512
+	 * @pattern ^rzs1\..*
+	 * @type string
+	 */
+	scope: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	ceilingId: string;
+};
+
+export const RevokeAccessAssignmentCeilingStatus200StateEnum = {
+	active: "active",
+	revoked: "revoked",
+} as const;
+
+export type RevokeAccessAssignmentCeilingStatus200StateEnum =
+	(typeof RevokeAccessAssignmentCeilingStatus200StateEnum)[keyof typeof RevokeAccessAssignmentCeilingStatus200StateEnum];
+
+export type RevokeAccessAssignmentCeilingStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	ceilingId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	operationId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	version: number;
+	state: RevokeAccessAssignmentCeilingStatus200StateEnum;
+};
+
+export type RevokeAccessAssignmentCeilingStatus400 =
+	| {
+			error: {
+				/**
+				 * @default 'AccessInputInvalid'
+				 * @type string
+				 */
+				code: "AccessInputInvalid";
+				message: string;
+				details?: void;
+			};
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const RevokeAccessAssignmentCeilingStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type RevokeAccessAssignmentCeilingStatus401ErrorCodeEnum =
+	(typeof RevokeAccessAssignmentCeilingStatus401ErrorCodeEnum)[keyof typeof RevokeAccessAssignmentCeilingStatus401ErrorCodeEnum];
+
+export type RevokeAccessAssignmentCeilingStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: RevokeAccessAssignmentCeilingStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const RevokeAccessAssignmentCeilingStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type RevokeAccessAssignmentCeilingStatus403ErrorCodeEnum =
+	(typeof RevokeAccessAssignmentCeilingStatus403ErrorCodeEnum)[keyof typeof RevokeAccessAssignmentCeilingStatus403ErrorCodeEnum];
+
+export type RevokeAccessAssignmentCeilingStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: RevokeAccessAssignmentCeilingStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RevokeAccessAssignmentCeilingStatus404 = {
+	error: {
+		/**
+		 * @default 'AccessRecordUnavailable'
+		 * @type string
+		 */
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RevokeAccessAssignmentCeilingStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RevokeAccessAssignmentCeilingStatus422 = ValidationError;
+
+export type RevokeAccessAssignmentCeilingStatus500 = InternalError;
+
+export type RevokeAccessAssignmentCeilingStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type RevokeAccessAssignmentCeilingBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reviewId: string;
+	/**
+	 * @pattern ^[0-9a-f]{64}$
+	 * @type string
+	 */
+	proposalDigest: string;
+	/**
+	 * @pattern ^[0-9a-f]{64}$
+	 * @type string
+	 */
+	effectDigest: string;
+};
+
+export type RevokeAccessAssignmentCeilingOptions = {
+	body: RevokeAccessAssignmentCeilingBody;
+	path: RevokeAccessAssignmentCeilingPath;
+	query?: never;
+	headers?: never;
+};
+
+export type RevokeAccessAssignmentCeilingResponses = {
+	"200": RevokeAccessAssignmentCeilingStatus200;
+	"400": RevokeAccessAssignmentCeilingStatus400;
+	"401": RevokeAccessAssignmentCeilingStatus401;
+	"403": RevokeAccessAssignmentCeilingStatus403;
+	"404": RevokeAccessAssignmentCeilingStatus404;
+	"409": RevokeAccessAssignmentCeilingStatus409;
+	"422": RevokeAccessAssignmentCeilingStatus422;
+	"500": RevokeAccessAssignmentCeilingStatus500;
+	"503": RevokeAccessAssignmentCeilingStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type RevokeAccessAssignmentCeilingResponse =
+	| RevokeAccessAssignmentCeilingStatus200
+	| RevokeAccessAssignmentCeilingStatus400
+	| RevokeAccessAssignmentCeilingStatus401
+	| RevokeAccessAssignmentCeilingStatus403
+	| RevokeAccessAssignmentCeilingStatus404
+	| RevokeAccessAssignmentCeilingStatus409
+	| RevokeAccessAssignmentCeilingStatus422
+	| RevokeAccessAssignmentCeilingStatus500
+	| RevokeAccessAssignmentCeilingStatus503;
+
 export type ResolveAccessManagementScopeStatus200 = {
 	/**
 	 * @maxLength 512

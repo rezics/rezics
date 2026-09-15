@@ -497,3 +497,6 @@ export async function readAccessRoleBindingSnapshot(
 		},
 	};
 }
+
+/** Owning native command decoder; private API adapters resolve subjects before using it. @internal */
+export { schema as AccessRoleBindingCommandSchema, termsSchema as AccessRoleBindingTermsSchema };
