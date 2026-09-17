@@ -1,0 +1,327 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"type": "object",
+	"properties": {
+		"format": {
+			"type": "number",
+			"const": 1
+		},
+		"compiler": {
+			"type": "string",
+			"const": "rezics-schema/1"
+		},
+		"id": {
+			"type": "string",
+			"format": "uuid",
+			"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+		},
+		"digest": {
+			"type": "string",
+			"pattern": "^[0-9a-f]{64}$"
+		},
+		"terms": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"format": "uuid",
+						"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+					},
+					"iri": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 65536,
+						"pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\u0000-\\u0020<>\"{}|^`\\\\]*$"
+					},
+					"aliases": {
+						"type": "array",
+						"items": {
+							"type": "string",
+							"minLength": 1,
+							"maxLength": 65536,
+							"pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\u0000-\\u0020<>\"{}|^`\\\\]*$"
+						}
+					}
+				},
+				"required": [
+					"id",
+					"iri",
+					"aliases"
+				],
+				"additionalProperties": false
+			}
+		},
+		"releases": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"format": "uuid",
+						"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+					},
+					"vocabularyId": {
+						"type": "string",
+						"format": "uuid",
+						"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+					},
+					"source": {
+						"type": "object",
+						"properties": {
+							"key": {
+								"type": "string",
+								"pattern": "^[a-z][a-z0-9-]{0,63}$"
+							},
+							"version": {
+								"type": "string",
+								"minLength": 1
+							},
+							"url": {
+								"type": "string",
+								"format": "uri"
+							},
+							"baseIri": {
+								"type": "string",
+								"minLength": 1,
+								"maxLength": 65536,
+								"pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\u0000-\\u0020<>\"{}|^`\\\\]*$"
+							},
+							"namespaces": {
+								"minItems": 1,
+								"type": "array",
+								"items": {
+									"type": "string",
+									"minLength": 1,
+									"maxLength": 65536,
+									"pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\u0000-\\u0020<>\"{}|^`\\\\]*$"
+								}
+							},
+							"file": {
+								"type": "string",
+								"pattern": "^[a-z0-9][a-z0-9.-]*\\.(ttl|rdf|jsonld|nq)$"
+							},
+							"mediaType": {
+								"type": "string",
+								"enum": [
+									"text/turtle",
+									"application/rdf+xml",
+									"application/ld+json",
+									"application/n-quads"
+								]
+							},
+							"sha256": {
+								"type": "string",
+								"pattern": "^[0-9a-f]{64}$"
+							},
+							"bytes": {
+								"type": "integer",
+								"exclusiveMinimum": 0,
+								"maximum": 16777216
+							},
+							"license": {
+								"type": "string",
+								"minLength": 1
+							},
+							"contexts": {
+								"default": [],
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+										"url": {
+											"type": "string",
+											"minLength": 1,
+											"maxLength": 65536,
+											"pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\u0000-\\u0020<>\"{}|^`\\\\]*$"
+										},
+										"file": {
+											"type": "string",
+											"pattern": "^[a-z0-9][a-z0-9.-]*\\.jsonld$"
+										},
+										"sha256": {
+											"type": "string",
+											"pattern": "^[0-9a-f]{64}$"
+										}
+									},
+									"required": [
+										"url",
+										"file",
+										"sha256"
+									],
+									"additionalProperties": false
+								}
+							}
+						},
+						"required": [
+							"key",
+							"version",
+							"url",
+							"baseIri",
+							"namespaces",
+							"file",
+							"mediaType",
+							"sha256",
+							"bytes",
+							"license",
+							"contexts"
+						],
+						"additionalProperties": false
+					},
+					"digest": {
+						"type": "string",
+						"pattern": "^[0-9a-f]{64}$"
+					},
+					"canonical": {
+						"type": "string"
+					},
+					"quadCount": {
+						"type": "integer",
+						"minimum": 0,
+						"maximum": 9007199254740991
+					},
+					"definitions": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"id": {
+									"type": "string",
+									"format": "uuid",
+									"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+								},
+								"termId": {
+									"type": "string",
+									"format": "uuid",
+									"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+								},
+								"vocabularyId": {
+									"type": "string",
+									"format": "uuid",
+									"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+								},
+								"digest": {
+									"type": "string",
+									"pattern": "^[0-9a-f]{64}$"
+								},
+								"canonical": {
+									"type": "string"
+								},
+								"types": {
+									"type": "array",
+									"items": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 65536,
+										"pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\u0000-\\u0020<>\"{}|^`\\\\]*$"
+									}
+								},
+								"status": {
+									"type": "string",
+									"enum": [
+										"active",
+										"pending",
+										"retired"
+									]
+								},
+								"replacements": {
+									"type": "array",
+									"items": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 65536,
+										"pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\u0000-\\u0020<>\"{}|^`\\\\]*$"
+									}
+								}
+							},
+							"required": [
+								"id",
+								"termId",
+								"vocabularyId",
+								"digest",
+								"canonical",
+								"types",
+								"status",
+								"replacements"
+							],
+							"additionalProperties": false
+						}
+					},
+					"labels": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"id": {
+									"type": "string",
+									"format": "uuid",
+									"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+								},
+								"termId": {
+									"type": "string",
+									"format": "uuid",
+									"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+								},
+								"predicate": {
+									"type": "string",
+									"minLength": 1,
+									"maxLength": 65536,
+									"pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\u0000-\\u0020<>\"{}|^`\\\\]*$"
+								},
+								"value": {
+									"type": "string"
+								},
+								"language": {
+									"type": "string"
+								},
+								"datatype": {
+									"type": "string",
+									"minLength": 1,
+									"maxLength": 65536,
+									"pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\u0000-\\u0020<>\"{}|^`\\\\]*$"
+								}
+							},
+							"required": [
+								"id",
+								"termId",
+								"predicate",
+								"value",
+								"language",
+								"datatype"
+							],
+							"additionalProperties": false
+						}
+					},
+					"unindexedLabels": {
+						"type": "integer",
+						"minimum": 0,
+						"maximum": 9007199254740991
+					}
+				},
+				"required": [
+					"id",
+					"vocabularyId",
+					"source",
+					"digest",
+					"canonical",
+					"quadCount",
+					"definitions",
+					"labels",
+					"unindexedLabels"
+				],
+				"additionalProperties": false
+			}
+		}
+	},
+	"required": [
+		"format",
+		"compiler",
+		"id",
+		"digest",
+		"terms",
+		"releases"
+	],
+	"additionalProperties": false
+}

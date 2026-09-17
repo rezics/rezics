@@ -90,6 +90,7 @@ tasks:
     test:
         desc: Run behavior tests for every application and service workspace.
         cmds:
+            - task: libraries:schema:test
             - task: libraries:content-language:test
             - task: libraries:access:test
             - task: libraries:avatar:test

@@ -1,6 +1,9 @@
 version: "3"
 
 includes:
+    schema:
+        taskfile: ./schema/Taskfile.yml
+        dir: ./schema
     reference:
         taskfile: ./reference/Taskfile.yml
         dir: ./reference
@@ -67,6 +70,7 @@ tasks:
     typecheck:
         desc: Type-check library packages.
         cmds:
+            - task: schema:typecheck
             - task: reference:typecheck
             - task: content-language:typecheck
             - task: access:typecheck

@@ -1,0 +1,210 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"type": "object",
+	"properties": {
+		"id": {
+			"type": "string",
+			"format": "uuid",
+			"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+		},
+		"relationId": {
+			"type": "string",
+			"format": "uuid",
+			"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+		},
+		"subject": {
+			"type": "object",
+			"properties": {
+				"owner": {
+					"type": "string",
+					"pattern": "^[a-z][a-z0-9_.-]{0,95}$"
+				},
+				"id": {
+					"type": "string",
+					"format": "uuid",
+					"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+				},
+				"revisionId": {
+					"type": "string",
+					"format": "uuid",
+					"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+				}
+			},
+			"required": [
+				"owner",
+				"id"
+			],
+			"additionalProperties": false
+		},
+		"predicateId": {
+			"type": "string",
+			"format": "uuid",
+			"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+		},
+		"definitionId": {
+			"type": "string",
+			"format": "uuid",
+			"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+		},
+		"parentRevisionId": {
+			"anyOf": [
+				{
+					"type": "string",
+					"format": "uuid",
+					"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+				},
+				{
+					"type": "null"
+				}
+			]
+		},
+		"changeId": {
+			"type": "string",
+			"format": "uuid",
+			"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+		},
+		"value": {
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "reference"
+						},
+						"reference": {
+							"type": "object",
+							"properties": {
+								"owner": {
+									"type": "string",
+									"pattern": "^[a-z][a-z0-9_.-]{0,95}$"
+								},
+								"id": {
+									"type": "string",
+									"format": "uuid",
+									"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+								},
+								"revisionId": {
+									"type": "string",
+									"format": "uuid",
+									"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+								}
+							},
+							"required": [
+								"owner",
+								"id"
+							],
+							"additionalProperties": false
+						}
+					},
+					"required": [
+						"kind",
+						"reference"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "iri"
+						},
+						"iri": {
+							"type": "string",
+							"minLength": 1,
+							"maxLength": 65536,
+							"pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\u0000-\\u0020<>\"{}|^`\\\\]*$"
+						}
+					},
+					"required": [
+						"kind",
+						"iri"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "literal"
+						},
+						"value": {
+							"type": "string",
+							"maxLength": 65536
+						},
+						"datatype": {
+							"type": "string",
+							"minLength": 1,
+							"maxLength": 65536,
+							"pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\u0000-\\u0020<>\"{}|^`\\\\]*$"
+						},
+						"language": {
+							"type": "string",
+							"minLength": 1,
+							"maxLength": 255,
+							"pattern": "^[a-z]+(?:-[a-z0-9]+)*$"
+						}
+					},
+					"required": [
+						"kind",
+						"value",
+						"datatype"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "unknown"
+						}
+					},
+					"required": [
+						"kind"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"kind": {
+							"type": "string",
+							"const": "no-value"
+						}
+					},
+					"required": [
+						"kind"
+					],
+					"additionalProperties": false
+				}
+			]
+		},
+		"position": {
+			"anyOf": [
+				{
+					"type": "string",
+					"maxLength": 40,
+					"pattern": "^(0|[1-9][0-9]*)$"
+				},
+				{
+					"type": "null"
+				}
+			]
+		}
+	},
+	"required": [
+		"id",
+		"relationId",
+		"subject",
+		"predicateId",
+		"definitionId",
+		"parentRevisionId",
+		"changeId",
+		"value",
+		"position"
+	],
+	"additionalProperties": false
+}

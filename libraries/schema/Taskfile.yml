@@ -1,0 +1,57 @@
+version: "3"
+
+tasks:
+    sources:fetch:
+        desc: Restore missing official vocabulary files from the checksum-pinned manifest.
+        cmds:
+            - yarn exec tsx scripts/cli.ts fetch {{.CLI_ARGS}}
+    generate:
+        desc: Compile complete pinned vocabularies, typed term IDs, profiles and portable schemas offline.
+        cmds:
+            - yarn exec tsx scripts/cli.ts compile {{.CLI_ARGS}}
+    db:generate:
+        desc: Generate PostgreSQL migrations from the exported Drizzle schema.
+        cmds:
+            - yarn exec drizzle-kit generate --config drizzle.config.ts {{.CLI_ARGS}}
+    db:guards:generate:
+        desc: Append the canonical immutability guards as a custom Drizzle migration.
+        cmds:
+            - yarn exec drizzle-kit generate --config drizzle.config.ts --custom --name schema_integrity
+            - yarn exec tsx scripts/generate-guards.ts
+    db:migrate:
+        cmds:
+            - yarn exec tsx scripts/cli.ts migrate
+    export:
+        cmds:
+            - yarn exec tsx scripts/cli.ts export {{.CLI_ARGS}}
+    select:
+        cmds:
+            - yarn exec tsx scripts/cli.ts select {{.CLI_ARGS}}
+    import:
+        desc: Atomically install a compiled vocabulary bundle into PostgreSQL.
+        cmds:
+            - yarn exec tsx scripts/cli.ts import {{.CLI_ARGS}}
+    inspect:
+        desc: Inspect a term by UUID or full IRI in the compiled bundle.
+        cmds:
+            - yarn exec tsx scripts/cli.ts inspect {{.CLI_ARGS}}
+    diff:
+        desc: Compare two compiled bundles without changing either input.
+        cmds:
+            - yarn exec tsx scripts/cli.ts diff {{.CLI_ARGS}}
+    typecheck:
+        cmds:
+            - yarn exec tsc --noEmit -p tsconfig.json
+    test:
+        dir: ../..
+        cmds:
+            - yarn exec vitest run --project schema
+    db:test:
+        desc: Replay migrations and qualify persistence on a newly created, task-owned PostgreSQL cluster.
+        cmds:
+            - yarn exec tsx scripts/check-postgres.ts
+    check:
+        cmds:
+            - task: typecheck
+            - task: test
+            - task: db:test
