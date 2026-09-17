@@ -188,7 +188,11 @@ async function main() {
 		db = createSchemaDatabase(pool);
 	try {
 		if (command === "migrate") {
-			await migrate(db, { migrationsFolder: resolve(root, "migrations") });
+			await migrate(db, {
+				migrationsFolder: resolve(root, "migrations"),
+				migrationsSchema: "public",
+				migrationsTable: "rezics_schema_migrations",
+			});
 			console.info("Applied schema-package migrations");
 		} else if (command === "import") {
 			const bundle = await importVocabularyBundle(db, await json(bundleFile), readArtifact);

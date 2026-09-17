@@ -69,7 +69,8 @@ const mediaRelations = defineRelationTables("media");
 const creatorId = terms.schemaorg.creator;
 ```
 
-All tables use `public` and explicit snake_case column names. This package has its
+All tables use `public` and explicit snake_case column names. The standalone
+migrator keeps its bookkeeping in `public.rezics_schema_migrations`. This package has its
 own generated Drizzle migrations for standalone installation and qualification.
 A service incorporating these exports into its existing Drizzle owner must generate
 its own forward migration using that owner's workflow; do not replay two owners'

@@ -105,9 +105,14 @@ try {
 		second = createSchemaDatabase(secondPool);
 	const version = (await pool.query("SHOW server_version")).rows[0]?.server_version;
 	await step("generated migrations install and replay idempotently", async () => {
-		await migrate(db, { migrationsFolder: resolve(root, "migrations") });
-		await migrate(db, { migrationsFolder: resolve(root, "migrations") });
-		await migrate(second, { migrationsFolder: resolve(root, "migrations") });
+		const options = {
+			migrationsFolder: resolve(root, "migrations"),
+			migrationsSchema: "public",
+			migrationsTable: "rezics_schema_migrations",
+		};
+		await migrate(db, options);
+		await migrate(db, options);
+		await migrate(second, options);
 		assert.equal(
 			(
 				await pool.query(
