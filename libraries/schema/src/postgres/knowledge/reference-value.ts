@@ -8,11 +8,11 @@ import {
 	unitReferenceTargetColumn,
 	unitReferenceIdExpression,
 } from "../shared/unit-reference-columns";
-import { descriptionObject } from "./descriptions";
-import { wikiPage } from "../wiki/pages";
-import { mediaItem } from "../media/indexing";
-import { schemaTerm } from "../vocabulary/registry";
-import { schemaRelation } from "./semantic-relations";
+import { descriptionObject } from "./descriptions.generated";
+import { wikiPage } from "../wiki/pages.generated";
+import { mediaItem } from "../media/indexing.generated";
+import { schemaTerm } from "../vocabulary/registry.generated";
+import { schemaRelation } from "./semantic-relations.generated";
 
 /**
  * Immutable reference values for generic consumers; native owners exist independently.

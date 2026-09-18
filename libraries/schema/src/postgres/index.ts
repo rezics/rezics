@@ -21,4 +21,4 @@ export * from "./discovery/index";
 export * from "./operations/index";
 export * from "./vocabulary/index";
 export * from "./commerce/subscriptions";
-export * from "./wiki/pages";
+export * from "./wiki/pages.generated";

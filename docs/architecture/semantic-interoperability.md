@@ -1,11 +1,11 @@
 # Schema.org and Wikidata interoperability
 
-Status: selected target for full indexing, September 15, 2026. The independently
-consumable [schema package](../../libraries/schema/README.md) now implements the
-selected vocabulary-definition path, its Drizzle persistence and portable artifacts.
-The main service now consumes the same domain-organized Drizzle schema; source converters and declaration storage live in `libraries/schema-importer`. Full source-instance acquisition/indexing remains a separate capability.
-This contract extends M02/M07/M09, with M04 owning native domain mappings. The
-[plan](../plan/README.md) owns the currently selected execution scope and sequence.
+Status: standards-driven schema/compiler contracts implemented and qualified,
+September 18, 2026. Source-native workflow coverage remains separately qualified.
+[Schema modeling](schema-modeling.md) separates standard vocabularies, authored
+native decisions/Drizzle lowering, and content adapters. Full vocabulary preservation
+is not native-model or whole-source-workflow qualification. The execution plan owns
+scope and phase.
 
 ## Meaning of full compatibility
 

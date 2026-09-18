@@ -1,0 +1,2 @@
+# Pinned provider contract fixtures retain their exact upstream bytes.
+contracts/**/inputs/** -text -whitespace

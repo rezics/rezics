@@ -1,107 +1,90 @@
-# Schema importer
+# Standards and native-model compiler
 
-`@rezics/schema-importer` is the independent conversion tool. It consumes upstream
-machine schemas, produces reproducible semantic/structural declarations, and
-imports them through the [complete Drizzle model](../schema/README.md). It does
-not generate an unrelated per-provider production database or execute upstream SQL.
+`@rezics/schema-importer` imports **modeling standards** and compiles reviewed
+REZICS decisions into executable validation and real Drizzle declarations.
+Bangumi, MusicBrainz, VNDB and Open Library contracts/records belong to
+[`@rezics/content-adapters`](../content-adapters/README.md) and the native catalog
+writers. Their OpenAPI/SQL/type documents never determine REZICS's table topology.
 
-## Source and file ownership
+## Inputs and decisions
 
-| Input | Reader | Output |
-| --- | --- | --- |
-| Schema.org **30.1 all terms** | `readers/rdf.ts` | Every definition, enum member, deprecated term, multilingual label, RDF node and statement; 940 class profiles follow full multiple inheritance. |
-| RDF, RDFS, OWL, SKOS, PROV-O, Web Annotation, DC Terms/Type/Elements, BIBFRAME **3.0.1** | Same bounded RDF parser/canonicalizer | Complete pinned graphs, referenced datatypes, release/meaning/label identities. |
-| Bangumi OpenAPI/JSON Schema, archive and vocabularies | `readers/json-schema.ts`, `readers/bangumi.ts` | Component and operation schemas, composition, references, keywords, exact syntax, all archive fields and vocabulary tree nodes. |
-| MusicBrainz table/PK/FK SQL | `readers/postgres-ddl.ts` | Columns/types/defaults/nullability and complete table/key constraints, including composite foreign keys. SQL remains data. |
-| VNDB Kana registry | `readers/provider-contracts.ts` | Endpoint fields, selectable nested references, enums/extensions retained in the document contract; undocumented type facets stay `unspecified`. |
-| Open Library `.type` files | `readers/provider-contracts.ts` | Properties, expected types, multiplicity, reverse properties and exact document syntax. |
-| Wikibase entity JSON | `readers/wikibase.ts` | Item/Property/Lexeme/Form/Sense/MediaInfo identity, statements, exact values, rank, ordered qualifiers and reference groups, revision-local occurrence IDs. |
-| IIIF Presentation 3 | `readers/iiif.ts` | Ordered resource/annotation/canvas/body/target/selector occurrences with full original data. |
-| Media Fragments URI | `readers/media-fragments.ts` | Temporal/spatial/track/named dimensions with exact strings and preserved extensions. |
+`sources/manifest.json` pins exact artifact versions, URLs, byte counts, hashes and
+licenses. `sources/` contains only standard vocabulary inputs: RDF, RDFS, OWL,
+Schema.org 30.1 all terms, SKOS, PROV-O, Web Annotation, Dublin Core Terms/Elements/Type,
+BIBFRAME's pinned ontology artifact and SHACL's 2017-07-20 vocabulary. Required XSD
+1.1 datatype semantics have an explicit reviewed implementation/catalogue in the
+schema package; there is no claim of a complete XML Schema processor.
 
-`registry/sources.lock.json` pins 11 vocabularies. `sources/catalog/artifacts.lock.json`
-is the single provider-schema pin owner, also used by main's native-mapping
-inventory. All pinned raw inputs are checked into `registry/sources/` or
-`sources/{provider}/inputs/`; `.gitattributes` protects exact source bytes. These
-small control-plane artifacts are not content corpora. Provider native-field
-coverage remains in main's source-contract owner and is distinct from declaration
-preservation here.
+`../schema/model/` is the authored model. It names actual standard terms and states
+why a native concept is exact, specialized or projected. It owns cardinalities,
+order, allowed values, native write authority, storage and locality decisions.
+The generator rejects missing meanings/storage targets, conflicting authorities,
+invalid storage identifiers and domains without an ownership decision.
 
-The VNDB live schema pin was refreshed on 2026-09-18 after an upstream checksum
-change. Fetch never accepts such changes automatically. A changed pin requires
-regeneration and review of semantic/native coverage; a larger field count alone
-is not acceptance.
+## Compilation stages
 
-`generated/{provider}/contracts.json` contains normalized definitions and full
-keyword syntax. `registry/bundle.json`, `profiles.json`, `storage-bindings.json`
-and `coverage.json` contain compiled vocabularies and complete dispositions.
-`../schema/src/generated/terms.ts` is generated TypeScript. `schemas/` contains
-JSON Schema contracts for portable exchange. Do not edit generated outputs.
+1. Parse and canonicalize every pinned graph, retaining original bytes and all
+   statements, including blank-node expressions and unknown axioms.
+2. Build `registry/ontology.json`: complete definition/provenance inventory with
+   inheritance, domain/range versus hints, inverses/equivalences and selected datatypes.
+3. Compile the authored application model and exact source-meaning dependencies.
+4. Emit `../schema/src/postgres/**/*.generated.ts`, `../schema/src/generated/model.ts`,
+   term UUIDs, model JSON, JSON Schema contracts and human/machine traceability.
+5. Inspect native targets as a generation admission guard. Existing Drizzle is a
+   target to check, not the source from which semantic decisions are invented.
+
+`registry/vocabulary-descriptions.json` is vocabulary navigation only. It has no
+fabricated cardinality or blanket value-kind acceptance and is not installed as
+an application validation profile. `registry/model.json` contains the actual
+reviewed profiles. `registry/traceability.json` distinguishes native mappings,
+semantic descriptions/assertions and retained vocabulary definitions for every
+selected definition. These categories are not interchangeable acceptance claims.
+
+`registry/model.shacl.ttl` is an advisory **direct-triple projection**. Its companion
+`model-shacl-report.json` enumerates what SHACL Core in that projection cannot prove:
+identified duplicate occurrences, native ordering, owner existence, writer authority,
+CAS and erasure. Native-record validation remains authoritative; this output is not
+a claim of lossless SHACL/OWL execution. Portable model JSON retains these obligations.
 
 ## Commands
 
-Run from the repository root. Ordinary conversion is offline.
+Run from the repository root; ordinary compilation is offline.
 
 ```sh
 task libraries:schema-importer:sources
-task libraries:schema-importer:fetch       # restore 11 pinned vocabulary files
-task libraries:schema-importer:fetch -- all # restore every pinned vocabulary/provider schema file
-task libraries:schema-importer:convert -- all
-task libraries:schema-importer:convert -- musicbrainz
-task libraries:schema-importer:generate   # vocabulary artifacts/profiles/bindings only
+task libraries:schema-importer:fetch -- all
+task libraries:schema-importer:generate
 task libraries:schema-importer:inspect -- https://schema.org/creator zh-Hant
-task libraries:schema-importer:convert -- wikibase /absolute/entity.json /absolute/result.json
-task libraries:schema-importer:convert -- iiif /absolute/manifest.json /absolute/result.json
-task libraries:schema-importer:convert -- media-fragments 'https://example.org/video#t=1.25,9&xywh=percent:0,0,50,50'
+task libraries:schema-importer:inspect-model -- book-work
+task libraries:schema-importer:validate -- annotation /absolute/record.json
 ```
 
-Exchange readers convert explicitly supplied documents; there is no hidden dump
-crawler. EntitySchema/ShEx parsing, OWL inference, every external datatype's value
-space and complete source synchronization are separate capabilities, not implied
-by preserving schemas or Wikibase values. Invalid/unsupported entity types fail
-explicitly. Original lexical values, `somevalue`, `novalue`, absence and source
-ordering must survive conversion. Unresolved external references stay explicit.
+A vocabulary name passed to `convert` rebuilds the selected linked vocabulary/model
+bundle. To convert content documents, use the content-adapter commands instead.
+`generate` updates the actual Drizzle modules consumed by main, not just constants.
+Generated files and committed original input bytes must not be hand-edited.
 
-After installing the main migration history into the intended database:
+After the main migration history is installed in the intended database:
 
 ```sh
 export REZICS_SCHEMA_DATABASE_URL='postgresql://user:password@localhost:5432/rezics'
 task libraries:schema-importer:import
-task libraries:schema-importer:select -- RELEASE_UUID EXPECTED_VERSION
+task libraries:schema-importer:select -- VOCABULARY_RELEASE_UUID EXPECTED_VERSION
+task libraries:schema-importer:select-model -- MODEL_UUID EXPECTED_VERSION
 task libraries:schema-importer:export -- /absolute/export-directory
-task libraries:schema-importer:diff -- /absolute/before.json /absolute/after.json
 ```
 
-Import re-verifies compiled vocabularies and provider contracts against the pinned inputs before writing, then stages immutable releases, structured contracts and description profiles.
-Selecting a release is an independent CAS operation (`0` means no prior selection).
-A source schema update does not silently adopt content, overwrite translations,
-change native cardinality or generate production DDL. Export includes selected
-vocabulary releases and original bytes for deterministic reconstruction; it is not
-an export of the complete REZICS corpus.
+Import verifies/stages the vocabularies and model; it does not silently select a
+release or adopt content. Model selection checks complete profiles and meaning
+bindings. Description revisions and assertions pin their interpretation, so a
+later vocabulary/model update does not rewrite earlier meaning or translations.
+`export` preserves selected vocabulary artifacts for deterministic reconstruction;
+it is not an export of the entire content corpus.
 
-## Adding a schema source
+## Qualification
 
-1. Add the exact official artifact URL, digest and format to the owning pin manifest.
-2. Implement a reader into `ConvertedContract` or the RDF bundle. Preserve every
-   construct or report unsupported semantics; never infer missing constraints.
-3. Register the source in `src/sources.ts` and the CLI dispatch. Give every source
-   declaration a stable path, a content/version identity, references and keywords.
-4. Add a reviewed native storage binding only when the referent/grain/invariants
-   agree. Native Drizzle changes go through the main migration owner.
-5. Regenerate the complete artifacts and qualify round-trip, rejected inputs and
-   real PostgreSQL import/retry/query behavior.
-
-## Verification
-
-The main migration owner installs the complete schema. The importer PostgreSQL
-harness uses disposable databases and verifies import/retry/export, raw and
-structured graph preservation, source contracts, translation/meaning history,
-selection concurrency, invalid references and portable relation transfer. Main
-schema tests separately exercise new media/wiki/message/native constraints.
-The [verification owner](../../docs/testing/schema.md) records the passing package checks, 17 PostgreSQL scenarios, 30 native integrity assertions, complete replay/drift and the remaining pre-existing main-service IAM failures. The former standalone 18-table checks are historical and are not reused as current acceptance.
-
-Primary source specifications used: [Schema.org](https://schema.org/docs/datamodel.html),
-[Wikibase JSON](https://doc.wikimedia.org/Wikibase/master/php/docs_topics_json.html),
-[IIIF Presentation 3](https://iiif.io/api/presentation/3.0/),
-[Media Fragments](https://www.w3.org/TR/media-frags/),
-[RDF canonicalization](https://www.w3.org/TR/rdf-canon/).
+Use the owning `typecheck`, `test` and `db:test` tasks in the repository's applicable
+verification phase. Main owns production replay/drift. The database harness uses
+explicit disposable loopback fixtures and checks immutability, rejected meanings,
+model selection, native description writes and relocation. Results and broader
+limits belong to [the verification owner](../../docs/testing/schema.md).

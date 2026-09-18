@@ -12,7 +12,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { pgTable } from "../shared/base";
 import { softwareIdentity } from "../catalog/identity";
-import { mediaBlob } from "../media/indexing";
+import { mediaBlob } from "../media/indexing.generated";
 import { entityIdentity } from "../catalog/identity";
 
 /** @alpha Package coordinates, immutable artifacts and installations are different identities. */

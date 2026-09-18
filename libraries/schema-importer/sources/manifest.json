@@ -1,0 +1,185 @@
+{
+	"format": 1,
+	"sources": [
+		{
+			"key": "bibframe",
+			"version": "3.0.1",
+			"url": "https://raw.githubusercontent.com/lcnetdev/bibframe-ontology/76753d48e12530eac19ad6091fd6c461eb1bed66/bibframe.rdf",
+			"baseIri": "http://id.loc.gov/ontologies/bibframe/",
+			"namespaces": [
+				"http://id.loc.gov/ontologies/bibframe/"
+			],
+			"file": "bibframe.rdf",
+			"mediaType": "application/rdf+xml",
+			"sha256": "8cbf7cb199315e9b099a09ce611930003cda6587a3337d9df7f1cee6a30db251",
+			"bytes": 335201,
+			"license": "https://www.loc.gov/legal/",
+			"contexts": []
+		},
+		{
+			"key": "dc",
+			"version": "2020-01-20",
+			"url": "https://dublincore.org/2020/01/20/dublin_core_elements.ttl",
+			"baseIri": "http://purl.org/dc/elements/1.1/",
+			"namespaces": [
+				"http://purl.org/dc/elements/1.1/"
+			],
+			"file": "dc.ttl",
+			"mediaType": "text/turtle",
+			"sha256": "ffb46b7a21e40344b93bc4ad2e6808b24dd53e261995ec3a926df6bcd87bbfa5",
+			"bytes": 14329,
+			"license": "https://www.dublincore.org/about/copyright/",
+			"contexts": []
+		},
+		{
+			"key": "dcterms",
+			"version": "2020-01-20",
+			"url": "https://dublincore.org/2020/01/20/dublin_core_terms.ttl",
+			"baseIri": "http://purl.org/dc/terms/",
+			"namespaces": [
+				"http://purl.org/dc/terms/"
+			],
+			"file": "dcterms.ttl",
+			"mediaType": "text/turtle",
+			"sha256": "075287f7774f59bf450d0d464bf5e4d3c101358da36b061ab7a45140d96feaf8",
+			"bytes": 44157,
+			"license": "https://www.dublincore.org/about/copyright/",
+			"contexts": []
+		},
+		{
+			"key": "dctype",
+			"version": "2020-01-20",
+			"url": "https://dublincore.org/2020/01/20/dublin_core_type.ttl",
+			"baseIri": "http://purl.org/dc/dcmitype/",
+			"namespaces": [
+				"http://purl.org/dc/dcmitype/"
+			],
+			"file": "dctype.ttl",
+			"mediaType": "text/turtle",
+			"sha256": "f987b11d556e556fef95d7e9410c1c561fc1b7ac05ccd457128dc8962641b01e",
+			"bytes": 6958,
+			"license": "https://www.dublincore.org/about/copyright/",
+			"contexts": []
+		},
+		{
+			"key": "oa",
+			"version": "2017-02-23",
+			"url": "https://www.w3.org/ns/oa.ttl",
+			"baseIri": "http://www.w3.org/ns/oa#",
+			"namespaces": [
+				"http://www.w3.org/ns/oa#"
+			],
+			"file": "oa.ttl",
+			"mediaType": "text/turtle",
+			"sha256": "f661e37d33bf29176390101687711734a7e33a716bdecfb66b90c732373d7af5",
+			"bytes": 21632,
+			"license": "https://www.w3.org/copyright/software-license/",
+			"contexts": []
+		},
+		{
+			"key": "owl",
+			"version": "namespace-snapshot-2026-09-17",
+			"url": "https://www.w3.org/2002/07/owl.ttl",
+			"baseIri": "http://www.w3.org/2002/07/owl#",
+			"namespaces": [
+				"http://www.w3.org/2002/07/owl#"
+			],
+			"file": "owl.ttl",
+			"mediaType": "text/turtle",
+			"sha256": "718fa1db7840d3315bfce94398543f91437ef6fe933054fd93f5471d19262fc5",
+			"bytes": 24545,
+			"license": "https://www.w3.org/copyright/software-license/",
+			"contexts": []
+		},
+		{
+			"key": "prov",
+			"version": "2013-04-30",
+			"url": "https://www.w3.org/ns/prov-o.ttl",
+			"baseIri": "http://www.w3.org/ns/prov#",
+			"namespaces": [
+				"http://www.w3.org/ns/prov#"
+			],
+			"file": "prov.ttl",
+			"mediaType": "text/turtle",
+			"sha256": "7d203989f67b38bca572253942acc5a1bf24ce3ccfece16f072dcb4be2b79a96",
+			"bytes": 68795,
+			"license": "https://www.w3.org/copyright/software-license/",
+			"contexts": []
+		},
+		{
+			"key": "rdf",
+			"version": "namespace-snapshot-2026-09-17",
+			"url": "https://www.w3.org/1999/02/22-rdf-syntax-ns.ttl",
+			"baseIri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+			"namespaces": [
+				"http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+			],
+			"file": "rdf.ttl",
+			"mediaType": "text/turtle",
+			"sha256": "93d52b1a5824c7dd6504ca79c16205c0b740a0ba68b7a14952780f52561186a2",
+			"bytes": 6004,
+			"license": "https://www.w3.org/copyright/software-license/",
+			"contexts": []
+		},
+		{
+			"key": "rdfs",
+			"version": "namespace-snapshot-2026-09-17",
+			"url": "https://www.w3.org/2000/01/rdf-schema.ttl",
+			"baseIri": "http://www.w3.org/2000/01/rdf-schema#",
+			"namespaces": [
+				"http://www.w3.org/2000/01/rdf-schema#"
+			],
+			"file": "rdfs.ttl",
+			"mediaType": "text/turtle",
+			"sha256": "ecee3a011b7c13ea2a7e40b0a208bfe6be53d69fdd53ee035e09e9f9e5108ad6",
+			"bytes": 3790,
+			"license": "https://www.w3.org/copyright/software-license/",
+			"contexts": []
+		},
+		{
+			"key": "schemaorg",
+			"version": "30.1",
+			"url": "https://raw.githubusercontent.com/schemaorg/schemaorg/5f2d8cdec99b7329459ef6584e94b6a840f88471/data/releases/30.1/schemaorg-all-https.ttl",
+			"baseIri": "https://schema.org/",
+			"namespaces": [
+				"https://schema.org/"
+			],
+			"file": "schemaorg.ttl",
+			"mediaType": "text/turtle",
+			"sha256": "ae1e84a1095f63063a7cb3dc3448570a9a07ce430de3cdd0a54de9d06d5c4529",
+			"bytes": 1089253,
+			"license": "https://schema.org/docs/terms.html",
+			"contexts": []
+		},
+		{
+			"key": "shacl",
+			"version": "2017-07-20",
+			"url": "https://www.w3.org/ns/shacl.ttl",
+			"baseIri": "http://www.w3.org/ns/shacl#",
+			"namespaces": [
+				"http://www.w3.org/ns/shacl#"
+			],
+			"file": "shacl.ttl",
+			"mediaType": "text/turtle",
+			"sha256": "0e5d8aea0eab98a072d4a02faaee1ee914ec99eab2ca473429726faed4a13f69",
+			"bytes": 52899,
+			"license": "https://www.w3.org/copyright/software-license/",
+			"contexts": []
+		},
+		{
+			"key": "skos",
+			"version": "2009-08-18",
+			"url": "https://www.w3.org/TR/skos-reference/skos.rdf",
+			"baseIri": "http://www.w3.org/2004/02/skos/core#",
+			"namespaces": [
+				"http://www.w3.org/2004/02/skos/core#"
+			],
+			"file": "skos.rdf",
+			"mediaType": "application/rdf+xml",
+			"sha256": "e79633b8d0564816cee8a99f5c9acf9a0e6fc7257c7209acd684ecad53a89dd6",
+			"bytes": 28966,
+			"license": "https://www.w3.org/copyright/software-license/",
+			"contexts": []
+		}
+	]
+}

@@ -57,3 +57,15 @@ expects a raw constraint-code rejection while the Group command reports
 the intended command error contract and retained callers/fixtures, then complete
 the remaining main checks; do not relax the storage denial or count this as a
 passing whole-backend result.
+
+## Online exact-count policy inventory
+
+Observed 2026-09-18 with `task services-main:counts:check`: 14 reported query
+occurrences and three stale allowlist expectations fail the policy scanner.
+Affected owners include OAuth/participation erasure, Group impact discovery,
+Entity measurements, connected-app grants, recommendation partitions, search
+facets and attribution. The reported implementation files and scanner are
+unchanged by the standards/model refactor; one allowlisted merge path is already
+absent at its base commit `beac6497b`. Review each actual bound and update the
+queries or narrowly justified allowlist, then pass the owning scanner. A bounded
+batch count and an unbounded corpus count must not be accepted interchangeably.

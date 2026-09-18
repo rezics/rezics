@@ -1,0 +1,23 @@
+{
+	"name": "@rezics/content-adapters",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"license": "AGPL-3.0-only",
+	"exports": {
+		".": "./src/index.ts",
+		"./readers/*": "./src/readers/*.ts"
+	},
+	"dependencies": {
+		"@rezics/content-language": "workspace:*",
+		"@rezics/schema": "workspace:*",
+		"yaml": "2.9.0",
+		"zod": "^4.5.4"
+	},
+	"devDependencies": {
+		"@types/node": "26.5.0",
+		"tsx": "4.23.13",
+		"typescript": "7.0.2",
+		"vitest": "4.1.10"
+	}
+}

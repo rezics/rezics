@@ -1,22 +1,15 @@
-import { and, desc, eq, getTableName, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { Pool } from "pg";
 import { z } from "zod";
 import { parseContentLanguageTag } from "@rezics/content-language";
-import {
-	LabelSchema,
-	LogicalReferenceSchema,
-	RelationRevisionSchema,
-	type ApplicationProfile,
-	type LogicalReference,
-	type RelationRevision,
-	type TermLabel,
-	type VocabularyBundle,
-} from "@rezics/schema";
+import { LabelSchema, type TermLabel, type VocabularyBundle } from "@rezics/schema";
 import * as tables from "@rezics/schema/postgres/vocabulary";
 import { compileVocabularies, makeLabel, verifyBundle, type ArtifactReader } from "../readers/rdf";
-import { digest, stableJson } from "@rezics/schema/identity";
-import { createProfile } from "@rezics/schema/profiles";
+import { datatypeDefinitions } from "@rezics/schema/model/datatypes";
+import { termId } from "@rezics/schema/identity";
+import { digest } from "@rezics/schema/identity";
+import { verifyModel } from "@rezics/schema/model";
 import { preferredLabel } from "@rezics/schema/registry";
 
 /** @alpha Drizzle database for shared schema import commands. Applications own connections and authorization. */
@@ -279,68 +272,81 @@ export async function exportVocabularyBundle(
 	return { bundle, artifacts };
 }
 
-/** @alpha Store an immutable common edit; retrying an ID with different content is rejected. */
-export async function putChange(
-	tx: SchemaTransaction,
-	input: { id: string; actor: { owner: string; id: string } | null; message: string },
-): Promise<void> {
-	z.uuid().parse(input.id);
-	if (input.actor) LogicalReferenceSchema.parse(input.actor);
-	if (!input.message || Buffer.byteLength(input.message) > 16_384)
-		throw new TypeError("Invalid edit message");
-	await tx.insert(tables.schemaChange).values(input).onConflictDoNothing();
-	const [stored] = await tx
-		.select()
-		.from(tables.schemaChange)
-		.where(eq(tables.schemaChange.id, input.id));
-	if (
-		!stored ||
-		stored.message !== input.message ||
-		stableJson(stored.actor) !== stableJson(input.actor)
-	)
-		throw new TypeError("Edit ID reused with different content");
+/** @alpha Stage a verified compiled model and its exact standard dependencies; adoption is separate. */
+export async function installApplicationModel(tx: SchemaTransaction, input: unknown) {
+	const model = verifyModel(input);
+	const { id, digest: hash } = model;
+	for (const datatype of datatypeDefinitions)
+		await tx
+			.insert(tables.schemaTerm)
+			.values({ id: termId(datatype.iri), iri: datatype.iri, iriHash: digest(datatype.iri) })
+			.onConflictDoNothing();
+	await tx
+		.insert(tables.schemaModelRelease)
+		.values({ id, digest: hash, ontologyDigest: model.ontologyDigest, body: model })
+		.onConflictDoNothing();
+	for (const profile of model.profiles) {
+		await tx
+			.insert(tables.schemaModelProfile)
+			.values({ modelId: id, key: profile.key, owner: profile.owner, body: profile })
+			.onConflictDoNothing();
+		const bindings = [
+			...profile.types.map((type) => ({
+				termId: type.termId,
+				definitionId: type.definitionId,
+				releaseId: type.releaseId,
+				role: "type" as const,
+			})),
+			...profile.properties.map((rule) => ({
+				termId: rule.predicateId,
+				definitionId: rule.definitionId,
+				releaseId: rule.releaseId,
+				role: "property" as const,
+			})),
+		];
+		for (const rows of chunks(bindings))
+			if (rows.length)
+				await tx
+					.insert(tables.schemaModelBinding)
+					.values(rows.map((row) => ({ ...row, modelId: id, profileKey: profile.key })))
+					.onConflictDoNothing();
+	}
+	return model;
 }
 
-/** @alpha Pin product constraints without changing upstream term meanings. */
-export async function installProfile(
+/** @alpha Model selection requires a locally installed model and an expected head version. */
+export async function selectApplicationModel(
 	tx: SchemaTransaction,
-	input: ApplicationProfile,
-): Promise<void> {
-	const profile = createProfile({
-		key: input.key,
-		types: input.types,
-		rules: input.rules,
-		additionalProperties: input.additionalProperties,
-	});
-	if (stableJson(profile) !== stableJson(input))
-		throw new TypeError("Profile content identity mismatch");
-	const terms = await tx
-		.select({ id: tables.schemaTerm.id })
-		.from(tables.schemaTerm)
-		.where(inArray(tables.schemaTerm.id, profile.types));
-	if (new Set(terms.map((term) => term.id)).size !== new Set(profile.types).size)
-		throw new TypeError("Profile type is missing");
-	await tx
-		.insert(tables.schemaProfile)
-		.values({ id: profile.id, key: profile.key })
-		.onConflictDoNothing();
-	await tx
-		.insert(tables.schemaProfileRevision)
-		.values({
-			id: profile.revisionId,
-			profileId: profile.id,
-			digest: profile.digest,
-			body: profile,
-		})
-		.onConflictDoNothing();
-	for (const group of chunks(
-		profile.rules.map((rule) => ({
-			profileRevisionId: profile.revisionId,
-			predicateId: rule.predicateId,
-			definitionId: rule.definitionId,
-		})),
-	))
-		await tx.insert(tables.schemaProfileRule).values(group).onConflictDoNothing();
+	modelId: string,
+	expectedVersion: number,
+) {
+	z.uuid().parse(modelId);
+	z.number()
+		.int()
+		.min(0)
+		.max(Number.MAX_SAFE_INTEGER - 1)
+		.parse(expectedVersion);
+	await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended('schema-model:rezics',0))`);
+	const [model] = await tx
+		.select()
+		.from(tables.schemaModelRelease)
+		.where(eq(tables.schemaModelRelease.id, modelId));
+	if (!model) throw new TypeError("Model is not installed");
+	const [head] = await tx
+		.select()
+		.from(tables.schemaModelHead)
+		.where(eq(tables.schemaModelHead.key, "rezics"));
+	if ((head?.version ?? 0) !== expectedVersion) throw new TypeError("Model selection changed");
+	// BEFORE INSERT guards run even for ON CONFLICT DO UPDATE. The locked
+	// existence decision must choose the actual insert/update transition.
+	const next = { key: "rezics", modelId, version: expectedVersion + 1 };
+	if (head)
+		await tx
+			.update(tables.schemaModelHead)
+			.set(next)
+			.where(eq(tables.schemaModelHead.key, "rezics"));
+	else await tx.insert(tables.schemaModelHead).values(next);
+	return expectedVersion + 1;
 }
 
 /** @alpha Adopt a translation with independent history and per-locale optimistic concurrency. */
@@ -466,138 +472,4 @@ export async function readTermLabels(db: SchemaDatabase, ids: string[], language
 		];
 		return { termId, label: preferredLabel(labels, tag) };
 	});
-}
-
-/** @alpha Endpoint validation is supplied by the owning service and executes inside the same transaction. */
-export type ReferenceValidator = (
-	reference: LogicalReference,
-	tx: SchemaTransaction,
-) => Promise<void>;
-/** @alpha Select another physical family without changing logical records or command semantics. */
-export type RelationTables = ReturnType<typeof tables.defineRelationTables>;
-const defaultFamily: RelationTables = {
-	relation: tables.schemaRelation,
-	revision: tables.schemaRelationRevision,
-	selection: tables.schemaRelationSelection,
-};
-
-/** @alpha Include these guards in migrations for additional relation families after installing package migrations. */
-export function relationIntegritySql(family: RelationTables): string {
-	const names = [family.relation, family.revision, family.selection].map(getTableName);
-	if (names.some((name) => !/^[a-z][a-z0-9_]{0,62}$/u.test(name)))
-		throw new TypeError("Invalid relation family name");
-	return (
-		names
-			.map(
-				(name) =>
-					`CREATE OR REPLACE TRIGGER schema_immutable BEFORE UPDATE OR DELETE ON public."${name}" FOR EACH ROW EXECUTE FUNCTION public.schema_reject_mutation();`,
-			)
-			.join("\n") +
-		`\nCREATE OR REPLACE TRIGGER schema_revision_parent BEFORE INSERT ON public."${names[1]}" FOR EACH ROW EXECUTE FUNCTION public.schema_require_prior_revision();\n`
-	);
-}
-
-/** @alpha Append an addressable assertion; creating a proposal does not adopt it as current truth. */
-export async function putRelationRevision(
-	tx: SchemaTransaction,
-	raw: RelationRevision,
-	validateReference: ReferenceValidator,
-	family: RelationTables = defaultFamily,
-): Promise<void> {
-	const input = RelationRevisionSchema.parse(raw),
-		hash = digest(stableJson(input));
-	await validateReference(input.subject, tx);
-	if (input.value.kind === "reference") await validateReference(input.value.reference, tx);
-	await tx
-		.insert(family.relation)
-		.values({
-			id: input.relationId,
-			subjectOwner: input.subject.owner,
-			subjectId: input.subject.id,
-		})
-		.onConflictDoNothing();
-	const [relation] = await tx
-		.select()
-		.from(family.relation)
-		.where(eq(family.relation.id, input.relationId));
-	if (
-		!relation ||
-		relation.subjectOwner !== input.subject.owner ||
-		relation.subjectId !== input.subject.id
-	)
-		throw new TypeError("Relation identity belongs to another subject");
-	await tx
-		.insert(family.revision)
-		.values({
-			id: input.id,
-			relationId: input.relationId,
-			predicateId: input.predicateId,
-			definitionId: input.definitionId,
-			subjectRevisionId: input.subject.revisionId ?? null,
-			parentRevisionId: input.parentRevisionId,
-			changeId: input.changeId,
-			value: input.value,
-			position: input.position,
-			digest: hash,
-		})
-		.onConflictDoNothing();
-	const [stored] = await tx.select().from(family.revision).where(eq(family.revision.id, input.id));
-	if (!stored || stored.digest !== hash)
-		throw new TypeError("Relation revision ID reused with different content");
-}
-
-/** @alpha Select or retract an exact assertion revision while retaining conflicting proposals and prior decisions. */
-export async function selectRelationRevision(
-	tx: SchemaTransaction,
-	input: {
-		id: string;
-		relationId: string;
-		revisionId: string | null;
-		expectedVersion: number;
-		changeId: string;
-	},
-	family: RelationTables = defaultFamily,
-): Promise<number> {
-	z.uuid().parse(input.id);
-	z.uuid().parse(input.relationId);
-	z.uuid().nullable().parse(input.revisionId);
-	z.uuid().parse(input.changeId);
-	z.number()
-		.int()
-		.min(0)
-		.max(Number.MAX_SAFE_INTEGER - 1)
-		.parse(input.expectedVersion);
-	const [relation] = await tx
-		.select()
-		.from(family.relation)
-		.where(eq(family.relation.id, input.relationId))
-		.for("update");
-	if (!relation) throw new TypeError("Relation is missing");
-	const [retry] = await tx.select().from(family.selection).where(eq(family.selection.id, input.id));
-	if (retry) {
-		if (
-			retry.relationId !== input.relationId ||
-			retry.revisionId !== input.revisionId ||
-			retry.changeId !== input.changeId ||
-			retry.version !== input.expectedVersion + 1
-		)
-			throw new TypeError("Selection ID reused with different content");
-		return retry.version;
-	}
-	const [latest] = await tx
-		.select()
-		.from(family.selection)
-		.where(eq(family.selection.relationId, input.relationId))
-		.orderBy(desc(family.selection.version))
-		.limit(1);
-	if ((latest?.version ?? 0) !== input.expectedVersion)
-		throw new TypeError("Relation selection changed");
-	await tx.insert(family.selection).values({
-		id: input.id,
-		relationId: input.relationId,
-		revisionId: input.revisionId,
-		changeId: input.changeId,
-		version: input.expectedVersion + 1,
-	});
-	return input.expectedVersion + 1;
 }

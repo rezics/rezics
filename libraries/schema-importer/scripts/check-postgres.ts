@@ -1,6 +1,4 @@
 import assert from "node:assert/strict";
-import { convertProviderSchemas } from "../src/convert";
-import { importConvertedContracts } from "../src/targets/contracts-postgres";
 import { checkCompleteSchema } from "../../../services/main/scripts/schema-complete-cases";
 import { execFile } from "node:child_process";
 import { randomUUID } from "node:crypto";
@@ -13,22 +11,31 @@ import { Pool } from "pg";
 import { BundleSchema, type RelationRevision } from "@rezics/schema";
 import * as tables from "@rezics/schema/postgres/vocabulary";
 import { compileVocabularies } from "../src/readers/rdf";
-import { compileDeclarationProfiles } from "@rezics/schema/profiles";
+import { applicationModel } from "@rezics/schema/model/generated";
+import {
+	putChange,
+	putRelationRevision,
+	putProfiledRelationRevision,
+	relationIntegritySql,
+	selectRelationRevision,
+	type ReferenceValidator,
+} from "@rezics/schema/persistence/relations";
+import {
+	writeSemanticDescription,
+	selectSemanticDescription,
+	readSemanticDescription,
+} from "../../../services/main/src/services/catalog/semantic-descriptions";
 import { VocabularyRegistry } from "@rezics/schema/registry";
-import { digest, termId } from "@rezics/schema/identity";
+import { digest, termId, schemaId, stableJson } from "@rezics/schema/identity";
 import {
 	createSchemaDatabase,
 	exportVocabularyBundle,
 	importVocabularyBundle,
-	installProfile,
-	putChange,
-	putRelationRevision,
+	installApplicationModel,
+	selectApplicationModel,
 	readTermLabels,
-	relationIntegritySql,
-	selectRelationRevision,
 	selectTermLabel,
 	selectVocabularyRelease,
-	type ReferenceValidator,
 } from "../src/targets/postgres";
 
 const run = promisify(execFile),
@@ -103,14 +110,14 @@ try {
 		JSON.parse(await readFile(resolve(root, "registry/bundle.json"), "utf8")),
 	);
 	const registry = new VocabularyRegistry(bundle),
-		read = (file: string) => readFile(resolve(root, "registry/sources", file));
+		read = (file: string) => readFile(resolve(root, "sources", file));
 	await step(
 		"all official vocabularies import as structured graphs without implicit adoption",
 		async () => {
 			await importVocabularyBundle(db, bundle, read);
 			assert.equal((await db.select().from(tables.schemaVocabularyHead)).length, 0);
 			assert.equal((await db.select().from(tables.schemaTerm)).length, bundle.terms.length);
-			assert.equal((await db.select().from(tables.schemaRelease)).length, 11);
+			assert.equal((await db.select().from(tables.schemaRelease)).length, 12);
 			assert.equal(
 				(await db.select().from(tables.schemaStatement)).length,
 				bundle.releases.reduce((n, release) => n + release.quadCount, 0),
@@ -121,30 +128,179 @@ try {
 			);
 		},
 	);
+	await step("reviewed models install atomically with exact meaning bindings", async () => {
+		const corrupt = structuredClone(applicationModel);
+		corrupt.profiles[0]!.grain = "forged";
+		await assert.rejects(
+			db.transaction((tx) => installApplicationModel(tx, corrupt)),
+			/identity/,
+		);
+		await db.transaction((tx) => installApplicationModel(tx, applicationModel));
+		await db.transaction((tx) => installApplicationModel(tx, applicationModel));
+		assert.equal(
+			(await db.select().from(tables.schemaModelProfile)).length,
+			applicationModel.profiles.length,
+		);
+		assert.equal(
+			(await db.select().from(tables.schemaModelBinding)).length,
+			applicationModel.profiles.reduce(
+				(sum, profile) => sum + profile.types.length + profile.properties.length,
+				0,
+			),
+		);
+		assert.equal((await db.select().from(tables.schemaModelHead)).length, 0);
+		await db.transaction((tx) => selectApplicationModel(tx, applicationModel.id, 0));
+		assert.equal(
+			await db.transaction((tx) => selectApplicationModel(tx, applicationModel.id, 1)),
+			2,
+		);
+		const modelRace = await Promise.allSettled([
+			db.transaction((tx) => selectApplicationModel(tx, applicationModel.id, 2)),
+			db.transaction((tx) => selectApplicationModel(tx, applicationModel.id, 2)),
+		]);
+		assert.equal(modelRace.filter((result) => result.status === "fulfilled").length, 1);
+		await assert.rejects(
+			db.transaction((tx) => selectApplicationModel(tx, applicationModel.id, 0)),
+			/selection changed/,
+		);
+		await rejectCode(
+			() => pool.query("update schema_model_head set version=9 where key='rezics'"),
+			"23514",
+		);
+		await rejectCode(
+			() =>
+				pool.query("update schema_model_release set body='{}' where id=$1", [applicationModel.id]),
+			"23514",
+		);
+	});
 	await step(
-		"every provider declaration imports with references and lossless keywords",
+		"native description writes enforce and retain the actual generated model",
 		async () => {
-			const contracts = await convertProviderSchemas("all");
-			const corrupt = structuredClone(contracts[0]!);
-			corrupt.fields[0]!.shape = "forged-shape";
-			await assert.rejects(importConvertedContracts(db, [corrupt]), /pinned compilation/u);
-			await importConvertedContracts(db, contracts);
-			await importConvertedContracts(db, contracts);
-			assert.equal((await db.select().from(tables.schemaContract)).length, contracts.length);
+			const profile = applicationModel.profiles.find((profile) => profile.key === "annotation")!,
+				target = profile.properties.find(
+					(rule) => rule.iri === "http://www.w3.org/ns/oa#hasTarget",
+				)!;
+			const objectId = randomUUID(),
+				revisionId = randomUUID(),
+				changeId = randomUUID();
+			await pool.query(
+				"insert into description_object(id,visibility,state) values($1,'public','draft')",
+				[objectId],
+			);
+			const input = {
+				modelId: applicationModel.id,
+				profileKey: profile.key,
+				objectId,
+				revisionId,
+				parentId: null,
+				changeId,
+				nonce: "annotation-write",
+				actorUserId: null,
+				types: [profile.types[0]!.termId],
+				summary: null,
+				statements: [
+					{
+						id: randomUUID(),
+						predicateId: target.predicateId,
+						definitionId: target.definitionId,
+						state: "reference" as const,
+						externalIri: "https://example.test/book#revision-1",
+					},
+				],
+			};
+			await assert.rejects(
+				db.transaction((tx) => writeSemanticDescription(tx, { ...input, statements: [] })),
+				/cardinality/,
+			);
+			await db.transaction((tx) => writeSemanticDescription(tx, input));
+			const result = await db.transaction((tx) =>
+				readSemanticDescription(tx, objectId, revisionId),
+			);
+			assert.equal(result?.revision.modelId, applicationModel.id);
+			assert.equal(result?.revision.profileKey, "annotation");
+			assert.equal(result?.statements[0]?.definitionId, target.definitionId);
+			const selection = { objectId, revisionId, changeId, expectedVersion: 0 };
 			assert.equal(
-				(await db.select().from(tables.schemaContractField)).length,
-				contracts.reduce((n, c) => n + c.fields.length, 0),
+				(await db.transaction((tx) => selectSemanticDescription(tx, selection))).version,
+				1,
 			);
 			assert.equal(
-				(await db.select().from(tables.schemaContractKeyword)).length,
-				contracts.reduce((n, c) => n + c.fields.reduce((n, f) => n + f.keywords.length, 0), 0),
+				(
+					await db.transaction((tx) =>
+						selectSemanticDescription(tx, { ...selection, expectedVersion: 1 }),
+					)
+				).version,
+				2,
 			);
-			const references = await db.select().from(tables.schemaContractReference);
-			assert.equal(
-				references.length,
-				contracts.reduce((n, c) => n + c.fields.reduce((n, f) => n + f.references.length, 0), 0),
+			await assert.rejects(
+				db.transaction((tx) => selectSemanticDescription(tx, selection)),
+				/selection changed/,
 			);
-			assert.ok(references.some((reference) => reference.targetContractId !== null));
+			await assert.rejects(
+				db.transaction((tx) => writeSemanticDescription(tx, { ...input, modelId: randomUUID() })),
+				/not installed/,
+			);
+			await assert.rejects(
+				db.transaction((tx) => writeSemanticDescription(tx, { ...input, profileKey: "book-work" })),
+				/native domain writer/,
+			);
+		},
+	);
+	await step(
+		"profiled relations preserve model context and reject an alternate native writer",
+		async () => {
+			const profile = applicationModel.profiles.find((profile) => profile.key === "indexed-image")!,
+				creator = profile.properties.find((rule) => rule.iri === "https://schema.org/creator")!;
+			const objectId = randomUUID(),
+				editId = randomUUID();
+			await pool.query("insert into media_item(id,kind) values($1,'image')", [objectId]);
+			const revision: RelationRevision = {
+				id: randomUUID(),
+				relationId: randomUUID(),
+				subject: { owner: "indexed_media", id: objectId },
+				predicateId: creator.predicateId,
+				definitionId: creator.definitionId,
+				parentRevisionId: null,
+				changeId: editId,
+				value: { kind: "iri", iri: "https://example.test/creator" },
+				position: null,
+			};
+			const validate: ReferenceValidator = async (reference, tx) => {
+				const rows = await tx.execute(
+					sql`select id from media_item where id=${reference.id}::uuid and kind='image'`,
+				);
+				assert.equal(rows.rows.length, 1);
+			};
+			await db.transaction(async (tx) => {
+				await putChange(tx, { id: editId, actor: null, message: "Profiled creator" });
+				await putProfiledRelationRevision(tx, applicationModel, profile.key, revision, validate);
+			});
+			const [stored] = await db
+				.select()
+				.from(tables.schemaRelationRevision)
+				.where(eq(tables.schemaRelationRevision.id, revision.id));
+			assert.equal(stored?.modelId, applicationModel.id);
+			assert.equal(stored?.profileKey, profile.key);
+			const book = applicationModel.profiles.find((profile) => profile.key === "book-work")!,
+				author = book.properties.find((rule) => rule.iri === "https://schema.org/author")!;
+			await assert.rejects(
+				db.transaction((tx) =>
+					putProfiledRelationRevision(
+						tx,
+						applicationModel,
+						book.key,
+						{
+							...revision,
+							id: randomUUID(),
+							subject: { owner: "publishing", id: randomUUID() },
+							predicateId: author.predicateId,
+							definitionId: author.definitionId,
+						},
+						validate,
+					),
+				),
+				/another native writer/,
+			);
 		},
 	);
 	await step("domain media, wiki, description and message integrity", () =>
@@ -164,18 +320,13 @@ try {
 			counts.rows,
 		);
 	});
-	await step("selection CAS and every inherited Schema.org class profile persist", async () => {
+	await step("vocabulary selection CAS remains separate from native model selection", async () => {
 		await db.transaction(async (tx) => {
 			for (const release of bundle.releases) await selectVocabularyRelease(tx, release.id, 0);
-			for (const profile of compileDeclarationProfiles(registry)) await installProfile(tx, profile);
 		});
 		await assert.rejects(
 			db.transaction((tx) => selectVocabularyRelease(tx, bundle.releases[0]!.id, 0)),
 			/selection changed/u,
-		);
-		assert.equal(
-			(await db.select().from(tables.schemaProfileRevision)).length,
-			compileDeclarationProfiles(registry).length,
 		);
 	});
 	const book = randomUUID(),
@@ -260,10 +411,31 @@ try {
 				await selectRelationRevision(tx, selection);
 				await putRelationRevision(tx, revised, validateReference);
 			});
-			assert.equal((await db.select().from(tables.schemaRelation)).length, 2);
-			assert.equal((await db.select().from(tables.schemaRelationRevision)).length, 3);
 			assert.equal(
-				(await db.select().from(tables.schemaRelationSelection))[0]?.revisionId,
+				(
+					await db
+						.select()
+						.from(tables.schemaRelation)
+						.where(eq(tables.schemaRelation.subjectId, book))
+				).length,
+				2,
+			);
+			assert.equal(
+				(
+					await db
+						.select()
+						.from(tables.schemaRelationRevision)
+						.where(eq(tables.schemaRelationRevision.changeId, change))
+				).length,
+				3,
+			);
+			assert.equal(
+				(
+					await db
+						.select()
+						.from(tables.schemaRelationSelection)
+						.where(eq(tables.schemaRelationSelection.relationId, first.relationId))
+				)[0]?.revisionId,
 				first.id,
 			);
 		},
@@ -564,6 +736,7 @@ try {
 			);
 			assert.deepEqual(recovered, bundle);
 			await importVocabularyBundle(second, recovered, readExport);
+			await second.transaction((tx) => installApplicationModel(tx, applicationModel));
 			assert.deepEqual(
 				(await second.select().from(tables.schemaTerm)).sort((a, b) => a.id.localeCompare(b.id)),
 				(await db.select().from(tables.schemaTerm)).sort((a, b) => a.id.localeCompare(b.id)),
@@ -659,6 +832,182 @@ try {
 			0,
 		);
 	});
+	await step(
+		"description values preserve exact decimals and explicitly unsupported datatypes",
+		async () => {
+			const profile = applicationModel.profiles.find(
+				(profile) => profile.key === "described-resource",
+			)!;
+			const predicate = registry.term("https://schema.org/name").id,
+				meaning = registry.definition(predicate, "schemaorg").id;
+			const objectId = randomUUID(),
+				revisionId = randomUUID(),
+				changeId = randomUUID(),
+				unsupportedId = randomUUID();
+			await pool.query(
+				"insert into description_object(id,visibility,state) values($1,'public','draft')",
+				[objectId],
+			);
+			const exact = "900719925474099312345.0000000000000000001";
+			const input = {
+				modelId: applicationModel.id,
+				profileKey: profile.key,
+				objectId,
+				revisionId,
+				parentId: null,
+				changeId,
+				nonce: "opaque-values",
+				actorUserId: null,
+				types: [profile.types[0]!.termId],
+				summary: null,
+				statements: [
+					{
+						id: randomUUID(),
+						predicateId: predicate,
+						definitionId: meaning,
+						state: "literal" as const,
+						datatypeIri: "http://www.w3.org/2001/XMLSchema#decimal",
+						lexical: exact,
+					},
+					{
+						id: unsupportedId,
+						predicateId: predicate,
+						definitionId: meaning,
+						state: "literal" as const,
+						datatypeIri: "https://example.test/opaque-datatype",
+						lexical: "original value",
+					},
+				],
+			};
+			await assert.rejects(
+				db.transaction((tx) =>
+					writeSemanticDescription(tx, {
+						...input,
+						statements: Array.from({ length: 150 }, () => ({
+							...input.statements[0]!,
+							id: randomUUID(),
+							lexical: "1".repeat(60000),
+						})),
+					}),
+				),
+				/8 MiB/,
+			);
+			const written = await db.transaction((tx) => writeSemanticDescription(tx, input));
+			assert.deepEqual(written.validation.unsupportedDatatypes, [unsupportedId]);
+			assert.equal(
+				(await db.transaction((tx) => writeSemanticDescription(tx, input))).revisionId,
+				revisionId,
+			);
+			const read = await db.transaction((tx) => readSemanticDescription(tx, objectId, revisionId));
+			assert.ok(read?.statements.some((row) => row.lexical === exact));
+			assert.ok(
+				read?.statements.some(
+					(row) =>
+						row.datatypeIri === "https://example.test/opaque-datatype" &&
+						row.lexical === "original value",
+				),
+			);
+			await assert.rejects(
+				db.transaction((tx) =>
+					writeSemanticDescription(tx, { ...input, types: [...input.types, randomUUID()] }),
+				),
+				/type is outside/,
+			);
+			await assert.rejects(
+				db.transaction((tx) =>
+					writeSemanticDescription(tx, { ...input, summary: "conflicting retry" }),
+				),
+				/nonce reused/,
+			);
+			await assert.rejects(
+				db.transaction((tx) =>
+					writeSemanticDescription(tx, {
+						...input,
+						statements: [{ ...input.statements[0]!, definitionId: randomUUID() }],
+					}),
+				),
+				/meaning is outside/,
+			);
+		},
+	);
+
+	await step(
+		"a valid model hash cannot disguise a definition from the wrong vocabulary release",
+		async () => {
+			const text =
+				'<https://schema.org/Person> a <http://www.w3.org/2000/01/rdf-schema#Class> ; <http://www.w3.org/2000/01/rdf-schema#comment> "Different test definition" .';
+			const source = {
+				...registry.release("schemaorg").source,
+				version: "fixture-model-pin",
+				sha256: digest(text),
+				bytes: Buffer.byteLength(text),
+			};
+			const future = await compileVocabularies({ format: 1, sources: [source] }, async () =>
+				Buffer.from(text),
+			);
+			await importVocabularyBundle(db, future, async () => Buffer.from(text));
+			const { id: _id, digest: _digest, ...content } = structuredClone(applicationModel);
+			const person = content.profiles.find((profile) => profile.key === "person")!;
+			person.properties = [];
+			person.types = person.types.filter((type) => type.vocabulary === "schemaorg");
+			person.types[0]!.releaseId = future.releases[0]!.id;
+			content.profiles = [person];
+			content.sourceReleases = [
+				{ key: "schemaorg", id: future.releases[0]!.id, digest: future.releases[0]!.digest },
+			];
+			const hash = digest(stableJson(content)),
+				invalid = { ...content, id: schemaId("application-model", hash), digest: hash };
+			await rejectCode(() => db.transaction((tx) => installApplicationModel(tx, invalid)), "23514");
+			assert.equal(
+				(
+					await db
+						.select()
+						.from(tables.schemaModelRelease)
+						.where(eq(tables.schemaModelRelease.id, invalid.id))
+				).length,
+				0,
+			);
+		},
+	);
+
+	await step(
+		"the CLI stages, explicitly selects and exports the exact installed model",
+		async () => {
+			const options = {
+				cwd: root,
+				timeout: 120_000,
+				maxBuffer: 2_097_152,
+				env: { ...process.env, REZICS_SCHEMA_DATABASE_URL: fixtureUrl(fixtureNames[0]!) },
+			};
+			await run("yarn", ["exec", "tsx", "src/cli.ts", "import"], options);
+			assert.equal((await db.select().from(tables.schemaModelHead))[0]?.version, 3);
+			await run(
+				"yarn",
+				["exec", "tsx", "src/cli.ts", "select-model", applicationModel.id, "3"],
+				options,
+			);
+			await run(
+				"yarn",
+				["exec", "tsx", "src/cli.ts", "select", bundle.releases[0]!.id, "1"],
+				options,
+			);
+			const destination = resolve(scratch, "cli-export");
+			await run("yarn", ["exec", "tsx", "src/cli.ts", "export", destination], options);
+			assert.deepEqual(
+				JSON.parse(await readFile(resolve(destination, "bundle.json"), "utf8")),
+				bundle,
+			);
+			const selected = JSON.parse(await readFile(resolve(destination, "models.json"), "utf8"));
+			assert.equal(selected[0]?.version, 4);
+			assert.deepEqual(selected[0]?.model, applicationModel);
+			for (const release of bundle.releases)
+				assert.equal(
+					digest(await readFile(resolve(destination, "sources", release.source.file))),
+					release.source.sha256,
+				);
+		},
+	);
+
 	console.info(
 		JSON.stringify(
 			{

@@ -1,6 +1,6 @@
 {
 	"name": "@rezics/schema-importer",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"private": true,
 	"type": "module",
 	"license": "AGPL-3.0-only",
@@ -10,13 +10,13 @@
 		"./targets/*": "./src/targets/*.ts"
 	},
 	"dependencies": {
+		"@babel/parser": "^8.0.4",
 		"@rezics/content-language": "workspace:*",
 		"@rezics/schema": "workspace:*",
 		"drizzle-orm": "1.0.0-rc.4",
 		"pg": "^8.23.0",
 		"rdf-canonize": "5.0.0",
 		"rdf-parse": "5.0.0",
-		"yaml": "2.9.0",
 		"zod": "^4.5.4"
 	},
 	"devDependencies": {

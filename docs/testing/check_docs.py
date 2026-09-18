@@ -65,8 +65,8 @@ def main():
     problems = []
     # Upstream machine-schema Markdown is an exact pinned input. Its relative
     # links belong to its upstream repository, not our maintained documentation.
-    source_pins = json.loads((ROOT / "libraries/schema-importer/sources/catalog/artifacts.lock.json").read_text())
-    upstream_docs = {f"libraries/schema-importer/sources/{entry['source']}/inputs/{entry['file']}": entry["sha256"] for entry in source_pins if entry["file"].endswith(".md")}
+    source_pins = json.loads((ROOT / "libraries/content-adapters/contracts/catalog/artifacts.lock.json").read_text())
+    upstream_docs = {f"libraries/content-adapters/contracts/{entry['source']}/inputs/{entry['file']}": entry["sha256"] for entry in source_pins if entry["file"].endswith(".md")}
     checked_links = 0
     anchor_cache = {}
     local_targets = {}

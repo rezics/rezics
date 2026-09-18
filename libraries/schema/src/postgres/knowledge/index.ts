@@ -9,4 +9,4 @@ export * from "./tag-expression";
 export * from "./tag-path";
 export * from "./tag";
 export * from "./vocabulary";
-export * from "./descriptions";
+export * from "./descriptions.generated";

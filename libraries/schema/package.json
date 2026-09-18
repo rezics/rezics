@@ -1,6 +1,6 @@
 {
 	"name": "@rezics/schema",
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"private": true,
 	"type": "module",
 	"license": "AGPL-3.0-only",
@@ -36,9 +36,13 @@
 		"./postgres/forum": "./src/postgres/forum/index.ts",
 		"./postgres/integrations": "./src/postgres/integrations/index.ts",
 		"./postgres/vocabulary": "./src/postgres/vocabulary/index.ts",
-		"./bindings": "./src/bindings.ts",
 		"./postgres/commerce": "./src/postgres/commerce/index.ts",
-		"./postgres/wiki": "./src/postgres/wiki/index.ts"
+		"./postgres/wiki": "./src/postgres/wiki/index.ts",
+		"./model/*": "./src/model/*.ts",
+		"./model-decisions/*": "./model/*.ts",
+		"./model": "./src/model/runtime.ts",
+		"./model/generated": "./src/generated/model.ts",
+		"./persistence/relations": "./src/persistence/relations.ts"
 	},
 	"dependencies": {
 		"@rezics/access": "workspace:*",

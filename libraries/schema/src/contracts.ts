@@ -69,8 +69,8 @@ export const SourceManifestSchema = z
 /** @alpha Shared logical addresses contain stable owner names, never table or shard names. */
 export const LogicalReferenceSchema = z.strictObject({
 	owner: z.string().regex(/^[a-z][a-z0-9_.-]{0,95}$/u),
-	id: z.uuid(),
-	revisionId: z.uuid().optional(),
+	id: z.uuid().toLowerCase(),
+	revisionId: z.uuid().toLowerCase().optional(),
 });
 export type LogicalReference = z.infer<typeof LogicalReferenceSchema>;
 /** @alpha An exact lexical value is not coerced through JavaScript numbers or dates. */
@@ -176,36 +176,16 @@ export const BundleSchema = z.strictObject({
 });
 export type VocabularyBundle = z.infer<typeof BundleSchema>;
 
-/** @alpha A profile pins interpretation and gives explicit closed-world rules for selected operations. */
-export const ProfileSchema = z.strictObject({
-	id: z.uuid(),
-	key,
-	revisionId: z.uuid(),
-	digest: DigestSchema,
-	types: z.array(z.uuid()).min(1),
-	rules: z.array(
-		z.strictObject({
-			predicateId: z.uuid(),
-			definitionId: z.uuid(),
-			min: z.number().int().nonnegative(),
-			max: z.number().int().positive().nullable(),
-			ordered: z.boolean(),
-			valueKinds: z.array(z.enum(["reference", "iri", "literal", "unknown", "no-value"])).min(1),
-		}),
-	),
-	additionalProperties: z.boolean(),
-});
-export type ApplicationProfile = z.infer<typeof ProfileSchema>;
-
 /** @alpha A binary assertion has its own identity and exact revision; evidence can reference either. */
 export const RelationRevisionSchema = z.strictObject({
-	id: z.uuid(),
-	relationId: z.uuid(),
+	model: z.strictObject({ id: z.uuid().toLowerCase(), profileKey: z.string() }).optional(),
+	id: z.uuid().toLowerCase(),
+	relationId: z.uuid().toLowerCase(),
 	subject: LogicalReferenceSchema,
-	predicateId: z.uuid(),
-	definitionId: z.uuid(),
-	parentRevisionId: z.uuid().nullable(),
-	changeId: z.uuid(),
+	predicateId: z.uuid().toLowerCase(),
+	definitionId: z.uuid().toLowerCase(),
+	parentRevisionId: z.uuid().toLowerCase().nullable(),
+	changeId: z.uuid().toLowerCase(),
 	value: SemanticValueSchema,
 	position: z
 		.string()

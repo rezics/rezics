@@ -8,7 +8,7 @@ import {
 	inventoryOpenLibrary,
 	inventoryVndb,
 	splitSqlColumns,
-} from "@rezics/schema-importer/readers/provider-contracts";
+} from "@rezics/content-adapters/readers/provider-contracts";
 
 describe("pinned source contract inventory", () => {
 	it("applies declared SQL keys instead of guessing references from column names", () => {

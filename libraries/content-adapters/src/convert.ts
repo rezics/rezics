@@ -27,7 +27,7 @@ export async function providerArtifacts() {
 	return z
 		.array(artifact)
 		.parse(
-			JSON.parse(await readFile(resolve(root, "sources/catalog/artifacts.lock.json"), "utf8")),
+			JSON.parse(await readFile(resolve(root, "contracts/catalog/artifacts.lock.json"), "utf8")),
 		);
 }
 
@@ -36,7 +36,7 @@ export async function fetchProviderSchemas(source = "all") {
 	z.enum(["all", "bangumi", "musicbrainz", "vndb", "openlibrary"]).parse(source);
 	for (const entry of await providerArtifacts()) {
 		if (source !== "all" && source !== entry.source) continue;
-		const path = resolve(root, "sources", entry.source, "inputs", entry.file);
+		const path = resolve(root, "contracts", entry.source, "inputs", entry.file);
 		try {
 			if (digest(await readFile(path)) === entry.sha256) continue;
 		} catch (error) {
@@ -117,7 +117,7 @@ export async function convertProviderSchemas(source = "all"): Promise<ConvertedC
 	const texts = new Map<string, string>();
 	for (const entry of artifacts) {
 		if (source !== "all" && source !== entry.source) continue;
-		const bytes = await readFile(resolve(root, "sources", entry.source, "inputs", entry.file));
+		const bytes = await readFile(resolve(root, "contracts", entry.source, "inputs", entry.file));
 		if (bytes.byteLength > 8_388_608 || digest(bytes) !== entry.sha256)
 			throw new TypeError(`Schema artifact drift: ${entry.file}`);
 		texts.set(entry.file, new TextDecoder("utf-8", { fatal: true }).decode(bytes));

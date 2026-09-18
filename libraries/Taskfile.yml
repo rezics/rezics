@@ -1,6 +1,9 @@
 version: "3"
 
 includes:
+    content-adapters:
+        taskfile: ./content-adapters/Taskfile.yml
+        dir: ./content-adapters
     schema-importer:
         taskfile: ./schema-importer/Taskfile.yml
         dir: ./schema-importer
@@ -75,6 +78,7 @@ tasks:
         cmds:
             - task: schema:typecheck
             - task: schema-importer:typecheck
+            - task: content-adapters:typecheck
             - task: reference:typecheck
             - task: content-language:typecheck
             - task: access:typecheck

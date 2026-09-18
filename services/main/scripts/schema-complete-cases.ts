@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import type { Pool } from "pg";
+import { applicationModel } from "@rezics/schema/model/generated";
 import { termId } from "@rezics/schema/identity";
 
 /** @internal Rejected cross-domain states on the real complete migration, never an application database. */
@@ -142,21 +143,31 @@ export async function checkCompleteSchema(pool: Pool) {
 			[change, object],
 		);
 		await rejects(
-			"INSERT INTO description_revision(object_id,id,parent_id,change_id) VALUES ($1,$2,$2,$3)",
-			[object, revision, change],
+			"INSERT INTO description_revision(object_id,id,parent_id,change_id,model_id,profile_key) VALUES ($1,$2,$2,$3,$4,'described-resource')",
+			[object, revision, change, applicationModel.id],
 		);
-		await exec("INSERT INTO description_revision(object_id,id,change_id) VALUES ($1,$2,$3)", [
-			object,
-			revision,
-			change,
-		]);
 		await exec(
-			"INSERT INTO description_statement(object_id,revision_id,id,predicate_id,state) VALUES ($1,$2,$3,$4,'unknown')",
-			[object, revision, uuid(), name],
+			"INSERT INTO description_revision(object_id,id,change_id,model_id,profile_key) VALUES ($1,$2,$3,$4,'described-resource')",
+			[object, revision, change, applicationModel.id],
+		);
+		const meaning = (
+			await exec(
+				"select definition_id from schema_release_term where term_id=$1 and release_id=$2",
+				[name, applicationModel.sourceReleases.find((release) => release.key === "schemaorg")!.id],
+			)
+		).rows[0].definition_id;
+		await exec(
+			"INSERT INTO description_statement(object_id,revision_id,id,predicate_id,definition_id,state) VALUES ($1,$2,$3,$4,$5,'unknown')",
+			[object, revision, uuid(), name, meaning],
 		);
 		await rejects(
-			"INSERT INTO description_statement(object_id,revision_id,id,predicate_id,state,lexical) VALUES ($1,$2,$3,$4,'no-value','not absent')",
-			[object, revision, uuid(), name],
+			"INSERT INTO description_statement(object_id,revision_id,id,predicate_id,definition_id,state,lexical) VALUES ($1,$2,$3,$4,$5,'no-value','not absent')",
+			[object, revision, uuid(), name, meaning],
+		);
+
+		await rejects(
+			"INSERT INTO description_statement(object_id,revision_id,id,predicate_id,definition_id,state,order_key) VALUES ($1,$2,$3,$4,$5,'unknown','not-an-integer')",
+			[object, revision, uuid(), name, meaning],
 		);
 		await exec(
 			"UPDATE description_revision SET payload_state='erased' WHERE object_id=$1 AND id=$2",

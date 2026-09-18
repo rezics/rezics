@@ -53,3 +53,17 @@ BEGIN
 END $$;
 CREATE OR REPLACE TRIGGER wiki_head_guard BEFORE INSERT OR UPDATE ON public.wiki_head FOR EACH ROW EXECUTE FUNCTION public.wiki_selection_guard();
 CREATE OR REPLACE TRIGGER wiki_selection_guard BEFORE INSERT OR UPDATE ON public.wiki_selection FOR EACH ROW EXECUTE FUNCTION public.wiki_selection_guard();
+
+CREATE OR REPLACE FUNCTION public.description_meaning_guard()
+RETURNS trigger LANGUAGE plpgsql SET search_path=pg_catalog,public AS $$
+BEGIN
+ IF NOT EXISTS(SELECT 1 FROM public.description_revision revision
+ JOIN public.schema_model_release model ON model.id=revision.model_id
+ CROSS JOIN jsonb_array_elements(model.body->'sourceReleases') source
+ JOIN public.schema_release_term meaning ON meaning.release_id=(source->>'id')::uuid
+ WHERE revision.object_id=NEW.object_id AND revision.id=NEW.revision_id AND revision.payload_state='available'
+ AND meaning.term_id=NEW.predicate_id AND meaning.definition_id=NEW.definition_id)
+ THEN RAISE EXCEPTION 'Statement meaning is outside the pinned revision model' USING ERRCODE='23514'; END IF;
+ RETURN NEW;
+END $$;
+CREATE OR REPLACE TRIGGER description_meaning_guard BEFORE INSERT ON public.description_statement FOR EACH ROW EXECUTE FUNCTION public.description_meaning_guard();

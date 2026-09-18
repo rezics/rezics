@@ -16,7 +16,7 @@ import {
 	inventoryOpenLibrary,
 	inventoryVndb,
 	type SourceContractField,
-} from "@rezics/schema-importer/readers/provider-contracts";
+} from "@rezics/content-adapters/readers/provider-contracts";
 
 const directory = fileURLToPath(
 	new URL("../src/services/catalog/source-contracts/", import.meta.url),
@@ -58,7 +58,7 @@ export async function generateCatalogSourceInventory(
 			JSON.parse(
 				await readFile(
 					new URL(
-						"../../../libraries/schema-importer/sources/catalog/artifacts.lock.json",
+						"../../../libraries/content-adapters/contracts/catalog/artifacts.lock.json",
 						import.meta.url,
 					),
 					"utf8",
@@ -76,7 +76,7 @@ export async function generateCatalogSourceInventory(
 		try {
 			bytes = await readFile(
 				new URL(
-					`../../../libraries/schema-importer/sources/${artifact.source}/inputs/${artifact.file}`,
+					`../../../libraries/content-adapters/contracts/${artifact.source}/inputs/${artifact.file}`,
 					import.meta.url,
 				),
 			).catch(() => readFile(path));

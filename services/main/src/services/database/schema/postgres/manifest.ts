@@ -105,6 +105,7 @@ export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number
 export const PostgreSqlSchemaMigrationBundles: Readonly<
 	Record<string, readonly PostgreSqlSchemaFileName[]>
 > = {
+	schema_model: ["schema-vocabulary.sql", "schema-native-history.sql"],
 	schema_complete: ["schema-vocabulary.sql", "schema-native-history.sql", "media-selection.sql", "message-history.sql", "reference-value.sql", "participation-messages.sql"],
 	realm_enrollment: [
 		"access-membership.sql", "access-group-membership.sql",
@@ -166,6 +167,7 @@ export const PostgreSqlSchemaMigrationBundles: Readonly<
 
 export const PostgreSqlSchemaFunctionNames = [
 	"conversation_member_guard", "description_revision_guard", "description_selection_guard", "wiki_revision_guard", "wiki_selection_guard",
+	"schema_model_profile_guard", "schema_model_binding_guard", "schema_model_head_guard", "description_meaning_guard",
 	"schema_reject_mutation", "schema_require_prior_revision", "schema_statement_shape_guard",
 	"media_selection_member_guard", "media_selection_seal_guard", "media_selection_head_guard",
 	"capture_message_revision", "guard_message_revision",
@@ -595,6 +597,13 @@ export const PostgreSqlSchemaTriggers = [
 	{ table: "wiki_revision_payload", name: "wiki_payload_immutable" },
 	{ table: "wiki_head", name: "wiki_head_guard" },
 	{ table: "wiki_selection", name: "wiki_selection_guard" },
+		{ table: "schema_model_release", name: "schema_immutable" },
+	{ table: "schema_model_profile", name: "schema_immutable" },
+	{ table: "schema_model_binding", name: "schema_immutable" },
+	{ table: "schema_model_profile", name: "schema_model_profile_guard" },
+	{ table: "schema_model_binding", name: "schema_model_binding_guard" },
+	{ table: "schema_model_head", name: "schema_model_head_guard" },
+	{ table: "description_statement", name: "description_meaning_guard" },
 	{ table: "schema_vocabulary", name: "schema_immutable" },
 	{ table: "schema_release", name: "schema_immutable" },
 	{ table: "schema_release_context", name: "schema_immutable" },
@@ -606,18 +615,11 @@ export const PostgreSqlSchemaTriggers = [
 	{ table: "schema_release_label", name: "schema_immutable" },
 	{ table: "schema_change", name: "schema_immutable" },
 	{ table: "schema_label_selection", name: "schema_immutable" },
-	{ table: "schema_profile", name: "schema_immutable" },
-	{ table: "schema_profile_revision", name: "schema_immutable" },
-	{ table: "schema_profile_rule", name: "schema_immutable" },
 	{ table: "schema_relation", name: "schema_immutable" },
 	{ table: "schema_relation_revision", name: "schema_immutable" },
 	{ table: "schema_relation_selection", name: "schema_immutable" },
 	{ table: "schema_node", name: "schema_immutable" },
 	{ table: "schema_statement", name: "schema_immutable" },
-	{ table: "schema_contract", name: "schema_immutable" },
-	{ table: "schema_contract_field", name: "schema_immutable" },
-	{ table: "schema_contract_keyword", name: "schema_immutable" },
-	{ table: "schema_contract_reference", name: "schema_immutable" },
 	{ table: "catalog_definition_binding", name: "schema_immutable" },
 	{ table: "schema_relation_revision", name: "schema_revision_parent" },
 	{ table: "schema_statement", name: "schema_statement_shape_guard" },

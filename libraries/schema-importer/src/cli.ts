@@ -1,35 +1,20 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { eq } from "drizzle-orm";
 import { Pool } from "pg";
 import { z } from "zod";
-import {
-	BundleSchema,
-	ProfileSchema,
-	RelationRevisionSchema,
-	SourceManifestSchema,
-} from "@rezics/schema";
-import { compileVocabularies } from "./readers/rdf";
+import { BundleSchema, RelationRevisionSchema, SourceManifestSchema } from "@rezics/schema";
 import { digest } from "@rezics/schema/identity";
-import {
-	createSchemaDatabase,
-	exportVocabularyBundle,
-	importVocabularyBundle,
-	installProfile,
-	selectVocabularyRelease,
-} from "./targets/postgres";
-import { compileDeclarationProfiles } from "@rezics/schema/profiles";
+import { describeVocabularyClasses } from "@rezics/schema/profiles";
 import { diffVocabularies, VocabularyRegistry } from "@rezics/schema/registry";
 import { SchemaSources } from "./sources";
-import { fetchProviderSchemas, convertProviderSchemas } from "./convert";
-import { convertWikibase } from "./readers/wikibase";
-import { convertIiif } from "./readers/iiif";
-import { convertMediaFragment } from "./readers/media-fragments";
-import { importConvertedContracts } from "./targets/contracts-postgres";
-import { vocabularyStorageBindings } from "@rezics/schema/bindings";
+import { validateModelRecord } from "@rezics/schema/model";
+import { CompiledModelSchema } from "@rezics/schema/model/contracts";
+import { generateNativeModel } from "./compiler/generate";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
-const sourceRoot = resolve(root, "registry/sources");
+const sourceRoot = resolve(root, "sources");
 const bundleFile = resolve(root, "registry/bundle.json");
 const [command, ...args] = process.argv.slice(2);
 const readArtifact = async (file: string) => readFile(resolve(sourceRoot, file));
@@ -77,18 +62,11 @@ async function fetchArtifact(url: string, hash: string, file: string, maximum: n
 }
 
 async function compile() {
-	const manifest = SourceManifestSchema.parse(
-		await json(resolve(root, "registry/sources.lock.json")),
-	);
-	const bundle = await compileVocabularies(manifest, readArtifact),
-		registry = new VocabularyRegistry(bundle);
-	const profiles = compileDeclarationProfiles(registry);
+	const { bundle, model } = await generateNativeModel();
+	const registry = new VocabularyRegistry(bundle);
+	const descriptions = describeVocabularyClasses(registry);
 	await writeJson(bundleFile, bundle);
-	await writeJson(resolve(root, "registry/profiles.json"), profiles);
-	await writeJson(
-		resolve(root, "registry/storage-bindings.json"),
-		vocabularyStorageBindings(registry),
-	);
+
 	const terms: Record<string, Record<string, string>> = Object.create(null);
 	for (const release of bundle.releases) {
 		const vocabulary: Record<string, string> = Object.create(null);
@@ -111,7 +89,7 @@ async function compile() {
 	);
 	for (const [name, schema] of [
 		["bundle", BundleSchema],
-		["profile", ProfileSchema],
+		["application-model", CompiledModelSchema],
 		["relation-revision", RelationRevisionSchema],
 	] as const)
 		await writeJson(resolve(root, `schemas/${name}.schema.json`), z.toJSONSchema(schema));
@@ -130,11 +108,7 @@ async function compile() {
 			unindexedLabels: release.unindexedLabels,
 			retired: release.definitions.filter((definition) => definition.status === "retired").length,
 		})),
-		profiles: profiles.map((profile) => ({
-			key: profile.key,
-			id: profile.id,
-			revisionId: profile.revisionId,
-		})),
+		profiles: model.profiles.map((profile) => ({ key: profile.key })),
 	};
 	await writeJson(resolve(root, "registry/coverage.json"), coverage);
 	console.info(
@@ -143,7 +117,8 @@ async function compile() {
 				bundleId: bundle.id,
 				terms: bundle.terms.length,
 				releases: bundle.releases.length,
-				profiles: profiles.length,
+				profiles: model.profiles.length,
+				vocabularyDescriptions: descriptions.length,
 				quads: bundle.releases.reduce((sum, release) => sum + release.quadCount, 0),
 			},
 			null,
@@ -153,61 +128,61 @@ async function compile() {
 }
 
 async function main() {
+	if (command === "inspect-model" && args.length <= 1) {
+		const model = await json(resolve(root, "registry/model.json"));
+		console.info(
+			JSON.stringify(
+				args[0]
+					? model.profiles.find((profile: { key: string }) => profile.key === args[0])
+					: model,
+				null,
+				2,
+			),
+		);
+		return;
+	}
+	if (command === "validate" && args.length === 2) {
+		console.info(
+			JSON.stringify(
+				validateModelRecord(
+					await json(resolve(root, "registry/model.json")),
+					args[0]!,
+					await json(resolve(args[1]!)),
+				),
+				null,
+				2,
+			),
+		);
+		return;
+	}
+
 	if (command === "sources" && args.length === 0) {
 		console.info(JSON.stringify(SchemaSources, null, 2));
 		return;
 	}
 	if (command === "convert") {
-		const source = args[0] ?? "all";
-		if (source === "wikibase" || source === "iiif") {
-			if (!args[1]) throw new TypeError("Specify an input JSON file");
-			const input = await json(resolve(args[1]));
-			const output = source === "wikibase" ? convertWikibase(input) : convertIiif(input);
-			if (args[2]) await writeJson(resolve(args[2]), output);
-			else console.info(JSON.stringify(output, null, 2));
-			return;
-		}
-		if (source === "media-fragments") {
-			if (!args[1]) throw new TypeError("Specify a media URI");
-			console.info(JSON.stringify(convertMediaFragment(args[1]), null, 2));
-			return;
-		}
-		if (source === "all" || ["bangumi", "musicbrainz", "vndb", "openlibrary"].includes(source)) {
-			const contracts = await convertProviderSchemas(source);
-			for (const key of [...new Set(contracts.map((contract) => contract.source))])
-				await writeJson(
-					resolve(root, `generated/${key}/contracts.json`),
-					contracts.filter((contract) => contract.source === key),
-				);
-			await writeJson(resolve(root, `generated/${source}-coverage.json`), {
-				sources: [...new Set(contracts.map((contract) => contract.source))],
-				contracts: contracts.length,
-				fields: contracts.reduce((n, c) => n + c.fields.length, 0),
-			});
-			console.info(
-				`Converted ${contracts.length} contracts and ${contracts.reduce((n, c) => n + c.fields.length, 0)} declarations`,
+		if (
+			args.length > 1 ||
+			(args[0] !== undefined &&
+				args[0] !== "all" &&
+				!SchemaSources.some((source) => source.key === args[0]))
+		)
+			throw new TypeError(
+				"Convert selects the pinned standard vocabulary bundle; content adapters have a separate CLI",
 			);
-			if (source === "all") await compile();
-			return;
-		}
-		if (SchemaSources.some((entry) => entry.key === source && entry.family === "vocabulary")) {
-			await compile();
-			return;
-		}
-		throw new TypeError(`Unknown schema source: ${source}`);
+		await compile();
+		return;
 	}
 	if (command === "fetch" && args.length <= 1) {
 		const key = args[0];
-		const manifest = SourceManifestSchema.parse(
-			await json(resolve(root, "registry/sources.lock.json")),
-		);
+		const manifest = SourceManifestSchema.parse(await json(resolve(root, "sources/manifest.json")));
 		const selected = manifest.sources.filter(
 			(source) => key === undefined || key === "all" || source.key === key,
 		);
 		if (
 			key !== undefined &&
 			selected.length === 0 &&
-			!SchemaSources.some((source) => source.key === key && source.family === "provider")
+			!SchemaSources.some((source) => source.key === key)
 		)
 			throw new TypeError(`Unknown pinned schema source: ${key}`);
 		for (const source of selected) {
@@ -215,8 +190,6 @@ async function main() {
 			for (const context of source.contexts)
 				await fetchArtifact(context.url, context.sha256, context.file, 1_048_576);
 		}
-		if (key === "all" || (key !== undefined && selected.length === 0))
-			await fetchProviderSchemas(key);
 		console.info(`Restored pinned schema inputs for ${key ?? "the vocabulary bundle"}`);
 		return;
 	}
@@ -251,11 +224,19 @@ async function main() {
 	if (
 		command !== "import" &&
 		!(command === "export" && args.length === 1) &&
-		!(command === "select" && args.length === 2)
+		!((command === "select" || command === "select-model") && args.length === 2)
 	)
 		throw new TypeError(
-			"Use fetch | compile | inspect <IRI|UUID> [language] | diff <before.json> <after.json> | import | select <release-UUID> <expected-version> | export <directory>",
+			"Use sources | fetch [source] | compile | inspect-model [profile] | validate <profile> <record.json> | inspect <IRI|UUID> [language] | diff <before.json> <after.json> | import | select <release-UUID> <expected-version> | select-model <model-UUID> <expected-version> | export <directory>",
 		);
+	const {
+		createSchemaDatabase,
+		exportVocabularyBundle,
+		importVocabularyBundle,
+		installApplicationModel,
+		selectApplicationModel,
+		selectVocabularyRelease,
+	} = await import("./targets/postgres");
 	const connectionString = process.env.REZICS_SCHEMA_DATABASE_URL;
 	if (!connectionString)
 		throw new TypeError("Set REZICS_SCHEMA_DATABASE_URL to the intended PostgreSQL database");
@@ -264,14 +245,17 @@ async function main() {
 	try {
 		if (command === "import") {
 			const bundle = await importVocabularyBundle(db, await json(bundleFile), readArtifact);
-			await importConvertedContracts(db, await convertProviderSchemas("all"));
 			await db.transaction(async (tx) => {
-				for (const profile of compileDeclarationProfiles(new VocabularyRegistry(bundle)))
-					await installProfile(tx, profile);
+				await installApplicationModel(tx, await json(resolve(root, "registry/model.json")));
 			});
 			console.info(
 				`Staged ${bundle.releases.length} vocabulary releases; selection is an explicit command`,
 			);
+		} else if (command === "select-model") {
+			const version = await db.transaction((tx) =>
+				selectApplicationModel(tx, args[0]!, Number(args[1])),
+			);
+			console.info(`Selected application model at version ${version}`);
 		} else if (command === "select") {
 			const version = await db.transaction((tx) =>
 				selectVocabularyRelease(tx, args[0]!, Number(args[1])),
@@ -279,8 +263,20 @@ async function main() {
 			console.info(`Selected vocabulary release at version ${version}`);
 		} else {
 			const { bundle, artifacts } = await exportVocabularyBundle(db);
+			const { schemaModelRelease, schemaModelHead } = await import(
+				"@rezics/schema/postgres/vocabulary"
+			);
+			const models = await db
+				.select({
+					key: schemaModelHead.key,
+					version: schemaModelHead.version,
+					model: schemaModelRelease.body,
+				})
+				.from(schemaModelHead)
+				.innerJoin(schemaModelRelease, eq(schemaModelHead.modelId, schemaModelRelease.id));
 			const destination = resolve(args[0]!);
 			await writeJson(resolve(destination, "bundle.json"), bundle);
+			await writeJson(resolve(destination, "models.json"), models);
 			await writeJson(resolve(destination, "sources.lock.json"), {
 				format: 1,
 				sources: bundle.releases.map((release) => release.source),

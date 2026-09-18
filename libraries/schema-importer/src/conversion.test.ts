@@ -9,11 +9,9 @@ import {
 } from "@rezics/schema";
 import { digest, schemaId, stableJson } from "@rezics/schema/identity";
 import { diffVocabularies, VocabularyRegistry } from "@rezics/schema/registry";
-import {
-	createProfile,
-	compileDeclarationProfiles,
-	validateDescription,
-} from "@rezics/schema/profiles";
+import { describeVocabularyClasses } from "@rezics/schema/profiles";
+import { applicationModel } from "@rezics/schema/model/generated";
+import { validateModelRecord } from "@rezics/schema/model";
 
 const prefix = `@prefix ex: <https://example.test/> .\n@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n@prefix owl: <http://www.w3.org/2002/07/owl#> .\n`;
 const xsd = "http://www.w3.org/2001/XMLSchema#";
@@ -39,13 +37,13 @@ const compile = (text: string, extra: Partial<VocabularySource> = {}) =>
 describe("complete vocabulary preservation", () => {
 	it("reconstructs every pinned release and every generated term without network access", async () => {
 		const manifest = JSON.parse(
-			await readFile(new URL("../registry/sources.lock.json", import.meta.url), "utf8"),
+			await readFile(new URL("../sources/manifest.json", import.meta.url), "utf8"),
 		);
 		const generated = JSON.parse(
 			await readFile(new URL("../registry/bundle.json", import.meta.url), "utf8"),
 		);
 		const bundle = await compileVocabularies(manifest, (file) =>
-			readFile(new URL(`../registry/sources/${file}`, import.meta.url)),
+			readFile(new URL(`../sources/${file}`, import.meta.url)),
 		);
 		expect(bundle).toEqual(generated);
 		const registry = new VocabularyRegistry(bundle);
@@ -60,6 +58,7 @@ describe("complete vocabulary preservation", () => {
 			"rdf",
 			"rdfs",
 			"schemaorg",
+			"shacl",
 			"skos",
 		]);
 		expect(registry.term("http://schema.org/creator").id).toBe(
@@ -76,27 +75,12 @@ describe("complete vocabulary preservation", () => {
 		expect(
 			registry.describe("https://schema.org/creator", "zh-Hant").contributions[0]?.label?.value,
 		).toBe("creator");
-		const profiles = compileDeclarationProfiles(registry);
-		const classes = registry
-			.release("schemaorg")
-			.definitions.filter(
-				(definition) =>
-					definition.types.includes("http://www.w3.org/2000/01/rdf-schema#Class") &&
-					registry.term(definition.termId).iri.startsWith("https://schema.org/"),
-			);
-		expect(profiles).toHaveLength(classes.length);
-		expect(profiles.length).toBeGreaterThan(900);
-		const book = profiles.find((profile) =>
-			profile.types.includes(registry.term("https://schema.org/Book").id),
-		);
-		expect(
-			book?.rules.some(
-				(rule) => rule.predicateId === registry.term("https://schema.org/creator").id,
-			),
-		).toBe(true);
-		expect(
-			book?.rules.some((rule) => rule.predicateId === registry.term("https://schema.org/name").id),
-		).toBe(true);
+		const classes = describeVocabularyClasses(registry);
+		expect(classes.length).toBeGreaterThan(900);
+		const book = classes.find((profile) => profile.iri === "https://schema.org/Book");
+		expect(book?.suggestedProperties).toContain(registry.term("https://schema.org/creator").id);
+		expect(book?.suggestedProperties).toContain(registry.term("https://schema.org/name").id);
+		expect(book).not.toHaveProperty("rules");
 		expect(registry.statements("https://schema.org/Book", "schemaorg").length).toBeGreaterThan(0);
 	});
 
@@ -289,58 +273,48 @@ describe("portable relation and profile contracts", () => {
 		).toThrow();
 	});
 
-	it("enforces explicit profile rules while allowing multiple independently identified authors", () => {
-		const id = (key: string) => schemaId("test", key);
-		const profile = createProfile({
-			key: "authors",
-			types: [id("book")],
-			additionalProperties: false,
-			rules: [
-				{
-					predicateId: id("author"),
-					definitionId: id("meaning"),
-					min: 1,
-					max: null,
-					ordered: true,
-					valueKinds: ["reference"],
-				},
-			],
+	it("enforces reviewed model rules for distinct author occurrences, exact meaning, ordering and cardinality", () => {
+		const model = structuredClone(applicationModel),
+			profile = model.profiles.find((profile) => profile.key === "book-work")!;
+		const authorRule = profile.properties.find((rule) => rule.iri === "https://schema.org/author")!;
+		authorRule.min = 1;
+		const { id: _, digest: __, ...content } = model;
+		model.digest = digest(stableJson(content));
+		model.id = schemaId("application-model", model.digest);
+		const id = (name: string) => schemaId("test", name);
+		const author = (position: string) => ({
+			id: id("author-" + position),
+			predicateId: authorRule.predicateId,
+			definitionId: authorRule.definitionId,
+			position,
+			value: { kind: "reference" as const, reference: { owner: "entity", id: id("person") } },
 		});
-		const author = (position: string) =>
-			RelationRevisionSchema.parse({
-				id: id(`revision${position}`),
-				relationId: id(`relation${position}`),
-				subject: { owner: "publishing", id: id("work") },
-				predicateId: id("author"),
-				definitionId: id("meaning"),
-				parentRevisionId: null,
-				changeId: id("edit"),
-				value: { kind: "reference", reference: { owner: "entity", id: id("person") } },
-				position,
-			});
-		expect(() =>
-			validateDescription(profile, { types: [id("book")], relations: [author("0"), author("1")] }),
-		).not.toThrow();
-		expect(() => validateDescription(profile, { types: [id("book")], relations: [] })).toThrow(
-			/cardinality/u,
+		const record = {
+			subject: { owner: "publishing", id: id("work") },
+			types: [profile.types[0]!.termId],
+			statements: [author("0"), author("1")],
+		};
+		expect(() => validateModelRecord(model, "book-work", record)).not.toThrow();
+		expect(() => validateModelRecord(model, "book-work", { ...record, statements: [] })).toThrow(
+			/cardinality/,
 		);
 		expect(() =>
-			validateDescription(profile, {
-				types: [id("book")],
-				relations: [
-					author("0"),
-					{ ...author("0"), id: id("another-revision"), relationId: id("another-relation") },
-				],
+			validateModelRecord(model, "book-work", {
+				...record,
+				statements: [author("0"), { ...author("0"), id: id("different") }],
 			}),
-		).toThrow(/positions/u);
+		).toThrow(/positions/);
 		expect(() =>
-			validateDescription(profile, { types: [id("book")], relations: [author("0"), author("0")] }),
-		).toThrow(/same relation/u);
-		expect(() =>
-			validateDescription(profile, {
-				types: [id("book")],
-				relations: [{ ...author("0"), definitionId: id("other") }],
+			validateModelRecord(model, "book-work", {
+				...record,
+				statements: [author("0"), author("0")],
 			}),
-		).toThrow(/meaning/u);
+		).toThrow(/identity/);
+		expect(() =>
+			validateModelRecord(model, "book-work", {
+				...record,
+				statements: [{ ...author("0"), definitionId: id("wrong-meaning") }],
+			}),
+		).toThrow(/meaning/);
 	});
 });

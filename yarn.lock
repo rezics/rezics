@@ -6222,6 +6222,7 @@ __metadata:
     "@rezics/avatar": "workspace:*"
     "@rezics/block": "workspace:*"
     "@rezics/brand": "workspace:*"
+    "@rezics/content-adapters": "workspace:*"
     "@rezics/content-language": "workspace:*"
     "@rezics/email": "workspace:*"
     "@rezics/filter": "workspace:*"
@@ -6291,6 +6292,21 @@ __metadata:
   resolution: "@rezics/brand@workspace:packages/brand"
   dependencies:
     tsx: "npm:4.23.13"
+  languageName: unknown
+  linkType: soft
+
+"@rezics/content-adapters@workspace:*, @rezics/content-adapters@workspace:libraries/content-adapters":
+  version: 0.0.0-use.local
+  resolution: "@rezics/content-adapters@workspace:libraries/content-adapters"
+  dependencies:
+    "@rezics/content-language": "workspace:*"
+    "@rezics/schema": "workspace:*"
+    "@types/node": "npm:26.5.0"
+    tsx: "npm:4.23.13"
+    typescript: "npm:7.0.2"
+    vitest: "npm:4.1.10"
+    yaml: "npm:2.9.0"
+    zod: "npm:^4.5.4"
   languageName: unknown
   linkType: soft
 
@@ -6596,6 +6612,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@rezics/schema-importer@workspace:libraries/schema-importer"
   dependencies:
+    "@babel/parser": "npm:^8.0.4"
     "@rezics/content-language": "workspace:*"
     "@rezics/schema": "workspace:*"
     "@types/node": "npm:26.5.0"
@@ -6608,7 +6625,6 @@ __metadata:
     tsx: "npm:4.23.13"
     typescript: "npm:7.0.2"
     vitest: "npm:4.1.10"
-    yaml: "npm:2.9.0"
     zod: "npm:^4.5.4"
   languageName: unknown
   linkType: soft

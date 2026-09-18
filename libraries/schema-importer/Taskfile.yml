@@ -2,7 +2,7 @@ version: "3"
 
 tasks:
     sources:
-        desc: List every supported schema source and converter.
+        desc: List pinned standard vocabulary sources.
         cmds:
             - yarn exec tsx src/cli.ts sources
     fetch:
@@ -14,6 +14,12 @@ tasks:
     convert:
         cmds:
             - yarn exec tsx src/cli.ts convert {{.CLI_ARGS}}
+    inspect-model:
+        cmds: ["yarn exec tsx src/cli.ts inspect-model {{.CLI_ARGS}}"]
+    validate:
+        cmds: ["yarn exec tsx src/cli.ts validate {{.CLI_ARGS}}"]
+    select-model:
+        cmds: ["yarn exec tsx src/cli.ts select-model {{.CLI_ARGS}}"]
     import:
         cmds:
             - yarn exec tsx src/cli.ts import {{.CLI_ARGS}}

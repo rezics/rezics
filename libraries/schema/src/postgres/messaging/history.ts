@@ -13,7 +13,7 @@ import { pgTable } from "../shared/base";
 import { conversation, message } from "./communication";
 import { users } from "../identity/auth";
 import { entityIdentity } from "../catalog/identity";
-import { mediaRepresentation } from "../media/indexing";
+import { mediaRepresentation } from "../media/indexing.generated";
 
 export const conversationMember = pgTable(
 	"conversation_member",

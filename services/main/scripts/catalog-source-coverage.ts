@@ -6,7 +6,7 @@ import {
 	CatalogSourceValues,
 	SourceContractFieldSchema,
 	type SourceContractField,
-} from "@rezics/schema-importer/readers/provider-contracts";
+} from "@rezics/content-adapters/readers/provider-contracts";
 
 const explanation = z.string().trim().min(20).max(4_000);
 const sha256 = z.string().regex(/^[a-f0-9]{64}$/u);

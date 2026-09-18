@@ -3,7 +3,6 @@ import {
 	check,
 	foreignKey,
 	index,
-	integer,
 	jsonb,
 	pgTable,
 	primaryKey,
@@ -11,7 +10,7 @@ import {
 	unique,
 	uuid,
 } from "drizzle-orm/pg-core";
-import { schemaRelease, schemaReleaseTerm, schemaTerm } from "./registry";
+import { schemaRelease, schemaReleaseTerm, schemaTerm } from "./registry.generated";
 import { catalogDefinitionRevision } from "../catalog/identity";
 
 /** @alpha Complete RDF node identity; blank nodes and graphs are scoped to one immutable release. */
@@ -108,86 +107,5 @@ export const catalogDefinitionBinding = pgTable(
 			"catalog_definition_binding_relation_check",
 			sql`${t.relation} in ('exact','specialization','transformation') and jsonb_typeof(${t.contract})='object'`,
 		),
-	],
-);
-
-/** @alpha Converted external schemas keep declarations and references independently of source syntax. */
-export const schemaContract = pgTable(
-	"schema_contract",
-	{
-		id: uuid().primaryKey(),
-		source: text().notNull(),
-		name: text().notNull(),
-		version: text().notNull(),
-		digest: text().notNull(),
-		origin: text().notNull(),
-		dialect: text().notNull(),
-	},
-	(t) => [unique("schema_contract_version_key").on(t.source, t.name, t.version, t.digest)],
-);
-
-/** @alpha Every JSON/SQL/provider declaration has its exact pointer, shape and explicit unknown states. */
-export const schemaContractField = pgTable(
-	"schema_contract_field",
-	{
-		contractId: uuid("contract_id")
-			.notNull()
-			.references(() => schemaContract.id),
-		id: uuid().notNull(),
-		path: text().notNull(),
-		pathHash: text("path_hash").notNull(),
-		shape: text().notNull(),
-		required: text().$type<"yes" | "no" | "unspecified">().notNull(),
-		cardinality: text().$type<"one" | "many" | "unspecified">().notNull(),
-		nullability: text().$type<"nullable" | "non-null" | "unspecified">().notNull(),
-	},
-	(t) => [
-		primaryKey({ columns: [t.contractId, t.id] }),
-		unique("schema_contract_field_path_key").on(t.contractId, t.pathHash),
-		check(
-			"schema_contract_field_states",
-			sql`${t.required} in ('yes','no','unspecified') and ${t.cardinality} in ('one','many','unspecified') and ${t.nullability} in ('nullable','non-null','unspecified')`,
-		),
-	],
-);
-
-/** @alpha Source keywords are structured data, including extension keywords not executed by this compiler. */
-export const schemaContractKeyword = pgTable(
-	"schema_contract_keyword",
-	{
-		contractId: uuid("contract_id").notNull(),
-		fieldId: uuid("field_id").notNull(),
-		position: integer().notNull(),
-		keyword: text().notNull(),
-		value: jsonb().$type<unknown>().notNull(),
-	},
-	(t) => [
-		primaryKey({ columns: [t.contractId, t.fieldId, t.position] }),
-		foreignKey({
-			columns: [t.contractId, t.fieldId],
-			foreignColumns: [schemaContractField.contractId, schemaContractField.id],
-		}),
-		check("schema_contract_keyword_position", sql`${t.position}>=0`),
-	],
-);
-
-/** @alpha Reference resolution is version-pinned; unresolved external contracts remain explicit. */
-export const schemaContractReference = pgTable(
-	"schema_contract_reference",
-	{
-		contractId: uuid("contract_id").notNull(),
-		fieldId: uuid("field_id").notNull(),
-		position: integer().notNull(),
-		kind: text().notNull(),
-		reference: text().notNull(),
-		targetContractId: uuid("target_contract_id").references(() => schemaContract.id),
-		targetPath: text("target_path"),
-	},
-	(t) => [
-		primaryKey({ columns: [t.contractId, t.fieldId, t.position] }),
-		foreignKey({
-			columns: [t.contractId, t.fieldId],
-			foreignColumns: [schemaContractField.contractId, schemaContractField.id],
-		}),
 	],
 );

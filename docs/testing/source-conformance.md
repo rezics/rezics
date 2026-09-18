@@ -26,7 +26,7 @@ not exempt that domain from the common Work contract.
 | Schema.org | Pinned complete vocabulary including retired terms, JSON-LD/Microdata/RDFa input profiles, multiple types, named/anonymous graphs, collections, Role structures and mixed vocabularies; native mapping and public JSON-LD are separate outputs. |
 | Wikidata | Complete statements and datatypes across Items, Properties, Lexemes/Forms/Senses and EntitySchemas; terms, sitelinks/badges, rank, snak states, qualifiers/reference groups, revisions, redirects, dumps and incremental reconciliation. Inventory each namespace's acquisition surface. |
 
-The current [source artifact inventory](../../libraries/schema-importer/sources/catalog/artifacts.lock.json) and [field inventory](../../services/main/src/services/catalog/source-contracts/fields.jsonl) are inputs to reviewed mapping. Declaration counts, raw dumps and old reports are not evidence that every field is supported.
+The current [source artifact inventory](../../libraries/content-adapters/contracts/catalog/artifacts.lock.json) and [field inventory](../../services/main/src/services/catalog/source-contracts/fields.jsonl) are inputs to reviewed mapping. Declaration counts, raw dumps and old reports are not evidence that every field is supported.
 
 The Schema.org/Wikidata inventories and fixtures remain implementation/verification
 deliverables; existing VNDB Wikidata joins or SEO output do not satisfy them.

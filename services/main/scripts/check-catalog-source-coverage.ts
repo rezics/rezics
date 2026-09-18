@@ -37,7 +37,7 @@ export async function checkCatalogSourceCoverage(root: string = repository) {
 			.split(/\r?\n/u)
 			.map((line) => JSON.parse(line)),
 	);
-	const artifacts: unknown = JSON.parse(await read("libraries/schema-importer/sources/catalog/artifacts.lock.json"));
+	const artifacts: unknown = JSON.parse(await read("libraries/content-adapters/contracts/catalog/artifacts.lock.json"));
 	const manifest = SourceCoverageManifestSchema.parse(
 		JSON.parse(await read(`${contracts}/coverage.json`)),
 	);

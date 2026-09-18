@@ -1,0 +1,13 @@
+version: "3"
+tasks:
+    fetch-contracts:
+        cmds: ["yarn exec tsx src/cli.ts fetch-contracts {{.CLI_ARGS}}"]
+    contracts:
+        cmds: ["yarn exec tsx src/cli.ts contracts {{.CLI_ARGS}}"]
+    convert:
+        cmds: ["yarn exec tsx src/cli.ts convert {{.CLI_ARGS}}"]
+    typecheck:
+        cmds: ["yarn exec tsc --noEmit -p tsconfig.json"]
+    test:
+        dir: ../..
+        cmds: ["yarn exec vitest run --project content-adapters"]
