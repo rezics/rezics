@@ -66,6 +66,28 @@ includes:
         dir: ./services/main/openapi-tanstack-query
 
 tasks:
+    artifacts:fetch:
+        desc: Restore exact pinned standard and provider inputs over HTTPS.
+        cmds:
+            - task: schema-importer:fetch
+              vars: { CLI_ARGS: all }
+            - task: content-adapters:fetch-contracts
+              vars: { CLI_ARGS: all }
+
+    artifacts:generate:
+        desc: Regenerate local schema declarations, inventories and reports from restored inputs.
+        cmds:
+            - task: schema-importer:generate
+            - task: schema:catalogue
+            - task: content-adapters:contracts
+              vars: { CLI_ARGS: all }
+
+    artifacts:prepare:
+        desc: Restore pinned inputs and regenerate all ignored schema artifacts.
+        cmds:
+            - task: artifacts:fetch
+            - task: artifacts:generate
+
     generate:
         desc: Generate the OpenAPI document and SDKs.
         cmds:

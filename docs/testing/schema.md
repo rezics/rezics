@@ -8,7 +8,7 @@ The [modeling contract](../architecture/schema-modeling.md),
 [content adapters](../../libraries/content-adapters/README.md) own the resulting
 contracts. The main service owns the sole production migration history.
 
-Earlier results at `beac6497b` remain in Git. Its 940 permissive class profiles and
+Earlier package iterations had 940 permissive class profiles and
 provider-contract database tables were not evidence of complete native modeling;
 those artifacts/tables are removed. Vocabulary navigation has no invented validation
 rules. Native workflow coverage is not inferred from a term or table count.
@@ -71,6 +71,7 @@ fixtures with PostgreSQL `STRATEGY FILE_COPY`; it is not a production backup dri
 ## Reproduction
 
 ```sh
+task artifacts:prepare
 task libraries:schema-importer:generate
 task libraries:schema:catalogue
 task libraries:content-adapters:contracts -- all
@@ -89,12 +90,16 @@ For alternate ports set both `POSTGRES_MIGRATION_HOST_PORT` and
 `POSTGRES_MIGRATION_LOCAL_PORT`. Set `ATLAS_DEV_DATABASE_URL` to the fixture's
 `rezics_atlas_dev` database for the owning structural drift check. The full main
 `db:check` includes the schema database harness after earlier main-domain checks.
-Offline generation uses committed pins; only explicit `fetch` downloads standards.
+The fresh-checkout preparation downloads exact-byte pinned standards and provider
+contracts and regenerates ignored artifacts and the missing local typed migration
+anchor. Later `task artifacts:generate` runs
+offline from the restored inputs; individual `fetch` tasks can repair missing or
+drifted inputs without silently updating the committed pins.
 
 ## Limits
 
-Main typechecking still reports the same 160 pre-existing errors recorded at
-`beac6497b`, involving the earlier IAM/Org/Realm redesign rather than this model
+Main typechecking still reports the same 160 pre-existing errors recorded before
+the standards/model refactor, involving the earlier IAM/Org/Realm redesign rather than this model
 pipeline. The full main database gate rerun also stopped at the Group fixture's
 expectation of a PostgreSQL constraint code where the command returned
 `AccessGroupConflict`. The full main attempt ran before final migration consolidation and passed Auth,

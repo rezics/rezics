@@ -72,3 +72,20 @@ sops-age.key
 /.temp/
 /.VSCodeCounter/
 /example-gitignore/
+
+# Reconstruct pinned external schema inputs and derived inventories locally.
+/libraries/schema-importer/sources/*.ttl
+/libraries/schema-importer/sources/*.rdf
+/libraries/schema-importer/registry/
+/libraries/schema-importer/schemas/
+/libraries/content-adapters/contracts/*/inputs/
+/libraries/content-adapters/generated/
+/libraries/schema/src/generated/
+/libraries/schema/src/postgres/knowledge/*.generated.ts
+/libraries/schema/src/postgres/media/*.generated.ts
+/libraries/schema/src/postgres/vocabulary/*.generated.ts
+/libraries/schema/src/postgres/wiki/*.generated.ts
+/libraries/schema/docs/model.generated.md
+/libraries/schema/docs/tables/
+/libraries/schema/schema-catalogue.generated.json
+/services/main/src/services/database/typed-schema.generated.json

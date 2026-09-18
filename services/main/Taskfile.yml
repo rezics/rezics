@@ -310,7 +310,7 @@ tasks:
             - yarn exec atlas version
 
     db:generate:typed:
-        desc: Produce migration SQL from the tracked typed schema anchor without database replay or qualification.
+        desc: Produce migration SQL from the local typed schema anchor without database replay or qualification.
         cmds:
             - yarn exec tsx scripts/generate-typed-database-migration.ts {{.CLI_ARGS}}
 

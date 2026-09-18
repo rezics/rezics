@@ -63,6 +63,8 @@ original lexical value is never coerced through JavaScript numbers/dates.
 ## Drizzle generation and installation
 
 ```sh
+task artifacts:prepare # fresh checkout; requires network for pinned inputs
+task artifacts:generate # later offline rebuilds
 task libraries:schema-importer:generate
 task libraries:schema:catalogue
 task libraries:schema-importer:inspect-model -- book-work

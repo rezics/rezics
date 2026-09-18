@@ -37,6 +37,26 @@ includes:
         dir: ./packages/storybook
 
 tasks:
+    artifacts:prepare:
+        desc: Restore pinned external inputs and regenerate the local schema artifacts.
+        cmds:
+            - task: libraries:artifacts:prepare
+            - task: artifacts:typed-anchor
+
+    artifacts:generate:
+        desc: Regenerate artifacts offline after pinned inputs have been restored.
+        cmds:
+            - task: libraries:artifacts:generate
+            - task: artifacts:typed-anchor
+
+    artifacts:typed-anchor:
+        desc: Initialize the ignored migration snapshot only when absent.
+        cmds:
+            - task: services-main:db:generate:typed
+              vars: { CLI_ARGS: --initialize }
+        status:
+            - test -f services/main/src/services/database/typed-schema.generated.json
+
     storybook:check:
         desc: Run all owners' component and accessibility suites through the official Vitest addon.
         cmds:

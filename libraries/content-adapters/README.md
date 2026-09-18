@@ -21,13 +21,15 @@ Provider schemas can reveal missing capabilities and drive conformance tests,
 but cannot create native tables or decide native referent/identity automatically.
 
 `contracts/catalog/artifacts.lock.json` pins 46 exact upstream input contracts.
-`contracts/{provider}/inputs/` retains their bytes. Generated contract inventories
-live in `generated/`; they preserve fields, syntax, references and unknown facets
+`contracts/{provider}/inputs/` restores their bytes by URL and SHA-256. Generated
+contract inventories live in `generated/`; both directories are ignored by Git.
+The inventories preserve fields, syntax, references and unknown facets
 for adapter development. There is no provider-contract database schema and no
 native DDL/migration command in this package. Native field dispositions remain in
 main's source-contract owner with their independent evidence requirements.
 
 ```sh
+task artifacts:prepare # fresh checkout: fetch pins and regenerate both packages
 task libraries:content-adapters:fetch-contracts -- all
 task libraries:content-adapters:contracts -- all
 task libraries:content-adapters:convert -- wikibase /absolute/entity.json /absolute/result.json

@@ -14,6 +14,13 @@ replace an existing anchor. The first anchor records the intended model of the
 existing generated migration tip; it does not prove that an installed database
 matches that model.
 
+The anchor is ignored by Git. On a fresh checkout, `task artifacts:prepare`
+restores pinned schema inputs, emits the Drizzle declarations and initializes the
+missing anchor at the checked-out migration tip. `task artifacts:generate` only
+initializes it if missing; neither command overwrites an existing migration anchor
+or changes migration SQL. Released-history checks and database replay remain the
+independent guards for committed SQL integrity and installation.
+
 After editing the owning schema and canonical SQL, generate one coherent migration.
 The tool rejects changed/deleted/replaced history, a different baseline, incompatible
 snapshot versions and implicit changes to an existing partition layout. New physical

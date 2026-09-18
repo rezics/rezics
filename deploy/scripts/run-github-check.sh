@@ -22,6 +22,7 @@ export COMPOSE_PROJECT_NAME="${compose_project}"
 
 bash deploy/scripts/check-released-migration-history.sh
 yarn install --immutable
+task artifacts:prepare
 task apps-web:offline:check
 task apps-web:cloudflare:typegen:check
 task format:check

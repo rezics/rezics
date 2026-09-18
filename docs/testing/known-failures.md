@@ -42,7 +42,7 @@ The September 8 convergence qualification recorded a PostgreSQL SIGILL during At
 ## Main IAM qualification after schema extraction
 
 Observed 2026-09-18 during the [shared schema qualification](schema.md). The clean
-base commit `99be45f46` had 167 TypeScript errors; the shared schema replacement
+base before shared schema extraction had 167 TypeScript errors; the replacement
 retains 160 existing IAM/Org/Realm errors, with no new file/error-code categories.
 `task services-main:typecheck` reproduces them. They include old membership
 fixtures/authority inputs, omitted role-binding eligibility and writes through
@@ -66,6 +66,6 @@ Affected owners include OAuth/participation erasure, Group impact discovery,
 Entity measurements, connected-app grants, recommendation partitions, search
 facets and attribution. The reported implementation files and scanner are
 unchanged by the standards/model refactor; one allowlisted merge path is already
-absent at its base commit `beac6497b`. Review each actual bound and update the
+absent before the standards/model refactor. Review each actual bound and update the
 queries or narrowly justified allowlist, then pass the owning scanner. A bounded
 batch count and an unbounded corpus count must not be accepted interchangeably.
