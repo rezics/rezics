@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import type { DatabaseTransaction } from "../../database";
 import { tag, vocabularyNode } from "../../database/schema";
 import { ensureSimpleTagExpressionInTransaction } from "../../tag-expressions/service";
-import { fractionalPositionAt } from "../../ordering/position";
+import { fractionalPositionAt } from "@rezics/schema/contracts/native/positions";
 import { recordUnitRevision } from "../../units/history";
 import { ContentLabelRegistryManifest, TopLevelSlugNamespaceIds } from "../data";
 import {

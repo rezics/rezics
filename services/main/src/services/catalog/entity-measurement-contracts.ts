@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CatalogReferenceSchema } from "./contracts";
+import { CatalogReferenceSchema } from "@rezics/schema/contracts/native/catalog";
 
 export const EntityMeasurementContextOwnerValues = ["publishing", "music", "program", "software"] as const;
 export const EntityMeasurementContextSchema = CatalogReferenceSchema.extend({ owner: z.enum(EntityMeasurementContextOwnerValues) });

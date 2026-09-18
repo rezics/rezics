@@ -1,4 +1,4 @@
-import { fractionalPositionBetween } from "../../ordering/position";
+import { fractionalPositionBetween } from "@rezics/schema/contracts/native/positions";
 
 export type PlannedCollectionInsertion = {
 	readonly targetId: string;

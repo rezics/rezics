@@ -2,7 +2,7 @@ import { and, eq, gt } from "drizzle-orm";
 import { z } from "zod";
 import { canonicalizeContentLanguageTag } from "@rezics/content-language";
 import type { DatabaseTransaction } from "../database";
-import { musicIdentity } from "../database/schema/catalog-identity";
+import { musicIdentity } from "@rezics/schema/postgres/catalog/identity";
 import { readCatalogAuthorityScope, catalogIdentityReadPredicate } from "../participation/policy";
 import { musicCreditReferenceHeads, requireMusicCreditAccess } from "./music-credit-access";
 import { assertMusicMediumFormatCompatibility } from "./music-medium-attributes";
@@ -25,13 +25,13 @@ import {
 	musicTrackPresentation,
 	musicWork,
 	musicWorkLanguage,
-} from "../database/schema/catalog-music";
+} from "@rezics/schema/postgres/music/music";
 import {
 	CatalogPageSchema,
 	CatalogPartialDateSchema,
 	CatalogReferenceSchema,
 	type CatalogReference,
-} from "./contracts";
+} from "@rezics/schema/contracts/native/catalog";
 import {
 	assertReadableTargets,
 	CatalogReferenceNotFound,

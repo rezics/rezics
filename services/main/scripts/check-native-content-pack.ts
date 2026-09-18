@@ -31,9 +31,9 @@ const { readCatalogContentLanguageSupport } = await import(
 );
 const { BootstrapPlatformAdministratorProfile } = await import("../src/services/bootstrap/data");
 const { withSeedAuthority } = await import("../src/services/seed/identity");
-const { CatalogNameTables } = await import("../src/services/database/schema/catalog-names");
-const { CatalogFactTables } = await import("../src/services/database/schema/catalog-facts");
-const { authEntity } = await import("../src/services/database/schema/participation");
+const { CatalogNameTables } = await import("@rezics/schema/postgres/knowledge/names");
+const { CatalogFactTables } = await import("@rezics/schema/postgres/knowledge/facts");
+const { authEntity } = await import("@rezics/schema/postgres/access/participation");
 const lifecycle = {
 	status: "published",
 	visibility: "public",

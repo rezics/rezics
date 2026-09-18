@@ -7,7 +7,7 @@ import { applyCatalogSourceIdentifierDelta } from "./source-identifier-delta";
 import { runParticipationSavepoint } from "../participation/policy";
 import { musicBrainzLanguageTag } from "./musicbrainz-language";
 import { z } from "zod";
-import { musicDiscToc, musicDiscTocOffset } from "../database/schema/catalog-music";
+import { musicDiscToc, musicDiscTocOffset } from "@rezics/schema/postgres/music/music";
 import {
 	MusicBrainzCatalogContractSha256,
 	MusicBrainzReleaseSchema,

@@ -1,8 +1,8 @@
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { CatalogIdentityTables } from "../database/schema/catalog-identity";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
-import { CatalogIdentityInputSchema, type CatalogIdentityInput } from "./contracts";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
+import { CatalogIdentityInputSchema, type CatalogIdentityInput } from "@rezics/schema/contracts/native/catalog";
 
 /**
  * Write a native identity and its initial provenance in the caller's transaction.

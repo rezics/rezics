@@ -3,16 +3,16 @@ import { and, eq, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import { AccessPermissionValues, accessPermissionKey, type AccessPermission } from "@rezics/access";
 import type { DatabaseTransaction } from "../database";
-import { accessRole } from "../database/schema/access-role";
-import { accessScope, accessSubject } from "../database/schema/access-identity";
-import { accessGroup, accessGroupTree } from "../database/schema/access-group";
+import { accessRole } from "@rezics/schema/postgres/access/access-role";
+import { accessScope, accessSubject } from "@rezics/schema/postgres/access/access-identity";
+import { accessGroup, accessGroupTree } from "@rezics/schema/postgres/access/access-group";
 import {
 	accessRoleBinding,
 	accessRoleBindingScope,
 	accessRoleBindingEvent,
 	accessRoleBindingRevision,
 	accessRoleBindingPermission,
-} from "../database/schema/access-role-binding";
+} from "@rezics/schema/postgres/access/access-role-binding";
 import { AccessPermissionSchema, decodeAccessPermissionSnapshot } from "./permission";
 const versionSchema = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
 const recipientSchema = z.discriminatedUnion("kind", [

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { DatabaseTransaction } from "../database";
-import { imageAsset, imageObject } from "../database/schema/image";
+import { imageAsset, imageObject } from "@rezics/schema/postgres/media/image";
 import { erasePrivateImageBatch, type ImageErasureArchive } from "./erasure";
 
 const authUserId = "019b76da-a800-7100-8000-000000000004";

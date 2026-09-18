@@ -1,8 +1,8 @@
 import { and, eq, sql } from "drizzle-orm";
 import type { JetStreamClient } from "@nats-io/jetstream";
 import type { DatabaseSession } from "../database";
-import { operationalRelayPending as pending } from "../database/schema/operational-runtime";
-import { operationalOutbox as outbox } from "../database/schema/operational-durability";
+import { operationalRelayPending as pending } from "@rezics/schema/postgres/operations/operational-runtime";
+import { operationalOutbox as outbox } from "@rezics/schema/postgres/operations/operational-durability";
 import { decodeEnvelope } from "./envelope";
 import { publishEnvelope } from "./publisher";
 import type { StreamRoute } from "./topology";

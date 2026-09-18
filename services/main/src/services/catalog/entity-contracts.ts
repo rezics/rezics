@@ -1,6 +1,6 @@
 import { canonicalizeContentLanguageTag } from "@rezics/content-language";
 import { z } from "zod";
-import { CatalogPartialDateSchema } from "./contracts";
+import { CatalogPartialDateSchema } from "@rezics/schema/contracts/native/catalog";
 
 const text = (maximum: number) =>
 	z.string().refine((value) => Buffer.byteLength(value, "utf8") <= maximum);

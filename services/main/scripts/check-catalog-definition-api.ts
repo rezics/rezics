@@ -4,10 +4,10 @@ import { eq, inArray } from "drizzle-orm";
 import type { PoolClient } from "pg";
 import { serializeSignedCookie } from "better-call";
 import { initializeObservability } from "@rezics/observability";
-import { users, sessions } from "../src/services/database/schema/auth";
-import { platformCapabilityGrant } from "../src/services/database/schema/realm";
-import { catalogDefinitionRevision } from "../src/services/database/schema/catalog-identity";
-import { catalogDefinitionLabel, catalogDefinitionReview } from "../src/services/database/schema/catalog-definition-governance";
+import { users, sessions } from "@rezics/schema/postgres/identity/auth";
+import { platformCapabilityGrant } from "@rezics/schema/postgres/realms/realm";
+import { catalogDefinitionRevision } from "@rezics/schema/postgres/catalog/identity";
+import { catalogDefinitionLabel, catalogDefinitionReview } from "@rezics/schema/postgres/knowledge/definition-governance";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import {
 	CatalogDefinitionPageSchema,

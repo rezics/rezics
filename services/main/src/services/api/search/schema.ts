@@ -11,7 +11,7 @@ import { t } from "elysia";
 import type { StaticDecode } from "typebox";
 
 import { SearchCountResultSchema } from "../../counts/contract";
-import { ContentRatingValues } from "../../database/schema/contract-values";
+import { ContentRatingValues } from "@rezics/schema/postgres/shared/contract-values";
 import { SearchCategories, SearchSorts } from "../../search/schema";
 import { ContentLanguage, LocalizationLanguageHints, Uuid } from "../schema";
 import {

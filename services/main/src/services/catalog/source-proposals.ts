@@ -8,8 +8,8 @@ import {
 	catalogSourceSubscription as subscriptions,
 	catalogSourceObservationFanout as fanout,
 	catalogSourceBindingRevision as bindingRevisions,
-} from "../database/schema/catalog-source";
-import { type CatalogReference } from "./contracts";
+} from "@rezics/schema/postgres/ingestion/source";
+import { type CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { loadCatalogIdentity } from "./storage";
 import {
 	type CatalogBindingKey,
@@ -20,8 +20,8 @@ import {
 	recordCatalogSourceApplication,
 	type CatalogSourceNativeChange,
 } from "./source-applications";
-import { catalogSourceApplication } from "../database/schema/catalog-source-application";
-import { CatalogIdentityTables } from "../database/schema/catalog-identity";
+import { catalogSourceApplication } from "@rezics/schema/postgres/ingestion/source-application";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
 import {
 	currentParticipationAuthority,
 	runWithApprovedSourceProposal,

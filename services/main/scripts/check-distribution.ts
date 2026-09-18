@@ -3,14 +3,14 @@ import { eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import type { DatabaseTransaction } from "../src/services/database";
-import { users } from "../src/services/database/schema/auth";
-import { distributionIdentity } from "../src/services/database/schema/catalog-identity";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { distributionIdentity } from "@rezics/schema/postgres/catalog/identity";
 import {
 	distributionManifest,
 	distributionMember,
 	distributionPackage,
 	distributionRevision,
-} from "../src/services/database/schema/catalog-distribution";
+} from "@rezics/schema/postgres/publishing/distribution";
 import {
 	createPublication,
 	createMusicRelease,

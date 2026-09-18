@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 
 import { database } from "../database";
-import { CanonicalPgroongaIndexes } from "../database/schema/pgroonga";
+import { CanonicalPgroongaIndexes } from "@rezics/schema/postgres/shared/pgroonga";
 
 const canonicalIndexNames = sql`array[${sql.join(
 	CanonicalPgroongaIndexes.map((index) => sql`${index}`),

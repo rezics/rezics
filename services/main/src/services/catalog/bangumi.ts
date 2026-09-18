@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
-import { CatalogPartialDateSchema } from "./contracts";
+import { CatalogPartialDateSchema } from "@rezics/schema/contracts/native/catalog";
 
 const count = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
 /** Fully bundled upstream component graph recorded by the source-contract audit. */

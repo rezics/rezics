@@ -1,9 +1,9 @@
 import { and, desc, eq, inArray, lt, sql } from "drizzle-orm";
 import type { CatalogReference } from "@rezics/reference";
 import type { DatabaseTransaction } from "../../database";
-import { unitMergeRequest } from "../../database/schema/unit-merge";
+import { unitMergeRequest } from "@rezics/schema/postgres/identity/unit-merge";
 import { loadCatalogIdentity } from "../../catalog/storage";
-import { CatalogIdentityTables } from "../../database/schema/catalog-identity";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
 import {
 	readCatalogAuthorityScope,
 	catalogIdentityReadPredicate,

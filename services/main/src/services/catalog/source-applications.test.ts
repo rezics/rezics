@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
 	MUSIC_SOURCE_COMPONENT_LIMIT,
 	SOURCE_ANCILLARY_CHANGE_LIMIT,
-} from "../database/schema/catalog-source-limits";
+} from "@rezics/schema/postgres/ingestion/source-limits";
 import { CatalogSourceNativeChangesSchema } from "./source-applications";
 
 const ownerId = "01900000-0000-7000-8000-000000000001";

@@ -2,16 +2,16 @@ import { createHash, randomBytes } from "node:crypto";
 import { and, eq, gt, isNull, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { users } from "../database/schema/auth";
+import { users } from "@rezics/schema/postgres/identity/auth";
 import {
 	authEntity,
 	participationGrant,
 	participationGrantEvent,
 	servicePrincipal,
 	ParticipationCapabilityValues,
-} from "../database/schema/participation";
-import { CatalogIdentityTables } from "../database/schema/catalog-identity";
-import { CatalogReferenceSchema } from "../catalog/contracts";
+} from "@rezics/schema/postgres/access/participation";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
+import { CatalogReferenceSchema } from "@rezics/schema/contracts/native/catalog";
 import {
 	ParticipationAuthoritySchema,
 	ParticipationDenied,
@@ -26,7 +26,7 @@ import {
 	suspendUncontrolledEntity,
 } from "./lifecycle";
 import { createParticipantIdentity } from "./identity";
-import { catalogSourceAdoptionProposal } from "../database/schema/catalog-source";
+import { catalogSourceAdoptionProposal } from "@rezics/schema/postgres/ingestion/source";
 import { lockCatalogSourceBinding } from "../catalog/source-bindings";
 import { publicEntityName } from "./presentation";
 

@@ -6,7 +6,7 @@ import { initializeObservability } from "@rezics/observability";
 import { z } from "zod";
 import type { CatalogReference } from "@rezics/reference";
 import type { DatabaseTransaction } from "../src/services/database";
-import { users, sessions } from "../src/services/database/schema/auth";
+import { users, sessions } from "@rezics/schema/postgres/identity/auth";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import {
 	CatalogCreatedSchema,
@@ -31,7 +31,7 @@ import {
 import {
 	InitialFractionalPosition,
 	fractionalPositionBetween,
-} from "../src/services/ordering/position";
+} from "@rezics/schema/contracts/native/positions";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString || process.env.REZICS_DISPOSABLE_MIGRATION_FIXTURE !== "1")

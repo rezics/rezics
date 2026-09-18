@@ -4,7 +4,7 @@ import { AuthenticationRequired } from "../../auth/errors";
 import { ensureAccountAuthenticationAllowed } from "../../auth/account-state";
 import { database, type DatabaseExecutor } from "../../database";
 import { accountEnforcement, users } from "../../database/schema";
-import { EnforcementKindValues } from "../../database/schema/contract-values";
+import { EnforcementKindValues } from "@rezics/schema/postgres/shared/contract-values";
 import { AccountRestricted } from "../errors";
 import { doesEnforcementBlockAction, type AccountAction } from "./policy";
 

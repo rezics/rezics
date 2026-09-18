@@ -1,4 +1,4 @@
-import type { AssociationKind } from "../../database/schema/contract-values";
+import type { AssociationKind } from "@rezics/schema/postgres/shared/contract-values";
 import type { UnitPermission } from "../unit/policy";
 
 export type { AssociationKind };

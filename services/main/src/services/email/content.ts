@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 
 import { database } from "../database";
 import { accountPreference, notification, users } from "../database/schema";
-import { DefaultStoredUiLocale } from "../database/schema/contract-values";
+import { DefaultStoredUiLocale } from "@rezics/schema/postgres/shared/contract-values";
 import { getTranslation } from "../i18n";
 import { notificationTranslationKey } from "../notifications/service";
 import type { ClaimedEmail } from "./outbox";

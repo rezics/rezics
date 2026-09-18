@@ -5,7 +5,7 @@ import { generateDrizzleJson, generateMigration } from "drizzle-kit/api-postgres
 import { drizzle } from "drizzle-orm/node-postgres";
 import { sql } from "drizzle-orm";
 import { Pool } from "pg";
-import * as schema from "../src/services/database/schema/operational-durability";
+import * as schema from "@rezics/schema/postgres/operations/operational-durability";
 import { applyOperationalPartitions } from "./operational-partitions";
 import { aggregateRoutingBucket, type EventEnvelope } from "../src/services/events/envelope";
 import {

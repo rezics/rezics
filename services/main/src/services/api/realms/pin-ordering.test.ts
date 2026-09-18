@@ -5,7 +5,7 @@ import {
 	fractionalPositionAt,
 	fractionalPositionBetween,
 	fractionalPositionNeedsRebalance,
-} from "../../ordering/position";
+} from "@rezics/schema/contracts/native/positions";
 import { planRealmPinMove, type OrderedRealmPin } from "./pin-ordering";
 
 const pins = [

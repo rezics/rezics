@@ -3,7 +3,7 @@ import { and, asc, eq, inArray, notInArray } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../database";
 import { authEntity, accountFollowPreference, unitFollow } from "../database/schema";
-import { fractionalPositionBetween } from "../ordering/position";
+import { fractionalPositionBetween } from "@rezics/schema/contracts/native/positions";
 import { OfficialZoneUnitIds } from "@rezics/slug";
 
 const officialZoneIds = Object.values(OfficialZoneUnitIds);

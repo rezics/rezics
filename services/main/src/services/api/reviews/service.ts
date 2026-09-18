@@ -1,5 +1,5 @@
 import { DefaultResourceVisibility, score } from "../../database/schema";
-import type { ResourceVisibility } from "../../database/schema/contract-values";
+import type { ResourceVisibility } from "@rezics/schema/postgres/shared/contract-values";
 import type { DatabaseTransaction } from "../../database";
 
 export async function upsertScore(

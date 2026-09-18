@@ -3,10 +3,10 @@ import type { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { AccountAuthorization } from "../authorization/account/authorization";
 import { currentParticipationAuthority, ParticipationDenied, requireParticipation } from "../participation/policy";
-import { catalogSourceAdoptionProposal as proposals, catalogSourceRecord as records, catalogSourceMappingClaim as claims, catalogSourceBindingRevision as bindingRevisions } from "../database/schema/catalog-source";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
-import type { CatalogReference } from "./contracts";
-import { catalogSourceApplication as applications } from "../database/schema/catalog-source-application";
+import { catalogSourceAdoptionProposal as proposals, catalogSourceRecord as records, catalogSourceMappingClaim as claims, catalogSourceBindingRevision as bindingRevisions } from "@rezics/schema/postgres/ingestion/source";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
+import { catalogSourceApplication as applications } from "@rezics/schema/postgres/ingestion/source-application";
 import { beginCatalogSourceAcquisition, registerCatalogSourceRecord, loadCatalogSourceReceipt,
 	catalogSourceRecordId, type CatalogSourceReceipt, type CatalogSourceArchive } from "./source-observations";
 import { CatalogSourceIntakeKeySchema, type NativeSourceSnapshot } from "./source-native-registry";

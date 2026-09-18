@@ -3,8 +3,8 @@ import { createHash } from "node:crypto";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
-import { groupingIdentity } from "../database/schema/catalog-identity";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
+import { groupingIdentity } from "@rezics/schema/postgres/catalog/identity";
 import { BangumiIndexSchema, BangumiIndexSubjectPageSchema } from "./bangumi-records";
 import { BangumiApiContractSha256, resolveBangumiDependency } from "./bangumi-adoption";
 import {
@@ -28,8 +28,8 @@ import {
 	loadCatalogIdentity,
 	recordCatalogChange,
 } from "./storage";
-import { type CatalogReference } from "./contracts";
-import { isFractionalPosition } from "../ordering/position";
+import { type CatalogReference } from "@rezics/schema/contracts/native/catalog";
+import { isFractionalPosition } from "@rezics/schema/contracts/native/positions";
 import { writeCatalogSourceScalar } from "./source-semantic-values";
 import { bindCatalogNameSourceOccurrence } from "./names";
 

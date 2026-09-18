@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { ResourceVisibilityValues } from "../database/schema/contract-values";
+import { ResourceVisibilityValues } from "@rezics/schema/postgres/shared/contract-values";
 import { toUnitVisibilityUpdate } from "./visibility-update";
 
 describe("Unit visibility update", () => {

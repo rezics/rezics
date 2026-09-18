@@ -1,7 +1,7 @@
 import Elysia from "elysia";
 import { createHash } from "node:crypto";
 import { z } from "zod";
-import { CatalogOwnerValues } from "../../catalog/contracts";
+import { CatalogOwnerValues } from "@rezics/schema/contracts/native/catalog";
 import session from "../../auth/session";
 import { catalogRead, catalogMutation as mutateCatalog } from "./transaction";
 import type { DatabaseTransaction } from "../../database";

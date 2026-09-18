@@ -4,10 +4,10 @@ import { withCatalogReferenceInitialization } from "./reference-initialization";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { catalogSourceMappingClaim, catalogSourceRecord } from "../database/schema/catalog-source";
+import { catalogSourceMappingClaim, catalogSourceRecord } from "@rezics/schema/postgres/ingestion/source";
 import { catalogSourceRecordId } from "./source-record-key";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
-import { CatalogReferenceSchema, type CatalogOwner, type CatalogReference } from "./contracts";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
+import { CatalogReferenceSchema, type CatalogOwner, type CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { addCatalogName, createCatalogIdentity, loadCatalogIdentity } from "./storage";
 import { sealInitialCatalogSourceBinding } from "./source-bindings";
 import {

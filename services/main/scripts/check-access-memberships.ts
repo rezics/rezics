@@ -262,9 +262,20 @@ try {
 		allocateAccessSubject(tx, { kind: "principal", id: operatorAuthUserId }),
 	);
 	const otherScope = await db.transaction((tx) => allocateAccessScope(tx, { kind: "platform" }));
-	await rejected(
-		"insert into access_membership(scope_id,subject_id) values ($1,$2)",
+	// A reserved identity is allowed by the admission contract and grants no membership.
+	const reserved = await first.query<{
+		id: string;
+		version: string;
+		active_generation: string | null;
+	}>(
+		"insert into access_membership(scope_id,subject_id) values ($1,$2) returning id,version,active_generation",
 		[otherScope, emptySubject],
+	);
+	equal(reserved.rows[0]?.version, "0");
+	equal(reserved.rows[0]?.active_generation, null);
+	await rejected(
+		"update access_membership set version=1,last_generation=1,active_generation=1 where id=$1",
+		[reserved.rows[0]!.id],
 		"23514",
 	);
 	await db.transaction(async (tx) => {
@@ -280,7 +291,14 @@ try {
 	assertions++;
 	equal(
 		await db.transaction((tx) => readAccessMembership(tx, { scopeId: otherScope, subjectId })),
-		null,
+		{
+			id: reserved.rows[0]!.id,
+			scopeId: otherScope,
+			subjectId,
+			version: 0,
+			lastGeneration: 0,
+			activeGeneration: null,
+		},
 	);
 	// An owner-policy denial cannot be bypassed by rejoining; actual ban policy is separately qualified.
 	await db.transaction((tx) =>
@@ -491,7 +509,7 @@ try {
 	for (const path of [
 		"services/main/scripts/check-access-memberships.ts",
 		"services/main/src/services/authorization/memberships.ts",
-		"services/main/src/services/database/schema/access-membership.ts",
+		"libraries/schema/src/postgres/access/access-membership.ts",
 		"services/main/src/services/database/schema/postgres/access-membership.sql",
 		"services/main/src/services/database/migrations/atlas.sum",
 	])

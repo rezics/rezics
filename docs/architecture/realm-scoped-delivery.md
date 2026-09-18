@@ -301,8 +301,8 @@ capacity owner; a new projection is not proof of a single-node 3B-row deployment
 Source inspection on September 15, 2026 found these concrete gaps, not measured
 production failures:
 
-- [Post/reply schema](../../services/main/src/services/database/schema/post.ts)
-  gives replies native Post identity and one root/parent; [Realm associations](../../services/main/src/services/database/schema/realm.ts)
+- [Post/reply schema](../../libraries/schema/src/postgres/forum/post.ts)
+  gives replies native Post identity and one root/parent; [Realm associations](../../libraries/schema/src/postgres/realms/realm.ts)
   allow multiple contexts. [CreateReplyBody](../../services/main/src/services/api/posts/schema.ts)
   still accepts only one `realmId`, so multi-destination authoring is not complete.
 - [Reply selection](../../services/main/src/services/api/posts/reply-tree-query.ts)

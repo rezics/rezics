@@ -6,27 +6,27 @@ import {
 	softwareSourceContextBaseline,
 	softwareSourceParticipationBaseline,
 	softwareSourceRecordBaseline,
-} from "../database/schema/catalog-source-owned-baseline";
+} from "@rezics/schema/postgres/ingestion/source-owned-baseline";
 import {
 	CatalogSourceOwnedApplicationTables,
 	softwareSourceContextApplicationChange,
 	softwareSourceParticipationApplicationChange,
-} from "../database/schema/catalog-source-application";
+} from "@rezics/schema/postgres/ingestion/source-application";
 import {
 	softwareComponentSourceOccurrence,
 	softwareRecordSourceOccurrence,
-} from "../database/schema/catalog-software-source";
+} from "@rezics/schema/postgres/software/software-source";
 import {
 	softwareParticipation,
 	softwareParticipationRevision,
 	softwareParticipationCreditSourceOccurrence,
-} from "../database/schema/catalog-software-participation";
-import { CatalogNameTables } from "../database/schema/catalog-names";
+} from "@rezics/schema/postgres/software/software-participation";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
 import {
 	catalogSourceBindingRevision,
 	catalogSourceMappingClaim,
-} from "../database/schema/catalog-source";
-import { softwareParticipationSourceOccurrence } from "../database/schema/catalog-software";
+} from "@rezics/schema/postgres/ingestion/source";
+import { softwareParticipationSourceOccurrence } from "@rezics/schema/postgres/software/software";
 
 const tables: AnyPgTable[] = [
 	catalogSourceBindingRevision,

@@ -44,7 +44,7 @@ import {
 	unitTagJudgmentStat,
 	video,
 } from "../database/schema";
-import { isEntityKind } from "../database/schema/contract-values";
+import { isEntityKind } from "@rezics/schema/postgres/shared/contract-values";
 
 import { presentNullablePortableTextDocument } from "../documents/portable-text-presentation";
 

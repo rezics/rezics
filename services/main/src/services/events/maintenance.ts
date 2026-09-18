@@ -4,8 +4,8 @@ import type { DatabaseTransaction } from "../database";
 import {
 	operationalCapacity as capacity,
 	operationalOutbox as outbox,
-} from "../database/schema/operational-durability";
-import { operationalRelayPending as pending } from "../database/schema/operational-runtime";
+} from "@rezics/schema/postgres/operations/operational-durability";
+import { operationalRelayPending as pending } from "@rezics/schema/postgres/operations/operational-runtime";
 
 const budgetSchema = z.strictObject({
 	routingBucket: z.number().int().min(0).max(1023),

@@ -1,15 +1,15 @@
 import { createHash, randomUUID } from "node:crypto";
-import { accessMembership } from "../database/schema/access-membership";
-import { realmEnforcement, realmEnrollmentOperation } from "../database/schema/realm-enrollment";
+import { accessMembership } from "@rezics/schema/postgres/access/access-membership";
+import { realmEnforcement, realmEnrollmentOperation } from "@rezics/schema/postgres/realms/realm-enrollment";
 import { presentEnrollment } from "./membership";
 import { and, eq, sql, type SQL } from "drizzle-orm";
 import { database, type DatabaseTransaction } from "../database";
 import {
 	realmEnrollment,
 	realmEnrollmentContact as contacts,
-} from "../database/schema/realm-enrollment";
-import { accessSubject } from "../database/schema/access-identity";
-import { users } from "../database/schema/auth";
+} from "@rezics/schema/postgres/realms/realm-enrollment";
+import { accessSubject } from "@rezics/schema/postgres/access/access-identity";
+import { users } from "@rezics/schema/postgres/identity/auth";
 import { AccessDenied } from "../authorization/http-errors";
 import { lockOrganizationEnrollment } from "../participation/membership-policy";
 

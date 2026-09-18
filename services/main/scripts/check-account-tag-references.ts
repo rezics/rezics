@@ -13,12 +13,12 @@ import {
 	withDatabaseTransactionDeadline,
 	type DatabaseTransaction,
 } from "../src/services/database";
-import { users } from "../src/services/database/schema/auth";
-import { CatalogIdentityTables } from "../src/services/database/schema/catalog-identity";
-import { accountUnitTag, tag } from "../src/services/database/schema/tag";
-import { vocabularyNode } from "../src/services/database/schema/vocabulary";
-import { referenceValue } from "../src/services/database/schema/reference-value";
-import { accountErasure } from "../src/services/database/schema/participation";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
+import { accountUnitTag, tag } from "@rezics/schema/postgres/knowledge/tag";
+import { vocabularyNode } from "@rezics/schema/postgres/knowledge/vocabulary";
+import { referenceValue } from "@rezics/schema/postgres/knowledge/reference-value";
+import { accountErasure } from "@rezics/schema/postgres/access/participation";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import { allocateReferenceValue } from "../src/services/units/reference-value";
 import {
@@ -397,9 +397,9 @@ for (const path of [
 	"services/main/src/services/units/immutable-reference.ts",
 	"services/main/src/services/participation/account-query.ts",
 	"services/main/src/services/participation/erasure.ts",
-	"services/main/src/services/database/schema/tag.ts",
-	"services/main/src/services/database/schema/reference-value.ts",
-	"services/main/src/services/database/schema/unit-reference-columns.ts",
+	"libraries/schema/src/postgres/knowledge/tag.ts",
+	"libraries/schema/src/postgres/knowledge/reference-value.ts",
+	"libraries/schema/src/postgres/shared/unit-reference-columns.ts",
 	"services/main/src/services/database/schema/postgres/account-tag-reference.sql",
 	"services/main/src/services/database/schema/postgres/content-label-policy.sql",
 	"services/main/src/services/database/schema/postgres/participation-private-state.sql",

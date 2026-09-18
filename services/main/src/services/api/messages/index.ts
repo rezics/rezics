@@ -14,7 +14,7 @@ import {
 	conversationRead,
 	message,
 } from "../../database/schema";
-import { authEntity } from "../../database/schema/participation";
+import { authEntity } from "@rezics/schema/postgres/access/participation";
 import { createNotification } from "../../notifications/service";
 import { parseJsonCursor } from "../../pagination";
 import { publicEntityName } from "../../participation/presentation";
@@ -371,7 +371,7 @@ export default new Elysia({ prefix: "/messages" })
 					.from(conversation)
 					.where(eq(conversation.id, params.conversationId))
 					.limit(1);
-				if (!current || (current.low !== user.id && current.high !== user.id))
+				if (!current || !current.low || !current.high || !current.lowEntity || !current.highEntity || (current.low !== user.id && current.high !== user.id))
 					throw new ConversationNotFound();
 				const recipientAuthUserId = current.low === user.id ? current.high : current.low;
 				const senderEntityId = current.low === user.id ? current.lowEntity : current.highEntity;

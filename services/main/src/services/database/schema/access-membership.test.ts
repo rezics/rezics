@@ -5,7 +5,7 @@ import {
 	accessMembership,
 	accessMembershipAdmission,
 	accessMembershipEvent,
-} from "./access-membership";
+} from "@rezics/schema/postgres/access/access-membership";
 
 describe("shared typed membership storage", () => {
 	it("keeps one scope/subject identity with a distinct selected admission generation", () => {

@@ -2,7 +2,7 @@ import { and, desc, eq, gt, lt, sql } from "drizzle-orm";
 import { z } from "zod";
 import { canonicalizeContentLanguageTag } from "@rezics/content-language";
 import type { DatabaseTransaction } from "../database";
-import { softwareIdentity, referenceIdentity } from "../database/schema/catalog-identity";
+import { softwareIdentity, referenceIdentity } from "@rezics/schema/postgres/catalog/identity";
 import {
 	readCatalogAuthorityScope,
 	catalogIdentityReadPredicate,
@@ -21,8 +21,8 @@ import {
 	softwarePatchTarget,
 	softwareRecordRevision,
 	softwareComponentRevision,
-} from "../database/schema/catalog-software";
-import { CatalogPageSchema, CatalogPartialDateSchema, type CatalogReference } from "./contracts";
+} from "@rezics/schema/postgres/software/software";
+import { CatalogPageSchema, CatalogPartialDateSchema, type CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import {
 	CatalogAccessDenied,
 	addCatalogName,

@@ -3,13 +3,13 @@ import { runWithNativeFixtureActor } from "./native-fixture-actor";
 import { eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { users } from "../src/services/database/schema/auth";
+import { users } from "@rezics/schema/postgres/identity/auth";
 import {
 	musicComponentRevision,
 	musicDiscToc,
 	musicDiscTocOffset,
 	musicMediumToc,
-} from "../src/services/database/schema/catalog-music";
+} from "@rezics/schema/postgres/music/music";
 import { createMusicRelease, addMusicMedium } from "../src/services/catalog/domains";
 import {
 	editMusicReleaseMetadata,

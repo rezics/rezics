@@ -2,8 +2,8 @@ import { createHash } from "node:crypto";
 import { and, eq, inArray, isNull, or, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { users } from "../database/schema/auth";
-import { identityPreference, identityPreferenceEvent, identityPreferenceRepresentation } from "../database/schema/identity-preference";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { identityPreference, identityPreferenceEvent, identityPreferenceRepresentation } from "@rezics/schema/postgres/identity/identity-preference";
 import { RequestedAuthoritySelectionSchema } from "./authority-context";
 
 /** One bounded explicit representation context, retained only as a revalidation hint. @internal */

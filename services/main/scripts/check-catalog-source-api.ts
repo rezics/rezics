@@ -6,18 +6,18 @@ import { and, eq, inArray } from "drizzle-orm";
 import { serializeSignedCookie } from "better-call";
 import { initializeObservability } from "@rezics/observability";
 import { z } from "zod";
-import { users, sessions } from "../src/services/database/schema/auth";
+import { users, sessions } from "@rezics/schema/postgres/identity/auth";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
-import { CatalogFactTables } from "../src/services/database/schema/catalog-facts";
-import { CatalogIdentityTables } from "../src/services/database/schema/catalog-identity";
-import { CatalogNameTables } from "../src/services/database/schema/catalog-names";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
 import {
 	catalogSourceProviderBudget,
 	catalogSourceRecord,
 	catalogSourceSnapshot,
 	catalogSourceMappingClaim,
-} from "../src/services/database/schema/catalog-source";
-import { CatalogOwnerValues } from "../src/services/catalog/contracts";
+} from "@rezics/schema/postgres/ingestion/source";
+import { CatalogOwnerValues } from "@rezics/schema/contracts/native/catalog";
 import {
 	CatalogResourceSchema,
 	CatalogNamePageSchema,
@@ -27,7 +27,7 @@ import {
 	AddCatalogNameSchema,
 	EditCatalogNameSchema,
 } from "../src/services/catalog/resource-contracts";
-import { CatalogNameInputSchema } from "../src/services/catalog/name-contracts";
+import { CatalogNameInputSchema } from "@rezics/schema/contracts/native/names";
 import {
 	CatalogSourceIntakeResultSchema,
 	CatalogResourceBindingsPageSchema,
@@ -47,7 +47,7 @@ import {
 	OpenLibraryMappingVersion,
 } from "../src/services/catalog/openlibrary";
 import { catalogSourceRecordId } from "../src/services/catalog/source-record-key";
-import { operationalCapacity } from "../src/services/database/schema/operational-durability";
+import { operationalCapacity } from "@rezics/schema/postgres/operations/operational-durability";
 import { aggregateRoutingBucket } from "../src/services/events/envelope";
 import type { CatalogSourceArchive } from "../src/services/catalog/source-observations";
 import type { CatalogSourceFetch } from "../src/services/catalog/source-acquisition";

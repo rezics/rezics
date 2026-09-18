@@ -4,7 +4,7 @@ const select = vi.hoisted(() => vi.fn());
 
 vi.mock("../database", () => ({ database: { select } }));
 
-import { fractionalPositionAt } from "../ordering/position";
+import { fractionalPositionAt } from "@rezics/schema/contracts/native/positions";
 import {
 	BootstrapUnitIds,
 	ContentLabelRegistryIds,

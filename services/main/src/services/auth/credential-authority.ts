@@ -4,9 +4,9 @@ import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { RequestedAuthoritySelection } from "@rezics/access";
 import type { DatabaseTransaction } from "../database";
-import { apiKeyAuthority, apikeys, sessions, users } from "../database/schema/auth";
+import { apiKeyAuthority, apikeys, sessions, users } from "@rezics/schema/postgres/identity/auth";
 import { RequestedAuthoritySelectionSchema } from "../authorization/authority-context";
-import { ApiPermissionValues, fromApiKeyPermissions, type ApiPermission } from "./api-permissions";
+import { ApiPermissionValues, fromApiKeyPermissions, type ApiPermission } from "@rezics/schema/contracts/native/api-permissions";
 import { CredentialControlFreshAgeSeconds } from "./credential-policy";
 
 const uuid = z.uuid().toLowerCase();
@@ -14,10 +14,8 @@ const authoritySchema = z.union([z.strictObject({ mode: z.literal("operator") })
 const metadataSchema = z.strictObject({ version: z.literal(1), authority: authoritySchema });
 /** First-party credential authority is operator-wide or an explicit context limit. @internal */
 export type FirstPartyCredentialAuthority = z.infer<typeof authoritySchema>;
-/** Private proof produced after authenticating the secret; IDs alone are not credentials. @internal */
-export type FirstPartyCredentialProof =
-	| { kind: "session"; id: string; principalId: string; tokenDigest: string }
-	| { kind: "api-key"; id: string; principalId: string; tokenDigest: string };
+import type { FirstPartyCredentialProof } from "@rezics/schema/contracts/native/authority";
+export type { FirstPartyCredentialProof };
 /** Credential no longer authenticates its original principal/context or entry scope. @internal */
 export class CredentialAuthorityDenied extends Error {
 	constructor() { super("Current credential authority is required"); }

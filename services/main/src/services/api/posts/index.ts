@@ -26,7 +26,7 @@ import {
 } from "../../database/schema";
 import { runVoteTransaction } from "../../database/vote-admission";
 import { createNotification } from "../../notifications/service";
-import { fractionalPositionAt, fractionalPositionBetween } from "../../ordering/position";
+import { fractionalPositionAt, fractionalPositionBetween } from "@rezics/schema/contracts/native/positions";
 import { usesSharedPostLocalizationRoute } from "../../posts/localization-route";
 import { getPostSubjectPresentation } from "../../posts/presentation";
 import { selectPostProgressEntry } from "../../posts/progress";

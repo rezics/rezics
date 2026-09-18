@@ -3,8 +3,8 @@ import { MusicBrainzRelationEndpointFamilies } from "./musicbrainz-relation-plan
 import { catalogReferenceAwareSupportColumns } from "./source-support";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
-import type { CatalogReference } from "./contracts";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { MusicBrainzRelationSchema, musicBrainzDate } from "./musicbrainz";
 import { bindReferencedSourceIdentity } from "./source-references";
 import type { recordCatalogSourceDocument } from "./source-observations";

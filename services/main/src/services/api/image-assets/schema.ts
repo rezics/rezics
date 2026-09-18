@@ -4,7 +4,7 @@ import { t } from "elysia";
 import {
 	ImageAssetPresentationRoleValues,
 	ImageAssetStatusValues,
-} from "../../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 import { Uuid } from "../schema";
 
 export const ImageAssetAccess = t.Union([t.Literal("private"), t.Literal("public")]);

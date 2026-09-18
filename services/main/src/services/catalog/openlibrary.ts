@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CatalogPartialDateSchema } from "./contracts";
+import { CatalogPartialDateSchema } from "@rezics/schema/contracts/native/catalog";
 const reference = z.object({ key: z.string().min(1) }).passthrough();
 const strings = z.array(z.string()).max(8192);
 export const OpenLibraryTextSchema = z.union([

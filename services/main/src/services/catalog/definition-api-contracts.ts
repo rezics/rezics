@@ -1,8 +1,8 @@
 import { parseContentLanguageTag } from "@rezics/content-language";
 import { z } from "zod";
-import { CatalogValueKindValues } from "./contracts";
-import { CatalogDefinitionConstraintsSchema } from "./definition-contracts";
-import { CatalogRevisionNumberSchema } from "./name-contracts";
+import { CatalogValueKindValues } from "@rezics/schema/contracts/native/catalog";
+import { CatalogDefinitionConstraintsSchema } from "@rezics/schema/contracts/native/definition";
+import { CatalogRevisionNumberSchema } from "@rezics/schema/contracts/native/names";
 
 const text = (bytes: number) => z.string().min(1).refine(value => Buffer.byteLength(value, "utf8") <= bytes);
 export const CatalogDefinitionKindSchema = z.enum(["class", "property", "predicate", "role", "vocabulary"]);

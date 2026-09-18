@@ -4,7 +4,7 @@ import {
 	CatalogReferenceSchema,
 	CatalogPartialDateSchema,
 	CatalogFactStateValues,
-} from "./contracts";
+} from "@rezics/schema/contracts/native/catalog";
 import {
 	CreateEntitySchema,
 	ReferenceProfileSchema,
@@ -22,14 +22,14 @@ import {
 	CatalogRevisionNumberSchema,
 	CatalogNameOriginValues,
 	CatalogTranslationMethodValues,
-} from "./name-contracts";
-import { CatalogNameTables } from "../database/schema/catalog-names";
+} from "@rezics/schema/contracts/native/names";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
 import {
 	ContentRatingValues,
 	ModerationStatusValues,
 	ResourceVisibilityValues,
 	UnitStatusValues,
-} from "../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 
 const name = NativeCatalogNameSchema;
 const nullableId = z.uuid().nullable().optional();

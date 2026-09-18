@@ -17,7 +17,7 @@ import {
 	RealmUnitStatusValues,
 	UnitStatusValues,
 	ResourceVisibilityValues,
-} from "../../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 import {
 	DateTime,
 	FractionalPosition,

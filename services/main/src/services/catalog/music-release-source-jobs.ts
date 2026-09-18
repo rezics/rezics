@@ -1,4 +1,4 @@
-import { MUSIC_SOURCE_DEPENDENCY_LIMIT, MUSIC_SOURCE_DEPENDENCY_POSITION_LIMIT, SOURCE_ACQUISITION_IO_TIMEOUT_MS } from "../database/schema/catalog-source-limits";
+import { MUSIC_SOURCE_DEPENDENCY_LIMIT, MUSIC_SOURCE_DEPENDENCY_POSITION_LIMIT, SOURCE_ACQUISITION_IO_TIMEOUT_MS } from "@rezics/schema/postgres/ingestion/source-limits";
 import { peekActiveObservability } from "@rezics/observability";
 import { withPreparedMusicBrainzRecordings } from "./musicbrainz-reference-cache";
 import { tracks } from "./musicbrainz-release-plan";
@@ -6,9 +6,9 @@ import { planMusicBrainzDependencies, prepareMusicBrainzProposalDependencies, Mu
 import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseExecutor, DatabaseTransaction } from "../database";
-import { musicReleaseSourceJob as jobs } from "../database/schema/catalog-music-source-job";
-import { catalogSourceAdoptionProposal as proposals, catalogSourceRecord as records } from "../database/schema/catalog-source";
-import { catalogSourceApplication as applications } from "../database/schema/catalog-source-application";
+import { musicReleaseSourceJob as jobs } from "@rezics/schema/postgres/music/music-source-job";
+import { catalogSourceAdoptionProposal as proposals, catalogSourceRecord as records } from "@rezics/schema/postgres/ingestion/source";
+import { catalogSourceApplication as applications } from "@rezics/schema/postgres/ingestion/source-application";
 import { currentParticipationAuthority, ParticipationAuthoritySchema, ParticipationDenied, requireParticipation, runWithParticipationAuthority } from "../participation/policy";
 import { loadCatalogIdentity, CatalogReferenceNotFound } from "./storage";
 import { lockCatalogSourceBinding } from "./source-bindings";

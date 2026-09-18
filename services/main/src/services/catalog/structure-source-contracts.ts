@@ -4,20 +4,8 @@ import { PublishingStructureSchema } from "./publishing";
 
 export const StructureSourceOwnerSchema = z.enum(["program", "publishing"]);
 export type StructureSourceOwner = z.output<typeof StructureSourceOwnerSchema>;
-export const StructureSourceComponentSchema = z.enum([
-	"program_work",
-	"program_season",
-	"program_version",
-	"program_episode",
-	"publishing_work",
-	"publishing_text_version",
-	"publishing_publication",
-	"publishing_serialization",
-]);
-export type StructureSourceComponent = z.output<typeof StructureSourceComponentSchema>;
-export type StructureSourceValue =
-	| z.output<typeof ProgramStructureSchema>
-	| z.output<typeof PublishingStructureSchema>;
+import { StructureSourceComponentSchema, type StructureSourceComponent, type StructureSourceValue } from "@rezics/schema/contracts/native/source-values";
+export { StructureSourceComponentSchema, type StructureSourceComponent, type StructureSourceValue };
 export type StructureSourceProjection = { value: StructureSourceValue; observedFields: string[] };
 export const CatalogStructureSourceChangeSchema = z
 	.strictObject({

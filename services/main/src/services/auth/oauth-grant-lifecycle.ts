@@ -4,16 +4,16 @@ import { APIError } from "better-auth/api";
 import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { withDatabaseTransactionContext, type DatabaseTransaction } from "../database";
-import { oauthGrantContext, oauthAccessContext, oauthRefreshContext } from "../database/schema/oauth-grant-context";
-import { oauthAccessTokens, oauthRefreshTokens } from "../database/schema/auth-oauth.generated";
-import { users } from "../database/schema/auth";
+import { oauthGrantContext, oauthAccessContext, oauthRefreshContext } from "@rezics/schema/postgres/integrations/oauth-grant-context";
+import { oauthAccessTokens, oauthRefreshTokens } from "@rezics/schema/postgres/identity/auth-oauth.generated";
+import { users } from "@rezics/schema/postgres/identity/auth";
 import { runAccessTransaction, rethrowAccessFailure, requireAccessAdmission } from "../authorization/transaction";
 import { AccessChanged, AccessDenied, AccessUnavailable } from "../authorization/http-errors";
 import { withFrozenCimdClients } from "./cimd-admission";
 import { readOAuthClientPolicy } from "./oauth-client-policy";
 import { readOAuthClientSecretPolicy } from "./oauth-client-secrets";
 import { readOAuthRefreshTokenContext } from "./oauth-token-context";
-import { SupportedOAuthScopes } from "./oauth-profile-values";
+import { SupportedOAuthScopes } from "@rezics/schema/contracts/native/oauth";
 import { createUserOAuthGrantContext, createInstallationOAuthGrantContext, readOAuthGrantContext,
 	invalidateOAuthAuthorizationCode, invalidateOAuthRefreshFamily, lockOAuthRefreshFamily,
 	selectOAuthIssuanceContext, OAuthGrantContextDenied, OAuthGrantContextUnavailable } from "./oauth-grant-context";

@@ -6,8 +6,8 @@ import {
 	musicAlternativeTrack,
 	musicMediumIdentifier,
 	musicTrackIdentifier,
-} from "../database/schema/catalog-music";
-import type { CatalogReference } from "./contracts";
+} from "@rezics/schema/postgres/music/music";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { MusicBrainzCatalogContractSha256, musicBrainzSourceKey } from "./musicbrainz";
 import { MusicBrainzAlternativeReleaseDumpSchema } from "./musicbrainz-alternative-contracts";
 import { musicBrainzLanguageTag } from "./musicbrainz-language";

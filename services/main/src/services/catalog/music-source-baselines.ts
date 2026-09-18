@@ -4,14 +4,14 @@ import type { DatabaseTransaction } from "../database";
 import {
 	musicComponentRevision,
 	musicComponentSourceOccurrence,
-} from "../database/schema/catalog-music";
-import { musicComponentSourceBaseline } from "../database/schema/catalog-music-source";
+} from "@rezics/schema/postgres/music/music";
+import { musicComponentSourceBaseline } from "@rezics/schema/postgres/music/music-source";
 import {
 	catalogSourceAdoptionProposal,
 	catalogSourceBindingRevision,
-} from "../database/schema/catalog-source";
+} from "@rezics/schema/postgres/ingestion/source";
 import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspondence";
-import { catalogSourceApplication } from "../database/schema/catalog-source-application";
+import { catalogSourceApplication } from "@rezics/schema/postgres/ingestion/source-application";
 import type { CatalogSourceNativeChange } from "./source-applications";
 
 /** @internal Resolves only a journal-proved compensation frontier, never an equal spelling or equal row body. */

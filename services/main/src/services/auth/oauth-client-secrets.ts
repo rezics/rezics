@@ -2,9 +2,9 @@ import { createHash } from "node:crypto";
 import { and, eq, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { oauthClientAuthority } from "../database/schema/oauth-client-authority";
-import { oauthClients } from "../database/schema/auth-oauth.generated";
-import { oauthClientSecretEvent, oauthClientSecretPolicy } from "../database/schema/oauth-client-secret-policy";
+import { oauthClientAuthority } from "@rezics/schema/postgres/integrations/oauth-client-authority";
+import { oauthClients } from "@rezics/schema/postgres/identity/auth-oauth.generated";
+import { oauthClientSecretEvent, oauthClientSecretPolicy } from "@rezics/schema/postgres/integrations/oauth-client-secret-policy";
 
 const id = z.uuid().toLowerCase(), version = z.number().int().nonnegative().safe();
 const base = { clientId: id, operationId: id, expectedVersion: version, operatorAuthUserId: id, authoritySubjectId: id };

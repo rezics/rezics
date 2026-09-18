@@ -1,10 +1,10 @@
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { database } from "../database";
-import { users } from "../database/schema/auth";
+import { users } from "@rezics/schema/postgres/identity/auth";
 import { auth } from "./index";
 import { ensureAccountAuthenticationAllowed } from "./account-state";
-import { ApiPermissionValues, fromApiKeyPermissions, type ApiPermission } from "./api-permissions";
+import { ApiPermissionValues, fromApiKeyPermissions, type ApiPermission } from "@rezics/schema/contracts/native/api-permissions";
 import { captureSessionCredentialProof, captureApiKeyCredentialProof } from "./credential-authority";
 import { AuthenticationRequired, ApiTokenPermissionRequired, ApiTokenRateLimitExceeded } from "./errors";
 

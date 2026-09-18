@@ -5,13 +5,13 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { registerCatalogSourceRecord } from "../src/services/catalog/source-observations";
 import type { DatabaseTransaction } from "../src/services/database";
-import { users } from "../src/services/database/schema/auth";
+import { users } from "@rezics/schema/postgres/identity/auth";
 import {
 	softwareParticipationContext,
 	softwareParticipationContextRevision,
 	softwareParticipationSourceOccurrence,
-} from "../src/services/database/schema/catalog-software";
-import { catalogSourceSnapshot } from "../src/services/database/schema/catalog-source";
+} from "@rezics/schema/postgres/software/software";
+import { catalogSourceSnapshot } from "@rezics/schema/postgres/ingestion/source";
 import { createVisualNovel } from "../src/services/catalog/domains";
 import {
 	createSoftwareParticipationContext,

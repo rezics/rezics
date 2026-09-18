@@ -5,12 +5,12 @@ import { and, eq, gt, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { PrincipalRequestContext } from "../auth/principal-session";
 import type { DatabaseTransaction } from "../database";
-import { accessMembership } from "../database/schema/access-membership";
+import { accessMembership } from "@rezics/schema/postgres/access/access-membership";
 import {
 	realmEnrollment,
 	realmEnforcement,
 	realmEnrollmentOperation,
-} from "../database/schema/realm-enrollment";
+} from "@rezics/schema/postgres/realms/realm-enrollment";
 import { resolveAccessSubject } from "../authorization/identities";
 import { requireAccessAdmission, rethrowAccessFailure } from "../authorization/transaction";
 import {

@@ -1,0 +1,30 @@
+{
+	"name": "@rezics/schema-importer",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"license": "AGPL-3.0-only",
+	"exports": {
+		".": "./src/index.ts",
+		"./readers/*": "./src/readers/*.ts",
+		"./targets/*": "./src/targets/*.ts"
+	},
+	"dependencies": {
+		"@rezics/content-language": "workspace:*",
+		"@rezics/schema": "workspace:*",
+		"drizzle-orm": "1.0.0-rc.4",
+		"pg": "^8.23.0",
+		"rdf-canonize": "5.0.0",
+		"rdf-parse": "5.0.0",
+		"yaml": "2.9.0",
+		"zod": "^4.5.4"
+	},
+	"devDependencies": {
+		"@types/node": "26.5.0",
+		"@types/pg": "^8.23.1",
+		"drizzle-kit": "1.0.0-rc.4",
+		"tsx": "4.23.13",
+		"typescript": "7.0.2",
+		"vitest": "4.1.10"
+	}
+}

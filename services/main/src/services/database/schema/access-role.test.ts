@@ -6,7 +6,7 @@ import {
 	accessRoleRevision,
 	accessRolePermission,
 	accessRoleEvent,
-} from "./access-role";
+} from "@rezics/schema/postgres/access/access-role";
 
 describe("scoped role persistence", () => {
 	it("keeps a narrow scoped head and independent immutable definition keys", () => {

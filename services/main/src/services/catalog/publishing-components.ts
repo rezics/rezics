@@ -4,8 +4,8 @@ import type { DatabaseTransaction } from "../database";
 import {
 	publishingPublicationFacet,
 	publishingReleaseEvent,
-} from "../database/schema/catalog-publishing";
-import { CatalogPartialDateSchema, type CatalogReference } from "./contracts";
+} from "@rezics/schema/postgres/publishing/publishing";
+import { CatalogPartialDateSchema, type CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { assertCatalogDefinitionTarget } from "./definitions";
 import { assertReadableTargets, loadCatalogIdentity, recordCatalogChange } from "./storage";
 import {

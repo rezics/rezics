@@ -1,6 +1,6 @@
 import { t } from "elysia";
 
-import { ApiPermissionValues } from "../../auth/api-permissions";
+import { ApiPermissionValues } from "@rezics/schema/contracts/native/api-permissions";
 import {
 	PrivilegedApiAccountQuotaOverride,
 	ApiTokenQuotaOverrideInput,

@@ -7,17 +7,17 @@ import {
 import { issueParticipationGrant } from "../src/services/participation/commands";
 import type { CatalogSourceNativeWriter } from "../src/services/catalog/source-proposals";
 import { checkSourceRelationDelta } from "./source-relation-delta-fixture";
-import { CatalogFactTables } from "../src/services/database/schema/catalog-facts";
-import type { CatalogReference } from "../src/services/catalog/contracts";
-import { programEpisode } from "../src/services/database/schema/catalog-program";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
+import { programEpisode } from "@rezics/schema/postgres/audiovisual/program";
 import assert from "node:assert/strict";
 import { Readable } from "node:stream";
 import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { users } from "../src/services/database/schema/auth";
-import { operationalCapacity } from "../src/services/database/schema/operational-durability";
-import { CatalogNameTables } from "../src/services/database/schema/catalog-names";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { operationalCapacity } from "@rezics/schema/postgres/operations/operational-durability";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
 import { runWithNativeFixtureActor } from "./native-fixture-actor";
 import { aggregateRoutingBucket } from "../src/services/events/envelope";
 import {

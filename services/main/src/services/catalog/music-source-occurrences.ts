@@ -1,10 +1,10 @@
 import { catalogSourcePath } from "./source-document-scope";
 import { AsyncLocalStorage } from "node:async_hooks";
-import { MUSIC_SOURCE_OCCURRENCE_LIMIT } from "../database/schema/catalog-source-limits";
+import { MUSIC_SOURCE_OCCURRENCE_LIMIT } from "@rezics/schema/postgres/ingestion/source-limits";
 import { and, eq, gt } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { musicComponentSourceOccurrence } from "../database/schema/catalog-music";
+import { musicComponentSourceOccurrence } from "@rezics/schema/postgres/music/music";
 import { readMusicComponentHead, readMusicComponentHeads } from "./music-structure";
 import {
 	MusicComponentNameSchema,

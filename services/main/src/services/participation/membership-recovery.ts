@@ -4,9 +4,9 @@ import type { DatabaseTransaction } from "../database";
 import {
 	accessRecoveryPath,
 	accessRecoveryPolicy,
-} from "../database/schema/access-group-admission";
-import { accessRoleBindingScope } from "../database/schema/access-role-binding";
-import { accessMembership } from "../database/schema/access-membership";
+} from "@rezics/schema/postgres/access/access-group-admission";
+import { accessRoleBindingScope } from "@rezics/schema/postgres/access/access-role-binding";
+import { accessMembership } from "@rezics/schema/postgres/access/access-membership";
 import { AccessDenied, AccessUnavailable } from "../authorization/http-errors";
 import { groupAuthoritySourceDigest } from "../authorization/group-impact-evaluation";
 import {

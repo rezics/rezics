@@ -5,7 +5,7 @@ import { t } from "elysia";
 import {
 	GovernanceMaxRuleReferences,
 	ContentReviewCaseStateValues,
-} from "../../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 import { ContentLanguage, DateTime, LocalizationLanguageQuery, Uuid } from "../schema";
 import { GovernanceRuleReference } from "../governance/schema";
 import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";

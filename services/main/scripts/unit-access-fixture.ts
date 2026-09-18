@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import type { DatabaseTransaction } from "../src/services/database";
-import { realm, realmRule, realmRuleRevision } from "../src/services/database/schema/realm";
+import { realm, realmRule, realmRuleRevision } from "@rezics/schema/postgres/realms/realm";
 import { createGovernanceDecision } from "../src/services/governance/decision-service";
 
 /** Supply real finalized rule-backed evidence for an isolated restriction fixture. */

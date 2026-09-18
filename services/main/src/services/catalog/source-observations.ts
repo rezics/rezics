@@ -1,8 +1,8 @@
-import { SOURCE_DOCUMENT_BYTE_LIMIT, SOURCE_MULTIPART_BYTE_LIMIT, SOURCE_MULTIPART_PART_LIMIT, SOURCE_MANIFEST_BYTE_LIMIT, SOURCE_ACQUISITION_IO_TIMEOUT_MS } from "../database/schema/catalog-source-limits";
+import { SOURCE_DOCUMENT_BYTE_LIMIT, SOURCE_MULTIPART_BYTE_LIMIT, SOURCE_MULTIPART_PART_LIMIT, SOURCE_MANIFEST_BYTE_LIMIT, SOURCE_ACQUISITION_IO_TIMEOUT_MS } from "@rezics/schema/postgres/ingestion/source-limits";
 import { withSourceDocumentPaths } from "./source-document-scope";
 export { catalogSourcePath, catalogSourceLogicalPath } from "./source-document-scope";
 import { isDeepStrictEqual } from "node:util";
-import { catalogSourceSnapshotBundle, catalogSourceSnapshotPart } from "../database/schema/catalog-source-multipart";
+import { catalogSourceSnapshotBundle, catalogSourceSnapshotPart } from "@rezics/schema/postgres/ingestion/source-multipart";
 import { CatalogSourceManifestSchema, CatalogSourceMultipartReceiptSchema, type CatalogSourceMultipartReceipt } from "./source-multipart-contracts";
 import { createHash } from "node:crypto";
 import { Readable, addAbortSignal } from "node:stream";
@@ -10,7 +10,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { storage } from "../storage";
-import { catalogSourceRecord, catalogSourceSnapshot } from "../database/schema/catalog-source";
+import { catalogSourceRecord, catalogSourceSnapshot } from "@rezics/schema/postgres/ingestion/source";
 import { appendOperationalOutbox } from "../events/durability";
 import { createSourceObservationEvent } from "./source-events";
 

@@ -9,15 +9,15 @@ import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import type { DatabaseTransaction } from "../src/services/database";
-import { users } from "../src/services/database/schema/auth";
+import { users } from "@rezics/schema/postgres/identity/auth";
 import {
 	authEntity,
 	entityParticipation,
 	participationGrant,
-} from "../src/services/database/schema/participation";
-import { entityPresentation } from "../src/services/database/schema/entity-presentation";
-import { platformCapabilityGrant } from "../src/services/database/schema/realm";
-import { operationalCapacity } from "../src/services/database/schema/operational-durability";
+} from "@rezics/schema/postgres/access/participation";
+import { entityPresentation } from "@rezics/schema/postgres/identity/entity-presentation";
+import { platformCapabilityGrant } from "@rezics/schema/postgres/realms/realm";
+import { operationalCapacity } from "@rezics/schema/postgres/operations/operational-durability";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import { createManagedOrganization } from "../src/services/participation/organizations";
 import {

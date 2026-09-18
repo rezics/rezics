@@ -2,14 +2,14 @@ import assert from "node:assert/strict";
 import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { users } from "../src/services/database/schema/auth";
-import { entityCatalogProfileRevision } from "../src/services/database/schema/catalog-entity";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { entityCatalogProfileRevision } from "@rezics/schema/postgres/catalog/entity";
 import {
 	referenceArea,
 	referenceCatalogProfileRevision,
-} from "../src/services/database/schema/catalog-reference";
-import { referenceIdentity } from "../src/services/database/schema/catalog-identity";
-import { groupingOrderEntry } from "../src/services/database/schema/catalog-grouping";
+} from "@rezics/schema/postgres/catalog/reference";
+import { referenceIdentity } from "@rezics/schema/postgres/catalog/identity";
+import { groupingOrderEntry } from "@rezics/schema/postgres/catalog/grouping";
 import { transitionCatalogSemanticState } from "../src/services/catalog/semantic-history";
 import {
 	createEntity,

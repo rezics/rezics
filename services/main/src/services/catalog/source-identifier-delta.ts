@@ -2,15 +2,15 @@ import { catalogSourcePath } from "./source-document-scope";
 import { and, eq, isNull, ne, or, getTableColumns } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
-import { CatalogNameTables } from "../database/schema/catalog-names";
-import type { CatalogReference } from "./contracts";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import {
 	addCatalogIdentifier,
 	bindCatalogIdentifierSourceOccurrence,
 	reviseCatalogIdentifier,
 } from "./identifiers";
-import { normalizeCatalogIdentifier } from "./name-contracts";
+import { normalizeCatalogIdentifier } from "@rezics/schema/contracts/native/names";
 import { catalogIdentifierRevisionValues } from "./source-owned-compensation";
 import { resolveCatalogSourceOwnedBaseline } from "./source-owned-baselines";
 import { catalogSourceSupportColumns } from "./source-support";

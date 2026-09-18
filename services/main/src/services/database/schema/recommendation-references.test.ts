@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { getTableConfig } from "drizzle-orm/pg-core";
-import { recommendationExclusion } from "./recommendation";
-import { referenceValue } from "./reference-value";
+import { recommendationExclusion } from "@rezics/schema/postgres/discovery/recommendation";
+import { referenceValue } from "@rezics/schema/postgres/knowledge/reference-value";
 
 describe("private recommendation exclusion references", () => {
 	it("stores one restrictive canonical reference without an independent native target", () => {

@@ -5,7 +5,7 @@ import {
 	type RevisionAttributionAssurance,
 	type RevisionContributionRole,
 	type UnitRevisionPrimaryContributionKind,
-} from "../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 
 export {
 	RevisionAttributionAssuranceValues,

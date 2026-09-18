@@ -1,8 +1,8 @@
 import { sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
-import type { CatalogOwner } from "./contracts";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
+import type { CatalogOwner } from "@rezics/schema/contracts/native/catalog";
 
 export const CatalogNameLabelSchema = z.strictObject({
 	value: z.string(),

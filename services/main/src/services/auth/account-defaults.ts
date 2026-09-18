@@ -1,5 +1,5 @@
 import type { DatabaseTransaction } from "../database";
-import { accountFavoritesState } from "../database/schema/favorites";
+import { accountFavoritesState } from "@rezics/schema/postgres/community/favorites";
 import { ensureOfficialZoneFollows } from "../bootstrap/official-zone-follows";
 
 /** Required account resources are committed with first self-identity admission. @internal */

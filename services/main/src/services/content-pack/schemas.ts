@@ -1,4 +1,4 @@
-import { CatalogIdentifierValuesSchema } from "../catalog/name-contracts";
+import { CatalogIdentifierValuesSchema } from "@rezics/schema/contracts/native/names";
 import { PublishingComponentValuesSchema } from "../catalog/publishing-components";
 import { SoftwareReleaseComponentSchema } from "../catalog/software";
 import {
@@ -17,7 +17,7 @@ import { isLicenseId } from "@rezics/license";
 import { CatalogOwnerValues, UnitOwnerValues } from "@rezics/reference";
 import { SlugLabelPattern } from "@rezics/slug";
 import { z } from "zod";
-import { CatalogDefinitionInputSchema } from "../catalog/contracts";
+import { CatalogDefinitionInputSchema } from "@rezics/schema/contracts/native/catalog";
 import { CreateCatalogResourceSchema } from "../catalog/resource-contracts";
 import { nativePackReference } from "./native-contracts";
 
@@ -37,14 +37,14 @@ import {
 	SubjectAssociationRoleValues,
 	UnitOwnershipModeValues,
 	UnitStatusValues,
-} from "../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 import {
 	TagExpressionArgumentRoleValues,
 	TagExpressionInferenceKindValues,
 	TagExpressionKindValues,
 	TagExpressionLabelComponentKindValues,
-} from "../database/schema/tag-expression";
-import { TagRelationKindValues } from "../database/schema/vocabulary";
+} from "@rezics/schema/postgres/knowledge/tag-expression";
+import { TagRelationKindValues } from "@rezics/schema/postgres/knowledge/vocabulary";
 
 const MaximumPostgresInteger = 2_147_483_647;
 const ContentLanguageSupportOwnerValues = [

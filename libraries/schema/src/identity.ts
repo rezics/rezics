@@ -1,9 +1,10 @@
 import { createHash } from "node:crypto";
 import { v5 } from "uuid";
 import { IriSchema } from "./contracts";
+import { RezicsNamespaces } from "./namespaces";
 
 // Public, immutable namespace. Its value is part of bundle format 1, not a deployment setting.
-const namespace = v5("https://rezics.org/ns/schema/identity/v1", v5.URL);
+const namespace = v5(RezicsNamespaces.identity, v5.URL);
 
 /** @alpha Name-based identities are reproducible across deployments and database implementations. */
 export function schemaId(kind: string, ...parts: string[]): string {

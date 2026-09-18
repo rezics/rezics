@@ -1,0 +1,3 @@
+# Official input digests cover exact bytes, including upstream CRLF and whitespace.
+registry/sources/** -text -whitespace
+sources/**/inputs/** -text -whitespace

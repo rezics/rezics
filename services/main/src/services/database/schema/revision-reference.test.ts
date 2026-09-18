@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import { getTableName } from "drizzle-orm";
 import { getTableConfig } from "drizzle-orm/pg-core";
 import { CatalogOwnerValues } from "@rezics/reference";
-import { CatalogNameTables } from "./catalog-names";
-import { revisionReference } from "./revision-reference";
-import { CatalogRevisionReferenceSchema } from "../../units/revision-reference-contract";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
+import { revisionReference } from "@rezics/schema/postgres/knowledge/revision-reference";
+import { CatalogRevisionReferenceSchema } from "@rezics/schema/contracts/native/revision-reference";
 
 describe("exact catalog revision reference values", () => {
 	it("references complete owner-local revision keys without an independently writable parent value", () => {

@@ -1,7 +1,7 @@
 import { and, eq, isNull, sql } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
-import { accessSubject } from "../database/schema/access-identity";
-import { unitAccessGrant, unitAccessRestriction, unitOwnership } from "../database/schema/access";
+import { accessSubject } from "@rezics/schema/postgres/access/access-identity";
+import { unitAccessGrant, unitAccessRestriction, unitOwnership } from "@rezics/schema/postgres/access/access";
 import { readSubjectRoleBindingPermissions } from "./role-binding-permissions";
 import { readAccessMemberSetRecipients } from "./member-set-recipients";
 import { scopeLifecycleAdmission } from "./scope-policy";

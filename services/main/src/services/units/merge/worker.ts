@@ -10,14 +10,14 @@ import {
 	unitMergeGraphLock,
 	unitMergeRedirect,
 	unitMergeReconciliationItem,
-} from "../../database/schema/unit-merge";
-import { CatalogIdentityTables } from "../../database/schema/catalog-identity";
-import { CatalogNameTables } from "../../database/schema/catalog-names";
-import { CatalogFactTables } from "../../database/schema/catalog-facts";
+} from "@rezics/schema/postgres/identity/unit-merge";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
 import {
 	catalogSourceMappingClaim,
 	catalogSourceBindingRevision,
-} from "../../database/schema/catalog-source";
+} from "@rezics/schema/postgres/ingestion/source";
 import {
 	ParticipationAuthoritySchema,
 	runWithParticipationAuthority,
@@ -25,7 +25,7 @@ import {
 import { withCatalogViewerPolicy } from "../../catalog/read-policy";
 import { addCatalogName } from "../../catalog/names";
 import { addCatalogIdentifier } from "../../catalog/identifiers";
-import { CatalogNameInputSchema } from "../../catalog/name-contracts";
+import { CatalogNameInputSchema } from "@rezics/schema/contracts/native/names";
 import {
 	reviseCatalogSourceBinding,
 	lockCatalogSourceBinding,

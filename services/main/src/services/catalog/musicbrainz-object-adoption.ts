@@ -1,12 +1,12 @@
 import { createHash } from "node:crypto";
 import type { DatabaseTransaction } from "../database";
-import { musicRecording, musicReleaseGroup, musicWork } from "../database/schema/catalog-music";
+import { musicRecording, musicReleaseGroup, musicWork } from "@rezics/schema/postgres/music/music";
 import { acceptCatalogSourceInitialization } from "./source-bindings";
 import {
 	prepareCatalogSourceChildCorrespondence,
 	sealCatalogSourceChildCorrespondence,
 } from "./source-child-correspondence";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
 import { createCatalogIdentity } from "./storage";
 import { adoptMusicBrainzRelations } from "./musicbrainz-relations";
 import { adoptMusicBrainzAliases, adoptMusicBrainzTitle } from "./musicbrainz-names";

@@ -25,7 +25,7 @@ import {
 	PostKindValues,
 	RealmUnitPublicationStateValues,
 	RealmUnitStatusValues,
-} from "../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 import { compileUnitPredicateCandidateSet, compileUnitPredicateSql } from "./sql";
 
 const RealmId = "00000000-0000-4000-8000-000000000001";

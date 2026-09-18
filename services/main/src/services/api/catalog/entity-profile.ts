@@ -5,7 +5,7 @@ import { EntityProfileSchema, EntityShapeSchema } from "../../catalog/entity-con
 import { initializeEntityProfile, readEntityProfile, readEntityProfileHistory, removeEntityProfile,
 	restoreEntityProfile, resolveEntityShape } from "../../catalog/entities";
 import { DomainPageQuerySchema, decodeDomainCursor, domainPage } from "../../catalog/domain-api-pagination";
-import { CatalogRevisionNumberSchema } from "../../catalog/name-contracts";
+import { CatalogRevisionNumberSchema } from "@rezics/schema/contracts/native/names";
 import { catalogRead, catalogMutation } from "./transaction";
 import { catalogDomainHistory } from "./domain-read";
 

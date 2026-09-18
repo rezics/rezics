@@ -4,13 +4,13 @@ import type { DatabaseTransaction } from "../database";
 import {
 	entityCatalogProfile,
 	entityCatalogProfileRevision,
-} from "../database/schema/catalog-entity";
+} from "@rezics/schema/postgres/catalog/entity";
 import {
 	catalogDefinition,
 	catalogDefinitionRevision,
 	entityIdentity,
-} from "../database/schema/catalog-identity";
-import { CatalogPartialDateSchema, type CatalogReference } from "./contracts";
+} from "@rezics/schema/postgres/catalog/identity";
+import { CatalogPartialDateSchema, type CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import {
 	CreateEntitySchema,
 	EntityProfileSchema,

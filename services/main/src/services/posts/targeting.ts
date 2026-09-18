@@ -1,6 +1,6 @@
 import { UnitOwnerValues } from "@rezics/reference";
 import { z } from "zod";
-import { unitOwnerTable } from "../database/schema/unit-reference-columns";
+import { unitOwnerTable } from "@rezics/schema/postgres/shared/unit-reference-columns";
 import { and, eq, inArray, sql } from "drizzle-orm";
 
 import type { DatabaseExecutor, DatabaseTransaction } from "../database";

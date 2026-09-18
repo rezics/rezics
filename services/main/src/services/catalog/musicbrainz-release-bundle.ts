@@ -1,4 +1,4 @@
-import { SOURCE_DOCUMENT_BYTE_LIMIT } from "../database/schema/catalog-source-limits";
+import { SOURCE_DOCUMENT_BYTE_LIMIT } from "@rezics/schema/postgres/ingestion/source-limits";
 import { createHash } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 import { z } from "zod";

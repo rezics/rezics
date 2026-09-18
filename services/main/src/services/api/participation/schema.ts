@@ -1,8 +1,8 @@
 import { PortableTextDocument } from "@rezics/block";
 import { t } from "elysia";
 import { z } from "zod";
-import { CatalogReferenceSchema } from "../../catalog/contracts";
-import { ParticipationCapabilityValues } from "../../database/schema/participation";
+import { CatalogReferenceSchema } from "@rezics/schema/contracts/native/catalog";
+import { ParticipationCapabilityValues } from "@rezics/schema/postgres/access/participation";
 import { IssueGrantInputSchema } from "../../participation/commands";
 import { AvatarInput, Uuid } from "../schema";
 

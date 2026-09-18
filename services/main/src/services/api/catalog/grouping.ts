@@ -10,7 +10,7 @@ import { GroupingMutationSchema, GroupingEditSchema, GroupingClassSchema, Groupi
 	GroupingOrderProfileEditSchema, GroupingOrderCreatedSchema, GroupingOrderEntrySchema, GroupingOrderEntryEditSchema,
 	GroupingOrderCursorSchema, GroupingOrderQuerySchema, GroupingHistorySchema, GroupingRestoreSchema, groupingPage } from "../../catalog/grouping-api-contracts";
 import { DomainPageQuerySchema, decodeDomainCursor, encodeDomainCursor, domainPage } from "../../catalog/domain-api-pagination";
-import { CatalogRevisionNumberSchema } from "../../catalog/name-contracts";
+import { CatalogRevisionNumberSchema } from "@rezics/schema/contracts/native/names";
 
 const params = z.strictObject({ id: z.uuid() });
 const classParams = params.extend({ classRevisionId: z.uuid() });

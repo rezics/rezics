@@ -1,5 +1,5 @@
 import { sql, type SQLWrapper } from "drizzle-orm";
-import { authEntity } from "../database/schema/participation";
+import { authEntity } from "@rezics/schema/postgres/access/participation";
 
 /**
  * Private identity traversal for applying an author's personal visibility policy.

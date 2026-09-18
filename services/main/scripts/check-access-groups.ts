@@ -541,7 +541,7 @@ try {
 	for (const path of [
 		"services/main/scripts/check-access-groups.ts",
 		"services/main/src/services/authorization/groups.ts",
-		"services/main/src/services/database/schema/access-group.ts",
+		"libraries/schema/src/postgres/access/access-group.ts",
 		"services/main/src/services/database/schema/postgres/access-group.sql",
 		"services/main/src/services/database/migrations/atlas.sum",
 	])

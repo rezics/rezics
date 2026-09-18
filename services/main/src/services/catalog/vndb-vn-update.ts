@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { softwareRecordRevision, softwareVisualNovel } from "../database/schema/catalog-software";
+import { softwareRecordRevision, softwareVisualNovel } from "@rezics/schema/postgres/software/software";
 import { VndbVnSchema, VndbCatalogContractSha256, VndbDumpContractSha256 } from "./vndb";
 import { normalizeVndbVnDump } from "./vndb-vn-dump";
 import { remapVndbSemanticPlan } from "./vndb-semantics";

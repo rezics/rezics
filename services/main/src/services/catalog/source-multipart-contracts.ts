@@ -1,4 +1,4 @@
-import { SOURCE_DOCUMENT_BYTE_LIMIT, SOURCE_MULTIPART_BYTE_LIMIT, SOURCE_MULTIPART_PART_LIMIT } from "../database/schema/catalog-source-limits";
+import { SOURCE_DOCUMENT_BYTE_LIMIT, SOURCE_MULTIPART_BYTE_LIMIT, SOURCE_MULTIPART_PART_LIMIT } from "@rezics/schema/postgres/ingestion/source-limits";
 import { z } from "zod";
 import { sourceKeySchema } from "./source-record-key";
 

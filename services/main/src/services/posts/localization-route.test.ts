@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { PostKindValues } from "../database/schema/contract-values";
+import { PostKindValues } from "@rezics/schema/postgres/shared/contract-values";
 import { usesSharedPostLocalizationRoute } from "./localization-route";
 
 describe("shared Post localization route", () => {

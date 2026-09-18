@@ -3,7 +3,7 @@ import { StatusCodes } from "http-status-codes";
 
 import Elysia, { t } from "elysia";
 
-import { ApiPermissionValues } from "../../auth/api-permissions";
+import { ApiPermissionValues } from "@rezics/schema/contracts/native/api-permissions";
 import session from "../../auth/session";
 import { database } from "../../database";
 import { apikeys } from "../../database/schema";

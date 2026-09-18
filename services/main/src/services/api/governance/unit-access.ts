@@ -6,7 +6,7 @@ import {
 import { and, eq, exists, inArray, isNull, ne, notExists, or, sql } from "drizzle-orm";
 import Elysia from "elysia";
 import { StatusCodes } from "http-status-codes";
-import { users } from "../../database/schema/auth";
+import { users } from "@rezics/schema/postgres/identity/auth";
 import { selfAuthUserIdForEntity } from "../../participation/account-query";
 import { publicEntityName } from "../../participation/presentation";
 

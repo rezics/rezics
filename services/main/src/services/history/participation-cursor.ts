@@ -4,7 +4,7 @@ import {
 	ContributionResourceKindValues,
 	type ContributionResourceListQuery,
 } from "../api/history/schema";
-import { ContentLanguageValues } from "../database/schema/contract-values";
+import { ContentLanguageValues } from "@rezics/schema/postgres/shared/contract-values";
 import { parseJsonCursor } from "../pagination";
 import { InvalidPaginationCursor } from "../pagination/errors";
 import { ResourceSectionValues } from "../units/resource-section";

@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { users } from "../src/services/database/schema/auth";
-import { musicArtistCredit, musicRelease } from "../src/services/database/schema/catalog-music";
-import { musicIdentity } from "../src/services/database/schema/catalog-identity";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { musicArtistCredit, musicRelease } from "@rezics/schema/postgres/music/music";
+import { musicIdentity } from "@rezics/schema/postgres/catalog/identity";
 import { runWithNativeFixtureActor } from "./native-fixture-actor";
 import {
 	currentParticipationAuthority,

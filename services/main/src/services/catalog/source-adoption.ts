@@ -2,17 +2,17 @@ import { catalogSourceSupportColumns } from "./source-support";
 import { createHash } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
-import { CatalogIdentityTables } from "../database/schema/catalog-identity";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
 import {
 	catalogSourceAdoptionProposal,
 	catalogSourceMappingClaim,
 	catalogSourceSnapshot,
-} from "../database/schema/catalog-source";
+} from "@rezics/schema/postgres/ingestion/source";
 import { updateProgramStructure } from "./program";
 import { initializeBangumiNativeOccurrences } from "./bangumi-native";
-import { softwareContent } from "../database/schema/catalog-software";
-import { type CatalogOwner } from "./contracts";
+import { softwareContent } from "@rezics/schema/postgres/software/software";
+import { type CatalogOwner } from "@rezics/schema/contracts/native/catalog";
 import { BangumiSubjectContractSha256, planBangumiSubject } from "./bangumi";
 import { planBangumiArchiveSubject } from "./bangumi-records";
 import { BangumiArchiveContractSha256 } from "./bangumi-adoption";

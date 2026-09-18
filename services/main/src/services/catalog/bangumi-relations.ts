@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import type { CatalogReference } from "./contracts";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { BangumiArchiveRelationSchema, bangumiRelationKey } from "./bangumi-records";
 import type { CatalogSourceReceipt } from "./source-observations";
 

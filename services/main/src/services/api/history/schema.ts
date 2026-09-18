@@ -1,8 +1,8 @@
 import { FollowableUnitOwnerValues } from "@rezics/reference";
 import type { StaticDecode } from "typebox";
 import { t } from "elysia";
-import { ResourceVisibilityValues, UnitStatusValues } from "../../database/schema/contract-values";
-import { TagPathMaximumMembers, TagPathMinimumMembers } from "../../database/schema/tag-path";
+import { ResourceVisibilityValues, UnitStatusValues } from "@rezics/schema/postgres/shared/contract-values";
+import { TagPathMaximumMembers, TagPathMinimumMembers } from "@rezics/schema/postgres/knowledge/tag-path";
 import { RevisionHiddenFieldValues } from "../../history/visibility";
 import { UnitRevisionChangeTags } from "../../units/history";
 import { ResourceSectionValues } from "../../units/resource-section";

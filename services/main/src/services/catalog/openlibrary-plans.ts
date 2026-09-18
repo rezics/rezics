@@ -7,7 +7,7 @@ import type { CatalogSourceFactDescriptor } from "./source-fact-delta";
 import type { CatalogSourceIdentifierDescriptor } from "./source-identifier-delta";
 import { openLibraryDate, openLibraryText, type OpenLibraryDocument } from "./openlibrary";
 import { openLibraryLanguageTag } from "./openlibrary-language";
-import type { CatalogDefinitionConstraints } from "./definition-contracts";
+import type { CatalogDefinitionConstraints } from "@rezics/schema/contracts/native/definition";
 
 const identityHash = (value: unknown) =>
 	createHash("sha256").update(JSON.stringify(value)).digest("hex");

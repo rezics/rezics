@@ -1,8 +1,8 @@
 import { and, eq, gt } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { musicComponentRevision } from "../database/schema/catalog-music";
-import { CatalogPageSchema, type CatalogReference } from "./contracts";
+import { musicComponentRevision } from "@rezics/schema/postgres/music/music";
+import { CatalogPageSchema, type CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { loadCatalogIdentity } from "./storage";
 import { editMusicReleaseMetadata } from "./music-domain";
 

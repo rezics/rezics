@@ -1,4 +1,7 @@
 api_owner	dictionary_groups	disposition
+access	D02	Retain endpoint responsibility; implement the referenced target contracts without implied old-wire compatibility.
+account	D02	Retain endpoint responsibility; implement the referenced target contracts without implied old-wire compatibility.
+apps	D02	Retain endpoint responsibility; implement the referenced target contracts without implied old-wire compatibility.
 association-proposals	D03	Retain endpoint responsibility; implement the referenced target contracts without implied old-wire compatibility.
 audit	D13	Retain endpoint responsibility; implement the referenced target contracts without implied old-wire compatibility.
 catalog	D05,D06,D07,D14	Retain endpoint responsibility; implement the referenced target contracts without implied old-wire compatibility.

@@ -12,7 +12,7 @@ import {
 	contentStructureNode,
 	contentStructureRevisionHead,
 } from "../database/schema";
-import { fractionalPositionAt } from "../ordering/position";
+import { fractionalPositionAt } from "@rezics/schema/contracts/native/positions";
 import {
 	ContentStructureSnapshotSchema,
 	type ContentStructureNodeState,

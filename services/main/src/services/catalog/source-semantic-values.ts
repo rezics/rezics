@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
-import type { CatalogReference } from "./contracts";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { appendCatalogFactNodes, beginCatalogFact, sealCatalogFact } from "./storage";
 import { catalogValueNodes } from "./value-nodes";
 

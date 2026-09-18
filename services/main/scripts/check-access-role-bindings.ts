@@ -907,7 +907,7 @@ try {
 	for (const path of [
 		"services/main/scripts/check-access-role-bindings.ts",
 		"services/main/src/services/authorization/role-bindings.ts",
-		"services/main/src/services/database/schema/access-role-binding.ts",
+		"libraries/schema/src/postgres/access/access-role-binding.ts",
 		"services/main/src/services/database/schema/postgres/access-role-binding.sql",
 		"services/main/src/services/database/migrations/atlas.sum",
 	])

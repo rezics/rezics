@@ -1,6 +1,9 @@
 version: "3"
 
 includes:
+    schema-importer:
+        taskfile: ./schema-importer/Taskfile.yml
+        dir: ./schema-importer
     schema:
         taskfile: ./schema/Taskfile.yml
         dir: ./schema
@@ -71,6 +74,7 @@ tasks:
         desc: Type-check library packages.
         cmds:
             - task: schema:typecheck
+            - task: schema-importer:typecheck
             - task: reference:typecheck
             - task: content-language:typecheck
             - task: access:typecheck

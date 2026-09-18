@@ -4,7 +4,7 @@ import {
 	compareBytewisePositions,
 	fractionalPositionsBetween,
 	rebalanceFractionalPositionSequence,
-} from "../ordering/position";
+} from "@rezics/schema/contracts/native/positions";
 import { ContentStructureInvalid } from "./errors";
 
 type CurrentDraftMember = {

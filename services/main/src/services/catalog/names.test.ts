@@ -3,7 +3,7 @@ import {
 	CatalogNameValuesSchema,
 	CatalogNameAuthorityValuesSchema,
 	normalizeCatalogIdentifier,
-} from "./name-contracts";
+} from "@rezics/schema/contracts/native/names";
 import { catalogNameAuthorityApplicability } from "./authority";
 
 const nameId = "00000000-0000-4000-8000-000000000001";

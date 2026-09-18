@@ -1,12 +1,12 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { eq, sql, type SQLWrapper } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
-import { accountPreference } from "../database/schema/account-preference";
+import { accountPreference } from "@rezics/schema/postgres/identity/account-preference";
 import {
 	ContentRatingValues,
 	DefaultContentRatingValues,
 	type ContentRating,
-} from "../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 
 const readRatings = new AsyncLocalStorage<readonly ContentRating[]>();
 

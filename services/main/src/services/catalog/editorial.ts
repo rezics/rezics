@@ -5,13 +5,13 @@ import { createSchemaFactory } from "drizzle-orm/zod";
 import { Value } from "typebox/value";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { CatalogEditorialTables } from "../database/schema/catalog-editorial";
+import { CatalogEditorialTables } from "@rezics/schema/postgres/catalog/editorial";
 import { ensureImageAssetsAttachable } from "../api/image-assets/service";
 import { presentImageAsset } from "../api/image-assets/presentation";
 import { avatarReferenceFromColumns, avatarReferenceToColumns, unitLocalizationImageAssetReferences } from "../units/localization";
 import { presentAvatar } from "../units/avatar";
 import { CatalogEditorialContent, CatalogEditorialWrite } from "./editorial-contracts";
-import type { CatalogReference } from "./contracts";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { CatalogReferenceNotFound, CatalogRevisionConflict, loadCatalogIdentity, recordCatalogChange } from "./storage";
 import { decodeDomainCursor, encodeDomainCursor } from "./domain-api-pagination";
 

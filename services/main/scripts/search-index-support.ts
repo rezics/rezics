@@ -1,7 +1,7 @@
 import {
 	CanonicalPgroongaIndexes,
 	type CanonicalPgroongaIndex,
-} from "../src/services/database/schema/pgroonga";
+} from "@rezics/schema/postgres/shared/pgroonga";
 
 export { CanonicalPgroongaIndexes, type CanonicalPgroongaIndex };
 export type SearchIndexAction = "check" | "reindex" | "reindex-concurrently";

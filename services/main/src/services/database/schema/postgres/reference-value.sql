@@ -12,6 +12,7 @@ RETURNS uuid LANGUAGE sql VOLATILE STRICT SET search_path = pg_catalog, public A
     target_distribution_id, target_video_id, target_audio_id, target_post_id,
     target_poll_id, target_zone_id, target_realm_id, target_realm_rule_id,
     target_custom_theme_id, target_collection_id, target_tag_id, target_tag_path_id,
-    target_label_id)
+    target_label_id, target_description_id, target_wiki_id, target_indexed_media_id,
+    target_vocabulary_term_id, target_semantic_relation_id)
   FROM public.reference_value WHERE id = value_id
 $$;

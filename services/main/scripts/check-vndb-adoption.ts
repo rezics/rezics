@@ -3,12 +3,12 @@ import { Readable } from "node:stream";
 import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { users } from "../src/services/database/schema/auth";
+import { users } from "@rezics/schema/postgres/identity/auth";
 import {
 	softwareParticipationSourceOccurrence,
 	softwareVisualNovel,
-} from "../src/services/database/schema/catalog-software";
-import { catalogSourceRecord } from "../src/services/database/schema/catalog-source";
+} from "@rezics/schema/postgres/software/software";
+import { catalogSourceRecord } from "@rezics/schema/postgres/ingestion/source";
 import {
 	VndbCatalogContractSha256,
 	VndbVnSchema,

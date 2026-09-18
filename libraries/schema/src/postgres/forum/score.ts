@@ -1,0 +1,109 @@
+import { unitReferenceColumns, unitReferenceConstraints } from "../shared/unit-reference-columns";
+import { sql } from "drizzle-orm";
+import { check, foreignKey, index, integer, primaryKey, unique, uuid } from "drizzle-orm/pg-core";
+
+import { pgTable } from "../shared/base";
+import { entityIdentity } from "../catalog/identity";
+import {
+	createCreatedAtColumn,
+	createFractionalIndexPositionByteLengthConstraint,
+	createUpdatedAtColumn,
+	createUuidv7PrimaryKey,
+	fractionalIndexPosition,
+} from "../shared/columns";
+import { DefaultResourceVisibility } from "../shared/contract-values";
+import { post } from "./post";
+import { realm, realmUnit } from "../realms/realm";
+import { resourceVisibility } from "../shared/platform-identity";
+
+/**
+ * Current Score state for a Profile, target Unit, and Realm.
+ *
+ * @todo Add immutable Score history and point-in-time Post rendering when required.
+ */
+export const score = pgTable(
+	"score",
+	{
+		id: createUuidv7PrimaryKey(),
+		profileId: uuid()
+			.notNull()
+			.references(() => entityIdentity.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
+		realmId: uuid()
+			.notNull()
+			.references(() => realm.id, { onDelete: "cascade" }),
+		value: integer().notNull(),
+		visibility: resourceVisibility().default(DefaultResourceVisibility).notNull(),
+		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
+	},
+	(table) => [
+		...unitReferenceConstraints("score", "unit", table, false, table.unitId),
+
+		unique("score_profile_unit_realm_key").on(table.profileId, table.unitId, table.realmId),
+		index("score_unit_realm_value_idx").on(table.unitId, table.realmId, table.value),
+		index("score_realm_idx").on(table.realmId, table.unitId),
+		index("score_public_profile_updated_at_idx")
+			.on(table.profileId, table.updatedAt.desc(), table.id.desc())
+			.where(sql`${table.visibility} = 'public'`),
+		check("score_value_check", sql`${table.value} between 1 and 10`),
+	],
+);
+
+/**
+ * Ordered live Scores displayed by a Post.
+ *
+ * @remarks
+ * This relation intentionally renders the current mutable Score. Editing,
+ * deleting, or restricting the Score may change or remove the value displayed
+ * by the Post. Introduce immutable revisions only if historical point-in-time
+ * rendering becomes a product guarantee.
+ */
+export const postScore = pgTable(
+	"post_score",
+	{
+		postId: uuid()
+			.notNull()
+			.references(() => post.id, { onDelete: "cascade" }),
+		scoreId: uuid()
+			.notNull()
+			.references(() => score.id, { onDelete: "cascade" }),
+		position: fractionalIndexPosition().notNull(),
+		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.postId, table.scoreId] }),
+		unique("post_score_post_position_key").on(table.postId, table.position),
+		index("post_score_score_idx").on(table.scoreId, table.postId),
+		createFractionalIndexPositionByteLengthConstraint(
+			"post_score_position_byte_length_check",
+			table.position,
+		),
+	],
+);
+
+/** Current Realm scoring-rules explanation. */
+export const realmScoreContext = pgTable(
+	"realm_score_context",
+	{
+		realmId: uuid()
+			.primaryKey()
+			.references(() => realm.id, { onDelete: "cascade" }),
+		contextPostId: uuid()
+			.notNull()
+			.references(() => post.id, { onDelete: "restrict" }),
+		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.realmId, table.contextPostId],
+			foreignColumns: [realmUnit.realmId, realmUnit.unitId],
+			name: "realm_score_context_post_realm_fkey",
+		}).onDelete("restrict"),
+		index("realm_score_context_post_idx").on(table.contextPostId),
+	],
+);

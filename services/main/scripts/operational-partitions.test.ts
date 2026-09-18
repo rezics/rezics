@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import { generateDrizzleJson, generateMigration } from "drizzle-kit/api-postgres";
-import * as durability from "../src/services/database/schema/operational-durability";
-import * as runtime from "../src/services/database/schema/operational-runtime";
+import * as durability from "@rezics/schema/postgres/operations/operational-durability";
+import * as runtime from "@rezics/schema/postgres/operations/operational-runtime";
 import { applyOperationalPartitions, operationalPartitionTables } from "./operational-partitions";
 
 test("partition export preserves typed keys and creates every nonoverlapping routing range", async () => {

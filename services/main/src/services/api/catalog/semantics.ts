@@ -1,7 +1,7 @@
 import Elysia from "elysia";
 import { z } from "zod";
 import session from "../../auth/session";
-import { CatalogOwnerValues } from "../../catalog/contracts";
+import { CatalogOwnerValues } from "@rezics/schema/contracts/native/catalog";
 import { readCatalogRelationQualifiers } from "../../catalog/storage";
 import { transitionCatalogSemanticState, restoreCatalogSemanticRevision } from "../../catalog/semantic-history";
 import {

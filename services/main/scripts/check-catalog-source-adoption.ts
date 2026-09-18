@@ -4,13 +4,13 @@ import { readFile } from "node:fs/promises";
 import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { users } from "../src/services/database/schema/auth";
-import { programWork } from "../src/services/database/schema/catalog-program";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { programWork } from "@rezics/schema/postgres/audiovisual/program";
 import {
 	catalogSourceAdoptionProposal,
 	catalogSourceRecord,
 	catalogSourceSnapshot,
-} from "../src/services/database/schema/catalog-source";
+} from "@rezics/schema/postgres/ingestion/source";
 import { BangumiSubjectContractSha256, parseBangumiSubject } from "../src/services/catalog/bangumi";
 import { adoptBangumiSubject } from "../src/services/catalog/source-adoption";
 import { exportBangumiSubject } from "../src/services/catalog/source-export";

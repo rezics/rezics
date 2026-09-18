@@ -6,14 +6,14 @@ import { sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import { ResourceUriSchema } from "@better-auth/oauth-provider";
 import type { DatabaseTransaction } from "../database";
-import { verifications } from "../database/schema/auth";
+import { verifications } from "@rezics/schema/postgres/identity/auth";
 import { requireAccessAdmission, rethrowAccessFailure } from "../authorization/transaction";
 import { AccessChanged, AccessDenied, AccessUnavailable } from "../authorization/http-errors";
 import { AuthorityOperationSchema } from "../authorization/authority-context";
 import { readUserConsentOperationAuthority } from "../connected-apps/user-authority";
 import { readInstallationOperationAuthority } from "../connected-apps/installation-authority";
 import { readOAuthAccessTokenContext } from "./oauth-token-context";
-import { ApiPermissionValues, type ApiPermission } from "./api-permissions";
+import { ApiPermissionValues, type ApiPermission } from "@rezics/schema/contracts/native/api-permissions";
 
 const confirmation = z.strictObject({ jkt: z.string().regex(/^[A-Za-z0-9_-]{43}$/) });
 type NativeToken = Awaited<ReturnType<typeof readOAuthAccessTokenContext>>;

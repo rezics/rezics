@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import { Readable } from "node:stream";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { users } from "../src/services/database/schema/auth";
-import type { CatalogReference } from "../src/services/catalog/contracts";
-import { operationalCapacity } from "../src/services/database/schema/operational-durability";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
+import { operationalCapacity } from "@rezics/schema/postgres/operations/operational-durability";
 import { runWithNativeFixtureActor } from "./native-fixture-actor";
 import { aggregateRoutingBucket } from "../src/services/events/envelope";
 import {

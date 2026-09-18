@@ -1,0 +1,41 @@
+version: "3"
+
+tasks:
+    sources:
+        desc: List every supported schema source and converter.
+        cmds:
+            - yarn exec tsx src/cli.ts sources
+    fetch:
+        cmds:
+            - yarn exec tsx src/cli.ts fetch {{.CLI_ARGS}}
+    generate:
+        cmds:
+            - yarn exec tsx src/cli.ts compile {{.CLI_ARGS}}
+    convert:
+        cmds:
+            - yarn exec tsx src/cli.ts convert {{.CLI_ARGS}}
+    import:
+        cmds:
+            - yarn exec tsx src/cli.ts import {{.CLI_ARGS}}
+    inspect:
+        cmds:
+            - yarn exec tsx src/cli.ts inspect {{.CLI_ARGS}}
+    diff:
+        cmds:
+            - yarn exec tsx src/cli.ts diff {{.CLI_ARGS}}
+    export:
+        cmds:
+            - yarn exec tsx src/cli.ts export {{.CLI_ARGS}}
+    select:
+        cmds:
+            - yarn exec tsx src/cli.ts select {{.CLI_ARGS}}
+    typecheck:
+        cmds:
+            - yarn exec tsc --noEmit -p tsconfig.json
+    test:
+        dir: ../..
+        cmds:
+            - yarn exec vitest run --project schema-importer
+    db:test:
+        cmds:
+            - yarn exec tsx scripts/check-postgres.ts

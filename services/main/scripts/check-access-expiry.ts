@@ -8,10 +8,10 @@ import { setTimeout } from "node:timers/promises";
 import { eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { users } from "../src/services/database/schema/auth";
-import { post } from "../src/services/database/schema/post";
-import { unitAccessGrant, unitAccessRestriction } from "../src/services/database/schema/access";
-import { platformCapabilityGrant } from "../src/services/database/schema/realm";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { post } from "@rezics/schema/postgres/forum/post";
+import { unitAccessGrant, unitAccessRestriction } from "@rezics/schema/postgres/access/access";
+import { platformCapabilityGrant } from "@rezics/schema/postgres/realms/realm";
 import { Authorization } from "../src/services/authorization";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import type { ParticipationAuthority } from "../src/services/participation/policy";
@@ -245,8 +245,8 @@ try {
 			"unit/access-lock.ts",
 		].map((path) => `services/main/src/services/authorization/${path}`),
 		"services/main/src/services/units/reference.ts",
-		"services/main/src/services/database/schema/access.ts",
-		"services/main/src/services/database/schema/realm.ts",
+		"libraries/schema/src/postgres/access/access.ts",
+		"libraries/schema/src/postgres/realms/realm.ts",
 		"services/main/src/services/database/migrations/atlas.sum",
 	])
 		sourceDigests[path] = createHash("sha256")

@@ -4,7 +4,7 @@ import { and, eq, inArray, isNull } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../database";
 import { contentStructure, contentStructureNode, unitLocalization } from "../database/schema";
-import type { UnitOwnershipMode } from "../database/schema/contract-values";
+import type { UnitOwnershipMode } from "@rezics/schema/postgres/shared/contract-values";
 import {
 	createProfileOwnedUnitAccess,
 	createPublicEditableUnitAccess,

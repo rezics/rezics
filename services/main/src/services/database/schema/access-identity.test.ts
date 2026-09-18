@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { getTableName } from "drizzle-orm";
 import { getTableConfig } from "drizzle-orm/pg-core";
-import { accessScope, accessSubject } from "./access-identity";
+import { accessScope, accessSubject } from "@rezics/schema/postgres/access/access-identity";
 
 describe("mixed access identity storage", () => {
 	it("uses concrete principal/Entity keys without admitting groups as callers", () => {

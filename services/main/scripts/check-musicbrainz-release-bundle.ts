@@ -2,7 +2,7 @@ import { setTimeout as delay } from "node:timers/promises";
 import { createHash } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { SOURCE_DOCUMENT_BYTE_LIMIT, MUSIC_SOURCE_AUXILIARY_ROW_LIMIT } from "../src/services/database/schema/catalog-source-limits";
+import { SOURCE_DOCUMENT_BYTE_LIMIT, MUSIC_SOURCE_AUXILIARY_ROW_LIMIT } from "@rezics/schema/postgres/ingestion/source-limits";
 import { musicBrainzReleaseAuxiliaryRows } from "../src/services/catalog/musicbrainz-release-plan";
 import { boundedSourceJson, musicBrainzReleaseAcquisitionProfiles, normalizeMusicBrainzReleaseBundle } from "../src/services/catalog/musicbrainz-release-bundle";
 

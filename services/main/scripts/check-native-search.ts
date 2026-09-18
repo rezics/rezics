@@ -4,7 +4,7 @@ import { inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import { serializeSignedCookie } from "better-call";
 import { initializeObservability } from "@rezics/observability";
-import { users, sessions } from "../src/services/database/schema/auth";
+import { users, sessions } from "@rezics/schema/postgres/identity/auth";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import { CatalogCreatedSchema, CatalogMutationSchema, CatalogNameCreatedSchema } from "../src/services/catalog/resource-contracts";
 

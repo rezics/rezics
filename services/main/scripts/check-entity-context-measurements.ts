@@ -4,8 +4,8 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 import { serializeSignedCookie } from "better-call";
 import { initializeObservability } from "@rezics/observability";
 import type { CatalogReference } from "@rezics/reference";
-import { CatalogFactTables } from "../src/services/database/schema/catalog-facts";
-import { users, sessions } from "../src/services/database/schema/auth";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
+import { users, sessions } from "@rezics/schema/postgres/identity/auth";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import { CatalogCreatedSchema, CatalogResourceSchema } from "../src/services/catalog/resource-contracts";
 import {
@@ -13,7 +13,7 @@ import {
 	EntityMeasurementContextResponseSchema,
 	EntityMeasurementContextWriteSchema,
 } from "../src/services/catalog/entity-measurement-contracts";
-import { CatalogIdentityTables } from "../src/services/database/schema/catalog-identity";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
 import { catalogValueNodes } from "../src/services/catalog/value-nodes";
 import {
 	WriteCatalogFactSchema,

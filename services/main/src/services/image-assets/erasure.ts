@@ -1,6 +1,6 @@
 import { and, eq, isNull, ne, or, sql } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
-import { imageAsset, imageObject } from "../database/schema/image";
+import { imageAsset, imageObject } from "@rezics/schema/postgres/media/image";
 import { storage } from "../storage";
 
 export type ImageErasureArchive = Pick<

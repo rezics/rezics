@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { users } from "../src/services/database/schema/auth";
-import { CatalogFactTables } from "../src/services/database/schema/catalog-facts";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
 import {
 	createCatalogIdentity,
 	ensureCatalogDefinition,

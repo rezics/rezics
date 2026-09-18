@@ -3,11 +3,11 @@ import { and, eq, gt, gte, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import { AccessPermissionValues } from "@rezics/access";
 import type { DatabaseTransaction } from "../database";
-import { accessMembership } from "../database/schema/access-membership";
-import { accessGroupMembership } from "../database/schema/access-group-membership";
-import { accessGroup, accessGroupTree } from "../database/schema/access-group";
+import { accessMembership } from "@rezics/schema/postgres/access/access-membership";
+import { accessGroupMembership } from "@rezics/schema/postgres/access/access-group-membership";
+import { accessGroup, accessGroupTree } from "@rezics/schema/postgres/access/access-group";
 import { accessGroupImpactReview as reviews, accessGroupImpactNode as nodes, accessGroupImpactFact as facts,
-	accessGroupImpactWitness as witnesses, accessImpactFence as fences } from "../database/schema/access-group-impact";
+	accessGroupImpactWitness as witnesses, accessImpactFence as fences } from "@rezics/schema/postgres/access/access-group-impact";
 import { AccessChanged, AccessRecordUnavailable, AccessUnavailable } from "./http-errors";
 import { decodeAccessPermissionSnapshot, AccessPermissionSnapshotUnavailable } from "./permission";
 

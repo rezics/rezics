@@ -3,13 +3,13 @@ import { HTTPError } from "elysia";
 import { isDeepStrictEqual } from "node:util";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
 import {
 	CatalogIdentityTables,
 	catalogDefinition,
 	catalogDefinitionRevision,
 	catalogUnitLocator,
-} from "../database/schema/catalog-identity";
+} from "@rezics/schema/postgres/catalog/identity";
 import {
 	canAccessCatalog,
 	catalogAccessDecisions,
@@ -25,7 +25,7 @@ import {
 	CatalogReferenceSchema,
 	type CatalogIdentityInput,
 	type CatalogReference,
-} from "./contracts";
+} from "@rezics/schema/contracts/native/catalog";
 import {
 	assertCatalogDefinitionRevision,
 	validateCatalogParticipants,

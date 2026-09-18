@@ -699,7 +699,7 @@ try {
 		"services/main/scripts/check-access-roles.ts",
 		"services/main/src/services/authorization/roles.ts",
 		"services/main/src/services/authorization/permission.ts",
-		"services/main/src/services/database/schema/access-role.ts",
+		"libraries/schema/src/postgres/access/access-role.ts",
 		"services/main/src/services/database/schema/postgres/access-role.sql",
 		"services/main/src/services/database/migrations/atlas.sum",
 	])

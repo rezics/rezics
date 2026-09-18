@@ -1,6 +1,6 @@
 import type { UnitReference } from "@rezics/reference";
 import { CatalogReferenceSchema } from "@rezics/reference";
-import { unitOwnerTable } from "../database/schema/unit-reference-columns";
+import { unitOwnerTable } from "@rezics/schema/postgres/shared/unit-reference-columns";
 import { readUnitState, readUnitStateById } from "./query";
 import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
 

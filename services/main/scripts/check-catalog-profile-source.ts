@@ -3,9 +3,9 @@ import { Readable } from "node:stream";
 import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { users } from "../src/services/database/schema/auth";
-import { CatalogProfileSourceTables } from "../src/services/database/schema/catalog-profile-source";
-import { operationalCapacity } from "../src/services/database/schema/operational-durability";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { CatalogProfileSourceTables } from "@rezics/schema/postgres/catalog/profile-source";
+import { operationalCapacity } from "@rezics/schema/postgres/operations/operational-durability";
 import { createEntity, initializeEntityProfile } from "../src/services/catalog/entities";
 import { createReference, initializeReferenceProfile } from "../src/services/catalog/references";
 import {
@@ -39,7 +39,7 @@ import {
 } from "../src/services/catalog/source-observations";
 import { aggregateRoutingBucket } from "../src/services/events/envelope";
 import { runWithNativeFixtureActor } from "./native-fixture-actor";
-import type { CatalogReference } from "../src/services/catalog/contracts";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString || process.env.REZICS_DISPOSABLE_MIGRATION_FIXTURE !== "1")

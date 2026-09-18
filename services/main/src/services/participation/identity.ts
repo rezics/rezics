@@ -1,18 +1,18 @@
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { insertCatalogIdentity } from "../catalog/identity-storage";
-import { CatalogNameValuesSchema } from "../catalog/name-contracts";
-import { CatalogNameTables } from "../database/schema/catalog-names";
+import { CatalogNameValuesSchema } from "@rezics/schema/contracts/native/names";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
 import {
 	entityCatalogProfile,
 	entityCatalogProfileRevision,
-} from "../database/schema/catalog-entity";
+} from "@rezics/schema/postgres/catalog/entity";
 import { EntityProfileSchema } from "../catalog/entity-contracts";
-import { entityParticipation } from "../database/schema/participation";
+import { entityParticipation } from "@rezics/schema/postgres/access/participation";
 import {
 	entityPresentation,
 	entityPresentationRevision,
-} from "../database/schema/entity-presentation";
+} from "@rezics/schema/postgres/identity/entity-presentation";
 
 /**
  * Creates a newly admitted participant and its first public presentation atomically.

@@ -1,16 +1,16 @@
-import { entityIdentity } from "../database/schema/catalog-identity";
+import { entityIdentity } from "@rezics/schema/postgres/catalog/identity";
 import { and, eq, isNull, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { users } from "../database/schema/auth";
+import { users } from "@rezics/schema/postgres/identity/auth";
 import {
 	authEntity,
 	entityParticipation,
 	entityRecoveryEvent,
 	participationGrant,
 	participationGrantEvent,
-} from "../database/schema/participation";
-import { platformCapabilityGrant } from "../database/schema/realm";
+} from "@rezics/schema/postgres/access/participation";
+import { platformCapabilityGrant } from "@rezics/schema/postgres/realms/realm";
 import { ParticipationDenied, requireParticipation, type ParticipationAuthority } from "./policy";
 
 /** An explicit control-plane bound per account; history remains append-only and separately paginated. */

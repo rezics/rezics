@@ -2,9 +2,9 @@ import { createHash } from "node:crypto";
 import { and, eq, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { users } from "../database/schema/auth";
+import { users } from "@rezics/schema/postgres/identity/auth";
 import { connectedUserConnection, connectedUserConnectionEvent, connectedUserConsent, connectedUserConsentCapability,
-	connectedUserConsentEvent, connectedUserConsentRepresentation, connectedUserConsentResource, connectedUserConsentRevision } from "../database/schema/connected-user-authorization";
+	connectedUserConsentEvent, connectedUserConsentRepresentation, connectedUserConsentResource, connectedUserConsentRevision } from "@rezics/schema/postgres/integrations/connected-user-authorization";
 import { AppCapabilitySchema, MaximumAppCapabilities, appCapabilityDigest, appCapabilityKey, decodeAppCapabilities } from "./capabilities";
 
 const id = z.uuid().toLowerCase(), version = z.number().int().nonnegative().safe();

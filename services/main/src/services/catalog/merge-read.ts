@@ -2,8 +2,8 @@ import { and, eq, sql, type SQLWrapper } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import type { CatalogOwner, CatalogReference } from "@rezics/reference";
 import type { DatabaseTransaction } from "../database";
-import { CatalogIdentityTables } from "../database/schema/catalog-identity";
-import { unitMergeRedirect } from "../database/schema/unit-merge";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
+import { unitMergeRedirect } from "@rezics/schema/postgres/identity/unit-merge";
 import { catalogReadRatingPredicate } from "./read-policy";
 /** A retained source is readable by the canonical target's current audience, never writable through this rule. */
 export function mergedCatalogReadPredicate(

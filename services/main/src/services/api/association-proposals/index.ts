@@ -5,7 +5,7 @@ import session from "../../auth/session";
 import {
 	isCreditAttributionRole,
 	isSubjectAssociationRole,
-} from "../../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 import {
 	createAssociationInvitation,
 	createAssociationRequest,

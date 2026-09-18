@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 
-import { AliasSearchScoreThreshold } from "../src/services/database/schema/contract-values";
-import { CanonicalPgroongaIndexes } from "../src/services/database/schema/pgroonga";
+import { AliasSearchScoreThreshold } from "@rezics/schema/postgres/shared/contract-values";
+import { CanonicalPgroongaIndexes } from "@rezics/schema/postgres/shared/pgroonga";
 
 const template = await readFile(
 	new URL("../docker/postgres-verification/search-acceptance.sql.template", import.meta.url),

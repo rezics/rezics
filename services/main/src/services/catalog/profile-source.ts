@@ -5,8 +5,8 @@ import type { DatabaseTransaction } from "../database";
 import {
 	CatalogProfileHistoryTables,
 	CatalogProfileSourceTables,
-} from "../database/schema/catalog-profile-source";
-import { CatalogSourceProfileBaselines } from "../database/schema/catalog-source-owned-baseline";
+} from "@rezics/schema/postgres/catalog/profile-source";
+import { CatalogSourceProfileBaselines } from "@rezics/schema/postgres/ingestion/source-owned-baseline";
 import {
 	EntityProfileSchema,
 	ReferenceProfileSchema,
@@ -16,7 +16,7 @@ import {
 import { initializeEntityProfile, removeEntityProfile } from "./entities";
 import { initializeReferenceProfile, removeReferenceProfile } from "./references";
 import { CatalogRevisionConflict, loadCatalogIdentity } from "./storage";
-import type { CatalogReference } from "./contracts";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import type { CatalogSourceNativeChange } from "./source-applications";
 import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspondence";
 import { parseCatalogSourceProfile } from "./profile-source-contracts";

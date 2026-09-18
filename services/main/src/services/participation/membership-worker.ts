@@ -3,15 +3,15 @@ import { randomUUID } from "node:crypto";
 import { and, eq, gt, inArray, isNull, sql } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
 import { database } from "../database";
-import { users } from "../database/schema/auth";
-import { accessSubject } from "../database/schema/access-identity";
-import { accessMembership } from "../database/schema/access-membership";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { accessSubject } from "@rezics/schema/postgres/access/access-identity";
+import { accessMembership } from "@rezics/schema/postgres/access/access-membership";
 import {
 	organizationEnrollmentInvitation as invitations,
 	organizationEnrollmentOperation as operations,
 	organizationEnrollmentContact as contacts,
 	organizationEnrollmentReview as reviews,
-} from "../database/schema/organization-membership";
+} from "@rezics/schema/postgres/access/organization-membership";
 import { applyAccessMembershipCommand } from "../authorization/memberships";
 import { AccessDenied } from "../authorization/http-errors";
 import { lockOrganizationEnrollment } from "./membership-policy";

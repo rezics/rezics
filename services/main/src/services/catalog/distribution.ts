@@ -7,9 +7,9 @@ import {
 	distributionManifest,
 	distributionMember,
 	distributionRevision,
-} from "../database/schema/catalog-distribution";
-import { CatalogIdentityTables } from "../database/schema/catalog-identity";
-import type { CatalogReference } from "./contracts";
+} from "@rezics/schema/postgres/publishing/distribution";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import {
 	assertReadableTargets,
 	createCatalogIdentity,

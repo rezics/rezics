@@ -3,13 +3,13 @@ import { createHash } from "node:crypto";
 import { and, eq, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { accessGroup, accessGroupTree } from "../database/schema/access-group";
-import { accessMembership } from "../database/schema/access-membership";
+import { accessGroup, accessGroupTree } from "@rezics/schema/postgres/access/access-group";
+import { accessMembership } from "@rezics/schema/postgres/access/access-membership";
 import {
 	accessGroupMembership,
 	accessGroupMembershipEvent,
 	accessGroupMembershipSet,
-} from "../database/schema/access-group-membership";
+} from "@rezics/schema/postgres/access/access-group-membership";
 const version = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
 const schema = z.strictObject({
 	scopeId: z.uuid().toLowerCase(),

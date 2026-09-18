@@ -1,4 +1,4 @@
-import type { RealmTagQueryStrategy } from "../database/schema/contract-values";
+import type { RealmTagQueryStrategy } from "@rezics/schema/postgres/shared/contract-values";
 import { ContentStructureInvalid } from "./errors";
 import { planDraftSiblingPositions } from "./draft-batch";
 

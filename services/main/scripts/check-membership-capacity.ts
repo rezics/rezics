@@ -12,8 +12,8 @@ import {
 	withDatabaseTransactionDeadline,
 	type DatabaseTransaction,
 } from "../src/services/database";
-import { users } from "../src/services/database/schema/auth";
-import { organizationMembershipInvitation } from "../src/services/database/schema/organization-membership";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { organizationMembershipInvitation } from "@rezics/schema/postgres/access/organization-membership";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import { createManagedOrganization } from "../src/services/participation/organizations";
 import {
@@ -411,7 +411,7 @@ for (const path of [
 	"services/main/src/services/participation/membership.ts",
 	"services/main/src/services/participation/organizations.ts",
 	"services/main/src/services/participation/lifecycle.ts",
-	"services/main/src/services/database/schema/organization-membership.ts",
+	"libraries/schema/src/postgres/access/organization-membership.ts",
 	"services/main/src/services/database/schema/postgres/organization-membership.sql",
 	"services/main/src/services/database/migrations/atlas.sum",
 ])

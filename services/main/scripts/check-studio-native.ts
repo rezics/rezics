@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import Elysia from "elysia";
 import { and, eq, inArray, lt, desc, sql } from "drizzle-orm";
-import { studioAuthEditorCandidate } from "../src/services/database/schema/studio";
-import { CatalogIdentityTables } from "../src/services/database/schema/catalog-identity";
+import { studioAuthEditorCandidate } from "@rezics/schema/postgres/community/studio";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
 import { CatalogOwnerValues } from "@rezics/reference";
 import { serializeSignedCookie } from "better-call";
 import { initializeObservability } from "@rezics/observability";
-import { users, sessions } from "../src/services/database/schema/auth";
+import { users, sessions } from "@rezics/schema/postgres/identity/auth";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import { CatalogCreatedSchema } from "../src/services/catalog/resource-contracts";
 import { z } from "zod";

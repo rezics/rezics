@@ -2,8 +2,8 @@ import { readAuthorizedChildNameLabels } from "./child-name-labels";
 import { and, eq, gt, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { CatalogStructureHistoryTables } from "../database/schema/catalog-structure-history";
-import { programIdentity } from "../database/schema/catalog-identity";
+import { CatalogStructureHistoryTables } from "@rezics/schema/postgres/history/structure-history";
+import { programIdentity } from "@rezics/schema/postgres/catalog/identity";
 import {
 	readCatalogAuthorityScope,
 	catalogIdentityReadPredicate,

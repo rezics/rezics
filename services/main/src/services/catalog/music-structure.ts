@@ -1,5 +1,5 @@
 import { and, eq, inArray, isNull, getTableColumns, sql, type SQL } from "drizzle-orm";
-import { CatalogIdentityTables } from "../database/schema/catalog-identity";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
 import { catalogAccessDecisions } from "../participation/policy";
 import { catalogRatingReadable } from "./read-policy";
 import { requireMusicCreditAccess } from "./music-credit-access";
@@ -10,8 +10,8 @@ import {
 	musicAlternativeTrack,
 	musicComponentRevision,
 	musicComponentHead,
-} from "../database/schema/catalog-music";
-import type { CatalogReference } from "./contracts";
+} from "@rezics/schema/postgres/music/music";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { assertCatalogDefinitionTarget } from "./definitions";
 import {
 	assertMusicMediumFormatCompatibility,

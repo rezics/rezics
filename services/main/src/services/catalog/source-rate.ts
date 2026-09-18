@@ -1,7 +1,7 @@
 import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseExecutor } from "../database";
-import { catalogSourceProviderBudget as budgets } from "../database/schema/catalog-source";
+import { catalogSourceProviderBudget as budgets } from "@rezics/schema/postgres/ingestion/source";
 
 /** @internal Retryable provider-wide rate admission, not a completed source observation. */
 export class CatalogSourceRateLimited extends Error {

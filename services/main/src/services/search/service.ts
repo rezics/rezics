@@ -1,5 +1,5 @@
 import { CatalogOwnerValues, UnitOwnerValues, type UnitOwner } from "@rezics/reference";
-import { unitOwnerTable } from "../database/schema/unit-reference-columns";
+import { unitOwnerTable } from "@rezics/schema/postgres/shared/unit-reference-columns";
 import { unitStateRelation } from "../units/state-relation";
 import { ContentLanguageRegistryPolicy } from "@rezics/content-language";
 import { createHash } from "node:crypto";

@@ -2,8 +2,8 @@ import { and, eq, inArray } from "drizzle-orm";
 import type { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { readUnitPresentationsInTransaction } from "../units/presentation-reader";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
-import { CatalogOwnerValues, type CatalogReference } from "./contracts";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
+import { CatalogOwnerValues, type CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { pageCatalogFacts, listCatalogSemanticHistory } from "./semantic-history";
 import {
 	appendCatalogFactNodes, beginCatalogFact, createCatalogRelation, pageCatalogRelations,

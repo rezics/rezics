@@ -4,10 +4,10 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import type { DatabaseTransaction } from "../src/services/database";
-import { users } from "../src/services/database/schema/auth";
-import { operationalCapacity } from "../src/services/database/schema/operational-durability";
-import { catalogSourceProposalDependency } from "../src/services/database/schema/catalog-source-dependency";
-import { CatalogIdentityTables } from "../src/services/database/schema/catalog-identity";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { operationalCapacity } from "@rezics/schema/postgres/operations/operational-durability";
+import { catalogSourceProposalDependency } from "@rezics/schema/postgres/ingestion/source-dependency";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import { issueParticipationGrant } from "../src/services/participation/commands";
 import {

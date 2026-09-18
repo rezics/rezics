@@ -1,4 +1,4 @@
-import type { PostKind } from "../database/schema/contract-values";
+import type { PostKind } from "@rezics/schema/postgres/shared/contract-values";
 
 const SharedPostLocalizationRouteKindValues = [
 	"post",

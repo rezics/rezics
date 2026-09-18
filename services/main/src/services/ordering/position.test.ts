@@ -14,7 +14,7 @@ import {
 	isStorageSafeFractionalPosition,
 	rebalanceFractionalPositionSequence,
 	rebalancedFractionalPositions,
-} from "./position";
+} from "@rezics/schema/contracts/native/positions";
 
 describe("fractional positions", () => {
 	it("recognizes only keys accepted by the canonical generator", () => {

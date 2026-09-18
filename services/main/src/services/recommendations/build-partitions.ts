@@ -1,7 +1,7 @@
 import { and, desc, eq, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseExecutor } from "../database";
-import { recommendationSnapshot as snapshots, recommendationSnapshotPartition as partitions } from "../database/schema/recommendation";
+import { recommendationSnapshot as snapshots, recommendationSnapshotPartition as partitions } from "@rezics/schema/postgres/discovery/recommendation";
 import { RecommendationPolicy as policy, RecommendationPolicyVersion } from "./policy";
 
 export const RecommendationPartitionLeaseSchema = z.strictObject({

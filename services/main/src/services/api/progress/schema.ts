@@ -6,7 +6,7 @@ import {
 	ProgressDatePrecisionValues,
 	ProgressEntryKindValues,
 	ProgressStatusValues,
-} from "../../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 import { DateTime, LocalizationLanguageQuery, ResourceVisibility, Uuid } from "../schema";
 import { ProgressResponse } from "../schema/response";
 

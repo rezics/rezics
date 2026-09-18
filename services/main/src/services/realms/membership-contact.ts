@@ -2,7 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
 import type { PrincipalRequestContext } from "../auth/principal-session";
-import { realmEnrollmentContact as contacts } from "../database/schema/realm-enrollment";
+import { realmEnrollmentContact as contacts } from "@rezics/schema/postgres/realms/realm-enrollment";
 import {
 	enrollmentSubjectAuthority,
 	membershipRecipientContext,

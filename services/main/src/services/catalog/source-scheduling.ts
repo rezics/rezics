@@ -6,7 +6,7 @@ import {
 	catalogSourceCheckPlan as plans,
 	catalogSourceSubscription as subscriptions,
 	catalogSourceCheckReceipt as receipts,
-} from "../database/schema/catalog-source";
+} from "@rezics/schema/postgres/ingestion/source";
 import { aggregateRoutingBucket } from "../events/envelope";
 import {
 	type CatalogSourceAcquisition,

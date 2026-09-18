@@ -130,6 +130,26 @@ export const TermSchema = z.strictObject({
 	aliases: z.array(IriSchema),
 });
 export type VocabularyTerm = z.infer<typeof TermSchema>;
+/** @alpha Structured RDF nodes preserve original IRIs and lexical data independently of identity aliases. */
+export const GraphNodeSchema = z.strictObject({
+	id: z.uuid(),
+	kind: z.enum(["iri", "blank", "literal", "default-graph"]),
+	termId: z.uuid().nullable(),
+	lexical: z.string(),
+	datatypeId: z.uuid().nullable(),
+	language: z.string().nullable(),
+});
+export type GraphNode = z.infer<typeof GraphNodeSchema>;
+/** @alpha Exact graph membership and predicate spelling remain available for source-preserving export. */
+export const GraphStatementSchema = z.strictObject({
+	id: z.uuid(),
+	subjectId: z.uuid(),
+	predicateId: z.uuid(),
+	predicateIri: IriSchema,
+	objectId: z.uuid(),
+	graphId: z.uuid(),
+});
+export type GraphStatement = z.infer<typeof GraphStatementSchema>;
 /** @alpha The complete source graph is the authoritative retained representation. */
 export const ReleaseSchema = z.strictObject({
 	id: z.uuid(),
@@ -141,12 +161,14 @@ export const ReleaseSchema = z.strictObject({
 	definitions: z.array(DefinitionSchema),
 	labels: z.array(LabelSchema),
 	unindexedLabels: z.number().int().nonnegative(),
+	nodes: z.array(GraphNodeSchema),
+	statements: z.array(GraphStatementSchema),
 });
 export type VocabularyRelease = z.infer<typeof ReleaseSchema>;
 /** @alpha Portable bundle format; byte integrity and reference validation are also required on import. */
 export const BundleSchema = z.strictObject({
-	format: z.literal(1),
-	compiler: z.literal("rezics-schema/1"),
+	format: z.literal(2),
+	compiler: z.literal("rezics-schema/2"),
 	id: z.uuid(),
 	digest: DigestSchema,
 	terms: z.array(TermSchema),

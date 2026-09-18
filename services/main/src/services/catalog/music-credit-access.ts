@@ -6,9 +6,9 @@ import {
 	musicAlternativeTrack,
 	musicComponentRevision,
 	musicComponentHead,
-} from "../database/schema/catalog-music";
+} from "@rezics/schema/postgres/music/music";
 import { readCatalogAuthorityScope } from "../participation/policy";
-import type { CatalogReference } from "./contracts";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { CatalogAccessDenied, loadCatalogIdentity } from "./storage";
 
 /** @internal Private fragments need direct creator authority, an editable creation context, or exact authorized native reference history. */

@@ -4,9 +4,9 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { registerCatalogSourceRecord } from "../src/services/catalog/source-observations";
 import type { DatabaseTransaction } from "../src/services/database";
-import { users } from "../src/services/database/schema/auth";
-import { CatalogNameTables } from "../src/services/database/schema/catalog-names";
-import { catalogSourceSnapshot } from "../src/services/database/schema/catalog-source";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
+import { catalogSourceSnapshot } from "@rezics/schema/postgres/ingestion/source";
 import {
 	addCatalogName,
 	bindCatalogNameSourceOccurrence,

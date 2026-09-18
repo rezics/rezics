@@ -12,7 +12,7 @@ Use owner-local commands in transactions, propagate failures or use explicit sav
 
 Acquisition records immutable, fieldset-qualified observations. Versioned bindings/proposals call native commands and record exact native application receipts. Native history is not a source payload. A source redirect is not a native merge; source withdrawal and compensation affect only still-owned changes. Large updates require staged parts, complete dependency/correspondence validation and lease/head/authority fences.
 
-The [source-contract owner](source-contracts/README.md), [artifacts](source-contracts/artifacts.json) and [field inventory](source-contracts/fields.jsonl) provide pinned source inputs and reviewed dispositions. Use the existing generator and owning Taskfile, with reproducible network acquisition when needed. A local cache is disposable; no durable specification depends on its location or contents. Raw-only fields and declaration counts do not establish native coverage.
+The [source-contract owner](source-contracts/README.md), [artifacts](../../../../../libraries/schema-importer/sources/catalog/artifacts.lock.json) and [field inventory](source-contracts/fields.jsonl) provide pinned source inputs and reviewed dispositions. Use the existing generator and owning Taskfile, with reproducible network acquisition when needed. A local cache is disposable; no durable specification depends on its location or contents. Raw-only fields and declaration counts do not establish native coverage.
 
 ## Test ownership
 

@@ -7,7 +7,7 @@ import {
 	softwareComponentRevision,
 	softwareParticipationContext,
 	softwareParticipationContextRevision,
-} from "../database/schema/catalog-software";
+} from "@rezics/schema/postgres/software/software";
 import { loadCatalogIdentity, CatalogReferenceNotFound } from "./storage";
 import {
 	readSoftwareDetails,

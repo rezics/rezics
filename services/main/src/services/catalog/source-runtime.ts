@@ -7,7 +7,7 @@ import {
 	catalogSourceRecord as records,
 	catalogSourceMappingClaim as claims,
 	catalogSourceSnapshot as snapshots,
-} from "../database/schema/catalog-source";
+} from "@rezics/schema/postgres/ingestion/source";
 import type { EventHandler } from "../events/consumer";
 import type { StreamRoute } from "../events/topology";
 import { encodeEnvelope, eventEnvelopeSchema, type EventEnvelope } from "../events/envelope";

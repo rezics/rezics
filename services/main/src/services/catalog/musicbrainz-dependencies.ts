@@ -1,12 +1,12 @@
 import { withCatalogSourceReceipts } from "./source-observations";
 import { assertMusicBrainzReleaseArchive } from "./musicbrainz-release-bundle";
-import { MUSIC_SOURCE_DEPENDENCY_LIMIT } from "../database/schema/catalog-source-limits";
+import { MUSIC_SOURCE_DEPENDENCY_LIMIT } from "@rezics/schema/postgres/ingestion/source-limits";
 import { adoptMusicBrainzRelations } from "./musicbrainz-relations";
 import type { DatabaseTransaction } from "../database";
 import { z } from "zod";
-import type { CatalogOwner } from "./contracts";
+import type { CatalogOwner } from "@rezics/schema/contracts/native/catalog";
 import { MusicBrainzRelationEndpointFamilies } from "./musicbrainz-relation-plan";
-import { musicRecording, musicReleaseGroup } from "../database/schema/catalog-music";
+import { musicRecording, musicReleaseGroup } from "@rezics/schema/postgres/music/music";
 import {
 	currentParticipationAuthority,
 	ParticipationDenied,

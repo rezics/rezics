@@ -1,7 +1,4 @@
 import { defineConfig } from "drizzle-kit";
 
-export default defineConfig({
-	dialect: "postgresql",
-	schema: "./src/drizzle.ts",
-	out: "./migrations",
-});
+// Production migrations are composed only by services/main's migration owner.
+export default defineConfig({ dialect: "postgresql", schema: "./src/postgres/index.ts", out: "../../.temp/schema-preview-migrations" });

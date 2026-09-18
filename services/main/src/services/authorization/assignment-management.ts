@@ -12,25 +12,25 @@ import {
 import type { PrincipalRequestContext } from "../auth/principal-session";
 import type { DatabaseTransaction } from "../database";
 import { env } from "../config";
-import { accessRole } from "../database/schema/access-role";
-import { accessRoleBinding, accessRoleBindingScope } from "../database/schema/access-role-binding";
+import { accessRole } from "@rezics/schema/postgres/access/access-role";
+import { accessRoleBinding, accessRoleBindingScope } from "@rezics/schema/postgres/access/access-role-binding";
 import {
 	accessAssignmentCeiling,
 	accessAssignmentCeilingPermission,
-} from "../database/schema/access-assignment-ceiling";
-import { accessMembership } from "../database/schema/access-membership";
-import { accessGroup, accessGroupTree } from "../database/schema/access-group";
-import { accessGroupMembership } from "../database/schema/access-group-membership";
+} from "@rezics/schema/postgres/access/access-assignment-ceiling";
+import { accessMembership } from "@rezics/schema/postgres/access/access-membership";
+import { accessGroup, accessGroupTree } from "@rezics/schema/postgres/access/access-group";
+import { accessGroupMembership } from "@rezics/schema/postgres/access/access-group-membership";
 import {
 	accessAssignmentReview as reviews,
 	accessAssignmentApproval as approvals,
 	accessAssignmentReceipt as receipts,
-} from "../database/schema/access-assignment-management";
+} from "@rezics/schema/postgres/access/access-assignment-management";
 import {
 	accessRecoveryPath,
 	accessRecoveryPolicy,
-} from "../database/schema/access-group-admission";
-import { accessImpactFence } from "../database/schema/access-group-impact";
+} from "@rezics/schema/postgres/access/access-group-admission";
+import { accessImpactFence } from "@rezics/schema/postgres/access/access-group-impact";
 import { applyAccessRoleCommand, AccessRoleCommandSchema, readAccessRoleSnapshot } from "./roles";
 import {
 	applyAccessRoleBindingCommand,

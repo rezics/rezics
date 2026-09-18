@@ -396,7 +396,7 @@ in the disposable target; these timings are not 500M/3B load acceptance.
 
 OpenAPI and all SDKs include nullable native presentation language,
 `afterProfileId` and `nextCursor`. Consuming this traversal in the frontend is
-part of G5. The [Realm owner](../../services/main/src/services/realms/README.md#roster-reads)
+part of G5. The [Realm owner](../../services/main/src/services/realms/README.md#disclosure-and-retained-consumers)
 records pagination and disclosure semantics, workload estimates and skew limits.
 
 ## Public reviewed merge reference fixture

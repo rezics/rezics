@@ -7,7 +7,7 @@ import {
 	validateGrant,
 	type ParticipationAuthority,
 } from "./policy";
-import type { participationGrant } from "../database/schema/participation";
+import type { participationGrant } from "@rezics/schema/postgres/access/participation";
 
 const actor = "019f9ea5-5188-7f3a-8819-380ec28c0b11";
 const entity = "019f9ea5-5188-7f3a-8819-380ec28c0b12";

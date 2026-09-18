@@ -6,7 +6,7 @@ import { AccessInputInvalid } from "../authorization/http-errors";
 import { setAuditCredentialContext } from "../audit";
 import { personalApiKeyBearer, verifyInteractivePrincipal, verifyPersonalApiKey } from "./authentication";
 import { readApiKeyAuthorityMetadata, readFirstPartyCredentialAuthority, type FirstPartyCredentialProof } from "./credential-authority";
-import type { ApiPermission } from "./api-permissions";
+import type { ApiPermission } from "@rezics/schema/contracts/native/api-permissions";
 import { enforceApiQuota } from "./api-quota/limit-store";
 import { apiRouteOperationId, resolveApiQuotaOperation } from "./api-quota/operation";
 import { getApiTokenQuotaOverride, resolveApiAccountQuotaPolicy, resolveApiTokenQuotaPolicy } from "./api-quota/policy-service";

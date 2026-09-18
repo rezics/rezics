@@ -7,8 +7,8 @@ import {
 	musicComponentRevision,
 	musicReleaseEvent,
 	musicReleaseLabel,
-} from "../database/schema/catalog-music";
-import { CatalogIdentityTables } from "../database/schema/catalog-identity";
+} from "@rezics/schema/postgres/music/music";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
 import {
 	canAccessCatalog,
 	readCatalogAuthorityScope,

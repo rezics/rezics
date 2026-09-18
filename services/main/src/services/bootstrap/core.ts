@@ -1,5 +1,5 @@
 import { UnitOwnerValues } from "@rezics/reference";
-import { unitOwnerTable } from "../database/schema/unit-reference-columns";
+import { unitOwnerTable } from "@rezics/schema/postgres/shared/unit-reference-columns";
 import { inArray } from "drizzle-orm";
 
 import { database, type DatabaseExecutor } from "../database";

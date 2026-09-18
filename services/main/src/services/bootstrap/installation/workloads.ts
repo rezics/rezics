@@ -1,7 +1,7 @@
 import { and, eq, isNull, sql } from "drizzle-orm";
 import type { DatabaseTransaction } from "../../database";
-import { users } from "../../database/schema/auth";
-import { workloadPrincipal } from "../../database/schema/workload-principal";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { workloadPrincipal } from "@rezics/schema/postgres/identity/workload-principal";
 import { allocateAccessScope, allocateAccessSubject } from "../../authorization/identities";
 import { applyWorkloadPrincipalCommand, PlatformWorkloadDefinitions } from "../../authorization/workload-principals";
 

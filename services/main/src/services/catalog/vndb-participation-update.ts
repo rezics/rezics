@@ -7,9 +7,9 @@ import {
 	softwareParticipation as heads,
 	softwareParticipationRevision as revisions,
 	softwareParticipationCreditSourceOccurrence as occurrences,
-} from "../database/schema/catalog-software-participation";
-import { softwareSourceParticipationBaseline } from "../database/schema/catalog-source-owned-baseline";
-import type { CatalogReference } from "./contracts";
+} from "@rezics/schema/postgres/software/software-participation";
+import { softwareSourceParticipationBaseline } from "@rezics/schema/postgres/ingestion/source-owned-baseline";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import type { CatalogSourceNativeChange } from "./source-applications";
 import type { recordCatalogSourceDocument } from "./source-observations";
 import {

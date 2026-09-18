@@ -2,8 +2,8 @@ import { createHash } from "node:crypto";
 import { and, eq, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { connectedAppClient, connectedAppClientCapability, connectedAppClientEvent, connectedAppClientRevision } from "../database/schema/connected-app-client";
-import { oauthClientAuthority } from "../database/schema/oauth-client-authority";
+import { connectedAppClient, connectedAppClientCapability, connectedAppClientEvent, connectedAppClientRevision } from "@rezics/schema/postgres/integrations/connected-app-client";
+import { oauthClientAuthority } from "@rezics/schema/postgres/integrations/oauth-client-authority";
 import { AppCapabilitySchema, MaximumAppCapabilities, appCapabilityDigest, appCapabilityKey, decodeAppCapabilities } from "./capabilities";
 
 const id = z.uuid().toLowerCase(), version = z.number().int().nonnegative().safe();

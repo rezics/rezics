@@ -1,7 +1,7 @@
 import type { StaticDecode } from "typebox";
 import { t } from "elysia";
 
-import { PollModeValues, PollResultVisibilityValues } from "../../database/schema/contract-values";
+import { PollModeValues, PollResultVisibilityValues } from "@rezics/schema/postgres/shared/contract-values";
 import { ContentLanguage, LocalizationLanguageQuery, RevisionContext, Uuid } from "../schema";
 
 const PollOptionLabel = t.String({ minLength: 1, maxLength: 500 });

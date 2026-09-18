@@ -12,7 +12,7 @@ import { exactCount, lowerBoundCount, type CountResult } from "../counts/contrac
 import { database, type DatabaseExecutor } from "../database";
 import { toSafeInteger } from "../database/integer";
 import { creditAttribution, unitFollowStat } from "../database/schema";
-import type { CreditAttributionRole } from "../database/schema/contract-values";
+import type { CreditAttributionRole } from "@rezics/schema/postgres/shared/contract-values";
 import { WorkPolicy } from "../performance/policy";
 import type { LocalizationLanguageQuery } from "./localization";
 import {

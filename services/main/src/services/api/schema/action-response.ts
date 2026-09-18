@@ -18,7 +18,7 @@ import {
 	RealmMemberStateValues,
 	RealmPinKindValues,
 	RealmRuleAcknowledgementModeValues,
-} from "../../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
 import { AvatarResponse, FeedPostItemResponse, FeedUnitItemResponse } from "./response";
 

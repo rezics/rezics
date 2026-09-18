@@ -27,7 +27,7 @@ import {
 	unitTag,
 } from "../../database/schema";
 import { runVoteTransaction } from "../../database/vote-admission";
-import { fractionalPositionAt } from "../../ordering/position";
+import { fractionalPositionAt } from "@rezics/schema/contracts/native/positions";
 import { parseJsonCursor } from "../../pagination";
 import { InvalidPaginationCursor } from "../../pagination/errors";
 import { getPostSubjectPresentation } from "../../posts/presentation";

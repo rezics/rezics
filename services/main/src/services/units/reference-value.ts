@@ -3,14 +3,16 @@ import { alias } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import { UnitReferenceSchema, type UnitReference } from "@rezics/reference";
 import type { DatabaseTransaction } from "../database";
-import { referenceValue } from "../database/schema/reference-value";
+import {
+	referenceValue,
+	referenceValueNativeIdExpression,
+} from "@rezics/schema/postgres/knowledge/reference-value";
 import { allocateImmutableReference } from "./immutable-reference";
 import {
 	unitReferenceTargetColumn,
 	unitReferenceValues,
-	unitReferenceIdExpression,
 	unitReferenceOwnerExpression,
-} from "../database/schema/unit-reference-columns";
+} from "@rezics/schema/postgres/shared/unit-reference-columns";
 
 /**
  * Allocate or reuse an immutable value inside an already authorized operation.
@@ -60,7 +62,7 @@ export async function resolveReferenceValue(
 	const [row] = await tx
 		.select({
 			owner: unitReferenceOwnerExpression("target", referenceValue),
-			id: unitReferenceIdExpression("target", referenceValue),
+			id: referenceValueNativeIdExpression(referenceValue),
 		})
 		.from(referenceValue)
 		.where(eq(referenceValue.id, id))
@@ -71,7 +73,7 @@ export async function resolveReferenceValue(
 /** Derived target fields for a joined, immutable reference value. @internal */
 export const referenceValueTarget = {
 	owner: unitReferenceOwnerExpression("target", referenceValue),
-	id: unitReferenceIdExpression("target", referenceValue),
+	id: referenceValueNativeIdExpression(referenceValue),
 };
 
 /**
@@ -103,5 +105,5 @@ const referenceLookup = alias(referenceValue, "reference_lookup");
  */
 export function referenceValueIdForNativeId(nativeId: string | SQLWrapper) {
 	return sql<string | null>`(select ${referenceLookup.id} from ${referenceValue} reference_lookup
-  where ${unitReferenceIdExpression("target", referenceLookup)}=${nativeId}::uuid)`;
+  where ${referenceValueNativeIdExpression(referenceLookup)}=${nativeId}::uuid)`;
 }

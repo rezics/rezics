@@ -10,7 +10,7 @@ import { initializeObservability } from "@rezics/observability";
 import { OfficialRealmUnitIds } from "@rezics/slug";
 import type { CatalogReference } from "@rezics/reference";
 import type { Authorization } from "../src/services/authorization";
-import { operationalCapacity } from "../src/services/database/schema/operational-durability";
+import { operationalCapacity } from "@rezics/schema/postgres/operations/operational-durability";
 import { aggregateRoutingBucket } from "../src/services/events/envelope";
 import { catalogSourceRecordId } from "../src/services/catalog/source-record-key";
 import type { CatalogSourceArchive } from "../src/services/catalog/source-observations";
@@ -43,19 +43,19 @@ const observability = initializeObservability({
 const { database, withDatabaseTransactionDeadline } = await import("../src/services/database");
 type MergeFixtureTransaction = Parameters<Parameters<typeof database.transaction>[0]>[0];
 const { auth } = await import("../src/services/auth");
-const { users, sessions } = await import("../src/services/database/schema/auth");
+const { users, sessions } = await import("@rezics/schema/postgres/identity/auth");
 const { platformCapabilityGrant, realm, realmRule, realmRuleRevision } = await import(
-	"../src/services/database/schema/realm"
+	"@rezics/schema/postgres/realms/realm"
 );
-const { CatalogIdentityTables } = await import("../src/services/database/schema/catalog-identity");
-const { CatalogNameTables } = await import("../src/services/database/schema/catalog-names");
-const { CatalogFactTables } = await import("../src/services/database/schema/catalog-facts");
+const { CatalogIdentityTables } = await import("@rezics/schema/postgres/catalog/identity");
+const { CatalogNameTables } = await import("@rezics/schema/postgres/knowledge/names");
+const { CatalogFactTables } = await import("@rezics/schema/postgres/knowledge/facts");
 const {
 	catalogSourceMappingClaim,
 	catalogSourceBindingRevision,
-} = await import("../src/services/database/schema/catalog-source");
+} = await import("@rezics/schema/postgres/ingestion/source");
 const { unitMergeOperation, unitMergeRequest, unitMergeGraphLock, unitMergeRedirect } = await import(
-	"../src/services/database/schema/unit-merge"
+	"@rezics/schema/postgres/identity/unit-merge"
 );
 const { ensureSelfEntityInTransaction } = await import("../src/services/auth/entity");
 const { Authorization: AuthorizationService } = await import("../src/services/authorization");

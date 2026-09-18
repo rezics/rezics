@@ -1,8 +1,8 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
-import { CatalogReferenceSchema } from "./contracts";
+import { CatalogReferenceSchema } from "@rezics/schema/contracts/native/catalog";
 import { CatalogSourceProposalSchema } from "./source-api-contracts";
-import { SOURCE_DOCUMENT_BYTE_LIMIT } from "../database/schema/catalog-source-limits";
+import { SOURCE_DOCUMENT_BYTE_LIMIT } from "@rezics/schema/postgres/ingestion/source-limits";
 import { CatalogSourcePartKeySchema } from "./source-multipart-contracts";
 
 const scalarKind = z.enum(["null", "string", "number", "boolean", "object", "array"]);

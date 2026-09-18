@@ -9,7 +9,7 @@ import {
 	ContentLanguageValues,
 	ResourceVisibilityValues,
 	UnitStatusValues,
-} from "../../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 import { ResourceSectionValues, type ResourceSection } from "../../units/resource-section";
 import {
 	AvatarInput,

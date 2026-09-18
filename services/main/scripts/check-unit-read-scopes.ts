@@ -9,9 +9,9 @@ import {
 	withDatabaseTransactionDeadline,
 	type DatabaseTransaction,
 } from "../src/services/database";
-import { users } from "../src/services/database/schema/auth";
-import { post } from "../src/services/database/schema/post";
-import { unitAccessGrant, unitAccessRestriction } from "../src/services/database/schema/access";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { post } from "@rezics/schema/postgres/forum/post";
+import { unitAccessGrant, unitAccessRestriction } from "@rezics/schema/postgres/access/access";
 import { Authorization } from "../src/services/authorization";
 import { getUnitReadCondition } from "../src/services/authorization/unit/query";
 import { createProfileOwnedUnitAccess } from "../src/services/authorization/unit/ownership";
@@ -191,7 +191,7 @@ for (const path of [
 	"services/main/src/services/authorization/unit/authorization.ts",
 	"services/main/src/services/authorization/unit/query.ts",
 	"libraries/access/src/scope.ts",
-	"services/main/src/services/database/schema/access.ts",
+	"libraries/schema/src/postgres/access/access.ts",
 	"services/main/src/services/database/migrations/atlas.sum",
 ])
 	sourceDigests[path] = createHash("sha256")

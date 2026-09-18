@@ -59,7 +59,7 @@ Dynamic Collection runtime implementation is outside the required scope of this 
 
 MediaWiki category annotations create a generated page index; the index is distinct from the page annotations that determine membership. [MediaWiki category documentation](https://www.mediawiki.org/wiki/Help:Categories). Semantic MediaWiki separates query conditions, displayed properties and rendering, bounds query results, and notes that query arguments do not themselves add the queried annotations. [Inline query documentation](https://www.semantic-mediawiki.org/wiki/Results_format). PostgreSQL materialized results can be stale and require explicit refresh. [Materialized-view documentation](https://www.postgresql.org/docs/18/rules-materializedviews.html).
 
-The REZICS design below is an inference from those distinctions and the existing [stored Collection schema](../../services/main/src/services/database/schema/collection.ts), [Filter documents](filter-documents.md), [Filter execution](filter-feed-and-zone-experience.md) and [Zone composition](zone-composition-and-theming-decisions.md). Reuse those contracts; importing another wiki's query language or equating a materialized result with curated membership is unnecessary.
+The REZICS design below is an inference from those distinctions and the existing [stored Collection schema](../../libraries/schema/src/postgres/community/collection.ts), [Filter documents](filter-documents.md), [Filter execution](filter-feed-and-zone-experience.md) and [Zone composition](zone-composition-and-theming-decisions.md). Reuse those contracts; importing another wiki's query language or equating a materialized result with curated membership is unnecessary.
 
 ### Identity, writes and results
 

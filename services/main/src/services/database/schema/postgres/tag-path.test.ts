@@ -6,7 +6,7 @@ import {
 	TagExpressionMaximumActiveInferenceRules,
 	TagExpressionMaximumEffectiveTags,
 	TagExpressionMaximumReachableExpressions,
-} from "../tag-expression";
+} from "@rezics/schema/postgres/knowledge/tag-expression";
 
 let source = "";
 let aggregateSource = "";

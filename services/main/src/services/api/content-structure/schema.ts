@@ -16,7 +16,7 @@ import {
 	ContentRatingValues,
 	RealmTagQueryStrategyValues,
 	UnitOwnershipModeValues,
-} from "../../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 import { RevisionedBatchCommandLimit } from "../../history/revisioned-batch";
 
 export const UnitContentStructuresParams = t.Object({ unitId: Uuid });

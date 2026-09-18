@@ -7,8 +7,8 @@ import type { DatabaseTransaction } from "../database";
 import {
 	softwareParticipationSourceOccurrence,
 	softwareVisualNovel,
-} from "../database/schema/catalog-software";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
+} from "@rezics/schema/postgres/software/software";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
 import { acceptCatalogSourceInitialization } from "./source-bindings";
 import { type CatalogSourceReceipt, recordCatalogSourceDocument } from "./source-observations";
 import { inspectExistingSourceBinding } from "./source-adoption";

@@ -2,8 +2,13 @@
 	"format": "rezics.source-coverage.v1",
 	"inventory": {
 		"fieldsSha256": "d0959859bb11f507a8a699fe3c3d2a679632db9597f40fadf788231b3125f2ef",
-		"artifactsSha256": "b999453040ce620909105ad4c33ccb51f5346743a79dda955c3fcc4ca2a1f087",
-		"declarations": { "bangumi": 5644, "vndb": 214, "musicbrainz": 2437, "openlibrary": 117 }
+		"artifactsSha256": "2616df45708ca64e17e592f939d06dc9ae430a73e9e5f990dc3d80209b83edd3",
+		"declarations": {
+			"bangumi": 5644,
+			"vndb": 214,
+			"musicbrainz": 2437,
+			"openlibrary": 117
+		}
 	},
 	"entries": [
 		{

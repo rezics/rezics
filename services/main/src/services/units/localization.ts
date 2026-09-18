@@ -11,7 +11,7 @@ import type { PortableTextDocument } from "@rezics/block";
 
 import type { DatabaseTransaction } from "../database";
 import { unitLocalization } from "../database/schema";
-import { fractionalPositionAt, fractionalPositionBetween } from "../ordering/position";
+import { fractionalPositionAt, fractionalPositionBetween } from "@rezics/schema/contracts/native/positions";
 import {
 	UnitLastLocalizationRemovalForbidden,
 	UnitLocalizationNotFound,

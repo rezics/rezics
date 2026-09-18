@@ -2,9 +2,9 @@ import { createHash } from "node:crypto";
 import { and, eq, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { users } from "../database/schema/auth";
-import { workloadPrincipal, workloadPrincipalEvent } from "../database/schema/workload-principal";
-import { accessScope, accessSubject } from "../database/schema/access-identity";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { workloadPrincipal, workloadPrincipalEvent } from "@rezics/schema/postgres/identity/workload-principal";
+import { accessScope, accessSubject } from "@rezics/schema/postgres/access/access-identity";
 import { allocateAccessSubject } from "./identities";
 import { readAccessSubjectEligibility } from "./subject-eligibility";
 

@@ -4,7 +4,7 @@ import { createManagedOrganization } from "../src/services/participation/organiz
 import { setTimeout } from "node:timers/promises";
 import { lockUnitAccessState } from "../src/services/authorization/unit/access-lock";
 import { UnitNotFound } from "../src/services/units/errors";
-import { publishingIdentity } from "../src/services/database/schema/catalog-identity";
+import { publishingIdentity } from "@rezics/schema/postgres/catalog/identity";
 import { issueParticipationGrant } from "../src/services/participation/commands";
 import assert from "node:assert/strict";
 import { initializeObservability } from "@rezics/observability";

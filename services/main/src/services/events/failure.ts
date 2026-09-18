@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
 import type { DatabaseSession, DatabaseTransaction } from "../database";
-import { operationalApplicationReceipt as receipts } from "../database/schema/operational-durability";
+import { operationalApplicationReceipt as receipts } from "@rezics/schema/postgres/operations/operational-durability";
 import {
 	claimOperationalTask,
 	completeOperationalTask,

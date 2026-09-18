@@ -1,6 +1,6 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import type { DatabaseTransaction } from "../database";
-import type { CatalogReference } from "./contracts";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 
 type Initialization = {tx:DatabaseTransaction;reference:CatalogReference;evidenceSourceRecordId:string};
 const initialization=new AsyncLocalStorage<Initialization>();

@@ -3,7 +3,7 @@ import Elysia from "elysia";
 import { inArray } from "drizzle-orm";
 import { serializeSignedCookie } from "better-call";
 import { initializeObservability } from "@rezics/observability";
-import { users, sessions } from "../src/services/database/schema/auth";
+import { users, sessions } from "@rezics/schema/postgres/identity/auth";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import { ensureCatalogDefinition } from "../src/services/catalog/storage";
 import { CatalogCreatedSchema } from "../src/services/catalog/resource-contracts";

@@ -12,9 +12,9 @@ import {
 	withDatabaseTransactionDeadline,
 	type DatabaseTransaction,
 } from "../src/services/database";
-import { users } from "../src/services/database/schema/auth";
-import { authEntity, entityParticipation } from "../src/services/database/schema/participation";
-import { platformCapabilityGrant } from "../src/services/database/schema/realm";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { authEntity, entityParticipation } from "@rezics/schema/postgres/access/participation";
+import { platformCapabilityGrant } from "@rezics/schema/postgres/realms/realm";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import { createManagedOrganization } from "../src/services/participation/organizations";
 import {
@@ -409,7 +409,7 @@ for (const path of [
 	"services/main/src/services/participation/membership.ts",
 	"services/main/src/services/participation/commands.ts",
 	"services/main/src/services/participation/policy.ts",
-	"services/main/src/services/database/schema/participation.ts",
+	"libraries/schema/src/postgres/access/participation.ts",
 	"services/main/src/services/database/schema/postgres/organization-membership.sql",
 	"services/main/src/services/database/migrations/atlas.sum",
 ])

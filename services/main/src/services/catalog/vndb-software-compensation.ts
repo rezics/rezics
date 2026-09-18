@@ -3,8 +3,8 @@ import type { DatabaseTransaction } from "../database";
 import {
 	softwareRecordRevision,
 	softwareParticipationContextRevision,
-} from "../database/schema/catalog-software";
-import { softwareParticipationRevision } from "../database/schema/catalog-software-participation";
+} from "@rezics/schema/postgres/software/software";
+import { softwareParticipationRevision } from "@rezics/schema/postgres/software/software-participation";
 import type { CatalogSourceNativeWriter } from "./source-proposals";
 import {
 	CatalogSourceNativeChangesSchema,

@@ -4,25 +4,25 @@ import {
 	catalogSourceMappingClaim as claims,
 	catalogSourceBindingRevision as bindingRevisions,
 	catalogSourceSnapshot as snapshots,
-} from "../database/schema/catalog-source";
-import { CatalogNameTables } from "../database/schema/catalog-names";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
-import { softwareRecordSourceOccurrence } from "../database/schema/catalog-software-source";
+} from "@rezics/schema/postgres/ingestion/source";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
+import { softwareRecordSourceOccurrence } from "@rezics/schema/postgres/software/software-source";
 import {
 	softwareParticipationSourceOccurrence as contextOccurrences,
 	softwareParticipationContext,
 	softwareParticipationContextRevision,
-} from "../database/schema/catalog-software";
+} from "@rezics/schema/postgres/software/software";
 import {
 	softwareParticipationCreditSourceOccurrence as creditOccurrences,
 	softwareParticipation as creditHeads,
 	softwareParticipationRevision as creditRevisions,
-} from "../database/schema/catalog-software-participation";
+} from "@rezics/schema/postgres/software/software-participation";
 import {
 	CatalogSourceOwnedBaselines,
 	softwareSourceContextBaseline,
 	softwareSourceParticipationBaseline,
-} from "../database/schema/catalog-source-owned-baseline";
+} from "@rezics/schema/postgres/ingestion/source-owned-baseline";
 import type { CatalogSourceNativeWriter } from "./source-proposals";
 import type { CatalogSourceNativeChange } from "./source-applications";
 import { catalogNameRevisionValues } from "./source-owned-compensation";

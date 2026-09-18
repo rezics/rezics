@@ -34,8 +34,17 @@ const ExampleManifest = [
 ] as const;
 
 describe("canonical PostgreSQL view contract", () => {
-	it("does not restore legacy mutable-projection current views", () => {
-		expect(PostgreSqlSchemaViews).toEqual([]);
+	it("declares only the two read-only current-generation Entity presentation views", () => {
+		expect(PostgreSqlSchemaViews.map((view) => view.name)).toEqual([
+			"current_realm_entity_membership",
+			"current_realm_entity_rule_acceptance",
+		]);
+		for (const view of PostgreSqlSchemaViews) {
+			expect(
+				view.columns.some((column) => column.name === "profile_id" && column.dataType === "uuid"),
+			).toBe(true);
+			expect(view.columns.map((column) => column.name)).not.toContain("auth_user_id");
+		}
 	});
 
 	it("requires one canonical CREATE OR REPLACE declaration for every current view", async () => {

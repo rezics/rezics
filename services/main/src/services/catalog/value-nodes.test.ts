@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CatalogPartialDateSchema } from "./contracts";
+import { CatalogPartialDateSchema } from "@rezics/schema/contracts/native/catalog";
 import { CatalogValueNodeSchema, catalogValueNodes } from "./value-nodes";
 
 describe("native catalog values", () => {

@@ -1,6 +1,6 @@
 import { readSeedIdentityIds } from "./fixture-target";
 import { seedFixtureIdentityId } from "./identity";
-import { CatalogNameTables } from "../database/schema/catalog-names";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
 import { assertLocalDatabaseUrl } from "./data";
 import { env } from "../config";
 import { and, count, eq, inArray, isNotNull, isNull, sql } from "drizzle-orm";

@@ -1,7 +1,7 @@
 import { getTableConfig, PgDialect, type PgTable } from "drizzle-orm/pg-core";
 import { describe, expect, it } from "vitest";
 
-import { FractionalPositionStorageMaximumBytes } from "../ordering/contract";
+import { FractionalPositionStorageMaximumBytes } from "@rezics/schema/contracts/native/ordering";
 import {
 	collectionItem,
 	contentStructureNode,

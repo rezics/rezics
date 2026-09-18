@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import { AccessPermissionValues } from "@rezics/access";
-import { ApiPermissionValues } from "../auth/api-permissions";
+import { ApiPermissionValues } from "@rezics/schema/contracts/native/api-permissions";
 import { AccessPermissionSchema } from "../authorization/permission";
 
 /** API entry scopes and domain permissions remain separate members of an App declaration. @alpha */

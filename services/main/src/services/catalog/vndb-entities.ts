@@ -7,7 +7,7 @@ import { createHash } from "node:crypto";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import type { CatalogSourceReceipt } from "./source-observations";
-import type { CatalogReference } from "./contracts";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { EntityProfileSchema } from "./entity-contracts";
 import { VndbCatalogContractSha256, VndbDumpContractSha256 } from "./vndb";
 import { normalizeVndbEntityDump } from "./vndb-entity-dump";
@@ -357,7 +357,7 @@ async function adoptVndbEntity(
 	const { VndbSupportingRecordSchema, planVndbSupportingNames, planVndbSupportingSemantics } =
 		await import("./vndb-supporting-plans");
 	const { appendVndbSemanticPlan, remapVndbSemanticPlan } = await import("./vndb-semantics");
-	const { CatalogFactTables } = await import("../database/schema/catalog-facts");
+	const { CatalogFactTables } = await import("@rezics/schema/postgres/knowledge/facts");
 	const document = await recordCatalogSourceDocument(tx, receipt, bytes);
 	const existing = await inspectExistingSourceBinding(tx, actor, document, `vndb.${kind}.2`);
 	if (existing && existing.status !== "initialize_reference") return existing;

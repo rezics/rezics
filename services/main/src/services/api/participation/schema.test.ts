@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import type { participationGrant } from "../../database/schema/participation";
+import type { participationGrant } from "@rezics/schema/postgres/access/participation";
 import { IssueGrantInputSchema } from "../../participation/commands";
 import { presentParticipationGrant } from "./present";
 import * as schemas from "./schema";

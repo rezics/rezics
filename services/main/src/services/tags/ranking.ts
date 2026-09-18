@@ -1,6 +1,6 @@
 import { sql, type SQLWrapper } from "drizzle-orm";
 
-import { compareBytewisePositions } from "../ordering/position";
+import { compareBytewisePositions } from "@rezics/schema/contracts/native/positions";
 
 export interface GlobalTagRankInput {
 	readonly tagId: string;

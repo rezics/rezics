@@ -2,7 +2,7 @@ import {
 	ApiQuotaPolicySchemaVersion,
 	DefaultApiQuotaPolicies,
 } from "../auth/api-quota/policy-schema";
-import { compareFractionalPositions, fractionalPositionAt } from "../ordering/position";
+import { compareFractionalPositions, fractionalPositionAt } from "@rezics/schema/contracts/native/positions";
 import { avatarReferenceToColumns } from "../units/localization";
 import {
 	BootstrapAccountIds,

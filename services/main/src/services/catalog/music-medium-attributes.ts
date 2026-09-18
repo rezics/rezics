@@ -1,15 +1,15 @@
 import { and, eq, gt, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { catalogDefinition, catalogDefinitionRevision } from "../database/schema/catalog-identity";
+import { catalogDefinition, catalogDefinitionRevision } from "@rezics/schema/postgres/catalog/identity";
 import {
 	musicMedium,
 	musicMediumAttribute,
 	musicMediumAttributePolicy,
 	musicMediumAttributeAllowedFormat,
 	musicMediumAttributeAllowedValueFormat,
-} from "../database/schema/catalog-music";
-import { CatalogPageSchema, CatalogReferenceSchema, type CatalogReference } from "./contracts";
+} from "@rezics/schema/postgres/music/music";
+import { CatalogPageSchema, CatalogReferenceSchema, type CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { CatalogReferenceNotFound, loadCatalogIdentity, recordCatalogChange } from "./storage";
 import {
 	MusicMediumAttributeInputSchema,

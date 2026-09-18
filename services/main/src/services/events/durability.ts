@@ -7,7 +7,7 @@ import {
 	operationalApplicationReceipt as receipts,
 	operationalOutbox as outbox,
 	operationalTaskIntent as tasks,
-} from "../database/schema/operational-durability";
+} from "@rezics/schema/postgres/operations/operational-durability";
 import { decodeEnvelope, encodeEnvelope, envelopeSubject } from "./envelope";
 
 const taskRequestSchema = z

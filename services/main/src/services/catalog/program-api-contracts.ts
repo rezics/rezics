@@ -1,7 +1,7 @@
 import { CatalogNameLabelSchema } from "./child-name-labels";
 import { z } from "zod";
 import { ProgramStructureSchema } from "./program";
-import { isFractionalPosition } from "../ordering/position";
+import { isFractionalPosition } from "@rezics/schema/contracts/native/positions";
 import { DomainPageQuerySchema } from "./domain-api-pagination";
 const revision = z.number().int().min(1).max(Number.MAX_SAFE_INTEGER);
 export const ProgramComponentSchema = z.enum([

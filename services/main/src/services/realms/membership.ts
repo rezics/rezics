@@ -13,10 +13,10 @@ import {
 	realmEnrollmentOperation,
 	realmEnrollmentRuleAcceptance,
 	realmEnrollmentContact,
-} from "../database/schema/realm-enrollment";
-import { accessMembership } from "../database/schema/access-membership";
+} from "@rezics/schema/postgres/realms/realm-enrollment";
+import { accessMembership } from "@rezics/schema/postgres/access/access-membership";
 import { unitFollow, unitOwnership } from "../database/schema";
-import type { EnrollmentAuthorityEvidence } from "../database/schema/organization-membership";
+import type { EnrollmentAuthorityEvidence } from "@rezics/schema/postgres/access/organization-membership";
 import { allocateAccessSubject, resolveAccessSubject } from "../authorization/identities";
 import { applyAccessMembershipCommand, readAccessMembership } from "../authorization/memberships";
 import {

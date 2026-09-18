@@ -1,7 +1,7 @@
-import { ContentLanguageValues } from "../database/schema/contract-values";
+import { ContentLanguageValues } from "@rezics/schema/postgres/shared/contract-values";
 import { z } from "zod";
 import { MembershipRecipientSchema } from "../participation/membership-contracts";
-import { RealmEnrollmentStateValues } from "../database/schema/realm-enrollment";
+import { RealmEnrollmentStateValues } from "@rezics/schema/postgres/realms/realm-enrollment";
 const id = z.uuid().toLowerCase(),
 	version = z
 		.number()

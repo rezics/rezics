@@ -1,6 +1,6 @@
-import { MUSIC_SOURCE_COMPONENT_LIMIT, MUSIC_SOURCE_APPLICATION_LIMIT, SOURCE_ANCILLARY_CHANGE_LIMIT } from "../database/schema/catalog-source-limits";
+import { MUSIC_SOURCE_COMPONENT_LIMIT, MUSIC_SOURCE_APPLICATION_LIMIT, SOURCE_ANCILLARY_CHANGE_LIMIT } from "@rezics/schema/postgres/ingestion/source-limits";
 import { CatalogChildSourceChangeSchema } from "./child-source-contracts";
-import { CatalogChildSourceTables } from "../database/schema/catalog-child-source";
+import { CatalogChildSourceTables } from "@rezics/schema/postgres/ingestion/child-source";
 import { advanceChildSourceBaselines } from "./child-source-baselines";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { z } from "zod";
@@ -14,17 +14,17 @@ import {
 	musicSourceApplicationChange,
 	softwareSourceComponentApplicationChange,
 	softwareSourceRecordApplicationChange,
-} from "../database/schema/catalog-source-application";
-import { catalogSourceAdoptionProposal } from "../database/schema/catalog-source";
+} from "@rezics/schema/postgres/ingestion/source-application";
+import { catalogSourceAdoptionProposal } from "@rezics/schema/postgres/ingestion/source";
 import { lockCatalogSourceBinding } from "./source-bindings";
-import { CatalogIdentityTables } from "../database/schema/catalog-identity";
-import { CatalogOwnerValues } from "./contracts";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
+import { CatalogOwnerValues } from "@rezics/schema/contracts/native/catalog";
 import { loadCatalogIdentity } from "./storage";
 import { advanceMusicSourceComponentBaselines } from "./music-source-baselines";
 import { advanceCatalogSourceOwnedBaselines } from "./source-owned-baselines";
 import { catalogAccessDecisions } from "../participation/policy";
 import { CatalogStructureSourceChangeSchema } from "./structure-source-contracts";
-import { CatalogStructureSourceTables } from "../database/schema/catalog-structure-source";
+import { CatalogStructureSourceTables } from "@rezics/schema/postgres/ingestion/structure-source";
 import { advanceStructureSourceBaselines } from "./structure-source";
 
 const revision = z.number().int().min(1).max(Number.MAX_SAFE_INTEGER);

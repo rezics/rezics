@@ -10,7 +10,7 @@ import {
 	type DatabaseTransaction,
 } from "../src/services/database";
 import { users, post, studioResourceVisit, accountErasure } from "../src/services/database/schema";
-import { referenceValue } from "../src/services/database/schema/reference-value";
+import { referenceValue } from "@rezics/schema/postgres/knowledge/reference-value";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import { Authorization } from "../src/services/authorization";
 import { runWithParticipationAuthority } from "../src/services/participation/policy";
@@ -470,7 +470,7 @@ order by last_visited_at desc nulls last,target_reference_id desc nulls last lim
 const sourceDigests: Record<string, string> = {};
 for (const path of [
 	"services/main/scripts/check-studio-visit-references.ts",
-	"services/main/src/services/database/schema/studio.ts",
+	"libraries/schema/src/postgres/community/studio.ts",
 	"services/main/src/services/studio/service.ts",
 	"services/main/src/services/database/schema/postgres/merge-integrity.sql",
 	"services/main/src/services/database/migrations/atlas.sum",

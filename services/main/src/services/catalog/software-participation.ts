@@ -5,14 +5,14 @@ import { readCatalogAuthorityScope, catalogIdentityReadPredicate } from "../part
 import {
 	softwareParticipation as heads,
 	softwareParticipationRevision as revisions,
-} from "../database/schema/catalog-software-participation";
-import { softwareParticipationContextRevision } from "../database/schema/catalog-software";
+} from "@rezics/schema/postgres/software/software-participation";
+import { softwareParticipationContextRevision } from "@rezics/schema/postgres/software/software";
 import {
 	catalogDefinitionRevision,
 	catalogDefinition,
 	entityIdentity,
-} from "../database/schema/catalog-identity";
-import type { CatalogReference } from "./contracts";
+} from "@rezics/schema/postgres/catalog/identity";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { requireCatalogNameRevision } from "./names";
 import { CatalogReferenceNotFound, CatalogRevisionConflict, loadCatalogIdentity } from "./storage";
 const revisionNumber = z.number().int().min(1).max(Number.MAX_SAFE_INTEGER);

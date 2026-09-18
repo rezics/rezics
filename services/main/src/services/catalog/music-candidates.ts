@@ -7,8 +7,8 @@ import {
 	musicDiscToc,
 	musicDiscTocOffset,
 	musicReleaseCandidate,
-} from "../database/schema/catalog-music";
-import { type CatalogReference, CatalogReferenceSchema } from "./contracts";
+} from "@rezics/schema/postgres/music/music";
+import { type CatalogReference, CatalogReferenceSchema } from "@rezics/schema/contracts/native/catalog";
 import {
 	addCatalogName,
 	createCatalogIdentity,

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CatalogNameValuesSchema, type CatalogNameInput } from "./name-contracts";
+import { CatalogNameValuesSchema, type CatalogNameInput } from "@rezics/schema/contracts/native/names";
 
 /** @internal WS/2 aliases are unordered and have no stable alias ID; only exact native forms retain correspondence. */
 export function correlateMusicBrainzNativeAliases(

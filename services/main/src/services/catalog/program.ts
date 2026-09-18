@@ -8,10 +8,10 @@ import {
 	programSeason,
 	programVersion,
 	programWork,
-} from "../database/schema/catalog-program";
-import { programIdentity } from "../database/schema/catalog-identity";
-import { isFractionalPosition } from "../ordering/position";
-import { CatalogPartialDateSchema, type CatalogReference } from "./contracts";
+} from "@rezics/schema/postgres/audiovisual/program";
+import { programIdentity } from "@rezics/schema/postgres/catalog/identity";
+import { isFractionalPosition } from "@rezics/schema/contracts/native/positions";
+import { type CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { assertCatalogDefinitionTarget } from "./definitions";
 import {
 	addCatalogName,
@@ -21,50 +21,12 @@ import {
 	recordCatalogChange,
 } from "./storage";
 
-const integer = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
-const nullableId = z.uuid().nullable().default(null);
 const name = z.strictObject({
 	languageTag: z.string().nullable(),
 	value: z.string().min(1).max(131_072),
 });
-const programFields = z.strictObject({
-	typeRevisionId: nullableId,
-	declaredMainEpisodeCount: integer.nullable().default(null),
-	declaredTotalEpisodeCount: integer.nullable().default(null),
-});
-const seasonFields = z.strictObject({
-	programId: nullableId,
-	number: z.string().max(4096).nullable().default(null),
-});
-const versionFields = z.strictObject({
-	programId: nullableId,
-	versionTypeRevisionId: nullableId,
-	lengthMilliseconds: integer.nullable().default(null),
-});
-const episodeFields = z
-	.strictObject({
-		programId: nullableId,
-		seasonId: nullableId,
-		typeRevisionId: nullableId,
-		sortNumber: z.number().finite().nullable().default(null),
-		episodeNumber: z.number().finite().nullable().default(null),
-		discNumber: z.number().int().min(0).max(2_147_483_647).nullable().default(null),
-		durationText: z.string().max(4096).nullable().default(null),
-		lengthMilliseconds: integer.nullable().default(null),
-		date: CatalogPartialDateSchema.default({ year: null, month: null, day: null }),
-		dateText: z.string().max(4096).nullable().default(null),
-	})
-	.refine((value) => value.seasonId === null || value.programId !== null, {
-		message: "An episode assigned to a season requires the season's program",
-	});
-
-/** Native program structures, independent of source subject classifications. @internal */
-export const ProgramStructureSchema = z.discriminatedUnion("shape", [
-	z.strictObject({ shape: z.literal("program"), fields: programFields }),
-	z.strictObject({ shape: z.literal("season"), fields: seasonFields }),
-	z.strictObject({ shape: z.literal("program_version"), fields: versionFields }),
-	z.strictObject({ shape: z.literal("episode"), fields: episodeFields }),
-]);
+import { ProgramStructureSchema } from "@rezics/schema/contracts/native/structures";
+export { ProgramStructureSchema };
 
 async function requireProgram(
 	tx: DatabaseTransaction,
@@ -109,7 +71,7 @@ async function validateParents(
 	}
 }
 
-function episodeColumns(fields: z.output<typeof episodeFields>) {
+function episodeColumns(fields: Extract<z.output<typeof ProgramStructureSchema>, { shape: "episode" }>["fields"]) {
 	const { date, sortNumber, episodeNumber, ...rest } = fields;
 	return {
 		...rest,

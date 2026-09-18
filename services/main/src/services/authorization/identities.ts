@@ -2,7 +2,7 @@ import type { AccessScopeTarget, AccessSubjectTarget } from "@rezics/access";
 import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { accessScope, accessSubject } from "../database/schema/access-identity";
+import { accessScope, accessSubject } from "@rezics/schema/postgres/access/access-identity";
 import { allocateImmutableReference } from "../units/immutable-reference";
 
 const subjectTargetSchema = z.discriminatedUnion("kind", [

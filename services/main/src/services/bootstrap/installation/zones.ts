@@ -16,7 +16,7 @@ import {
 	insertContentStructureNode,
 } from "../../content-structure/service";
 import { createDockHistory } from "../../api/docks/history";
-import { fractionalPositionAt } from "../../ordering/position";
+import { fractionalPositionAt } from "@rezics/schema/contracts/native/positions";
 import { insertPlatformUnitIfMissing } from "../../units/create";
 import { recordUnitRevision } from "../../units/history";
 import { recordInitialRealmUnitPublicationEvents } from "../../units/realm-publication";

@@ -9,7 +9,7 @@ import { formatWithBiome } from "./format-with-biome";
 
 const schemaPath = resolve(
 	dirname(fileURLToPath(import.meta.url)),
-	"../src/services/database/schema/auth.ts",
+	"../../../libraries/schema/src/postgres/identity/auth.ts",
 );
 
 const observability = initializeObservability({

@@ -6,7 +6,7 @@ import {
 	compareFractionalPositions,
 	fractionalPositionBetween,
 	fractionalPositionNeedsRebalance,
-} from "../ordering/position";
+} from "@rezics/schema/contracts/native/positions";
 
 const CollectionId = "019b1234-1234-7000-8000-000000000001";
 const FirstTargetId = "019b1234-1234-7000-8000-000000000002";

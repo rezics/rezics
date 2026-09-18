@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { database, type DatabaseTransaction } from "../database";
-import { users } from "../database/schema/auth";
-import { imageAsset } from "../database/schema/image";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { imageAsset } from "@rezics/schema/postgres/media/image";
 import { ImageAssetNotFound } from "../api/image-assets/errors";
 
 /** One database connection locks account then asset across its bounded object-store effect. */

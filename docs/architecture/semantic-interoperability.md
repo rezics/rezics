@@ -3,7 +3,7 @@
 Status: selected target for full indexing, September 15, 2026. The independently
 consumable [schema package](../../libraries/schema/README.md) now implements the
 selected vocabulary-definition path, its Drizzle persistence and portable artifacts.
-Full source-instance indexing and existing native-domain integration remain pending.
+The main service now consumes the same domain-organized Drizzle schema; source converters and declaration storage live in `libraries/schema-importer`. Full source-instance acquisition/indexing remains a separate capability.
 This contract extends M02/M07/M09, with M04 owning native domain mappings. The
 [plan](../plan/README.md) owns the currently selected execution scope and sequence.
 

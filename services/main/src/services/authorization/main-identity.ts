@@ -9,7 +9,7 @@ import { readPrivateAccountAuthority } from "./private-account-authority";
 import { evaluateCurrentRepresentationAuthority } from "./representation-authority";
 import { AccessDenied, AccessUnavailable } from "./http-errors";
 import { requireAccessAdmission, runAccessTransaction } from "./transaction";
-import { entityIdentity } from "../database/schema/catalog-identity";
+import { entityIdentity } from "@rezics/schema/postgres/catalog/identity";
 
 /** Read the private recorded choice; it is not a current representation or publication admission. @internal */
 export async function getMainIdentityPreference(context: PrincipalRequestContext) {

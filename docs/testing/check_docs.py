@@ -7,6 +7,8 @@ staging. Source/localization examples inside code fences remain exact data.
 from __future__ import annotations
 
 import re
+import json
+import hashlib
 import subprocess
 import sys
 import unicodedata
@@ -61,11 +63,19 @@ def main():
     names = set(subprocess.check_output(["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"], cwd=ROOT).decode("utf-8").split("\0"))
     docs = sorted(ROOT / name for name in names if name.endswith(".md") and (ROOT / name).is_file())
     problems = []
+    # Upstream machine-schema Markdown is an exact pinned input. Its relative
+    # links belong to its upstream repository, not our maintained documentation.
+    source_pins = json.loads((ROOT / "libraries/schema-importer/sources/catalog/artifacts.lock.json").read_text())
+    upstream_docs = {f"libraries/schema-importer/sources/{entry['source']}/inputs/{entry['file']}": entry["sha256"] for entry in source_pins if entry["file"].endswith(".md")}
     checked_links = 0
     anchor_cache = {}
     local_targets = {}
     for path in docs:
         name = path.relative_to(ROOT).as_posix()
+        if name in upstream_docs:
+            if hashlib.sha256(path.read_bytes()).hexdigest() != upstream_docs[name]:
+                problems.append(f"{name}: pinned upstream documentation bytes changed")
+            continue
         text = path.read_text(encoding="utf-8")
         for retired in RETIRED:
             if name.startswith(retired):

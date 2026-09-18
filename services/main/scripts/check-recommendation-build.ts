@@ -11,13 +11,13 @@ import { z } from "zod";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import { runWithParticipationAuthority } from "../src/services/participation/policy";
 import { createCatalogIdentity } from "../src/services/catalog/storage";
-import { users } from "../src/services/database/schema/auth";
-import { post } from "../src/services/database/schema/post";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { post } from "@rezics/schema/postgres/forum/post";
 import {
 	recommendationSnapshot,
 	recommendationSnapshotPartition,
 	unitBestScore,
-} from "../src/services/database/schema/recommendation";
+} from "@rezics/schema/postgres/discovery/recommendation";
 import {
 	admitRecommendationSnapshot,
 	advanceRecommendationPartition,
@@ -1045,7 +1045,7 @@ try {
 		"services/main/scripts/check-recommendation-build.ts",
 		"services/main/src/services/recommendations/build-partitions.ts",
 		"services/main/src/services/recommendations/policy.ts",
-		"services/main/src/services/database/schema/recommendation.ts",
+		"libraries/schema/src/postgres/discovery/recommendation.ts",
 		"services/main/src/services/database/schema/postgres/recommendation-build.sql",
 		"services/main/src/services/database/migrations/atlas.sum",
 	])

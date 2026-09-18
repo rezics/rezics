@@ -5,10 +5,10 @@ import { AccessPermissionValues, type AccessPermission, type RepresentationRefer
 import type { DatabaseTransaction } from "../database";
 import {
 	accessRepresentation, accessRepresentationEntity, accessRepresentationRevision, accessRepresentationPermission,
-} from "../database/schema/access-representation";
-import { accessMembership } from "../database/schema/access-membership";
-import { accessGroupTree } from "../database/schema/access-group";
-import { accessGroupMembershipSet } from "../database/schema/access-group-membership";
+} from "@rezics/schema/postgres/access/access-representation";
+import { accessMembership } from "@rezics/schema/postgres/access/access-membership";
+import { accessGroupTree } from "@rezics/schema/postgres/access/access-group";
+import { accessGroupMembershipSet } from "@rezics/schema/postgres/access/access-group-membership";
 import { decodeAccessPermissionSnapshot } from "./permission";
 import { AccessRepresentationUnavailable } from "./representations";
 import type { AuthorityOutcome } from "./authority-context";

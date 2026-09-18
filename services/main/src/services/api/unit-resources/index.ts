@@ -36,7 +36,7 @@ import {
 	type UnitReferenceCurationKind,
 	UnitReferenceActiveLimit,
 	UnitReferencePageDefault,
-} from "../../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 import { runVoteTransaction } from "../../database/vote-admission";
 import {
 	CreditAttributionNotFound,
@@ -44,7 +44,7 @@ import {
 	EntityEntryNotFound,
 	SubjectAssociationNotFound,
 } from "../../entities/errors";
-import { fractionalPositionBetween } from "../../ordering/position";
+import { fractionalPositionBetween } from "@rezics/schema/contracts/native/positions";
 import { updateDirectUnitTagCuration } from "../../tags/curation";
 import { ensureWikiAssociationContextPost } from "../../units/association-context";
 import { ensureDirectCreditAttributionAllowed } from "../../units/attribution-authorization";

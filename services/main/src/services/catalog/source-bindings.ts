@@ -1,14 +1,14 @@
 import { and, eq, gt, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
 import {
 	catalogSourceRecord,
 	catalogSourceMappingClaim as claims,
 	catalogSourceBindingRevision as revisions,
 	catalogSourceSubscription as subscriptions,
-} from "../database/schema/catalog-source";
-import { type CatalogReference, CatalogReferenceSchema } from "./contracts";
+} from "@rezics/schema/postgres/ingestion/source";
+import { type CatalogReference, CatalogReferenceSchema } from "@rezics/schema/contracts/native/catalog";
 import { loadCatalogIdentity, CatalogAccessDenied, CatalogRevisionConflict } from "./storage";
 import { hasCatalogMergeRedirect } from "./merge-read";
 import { canAccessCatalog } from "../participation/policy";

@@ -19,9 +19,9 @@ import {
 	musicRecording,
 	musicReleaseGroup,
 	musicRelease,
-} from "../database/schema/catalog-music";
-import { softwareVersion, softwareVisualNovel } from "../database/schema/catalog-software";
-import { distributionPackage } from "../database/schema/catalog-distribution";
+} from "@rezics/schema/postgres/music/music";
+import { softwareVersion, softwareVisualNovel } from "@rezics/schema/postgres/software/software";
+import { distributionPackage } from "@rezics/schema/postgres/publishing/distribution";
 
 /** Complete native owner initialization with a deterministic pack ID, in the caller's transaction. */
 export async function insertNativePackObject(

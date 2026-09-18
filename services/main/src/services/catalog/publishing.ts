@@ -1,6 +1,5 @@
 import { and, eq, gt, isNull, or } from "drizzle-orm";
 import { z } from "zod";
-import { canonicalizeContentLanguageTag } from "@rezics/content-language";
 import type { DatabaseTransaction } from "../database";
 import {
 	publishingInstallment,
@@ -11,9 +10,9 @@ import {
 	publishingTextVersion,
 	publishingTextWork,
 	publishingWork,
-} from "../database/schema/catalog-publishing";
-import { isFractionalPosition } from "../ordering/position";
-import { CatalogPartialDateSchema, type CatalogReference } from "./contracts";
+} from "@rezics/schema/postgres/publishing/publishing";
+import { isFractionalPosition } from "@rezics/schema/contracts/native/positions";
+import { CatalogPartialDateSchema, type CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { assertCatalogDefinitionTarget } from "./definitions";
 import {
 	addCatalogName,
@@ -29,31 +28,8 @@ const title = z.strictObject({
 });
 const count = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
 
-/** Complete provider-free fixed fields; unknown source grain can remain a catalog entry. @internal */
-export const PublishingStructureSchema = z.discriminatedUnion("shape", [
-	z.strictObject({ shape: z.literal("work"), fields: z.strictObject({}) }),
-	z.strictObject({
-		shape: z.literal("text_version"),
-		fields: z.strictObject({
-			languageTag: z.string().transform(canonicalizeContentLanguageTag).nullable().default(null),
-			methodRevisionId: z.uuid().nullable().default(null),
-		}),
-	}),
-	z.strictObject({
-		shape: z.literal("publication"),
-		fields: z.strictObject({
-			pageCount: count.nullable().default(null),
-			paginationText: z.string().max(131_072).nullable().default(null),
-		}),
-	}),
-	z.strictObject({
-		shape: z.literal("serialization"),
-		fields: z.strictObject({
-			textVersionId: z.uuid().nullable().default(null),
-			statusRevisionId: z.uuid().nullable().default(null),
-		}),
-	}),
-]);
+import { PublishingStructureSchema } from "@rezics/schema/contracts/native/structures";
+export { PublishingStructureSchema };
 
 /** Native corrections do not overwrite a source snapshot or invent a missing parent layer. @internal */
 export async function updatePublishingStructure(

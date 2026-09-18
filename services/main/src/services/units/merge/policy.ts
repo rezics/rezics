@@ -1,7 +1,7 @@
 import {
 	UnitMergeOperationPhaseValues,
 	type UnitMergeOperationPhase,
-} from "../../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 export const UnitMergePolicy = {
 	version: 1,
 	requiredApprovals: 2,

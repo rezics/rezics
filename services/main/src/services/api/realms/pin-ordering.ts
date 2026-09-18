@@ -1,7 +1,7 @@
 import {
 	fractionalPositionsBetween,
 	rebalanceFractionalPositionSequence,
-} from "../../ordering/position";
+} from "@rezics/schema/contracts/native/positions";
 import { peekActiveObservability } from "@rezics/observability";
 import type { MoveRealmPinsBody, RealmPinKind } from "./schema";
 

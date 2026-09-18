@@ -10,7 +10,7 @@ import {
 	unitLocalization,
 	unitOwnership,
 } from "../database/schema";
-import type { RealmTagQueryStrategy } from "../database/schema/contract-values";
+import type { RealmTagQueryStrategy } from "@rezics/schema/postgres/shared/contract-values";
 import { insertPlatformUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
 import type { RevisionContributionInput } from "../units/revision-contribution";

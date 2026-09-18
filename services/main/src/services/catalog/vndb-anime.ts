@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { runParticipationSavepoint } from "../participation/policy";
-import type { CatalogReference } from "./contracts";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import type { CatalogSourceReceipt } from "./source-observations";
 import { recordCatalogSourceDocument, loadCatalogSourceDocument } from "./source-observations";
 import { inspectExistingSourceBinding } from "./source-adoption";

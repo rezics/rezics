@@ -5,8 +5,8 @@ import type { DatabaseTransaction } from "../database";
 import { allocateAccessScope, allocateAccessSubject } from "../authorization/identities";
 import { allocateReferenceValue } from "../units/reference-value";
 import { applyAccessRepresentationCommand } from "../authorization/representations";
-import { accessRepresentation } from "../database/schema/access-representation";
-import { entityIdentity } from "../database/schema/catalog-identity";
+import { accessRepresentation } from "@rezics/schema/postgres/access/access-representation";
+import { entityIdentity } from "@rezics/schema/postgres/catalog/identity";
 import { requireAccessAdmission } from "../authorization/transaction";
 import { AccessUnavailable } from "../authorization/http-errors";
 

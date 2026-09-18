@@ -3,10 +3,10 @@ import { Readable } from "node:stream";
 import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { users } from "../src/services/database/schema/auth";
-import { operationalCapacity } from "../src/services/database/schema/operational-durability";
-import { catalogSourceMappingClaim } from "../src/services/database/schema/catalog-source";
-import { CatalogStructureSourceTables } from "../src/services/database/schema/catalog-structure-source";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { operationalCapacity } from "@rezics/schema/postgres/operations/operational-durability";
+import { catalogSourceMappingClaim } from "@rezics/schema/postgres/ingestion/source";
+import { CatalogStructureSourceTables } from "@rezics/schema/postgres/ingestion/structure-source";
 import { aggregateRoutingBucket } from "../src/services/events/envelope";
 import { runWithNativeFixtureActor } from "./native-fixture-actor";
 import {
@@ -43,7 +43,7 @@ import {
 	type CatalogSourceNativeWriter,
 } from "../src/services/catalog/source-proposals";
 import { readCatalogSourceApplication } from "../src/services/catalog/source-applications";
-import type { CatalogReference } from "../src/services/catalog/contracts";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { prepareStructureSourceProjection } from "../src/services/catalog/structure-source-contracts";
 
 const connectionString = process.env.DATABASE_URL;

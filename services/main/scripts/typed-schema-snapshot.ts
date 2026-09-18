@@ -2,7 +2,7 @@ import { generateDrizzleJson } from "drizzle-kit/api-postgres";
 import { is } from "drizzle-orm";
 import { PgTable, getTableConfig } from "drizzle-orm/pg-core";
 import { UnitOwnerValues } from "@rezics/reference";
-import { UnitReferenceConsumers } from "../src/services/database/schema/unit-reference-consumers";
+import { UnitReferenceConsumers } from "@rezics/schema/postgres/shared/unit-reference-consumers";
 import { operationalPartitionTables } from "./operational-partitions";
 import { sourcePartitionKeys } from "./source-partitions";
 import * as schema from "../src/services/database/schema";

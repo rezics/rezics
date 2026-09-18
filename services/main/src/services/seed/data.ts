@@ -11,7 +11,7 @@ import {
 import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
 import type { PortableText } from "@rezics/portable-text";
 
-import type { EnforcementKindValues } from "../database/schema/contract-values";
+import type { EnforcementKindValues } from "@rezics/schema/postgres/shared/contract-values";
 
 export const SeedValue = 20_260_715;
 

@@ -5,11 +5,11 @@ import {
 	ContentLanguageValues,
 	type FollowableUnitOwner,
 	FollowableUnitOwnerValues,
-} from "../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 import type { ContentLanguage } from "@rezics/i18n";
 import { InvalidPaginationCursor } from "../pagination/errors";
 import { parseJsonCursor } from "../pagination";
-import { isStorageSafeFractionalPosition } from "../ordering/position";
+import { isStorageSafeFractionalPosition } from "@rezics/schema/contracts/native/positions";
 
 const FollowingCursor = t.Object(
 	{

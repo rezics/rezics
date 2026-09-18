@@ -3,7 +3,7 @@ import { runWithNativeFixtureActor } from "./native-fixture-actor";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { sql } from "drizzle-orm";
-import { users } from "../src/services/database/schema/auth";
+import { users } from "@rezics/schema/postgres/identity/auth";
 import {
 	createProgramStructure,
 	listProgramOccurrences,

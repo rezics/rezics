@@ -18,8 +18,8 @@ import {
 	requireParticipation,
 	ParticipationDenied,
 } from "../../participation/policy";
-import { CatalogReferenceSchema } from "../../catalog/contracts";
-import { ParticipationCapabilityValues } from "../../database/schema/participation";
+import { CatalogReferenceSchema } from "@rezics/schema/contracts/native/catalog";
+import { ParticipationCapabilityValues } from "@rezics/schema/postgres/access/participation";
 import {
 	CreateManagedOrganizationSchema,
 	createManagedOrganization,

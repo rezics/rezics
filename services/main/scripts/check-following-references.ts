@@ -26,7 +26,7 @@ import {
 	accountErasure,
 	catalogRoutingControl,
 } from "../src/services/database/schema";
-import { referenceValue } from "../src/services/database/schema/reference-value";
+import { referenceValue } from "@rezics/schema/postgres/knowledge/reference-value";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import { Authorization } from "../src/services/authorization";
 import { runWithParticipationAuthority } from "../src/services/participation/policy";
@@ -619,7 +619,7 @@ const repository = new URL("../../../", import.meta.url),
 	sourceDigests: Record<string, string> = {};
 for (const path of [
 	"services/main/scripts/check-following-references.ts",
-	"services/main/src/services/database/schema/follow.ts",
+	"libraries/schema/src/postgres/community/follow.ts",
 	"services/main/src/services/database/schema/postgres/participation-follow.sql",
 	"services/main/src/services/database/schema/postgres/platform-aggregates.sql",
 	"services/main/src/services/following/service.ts",

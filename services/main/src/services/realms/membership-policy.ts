@@ -1,12 +1,12 @@
 import { groupAuthoritySourceDigest } from "../authorization/group-impact-evaluation";
 import { resolveAccessSubject } from "../authorization/identities";
-import { realmEnrollment, realmEnrollmentContact } from "../database/schema/realm-enrollment";
+import { realmEnrollment, realmEnrollmentContact } from "@rezics/schema/postgres/realms/realm-enrollment";
 import { eq, sql } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
 import { PrincipalRequestContext } from "../auth/principal-session";
-import { realm } from "../database/schema/realm";
-import { accessGroupTree } from "../database/schema/access-group";
-import { accessRoleBindingScope } from "../database/schema/access-role-binding";
+import { realm } from "@rezics/schema/postgres/realms/realm";
+import { accessGroupTree } from "@rezics/schema/postgres/access/access-group";
+import { accessRoleBindingScope } from "@rezics/schema/postgres/access/access-role-binding";
 import { allocateAccessScope } from "../authorization/identities";
 import { allocateReferenceValue } from "../units/reference-value";
 import { readManagementAuthority } from "../authorization/management-authority";

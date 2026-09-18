@@ -7,24 +7,24 @@ import {
 	softwareSourceRecordBaseline,
 	softwareSourceContextBaseline,
 	softwareSourceParticipationBaseline,
-} from "../database/schema/catalog-source-owned-baseline";
+} from "@rezics/schema/postgres/ingestion/source-owned-baseline";
 import {
 	softwareComponentSourceOccurrence,
 	softwareRecordSourceOccurrence,
-} from "../database/schema/catalog-software-source";
-import { softwareParticipationSourceOccurrence } from "../database/schema/catalog-software";
-import { softwareParticipationCreditSourceOccurrence } from "../database/schema/catalog-software-participation";
-import { CatalogNameTables } from "../database/schema/catalog-names";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
-import { catalogSourceBindingRevision } from "../database/schema/catalog-source";
-import { catalogSourceApplication } from "../database/schema/catalog-source-application";
-import { catalogSourceAdoptionProposal as proposals } from "../database/schema/catalog-source";
+} from "@rezics/schema/postgres/software/software-source";
+import { softwareParticipationSourceOccurrence } from "@rezics/schema/postgres/software/software";
+import { softwareParticipationCreditSourceOccurrence } from "@rezics/schema/postgres/software/software-participation";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
+import { catalogSourceBindingRevision } from "@rezics/schema/postgres/ingestion/source";
+import { catalogSourceApplication } from "@rezics/schema/postgres/ingestion/source-application";
+import { catalogSourceAdoptionProposal as proposals } from "@rezics/schema/postgres/ingestion/source";
 import {
 	CatalogSourceNativeChangesSchema,
 	type CatalogSourceNativeChange,
 } from "./source-applications";
 import type { CatalogSourceOwnedChange } from "./source-owned-compensation";
-import { CatalogProfileSourceTables } from "../database/schema/catalog-profile-source";
+import { CatalogProfileSourceTables } from "@rezics/schema/postgres/catalog/profile-source";
 import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspondence";
 import { catalogSourceApplicationScopes } from "./source-application-scopes";
 

@@ -6,7 +6,7 @@ import {
 	ContentGovernanceActionKindValues,
 	EnforcementKindValues,
 	NotificationKindValues,
-} from "../../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 import { CountResultSchema } from "../../counts/contract";
 import { DateTime, Uuid } from "../schema";
 import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";

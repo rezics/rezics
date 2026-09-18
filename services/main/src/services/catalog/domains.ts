@@ -7,7 +7,7 @@ import {
 	publishingReleaseEvent,
 	publishingTextVersion,
 	publishingWork,
-} from "../database/schema/catalog-publishing";
+} from "@rezics/schema/postgres/publishing/publishing";
 import {
 	musicArtistCredit,
 	musicArtistCreditName,
@@ -18,23 +18,23 @@ import {
 	musicReleaseGroup,
 	musicTrackOccurrence,
 	musicWork,
-} from "../database/schema/catalog-music";
-import { programEpisode, programWork } from "../database/schema/catalog-program";
+} from "@rezics/schema/postgres/music/music";
+import { programEpisode, programWork } from "@rezics/schema/postgres/audiovisual/program";
 import {
 	softwareContent,
 	softwareRelease,
 	softwareReleaseContent,
 	softwareVisualNovel,
-} from "../database/schema/catalog-software";
-import { referenceArea } from "../database/schema/catalog-reference";
-import { musicIdentity } from "../database/schema/catalog-identity";
+} from "@rezics/schema/postgres/software/software";
+import { referenceArea } from "@rezics/schema/postgres/catalog/reference";
+import { musicIdentity } from "@rezics/schema/postgres/catalog/identity";
 import { readCatalogAuthorityScope, catalogIdentityReadPredicate } from "../participation/policy";
 import { requireMusicCreditAccess, musicCreditReferenceHeads } from "./music-credit-access";
 import {
 	CatalogPartialDateSchema,
 	CatalogReferenceSchema,
 	type CatalogReference,
-} from "./contracts";
+} from "@rezics/schema/contracts/native/catalog";
 import {
 	CatalogAccessDenied,
 	addCatalogName,

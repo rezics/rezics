@@ -7,11 +7,11 @@ import assert from "node:assert/strict";
 import { eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { users } from "../src/services/database/schema/auth";
+import { users } from "@rezics/schema/postgres/identity/auth";
 import {
 	softwareRelease,
 	softwareRecordRevision,
-} from "../src/services/database/schema/catalog-software";
+} from "@rezics/schema/postgres/software/software";
 import { ensureCatalogDefinition } from "../src/services/catalog/storage";
 import {
 	createNativeSoftwareContent,

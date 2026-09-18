@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { and, eq, gt, sql } from "drizzle-orm";
 import type { DatabaseTransaction } from "../src/services/database";
-import { accountFavorite } from "../src/services/database/schema/favorites";
-import { referenceValue } from "../src/services/database/schema/reference-value";
+import { accountFavorite } from "@rezics/schema/postgres/community/favorites";
+import { referenceValue } from "@rezics/schema/postgres/knowledge/reference-value";
 import { referenceValueTarget } from "../src/services/units/reference-value";
 
 /** Bounded hot-account sample, rolled back by the owning lifecycle fixture. */

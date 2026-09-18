@@ -5,8 +5,8 @@ import { inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { UnitAuthorization } from "../../authorization/unit/authorization";
 import { database } from "../../database";
-import { catalogUnitLocator } from "../../database/schema/catalog-identity";
-import { CatalogNameTables } from "../../database/schema/catalog-names";
+import { catalogUnitLocator } from "@rezics/schema/postgres/catalog/identity";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
 
 const NativeNamePreviewRow = z.object({
 	id: z.uuid(),

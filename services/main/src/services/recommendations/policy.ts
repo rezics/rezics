@@ -1,4 +1,4 @@
-import type { FeedSortValues } from "../database/schema/contract-values";
+import type { FeedSortValues } from "@rezics/schema/postgres/shared/contract-values";
 import { WorkPolicy } from "../performance/policy";
 
 export const RecommendationPolicyVersion = "native_best_v1";

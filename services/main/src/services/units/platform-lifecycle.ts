@@ -21,8 +21,8 @@ import {
 	unitMergeRedirect,
 	unitOwnership,
 } from "../database/schema";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
-import { unitOwnerTable } from "../database/schema/unit-reference-columns";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
+import { unitOwnerTable } from "@rezics/schema/postgres/shared/unit-reference-columns";
 import {
 	createGovernanceDecision,
 	type GovernanceRuleReference,

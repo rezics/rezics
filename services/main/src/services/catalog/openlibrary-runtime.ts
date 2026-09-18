@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import type { DatabaseTransaction } from "../database";
-import type { CatalogReference } from "./contracts";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import {
 	OpenLibraryContractSha256,
 	OpenLibraryDocumentSchema,

@@ -3,14 +3,14 @@ import { Readable } from "node:stream";
 import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { users } from "../src/services/database/schema/auth";
-import { operationalCapacity } from "../src/services/database/schema/operational-durability";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { operationalCapacity } from "@rezics/schema/postgres/operations/operational-durability";
 import {
 	catalogSourceMappingClaim as claims,
 	catalogSourceBindingRevision as revisions,
-} from "../src/services/database/schema/catalog-source";
-import { CatalogNameTables } from "../src/services/database/schema/catalog-names";
-import { softwareParticipationSourceOccurrence as contexts } from "../src/services/database/schema/catalog-software";
+} from "@rezics/schema/postgres/ingestion/source";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
+import { softwareParticipationSourceOccurrence as contexts } from "@rezics/schema/postgres/software/software";
 import { aggregateRoutingBucket } from "../src/services/events/envelope";
 import {
 	catalogSourceRecordId,
@@ -21,7 +21,7 @@ import { VndbCatalogContractSha256, vndbSourceKey } from "../src/services/catalo
 import { adoptVndbVn, vndbVnDetails } from "../src/services/catalog/vndb-adoption";
 import { createNativeSoftwareContent } from "../src/services/catalog/software";
 import { recordVndbSoftwareScalarOccurrence } from "../src/services/catalog/vndb-release";
-import { softwareRecordSourceOccurrence } from "../src/services/database/schema/catalog-software-source";
+import { softwareRecordSourceOccurrence } from "@rezics/schema/postgres/software/software-source";
 import { loadCatalogSourceDocument } from "../src/services/catalog/source-observations";
 import { createSoftwareParticipationContext } from "../src/services/catalog/software-contexts";
 import {

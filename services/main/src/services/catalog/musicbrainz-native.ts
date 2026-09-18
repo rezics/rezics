@@ -3,18 +3,18 @@ import { catalogReferenceAwareSupportColumns } from "./source-support";
 import { isCatalogReferenceInitialization } from "./reference-initialization";
 import { and, eq, desc } from "drizzle-orm";
 import { isDeepStrictEqual } from "node:util";
-import { catalogDefinition, catalogDefinitionRevision } from "../database/schema/catalog-identity";
-import { CatalogDefinitionInputSchema } from "./contracts";
+import { catalogDefinition, catalogDefinitionRevision } from "@rezics/schema/postgres/catalog/identity";
+import { CatalogDefinitionInputSchema } from "@rezics/schema/contracts/native/catalog";
 import { musicBrainzLanguageTag } from "./musicbrainz-language";
 import type { DatabaseTransaction } from "../database";
-import type { CatalogReference } from "./contracts";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { initializeEntityProfile, resolveEntityShape } from "./entities";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
 import { initializeReferenceProfile, appendAreaCodes } from "./references";
 import { adoptMusicBrainzAliases } from "./musicbrainz-names";
 import { musicBrainzArtistShape, musicBrainzLabelShape } from "./musicbrainz-entities";
 import { addCatalogIdentifier } from "./identifiers";
-import { normalizeCatalogIdentifier } from "./name-contracts";
+import { normalizeCatalogIdentifier } from "@rezics/schema/contracts/native/names";
 import {
 	musicDiscToc,
 	musicDiscTocOffset,
@@ -23,7 +23,7 @@ import {
 	musicReleaseLabel,
 	musicReleaseGroupSecondaryType,
 	musicWorkLanguage,
-} from "../database/schema/catalog-music";
+} from "@rezics/schema/postgres/music/music";
 import { beginMusicCredit, appendMusicCreditMembers, sealMusicCredit } from "./domains";
 import { ensureCatalogDefinition, addCatalogName } from "./storage";
 import { bindCatalogNameSourceOccurrence } from "./names";

@@ -1,4 +1,4 @@
-import { authEntity } from "../database/schema/participation";
+import { authEntity } from "@rezics/schema/postgres/access/participation";
 import { createHash } from "node:crypto";
 
 import type { ContentLanguage } from "@rezics/i18n";

@@ -1,0 +1,81 @@
+import { sql } from "drizzle-orm";
+import { check, foreignKey, index, integer, pgEnum, unique, uuid } from "drizzle-orm/pg-core";
+import {
+	createPlatformIdentityColumns,
+	platformIdentityConstraints,
+} from "../shared/platform-identity";
+import { unitReferenceColumns, unitReferenceConstraints } from "../shared/unit-reference-columns";
+
+import { pgTable } from "../shared/base";
+import { createCreatedAtColumn } from "../shared/columns";
+import { PostKindValues, toEnumValues } from "../shared/contract-values";
+
+export const postKind = pgEnum("post_kind", toEnumValues(PostKindValues));
+
+export const post = pgTable(
+	"post",
+	{
+		...createPlatformIdentityColumns(),
+		/**
+		 * Generic typed target. Public posts and reviews that target an Entity pass the
+		 * Entity subject-association policy; structural and governance posts use this
+		 * column for containment or administrative context instead.
+		 */
+		subjectUnitId: uuid(),
+		...unitReferenceColumns("subjectUnit", "restrict"),
+		kind: postKind().default("post").notNull(),
+	},
+	(table) => [
+		...unitReferenceConstraints("post", "subjectUnit", table, true, table.subjectUnitId),
+		...platformIdentityConstraints("post", table),
+		index("post_subject_created_at_idx").on(
+			table.subjectUnitId,
+			table.createdAt.desc(),
+			table.id.desc(),
+		),
+		index("post_kind_created_at_idx").on(table.kind, table.createdAt.desc(), table.id.desc()),
+		check(
+			"post_subject_not_self_check",
+			sql`${table.subjectUnitId} is null or ${table.subjectUnitId} <> ${table.id}`,
+		),
+		check(
+			"post_review_subject_check",
+			sql`${table.kind} <> 'review'::post_kind or ${table.subjectUnitId} is not null`,
+		),
+		check(
+			"post_excerpt_subject_check",
+			sql`${table.kind} <> 'excerpt'::post_kind or ${table.subjectUnitId} is not null`,
+		),
+	],
+);
+
+export const postReply = pgTable(
+	"post_reply",
+	{
+		postId: uuid()
+			.primaryKey()
+			.references(() => post.id, { onDelete: "cascade" }),
+		rootPostId: uuid()
+			.notNull()
+			.references(() => post.id, { onDelete: "restrict" }),
+		parentPostId: uuid(),
+		depth: integer().notNull(),
+		createdAt: createCreatedAtColumn(),
+	},
+	(table) => [
+		unique("post_reply_post_root_key").on(table.postId, table.rootPostId),
+		foreignKey({
+			columns: [table.parentPostId, table.rootPostId],
+			foreignColumns: [table.postId, table.rootPostId],
+			name: "post_reply_parent_root_fkey",
+		}).onDelete("restrict"),
+		index("post_reply_root_created_at_idx").on(table.rootPostId, table.createdAt, table.postId),
+		index("post_reply_parent_created_at_idx").on(table.parentPostId, table.createdAt, table.postId),
+		check("post_reply_not_root_check", sql`${table.postId} <> ${table.rootPostId}`),
+		check(
+			"post_reply_not_self_parent_check",
+			sql`${table.parentPostId} is null or ${table.parentPostId} <> ${table.postId}`,
+		),
+		check("post_reply_depth_check", sql`${table.depth} between 0 and 64`),
+	],
+);

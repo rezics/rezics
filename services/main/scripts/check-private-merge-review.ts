@@ -22,7 +22,7 @@ import {
 	unitMergeOperation,
 } from "../src/services/database/schema";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
-import { CatalogIdentityTables } from "../src/services/database/schema/catalog-identity";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
 import { Authorization } from "../src/services/authorization";
 import {
 	createCatalogIdentity,

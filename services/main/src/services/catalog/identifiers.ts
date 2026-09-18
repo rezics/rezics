@@ -4,15 +4,15 @@ import { catalogSourceSupportColumns } from "./source-support";
 import { z } from "zod";
 import { readCatalogAuthorityScope, catalogIdentityReadPredicate } from "../participation/policy";
 import type { DatabaseTransaction } from "../database";
-import { CatalogNameTables } from "../database/schema/catalog-names";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
-import { CatalogIdentityTables } from "../database/schema/catalog-identity";
-import { CatalogPageSchema, type CatalogOwner, type CatalogReference } from "./contracts";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
+import { CatalogPageSchema, type CatalogOwner, type CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import {
 	CatalogRevisionNumberSchema,
 	normalizeCatalogIdentifier,
 	type CatalogIdentifierInput,
-} from "./name-contracts";
+} from "@rezics/schema/contracts/native/names";
 import { CatalogRevisionConflict, loadCatalogIdentity, recordCatalogChange } from "./storage";
 
 /** @alpha @remarks A normalized identifier remains a fallible claim; duplicate assignments are retained. */

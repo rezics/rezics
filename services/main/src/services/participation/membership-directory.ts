@@ -2,9 +2,9 @@ import { and, eq, gt, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import { PrincipalRequestContext } from "../auth/principal-session";
 import type { DatabaseTransaction } from "../database";
-import { accessRepresentation } from "../database/schema/access-representation";
-import { accessRoleBinding } from "../database/schema/access-role-binding";
-import { entityIdentity } from "../database/schema/catalog-identity";
+import { accessRepresentation } from "@rezics/schema/postgres/access/access-representation";
+import { accessRoleBinding } from "@rezics/schema/postgres/access/access-role-binding";
+import { entityIdentity } from "@rezics/schema/postgres/catalog/identity";
 import { allocateAccessSubject } from "../authorization/identities";
 import { readFirstPartyCredentialAuthority } from "../auth/credential-authority";
 import {

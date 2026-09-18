@@ -5,7 +5,7 @@ import {
 	fromApiKeyPermissions,
 	isApiPermission,
 	toApiKeyPermissions,
-} from "./api-permissions";
+} from "@rezics/schema/contracts/native/api-permissions";
 
 describe("API permissions", () => {
 	it("round-trips the flat public contract through Better Auth statements", () => {

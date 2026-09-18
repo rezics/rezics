@@ -57,7 +57,7 @@ import {
 	unitRevisionHead,
 	unitTag,
 } from "../../database/schema";
-import type { ContentRating } from "../../database/schema/contract-values";
+import type { ContentRating } from "@rezics/schema/postgres/shared/contract-values";
 import { compileUnitPredicateSql } from "../../filter/sql";
 import { parseJsonCursor } from "../../pagination";
 import {

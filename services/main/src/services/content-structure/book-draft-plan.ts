@@ -1,6 +1,6 @@
 import type { ContentLanguage } from "@rezics/i18n";
 
-import type { UnitOwnershipMode } from "../database/schema/contract-values";
+import type { UnitOwnershipMode } from "@rezics/schema/postgres/shared/contract-values";
 import { ContentStructureInvalid } from "./errors";
 import { planDraftSiblingPositions } from "./draft-batch";
 

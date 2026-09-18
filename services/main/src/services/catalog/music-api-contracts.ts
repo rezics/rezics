@@ -11,8 +11,8 @@ import {
 	musicCandidateTrack,
 	musicReleaseLabel,
 	musicReleaseEvent,
-} from "../database/schema/catalog-music";
-import { CatalogRevisionNumberSchema } from "./name-contracts";
+} from "@rezics/schema/postgres/music/music";
+import { CatalogRevisionNumberSchema } from "@rezics/schema/contracts/native/names";
 import { MusicComponentNameSchema, MusicComponentBatchSchema } from "./music-structure-contracts";
 
 const revision = CatalogRevisionNumberSchema;

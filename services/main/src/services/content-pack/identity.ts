@@ -2,8 +2,8 @@ import { nativePackDependencies } from "./native-contracts";
 import { inArray, sql } from "drizzle-orm";
 import { UnitOwnerValues } from "@rezics/reference";
 import type { DatabaseTransaction } from "../database";
-import { post } from "../database/schema/post";
-import { unitOwnerTable } from "../database/schema/unit-reference-columns";
+import { post } from "@rezics/schema/postgres/forum/post";
+import { unitOwnerTable } from "@rezics/schema/postgres/shared/unit-reference-columns";
 import type { LoadedPack, PackObject } from "./contracts";
 import { ContentPackInvalid } from "./errors";
 

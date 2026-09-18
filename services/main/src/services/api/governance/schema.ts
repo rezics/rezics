@@ -16,7 +16,7 @@ import {
 	EnforcementKindValues,
 	GovernanceMaxRuleReferences,
 	UnitStatusValues,
-} from "../../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 import {
 	ContentLanguage,
 	DateTime,

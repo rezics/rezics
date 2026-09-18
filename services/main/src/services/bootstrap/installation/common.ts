@@ -3,9 +3,9 @@ import { and, eq, isNull } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../../database";
 import { unitLocalization, unitOwnership, unitSlugAddress } from "../../database/schema";
-import type { ContentLanguage } from "../../database/schema/contract-values";
+import type { ContentLanguage } from "@rezics/schema/postgres/shared/contract-values";
 import { insertPlatformUnit, type CreatePlatformUnitInput } from "../../units/create";
-import { unitOwnerTable } from "../../database/schema/unit-reference-columns";
+import { unitOwnerTable } from "@rezics/schema/postgres/shared/unit-reference-columns";
 import { avatarReferenceToColumns } from "../../units/localization";
 import { BootstrapEpochIso, BootstrapPlatformAdministratorProfile } from "../data";
 import { bootstrapValuesEqual } from "../value-comparison";

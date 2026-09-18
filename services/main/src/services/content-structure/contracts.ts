@@ -9,8 +9,8 @@ import {
 	type ContentStructureKind,
 	type ContentStructureTargetKind,
 	type PostKind,
-} from "../database/schema/contract-values";
-import { FractionalPositionStorageMaximumBytes, isFractionalPosition } from "../ordering/position";
+} from "@rezics/schema/postgres/shared/contract-values";
+import { FractionalPositionStorageMaximumBytes, isFractionalPosition } from "@rezics/schema/contracts/native/positions";
 
 export const ContentStructureContentModel = "rezics.content-structure.v1" as const;
 /** Complete editor/checkpoint materialization stays bounded independently of corpus size. */

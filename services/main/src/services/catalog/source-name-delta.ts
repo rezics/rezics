@@ -4,8 +4,8 @@ import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspo
 import { isDeepStrictEqual } from "node:util";
 import { and, eq, or } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
-import { CatalogNameTables } from "../database/schema/catalog-names";
-import type { CatalogReference } from "./contracts";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import {
 	addCatalogName,
 	bindCatalogNameSourceOccurrence,
@@ -14,7 +14,7 @@ import {
 } from "./names";
 import { catalogNameRevisionValues } from "./source-owned-compensation";
 import { resolveCatalogSourceOwnedBaseline } from "./source-owned-baselines";
-import { CatalogNameValuesSchema, type CatalogNameInput } from "./name-contracts";
+import { CatalogNameValuesSchema, type CatalogNameInput } from "@rezics/schema/contracts/native/names";
 
 /** A stable source slot or an unordered alias with only exact native-value correspondence. @internal */
 export type CatalogSourceNamePlan = {

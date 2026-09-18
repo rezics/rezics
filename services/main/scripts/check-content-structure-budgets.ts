@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { Pool, type PoolClient } from "pg";
-import { fractionalPositionAt } from "../src/services/ordering/position";
+import { fractionalPositionAt } from "@rezics/schema/contracts/native/positions";
 
 const connectionString=process.env.DATABASE_URL;
 const target=connectionString && new URL(connectionString);

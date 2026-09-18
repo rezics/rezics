@@ -31,12 +31,12 @@ import {
 	UnitKindValues,
 	UnitStatusValues,
 	WorkReleaseStatusValues,
-} from "../../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 import {
 	FractionalPositionInputMaximumBytes,
 	FractionalPositionStorageMaximumBytes,
 	isFractionalPosition,
-} from "../../ordering/position";
+} from "@rezics/schema/contracts/native/positions";
 
 Format.Set("fractional-position", isFractionalPosition);
 Format.Set("single-emoji-grapheme", isSingleEmojiGrapheme);

@@ -6230,6 +6230,8 @@ __metadata:
     "@rezics/observability": "workspace:*"
     "@rezics/portable-text": "workspace:*"
     "@rezics/reference": "workspace:*"
+    "@rezics/schema": "workspace:*"
+    "@rezics/schema-importer": "workspace:*"
     "@rezics/slug": "workspace:*"
     "@scalar/types": "npm:0.19.0"
     "@t3-oss/env-core": "npm:^0.13.11"
@@ -6590,23 +6592,53 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@rezics/schema@workspace:libraries/schema":
+"@rezics/schema-importer@workspace:*, @rezics/schema-importer@workspace:libraries/schema-importer":
+  version: 0.0.0-use.local
+  resolution: "@rezics/schema-importer@workspace:libraries/schema-importer"
+  dependencies:
+    "@rezics/content-language": "workspace:*"
+    "@rezics/schema": "workspace:*"
+    "@types/node": "npm:26.5.0"
+    "@types/pg": "npm:^8.23.1"
+    drizzle-kit: "npm:1.0.0-rc.4"
+    drizzle-orm: "npm:1.0.0-rc.4"
+    pg: "npm:^8.23.0"
+    rdf-canonize: "npm:5.0.0"
+    rdf-parse: "npm:5.0.0"
+    tsx: "npm:4.23.13"
+    typescript: "npm:7.0.2"
+    vitest: "npm:4.1.10"
+    yaml: "npm:2.9.0"
+    zod: "npm:^4.5.4"
+  languageName: unknown
+  linkType: soft
+
+"@rezics/schema@workspace:*, @rezics/schema@workspace:libraries/schema":
   version: 0.0.0-use.local
   resolution: "@rezics/schema@workspace:libraries/schema"
   dependencies:
+    "@rezics/access": "workspace:*"
+    "@rezics/avatar": "workspace:*"
+    "@rezics/block": "workspace:*"
     "@rezics/content-language": "workspace:*"
+    "@rezics/filter": "workspace:*"
+    "@rezics/i18n": "workspace:*"
+    "@rezics/license": "workspace:*"
+    "@rezics/reference": "workspace:*"
+    "@rezics/slug": "workspace:*"
     "@types/node": "npm:26.5.0"
-    "@types/pg": "npm:8.18.0"
+    "@types/pg": "npm:^8.23.1"
     drizzle-kit: "npm:1.0.0-rc.4"
     drizzle-orm: "npm:1.0.0-rc.4"
-    pg: "npm:8.19.0"
-    rdf-canonize: "npm:5.0.0"
-    rdf-parse: "npm:5.0.0"
+    fractional-indexing: "npm:^4.0.0"
+    pg: "npm:^8.23.0"
     tsx: "npm:4.23.13"
     typescript: "npm:7.0.2"
     uuid: "npm:14.0.2"
     vitest: "npm:4.1.10"
     zod: "npm:^4.5.4"
+  peerDependencies:
+    drizzle-orm: 1.0.0-rc.4
   languageName: unknown
   linkType: soft
 
@@ -8486,17 +8518,6 @@ __metadata:
   dependencies:
     undici-types: "npm:~7.18.0"
   checksum: 10c0/f6c7f564e7b16670bc72ce119f2aaba0f6d6ebb886c13d8cd3656a96e4825d91d826be3d0995fc776df4e19eceb4d3074e5e18d54ce1aebd3f6e0ba12b9108cb
-  languageName: node
-  linkType: hard
-
-"@types/pg@npm:8.18.0":
-  version: 8.18.0
-  resolution: "@types/pg@npm:8.18.0"
-  dependencies:
-    "@types/node": "npm:*"
-    pg-protocol: "npm:*"
-    pg-types: "npm:^2.2.0"
-  checksum: 10c0/cafece430d8d583a75eb3f7beff7b3e97e05ef0b6326ae5070476bda46ccc42edb72724b9c2bf799cea93a48b1342319bfbbe1217fff5ffa5c322b8d637ea949
   languageName: node
   linkType: hard
 
@@ -16286,14 +16307,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pg-cloudflare@npm:^1.3.0, pg-cloudflare@npm:^1.4.0":
+"pg-cloudflare@npm:^1.4.0":
   version: 1.4.0
   resolution: "pg-cloudflare@npm:1.4.0"
   checksum: 10c0/553764d00055052648393cda53c1feb065991d6f9fbfdeb56cf8396c5b33377ab2897aaf5dc9cd3933d09023a1f01e8b1ca755431dcf5fd71c92ea277e2888f1
   languageName: node
   linkType: hard
 
-"pg-connection-string@npm:^2.11.0, pg-connection-string@npm:^2.14.0":
+"pg-connection-string@npm:^2.14.0":
   version: 2.14.0
   resolution: "pg-connection-string@npm:2.14.0"
   checksum: 10c0/c26d85970f782de72b90aa45b4acfa34df90242fc08bc676e8827297164044dbfb40a2cf20b0646bd02662a6b14c5ed27f322db627e41e582f2b705bc41e8b47
@@ -16307,7 +16328,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pg-pool@npm:^3.12.0, pg-pool@npm:^3.14.0":
+"pg-pool@npm:^3.14.0":
   version: 3.14.0
   resolution: "pg-pool@npm:3.14.0"
   peerDependencies:
@@ -16316,7 +16337,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pg-protocol@npm:*, pg-protocol@npm:^1.12.0, pg-protocol@npm:^1.16.0":
+"pg-protocol@npm:*, pg-protocol@npm:^1.16.0":
   version: 1.16.0
   resolution: "pg-protocol@npm:1.16.0"
   checksum: 10c0/8ea4a8f4970aa0ca1e5bf9a482da0a41a043d7470fbaf7592736971146b09a2a4003d953c0091b72fc30bf7a7994a0b7fdf897bf50cd219787bd22806b3ffb04
@@ -16333,28 +16354,6 @@ __metadata:
     postgres-date: "npm:~1.0.4"
     postgres-interval: "npm:^1.1.0"
   checksum: 10c0/ab3f8069a323f601cd2d2279ca8c425447dab3f9b61d933b0601d7ffc00d6200df25e26a4290b2b0783b59278198f7dd2ed03e94c4875797919605116a577c65
-  languageName: node
-  linkType: hard
-
-"pg@npm:8.19.0":
-  version: 8.19.0
-  resolution: "pg@npm:8.19.0"
-  dependencies:
-    pg-cloudflare: "npm:^1.3.0"
-    pg-connection-string: "npm:^2.11.0"
-    pg-pool: "npm:^3.12.0"
-    pg-protocol: "npm:^1.12.0"
-    pg-types: "npm:2.2.0"
-    pgpass: "npm:1.0.5"
-  peerDependencies:
-    pg-native: ">=3.0.1"
-  dependenciesMeta:
-    pg-cloudflare:
-      optional: true
-  peerDependenciesMeta:
-    pg-native:
-      optional: true
-  checksum: 10c0/7713d6ef9f32746370f2bd599ebfa54d22bbdbb3a256a64b76997dd8a7279a5734dde260d6a1da22047171604fba88bd273d570c77b16f08ebe32a47ffbe2aba
   languageName: node
   linkType: hard
 

@@ -6,9 +6,9 @@ import { isDeepStrictEqual } from "node:util";
 import { and, eq } from "drizzle-orm";
 import type { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { softwareParticipationSourceOccurrence as occurrences } from "../database/schema/catalog-software";
-import { softwareSourceContextBaseline } from "../database/schema/catalog-source-owned-baseline";
-import type { CatalogReference } from "./contracts";
+import { softwareParticipationSourceOccurrence as occurrences } from "@rezics/schema/postgres/software/software";
+import { softwareSourceContextBaseline } from "@rezics/schema/postgres/ingestion/source-owned-baseline";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import type { CatalogSourceNativeChange } from "./source-applications";
 import type { recordCatalogSourceDocument } from "./source-observations";
 import {

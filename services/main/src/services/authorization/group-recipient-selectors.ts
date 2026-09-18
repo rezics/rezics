@@ -1,7 +1,7 @@
 import { createHash, createHmac } from "node:crypto";
 import type { PrincipalRequestContext } from "../auth/principal-session";
 import { env } from "../config";
-import type { accessMembership } from "../database/schema/access-membership";
+import type { accessMembership } from "@rezics/schema/postgres/access/access-membership";
 import { createPrivateRecipientSelectors, type PrivateRecipientContext } from "./recipient-selectors";
 type Key = { scopeId: string; groupId: string };
 /** Group-purpose private selector codec; minting still requires current disclosure admission. @internal */

@@ -3,7 +3,7 @@ import { allocateReferenceValue } from "../units/reference-value";
 import { AccessUnavailable } from "../authorization/http-errors";
 import { sql, type SQL } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
-import type { RealmEnrollmentNotificationBasis } from "../database/schema/realm-enrollment";
+import type { RealmEnrollmentNotificationBasis } from "@rezics/schema/postgres/realms/realm-enrollment";
 import { allocateAccessSubject, allocateAccessScope } from "../authorization/identities";
 import { createNotification } from "../notifications/service";
 /** Retained consent routes a notice to one exact private inbox, never an inferred controller roster. @internal */

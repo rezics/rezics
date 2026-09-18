@@ -4,7 +4,7 @@ import {
 	AssociationKindValues,
 	CreditAttributionRoleValues,
 	SubjectAssociationRoleValues,
-} from "../../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 import { DateTime, RevisionContext, Uuid } from "../schema";
 
 const AssociationKind = t.UnionEnum(AssociationKindValues);

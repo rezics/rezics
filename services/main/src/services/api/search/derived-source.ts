@@ -1,4 +1,4 @@
-import { referenceValue } from "../../database/schema/reference-value";
+import { referenceValue } from "@rezics/schema/postgres/knowledge/reference-value";
 import { createHash, randomBytes } from "node:crypto";
 
 import {

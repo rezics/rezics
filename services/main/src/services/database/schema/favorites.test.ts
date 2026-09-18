@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { getTableName } from "drizzle-orm";
 import { getTableConfig } from "drizzle-orm/pg-core";
-import { accountFavorite, accountFavoriteRevision } from "./favorites";
-import { referenceValue } from "./reference-value";
+import { accountFavorite, accountFavoriteRevision } from "@rezics/schema/postgres/community/favorites";
+import { referenceValue } from "@rezics/schema/postgres/knowledge/reference-value";
 
 describe("Favorites canonical references", () => {
 	for (const table of [accountFavorite, accountFavoriteRevision]) {

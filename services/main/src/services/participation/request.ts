@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { database } from "../database";
-import { participationGrant } from "../database/schema/participation";
-import { CatalogReferenceSchema } from "../catalog/contracts";
+import { participationGrant } from "@rezics/schema/postgres/access/participation";
+import { CatalogReferenceSchema } from "@rezics/schema/contracts/native/catalog";
 import {
 	ParticipationDenied,
 	ParticipationAuthoritySchema,

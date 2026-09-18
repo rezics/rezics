@@ -1,5 +1,5 @@
 import type { DatabaseTransaction } from "../../database";
-import type { CatalogReference } from "../../catalog/contracts";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { CatalogAccessDenied, loadCatalogIdentity } from "../../catalog/storage";
 import { catalogRead } from "./transaction";
 /** @internal Private history requires current native edit authority; denied reads remain non-disclosing. */

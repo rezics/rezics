@@ -7,8 +7,8 @@ import { and, eq, gt } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { runParticipationSavepoint } from "../participation/policy";
-import { CatalogStructureHistoryTables } from "../database/schema/catalog-structure-history";
-import type { CatalogReference } from "./contracts";
+import { CatalogStructureHistoryTables } from "@rezics/schema/postgres/history/structure-history";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { CatalogRevisionConflict, loadCatalogIdentity } from "./storage";
 import {
 	ProgramStructureSchema,

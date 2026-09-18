@@ -1,7 +1,7 @@
 import type { Authorization } from "../authorization";
 import { and, eq, isNull } from "drizzle-orm";
 
-import { authEntity } from "../database/schema/participation";
+import { authEntity } from "@rezics/schema/postgres/access/participation";
 
 import { getProfileActivityReadCondition } from "../authorization/profile-activity/query";
 

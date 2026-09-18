@@ -5,7 +5,7 @@ import { z } from "zod";
 import { createBlockKey, createPortableTextDocument } from "@rezics/block";
 import { parseContentLanguageTag } from "@rezics/content-language";
 import { initializeObservability } from "@rezics/observability";
-import { users, sessions } from "../src/services/database/schema/auth";
+import { users, sessions } from "@rezics/schema/postgres/identity/auth";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import {
 	CatalogCreatedSchema,
@@ -13,9 +13,9 @@ import {
 	CatalogResourceSchema,
 	CreateCatalogResourceSchema,
 } from "../src/services/catalog/resource-contracts";
-import { CatalogEditorialTables } from "../src/services/database/schema/catalog-editorial";
-import { CatalogIdentityTables } from "../src/services/database/schema/catalog-identity";
-import { CatalogOwnerValues, type CatalogReference } from "../src/services/catalog/contracts";
+import { CatalogEditorialTables } from "@rezics/schema/postgres/catalog/editorial";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
+import { CatalogOwnerValues, type CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { EntityProfileSchema } from "../src/services/catalog/entity-contracts";
 
 const expectedPort = "25435";

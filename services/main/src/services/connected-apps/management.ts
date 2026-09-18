@@ -1,9 +1,9 @@
 import { and, eq, gt, sql, type SQL } from "drizzle-orm";
 import type { PrincipalRequestContext } from "../auth/principal-session";
 import type { DatabaseTransaction } from "../database";
-import { connectedApp, connectedAppEvent } from "../database/schema/connected-app";
-import { users } from "../database/schema/auth";
-import { workloadPrincipal } from "../database/schema/workload-principal";
+import { connectedApp, connectedAppEvent } from "@rezics/schema/postgres/integrations/connected-app";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { workloadPrincipal } from "@rezics/schema/postgres/identity/workload-principal";
 import { allocateAccessScope, resolveAccessScope } from "../authorization/identities";
 import { resolveReferenceValue } from "../units/reference-value";
 import { scopeLifecycleAdmission } from "../authorization/scope-policy";

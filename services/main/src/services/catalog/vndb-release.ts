@@ -6,19 +6,19 @@ import {
 	sealCatalogSourceChildCorrespondence,
 } from "./source-child-correspondence";
 import { and, desc, eq } from "drizzle-orm";
-import { softwareRecordRevision } from "../database/schema/catalog-software";
+import { softwareRecordRevision } from "@rezics/schema/postgres/software/software";
 import {
 	softwareComponentSourceOccurrence,
 	softwareRecordSourceOccurrence,
-} from "../database/schema/catalog-software-source";
+} from "@rezics/schema/postgres/software/software-source";
 import { appendVndbDisplayName } from "./vndb-names";
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { softwareContent, softwareVisualNovel } from "../database/schema/catalog-software";
+import { softwareContent, softwareVisualNovel } from "@rezics/schema/postgres/software/software";
 import { acceptCatalogSourceInitialization } from "./source-bindings";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
-import { CatalogPartialDateSchema } from "./contracts";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
+import { CatalogPartialDateSchema } from "@rezics/schema/contracts/native/catalog";
 import { ensureCatalogDefinition } from "./storage";
 import { type CatalogSourceReceipt, recordCatalogSourceDocument } from "./source-observations";
 import { inspectExistingSourceBinding } from "./source-adoption";

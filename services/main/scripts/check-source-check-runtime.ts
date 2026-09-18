@@ -7,8 +7,8 @@ import { eq } from "drizzle-orm";
 import { Pool } from "pg";
 import { connect } from "@nats-io/transport-node";
 import { jetstream, jetstreamManager } from "@nats-io/jetstream";
-import * as durability from "../src/services/database/schema/operational-durability";
-import * as runtime from "../src/services/database/schema/operational-runtime";
+import * as durability from "@rezics/schema/postgres/operations/operational-durability";
+import * as runtime from "@rezics/schema/postgres/operations/operational-runtime";
 import {
 	catalogSourceRecord,
 	catalogSourceSnapshot,
@@ -16,7 +16,7 @@ import {
 	catalogSourceSubscription,
 	catalogSourceCheckPlan,
 	catalogSourceCheckReceipt,
-} from "../src/services/database/schema/catalog-source";
+} from "@rezics/schema/postgres/ingestion/source";
 import { registerCatalogSourceRecord } from "../src/services/catalog/source-observations";
 import { planSourceCheck } from "../src/services/catalog/source-scheduling";
 import { configureOperationalBudget } from "../src/services/events/maintenance";

@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
 	MaximumAudioTracksPerVideo,
 	SubjectAssociationExpressionPreviewLimit,
-} from "../../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 
 import { DateTime, DateTimeString } from ".";
 import { ReactionSummaryResponse } from "./action-response";

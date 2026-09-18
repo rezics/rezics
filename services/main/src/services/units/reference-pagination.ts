@@ -5,7 +5,7 @@ import { parseJsonCursor } from "../pagination";
 import { InvalidPaginationCursor } from "../pagination/errors";
 import { wilsonLowerBound } from "../tags/ranking";
 import { presentBinaryVoteSummary, type BinaryVoteSummary } from "../votes/binary";
-import { compareBytewisePositions } from "../ordering/position";
+import { compareBytewisePositions } from "@rezics/schema/contracts/native/positions";
 import type { UnitReferenceCurationKind } from "../database/schema";
 
 interface RankedUnitReference {

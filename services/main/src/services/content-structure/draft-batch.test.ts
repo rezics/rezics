@@ -4,7 +4,7 @@ import {
 	fractionalPositionBetween,
 	fractionalPositionNeedsRebalance,
 	fractionalPositionsBetween,
-} from "../ordering/position";
+} from "@rezics/schema/contracts/native/positions";
 import {
 	assertContentStructureDraftCommandLimit,
 	deletedDraftSubtreeRootIds,

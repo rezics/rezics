@@ -8,7 +8,7 @@ import {
 } from "../bootstrap/data";
 import type { DatabaseExecutor, DatabaseTransaction } from "../database";
 import { users } from "../database/schema";
-import { unitOwnerTable } from "../database/schema/unit-reference-columns";
+import { unitOwnerTable } from "@rezics/schema/postgres/shared/unit-reference-columns";
 
 function bootstrapIds(owner: UnitOwner) {
 	return owner === "entity"

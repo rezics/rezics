@@ -66,6 +66,29 @@ export class VocabularyRegistry {
 		return release;
 	}
 
+	/** Read structured outgoing ontology statements, retaining graph and literal/blank-node identity. */
+	statements(reference: string, vocabulary: string, predicate?: string) {
+		const term = this.term(reference),
+			release = this.release(vocabulary),
+			nodes = new Map(release.nodes.map((node) => [node.id, node]));
+		const subjects = new Set(
+			release.nodes.filter((node) => node.termId === term.id).map((node) => node.id),
+		);
+		const predicateId = predicate ? this.term(predicate).id : null;
+		return release.statements
+			.filter(
+				(statement) =>
+					subjects.has(statement.subjectId) &&
+					(!predicateId || statement.predicateId === predicateId),
+			)
+			.map((statement) => ({
+				...statement,
+				subject: nodes.get(statement.subjectId)!,
+				object: nodes.get(statement.objectId)!,
+				graph: nodes.get(statement.graphId)!,
+			}));
+	}
+
 	/** Return all contributed definitions and labels; frontend text never determines identity. */
 	describe(reference: string, language = "en") {
 		const term = this.term(reference);

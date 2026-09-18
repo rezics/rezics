@@ -1,11 +1,11 @@
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { catalogDefinition, catalogDefinitionRevision } from "../database/schema/catalog-identity";
+import { catalogDefinition, catalogDefinitionRevision } from "@rezics/schema/postgres/catalog/identity";
 import {
 	CatalogDefinitionConstraintsSchema,
 	type CatalogDefinitionConstraints,
-} from "./definition-contracts";
+} from "@rezics/schema/contracts/native/definition";
 import type { CatalogValueNode } from "./value-nodes";
 
 /** @alpha Validates exact immutable meaning before any native write. */
@@ -115,7 +115,7 @@ export function validateCatalogParticipants(
 export async function validateCatalogDefinitionMeaning(
 	tx: DatabaseTransaction,
 	kind: typeof catalogDefinition.$inferSelect.kind,
-	input: { valueKind: import("./contracts").CatalogValueKind | null; constraints: z.input<typeof CatalogDefinitionConstraintsSchema> },
+	input: { valueKind: import("@rezics/schema/contracts/native/catalog").CatalogValueKind | null; constraints: z.input<typeof CatalogDefinitionConstraintsSchema> },
 ) {
 	const constraints = CatalogDefinitionConstraintsSchema.parse(input.constraints);
 	if ((kind === "property") !== (input.valueKind !== null))
@@ -153,7 +153,7 @@ export async function reviseCatalogDefinition(
 	definitionId: string,
 	expectedVersion: number,
 	input: {
-		valueKind: import("./contracts").CatalogValueKind | null;
+		valueKind: import("@rezics/schema/contracts/native/catalog").CatalogValueKind | null;
 		constraints: z.input<typeof CatalogDefinitionConstraintsSchema>;
 	},
 ) {

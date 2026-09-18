@@ -2,11 +2,11 @@ import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { ResourceUriSchema } from "@better-auth/oauth-provider";
 import type { DatabaseTransaction } from "../database";
-import { oauthAccessTokens, oauthRefreshTokens } from "../database/schema/auth-oauth.generated";
-import { oauthAccessContext, oauthRefreshContext, oauthGrantContext, oauthRefreshFamily } from "../database/schema/oauth-grant-context";
-import { users } from "../database/schema/auth";
-import { OAuthCredentialPrefixes, SupportedOAuthScopes } from "./oauth-profile-values";
-import { ApiPermissionValues, type ApiPermission } from "./api-permissions";
+import { oauthAccessTokens, oauthRefreshTokens } from "@rezics/schema/postgres/identity/auth-oauth.generated";
+import { oauthAccessContext, oauthRefreshContext, oauthGrantContext, oauthRefreshFamily } from "@rezics/schema/postgres/integrations/oauth-grant-context";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { OAuthCredentialPrefixes, SupportedOAuthScopes } from "@rezics/schema/contracts/native/oauth";
+import { ApiPermissionValues, type ApiPermission } from "@rezics/schema/contracts/native/api-permissions";
 import { oauthProtocolTokenDigest, OAuthGrantContextDenied, OAuthGrantContextUnavailable, readOAuthGrantContext } from "./oauth-grant-context";
 
 function tokenDigest(token: string, prefix: string) {

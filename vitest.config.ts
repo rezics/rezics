@@ -4,6 +4,7 @@ export default defineConfig({
 	test: {
 		projects: [
 			"./libraries/schema/vitest.config.ts",
+			"./libraries/schema-importer/vitest.config.ts",
 			"./libraries/reference/vitest.config.ts",
 			"./libraries/access/vitest.config.ts",
 			"./libraries/avatar/vitest.config.ts",

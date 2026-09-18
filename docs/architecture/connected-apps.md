@@ -374,7 +374,7 @@ within the unresolved [Hub execution decisions](../research/ai-hub-execution.md)
 ### Production protocol storage
 
 `task services-main:auth:oauth-schema:generate` produces
-[`auth-oauth.generated.ts`](../../services/main/src/services/database/schema/auth-oauth.generated.ts)
+[`auth-oauth.generated.ts`](../../libraries/schema/src/postgres/identity/auth-oauth.generated.ts)
 from the pinned Better Auth/provider/MCP/CIMD 1.7.3 metadata. The owning generator
 rejects unreviewed versions, models, field types and reference shapes. It preserves
 required fields (including the metadata's required-by-default rule), uniqueness,

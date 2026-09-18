@@ -4,21 +4,21 @@ import { Readable } from "node:stream";
 import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { users } from "../src/services/database/schema/auth";
-import { operationalCapacity } from "../src/services/database/schema/operational-durability";
-import { catalogSourceMappingClaim } from "../src/services/database/schema/catalog-source";
-import { softwareParticipationSourceOccurrence } from "../src/services/database/schema/catalog-software";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { operationalCapacity } from "@rezics/schema/postgres/operations/operational-durability";
+import { catalogSourceMappingClaim } from "@rezics/schema/postgres/ingestion/source";
+import { softwareParticipationSourceOccurrence } from "@rezics/schema/postgres/software/software";
 import {
 	catalogDefinition,
 	catalogDefinitionRevision,
-} from "../src/services/database/schema/catalog-identity";
+} from "@rezics/schema/postgres/catalog/identity";
 import {
 	findCatalogRelations,
 	readCatalogRelationQualifiers,
 	readCatalogFactNodes,
 } from "../src/services/catalog/storage";
 import { listCatalogNameAuthority } from "../src/services/catalog/authority";
-import { CatalogNameTables } from "../src/services/database/schema/catalog-names";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
 import { aggregateRoutingBucket } from "../src/services/events/envelope";
 import {
 	VndbCatalogContractSha256,

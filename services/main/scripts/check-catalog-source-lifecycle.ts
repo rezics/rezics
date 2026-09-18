@@ -4,16 +4,16 @@ import { Readable } from "node:stream";
 import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { operationalCapacity } from "../src/services/database/schema/operational-durability";
+import { operationalCapacity } from "@rezics/schema/postgres/operations/operational-durability";
 import { aggregateRoutingBucket } from "../src/services/events/envelope";
 import { catalogSourceRecordId } from "../src/services/catalog/source-record-key";
-import { users } from "../src/services/database/schema/auth";
+import { users } from "@rezics/schema/postgres/identity/auth";
 import {
 	catalogSourceRecord,
 	catalogSourceSnapshot,
 	catalogSourceBindingRevision,
 	catalogSourceObservationFanout,
-} from "../src/services/database/schema/catalog-source";
+} from "@rezics/schema/postgres/ingestion/source";
 import {
 	createCatalogIdentity,
 	addCatalogName,

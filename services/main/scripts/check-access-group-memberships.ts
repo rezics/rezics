@@ -815,7 +815,7 @@ try {
 		"services/main/scripts/check-access-group-memberships.ts",
 		"services/main/src/services/authorization/group-memberships.ts",
 		"services/main/src/services/authorization/memberships.ts",
-		"services/main/src/services/database/schema/access-group-membership.ts",
+		"libraries/schema/src/postgres/access/access-group-membership.ts",
 		"services/main/src/services/database/schema/postgres/access-group-membership.sql",
 		"services/main/src/services/database/migrations/atlas.sum",
 	])

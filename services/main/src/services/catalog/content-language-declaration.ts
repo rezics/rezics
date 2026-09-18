@@ -9,18 +9,18 @@ import {
 	normalizeContentLanguageSupport,
 } from "@rezics/content-language";
 import type { DatabaseTransaction } from "../database";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
 import {
 	catalogDefinition,
 	catalogDefinitionRevision,
 	CatalogIdentityTables,
-} from "../database/schema/catalog-identity";
+} from "@rezics/schema/postgres/catalog/identity";
 import {
 	getUnitContentLanguageSupport,
 	presentContentLanguageSupport,
 	replaceUnitContentLanguageSupport,
 } from "../units/content-language-support";
-import { CatalogDefinitionInputSchema } from "./contracts";
+import { CatalogDefinitionInputSchema } from "@rezics/schema/contracts/native/catalog";
 import {
 	CatalogAccessDenied,
 	CatalogReferenceNotFound,

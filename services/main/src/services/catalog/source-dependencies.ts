@@ -1,13 +1,13 @@
-import { MUSIC_SOURCE_DEPENDENCY_POSITION_LIMIT } from "../database/schema/catalog-source-limits";
+import { MUSIC_SOURCE_DEPENDENCY_POSITION_LIMIT } from "@rezics/schema/postgres/ingestion/source-limits";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { catalogSourceProposalDependency as dependencies } from "../database/schema/catalog-source-dependency";
+import { catalogSourceProposalDependency as dependencies } from "@rezics/schema/postgres/ingestion/source-dependency";
 import {
 	catalogSourceAdoptionProposal as proposals,
 	catalogSourceMappingClaim as claims,
 	catalogSourceRecord as records,
-} from "../database/schema/catalog-source";
+} from "@rezics/schema/postgres/ingestion/source";
 import {
 	currentParticipationAuthority,
 	ParticipationDenied,

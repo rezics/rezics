@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { sql } from "drizzle-orm";
 import { APIError } from "better-auth/api";
 import { withDatabaseSession } from "../database";
-import { oauthDiscoveryFetch } from "../database/schema/oauth-discovery-fetch";
+import { oauthDiscoveryFetch } from "@rezics/schema/postgres/integrations/oauth-discovery-fetch";
 
 /**
  * Admit a metadata/JWKS fetch against fleet-wide rolling minute budgets.

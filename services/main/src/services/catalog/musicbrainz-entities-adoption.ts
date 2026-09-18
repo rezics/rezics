@@ -1,8 +1,8 @@
 import { catalogSourceSupportColumns } from "./source-support";
 import type { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
-import type { CatalogReference } from "./contracts";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { initializeEntityProfile, resolveEntityShape } from "./entities";
 import { initializeReferenceProfile, appendAreaCodes } from "./references";
 import { assignGroupingClass } from "./grouping";

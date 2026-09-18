@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import type { DatabaseTransaction } from "../src/services/database";
-import { users } from "../src/services/database/schema/auth";
+import { users } from "@rezics/schema/postgres/identity/auth";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import { runWithParticipationAuthority } from "../src/services/participation/policy";
 

@@ -1,8 +1,8 @@
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { softwareReleaseAnimation } from "../database/schema/catalog-software";
-import type { CatalogReference } from "./contracts";
+import { softwareReleaseAnimation } from "@rezics/schema/postgres/software/software";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { loadCatalogIdentity, recordCatalogChange } from "./storage";
 
 export const SoftwareAnimationSchema = z

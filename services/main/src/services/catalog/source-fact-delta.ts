@@ -5,10 +5,10 @@ import { isDeepStrictEqual } from "node:util";
 import { and, eq, ne, isNull, or } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
-import type { CatalogReference } from "./contracts";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import type { recordCatalogSourceDocument } from "./source-observations";
-import { CatalogPartialDateSchema } from "./contracts";
+import { CatalogPartialDateSchema } from "@rezics/schema/contracts/native/catalog";
 import { catalogValueNodes } from "./value-nodes";
 import {
 	appendCatalogFactNodes,

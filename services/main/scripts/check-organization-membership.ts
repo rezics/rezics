@@ -9,13 +9,13 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { initializeObservability } from "@rezics/observability";
-import { users, sessions } from "../src/services/database/schema/auth";
-import { accountErasure, participationGrant } from "../src/services/database/schema/participation";
+import { users, sessions } from "@rezics/schema/postgres/identity/auth";
+import { accountErasure, participationGrant } from "@rezics/schema/postgres/access/participation";
 import {
 	organizationMembership,
 	organizationMembershipEvent,
 	organizationMembershipInvitation,
-} from "../src/services/database/schema/organization-membership";
+} from "@rezics/schema/postgres/access/organization-membership";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import { acceptMembershipInvitation } from "../src/services/participation/membership";
 import {
@@ -749,7 +749,7 @@ try {
 		"services/main/src/services/participation/erasure.ts",
 		"services/main/src/services/api/participation/membership.ts",
 		"services/main/src/services/auth/entity.ts",
-		"services/main/src/services/database/schema/organization-membership.ts",
+		"libraries/schema/src/postgres/access/organization-membership.ts",
 		"services/main/src/services/database/schema/postgres/organization-membership.sql",
 		"services/main/src/services/database/migrations/atlas.sum",
 	])

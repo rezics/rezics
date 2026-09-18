@@ -16,7 +16,7 @@ import {
 	inventoryOpenLibrary,
 	inventoryVndb,
 	type SourceContractField,
-} from "./catalog-source-inventory";
+} from "@rezics/schema-importer/readers/provider-contracts";
 
 const directory = fileURLToPath(
 	new URL("../src/services/catalog/source-contracts/", import.meta.url),
@@ -54,7 +54,17 @@ export async function generateCatalogSourceInventory(
 	const artifacts = z
 		.array(artifactSchema)
 		.max(128)
-		.parse(JSON.parse(await readFile(join(directory, "artifacts.json"), "utf8")));
+		.parse(
+			JSON.parse(
+				await readFile(
+					new URL(
+						"../../../libraries/schema-importer/sources/catalog/artifacts.lock.json",
+						import.meta.url,
+					),
+					"utf8",
+				),
+			),
+		);
 	let fields: SourceContractField[] = [];
 	let musicBrainzForeignKeys: string | undefined;
 	let musicBrainzPrimaryKeys: string | undefined;
@@ -64,7 +74,12 @@ export async function generateCatalogSourceInventory(
 		const path = join(cache, artifact.file);
 		let bytes: Buffer;
 		try {
-			bytes = await readFile(path);
+			bytes = await readFile(
+				new URL(
+					`../../../libraries/schema-importer/sources/${artifact.source}/inputs/${artifact.file}`,
+					import.meta.url,
+				),
+			).catch(() => readFile(path));
 		} catch (error: unknown) {
 			if (!fetchMissing || !(error instanceof Error && "code" in error && error.code === "ENOENT"))
 				throw error;

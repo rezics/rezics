@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { isStorageSafeFractionalPosition } from "../ordering/position";
+import { isStorageSafeFractionalPosition } from "@rezics/schema/contracts/native/positions";
 import { UnitReferenceSchema } from "@rezics/reference";
 
 const bytes = (maximum: number) =>

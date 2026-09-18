@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { CatalogReferenceSchema } from "./contracts";
-import { CatalogRevisionNumberSchema } from "./name-contracts";
+import { CatalogReferenceSchema } from "@rezics/schema/contracts/native/catalog";
+import { CatalogRevisionNumberSchema } from "@rezics/schema/contracts/native/names";
 import { MusicReleaseSourceJobSchema } from "./music-release-source-jobs";
 export { CatalogSourceIntakeKeySchema } from "./source-native-registry";
 const revision = CatalogRevisionNumberSchema;

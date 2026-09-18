@@ -46,8 +46,8 @@ Existing implementation foundations and selected target contracts are different 
 
 | Concern | Reuse or extend | Feature boundary |
 | --- | --- | --- |
-| Authored text, media and translations | [Document, Publication and adoption contracts](../architecture/database/data-dictionary.md#d09-publications-content-slots-threads-reviews-and-polls); current [Post foundation](../../services/main/src/services/database/schema/post.ts) | No `MinecraftPost`, `GeoPost` or duplicate comment body. |
-| Identity and generic capabilities | [Logical Unit and reference contract](../architecture/database/README.md); [reference bridge](../../services/main/src/services/database/schema/reference-value.ts) | Add eligible spatial resources through the owner registry and capability contract, without restoring a global Unit parent. |
+| Authored text, media and translations | [Document, Publication and adoption contracts](../architecture/database/data-dictionary.md#d09-publications-content-slots-threads-reviews-and-polls); current [Post foundation](../../libraries/schema/src/postgres/forum/post.ts) | No `MinecraftPost`, `GeoPost` or duplicate comment body. |
+| Identity and generic capabilities | [Logical Unit and reference contract](../architecture/database/README.md); [reference bridge](../../libraries/schema/src/postgres/knowledge/reference-value.ts) | Add eligible spatial resources through the owner registry and capability contract, without restoring a global Unit parent. |
 | Knowledge and relationships | [Relationship Graph contract](../architecture/database/relationship-graph.md) | Evidence and semantic landmark relationships use existing assertions/participants. Geometry with indexed structural invariants has a typed spatial owner. |
 | Tags, favorites, follow and reports | Existing capability modules and their qualified reference consumers | A map result targets the same publication or named resource as its ordinary view. |
 | Realm, Collection and Zone | [Composition contract](../architecture/realm-collection-zone.md) | Realm supplies community/governance context; Collection supplies stored curation; Zone supplies navigation and presentation. |

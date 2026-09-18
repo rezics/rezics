@@ -718,6 +718,11 @@ tasks:
                 DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
                 yarn exec tsx scripts/check-database-schema-drift.ts
 
+            - >-
+                REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
+                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
+                yarn exec tsx ../../libraries/schema-importer/scripts/check-postgres.ts
+
     db:migrate:dry-run:
         desc: Print pending Atlas migrations without applying them.
         cmds:

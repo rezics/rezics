@@ -1,6 +1,6 @@
 import type { ContentLanguage } from "@rezics/i18n";
 
-import { compareBytewisePositions } from "../ordering/position";
+import { compareBytewisePositions } from "@rezics/schema/contracts/native/positions";
 import { resolveUnitLocalizationFromOrdered } from "../units/localization";
 
 type ChapterLocalization = {

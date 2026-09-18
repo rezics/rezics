@@ -7,7 +7,7 @@ import type { StaticDecode } from "typebox";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { contentRatingPolicyFromAllowlist } from "../../content-rating/policy";
-import { MaximumSubjectAssociationsPageSize } from "../../database/schema/contract-values";
+import { MaximumSubjectAssociationsPageSize } from "@rezics/schema/postgres/shared/contract-values";
 import { decodeCursor, encodeCursor } from "../../pagination";
 import { resolveRecommendationViewer } from "../../recommendations/context";
 import { getReadableUnitPresentationsByIds } from "../../units/attribution";

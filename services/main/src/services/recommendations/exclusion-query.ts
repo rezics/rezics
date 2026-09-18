@@ -1,8 +1,10 @@
 import { sql, type SQL, type SQLWrapper } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { recommendationExclusion, authEntity } from "../database/schema";
-import { referenceValue } from "../database/schema/reference-value";
-import { unitReferenceIdExpression } from "../database/schema/unit-reference-columns";
+import {
+	referenceValue,
+	referenceValueNativeIdExpression,
+} from "@rezics/schema/postgres/knowledge/reference-value";
 
 const reference = alias(referenceValue, "recommendation_excluded_reference");
 const binding = alias(authEntity, "recommendation_exclusion_account");
@@ -20,6 +22,6 @@ export function recommendationExclusionCondition(
     on ${binding.authUserId} = ${recommendationExclusion.authUserId}
   where ${recommendationExclusion.authUserId} = ${authUserId}::uuid
     and ${binding.state} = 'active'
-    and ${unitReferenceIdExpression("target", reference)} = ${targetId}
+    and ${referenceValueNativeIdExpression(reference)} = ${targetId}
  )`;
 }

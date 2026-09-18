@@ -6,8 +6,8 @@ import { resolveRequestParticipation } from "../participation/request";
 
 import { setAuditCredentialContext } from "../audit";
 import { Authorization } from "../authorization";
-import type { ApiPermission } from "./api-permissions";
-import { isApiPermission } from "./api-permissions";
+import type { ApiPermission } from "@rezics/schema/contracts/native/api-permissions";
+import { isApiPermission } from "@rezics/schema/contracts/native/api-permissions";
 import { enforceApiQuota, type ApiQuotaLease } from "./api-quota/limit-store";
 import type { ApiQuotaOperationId } from "./api-quota/operation";
 import {

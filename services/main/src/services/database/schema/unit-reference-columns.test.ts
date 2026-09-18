@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { getTableName } from "drizzle-orm";
 import { getTableConfig, text, uuid } from "drizzle-orm/pg-core";
 import { UnitOwnerValues } from "@rezics/reference";
-import { pgTable } from "./base";
+import { pgTable } from "@rezics/schema/postgres/shared/base";
 import {
 	unitReferenceColumns,
 	unitReferenceValues,
@@ -10,7 +10,7 @@ import {
 	unitReferenceIdExpression,
 	unitReferenceOwnerExpression,
 	unitOwnerIdColumn,
-} from "./unit-reference-columns";
+} from "@rezics/schema/postgres/shared/unit-reference-columns";
 
 const fixture = pgTable(
 	"reference_contract_fixture",

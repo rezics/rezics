@@ -1,12 +1,12 @@
 import { and, eq, inArray, sql } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
-import { CatalogChildSourceTables } from "../database/schema/catalog-child-source";
-import { CatalogStructureHistoryTables } from "../database/schema/catalog-structure-history";
+import { CatalogChildSourceTables } from "@rezics/schema/postgres/ingestion/child-source";
+import { CatalogStructureHistoryTables } from "@rezics/schema/postgres/history/structure-history";
 import {
 	catalogSourceAdoptionProposal,
 	catalogSourceBindingRevision,
-} from "../database/schema/catalog-source";
-import { catalogSourceApplication } from "../database/schema/catalog-source-application";
+} from "@rezics/schema/postgres/ingestion/source";
+import { catalogSourceApplication } from "@rezics/schema/postgres/ingestion/source-application";
 import { catalogSourceApplicationScopes } from "./source-application-scopes";
 import type { CatalogChildSourceChange } from "./child-source-contracts";
 /** @internal Finalize at most 128 exact component changes with batched source/history reads for both recorded epochs. */

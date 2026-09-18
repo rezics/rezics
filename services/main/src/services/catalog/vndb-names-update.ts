@@ -4,11 +4,11 @@ import { createHash } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 import { and, eq } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
-import { CatalogNameTables } from "../database/schema/catalog-names";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
-import { CatalogSourceOwnedBaselines } from "../database/schema/catalog-source-owned-baseline";
-import type { CatalogReference } from "./contracts";
-import { CatalogNameValuesSchema, type CatalogNameInput } from "./name-contracts";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
+import { CatalogSourceOwnedBaselines } from "@rezics/schema/postgres/ingestion/source-owned-baseline";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
+import { CatalogNameValuesSchema, type CatalogNameInput } from "@rezics/schema/contracts/native/names";
 import {
 	addCatalogName,
 	bindCatalogNameSourceOccurrence,

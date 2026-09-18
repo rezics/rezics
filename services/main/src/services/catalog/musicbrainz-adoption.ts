@@ -1,6 +1,6 @@
 import { assertMusicBrainzReleaseArchive } from "./musicbrainz-release-bundle";
 import { catalogSourceDocumentSha256, withCatalogSourceReceipts } from "./source-observations";
-import { MUSIC_SOURCE_AUXILIARY_ROW_LIMIT } from "../database/schema/catalog-source-limits";
+import { MUSIC_SOURCE_AUXILIARY_ROW_LIMIT } from "@rezics/schema/postgres/ingestion/source-limits";
 import { preflightMusicBrainzReleaseDelta, musicBrainzReleaseAuxiliaryRows } from "./musicbrainz-release-plan";
 import { createHash } from "node:crypto";
 import type { DatabaseTransaction } from "../database";
@@ -13,13 +13,13 @@ import {
 	musicTrackOccurrence,
 	musicMediumIdentifier,
 	musicTrackIdentifier,
-} from "../database/schema/catalog-music";
+} from "@rezics/schema/postgres/music/music";
 import { acceptCatalogSourceInitialization } from "./source-bindings";
 import {
 	prepareCatalogSourceChildCorrespondence,
 	sealCatalogSourceChildCorrespondence,
 } from "./source-child-correspondence";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
 import { createCatalogIdentity } from "./storage";
 import {
 	musicBrainzCreditWriter,

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { vndbLanguage } from "./vndb";
-import type { CatalogOwner } from "./contracts";
+import type { CatalogOwner } from "@rezics/schema/contracts/native/catalog";
 
 const count = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
 const text = z.string().max(131_072);

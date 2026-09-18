@@ -7,8 +7,8 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { jetstream, jetstreamManager } from "@nats-io/jetstream";
 import { connect } from "@nats-io/transport-node";
-import * as durabilitySchema from "../src/services/database/schema/operational-durability";
-import * as runtimeSchema from "../src/services/database/schema/operational-runtime";
+import * as durabilitySchema from "@rezics/schema/postgres/operations/operational-durability";
+import * as runtimeSchema from "@rezics/schema/postgres/operations/operational-runtime";
 import { applyOperationalPartitions } from "./operational-partitions";
 import {
 	appendOperationalOutbox,

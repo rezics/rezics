@@ -37,3 +37,23 @@ remains required before closing it. The 500M/3B workload gate is also open.
 ## Fresh schema replay abort
 
 The September 8 convergence qualification recorded a PostgreSQL SIGILL during Atlas bookkeeping after schema statements. The underlying cause was not established. The current target must pass a fresh replay with exact generated inputs and engine diagnostics; a different successful replay does not close this observation.
+
+
+## Main IAM qualification after schema extraction
+
+Observed 2026-09-18 during the [shared schema qualification](schema.md). The clean
+base commit `99be45f46` had 167 TypeScript errors; the shared schema replacement
+retains 160 existing IAM/Org/Realm errors, with no new file/error-code categories.
+`task services-main:typecheck` reproduces them. They include old membership
+fixtures/authority inputs, omitted role-binding eligibility and writes through
+current Entity presentation views. The two schema packages type-check separately.
+
+After a fresh complete migration replay, Auth, concrete references, access
+identities and roles passed. The outdated membership assertion was repaired to
+the existing reserved-identity contract and its focused check passed. Continuing
+the main database checks reached `scripts/check-access-groups.ts:129`, which
+expects a raw constraint-code rejection while the Group command reports
+`AccessGroupConflict`. The broader Group/API gate remains unqualified. Reconcile
+the intended command error contract and retained callers/fixtures, then complete
+the remaining main checks; do not relax the storage denial or count this as a
+passing whole-backend result.

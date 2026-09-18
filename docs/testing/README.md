@@ -5,6 +5,7 @@ This directory owns test scenarios and evidence. Follow the [active scope](../pl
 | Owner | Scope |
 | --- | --- |
 | [Database scenarios](database/scenarios.tsv) | Cross-domain invariant cases; specifications until executed against the target. |
+| [Shared schema and converters](schema.md) | Complete shared Drizzle storage, pinned multi-source declarations, real PostgreSQL integrity and bounded relocation evidence. |
 | [Foundation persistence](foundation.md) | Concrete reference constraints, immutable allocation, concurrency and selective lookup evidence. |
 | [Identity, access and connected apps](identity-and-access.md) | Pending mixed-principal/Entity, groups/roles/representation, OAuth/MCP, privacy, revocation and layered-GUI acceptance; older Self fixtures are not qualification. |
 | [Subscribe and Realm participation](subscriptions-and-pro.md) | Selected M10 SUB/PRO, SITE/RPLY, capacity and experience scenarios: multi-plan commerce, independent gifts, local policies, fixed-site context and authorized multi-Realm reply delivery; runtime activation and qualification remain pending. |

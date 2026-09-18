@@ -1,8 +1,8 @@
 import { and, eq } from "drizzle-orm";
 import { CatalogReferenceSchema, type CatalogReference } from "@rezics/reference";
 import type { DatabaseTransaction } from "../database";
-import { CatalogNameTables } from "../database/schema/catalog-names";
-import { CatalogNameInputSchema } from "../catalog/name-contracts";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
+import { CatalogNameInputSchema } from "@rezics/schema/contracts/native/names";
 import {
 	createCatalogIdentity,
 	loadCatalogIdentity,
@@ -31,7 +31,7 @@ import {
 	orderGroupingRelation,
 } from "../catalog/grouping";
 import { catalogValueNodes } from "../catalog/value-nodes";
-import { fractionalPositionAt } from "../ordering/position";
+import { fractionalPositionAt } from "@rezics/schema/contracts/native/positions";
 import { SeedPlan } from "./data";
 import { withSeedAuthority, type SeedIdentityDescriptor } from "./identity";
 

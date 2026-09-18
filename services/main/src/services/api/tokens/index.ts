@@ -6,7 +6,7 @@ import Elysia, { t } from "elysia";
 import { recordAuditEvent } from "../../audit";
 import { auth } from "../../auth";
 import { firstPartyAuthorityMetadata } from "../../auth/credential-authority";
-import { fromApiKeyPermissions, toApiKeyPermissions } from "../../auth/api-permissions";
+import { fromApiKeyPermissions, toApiKeyPermissions } from "@rezics/schema/contracts/native/api-permissions";
 import { ApiQuotaPolicyDocumentInvalid } from "../../auth/api-quota/policy-schema";
 import {
 	deleteApiTokenQuotaOverride,

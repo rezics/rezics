@@ -5,7 +5,7 @@ import type { StaticDecode } from "typebox";
 import {
 	FeedSortValues,
 	type PostKind,
-} from "../../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 import { LocalizationLanguageQuery } from "../schema";
 
 export const FeedSortSchema = t.UnionEnum(FeedSortValues, { default: "best" });

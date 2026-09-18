@@ -8,7 +8,7 @@ import {
 	SubjectAssociationRoleValues,
 	UnitReferencePageDefault,
 	UnitReferencePageMaximum,
-} from "../../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 import {
 	ContentLanguage,
 	DateTime,

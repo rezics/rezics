@@ -13,13 +13,13 @@ import {
 	type PresentedAvatar,
 } from "@rezics/avatar";
 import { database, type DatabaseTransaction, type DatabaseExecutor } from "../database";
-import { entityIdentity } from "../database/schema/catalog-identity";
+import { entityIdentity } from "@rezics/schema/postgres/catalog/identity";
 import {
 	entityPresentation,
 	entityPresentationRevision,
-} from "../database/schema/entity-presentation";
-import { CatalogNameTables } from "../database/schema/catalog-names";
-import { CatalogNameValuesSchema } from "../catalog/name-contracts";
+} from "@rezics/schema/postgres/identity/entity-presentation";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
+import { CatalogNameValuesSchema } from "@rezics/schema/contracts/native/names";
 import { CatalogReferenceNotFound, CatalogRevisionConflict } from "../catalog/storage";
 import { avatarReferenceFromColumns, avatarReferenceToColumns } from "../units/localization";
 import { presentAvatar } from "../units/avatar";

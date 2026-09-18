@@ -15,10 +15,10 @@ import {
 	AccessRecordUnavailable,
 	AccessUnavailable,
 } from "../authorization/http-errors";
-import { accessRoleBindingScope } from "../database/schema/access-role-binding";
-import { accessGroupTree } from "../database/schema/access-group";
-import { entityParticipation } from "../database/schema/participation";
-import { entityIdentity } from "../database/schema/catalog-identity";
+import { accessRoleBindingScope } from "@rezics/schema/postgres/access/access-role-binding";
+import { accessGroupTree } from "@rezics/schema/postgres/access/access-group";
+import { entityParticipation } from "@rezics/schema/postgres/access/participation";
+import { entityIdentity } from "@rezics/schema/postgres/catalog/identity";
 import { env } from "../config";
 export const membershipRecipients = createPrivateRecipientSelectors(
 	Buffer.from(env.BETTER_AUTH_SECRET),

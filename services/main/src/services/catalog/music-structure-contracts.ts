@@ -1,4 +1,4 @@
-import { MUSIC_SOURCE_COMPONENT_LIMIT } from "../database/schema/catalog-source-limits";
+import { MUSIC_SOURCE_COMPONENT_LIMIT } from "@rezics/schema/postgres/ingestion/source-limits";
 import { z } from "zod";
 import { canonicalizeContentLanguageTag } from "@rezics/content-language";
 

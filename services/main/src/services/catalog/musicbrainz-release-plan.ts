@@ -1,5 +1,5 @@
 import { isDeepStrictEqual } from "node:util";
-import { MUSIC_SOURCE_OCCURRENCE_LIMIT, MUSIC_SOURCE_AUXILIARY_ROW_LIMIT } from "../database/schema/catalog-source-limits";
+import { MUSIC_SOURCE_OCCURRENCE_LIMIT, MUSIC_SOURCE_AUXILIARY_ROW_LIMIT } from "@rezics/schema/postgres/ingestion/source-limits";
 import type { MusicBrainzRelease } from "./musicbrainz";
 
 type Medium = MusicBrainzRelease["media"][number];

@@ -1,6 +1,6 @@
 import { Client } from "pg";
 
-import { LargeCapacityPgroongaIndexes } from "../src/services/database/schema/pgroonga";
+import { LargeCapacityPgroongaIndexes } from "@rezics/schema/postgres/shared/pgroonga";
 import { adminDatabaseUrl } from "./admin-database";
 import {
 	CanonicalPgroongaIndexes,

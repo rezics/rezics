@@ -353,7 +353,7 @@ try {
 		"libraries/access/src/identity.ts",
 		"services/main/src/services/units/immutable-reference.ts",
 		"services/main/src/services/authorization/identities.ts",
-		"services/main/src/services/database/schema/access-identity.ts",
+		"libraries/schema/src/postgres/access/access-identity.ts",
 		"services/main/src/services/database/schema/postgres/access-identity.sql",
 		"services/main/src/services/database/migrations/atlas.sum",
 	])

@@ -9,7 +9,7 @@ import { eq } from "drizzle-orm";
 
 import { CloudflareTurnstileTestSecretKey, env } from "../config";
 import { database } from "../database";
-import * as schema from "../database/schema/auth";
+import * as schema from "@rezics/schema/postgres/identity/auth";
 import { enqueueAuthenticationEmail } from "../email/outbox";
 import { getRequestTranslation } from "../i18n";
 import { durableAuthenticationCallbacks } from "./durable-callbacks";

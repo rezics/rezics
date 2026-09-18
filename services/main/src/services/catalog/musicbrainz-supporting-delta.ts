@@ -3,7 +3,7 @@ import { and, eq } from "drizzle-orm";
 import {
 	catalogSourceMappingClaim,
 	catalogSourceBindingRevision,
-} from "../database/schema/catalog-source";
+} from "@rezics/schema/postgres/ingestion/source";
 import { runParticipationSavepoint } from "../participation/policy";
 import { EntityProfileSchema, ReferenceProfileSchema } from "./entity-contracts";
 import { parseCatalogSourceProfile, mergeCatalogSourceProfile } from "./profile-source-contracts";

@@ -1,4 +1,8 @@
 import assert from "node:assert/strict";
+import {
+	referenceValue,
+	referenceValueNativeIdExpression,
+} from "@rezics/schema/postgres/knowledge/reference-value";
 import { createHash, randomUUID } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
@@ -6,7 +10,7 @@ import { fileURLToPath } from "node:url";
 import { setTimeout } from "node:timers/promises";
 import { Client } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { CatalogOwnerValues, UnitOwnerValues } from "@rezics/reference";
 import { checkRevisionReferences } from "./check-revision-references";
 
@@ -351,10 +355,15 @@ try {
 		"SQL projection sees a value allocated in its calling statement",
 	);
 	await first.query("analyze public.reference_value");
+	const nativeProbe = firstDb
+		.select()
+		.from(referenceValue)
+		.where(eq(referenceValueNativeIdExpression(referenceValue), sampleReference.targetId))
+		.limit(2)
+		.toSQL();
 	const nativeIdPlan = await first.query(
-		`explain (analyze, buffers, format json) select * from public.reference_value
-		where coalesce(${UnitOwnerValues.map((owner) => `target_${owner}_id`).join(", ")}) = $1 limit 2`,
-		[sampleReference.targetId],
+		`explain (analyze, buffers, format json) ${nativeProbe.sql}`,
+		nativeProbe.params,
 	);
 	assert.match(JSON.stringify(nativeIdPlan.rows), /reference_value_native_id_idx/u);
 	assert.doesNotMatch(JSON.stringify(nativeIdPlan.rows), /Seq Scan/u);
@@ -389,10 +398,10 @@ try {
 		"services/main/src/services/units/reference-value.ts",
 		"services/main/src/services/units/immutable-reference.ts",
 		"services/main/src/services/units/revision-reference.ts",
-		"services/main/src/services/units/revision-reference-contract.ts",
-		"services/main/src/services/database/schema/reference-value.ts",
-		"services/main/src/services/database/schema/revision-reference.ts",
-		"services/main/src/services/database/schema/unit-reference-columns.ts",
+		"libraries/schema/src/contracts/native/revision-reference.ts",
+		"libraries/schema/src/postgres/knowledge/reference-value.ts",
+		"libraries/schema/src/postgres/knowledge/revision-reference.ts",
+		"libraries/schema/src/postgres/shared/unit-reference-columns.ts",
 		"services/main/src/services/database/schema/postgres/reference-value.sql",
 		"services/main/src/services/database/schema/postgres/revision-reference.sql",
 		"services/main/src/services/database/migrations/atlas.sum",

@@ -2,7 +2,7 @@ import { catalogSourceSupportColumns } from "./source-support";
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
 import { BangumiArchiveEpisodeSchema, BangumiEpisodeSchema } from "./bangumi-records";
 import {
 	BangumiApiContractSha256,

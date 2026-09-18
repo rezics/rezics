@@ -1,14 +1,14 @@
 import type { UnitOwner } from "@rezics/reference";
 import { sql, type SQLWrapper } from "drizzle-orm";
 import { database } from "../database";
-import { post } from "../database/schema/post";
+import { post } from "@rezics/schema/postgres/forum/post";
 import type {
 	AiDisclosureValues,
 	ContentRating,
 	ModerationStatusValues,
 	ResourceVisibility,
 	UnitStatusValues,
-} from "../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 type AiDisclosure = (typeof AiDisclosureValues)[number];
 type ModerationStatus = (typeof ModerationStatusValues)[number];
 type UnitStatus = (typeof UnitStatusValues)[number];

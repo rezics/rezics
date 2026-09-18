@@ -3,7 +3,7 @@ import { t } from "elysia";
 import {
 	RealmUnitPublicationStateValues,
 	RealmUnitStatusValues,
-} from "../../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 import { parseJsonCursor } from "../../pagination";
 import { InvalidPaginationCursor } from "../../pagination/errors";
 

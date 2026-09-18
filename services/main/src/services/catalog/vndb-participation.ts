@@ -2,11 +2,11 @@ import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspo
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { CatalogNameTables } from "../database/schema/catalog-names";
-import { catalogSourceMappingClaim } from "../database/schema/catalog-source";
-import { softwareParticipationSourceOccurrence } from "../database/schema/catalog-software";
-import { softwareParticipationCreditSourceOccurrence } from "../database/schema/catalog-software-participation";
-import type { CatalogReference } from "./contracts";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
+import { catalogSourceMappingClaim } from "@rezics/schema/postgres/ingestion/source";
+import { softwareParticipationSourceOccurrence } from "@rezics/schema/postgres/software/software";
+import { softwareParticipationCreditSourceOccurrence } from "@rezics/schema/postgres/software/software-participation";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { VndbVnSchema, vndbSourceKey } from "./vndb";
 import { catalogSourceRecordId, type recordCatalogSourceDocument } from "./source-observations";
 import { bindReferencedSourceIdentity } from "./source-references";

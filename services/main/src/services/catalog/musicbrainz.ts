@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CatalogPartialDateSchema } from "./contracts";
+import { CatalogPartialDateSchema } from "@rezics/schema/contracts/native/catalog";
 
 /** @alpha Pinned upstream catalog semantics; source observations retain extra supplied fields. */
 export const MusicBrainzCatalogContractSha256 =

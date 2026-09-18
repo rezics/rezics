@@ -11,7 +11,7 @@ import {
 	SubjectAssociationExpressionCandidateScanLimit,
 	SubjectAssociationExpressionPreviewLimit,
 	type ContentRating,
-} from "../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 import { resolvedUnitLocalizationLanguage, resolvedUnitLocalizationTitle } from "./localization";
 
 export { SubjectAssociationExpressionPreviewLimit };

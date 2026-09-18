@@ -4,11 +4,11 @@ import { setTimeout } from "node:timers/promises";
 import { eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { users } from "../src/services/database/schema/auth";
-import { unitAccessGrant, unitAccessRestriction } from "../src/services/database/schema/access";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { unitAccessGrant, unitAccessRestriction } from "@rezics/schema/postgres/access/access";
 import { lockUnitAccessState } from "../src/services/authorization/unit/access-lock";
-import { post } from "../src/services/database/schema/post";
-import { accountFavoriteRevision } from "../src/services/database/schema/favorites";
+import { post } from "@rezics/schema/postgres/forum/post";
+import { accountFavoriteRevision } from "@rezics/schema/postgres/community/favorites";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import {
 	ParticipationDenied,

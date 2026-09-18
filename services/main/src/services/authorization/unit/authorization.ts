@@ -2,7 +2,7 @@ import { lockRealmGrantMemberships } from "../../realms/authorization";
 import { lockUnitAccessState } from "./access-lock";
 import { CatalogReferenceSchema } from "@rezics/reference";
 import { readUnitStateById } from "../../units/query";
-import { unitOwnerTable } from "../../database/schema/unit-reference-columns";
+import { unitOwnerTable } from "@rezics/schema/postgres/shared/unit-reference-columns";
 import { withCatalogViewerPolicy } from "../../catalog/read-policy";
 import {
 	loadCatalogIdentity,

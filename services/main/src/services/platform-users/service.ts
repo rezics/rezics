@@ -27,7 +27,7 @@ import {
 	userAccountState,
 	users,
 } from "../database/schema";
-import type { UserAccountState } from "../database/schema/contract-values";
+import type { UserAccountState } from "@rezics/schema/postgres/shared/contract-values";
 import {
 	createGovernanceDecision,
 	type GovernanceRuleReference,

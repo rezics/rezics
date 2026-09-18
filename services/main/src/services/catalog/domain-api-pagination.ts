@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
-import type { CatalogReference } from "./contracts";
-import { CatalogIdentityTables } from "../database/schema/catalog-identity";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
 /** @internal Keep multi-query values/history coherent; this lock never replaces the following native authorization check. */
 export async function lockDomainSnapshot(tx: DatabaseTransaction, reference: CatalogReference) {
 	const table = CatalogIdentityTables[reference.owner];

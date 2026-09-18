@@ -21,7 +21,7 @@ import {
 	notificationRecipientStat,
 	unitAccessInvitation,
 } from "../../database/schema";
-import { DefaultStoredUiLocale } from "../../database/schema/contract-values";
+import { DefaultStoredUiLocale } from "@rezics/schema/postgres/shared/contract-values";
 import { emailIntentDeliveryEnabled } from "../../email/policy";
 import i18n from "../../i18n";
 import { notificationTranslationKey } from "../../notifications/service";

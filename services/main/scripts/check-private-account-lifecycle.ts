@@ -11,20 +11,20 @@ import {
 	withDatabaseTransactionDeadline,
 	type DatabaseTransaction,
 } from "../src/services/database";
-import { users } from "../src/services/database/schema/auth";
-import { accountErasure } from "../src/services/database/schema/participation";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { accountErasure } from "@rezics/schema/postgres/access/participation";
 import {
 	accountFavorite,
 	accountFavoriteRevision,
 	accountFavoritesState,
-} from "../src/services/database/schema/favorites";
+} from "@rezics/schema/postgres/community/favorites";
 import { FavoriteNotFound } from "../src/services/favorites/errors";
-import { referenceValue } from "../src/services/database/schema/reference-value";
+import { referenceValue } from "@rezics/schema/postgres/knowledge/reference-value";
 import { allocateReferenceValue, findReferenceValueByNativeId } from "../src/services/units/reference-value";
-import { catalogUnitLocator } from "../src/services/database/schema/catalog-identity";
-import { accountFollowPreference, unitFollow } from "../src/services/database/schema/follow";
-import { imageAsset, imageObject } from "../src/services/database/schema/image";
-import { post } from "../src/services/database/schema/post";
+import { catalogUnitLocator } from "@rezics/schema/postgres/catalog/identity";
+import { accountFollowPreference, unitFollow } from "@rezics/schema/postgres/community/follow";
+import { imageAsset, imageObject } from "@rezics/schema/postgres/media/image";
+import { post } from "@rezics/schema/postgres/forum/post";
 import { Authorization } from "../src/services/authorization";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import {
@@ -598,8 +598,8 @@ for (const path of [
 	"services/main/src/services/authorization/unit/authorization.ts",
 	"services/main/src/services/participation/erasure.ts",
 	"services/main/src/services/image-assets/erasure.ts",
-	"services/main/src/services/database/schema/favorites.ts",
-	"services/main/src/services/database/schema/reference-value.ts",
+	"libraries/schema/src/postgres/community/favorites.ts",
+	"libraries/schema/src/postgres/knowledge/reference-value.ts",
 	"services/main/src/services/database/schema/postgres/participation-private-state.sql",
 	"services/main/src/services/database/schema/postgres/reference-value.sql",
 	"services/main/src/services/database/migrations/atlas.sum",

@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { and, eq } from "drizzle-orm";
 import type { DatabaseTransaction } from "../src/services/database";
-import { CatalogFactTables } from "../src/services/database/schema/catalog-facts";
-import type { CatalogReference } from "../src/services/catalog/contracts";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import {
 	applyCatalogSourceRelationDelta,
 	type CatalogSourceRelationDescriptor,

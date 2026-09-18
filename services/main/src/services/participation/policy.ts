@@ -10,42 +10,24 @@ import {
 	servicePrincipal,
 	ParticipationCapabilityValues,
 	entityParticipation,
-} from "../database/schema/participation";
-import { CatalogReferenceSchema, type CatalogReference } from "../catalog/contracts";
-import { users } from "../database/schema/auth";
+} from "@rezics/schema/postgres/access/participation";
+import { CatalogReferenceSchema, type CatalogReference } from "@rezics/schema/contracts/native/catalog";
+import { users } from "@rezics/schema/postgres/identity/auth";
 import { ensureAccountAuthenticationAllowed } from "../auth/account-state";
 import { AccountAuthorization } from "../authorization/account/authorization";
-import { catalogSourceProposalDependency } from "../database/schema/catalog-source-dependency";
+import { catalogSourceProposalDependency } from "@rezics/schema/postgres/ingestion/source-dependency";
 import {
 	catalogSourceMappingClaim,
 	catalogSourceAdoptionProposal,
 	catalogSourceBindingRevision,
-} from "../database/schema/catalog-source";
-import { catalogSourceApplication } from "../database/schema/catalog-source-application";
-import { CatalogIdentityTables } from "../database/schema/catalog-identity";
+} from "@rezics/schema/postgres/ingestion/source";
+import { catalogSourceApplication } from "@rezics/schema/postgres/ingestion/source-application";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
 import { mergedCatalogReadPredicate, catalogMergeSourcePredicate } from "../catalog/merge-read";
 import { catalogReadRatingPredicate } from "../catalog/read-policy";
 
-/** @alpha Request and queued command identity, including the revision approved at admission. */
-export const ParticipationAuthoritySchema = z.strictObject({
-	principal: z.discriminatedUnion("kind", [
-		z.strictObject({ kind: z.literal("auth"), authUserId: z.uuid() }),
-		z.strictObject({
-			kind: z.literal("service"),
-			servicePrincipalId: z.uuid(),
-			authUserId: z.uuid(),
-		}),
-	]),
-	actingEntityId: z.uuid(),
-	authorizationRevision: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
-	grant: z
-		.strictObject({
-			id: z.uuid(),
-			revision: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
-		})
-		.optional(),
-});
-export type ParticipationAuthority = z.infer<typeof ParticipationAuthoritySchema>;
+import { ParticipationAuthoritySchema, type ParticipationAuthority } from "@rezics/schema/contracts/native/authority";
+export { ParticipationAuthoritySchema, type ParticipationAuthority };
 export type ParticipationCapability = (typeof ParticipationCapabilityValues)[number];
 export class ParticipationDenied extends HTTPError.id("ParticipationDenied", 403) {
 	override readonly message: string;

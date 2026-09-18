@@ -5,12 +5,12 @@ import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { database } from "../src/services/database";
-import { users } from "../src/services/database/schema/auth";
+import { users } from "@rezics/schema/postgres/identity/auth";
 import {
 	recommendationSnapshot,
 	recommendationSnapshotPartition,
 	unitBestScore,
-} from "../src/services/database/schema/recommendation";
+} from "@rezics/schema/postgres/discovery/recommendation";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import { createCatalogIdentity } from "../src/services/catalog/storage";
 import { runWithParticipationAuthority } from "../src/services/participation/policy";

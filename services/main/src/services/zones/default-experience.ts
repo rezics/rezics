@@ -12,7 +12,7 @@ import { sql } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
 import { unitLocalization, unitOwnership, zonePage } from "../database/schema";
 import { createContentStructure, insertContentStructureNode } from "../content-structure/service";
-import { fractionalPositionAt } from "../ordering/position";
+import { fractionalPositionAt } from "@rezics/schema/contracts/native/positions";
 import { insertPlatformUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
 import { replaceZonePageSlugAddress } from "../units/slug-address";

@@ -1,6 +1,6 @@
 import type { UnitReference, UnitOwner } from "@rezics/reference";
 import type { DatabaseExecutor } from "../database";
-import type { CreditAttributionRole } from "../database/schema/contract-values";
+import type { CreditAttributionRole } from "@rezics/schema/postgres/shared/contract-values";
 import { readUnitState } from "./query";
 const written = [
 	"author",

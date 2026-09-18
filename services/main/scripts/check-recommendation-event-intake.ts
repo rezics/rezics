@@ -20,7 +20,7 @@ import {
 } from "../src/services/database/schema";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import { Authorization } from "../src/services/authorization";
-import { CatalogIdentityTables } from "../src/services/database/schema/catalog-identity";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
 import { createCatalogIdentity, recordCatalogChange } from "../src/services/catalog/storage";
 import {
 	ParticipationDenied,
@@ -767,7 +767,7 @@ for (const path of [
 	"services/main/src/services/recommendations/events.ts",
 	"services/main/src/services/recommendations/exclusions.ts",
 	"services/main/src/services/units/reference-value.ts",
-	"services/main/src/services/database/schema/recommendation.ts",
+	"libraries/schema/src/postgres/discovery/recommendation.ts",
 	"services/main/src/services/database/schema/postgres/participation-private-state.sql",
 	"services/main/src/services/api/recommendations/index.ts",
 	"services/main/src/services/recommendations/policy.ts",

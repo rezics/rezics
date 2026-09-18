@@ -13,7 +13,7 @@ import {
 	authEntity,
 	participationGrant,
 	participationGrantEvent,
-} from "../../database/schema/participation";
+} from "@rezics/schema/postgres/access/participation";
 import { createParticipantIdentity } from "../../participation/identity";
 import { preparePlatformCredential, type IssuedPlatformCredential } from "../credentials";
 import {

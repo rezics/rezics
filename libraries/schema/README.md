@@ -1,156 +1,114 @@
-# Schema and vocabulary storage
+# Complete REZICS schema
 
-`@rezics/schema` is an independent Node/TypeScript workspace. It exports the
-PostgreSQL **Drizzle schema**, a reproducible vocabulary importer, portable data
-contracts, typed term UUIDs, and the persistence commands needed to exercise the
-schema. No API server is required.
+`@rezics/schema` owns the production PostgreSQL **Drizzle declarations** for all
+REZICS domains. `services/main` imports these declarations directly; there is no
+second copy or compatibility schema. The [generated table catalogue](docs/tables/README.md)
+lists every table, column, primary/foreign key, index and check constraint. The
+machine-readable equivalent is [schema-catalogue.generated.json](schema-catalogue.generated.json).
+A table count is an inventory, not proof of product or capacity acceptance.
 
-The physical schema is deliberately authored from the persistence invariants;
-external vocabulary definitions generate **data and typed term constants**.
-An upstream `creator` property is an identified term used by relation records.
-Adding a term therefore requires an import, not a new SQL column or migration.
-This is the selected predicate-as-data representation; applications may add
-measured projections without changing its identity contract.
+## Organization
 
-## Artifacts and commands
+| Owner | Responsibility |
+| --- | --- |
+| `src/postgres/{domain}/*.ts` | Actual domain-specific Drizzle declarations; `index.ts` files are public entry points. |
+| `src/postgres/vocabulary/` | Terms, labels, immutable meaning/release membership, full RDF nodes/statements and converted provider contracts. |
+| `src/postgres/knowledge/` | Identified semantic relations, descriptions for classes without a native owner, typed values, evidence and assessments. |
+| `src/postgres/catalog/`, `publishing/`, `music/`, `audiovisual/`, `software/` | Native identities, Works/versions/releases, credits, structures and domain constraints. |
+| `src/postgres/media/` | Indexed media, observed URLs, page occurrences, representations, blobs, streams/fragments, metadata and bounded presentation selections. |
+| `src/postgres/forum/`, `messaging/`, `wiki/` | Separate identities, hot writes, revision/payload lifecycles and query locality. |
+| `src/postgres/identity/`, `access/`, `integrations/`, `realms/`, `community/`, `governance/`, `commerce/` | Accounts, participation, authorization, applications, realm policy, subscriptions and entitlements. |
+| `src/postgres/ingestion/`, `history/`, `documents/`, `discovery/`, `operations/` | Observations/adoption, edit references, payloads, rebuildable search/recommendations and durable operations. |
+| `src/contracts/` | Portable values and pure native contracts. This library never imports application services. |
+| `src/bindings.ts`, `src/profiles.ts` | Explicit native storage dispositions and every selected Schema.org class's inherited description properties. |
+| [`../schema-importer`](../schema-importer/README.md) | Source-specific conversion, pinned input bytes, compiled artifacts and database import/export commands. |
 
-Run from the repository root:
+`postgres` names the physical backend. Files name the domain and responsibility,
+for example `media/indexing.ts` and `wiki/pages.ts`; neither a giant `drizzle.ts`
+nor one file per upstream property helps ownership. Drizzle permits schema files
+and directories; no special filename is required ([official declarations](https://orm.drizzle.team/docs/sql-schema-declaration)).
+`drizzle.config.ts` remains the tool's conventional configuration filename.
+
+## What conversion means
+
+The importer compiles complete pinned **vocabulary and source declarations** into
+queryable data held by the actual Drizzle tables. Schema.org classes are not SQL
+tables and upstream properties do not automatically become native columns. That
+would incorrectly treat multiple inheritance, open ranges and descriptive
+properties as REZICS's cardinality/authorization rules. Drizzle domain tables are
+authored for the selected invariants; the converter generates definitions,
+UUID constants, inherited profiles and explicit storage dispositions. Both layers
+are part of the delivered schema. This is not a JSON blob standing in for a schema.
+
+A book author credit uses an identified relation and role/predicate definition;
+there is no universal `book.creator` singleton column. Operational ownership,
+revision, position and domain-required joins remain concrete columns and FKs.
+For example, `media_metadata_revision.creator_entity_id` attributes the metadata
+revision to its editor; authorship of the indexed media uses identified credits.
+`schema_relation` is the open semantic relation family; domain credit/structure
+owners remain the sole authority for their operational facts. A storage binding
+is an explicit mapping, never automatic dual-write. Source-specific concepts that
+cannot be mapped retain their queryable source declarations and unknown facets.
+
+The full RDF graph retains blank nodes, lists, named graphs, original predicate
+IRIs and unknown axioms in `schema_node`/`schema_statement`, with outgoing and
+reverse indexes. Labels have independent meaning/translation revisions. A source,
+review or AI annotation can target the exact edit/assertion/revision; a reference
+to a source book does not require a duplicated native book.
+
+## Identity and physical ownership
+
+Objects create UUIDs locally before persistence. A message, wiki page or indexed
+image does not insert a universal Unit/Work/Thing parent. The lazy
+`reference_value` directory is used only when something needs a concrete referenced
+object; it is not the content allocation path. New semantic/media/wiki references
+do not automatically receive old Unit capabilities. References and authorization
+are separate contracts.
+
+Owned namespaces use the only REZICS domain, `rezics.com`:
+
+| Meaning | URI prefix |
+| --- | --- |
+| Object identity | `https://rezics.com/id/` |
+| REZICS vocabulary | `https://rezics.com/ns/` |
+| Published schema contracts | `https://rezics.com/schema/` |
+| Source contracts | `https://rezics.com/schema/sources/` |
+| UUID namespace seed (format 2) | `https://rezics.com/ns/schema/identity/v1` |
+
+These are identifier contracts, not a claim that HTTP routes or DNS deployments
+were published. External standard IRIs keep their original domains. Only the
+explicit Schema.org HTTP/HTTPS alias policy affects identity normalization;
+original RDF spelling stays intact. The former `rezics.org` namespace and format 1
+have no compatibility bridge. Development/test state is rebuilt.
+
+## Installation and generated owners
 
 ```sh
-task libraries:schema:sources:fetch
-task libraries:schema:generate
-task libraries:schema:inspect -- https://schema.org/creator zh-Hant
-task libraries:schema:db:generate -- --name describe_the_change
+task libraries:schema-importer:convert -- all
+task libraries:schema:catalogue
+task services-main:db:generate -- schema_complete
+# On the intended development database, using its configured DATABASE_ADMIN_URL:
+task services-main:db:migrate
+REZICS_SCHEMA_DATABASE_URL='postgresql://…' task libraries:schema-importer:import
 ```
 
-The first command restores checksum-pinned upstream files. All compilation and
-normal tests are offline. `registry/sources.lock.json` owns exact URLs, versions,
-base IRIs, namespaces, byte counts, SHA-256 values and license references.
-`registry/sources/` contains those unmodified inputs. `registry/bundle.json`,
-`registry/profiles.json`, `registry/coverage.json`, `src/generated/terms.ts` and
-`schemas/*.schema.json` are generated, never hand-edited.
-Package Git attributes preserve upstream line endings and whitespace because
-the source checksums cover their exact bytes, including OWL's CRLF input.
-
-The initial inputs are Schema.org 30.1 **all terms**, SKOS Core, PROV-O, Web
-Annotation, Dublin Core Terms/Type/Elements (2020-01-20), BIBFRAME **3.0.1**, and
-the RDF/RDFS/OWL namespace files captured on 2026-09-17. The BIBFRAME artifact's
-own version supersedes the earlier research's generic "BIBFRAME 2" description.
-The compiler retains every parsed quad, including foreign-vocabulary assertions,
-blank-node structures, lists, named graphs, deprecated definitions and unrecognized
-axioms. Referenced XSD datatype IRIs retain their identity; this is not a complete
-XSD lexical validator or an OWL reasoner.
-
-An explicit PostgreSQL target is required for persistent operations:
-
-```sh
-export REZICS_SCHEMA_DATABASE_URL='postgresql://user:password@localhost:5432/schema_development'
-task libraries:schema:db:migrate
-task libraries:schema:import
-task libraries:schema:select -- RELEASE_UUID 0
-task libraries:schema:export -- /absolute/path/to/export
-```
-
-`import` verifies the entire bundle against its pinned inputs before an atomic
-transaction. It stages all releases and installs the initial description profiles.
-`select` uses an expected selection version: `0` means no previous selection.
-The generated coverage file lists release IDs. Importing a newer release alone
-does not adopt it. Export includes the selected releases and all original/context
-bytes needed to reproduce them. `diff -- before.json after.json` reports additions,
-removals, meaning changes and label changes separately; disappearance is not deletion.
-
-## Drizzle integration
+The **main deployment owns the only production migration history**, including
+canonical functions/triggers in `services/main/src/services/database/schema/postgres`.
+The old standalone 18-table migration owner is removed. Released SQL and the
+installation epoch remain intact; replacing the active model does not rewrite a
+released installation history. The preview Drizzle config writes only to `.temp`.
 
 ```ts
-import { schemaTerm, schemaDefinition, defineRelationTables } from "@rezics/schema/drizzle";
+import { mediaItem, wikiPage, schemaTerm } from "@rezics/schema/postgres";
 import { terms } from "@rezics/schema/terms";
-
+import { defineRelationTables } from "@rezics/schema/postgres/vocabulary";
 const mediaRelations = defineRelationTables("media");
-const creatorId = terms.schemaorg.creator;
+const creator = terms.schemaorg.creator;
 ```
 
-All tables use `public` and explicit snake_case column names. The standalone
-migrator keeps its bookkeeping in `public.rezics_schema_migrations`. This package has its
-own generated Drizzle migrations for standalone installation and qualification.
-A service incorporating these exports into its existing Drizzle owner must generate
-its own forward migration using that owner's workflow; do not replay two owners'
-installation histories against the same tables. Existing `services/main` catalog
-definitions still describe its older operational validation contracts; this package
-does not silently replace those consumers or claim their acceptance.
-
-`defineRelationTables(prefix)` produces a separate relation/revision/selection
-family with the same logical record contract. Pass that family to the relation
-commands. Install `relationIntegritySql(family)` with the consuming migration,
-after the package's common integrity functions. The default family is `schema`.
-Physical family names do not occur in logical addresses.
-
-The schema separates:
-
-| Responsibility | Persistence |
-| --- | --- |
-| Vocabulary identity, immutable release and selected release | `schema_vocabulary`, `schema_release`, `schema_vocabulary_head` |
-| Stable term IRI/UUID and explicit aliases | `schema_term`, `schema_term_alias` |
-| Exact upstream meaning and release membership | `schema_definition`, `schema_release_term` |
-| Original multilingual label literals and their release membership | `schema_label`, `schema_release_label` |
-| Independently adopted translations and their history | `schema_label_selection` |
-| Product validation rules and exact term dependencies | `schema_profile`, `schema_profile_revision`, `schema_profile_rule` |
-| Shared edit identity | `schema_change` |
-| Addressable assertions, revisions, adoption and retraction | Each relation table family |
-
-Immutable tables reject updates/deletes. Corrections append revisions; selections
-append decisions. Foreign keys prevent attaching another term's definition or
-another relation's revision. A revision parent must already exist in the same
-relation, preventing cycles even in a multi-row insert. Latest revision is not
-automatically the adopted revision. Translation selection has a separate per-locale
-history and does not change definition IDs or existing relations.
-
-Sources, reviews and AI annotations can be relations whose subject/target is an
-edit, relation or exact revision. They share this mechanism; there is no duplicated
-source-book/native-book model. A `LogicalReference` contains a stable logical owner,
-UUID and optional revision UUID. Each owning service supplies endpoint existence,
-capability, authorization and deletion policy through the reference validator;
-this package cannot enforce remote existence with a PostgreSQL foreign key.
-
-## Preservation and interpretation
-
-Term IDs use RFC 9562 UUIDv5 in the fixed package namespace and the exact IRI.
-This namespace and algorithm are part of portable format 1, never deployment
-configuration. A detected collision/conflicting IRI rejects import. Only declared
-Schema.org terms receive the documented HTTP-to-HTTPS identity alias; the retained
-graph keeps its original IRIs. An alias cannot take over a previously assigned IRI
-identity; such an upgrade fails for explicit resolution. `sameAs` and similar
-statements do not merge entities.
-
-RDFC-1.0 canonicalization gives order/blank-label-independent graph content digests.
-Blank-node labels are scoped to their release and are not global object IDs.
-Definition digests cover outgoing statements plus connected blank-node structures,
-excluding the explicit display-label predicate set. Comments and other axioms remain
-part of meaning. A definition's hash is not the closure of every inherited rule;
-profiles pin exact definition revisions and vocabulary bundles preserve the full
-dependency context.
-Changes to the import interpretation/alias/projection algorithm require a new
-compiler contract version and regenerated artifacts; changing implementation
-must not silently reinterpret a published compiler version.
-
-Native values preserve lexical strings and datatype IRIs, including integers beyond
-JavaScript's safe range. Unknown, no-value and absence remain different. RDF 1.2
-quoted/directional terms require a future explicit format; unsupported inputs fail.
-JSON-LD uses pinned local context loading, strict value handling and compound-literal
-direction encoding. Syntax discarded by RDF conversion is recoverable from the
-original artifact; it is not silently invented as graph assertions. The convenient
-label index covers literal labels. Resource/compound labels remain in the full graph
-and are explicitly counted as `unindexedLabels`, not reported as indexed translations.
-Audit timestamps use millisecond precision; external high-precision times remain
-typed lexical values rather than passing through JavaScript `Date`.
-Ordering positions are decimal strings in portable records and exact PostgreSQL
-`numeric` values with integral/nonnegative/40-digit checks, so database ordering
-does not become lexicographic or lose precision through JavaScript numbers.
-
-Book, image, video, wiki, forum and message profiles are initial **description**
-profiles. They demonstrate explicit value-kind/cardinality/order/definition rules.
-They do not implement publishing policy, every media selector, message delivery,
-OWL inference, datatype value-space validation or all domain APIs. Complete vocabulary
-preservation is distinct from implementing every possible use of that vocabulary.
+A deployment choosing another relation family installs its generated Drizzle DDL
+and `relationIntegritySql(family)` guards. Physical family names never enter
+portable logical references. Arbitrary source SQL is never executed.
 
 ## Capacity and portability
 
@@ -187,6 +145,32 @@ hot subjects may require coordination or specific placement. PostgreSQL partitio
 alone is not horizontal scaling. The package tests establish bounded representation
 and PostgreSQL correctness, not production trillion-row throughput or online cutover.
 
+### Workloads and split boundaries
+
+The local 500M/3B checkpoints are not a global corpus ceiling. In a 1T-image
+planning scenario, 3 page occurrences and 2 retained observations per image imply
+3T occurrence rows and 2T observation rows before representations, metadata or
+indexes. These are arithmetic scenarios, not measured throughput or an ingestion
+plan. Video streams/fragments can multiply rows independently of file count.
+
+| Workload | Authoritative locality and growth |
+| --- | --- |
+| Images/video/audio | `media_item` plus observations, representations and fragments by media identity; occurrence records grow with page appearances. A URL, a blob and an appearance are different grains. |
+| Forum | Native post identity and thread/root locality, replies, reactions and edits; one hot thread needs an explicit writer/ordering budget. |
+| Chat | Conversation-local ordered messages; only actual edits append closed bodies. Group message insertion does not synchronously fan out counters to every member. |
+| Wiki | Fewer page identities, but per-language revisions, payloads and outbound links can dominate size. History/link scans use page/revision keys. |
+| Vocabulary/schema | Small replicated release/term/profile metadata. A dictionary UUID does not require a synchronous central allocator. |
+
+A physical split moves an owner's identity, revisions and authoritative selections
+as a unit. Keep its local FKs; replace cross-owner storage FKs with explicit logical
+reference validation and deletion/erasure delivery when moving across databases.
+This requires a migration adapter and a placement/version fence; merely dropping
+constraints is not a valid split. The bounded relation-family transfer test proves
+stable IDs, history, exact lexical values, selected revisions and rejection rules
+survive table/database relocation. It does not claim that every domain has an
+online shard mover or that an arbitrary custom database already satisfies the
+same transaction/constraint contract.
+
 ## Evidence
 
 Primary sources reviewed September 2026:
@@ -201,21 +185,9 @@ Primary sources reviewed September 2026:
 Upstream vocabulary artifacts retain their original notices and the licenses
 linked in the source manifest; package implementation code uses the repository license.
 
-## Verified scope
+## Verification
 
-Verified on 2026-09-18 with Node 26.8.2 and PostgreSQL 18.6:
-
-| Command | Result |
-| --- | --- |
-| `task libraries:schema:typecheck` | Passed with the repository's TypeScript configuration. |
-| `task libraries:schema:test` | 12 tests passed, including reconstruction of every pinned input, blank-node/list/named-graph preservation, language and exact numeric values, translation/meaning separation, pinned contexts, malformed inputs and resource budgets. |
-| `task libraries:schema:db:test` | 16 scenarios passed on a newly created PostgreSQL cluster, including migration replay/drift, full import/retry/export, selection concurrency, 40-language translation history, exact revision evidence, numeric ordering, rejected foreign keys/cycles/corrupt bytes, atomic rollback, and transfer to another database and physical relation family. |
-
-The selected inputs contain **25,265 retained quads**, **4,468 distinct term/reference
-identities**, and zero unindexed labels. These are measured vocabulary counts, not
-content-corpus capacity results. PostgreSQL tests stop and remove only their own
-cluster under repository `.temp/`. They never reset an existing development database.
-
-This qualifies the standalone package's selected schema/import/persistence contracts.
-It does not qualify existing main-service consumers, complete HTTP APIs, arbitrary
-domain profiles, distributed transactions, online migration, or production capacity.
+Current acceptance and reproducible commands are recorded in
+[the importer README](../schema-importer/README.md#verification) and the
+[active execution plan](../../docs/plan/README.md#active-execution).
+Prior 18-table standalone results do not qualify this replacement.

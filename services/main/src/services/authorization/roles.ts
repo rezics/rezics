@@ -9,7 +9,7 @@ import {
 	accessRoleEvent,
 	accessRolePermission,
 	accessRoleRevision,
-} from "../database/schema/access-role";
+} from "@rezics/schema/postgres/access/access-role";
 
 /** Complete proposed definition; callers merge patches before entering persistence. @internal */
 export interface AccessRoleDefinition {

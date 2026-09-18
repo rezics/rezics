@@ -4,18 +4,18 @@ import { Readable } from "node:stream";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { users } from "../src/services/database/schema/auth";
-import { operationalCapacity } from "../src/services/database/schema/operational-durability";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { operationalCapacity } from "@rezics/schema/postgres/operations/operational-durability";
 import {
 	softwareRecordRevision,
 	softwareReleaseLanguage,
-} from "../src/services/database/schema/catalog-software";
-import { catalogSourceMappingClaim } from "../src/services/database/schema/catalog-source";
-import { CatalogNameTables } from "../src/services/database/schema/catalog-names";
+} from "@rezics/schema/postgres/software/software";
+import { catalogSourceMappingClaim } from "@rezics/schema/postgres/ingestion/source";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
 import {
 	catalogDefinition,
 	catalogDefinitionRevision,
-} from "../src/services/database/schema/catalog-identity";
+} from "@rezics/schema/postgres/catalog/identity";
 import { aggregateRoutingBucket } from "../src/services/events/envelope";
 import {
 	VndbCatalogContractSha256,

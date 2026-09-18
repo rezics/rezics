@@ -4,14 +4,14 @@ import { and, eq, gt, inArray, isNull, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { PrincipalRequestContext } from "../auth/principal-session";
-import { accessSubject } from "../database/schema/access-identity";
-import { users } from "../database/schema/auth";
-import { accessMembership, accessMembershipEvent } from "../database/schema/access-membership";
+import { accessSubject } from "@rezics/schema/postgres/access/access-identity";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { accessMembership, accessMembershipEvent } from "@rezics/schema/postgres/access/access-membership";
 import {
 	organizationEnrollmentInvitation as invitations,
 	organizationEnrollmentContact as contacts,
 	organizationEnrollmentOperation as operations,
-} from "../database/schema/organization-membership";
+} from "@rezics/schema/postgres/access/organization-membership";
 import { allocateAccessSubject, resolveAccessSubject } from "../authorization/identities";
 import { readAccessSubjectEligibility } from "../authorization/subject-eligibility";
 import { applyAccessMembershipCommand, readAccessMembership } from "../authorization/memberships";

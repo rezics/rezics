@@ -3,7 +3,7 @@ import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import Elysia from "elysia";
 import { StatusCodes } from "http-status-codes";
 import type { StaticDecode } from "typebox";
-import { users } from "../../database/schema/auth";
+import { users } from "@rezics/schema/postgres/identity/auth";
 
 import { recordAuditEvent as appendAuditEvent } from "../../audit";
 import session from "../../auth/session";

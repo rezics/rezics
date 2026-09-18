@@ -2,9 +2,9 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import { UnitReferenceSchema, type UnitReference } from "@rezics/reference";
 import type { DatabaseExecutor } from "../database";
-import { post } from "../database/schema/post";
-import { catalogRoutingControl, catalogUnitLocator } from "../database/schema/catalog-identity";
-import { unitOwnerTable } from "../database/schema/unit-reference-columns";
+import { post } from "@rezics/schema/postgres/forum/post";
+import { catalogRoutingControl, catalogUnitLocator } from "@rezics/schema/postgres/catalog/identity";
+import { unitOwnerTable } from "@rezics/schema/postgres/shared/unit-reference-columns";
 
 type Lock = "share" | "update" | "no key update" | "key share";
 type ReadOptions = { readonly lock?: Lock; readonly includeDeleted?: boolean };

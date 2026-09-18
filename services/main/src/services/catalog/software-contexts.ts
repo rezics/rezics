@@ -5,8 +5,8 @@ import type { DatabaseTransaction } from "../database";
 import {
 	softwareParticipationContext,
 	softwareParticipationContextRevision,
-} from "../database/schema/catalog-software";
-import type { CatalogReference } from "./contracts";
+} from "@rezics/schema/postgres/software/software";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { CatalogReferenceNotFound, CatalogRevisionConflict, loadCatalogIdentity } from "./storage";
 
 const revisionNumber = z.number().int().min(1).max(Number.MAX_SAFE_INTEGER);

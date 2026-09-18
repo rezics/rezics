@@ -6,10 +6,10 @@ import {
 	groupingOrderEntry,
 	groupingOrderProfile,
 	groupingCommandRevision,
-} from "../database/schema/catalog-grouping";
-import { groupingCatalogRelation } from "../database/schema/catalog-facts";
-import { isFractionalPosition } from "../ordering/position";
-import type { CatalogReference } from "./contracts";
+} from "@rezics/schema/postgres/catalog/grouping";
+import { groupingCatalogRelation } from "@rezics/schema/postgres/knowledge/facts";
+import { isFractionalPosition } from "@rezics/schema/contracts/native/positions";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import {
 	addCatalogName,
 	createCatalogIdentity,

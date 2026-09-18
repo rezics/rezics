@@ -3,8 +3,8 @@ import type { DatabaseTransaction } from "../database";
 import {
 	catalogSourceMappingClaim as claims,
 	catalogSourceBindingRevision as revisions,
-} from "../database/schema/catalog-source";
-import type { CatalogReference } from "./contracts";
+} from "@rezics/schema/postgres/ingestion/source";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import {
 	bindCatalogSourceIdentity,
 	lockCatalogSourceBinding,

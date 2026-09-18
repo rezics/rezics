@@ -6,10 +6,10 @@ import { createHash } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
-import { catalogSourceRecord } from "../database/schema/catalog-source";
-import { entityIdentity } from "../database/schema/catalog-identity";
-import { type CatalogReference } from "./contracts";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
+import { catalogSourceRecord } from "@rezics/schema/postgres/ingestion/source";
+import { entityIdentity } from "@rezics/schema/postgres/catalog/identity";
+import { type CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import {
 	BangumiArchiveCharacterSchema,
 	BangumiArchiveEpisodeSchema,

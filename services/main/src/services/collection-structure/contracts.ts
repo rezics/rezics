@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { FractionalPositionStorageMaximumBytes, isFractionalPosition } from "../ordering/position";
+import { FractionalPositionStorageMaximumBytes, isFractionalPosition } from "@rezics/schema/contracts/native/positions";
 
 export const CollectionStructureContentModel = "rezics.collection-structure.v1" as const;
 export const CollectionStructureCheckpointDepth = 32;

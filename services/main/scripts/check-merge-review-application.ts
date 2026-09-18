@@ -16,7 +16,7 @@ import {
 	authEntity,
 	participationGrant,
 } from "../src/services/database/schema";
-import { CatalogIdentityTables } from "../src/services/database/schema/catalog-identity";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
 import {
 	createReviewedFixtureMerge,
 	prepareFixtureMerge,
@@ -653,7 +653,7 @@ for (const path of [
 	"services/main/src/services/units/merge/service.ts",
 	"services/main/src/services/units/merge/worker.ts",
 	"services/main/src/services/authorization/platform/authorization.ts",
-	"services/main/src/services/database/schema/unit-merge.ts",
+	"libraries/schema/src/postgres/identity/unit-merge.ts",
 	"services/main/src/services/database/schema/postgres/merge-integrity.sql",
 	"services/main/src/services/database/migrations/atlas.sum",
 ])

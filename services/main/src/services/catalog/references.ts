@@ -10,8 +10,8 @@ import {
 	referenceCatalogProfileRevision,
 	referenceConcept,
 	referenceWebResource,
-} from "../database/schema/catalog-reference";
-import type { CatalogReference } from "./contracts";
+} from "@rezics/schema/postgres/catalog/reference";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import {
 	AreaCodeSchema,
 	NativeCatalogNameSchema,

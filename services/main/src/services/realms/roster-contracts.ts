@@ -1,4 +1,4 @@
-import type { RealmMemberStateValues } from "../database/schema/contract-values";
+import type { RealmMemberStateValues } from "@rezics/schema/postgres/shared/contract-values";
 
 /** Roster output and candidate-work limits are independent bounds. @internal */
 export const RealmRosterPageLimit = 100;

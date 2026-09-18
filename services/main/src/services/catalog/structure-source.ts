@@ -3,15 +3,15 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { runParticipationSavepoint } from "../participation/policy";
-import { CatalogStructureSourceTables } from "../database/schema/catalog-structure-source";
-import { CatalogStructureHistoryTables } from "../database/schema/catalog-structure-history";
+import { CatalogStructureSourceTables } from "@rezics/schema/postgres/ingestion/structure-source";
+import { CatalogStructureHistoryTables } from "@rezics/schema/postgres/history/structure-history";
 import {
 	catalogSourceBindingRevision,
 	catalogSourceAdoptionProposal,
-} from "../database/schema/catalog-source";
-import { catalogSourceApplication } from "../database/schema/catalog-source-application";
+} from "@rezics/schema/postgres/ingestion/source";
+import { catalogSourceApplication } from "@rezics/schema/postgres/ingestion/source-application";
 import { catalogSourceApplicationScopes } from "./source-application-scopes";
-import type { CatalogReference } from "./contracts";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspondence";
 import { CatalogRevisionConflict, loadCatalogIdentity } from "./storage";
 import { ProgramStructureSchema, updateProgramStructure } from "./program";

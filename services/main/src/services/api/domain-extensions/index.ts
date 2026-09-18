@@ -1,5 +1,5 @@
 import { readNativeZoneRenderReferences } from "./render-native-references";
-import { catalogUnitLocator } from "../../database/schema/catalog-identity";
+import { catalogUnitLocator } from "@rezics/schema/postgres/catalog/identity";
 import { unitStateRelation } from "../../units/state-relation";
 import { AuthenticationRequired } from "../../auth/errors";
 import { presentImageAsset } from "../image-assets/presentation";

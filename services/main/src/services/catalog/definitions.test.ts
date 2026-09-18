@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CatalogDefinitionConstraintsSchema } from "./definition-contracts";
+import { CatalogDefinitionConstraintsSchema } from "@rezics/schema/contracts/native/definition";
 import { validateCatalogParticipants, validateCatalogScalar } from "./definitions";
 import { catalogValueNodes } from "./value-nodes";
 const role = "019a0000-0000-7000-8000-000000000001";

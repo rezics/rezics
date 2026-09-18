@@ -22,6 +22,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 ARCHITECTURE = ROOT / "docs/architecture/database"
 SCHEMA = ROOT / "services/main/src/services/database/schema"
+SHARED_SCHEMA = ROOT / "libraries/schema/src/postgres"
 API = ROOT / "services/main/src/services/api"
 SOURCE_BASELINE_COMMIT = "74079abd73d5fc43ac87ac7cae8a2074ca72d13d"
 
@@ -44,6 +45,22 @@ GROUPS = {
 }
 FILE_GROUP = {name: group for group, names in GROUPS.items() for name in names.split()}
 
+# Physical ownership follows the shared package. Unknown domains still fail review.
+DOMAIN_GROUP = {
+ "shared":"D01", "identity":"D02", "access":"D02", "integrations":"D02",
+ "catalog":"D07", "knowledge":"D03", "vocabulary":"D03", "publishing":"D05",
+ "music":"D06", "audiovisual":"D05", "software":"D07", "media":"D08",
+ "documents":"D08", "history":"D08", "forum":"D09", "wiki":"D10",
+ "realms":"D10", "community":"D11", "messaging":"D12", "governance":"D13",
+ "ingestion":"D14", "operations":"D14", "discovery":"D15", "commerce":"D22",
+}
+MODULE_GROUP = {
+ "knowledge/names.ts":"D04", "knowledge/reference-value.ts":"D01", "knowledge/revision-reference.ts":"D01",
+ "knowledge/tag.ts":"D11", "knowledge/tag-path.ts":"D11", "knowledge/tag-expression.ts":"D11",
+ "knowledge/label.ts":"D10", "catalog/identity.ts":"D01", "software/registry.ts":"D21",
+}
+
+
 SQL_GROUPS = {
     "D01": "merge-integrity native-bootstrap unit-reference-integrity reference-value revision-reference",
     "D02": "access-identity access-role access-membership access-group access-group-membership access-role-binding organization-membership participation-integrity participation-private-state unit-license-grant",
@@ -61,15 +78,23 @@ SQL_GROUPS = {
     "D14": "catalog-child-source catalog-credit-integrity catalog-profile-source catalog-source-application catalog-source-correspondence catalog-source-dependency catalog-source-integrity catalog-source-multipart catalog-source-owned-baseline catalog-source-support catalog-structure-source music-release-source-job music-source-lifecycle operational-durability operational-runtime",
     "D15": "content-metrics participation-studio recommendation-build search-document-support unit-search-document tag-path-search",
 }
+SQL_GROUPS["D02"] += " access-representation access-subject-policy identity-preference access-assignment-ceiling api-key-authority access-current-policy account-identity-admission connected-app oauth-client-authority workload-principal connected-app-client oauth-client-secret-policy connected-installation connected-user-authorization oauth-grant-context access-group-impact access-group-admission access-assignment-management"
+SQL_GROUPS["D10"] += " realm-enrollment"
+SQL_GROUPS["D12"] += " message-history"
+SQL_GROUPS["D08"] += " media-selection"
+SQL_GROUPS["D03"] += " schema-vocabulary schema-native-history"
 SQL_GROUP = {name: group for group, names in SQL_GROUPS.items() for name in names.split()}
 OVERLAY_GROUP = {
     "recommendation_exclusion_reference_values.pre": "D15",
     "following_reference_values.pre": "D11",
     "studio_visit_reference_values.pre": "D15",
+    "realm_enrollment.pre":"D10", "organization_membership.pre":"D02",
 }
 
 
 DISPOSITIONS = {
+    "D21":"Keep package/release/file/install identities distinct; declarations never grant execution authority.",
+    "D22":"Keep paid agreements, independent awards and beneficiary-bound grants distinct; exact policy/review/meter revisions.",
     "D01": "Preserve owner identity; introduce normalized validated reference values; explicit correction/address history.",
     "D02": "Retain dedicated private/control domain; integrate authority fences and exact disclosure contracts.",
     "D03": "Reshape into immutable claims/evidence/decisions and identified n-ary relations; preserve native semantics.",
@@ -89,7 +114,7 @@ DISPOSITIONS = {
 
 API_GROUPS = {
     "D01": "slug-addresses unit-resources",
-    "D02": "participation platform-access platform-users token-info tokens users",
+    "D02": "access account apps participation platform-access platform-users token-info tokens users",
     "D03": "association-proposals domain-extensions",
     "D05,D06,D07,D14": "catalog",
     "D08": "history image-assets",
@@ -326,10 +351,14 @@ def tsv(fields, rows):
 
 def inventory():
     rows = []
-    for p in sorted(SCHEMA.rglob("*")):
+    for p in sorted([*SCHEMA.rglob("*"), *SHARED_SCHEMA.rglob("*.ts")]):
         if p.suffix not in {".ts", ".sql"} or p.name.endswith(".test.ts"):
             continue
-        if p.parent.name == "postgres":
+        if p.is_relative_to(SHARED_SCHEMA):
+            path = p.relative_to(SHARED_SCHEMA)
+            group = MODULE_GROUP.get(path.as_posix(), DOMAIN_GROUP.get(path.parts[0]))
+            if path.as_posix() == "index.ts": group = "D01"
+        elif p.parent.name == "postgres":
             group = "D01" if p.stem == "manifest" else SQL_GROUP.get(p.stem)
         elif p.parent.name == "migration-overlays":
             group = OVERLAY_GROUP.get(p.stem)

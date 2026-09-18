@@ -42,12 +42,12 @@ import {
 	SubjectAssociationExpressionPreviewLimit,
 	SubjectAssociationRoleValues,
 	UnitOwnershipModeValues,
-} from "../../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 import {
 	TagExpressionArgumentRoleValues,
 	TagExpressionKindValues,
 	TagExpressionLabelComponentKindValues,
-} from "../../database/schema/tag-expression";
+} from "@rezics/schema/postgres/knowledge/tag-expression";
 import { HealthCheckStateValues } from "../../health/model";
 import {
 	FeedNonReviewPostKindValues,

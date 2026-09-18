@@ -21,7 +21,7 @@ import {
 	recommendationExclusion,
 	recommendationEvent,
 } from "../src/services/database/schema";
-import { CatalogIdentityTables } from "../src/services/database/schema/catalog-identity";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import { Authorization } from "../src/services/authorization";
 import { lockUnitAccessState } from "../src/services/authorization/unit/access-lock";
@@ -554,7 +554,7 @@ const repository = new URL("../../../", import.meta.url),
 for (const path of [
 	"services/main/scripts/check-recommendation-references.ts",
 	"services/main/scripts/reference-merge-fixture.ts",
-	"services/main/src/services/database/schema/recommendation.ts",
+	"libraries/schema/src/postgres/discovery/recommendation.ts",
 	"services/main/src/services/database/schema/postgres/merge-integrity.sql",
 	"services/main/src/services/database/schema/postgres/unit-reference-integrity.sql",
 	"services/main/src/services/database/schema/postgres/manifest.ts",

@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { Readable } from "node:stream";
 import { and, eq } from "drizzle-orm";
 import type { DatabaseTransaction } from "../src/services/database";
-import { operationalCapacity } from "../src/services/database/schema/operational-durability";
-import { CatalogFactTables } from "../src/services/database/schema/catalog-facts";
+import { operationalCapacity } from "@rezics/schema/postgres/operations/operational-durability";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
 import { aggregateRoutingBucket } from "../src/services/events/envelope";
 import {
 	storeCatalogSourcePayload,

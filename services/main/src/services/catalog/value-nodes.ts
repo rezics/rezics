@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CatalogValueKindValues } from "./contracts";
+import { CatalogValueKindValues } from "@rezics/schema/contracts/native/catalog";
 
 export const CatalogValueNodeSchema = z
 	.strictObject({

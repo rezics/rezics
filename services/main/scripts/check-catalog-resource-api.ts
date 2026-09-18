@@ -3,8 +3,8 @@ import { eq, inArray } from "drizzle-orm";
 import { serializeSignedCookie } from "better-call";
 import { z } from "zod";
 import { initializeObservability } from "@rezics/observability";
-import { users, sessions } from "../src/services/database/schema/auth";
-import { accountPreference } from "../src/services/database/schema/account-preference";
+import { users, sessions } from "@rezics/schema/postgres/identity/auth";
+import { accountPreference } from "@rezics/schema/postgres/identity/account-preference";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import {
 	CatalogCreatedSchema,
@@ -27,7 +27,7 @@ import {
 	FavoriteRevisionSchema,
 	FavoriteStateSchema,
 } from "../src/services/favorites/contracts";
-import { catalogUnitLocator } from "../src/services/database/schema/catalog-identity";
+import { catalogUnitLocator } from "@rezics/schema/postgres/catalog/identity";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString || process.env.REZICS_DISPOSABLE_MIGRATION_FIXTURE !== "1")

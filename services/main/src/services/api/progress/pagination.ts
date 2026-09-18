@@ -2,7 +2,7 @@ import { and, desc, eq, lt, or, sql } from "drizzle-orm";
 import { t } from "elysia";
 
 import { unitProgressEntry } from "../../database/schema";
-import { ProgressStatusValues } from "../../database/schema/contract-values";
+import { ProgressStatusValues } from "@rezics/schema/postgres/shared/contract-values";
 import { parseJsonCursor } from "../../pagination";
 import { InvalidPaginationCursor } from "../../pagination/errors";
 import { Uuid } from "../schema";

@@ -1,4 +1,4 @@
-import { realmEnrollment } from "../database/schema/realm-enrollment";
+import { realmEnrollment } from "@rezics/schema/postgres/realms/realm-enrollment";
 import {
 	realmEnrollmentScope,
 	realmMembershipAuthority,

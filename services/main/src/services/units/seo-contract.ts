@@ -1,5 +1,5 @@
 import type { UnitOwner } from "@rezics/reference";
-import type { ContentRating } from "../database/schema/contract-values";
+import type { ContentRating } from "@rezics/schema/postgres/shared/contract-values";
 export const PublicUnitSeoOwners = [
 	"publishing",
 	"music",

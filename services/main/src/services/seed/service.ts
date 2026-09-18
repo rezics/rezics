@@ -1,6 +1,6 @@
 import { allocateReferenceValue } from "../units/reference-value";
 import { resolveRegisteredUnitReference } from "../units/reference";
-import { RecommendationSurfaceValues } from "../database/schema/contract-values";
+import { RecommendationSurfaceValues } from "@rezics/schema/postgres/shared/contract-values";
 import { saveFavorite } from "../favorites/service";
 import { CatalogReferenceSchema, type UnitOwner } from "@rezics/reference";
 import type { SeedIdentityDescriptor } from "./identity";
@@ -18,7 +18,7 @@ import {
 	seedNativeReleaseFixture,
 } from "./catalog";
 import { createHash } from "node:crypto";
-import { authEntity } from "../database/schema/participation";
+import { authEntity } from "@rezics/schema/postgres/access/participation";
 import { selfAuthUserIdForEntity } from "../participation/account-query";
 import { createParticipantIdentity } from "../participation/identity";
 
@@ -49,7 +49,7 @@ const SeedablePlatformCapabilityValues = PlatformCapabilityValues.filter(
 );
 
 import { createDockHistory, getDockRevisionId } from "../api/docks/history";
-import { ApiPermissionValues, toApiKeyPermissions } from "../auth/api-permissions";
+import { ApiPermissionValues, toApiKeyPermissions } from "@rezics/schema/contracts/native/api-permissions";
 import { replaceApiTokenQuotaOverride } from "../auth/api-quota/policy-service";
 import { Authorization } from "../authorization";
 import { assertPlatformCoreReady, inspectPlatformCore } from "../bootstrap/core";
@@ -153,7 +153,7 @@ import {
 	zonePage,
 } from "../database/schema";
 import { createGovernanceDecision } from "../governance/decision-service";
-import { fractionalPositionAt } from "../ordering/position";
+import { fractionalPositionAt } from "@rezics/schema/contracts/native/positions";
 import { RecommendationPolicyVersion } from "../recommendations/policy";
 import { createSharedSearchQuery } from "../search/shared-queries";
 import { ensureSimpleTagExpressionInTransaction } from "../tag-expressions/service";
@@ -2283,15 +2283,15 @@ async function seedCommunications(
 	});
 	const conversations: CreatedConversation[] = [];
 	for (const batch of chunks(conversationInputs)) {
-		conversations.push(
-			...(await tx.insert(conversation).values(batch).returning({
-				id: conversation.id,
-				lowId: conversation.participantLowAuthUserId,
-				highId: conversation.participantHighAuthUserId,
-				lowEntityId: conversation.participantLowEntityId,
-				highEntityId: conversation.participantHighEntityId,
-			})),
-		);
+        const inserted=await tx.insert(conversation).values(batch).returning({
+            id:conversation.id,lowId:conversation.participantLowAuthUserId,highId:conversation.participantHighAuthUserId,
+            lowEntityId:conversation.participantLowEntityId,highEntityId:conversation.participantHighEntityId,
+        });
+        for(const row of inserted){
+            const {lowId,highId,lowEntityId,highEntityId}=row;
+            if(!lowId||!highId||!lowEntityId||!highEntityId)throw new Error("Direct conversation seed returned incomplete participants");
+            conversations.push({...row,lowId,highId,lowEntityId,highEntityId});
+        }
 	}
 	const conversationCreatedAt = new Map(
 		conversationInputs.map((value) => [

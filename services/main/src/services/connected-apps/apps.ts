@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { and, eq, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { connectedApp, connectedAppCapability, connectedAppEvent, connectedAppRevision } from "../database/schema/connected-app";
+import { connectedApp, connectedAppCapability, connectedAppEvent, connectedAppRevision } from "@rezics/schema/postgres/integrations/connected-app";
 import { AppDefinitionSchema, MaximumAppCapabilities, appCapabilityDigest, appCapabilityKey, decodeAppCapabilities } from "./capabilities";
 
 const id = z.uuid().toLowerCase(), version = z.number().int().nonnegative().safe();

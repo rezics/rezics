@@ -23,9 +23,9 @@ import {
 	operationalOutbox,
 	operationalCapacity,
 } from "../src/services/database/schema";
-import { CatalogIdentityTables } from "../src/services/database/schema/catalog-identity";
-import { CatalogNameTables } from "../src/services/database/schema/catalog-names";
-import { CatalogFactTables } from "../src/services/database/schema/catalog-facts";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
 import {
 	claimUnitMergeOperations,
 	processClaimedUnitMergePage,

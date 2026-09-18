@@ -10,7 +10,7 @@ import {
 	ContentLanguageValues,
 	ResourceVisibilityValues,
 	UnitStatusValues,
-} from "../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 import { parseJsonCursor } from "../pagination";
 import { InvalidPaginationCursor } from "../pagination/errors";
 import { ResourceSectionValues, type ResourceSection } from "../units/resource-section";

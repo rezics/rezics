@@ -47,7 +47,7 @@ vi.mock("../realms/service", () => ({ acknowledgeCurrentRealmRulesOnFollow }));
 vi.mock("../notifications/service", () => ({ createNotification }));
 
 import { users, authEntity, unitMergeRedirect } from "../database/schema";
-import { FollowableUnitOwnerValues } from "../database/schema/contract-values";
+import { FollowableUnitOwnerValues } from "@rezics/schema/postgres/shared/contract-values";
 import { UnitNotFound } from "../units/errors";
 import { UserFollowBlocked, UserSelfFollowForbidden } from "./errors";
 import { followUnit } from "./service";

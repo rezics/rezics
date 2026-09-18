@@ -2,9 +2,9 @@ import { and, eq, gt, getTableColumns, getTableName, inArray, isNull, sql } from
 import { z } from "zod";
 import { canAccessCatalog } from "../participation/policy";
 import type { DatabaseTransaction } from "../database";
-import { catalogDefinitionRevision } from "../database/schema/catalog-identity";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
-import { CatalogFactStateValues, type CatalogFactState, type CatalogReference } from "./contracts";
+import { catalogDefinitionRevision } from "@rezics/schema/postgres/catalog/identity";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
+import { CatalogFactStateValues, type CatalogFactState, type CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import {
 	loadCatalogIdentity,
 	recordCatalogChange,

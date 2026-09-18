@@ -2,7 +2,7 @@ import { eq, inArray, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { AccessSubjectTarget, RequestedAuthoritySelection } from "@rezics/access";
 import type { DatabaseTransaction } from "../database";
-import { accessSubject } from "../database/schema/access-identity";
+import { accessSubject } from "@rezics/schema/postgres/access/access-identity";
 import { AuthorityOperationSchema, RequestedAuthoritySelectionSchema, type AuthorityOperation, type AuthorityOutcome } from "./authority-context";
 import { readCurrentAccessRepresentations, AccessRepresentationBudgetExceeded } from "./representation-reader";
 import { readAccessSubjectEligibility } from "./subject-eligibility";

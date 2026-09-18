@@ -37,10 +37,10 @@ vi.mock("../database", () => ({
 vi.mock("./account-defaults", () => ({ initializeAccountParticipation: vi.fn() }));
 vi.mock("../participation/identity", () => ({ createParticipantIdentity: state.create }));
 
-import { users } from "../database/schema/auth";
-import { accountPreference } from "../database/schema/account-preference";
-import { authEntity } from "../database/schema/participation";
-import { entityPresentation } from "../database/schema/entity-presentation";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { accountPreference } from "@rezics/schema/postgres/identity/account-preference";
+import { authEntity } from "@rezics/schema/postgres/access/participation";
+import { entityPresentation } from "@rezics/schema/postgres/identity/entity-presentation";
 import { ensureSelfEntity } from "./entity";
 
 const account = {

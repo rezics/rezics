@@ -6,8 +6,8 @@ import type { Authorization } from "../../authorization";
 import { CatalogReferenceSchema } from "@rezics/reference";
 import { nextUnitUpdatedAt } from "../../units/update-values";
 import { readUnitStateById } from "../../units/query";
-import { unitOwnerTable } from "../../database/schema/unit-reference-columns";
-import { CatalogFactTables } from "../../database/schema/catalog-facts";
+import { unitOwnerTable } from "@rezics/schema/postgres/shared/unit-reference-columns";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
 import { recordAuditEvent } from "../../audit";
 import type { DatabaseTransaction } from "../../database";
 import {

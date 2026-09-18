@@ -5,7 +5,7 @@ import {
 	RecommendationClientEventTypeValues,
 	RecommendationReasonValues,
 	RecommendationSurfaceValues,
-} from "../../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 import { DateTime, DisplayPosition, LocalizationLanguageHints, Uuid } from "../schema";
 import { RecommendationPolicy } from "../../recommendations/policy";
 import { CatalogOwnerValues } from "@rezics/reference";

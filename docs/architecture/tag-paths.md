@@ -341,7 +341,7 @@ persisted as parallel evidence and never participate in production merges.
 
 Primary implementation owners are:
 
-- schema: `services/main/src/services/database/schema/vocabulary.ts`,
+- schema: `libraries/schema/src/postgres/knowledge/vocabulary.ts`,
   `tag-expression.ts`, and `tag-path.ts`;
 - PostgreSQL projection/lifecycle owners: `schema/postgres/tag-path.sql`,
   `tag-judgment-aggregates.sql`, and `realm-tag-authority.sql`;

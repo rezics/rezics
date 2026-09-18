@@ -1,13 +1,13 @@
 import { eraseRealmEnrollmentBatch } from "../realms/membership-worker";
-import { accountFollowPreference } from "../database/schema/follow";
-import { governanceNoticeRecipient } from "../database/schema/governance-delivery";
+import { accountFollowPreference } from "@rezics/schema/postgres/community/follow";
+import { governanceNoticeRecipient } from "@rezics/schema/postgres/governance/governance-delivery";
 import { eraseOrganizationEnrollmentBatch } from "./membership-worker";
 import { invalidateErasedMembershipInvitations } from "./membership";
 import { erasePrivateImageBatch, type ImageErasureArchive } from "../image-assets/erasure";
 import { and, eq, isNull, lte, sql, type SQL } from "drizzle-orm";
 import type { PgTable } from "drizzle-orm/pg-core";
 import { database, type DatabaseTransaction } from "../database";
-import { users, sessions, accounts, apikeys, verifications } from "../database/schema/auth";
+import { users, sessions, accounts, apikeys, verifications } from "@rezics/schema/postgres/identity/auth";
 import {
 	accountErasure,
 	AccountErasureStageValues,
@@ -15,8 +15,8 @@ import {
 	participationGrant,
 	participationGrantEvent,
 	servicePrincipal,
-} from "../database/schema/participation";
-import { accountPreference } from "../database/schema/account-preference";
+} from "@rezics/schema/postgres/access/participation";
+import { accountPreference } from "@rezics/schema/postgres/identity/account-preference";
 import { eraseIdentityPreferenceBatch } from "../authorization/identity-preferences";
 import { eraseAccountIdentityAdmissionBatch } from "../authorization/create-account-identity";
 import { eraseUserAuthorizationBatch } from "../connected-apps/user-authorizations";
@@ -27,32 +27,32 @@ import {
 	emailOutbox,
 	message,
 	conversationRead,
-} from "../database/schema/communication";
+} from "@rezics/schema/postgres/messaging/communication";
 import {
 	notificationRecipientStat,
 	conversationParticipantStat,
-} from "../database/schema/aggregate";
-import { accountEntityBlock } from "../database/schema/account-block";
+} from "@rezics/schema/postgres/discovery/aggregate";
+import { accountEntityBlock } from "@rezics/schema/postgres/identity/account-block";
 import {
 	accountFavorite,
 	accountFavoriteRevision,
 	accountFavoritesState,
-} from "../database/schema/favorites";
-import { accountRealmTagSubscription, accountUnitTag } from "../database/schema/tag";
+} from "@rezics/schema/postgres/community/favorites";
+import { accountRealmTagSubscription, accountUnitTag } from "@rezics/schema/postgres/knowledge/tag";
 import {
 	apiQuotaRequestLease,
 	apiQuotaDailyUsage,
 	apiQuotaRateState,
 	apiTokenCreationReservation,
 	apiAccountQuotaBinding,
-} from "../database/schema/api-quota";
+} from "@rezics/schema/postgres/operations/api-quota";
 import {
 	contentStructureNodeProgress,
 	unitProgress,
 	unitProgressEntry,
-} from "../database/schema/progress";
-import { recommendationEvent, recommendationExclusion } from "../database/schema/recommendation";
-import { studioResourceVisit, studioAuthEditorCandidate } from "../database/schema/studio";
+} from "@rezics/schema/postgres/documents/progress";
+import { recommendationEvent, recommendationExclusion } from "@rezics/schema/postgres/discovery/recommendation";
+import { studioResourceVisit, studioAuthEditorCandidate } from "@rezics/schema/postgres/community/studio";
 import { ParticipationDenied, requireParticipation, type ParticipationAuthority } from "./policy";
 import {
 	MaximumActiveParticipationGrants,

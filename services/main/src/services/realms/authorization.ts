@@ -1,8 +1,8 @@
 import { and, eq, sql, type SQLWrapper } from "drizzle-orm";
 import type { DatabaseTransaction, DatabaseExecutor } from "../database";
-import { accessScope, accessSubject } from "../database/schema/access-identity";
-import { accessMembership } from "../database/schema/access-membership";
-import { unitAccessGrant, unitAccessRestriction } from "../database/schema/access";
+import { accessScope, accessSubject } from "@rezics/schema/postgres/access/access-identity";
+import { accessMembership } from "@rezics/schema/postgres/access/access-membership";
+import { unitAccessGrant, unitAccessRestriction } from "@rezics/schema/postgres/access/access";
 import { allocateAccessScope, allocateAccessSubject } from "../authorization/identities";
 import { allocateReferenceValue } from "../units/reference-value";
 import { lockUnitAccessState } from "../authorization/unit/access-lock";

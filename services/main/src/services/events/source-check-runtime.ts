@@ -6,7 +6,7 @@ import {
 	catalogSourceRecord as records,
 	catalogSourceCheckPlan as plans,
 	catalogSourceSubscription as subscriptions,
-} from "../database/schema/catalog-source";
+} from "@rezics/schema/postgres/ingestion/source";
 import {
 	claimDueSourceChecks,
 	finishCatalogSourceCheck,

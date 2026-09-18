@@ -2,8 +2,8 @@ import { and, eq, gt, sql, type SQL } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { CatalogIdentityTables } from "../database/schema/catalog-identity";
-import { CatalogStructureHistoryTables } from "../database/schema/catalog-structure-history";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
+import { CatalogStructureHistoryTables } from "@rezics/schema/postgres/history/structure-history";
 import {
 	publishingTextWork,
 	publishingPublicationText,
@@ -12,7 +12,7 @@ import {
 	publishingReleaseEvent,
 	publishingInstallment,
 	publishingSerialization,
-} from "../database/schema/catalog-publishing";
+} from "@rezics/schema/postgres/publishing/publishing";
 import {
 	readCatalogAuthorityScope,
 	catalogIdentityReadPredicate,

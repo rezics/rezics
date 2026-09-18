@@ -10,9 +10,9 @@ import type { DatabaseTransaction } from "../database";
 import {
 	softwareComponentRevision,
 	softwareRecordRevision,
-} from "../database/schema/catalog-software";
-import { softwareComponentSourceOccurrence } from "../database/schema/catalog-software-source";
-import { softwareSourceComponentBaseline } from "../database/schema/catalog-source-owned-baseline";
+} from "@rezics/schema/postgres/software/software";
+import { softwareComponentSourceOccurrence } from "@rezics/schema/postgres/software/software-source";
+import { softwareSourceComponentBaseline } from "@rezics/schema/postgres/ingestion/source-owned-baseline";
 import { CatalogRevisionConflict, loadCatalogIdentity, recordCatalogChange } from "./storage";
 import { loadCatalogSourceDocument, type CatalogSourceReceipt } from "./source-observations";
 import type { CatalogSourceNativeWriter } from "./source-proposals";

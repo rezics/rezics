@@ -6,7 +6,7 @@ import {
 	UnitMergeOperationPhaseValues,
 	UnitMergeItemKindValues,
 	UnitMergeItemStateValues,
-} from "../../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 const revision = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
 export const MergePlanSchema = z.strictObject({
 	names: z.enum(["copy_alternates", "retain_source"]),

@@ -5,24 +5,24 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../src/services/database";
-import { users } from "../src/services/database/schema/auth";
-import { musicIdentity } from "../src/services/database/schema/catalog-identity";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { musicIdentity } from "@rezics/schema/postgres/catalog/identity";
 import {
 	publishingPublication,
 	publishingReleaseEvent,
 	publishingSerialization,
 	publishingInstallment,
 	publishingWork,
-} from "../src/services/database/schema/catalog-publishing";
+} from "@rezics/schema/postgres/publishing/publishing";
 import {
 	musicArtistCredit,
 	musicArtistCreditName,
 	musicRecording,
 	musicReleaseEvent,
 	musicTrackOccurrence,
-} from "../src/services/database/schema/catalog-music";
-import { programEpisode, programWork } from "../src/services/database/schema/catalog-program";
-import { publishingIdentifierClaim } from "../src/services/database/schema/catalog-facts";
+} from "@rezics/schema/postgres/music/music";
+import { programEpisode, programWork } from "@rezics/schema/postgres/audiovisual/program";
+import { publishingIdentifierClaim } from "@rezics/schema/postgres/knowledge/facts";
 import {
 	addCatalogName,
 	createCatalogIdentity,

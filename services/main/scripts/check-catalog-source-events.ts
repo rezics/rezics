@@ -12,11 +12,11 @@ import {
 import {
 	catalogSourceRecord,
 	catalogSourceSnapshot,
-} from "../src/services/database/schema/catalog-source";
+} from "@rezics/schema/postgres/ingestion/source";
 import {
 	operationalCapacity,
 	operationalOutbox,
-} from "../src/services/database/schema/operational-durability";
+} from "@rezics/schema/postgres/operations/operational-durability";
 import { aggregateRoutingBucket, envelopeSubject } from "../src/services/events/envelope";
 import { catalogSourceRecordId } from "../src/services/catalog/source-record-key";
 

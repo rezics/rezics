@@ -4,7 +4,7 @@ import { and, eq, gt, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import { selfAuthUserIdForEntity } from "../participation/account-query";
 
 import { lockUnitAccessState } from "../authorization/unit/access-lock";
-import { referenceValue } from "../database/schema/reference-value";
+import { referenceValue } from "@rezics/schema/postgres/knowledge/reference-value";
 import {
 	allocateReferenceValue,
 	findReferenceValueByNativeId,
@@ -34,9 +34,9 @@ import {
 import type {
 	FollowableUnitOwner,
 	NonRealmFollowableUnitOwner,
-} from "../database/schema/contract-values";
-import { users } from "../database/schema/auth";
-import { authEntity } from "../database/schema/participation";
+} from "@rezics/schema/postgres/shared/contract-values";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { authEntity } from "@rezics/schema/postgres/access/participation";
 import { ParticipationDenied } from "../participation/policy";
 import { createNotification } from "../notifications/service";
 import { UnitNotFound } from "../units/errors";

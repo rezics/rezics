@@ -1,9 +1,9 @@
 import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { users } from "../database/schema/auth";
-import { oauthAccessTokens, oauthConsents, oauthRefreshTokens } from "../database/schema/auth-oauth.generated";
-import { oauthGrantContext, oauthRefreshFamily } from "../database/schema/oauth-grant-context";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { oauthAccessTokens, oauthConsents, oauthRefreshTokens } from "@rezics/schema/postgres/identity/auth-oauth.generated";
+import { oauthGrantContext, oauthRefreshFamily } from "@rezics/schema/postgres/integrations/oauth-grant-context";
 
 /**
  * Drain private user OAuth credentials/contexts before consent erasure, at most 64 rows per batch.

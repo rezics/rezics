@@ -1,8 +1,8 @@
 import { t } from "elysia";
 
 import { ContentLanguageTag, Uuid } from "../api/schema";
-import { MaximumSubjectAssociationsPageSize } from "../database/schema/contract-values";
-import { FractionalPositionStorageMaximumBytes, isFractionalPosition } from "../ordering/position";
+import { MaximumSubjectAssociationsPageSize } from "@rezics/schema/postgres/shared/contract-values";
+import { FractionalPositionStorageMaximumBytes, isFractionalPosition } from "@rezics/schema/contracts/native/positions";
 import { parseJsonCursor } from "../pagination";
 import { InvalidPaginationCursor } from "../pagination/errors";
 

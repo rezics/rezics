@@ -43,7 +43,7 @@ import { insertPlatformUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
 import type { RevisionContributionInput } from "../units/revision-contribution";
 import { replaceZonePageSlugAddress } from "../units/slug-address";
-import { fractionalPositionBetween } from "../ordering/position";
+import { fractionalPositionBetween } from "@rezics/schema/contracts/native/positions";
 
 export interface ZonePageLocalizationInput {
 	readonly language: ContentLanguage;

@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { getTableConfig } from "drizzle-orm/pg-core";
-import { accountUnitTag } from "./tag";
-import { referenceValue } from "./reference-value";
-import { UnitReferenceConsumers } from "./unit-reference-consumers";
+import { accountUnitTag } from "@rezics/schema/postgres/knowledge/tag";
+import { referenceValue } from "@rezics/schema/postgres/knowledge/reference-value";
+import { UnitReferenceConsumers } from "@rezics/schema/postgres/shared/unit-reference-consumers";
 
 describe("private Tag canonical references", () => {
 	it("stores one target value without an independent native identity", () => {

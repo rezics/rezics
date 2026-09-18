@@ -1,6 +1,6 @@
 import { PlatformOwnerValues } from "@rezics/reference";
 import { readUnitStateById } from "./query";
-import { unitOwnerTable } from "../database/schema/unit-reference-columns";
+import { unitOwnerTable } from "@rezics/schema/postgres/shared/unit-reference-columns";
 import { nextUnitUpdatedAt } from "./update-values";
 import { AvatarTypeValues, FontAwesomeIconPrefixValues } from "@rezics/avatar";
 import {
@@ -80,7 +80,7 @@ import {
 	compareFractionalPositions,
 	FractionalPositionStorageMaximumBytes,
 	isFractionalPosition,
-} from "../ordering/position";
+} from "@rezics/schema/contracts/native/positions";
 import { ensureSubjectPostTargetingAllowed } from "../posts/targeting";
 import { ensureWikiAssociationContextPosts } from "./association-context";
 import { ensureDirectCreditAttributionAllowed } from "./attribution-authorization";

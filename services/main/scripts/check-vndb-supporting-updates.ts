@@ -3,13 +3,13 @@ import { Readable } from "node:stream";
 import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { users } from "../src/services/database/schema/auth";
-import { operationalCapacity } from "../src/services/database/schema/operational-durability";
-import { catalogSourceMappingClaim } from "../src/services/database/schema/catalog-source";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { operationalCapacity } from "@rezics/schema/postgres/operations/operational-durability";
+import { catalogSourceMappingClaim } from "@rezics/schema/postgres/ingestion/source";
 import {
 	catalogDefinition,
 	catalogDefinitionRevision,
-} from "../src/services/database/schema/catalog-identity";
+} from "@rezics/schema/postgres/catalog/identity";
 import { aggregateRoutingBucket } from "../src/services/events/envelope";
 import { VndbCatalogContractSha256, VndbDumpContractSha256 } from "../src/services/catalog/vndb";
 import {
@@ -40,7 +40,7 @@ import { EntityProfileSchema } from "../src/services/catalog/entity-contracts";
 import { initializeEntityProfile } from "../src/services/catalog/entities";
 import { readCatalogProfileHead } from "../src/services/catalog/profile-source";
 import { runWithNativeFixtureActor } from "./native-fixture-actor";
-import type { CatalogReference } from "../src/services/catalog/contracts";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString || process.env.REZICS_DISPOSABLE_MIGRATION_FIXTURE !== "1")

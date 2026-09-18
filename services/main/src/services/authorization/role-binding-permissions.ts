@@ -8,16 +8,16 @@ import {
 	type AccessPermission,
 } from "@rezics/access";
 import type { DatabaseTransaction } from "../database";
-import { accessRole, accessRoleRevision, accessRolePermission } from "../database/schema/access-role";
+import { accessRole, accessRoleRevision, accessRolePermission } from "@rezics/schema/postgres/access/access-role";
 import {
 	accessRoleBinding,
 	accessRoleBindingScope,
 	accessRoleBindingRevision,
 	accessRoleBindingPermission,
-} from "../database/schema/access-role-binding";
-import { accessMembership } from "../database/schema/access-membership";
-import { accessGroupTree } from "../database/schema/access-group";
-import { accessGroupMembershipSet } from "../database/schema/access-group-membership";
+} from "@rezics/schema/postgres/access/access-role-binding";
+import { accessMembership } from "@rezics/schema/postgres/access/access-membership";
+import { accessGroupTree } from "@rezics/schema/postgres/access/access-group";
+import { accessGroupMembershipSet } from "@rezics/schema/postgres/access/access-group-membership";
 import { decodeAccessPermissionSnapshot } from "./permission";
 import { AccessRoleBindingUnavailable } from "./role-bindings";
 import { readAccessMemberSetRecipients } from "./member-set-recipients";

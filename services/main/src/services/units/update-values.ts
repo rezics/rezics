@@ -1,6 +1,6 @@
 import type { LicenseId } from "@rezics/license";
 
-import type { WorkReleaseStatus } from "../database/schema/contract-values";
+import type { WorkReleaseStatus } from "@rezics/schema/postgres/shared/contract-values";
 import type { RevisionContributionInput } from "./revision-contribution";
 
 /** @internal */

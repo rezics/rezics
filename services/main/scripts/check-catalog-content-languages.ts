@@ -1,7 +1,7 @@
 import {
 	catalogDefinition,
 	catalogDefinitionRevision,
-} from "../src/services/database/schema/catalog-identity";
+} from "@rezics/schema/postgres/catalog/identity";
 import { beginCatalogFact, CatalogRevisionConflict } from "../src/services/catalog/storage";
 import { runWithParticipationAuthority } from "../src/services/participation/policy";
 import {
@@ -13,7 +13,7 @@ import Elysia from "elysia";
 import { inArray } from "drizzle-orm";
 import { serializeSignedCookie } from "better-call";
 import { initializeObservability } from "@rezics/observability";
-import { users, sessions } from "../src/services/database/schema/auth";
+import { users, sessions } from "@rezics/schema/postgres/identity/auth";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import { CatalogCreatedSchema } from "../src/services/catalog/resource-contracts";
 import { z } from "zod";

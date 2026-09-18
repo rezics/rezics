@@ -7,12 +7,12 @@ import {
 	revisionReferenceFields,
 	revisionReferenceValues,
 	revisionReferenceTargetColumns,
-} from "../database/schema/revision-reference";
+} from "@rezics/schema/postgres/knowledge/revision-reference";
 import {
 	CatalogRevisionReferenceSchema,
 	RevisionReferenceKindValues,
 	type CatalogRevisionReference,
-} from "./revision-reference-contract";
+} from "@rezics/schema/contracts/native/revision-reference";
 import { allocateImmutableReference } from "./immutable-reference";
 
 /**

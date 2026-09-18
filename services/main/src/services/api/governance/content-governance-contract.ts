@@ -13,7 +13,7 @@ import {
 	type RealmModerationCommandValues,
 	type RealmUnitStatusValues,
 	type LicenseRecognitionStatusValues,
-} from "../../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 
 export type ContentGovernanceActionCommand = CreateContentGovernanceActionBody["kind"];
 export type ContentReviewAuthority = (typeof ContentReviewAuthorityValues)[number];

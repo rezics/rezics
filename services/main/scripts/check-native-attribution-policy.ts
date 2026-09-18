@@ -3,7 +3,7 @@ import { eq, inArray, sql } from "drizzle-orm";
 import { serializeSignedCookie } from "better-call";
 import { z } from "zod";
 import { initializeObservability } from "@rezics/observability";
-import { users, sessions } from "../src/services/database/schema/auth";
+import { users, sessions } from "@rezics/schema/postgres/identity/auth";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import {
 	CatalogCreatedSchema,
@@ -12,7 +12,7 @@ import {
 } from "../src/services/catalog/resource-contracts";
 import { GrantSelectionSchema } from "../src/services/api/participation/schema";
 import { encodeDomainCursor } from "../src/services/catalog/domain-api-pagination";
-import { creditAttribution, unitAssociationProposal } from "../src/services/database/schema/entity";
+import { creditAttribution, unitAssociationProposal } from "@rezics/schema/postgres/identity/entity";
 import { ParticipationAuthoritySchema } from "../src/services/participation/policy";
 
 const expectedPort = "25435";

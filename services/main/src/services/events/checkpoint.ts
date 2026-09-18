@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
 import type { JetStreamManager } from "@nats-io/jetstream";
 import type { DatabaseSession } from "../database";
-import { operationalConsumerCheckpoint as checkpoints } from "../database/schema/operational-runtime";
+import { operationalConsumerCheckpoint as checkpoints } from "@rezics/schema/postgres/operations/operational-runtime";
 import { streamConfig, type StreamRoute } from "./topology";
 
 /** Retention gaps and stream recreation fail closed until an explicit owner rebuild establishes a new generation. @internal */

@@ -3,16 +3,16 @@ import { Readable } from "node:stream";
 import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { users } from "../src/services/database/schema/auth";
-import { CatalogFactTables } from "../src/services/database/schema/catalog-facts";
-import { CatalogChildSourceTables } from "../src/services/database/schema/catalog-child-source";
-import { CatalogStructureSourceTables } from "../src/services/database/schema/catalog-structure-source";
-import { catalogSourceMappingClaim } from "../src/services/database/schema/catalog-source";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
+import { CatalogChildSourceTables } from "@rezics/schema/postgres/ingestion/child-source";
+import { CatalogStructureSourceTables } from "@rezics/schema/postgres/ingestion/structure-source";
+import { catalogSourceMappingClaim } from "@rezics/schema/postgres/ingestion/source";
 import {
 	publishingPublicationWork,
 	publishingReleaseEvent,
-} from "../src/services/database/schema/catalog-publishing";
-import { operationalCapacity } from "../src/services/database/schema/operational-durability";
+} from "@rezics/schema/postgres/publishing/publishing";
+import { operationalCapacity } from "@rezics/schema/postgres/operations/operational-durability";
 import { aggregateRoutingBucket } from "../src/services/events/envelope";
 import { runWithNativeFixtureActor } from "./native-fixture-actor";
 import {

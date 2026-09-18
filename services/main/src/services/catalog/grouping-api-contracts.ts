@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { CatalogRevisionNumberSchema } from "./name-contracts";
+import { CatalogRevisionNumberSchema } from "@rezics/schema/contracts/native/names";
 import { GroupingCommandSnapshotSchema } from "./grouping";
 import { DomainPageQuerySchema } from "./domain-api-pagination";
-import { FractionalPositionInputMaximumBytes, FractionalPositionStorageMaximumBytes, isFractionalPosition } from "../ordering/position";
+import { FractionalPositionInputMaximumBytes, FractionalPositionStorageMaximumBytes, isFractionalPosition } from "@rezics/schema/contracts/native/positions";
 
 const revision = CatalogRevisionNumberSchema;
 const key = z.string().min(1).max(160).refine(value => Buffer.byteLength(value, "utf8") <= 160);

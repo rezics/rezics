@@ -58,7 +58,7 @@ contract:
 The sparse `unit_content_language_support` relation stores one bounded JSONB
 `value` per supported Unit. Absence means the authoritative value is `[]`;
 empty arrays are never stored. The primary key is `unit_id`; the
-[current schema](../../services/main/src/services/database/schema/content-language.ts)
+[current schema](../../libraries/schema/src/postgres/documents/content-language.ts)
 uses validated concrete owner-FK alternatives rather than a global Unit parent.
 The `unit_kind` vocabulary and top-level non-empty array bound are separate
 checks, not a composite FK proving feature eligibility. Generic target conversion

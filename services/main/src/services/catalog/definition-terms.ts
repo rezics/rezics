@@ -4,7 +4,7 @@ import type { DatabaseTransaction } from "../database";
 import {
 	catalogDefinitionTerm,
 	catalogDefinitionTermSupport,
-} from "../database/schema/catalog-definition-terms";
+} from "@rezics/schema/postgres/knowledge/definition-terms";
 import { assertCatalogDefinitionRevision } from "./definitions";
 import { loadCatalogIdentity } from "./storage";
 import {

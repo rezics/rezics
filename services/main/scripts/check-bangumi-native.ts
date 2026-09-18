@@ -4,9 +4,9 @@ import { Readable } from "node:stream";
 import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { users } from "../src/services/database/schema/auth";
-import { CatalogFactTables } from "../src/services/database/schema/catalog-facts";
-import { CatalogNameTables } from "../src/services/database/schema/catalog-names";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
 import {
 	adoptBangumiIndex,
 	adoptBangumiIndexMember,
@@ -24,7 +24,7 @@ import {
 	type CatalogSourceArchive,
 } from "../src/services/catalog/source-observations";
 import { readGroupingOrder } from "../src/services/catalog/grouping";
-import { operationalCapacity } from "../src/services/database/schema/operational-durability";
+import { operationalCapacity } from "@rezics/schema/postgres/operations/operational-durability";
 import { aggregateRoutingBucket } from "../src/services/events/envelope";
 import { catalogSourceRecordId } from "../src/services/catalog/source-record-key";
 

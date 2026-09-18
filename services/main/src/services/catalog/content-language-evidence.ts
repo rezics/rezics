@@ -1,11 +1,11 @@
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { publishingSerialization } from "../database/schema/catalog-publishing";
-import { programEpisode, programSeason, programVersion } from "../database/schema/catalog-program";
-import { musicRelease } from "../database/schema/catalog-music";
-import { softwareVersion } from "../database/schema/catalog-software";
-import { CatalogNameTables } from "../database/schema/catalog-names";
+import { publishingSerialization } from "@rezics/schema/postgres/publishing/publishing";
+import { programEpisode, programSeason, programVersion } from "@rezics/schema/postgres/audiovisual/program";
+import { musicRelease } from "@rezics/schema/postgres/music/music";
+import { softwareVersion } from "@rezics/schema/postgres/software/software";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
 import { CatalogAccessDenied, CatalogReferenceNotFound, loadCatalogIdentity } from "./storage";
 import {
 	ContentLanguageDeclarationReferenceSchema,

@@ -17,8 +17,10 @@ import type {
 import { sql, type SQL } from "drizzle-orm";
 
 import { alias } from "drizzle-orm/pg-core";
-import { referenceValue } from "../database/schema/reference-value";
-import { unitReferenceIdExpression } from "../database/schema/unit-reference-columns";
+import {
+	referenceValue,
+	referenceValueNativeIdExpression,
+} from "@rezics/schema/postgres/knowledge/reference-value";
 import { unitEffectiveTag, unitTagJudgmentStat } from "../database/schema";
 
 type SqlName = SQL<unknown>;
@@ -255,7 +257,7 @@ function tagAssertionCondition(
 					from account_unit_tag filter_profile_tag
 					join ${referenceValue} filter_profile_tag_reference on ${privateTagReference.id} = filter_profile_tag.target_reference_id
 					join tag filter_tag on filter_tag.id = filter_profile_tag.tag_id
-					where ${unitReferenceIdExpression("target", privateTagReference)} = ${unitId}
+					where ${referenceValueNativeIdExpression(privateTagReference)} = ${unitId}
 						and filter_profile_tag.auth_user_id = ${selfAuthUserIdForEntity(viewerProfileId)}
 						and ${tagReference(sql`filter_profile_tag.tag_id`, sql`'tag'`)}
 				)`
@@ -517,7 +519,7 @@ function tagAssertionCandidateSet(
 					tagIds ? valuesCondition(sql`filter_realm_tag_stat.tag_id`, tagIds, true) : sql`true`,
 				])}`);
 	} else if (viewerProfileId) {
-		conjunctiveSets.push(sql`select ${unitReferenceIdExpression("target", privateTagReference)} as unit_id
+		conjunctiveSets.push(sql`select ${referenceValueNativeIdExpression(privateTagReference)} as unit_id
 			from account_unit_tag filter_profile_tag
 			join ${referenceValue} filter_profile_tag_reference on ${privateTagReference.id} = filter_profile_tag.target_reference_id
 			where filter_profile_tag.auth_user_id = ${selfAuthUserIdForEntity(viewerProfileId)}

@@ -1,6 +1,7 @@
-import { referenceValue } from "./schema/reference-value";
-import { CatalogIdentityTables } from "./schema/catalog-identity";
-import { CatalogNameTables } from "./schema/catalog-names";
+import { realmEnrollmentRuleAcceptance } from "@rezics/schema/postgres/realms/realm-enrollment";
+import { referenceValue } from "@rezics/schema/postgres/knowledge/reference-value";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
 import { creditRolesForReference } from "../units/credit-role-contract";
 import {
 	PlatformCapabilityValues,
@@ -8,7 +9,7 @@ import {
 	UnitPermissionValues,
 } from "@rezics/access";
 import { getTableName, type SQL } from "drizzle-orm";
-import { getTableConfig, PgDialect } from "drizzle-orm/pg-core";
+import { getTableConfig, getViewConfig, PgDialect } from "drizzle-orm/pg-core";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -135,20 +136,39 @@ import {
 
 const dialect = new PgDialect();
 const ReferenceTargetTables = [
-	"publishing_identity", "music_identity", "program_identity", "software_identity",
-	"entity_identity", "grouping_identity", "reference_identity", "distribution_identity",
-	"video", "audio", "post", "poll", "zone", "realm", "realm_rule", "custom_theme",
-	"collection", "tag", "tag_path", "label",
+	"publishing_identity",
+	"music_identity",
+	"program_identity",
+	"software_identity",
+	"entity_identity",
+	"grouping_identity",
+	"reference_identity",
+	"distribution_identity",
+	"video",
+	"audio",
+	"post",
+	"poll",
+	"zone",
+	"realm",
+	"realm_rule",
+	"custom_theme",
+	"collection",
+	"tag",
+	"tag_path",
+	"label",
 ];
 
 function expectConcreteReferences(
-	config: ReturnType<typeof getTableConfig>, prefix: string, onDelete?: string,
+	config: ReturnType<typeof getTableConfig>,
+	prefix: string,
+	onDelete?: string,
 ) {
 	const references = config.foreignKeys.filter((key) =>
 		key.reference().columns.some((column) => column.name.startsWith(`${prefix}_`)),
 	);
-	expect(references.map((key) => getTableName(key.reference().foreignTable)).sort())
-		.toEqual([...ReferenceTargetTables].sort());
+	expect(references.map((key) => getTableName(key.reference().foreignTable)).sort()).toEqual(
+		[...ReferenceTargetTables].sort(),
+	);
 	for (const key of references) {
 		expect(key.reference().foreignColumns.map((column) => column.name)).toEqual(["id"]);
 		if (onDelete) expect(key.onDelete).toBe(onDelete);
@@ -157,8 +177,12 @@ function expectConcreteReferences(
 
 describe("database schema contracts", () => {
 	it("owns every canonical PGroonga index in the concrete resource schemas", () => {
-		const indexes = [unitLocalization, unitAlias, unitSearchDocument,
-			...Object.values(CatalogNameTables).map((tables) => tables.name)]
+		const indexes = [
+			unitLocalization,
+			unitAlias,
+			unitSearchDocument,
+			...Object.values(CatalogNameTables).map((tables) => tables.name),
+		]
 			.flatMap((table) => getTableConfig(table).indexes)
 			.filter((index) => index.config.method === "pgroonga");
 
@@ -170,7 +194,8 @@ describe("database schema contracts", () => {
 			);
 		}
 		for (const index of indexes.filter((index) =>
-			LargeCapacityPgroongaIndexes.some((name) => name === index.config.name))) {
+			LargeCapacityPgroongaIndexes.some((name) => name === index.config.name),
+		)) {
 			expect(index.config.with).toEqual({
 				lexicon_flags_mapping: expect.stringMatching(/^'.*"LARGE".*'$/),
 				index_flags_mapping: expect.stringMatching(/^'.*"LARGE".*'$/),
@@ -238,11 +263,11 @@ describe("database schema contracts", () => {
 			"target_reference_id",
 		]);
 		expect(follow.foreignKeys.map((key) => key.getName())).toEqual(
-			expect.arrayContaining([
-				"unit_follow_follower_profile_id_entity_identity_id_fk",
-			]),
+			expect.arrayContaining(["unit_follow_follower_profile_id_entity_identity_id_fk"]),
 		);
-		expect(follow.foreignKeys.some(key => key.reference().foreignTable === referenceValue)).toBe(true);
+		expect(follow.foreignKeys.some((key) => key.reference().foreignTable === referenceValue)).toBe(
+			true,
+		);
 	});
 
 	it("stores immutable shared Search queries behind a UUIDv7 primary key", () => {
@@ -274,8 +299,11 @@ describe("database schema contracts", () => {
 		expect(grant.columns.map((column) => column.name)).not.toContain("role");
 		expect(grant.columns.map((column) => column.name)).not.toContain("status");
 		expect(grant.columns.map((column) => column.name)).not.toContain("withdrawn_at");
-		expect(grant.indexes.filter((index) => !index.config.name?.endsWith("_ref_idx"))
-			.map((index) => index.config.name)).toEqual([
+		expect(
+			grant.indexes
+				.filter((index) => !index.config.name?.endsWith("_ref_idx"))
+				.map((index) => index.config.name),
+		).toEqual([
 			"unit_license_grant_open_unit_license_key",
 			"unit_license_grant_unit_granted_at_idx",
 			"unit_license_grant_effective_license_unit_idx",
@@ -382,10 +410,12 @@ describe("database schema contracts", () => {
 		);
 		expect(revision.columns.map((column) => column.name)).not.toContain("require_on_update");
 
-		const acceptance = getTableConfig(realmRuleAcceptance);
+		const acceptance = getTableConfig(realmEnrollmentRuleAcceptance);
+		expect(getViewConfig(realmRuleAcceptance).name).toBe("current_realm_entity_rule_acceptance");
 		expect(acceptance.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
+			"membership_id",
+			"generation",
 			"revision_id",
-			"profile_id",
 		]);
 	});
 
@@ -508,7 +538,10 @@ describe("database schema contracts", () => {
 		expect(CreditAttributionRoleValues).toContain("translator");
 		expect(creditRolesForReference({ owner: "publishing", shape: "work" })).toContain("author");
 		expect(creditRolesForReference({ owner: "program", shape: "program" })).not.toContain("author");
-		expect(creditRolesForReference({ owner: "entity", shape: "character" })).toEqual(["publisher", "actor"]);
+		expect(creditRolesForReference({ owner: "entity", shape: "character" })).toEqual([
+			"publisher",
+			"actor",
+		]);
 		expect(creditRolesForReference({ owner: "software", shape: "content" })).toEqual(
 			expect.arrayContaining(["translator", "illustrator", "editor"]),
 		);
@@ -549,9 +582,7 @@ describe("database schema contracts", () => {
 			expect.arrayContaining(["unit_id", "entity_id", "kind"]),
 		);
 		expect(attribution.foreignKeys.map((key) => key.getName())).toEqual(
-			expect.arrayContaining([
-				"credit_attribution_credited_entity_id_entity_identity_id_fk",
-			]),
+			expect.arrayContaining(["credit_attribution_credited_entity_id_entity_identity_id_fk"]),
 		);
 		expectConcreteReferences(attribution, "source_unit");
 		expect(attribution.uniqueConstraints.map((constraint) => constraint.name)).toContain(
@@ -860,9 +891,10 @@ describe("database schema contracts", () => {
 		const concreteOwners = [post, ...Object.values(CatalogIdentityTables)];
 		const address = getTableConfig(unitSlugAddress);
 		expect(CatalogIdentityTables.publishing.shape.getSQLType()).toBe("text");
-		for (const owner of concreteOwners) expect(getTableConfig(owner).columns.map((column) => column.name)).not.toEqual(
-			expect.arrayContaining(["slug", "slug_scope_id"]),
-		);
+		for (const owner of concreteOwners)
+			expect(getTableConfig(owner).columns.map((column) => column.name)).not.toEqual(
+				expect.arrayContaining(["slug", "slug_scope_id"]),
+			);
 		expect(address.uniqueConstraints.map((constraint) => constraint.name)).toContain(
 			"unit_slug_address_scope_slug_key",
 		);
@@ -944,8 +976,12 @@ describe("database schema contracts", () => {
 		);
 		expect(PlatformCapabilityValues).not.toContain("unit.ownership.transfer");
 		expect(platformCapabilityGrant.capability.enumValues).toEqual(PlatformCapabilityValues);
-		expect(getTableConfig(platformCapabilityGrant).checks.map((constraint) => constraint.name))
-			.toEqual(["platform_capability_grant_revocation_check", "platform_capability_grant_expiry_check"]);
+		expect(
+			getTableConfig(platformCapabilityGrant).checks.map((constraint) => constraint.name),
+		).toEqual([
+			"platform_capability_grant_revocation_check",
+			"platform_capability_grant_expiry_check",
+		]);
 		expect(unitSlugAddress.kind.getSQLType()).toBe("text");
 	});
 

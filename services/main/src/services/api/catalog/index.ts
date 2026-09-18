@@ -3,7 +3,7 @@ import Elysia from "elysia";
 import mergedSources from "./merged-sources";
 import { z } from "zod";
 import session from "../../auth/session";
-import { CatalogOwnerValues } from "../../catalog/contracts";
+import { CatalogOwnerValues } from "@rezics/schema/contracts/native/catalog";
 import {
 	CreateCatalogResourceSchema,
 	CatalogCreatedSchema,

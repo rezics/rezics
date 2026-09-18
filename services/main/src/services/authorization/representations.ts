@@ -6,8 +6,8 @@ import type { DatabaseTransaction } from "../database";
 import {
 	accessRepresentation, accessRepresentationEntity, accessRepresentationEvent,
 	accessRepresentationRevision, accessRepresentationPermission,
-} from "../database/schema/access-representation";
-import { accessGroupTree } from "../database/schema/access-group";
+} from "@rezics/schema/postgres/access/access-representation";
+import { accessGroupTree } from "@rezics/schema/postgres/access/access-group";
 import { AccessPermissionSchema, decodeAccessPermissionSnapshot } from "./permission";
 import { allocateAccessSubject } from "./identities";
 import { RepresentationTargetSchema } from "./authority-context";

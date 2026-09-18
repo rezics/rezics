@@ -3,6 +3,7 @@ CREATE OR REPLACE FUNCTION public.participation_guard_conversation()
 RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
 DECLARE admitted integer;
 BEGIN
+  IF NEW.kind='group' THEN RETURN NEW; END IF;
   SELECT count(*) INTO admitted FROM (
     SELECT account.id FROM public.users account JOIN public.auth_entity self ON self.auth_user_id = account.id
     WHERE account.erased_at IS NULL AND self.state = 'active' AND
@@ -29,6 +30,16 @@ DECLARE pair public.conversation%ROWTYPE; admitted integer;
 BEGIN
   IF TG_OP = 'UPDATE' AND NEW.content IS NULL AND NEW.deleted_at IS NOT NULL THEN RETURN NEW; END IF;
   SELECT * INTO pair FROM public.conversation WHERE id = NEW.conversation_id;
+  IF pair.kind='group' THEN
+    PERFORM 1 FROM public.conversation_member member
+    JOIN public.users account ON account.id=member.user_id
+    JOIN public.auth_entity self ON self.auth_user_id=account.id AND self.entity_id=member.entity_id
+    WHERE member.conversation_id=NEW.conversation_id AND member.user_id=NEW.sender_auth_user_id
+      AND member.entity_id=NEW.sender_entity_id AND member.left_at IS NULL
+      AND account.erased_at IS NULL AND self.state='active' FOR SHARE OF member, account, self;
+    IF NOT FOUND THEN RAISE EXCEPTION 'Group message requires a current admitted member' USING ERRCODE='23514'; END IF;
+    RETURN NEW;
+  END IF;
   IF NOT FOUND OR NOT ((NEW.sender_auth_user_id = pair.participant_low_auth_user_id AND NEW.sender_entity_id = pair.participant_low_entity_id) OR
     (NEW.sender_auth_user_id = pair.participant_high_auth_user_id AND NEW.sender_entity_id = pair.participant_high_entity_id)) THEN
     RAISE EXCEPTION 'Message sender is not the admitted participant' USING ERRCODE = '23514';
@@ -80,8 +91,9 @@ SET search_path = pg_catalog, public
 AS $function$
 BEGIN
   INSERT INTO conversation_stat (conversation_id) VALUES (NEW.id);
+  IF NEW.kind='group' THEN RETURN NULL; END IF;
   INSERT INTO conversation_participant_stat (conversation_id, auth_user_id, sort_at)
-  VALUES (NEW.id, NEW.participant_low_auth_user_id, NEW.created_at),
+  VALUES (NEW.id, NEW.kind, NEW.participant_low_auth_user_id, NEW.created_at),
     (NEW.id, NEW.participant_high_auth_user_id, NEW.created_at);
   RETURN NULL;
 END;
@@ -99,6 +111,7 @@ BEGIN
       updated_at = now()
     WHERE conversation_id = NEW.conversation_id
       AND (last_message_at IS NULL OR (last_message_at, last_message_id) < (NEW.created_at, NEW.id));
+    IF EXISTS(SELECT 1 FROM conversation WHERE id=NEW.conversation_id AND kind='group') THEN RETURN NULL; END IF;
     UPDATE conversation_participant_stat SET last_message_id = NEW.id,
       last_message_at = NEW.created_at, sort_at = NEW.created_at, updated_at = now()
     WHERE conversation_id = NEW.conversation_id
@@ -161,9 +174,9 @@ CREATE OR REPLACE FUNCTION public.protect_conversation_aggregate_identity()
 SET search_path = pg_catalog, public
 AS $function$
 BEGIN
-  IF (OLD.id, OLD.participant_low_auth_user_id, OLD.participant_high_auth_user_id, OLD.participant_low_entity_id, OLD.participant_high_entity_id, OLD.created_at)
+  IF (OLD.id, OLD.kind, OLD.participant_low_auth_user_id, OLD.participant_high_auth_user_id, OLD.participant_low_entity_id, OLD.participant_high_entity_id, OLD.created_at)
     IS DISTINCT FROM
-    (NEW.id, NEW.participant_low_auth_user_id, NEW.participant_high_auth_user_id, NEW.participant_low_entity_id, NEW.participant_high_entity_id, NEW.created_at) THEN
+    (NEW.id, NEW.kind, NEW.participant_low_auth_user_id, NEW.participant_high_auth_user_id, NEW.participant_low_entity_id, NEW.participant_high_entity_id, NEW.created_at) THEN
     RAISE EXCEPTION 'conversation aggregate identity is immutable' USING ERRCODE = '55000';
   END IF;
   RETURN NEW;
@@ -235,3 +248,17 @@ CREATE TRIGGER message_aggregate_identity_protect BEFORE UPDATE ON public.messag
 DROP TRIGGER IF EXISTS message_stats_maintain ON public.message;
 CREATE TRIGGER message_stats_maintain AFTER INSERT OR DELETE OR UPDATE OF deleted_at ON public.message FOR EACH ROW EXECUTE FUNCTION maintain_message_stats();
 
+
+CREATE OR REPLACE FUNCTION public.conversation_member_guard()
+RETURNS trigger LANGUAGE plpgsql SET search_path=pg_catalog,public AS $$
+BEGIN
+ PERFORM 1 FROM public.conversation WHERE id=NEW.conversation_id AND kind='group' FOR SHARE;
+ IF NOT FOUND THEN RAISE EXCEPTION 'Explicit membership belongs to group conversations' USING ERRCODE='23514'; END IF;
+ PERFORM 1 FROM public.users account JOIN public.auth_entity self ON self.auth_user_id=account.id
+ WHERE account.id=NEW.user_id AND account.erased_at IS NULL AND self.entity_id=NEW.entity_id AND self.state='active' FOR SHARE OF account,self;
+ IF NOT FOUND AND NEW.left_at IS NULL THEN RAISE EXCEPTION 'Group membership requires a current identity' USING ERRCODE='23514'; END IF;
+ IF TG_OP='UPDATE' AND (NEW.conversation_id<>OLD.conversation_id OR NEW.user_id<>OLD.user_id OR NEW.entity_id<>OLD.entity_id OR NEW.revision<>OLD.revision+1) THEN
+  RAISE EXCEPTION 'Member identity is immutable and revision must advance' USING ERRCODE='23514'; END IF;
+ RETURN NEW;
+END $$;
+CREATE OR REPLACE TRIGGER conversation_member_guard BEFORE INSERT OR UPDATE ON public.conversation_member FOR EACH ROW EXECUTE FUNCTION public.conversation_member_guard();

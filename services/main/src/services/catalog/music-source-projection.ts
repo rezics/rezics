@@ -2,13 +2,13 @@ import { catalogSourcePath } from "./source-document-scope";
 import { isDeepStrictEqual } from "node:util";
 import { and, eq, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
-import { MUSIC_SOURCE_COMPONENT_LIMIT, MUSIC_SOURCE_OCCURRENCE_LIMIT } from "../database/schema/catalog-source-limits";
-import { musicComponentSourceBaseline } from "../database/schema/catalog-music-source";
+import { MUSIC_SOURCE_COMPONENT_LIMIT, MUSIC_SOURCE_OCCURRENCE_LIMIT } from "@rezics/schema/postgres/ingestion/source-limits";
+import { musicComponentSourceBaseline } from "@rezics/schema/postgres/music/music-source";
 import type { DatabaseTransaction } from "../database";
 import {
 	musicComponentRevision,
 	musicComponentSourceOccurrence,
-} from "../database/schema/catalog-music";
+} from "@rezics/schema/postgres/music/music";
 import type { CatalogSourceNativeWriter } from "./source-proposals";
 import {
 	musicComponentKey,

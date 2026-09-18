@@ -1,4 +1,4 @@
-import type { UnitOwnershipMode } from "../database/schema/contract-values";
+import type { UnitOwnershipMode } from "@rezics/schema/postgres/shared/contract-values";
 
 /**
  * Profile-owned Posts have an explicit publishing identity; community-owned

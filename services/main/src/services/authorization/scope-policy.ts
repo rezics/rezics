@@ -1,6 +1,6 @@
 import { eq, sql, type SQL } from "drizzle-orm";
-import { users } from "../database/schema/auth";
-import { unitOwnerTable } from "../database/schema/unit-reference-columns";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { unitOwnerTable } from "@rezics/schema/postgres/shared/unit-reference-columns";
 import type { DatabaseTransaction } from "../database";
 import { resolveReferenceValue } from "../units/reference-value";
 import { resolveAccessScope } from "./identities";

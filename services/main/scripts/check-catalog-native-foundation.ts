@@ -5,17 +5,17 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../src/services/database";
-import { users } from "../src/services/database/schema/auth";
+import { users } from "@rezics/schema/postgres/identity/auth";
 import {
 	CatalogIdentityTables,
 	catalogDefinitionRevision,
 	catalogUnitLocator,
-} from "../src/services/database/schema/catalog-identity";
-import { CatalogFactTables } from "../src/services/database/schema/catalog-facts";
+} from "@rezics/schema/postgres/catalog/identity";
+import { CatalogFactTables } from "@rezics/schema/postgres/knowledge/facts";
 import {
 	catalogSourceRecord,
 	catalogSourceSnapshot,
-} from "../src/services/database/schema/catalog-source";
+} from "@rezics/schema/postgres/ingestion/source";
 import {
 	addCatalogName,
 	appendCatalogFactNodes,

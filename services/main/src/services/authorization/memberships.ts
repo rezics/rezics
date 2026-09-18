@@ -2,12 +2,12 @@ import { createHash } from "node:crypto";
 import { and, eq, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { accessGroupTree } from "../database/schema/access-group";
+import { accessGroupTree } from "@rezics/schema/postgres/access/access-group";
 import {
 	accessMembership,
 	accessMembershipAdmission,
 	accessMembershipEvent,
-} from "../database/schema/access-membership";
+} from "@rezics/schema/postgres/access/access-membership";
 
 /** Captured scope, member, precondition and private audit context for one owner-authorized transition. @internal */
 export interface AccessMembershipCommand {

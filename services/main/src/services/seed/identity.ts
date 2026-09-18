@@ -2,12 +2,12 @@ import { createHash } from "node:crypto";
 import { eq, inArray } from "drizzle-orm";
 import type { PlatformOwner, UnitOwner } from "@rezics/reference";
 import type { DatabaseTransaction } from "../database";
-import { authEntity } from "../database/schema/participation";
+import { authEntity } from "@rezics/schema/postgres/access/participation";
 import {
 	BootstrapEpochUnixMilliseconds,
 	BootstrapPlatformAdministratorProfile,
 } from "../bootstrap/data";
-import { unitOwnerTable } from "../database/schema/unit-reference-columns";
+import { unitOwnerTable } from "@rezics/schema/postgres/shared/unit-reference-columns";
 import { insertPlatformUnit, type CreatePlatformUnitInput } from "../units/create";
 import {
 	runWithParticipationAuthority,
@@ -17,7 +17,7 @@ import type {
 	ResourceVisibility,
 	UnitStatusValues,
 	ModerationStatusValues,
-} from "../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 
 export type SeedIdentityDescriptor = {
 	readonly kind: UnitOwner;

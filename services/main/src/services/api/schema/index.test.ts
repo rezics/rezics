@@ -13,7 +13,7 @@ import {
 import {
 	FractionalPositionInputMaximumBytes,
 	fractionalPositionBetween,
-} from "../../ordering/position";
+} from "@rezics/schema/contracts/native/positions";
 
 describe("position schemas", () => {
 	it("keep fractional, ordinal, and display position contracts distinct", () => {

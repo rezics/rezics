@@ -1,6 +1,6 @@
 import { Check } from "typebox/value";
 import { describe, expect, it } from "vitest";
-import { MaximumAudioTracksPerVideo } from "../../database/schema/contract-values";
+import { MaximumAudioTracksPerVideo } from "@rezics/schema/postgres/shared/contract-values";
 import {
 	CreateTimedMediaBody,
 	ContentLanguageEvidenceUnitParams,

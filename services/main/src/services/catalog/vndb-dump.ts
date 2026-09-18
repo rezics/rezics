@@ -16,7 +16,7 @@ import {
 	vndbDumpImage,
 	planVndbDumpExternalLinks,
 } from "./vndb-dump-media";
-import { softwareComponentSourceOccurrence } from "../database/schema/catalog-software-source";
+import { softwareComponentSourceOccurrence } from "@rezics/schema/postgres/software/software-source";
 import { setSoftwareAnimation, vndbAnimation } from "./software-animation";
 
 const count = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);

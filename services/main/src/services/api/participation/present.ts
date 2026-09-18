@@ -1,8 +1,8 @@
 import { and, eq } from "drizzle-orm";
-import { CatalogReferenceSchema } from "../../catalog/contracts";
+import { CatalogReferenceSchema } from "@rezics/schema/contracts/native/catalog";
 import type { DatabaseTransaction } from "../../database";
-import { authEntity, type participationGrant } from "../../database/schema/participation";
-import { CatalogNameTables } from "../../database/schema/catalog-names";
+import { authEntity, type participationGrant } from "@rezics/schema/postgres/access/participation";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
 import { ParticipationDenied, type ParticipationAuthority } from "../../participation/policy";
 import { avatarReferenceFromColumns } from "../../units/localization";
 import { readEntityPresentationRevision } from "../../participation/presentation";

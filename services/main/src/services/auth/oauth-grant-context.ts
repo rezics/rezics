@@ -3,10 +3,10 @@ import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { ResourceUriSchema } from "@better-auth/oauth-provider";
 import type { DatabaseTransaction } from "../database";
-import { oauthGrantContext, oauthRefreshFamily } from "../database/schema/oauth-grant-context";
+import { oauthGrantContext, oauthRefreshFamily } from "@rezics/schema/postgres/integrations/oauth-grant-context";
 import { readAppClientAdmission } from "../connected-apps/client-admission";
 import { readUserConsentAdmission } from "../connected-apps/user-authority";
-import { SupportedOAuthScopes } from "./oauth-profile-values";
+import { SupportedOAuthScopes } from "@rezics/schema/contracts/native/oauth";
 
 const id = z.uuid().toLowerCase();
 const envelope = z.strictObject({

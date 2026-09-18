@@ -1,6 +1,6 @@
 import Elysia, { t } from "elysia";
 import session from "../../auth/session";
-import { CatalogOwnerValues } from "../../catalog/contracts";
+import { CatalogOwnerValues } from "@rezics/schema/contracts/native/catalog";
 import { CatalogEditorialContent, CatalogEditorialEdit, CatalogEditorialWrite, CatalogEditorialMutation,
 	CatalogEditorialResponse, CatalogEditorialLanguages, CatalogEditorialHistory } from "../../catalog/editorial-contracts";
 import { readCatalogEditorial, writeCatalogEditorial, listCatalogEditorialLanguages, listCatalogEditorialHistory, readCatalogEditorialRevision } from "../../catalog/editorial";

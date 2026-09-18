@@ -1,7 +1,7 @@
 import type { PortableTextDocument as PortableTextDocumentValue } from "@rezics/block";
 import type { ContentLanguage } from "@rezics/i18n";
 import { and, eq, inArray, lt, sql } from "drizzle-orm";
-import { authEntity } from "../database/schema/participation";
+import { authEntity } from "@rezics/schema/postgres/access/participation";
 import { selfAuthUserIdForEntity } from "../participation/account-query";
 
 import type { DatabaseTransaction } from "../database";

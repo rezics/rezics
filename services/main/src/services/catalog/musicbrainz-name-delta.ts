@@ -1,5 +1,5 @@
 import type { DatabaseTransaction } from "../database";
-import type { CatalogReference } from "./contracts";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import type { MusicBrainzRelease } from "./musicbrainz";
 import { musicBrainzAliasName } from "./musicbrainz-names";
 import { applyCatalogSourceNameDelta, type CatalogSourceNamePlan } from "./source-name-delta";

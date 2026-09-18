@@ -1,7 +1,7 @@
 import type { StaticDecode } from "typebox";
 import { t } from "elysia";
 
-import { ReactionKindValues } from "../../database/schema/contract-values";
+import { ReactionKindValues } from "@rezics/schema/postgres/shared/contract-values";
 import { Uuid } from "../schema";
 
 export const UnitReactionParams = t.Object({ unitId: Uuid });

@@ -9,7 +9,7 @@ import { and, asc, eq, isNull, or, sql } from "drizzle-orm";
 
 import { database } from "../database";
 import { creditAttribution, unitLocalization, zonePage } from "../database/schema";
-import { type ContentRating } from "../database/schema/contract-values";
+import { type ContentRating } from "@rezics/schema/postgres/shared/contract-values";
 import { UnitNotFound } from "./errors";
 import { localizationLanguageOrder, resolvedUnitLocalizationTitle } from "./localization";
 import {

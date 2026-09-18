@@ -3,13 +3,13 @@ import { Readable } from "node:stream";
 import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { users } from "../src/services/database/schema/auth";
-import { catalogSourceRecord } from "../src/services/database/schema/catalog-source";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { catalogSourceRecord } from "@rezics/schema/postgres/ingestion/source";
 import {
 	musicMedium,
 	musicRecording,
 	musicTrackOccurrence,
-} from "../src/services/database/schema/catalog-music";
+} from "@rezics/schema/postgres/music/music";
 import {
 	MusicBrainzCatalogContractSha256,
 	MusicBrainzReleaseSchema,

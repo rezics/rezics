@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { HTTPError } from "elysia";
-import { OrganizationMembershipInvitationStateValues } from "../database/schema/organization-membership";
+import { OrganizationMembershipInvitationStateValues } from "@rezics/schema/postgres/access/organization-membership";
 export class OrganizationMembershipConflict extends HTTPError.id(
 	"OrganizationMembershipConflict",
 	409,

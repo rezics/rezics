@@ -1,4 +1,4 @@
-import type { ResourceVisibility } from "../database/schema/contract-values";
+import type { ResourceVisibility } from "@rezics/schema/postgres/shared/contract-values";
 
 /**
  * Converts an optional API visibility change into a non-empty Unit update.

@@ -2,7 +2,7 @@ import { and, inArray, isNull, sql } from "drizzle-orm";
 
 import { database } from "../database";
 import { tag, unitLocalization, unitOwnership } from "../database/schema";
-import { fractionalPositionAt } from "../ordering/position";
+import { fractionalPositionAt } from "@rezics/schema/contracts/native/positions";
 import { ContentLabelRegistryIds, ContentLabelRegistryManifest } from "./data";
 
 /** Verifies all fixed label identities, policies, ownership, and starter titles. */

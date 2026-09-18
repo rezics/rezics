@@ -7,7 +7,7 @@ import {
 	allocateRevisionReference,
 	resolveRevisionReference,
 } from "../src/services/units/revision-reference";
-import { RevisionReferenceKindValues } from "../src/services/units/revision-reference-contract";
+import { RevisionReferenceKindValues } from "@rezics/schema/contracts/native/revision-reference";
 
 function isCode(error: unknown, code: string) {
 	const cause = error instanceof Error && "cause" in error ? error.cause : error;

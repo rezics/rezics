@@ -6,11 +6,11 @@ import { fileURLToPath } from "node:url";
 import { eq, sql } from "drizzle-orm";
 import { initializeObservability } from "@rezics/observability";
 import { database } from "../src/services/database";
-import { users } from "../src/services/database/schema/auth";
+import { users } from "@rezics/schema/postgres/identity/auth";
 import {
 	recommendationSnapshot,
 	unitBestScore,
-} from "../src/services/database/schema/recommendation";
+} from "@rezics/schema/postgres/discovery/recommendation";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import {
 	createCatalogIdentity,
@@ -21,11 +21,11 @@ import {
 	imageAsset,
 	imageObject,
 	imageAssetPresentation,
-} from "../src/services/database/schema/image";
+} from "@rezics/schema/postgres/media/image";
 import { writeCatalogEditorial } from "../src/services/catalog/editorial";
 import { addCatalogName } from "../src/services/catalog/names";
 import { runWithParticipationAuthority } from "../src/services/participation/policy";
-import { CatalogIdentityTables } from "../src/services/database/schema/catalog-identity";
+import { CatalogIdentityTables } from "@rezics/schema/postgres/catalog/identity";
 import {
 	admitRecommendationSnapshot,
 	claimRecommendationPartition,

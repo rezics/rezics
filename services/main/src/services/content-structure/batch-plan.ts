@@ -2,7 +2,7 @@ import {
 	compareFractionalPositions,
 	fractionalPositionBetween,
 	rebalanceFractionalPositionSequence,
-} from "../ordering/position";
+} from "@rezics/schema/contracts/native/positions";
 import { peekActiveObservability } from "@rezics/observability";
 import { RevisionedBatchCommandLimit } from "../history/revisioned-batch";
 import {

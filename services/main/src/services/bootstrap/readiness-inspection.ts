@@ -1,4 +1,4 @@
-import { referenceValue } from "../database/schema/reference-value";
+import { referenceValue } from "@rezics/schema/postgres/knowledge/reference-value";
 import { readBootstrapPlatformIdentityIds } from "./core";
 import { and, asc, count, eq, inArray, isNull, notInArray, sql } from "drizzle-orm";
 

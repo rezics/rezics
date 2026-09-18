@@ -13,13 +13,13 @@ import {
 	AccessRecordUnavailable,
 	AccessUnavailable,
 } from "../authorization/http-errors";
-import { organizationEnrollmentOperation } from "../database/schema/organization-membership";
-import { organizationEnrollmentContact } from "../database/schema/organization-membership";
+import { organizationEnrollmentOperation } from "@rezics/schema/postgres/access/organization-membership";
+import { organizationEnrollmentContact } from "@rezics/schema/postgres/access/organization-membership";
 import {
 	accessRepresentation,
 	accessRepresentationEntity,
-} from "../database/schema/access-representation";
-import { entityParticipation, entityRecoveryEvent } from "../database/schema/participation";
+} from "@rezics/schema/postgres/access/access-representation";
+import { entityParticipation, entityRecoveryEvent } from "@rezics/schema/postgres/access/participation";
 import { establishOrganizationEnrollmentControl } from "./organization-control";
 import {
 	organizationEnrollmentScope,

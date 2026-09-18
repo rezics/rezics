@@ -3,15 +3,15 @@ import { z } from "zod";
 import { Authorization } from "../authorization";
 import { ensureAccountAuthenticationAllowed } from "../auth/account-state";
 import type { DatabaseTransaction } from "../database";
-import { users } from "../database/schema/auth";
-import { authEntity } from "../database/schema/participation";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { authEntity } from "@rezics/schema/postgres/access/participation";
 import {
 	accountFavorite,
 	accountFavoriteRevision,
 	accountFavoritesState,
-} from "../database/schema/favorites";
+} from "@rezics/schema/postgres/community/favorites";
 import { UnitReferenceSchema } from "@rezics/reference";
-import { referenceValue } from "../database/schema/reference-value";
+import { referenceValue } from "@rezics/schema/postgres/knowledge/reference-value";
 import {
 	allocateReferenceValue,
 	findReferenceValueByNativeId,
@@ -20,7 +20,7 @@ import {
 import { readRegisteredUnitPreview, UnitReferenceUnavailable } from "../units/reference";
 import { withCatalogViewerPolicy } from "../catalog/read-policy";
 import { CatalogAccessDenied, CatalogReferenceNotFound } from "../catalog/storage";
-import { fractionalPositionBetween } from "../ordering/position";
+import { fractionalPositionBetween } from "@rezics/schema/contracts/native/positions";
 import {
 	type ParticipationAuthority,
 	ParticipationDenied,

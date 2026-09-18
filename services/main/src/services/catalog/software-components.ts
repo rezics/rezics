@@ -5,8 +5,8 @@ import {
 	softwareComponentRevision,
 	softwareRelease,
 	softwareVersion,
-} from "../database/schema/catalog-software";
-import type { CatalogReference } from "./contracts";
+} from "@rezics/schema/postgres/software/software";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { SoftwareReleaseComponentSchema } from "./software";
 import { SoftwareAnimationSchema } from "./software-animation";
 import { CatalogRevisionConflict, loadCatalogIdentity, recordCatalogChange } from "./storage";

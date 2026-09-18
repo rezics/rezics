@@ -2,10 +2,10 @@ import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { APIError } from "better-auth/api";
 import type { DatabaseTransaction } from "../database";
-import { oauthClients } from "../database/schema/auth-oauth.generated";
-import { oauthClientAuthority } from "../database/schema/oauth-client-authority";
-import { ApiPermissionValues } from "./api-permissions";
-import { SupportedOAuthScopes } from "./oauth-profile-values";
+import { oauthClients } from "@rezics/schema/postgres/identity/auth-oauth.generated";
+import { oauthClientAuthority } from "@rezics/schema/postgres/integrations/oauth-client-authority";
+import { ApiPermissionValues } from "@rezics/schema/contracts/native/api-permissions";
+import { SupportedOAuthScopes } from "@rezics/schema/contracts/native/oauth";
 const scopes = z.array(z.enum(SupportedOAuthScopes)).max(SupportedOAuthScopes.length)
 	.refine(values => new Set(values).size === values.length);
 const grantTypes = z.array(z.enum(["authorization_code", "refresh_token", "client_credentials"])).max(3)

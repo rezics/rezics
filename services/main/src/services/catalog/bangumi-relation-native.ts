@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import type { CatalogReference } from "./contracts";
+import type { CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import { BangumiArchiveContractSha256 } from "./bangumi-contracts";
 import { BangumiArchiveRelationSchema, bangumiRelationKey } from "./bangumi-records";
 import { BangumiRelationMappingSchema, planBangumiArchiveRelation } from "./bangumi-relations";

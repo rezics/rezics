@@ -12,7 +12,7 @@ import {
 	imageObject,
 	unitAccessGrant,
 } from "../../database/schema";
-import { fractionalPositionAt } from "../../ordering/position";
+import { fractionalPositionAt } from "@rezics/schema/contracts/native/positions";
 import { storage } from "../../storage";
 import { recordUnitRevision } from "../../units/history";
 import {

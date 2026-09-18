@@ -2,7 +2,7 @@ import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
 import { CatalogReferenceSchema } from "@rezics/reference";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
-import { catalogUnitLocator } from "../database/schema/catalog-identity";
+import { catalogUnitLocator } from "@rezics/schema/postgres/catalog/identity";
 import {
 	audio,
 	video,
@@ -11,7 +11,7 @@ import {
 	unitLocalization,
 	unitLocalizationContentMetric,
 } from "../database/schema";
-import { CatalogNameTables } from "../database/schema/catalog-names";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
 import { z } from "zod";
 import { resolvedUnitLocalizationLanguage } from "../units/localization";
 import { unitStateRelation } from "../units/state-relation";

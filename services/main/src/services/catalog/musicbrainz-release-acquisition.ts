@@ -1,4 +1,4 @@
-import { SOURCE_DOCUMENT_BYTE_LIMIT, SOURCE_ACQUISITION_IO_TIMEOUT_MS } from "../database/schema/catalog-source-limits";
+import { SOURCE_DOCUMENT_BYTE_LIMIT, SOURCE_ACQUISITION_IO_TIMEOUT_MS } from "@rezics/schema/postgres/ingestion/source-limits";
 import { setTimeout as delay } from "node:timers/promises";
 import { CatalogSourceRateLimited } from "./source-rate";
 import { MusicBrainzCatalogContractSha256 } from "./musicbrainz";

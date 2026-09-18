@@ -3,13 +3,13 @@ import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspo
 import { and, eq, gt } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { CatalogNameTables } from "../database/schema/catalog-names";
+import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
 import {
 	CatalogNameValuesSchema,
 	CatalogRevisionNumberSchema,
 	type CatalogNameInput,
-} from "./name-contracts";
-import { CatalogPageSchema, type CatalogReference } from "./contracts";
+} from "@rezics/schema/contracts/native/names";
+import { CatalogPageSchema, type CatalogReference } from "@rezics/schema/contracts/native/catalog";
 import {
 	CatalogReferenceNotFound,
 	CatalogRevisionConflict,

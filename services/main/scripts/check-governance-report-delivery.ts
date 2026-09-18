@@ -5,21 +5,21 @@ import { serializeSignedCookie } from "better-call";
 import { createPortableTextDocument } from "@rezics/block";
 import { initializeObservability } from "@rezics/observability";
 import { CatalogCreatedSchema } from "../src/services/catalog/resource-contracts";
-import { users, sessions } from "../src/services/database/schema/auth";
-import { entityIdentity } from "../src/services/database/schema/catalog-identity";
-import { userAccountState } from "../src/services/database/schema/account-control";
-import { realm, realmRule, realmRuleRevision } from "../src/services/database/schema/realm";
+import { users, sessions } from "@rezics/schema/postgres/identity/auth";
+import { entityIdentity } from "@rezics/schema/postgres/catalog/identity";
+import { userAccountState } from "@rezics/schema/postgres/identity/account-control";
+import { realm, realmRule, realmRuleRevision } from "@rezics/schema/postgres/realms/realm";
 import {
 	contentReport,
 	contentReportReferral,
 	contentReviewCase,
-} from "../src/services/database/schema/governance";
+} from "@rezics/schema/postgres/governance/governance";
 import {
 	governanceNoticeRecipient,
 	governanceReportDelivery,
-} from "../src/services/database/schema/governance-delivery";
-import { unitRevision } from "../src/services/database/schema/history";
-import { notification, notificationPreference } from "../src/services/database/schema/communication";
+} from "@rezics/schema/postgres/governance/governance-delivery";
+import { unitRevision } from "@rezics/schema/postgres/history/history";
+import { notification, notificationPreference } from "@rezics/schema/postgres/messaging/communication";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import {
 	databaseConstraintName,

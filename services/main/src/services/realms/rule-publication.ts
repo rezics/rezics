@@ -5,7 +5,7 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
 import { users, realmRuleRevision, unitLocalization, unitOwnership } from "../database/schema";
 import { AccountAuthorization } from "../authorization/account/authorization";
-import { fractionalPositionAt } from "../ordering/position";
+import { fractionalPositionAt } from "@rezics/schema/contracts/native/positions";
 import { insertPlatformUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
 import type { RevisionContributionInput } from "../units/revision-contribution";

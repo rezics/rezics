@@ -53,11 +53,11 @@ import {
 import {
 	RealmScoreContextPostKindValues,
 	RealmUnitStatusValues,
-} from "../../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 import { runVoteTransaction } from "../../database/vote-admission";
 import { createGovernanceNotePost, listGovernanceNotes } from "../../governance/note-service";
 import { enqueueGovernanceReportDelivery } from "../../governance/report-delivery";
-import { fractionalPositionBetween } from "../../ordering/position";
+import { fractionalPositionBetween } from "@rezics/schema/contracts/native/positions";
 import { decodeCursor, encodeCursor } from "../../pagination";
 import { assertWikiPostWriteDocument, createWikiPost } from "../../posts/wiki";
 import { publishRealmRuleRevision } from "../../realms/rule-publication";

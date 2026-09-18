@@ -3,7 +3,7 @@ import { and, eq, gt, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { PrincipalRequestContext } from "../auth/principal-session";
 import type { DatabaseTransaction } from "../database";
-import { accessGroupImpactEvaluation as evaluations, accessGroupImpactEffect as effects } from "../database/schema/access-group-impact";
+import { accessGroupImpactEvaluation as evaluations, accessGroupImpactEffect as effects } from "@rezics/schema/postgres/access/access-group-impact";
 import { lockCompleteGroupImpactDiscovery, readGroupImpactFacts, revalidateGroupImpactDiscovery, retainGroupImpactWitness,
 	observeGroupImpactTimes, GroupImpactDiscoveryStop, type GroupImpactReview } from "./group-impact-discovery";
 import { compileGroupImpactDelta, GroupImpactEffectSchema, GroupImpactDeltaUnavailable, type GroupImpactEffect } from "./group-impact-delta";

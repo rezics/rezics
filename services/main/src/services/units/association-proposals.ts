@@ -19,9 +19,9 @@ import {
 	isCreditAttributionRole,
 	isSubjectAssociationRole,
 	type SubjectAssociationRole,
-} from "../database/schema/contract-values";
+} from "@rezics/schema/postgres/shared/contract-values";
 import { EntityEntryNotFound } from "../entities/errors";
-import { fractionalPositionBetween } from "../ordering/position";
+import { fractionalPositionBetween } from "@rezics/schema/contracts/native/positions";
 import { ensureWikiAssociationContextPost } from "./association-context";
 import {
 	ensureCreditAttributionInvitationAllowed,
