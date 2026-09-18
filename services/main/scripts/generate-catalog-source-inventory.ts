@@ -15,38 +15,51 @@ import {
 	inventoryMusicBrainz,
 	inventoryOpenLibrary,
 	inventoryVndb,
+	normalizeProviderArtifact,
 	type SourceContractField,
 } from "@rezics/content-adapters/readers/provider-contracts";
 
 const directory = fileURLToPath(
 	new URL("../src/services/catalog/source-contracts/", import.meta.url),
 );
-// Bangumi common reuses staff definitions through YAML aliases. Artifacts are
-// checksum-pinned before parsing; keep a finite alias budget for those definitions.
+// Bangumi common reuses staff definitions through YAML aliases. Pinned artifacts
+// are checksum-checked before parsing; keep a finite alias budget for those definitions.
 const yamlOptions = { maxAliasCount: 10_000 } as const;
-const artifactSchema = z.strictObject({
-	file: z.string().regex(/^[a-z0-9][a-z0-9._-]+$/u),
-	source: z.enum(CatalogSourceValues),
-	format: z.enum([
-		"openapi",
-		"json_schema",
-		"vndb",
-		"musicbrainz_sql",
-		"musicbrainz_foreign_keys",
-		"musicbrainz_primary_keys",
-		"openlibrary_type",
-		"archive",
-		"vocabulary",
-	]),
-	url: z.url(),
-	sha256: z.string().regex(/^[a-f0-9]{64}$/u),
-});
+const artifactSchema = z
+	.strictObject({
+		file: z.string().regex(/^[a-z0-9][a-z0-9._-]+$/u),
+		source: z.enum(CatalogSourceValues),
+		format: z.enum([
+			"openapi",
+			"json_schema",
+			"vndb",
+			"musicbrainz_sql",
+			"musicbrainz_foreign_keys",
+			"musicbrainz_primary_keys",
+			"openlibrary_type",
+			"archive",
+			"vocabulary",
+		]),
+		url: z.url(),
+		tracking: z.literal("latest").optional(),
+		sha256: z
+			.string()
+			.regex(/^[a-f0-9]{64}$/u)
+			.nullable(),
+	})
+	.refine(
+		(entry) =>
+			entry.tracking === "latest"
+				? entry.source === "vndb" && entry.format === "vndb" && entry.sha256 === null
+				: entry.sha256 !== null,
+		{ message: "Only the live VNDB schema may omit a SHA-256 pin" },
+	);
 
 function sha256(bytes: Uint8Array): string {
 	return createHash("sha256").update(bytes).digest("hex");
 }
 
-/** Read pinned artifacts only; no upstream SQL, Python or wiki text is executed. */
+/** Read reviewed artifacts as data only; no upstream SQL, Python or wiki text is executed. */
 export async function generateCatalogSourceInventory(
 	cache: string,
 	fetchMissing: boolean,
@@ -72,17 +85,7 @@ export async function generateCatalogSourceInventory(
 	let totalBytes = 0;
 	for (const artifact of artifacts) {
 		const path = join(cache, artifact.file);
-		let bytes: Buffer;
-		try {
-			bytes = await readFile(
-				new URL(
-					`../../../libraries/content-adapters/contracts/${artifact.source}/inputs/${artifact.file}`,
-					import.meta.url,
-				),
-			).catch(() => readFile(path));
-		} catch (error: unknown) {
-			if (!fetchMissing || !(error instanceof Error && "code" in error && error.code === "ENOENT"))
-				throw error;
+		const download = async (): Promise<Buffer> => {
 			const url = new URL(artifact.url);
 			if (
 				url.protocol !== "https:" ||
@@ -103,16 +106,38 @@ export async function generateCatalogSourceInventory(
 				if (length > 8_000_000) throw new Error("Source contract artifact exceeds 8 MB");
 				chunks.push(chunk);
 			}
-			bytes = Buffer.concat(chunks);
-			if (sha256(bytes) !== artifact.sha256)
+			const downloaded = normalizeProviderArtifact(artifact.format, Buffer.concat(chunks));
+			if (artifact.sha256 !== null && sha256(downloaded) !== artifact.sha256)
 				throw new Error(`Source contract changed: ${artifact.file}`);
+			if (artifact.tracking === "latest") inventoryVndb(JSON.parse(downloaded.toString("utf8")));
 			await mkdir(dirname(path), { recursive: true });
-			await writeFile(path, bytes);
-		}
+			await writeFile(path, downloaded);
+			return downloaded;
+		};
+		const readCached = () =>
+			readFile(
+				new URL(
+					`../../../libraries/content-adapters/contracts/${artifact.source}/inputs/${artifact.file}`,
+					import.meta.url,
+				),
+			).catch(() => readFile(path));
+		const bytes = normalizeProviderArtifact(
+			artifact.format,
+			fetchMissing && artifact.tracking === "latest"
+				? await download()
+				: await readCached().catch((error: unknown) => {
+						if (
+							!fetchMissing ||
+							!(error instanceof Error && "code" in error && error.code === "ENOENT")
+						)
+							throw error;
+						return download();
+					}),
+		);
 		totalBytes += bytes.length;
 		if (bytes.length > 8_000_000 || totalBytes > 32_000_000)
 			throw new Error("Pinned source contracts exceed the reviewed artifact budget");
-		if (sha256(bytes) !== artifact.sha256)
+		if (artifact.sha256 !== null && sha256(bytes) !== artifact.sha256)
 			throw new Error(`Source contract checksum differs: ${artifact.file}`);
 		const text = bytes.toString("utf8");
 		switch (artifact.format) {
@@ -224,7 +249,7 @@ async function main(): Promise<void> {
 			throw new Error("Generated source inventory is stale");
 	} else await writeFile(target, output, "utf8");
 	console.info(
-		`Verified ${output.trimEnd().split("\n").length} pinned source field entries; native mapping qualification is separate`,
+		`Verified ${output.trimEnd().split("\n").length} source field entries; native mapping qualification is separate`,
 	);
 }
 

@@ -165,7 +165,8 @@
 		"source": "vndb",
 		"format": "vndb",
 		"url": "https://api.vndb.org/kana/schema",
-		"sha256": "43498d3274fea51789839aa88599b191da5ea8773e0e352410f937746f1dbb80"
+		"tracking": "latest",
+		"sha256": null
 	},
 	{
 		"file": "musicbrainz-tables.sql",

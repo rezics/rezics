@@ -20,8 +20,13 @@ reader reuse does not imply all external fields have approved native mappings.
 Provider schemas can reveal missing capabilities and drive conformance tests,
 but cannot create native tables or decide native referent/identity automatically.
 
-`contracts/catalog/artifacts.lock.json` pins 46 exact upstream input contracts.
-`contracts/{provider}/inputs/` restores their bytes by URL and SHA-256. Generated
+`contracts/catalog/artifacts.lock.json` lists 45 exact-byte SHA-256-pinned inputs
+and the live [VNDB `/schema`](https://api.vndb.org/kana#simple-requests) endpoint.
+`contracts/{provider}/inputs/` restores them by URL. Every network preparation
+fetches the latest VNDB response and validates its structure and inherited fields,
+without claiming a fixed checksum; only its unordered external-link arrays and
+JSON object keys are normalized. New VNDB fields still need a reviewed inventory
+and coverage update. The other 45 inputs retain exact upstream bytes. Generated
 contract inventories live in `generated/`; both directories are ignored by Git.
 The inventories preserve fields, syntax, references and unknown facets
 for adapter development. There is no provider-contract database schema and no

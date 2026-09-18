@@ -28,7 +28,7 @@ rules. Native workflow coverage is not inferred from a term or table count.
   The complete production catalogue includes 755 tables in 23 physical domains;
   other operational/native declarations have explicit authored ownership.
 - Four content-provider inventories retain 699 contracts / 11,054 declarations
-  from 46 pinned artifacts. This qualifies the preserved input contracts and
+  from 45 pinned artifacts and the fetched VNDB schema. This qualifies the observed input contracts and
   parsers, not every source field's native adoption.
 
 ## Executed evidence
@@ -90,8 +90,10 @@ For alternate ports set both `POSTGRES_MIGRATION_HOST_PORT` and
 `POSTGRES_MIGRATION_LOCAL_PORT`. Set `ATLAS_DEV_DATABASE_URL` to the fixture's
 `rezics_atlas_dev` database for the owning structural drift check. The full main
 `db:check` includes the schema database harness after earlier main-domain checks.
-The fresh-checkout preparation downloads exact-byte pinned standards and provider
-contracts and regenerates ignored artifacts and the missing local typed migration
+The fresh-checkout preparation downloads exact-byte pinned standards and 45 provider
+contracts, plus the latest structurally validated VNDB schema (with unordered
+external-link definitions normalized but no fixed checksum),
+and regenerates ignored artifacts and the missing local typed migration
 anchor. Later `task artifacts:generate` runs
 offline from the restored inputs; individual `fetch` tasks can repair missing or
 drifted inputs without silently updating the committed pins.

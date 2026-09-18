@@ -8,6 +8,7 @@ import {
 	inventoryOpenLibrary,
 	inventoryVndb,
 	applyMusicBrainzKeys,
+	normalizeProviderArtifact,
 	type SourceContractField,
 } from "./readers/provider-contracts";
 import { convertJsonSchema, convertOpenApi, readSchemaDocument } from "./readers/json-schema";
@@ -16,13 +17,25 @@ import { readPostgresDeclarations } from "./readers/postgres-ddl";
 import { convertBangumiArchive, convertBangumiVocabulary } from "./readers/bangumi";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
-const artifact = z.strictObject({
-	file: z.string().regex(/^[a-z0-9][a-z0-9._-]+$/),
-	source: z.enum(["bangumi", "vndb", "musicbrainz", "openlibrary"]),
-	format: z.string(),
-	url: z.url(),
-	sha256: z.string().regex(/^[a-f0-9]{64}$/),
-});
+const artifact = z
+	.strictObject({
+		file: z.string().regex(/^[a-z0-9][a-z0-9._-]+$/),
+		source: z.enum(["bangumi", "vndb", "musicbrainz", "openlibrary"]),
+		format: z.string(),
+		url: z.url(),
+		tracking: z.literal("latest").optional(),
+		sha256: z
+			.string()
+			.regex(/^[a-f0-9]{64}$/)
+			.nullable(),
+	})
+	.refine(
+		(entry) =>
+			entry.tracking === "latest"
+				? entry.source === "vndb" && entry.format === "vndb" && entry.sha256 === null
+				: entry.sha256 !== null,
+		{ message: "Only the live VNDB schema may omit a SHA-256 pin" },
+	);
 export async function providerArtifacts() {
 	return z
 		.array(artifact)
@@ -31,16 +44,23 @@ export async function providerArtifacts() {
 		);
 }
 
-/** @alpha Fetch only explicitly pinned schema inputs; downloaded SQL and expressions are never evaluated. */
+/** @alpha Fetch pinned inputs and the live VNDB schema; downloaded SQL and expressions are never evaluated. */
 export async function fetchProviderSchemas(source = "all") {
 	z.enum(["all", "bangumi", "musicbrainz", "vndb", "openlibrary"]).parse(source);
 	for (const entry of await providerArtifacts()) {
 		if (source !== "all" && source !== entry.source) continue;
 		const path = resolve(root, "contracts", entry.source, "inputs", entry.file);
-		try {
-			if (digest(await readFile(path)) === entry.sha256) continue;
-		} catch (error) {
-			if (!(error instanceof Error && "code" in error && error.code === "ENOENT")) throw error;
+		if (entry.sha256 !== null) {
+			try {
+				const cached = await readFile(path);
+				const normalized = normalizeProviderArtifact(entry.format, cached);
+				if (digest(normalized) === entry.sha256) {
+					if (digest(cached) !== entry.sha256) await writeFile(path, normalized);
+					continue;
+				}
+			} catch (error) {
+				if (!(error instanceof Error && "code" in error && error.code === "ENOENT")) throw error;
+			}
 		}
 		const response = await fetch(entry.url, {
 			signal: AbortSignal.timeout(30_000),
@@ -56,8 +76,10 @@ export async function fetchProviderSchemas(source = "all") {
 			if (size > 8_388_608) throw new RangeError("Schema artifact exceeds 8 MiB");
 			parts.push(part);
 		}
-		const bytes = Buffer.concat(parts);
-		if (digest(bytes) !== entry.sha256) throw new TypeError(`Pinned schema changed: ${entry.file}`);
+		const bytes = normalizeProviderArtifact(entry.format, Buffer.concat(parts));
+		if (entry.sha256 !== null && digest(bytes) !== entry.sha256)
+			throw new TypeError(`Pinned schema changed: ${entry.file}`);
+		if (entry.tracking === "latest") inventoryVndb(JSON.parse(bytes.toString("utf8")));
 		await mkdir(resolve(path, ".."), { recursive: true });
 		await writeFile(path, bytes);
 	}
@@ -117,8 +139,11 @@ export async function convertProviderSchemas(source = "all"): Promise<ConvertedC
 	const texts = new Map<string, string>();
 	for (const entry of artifacts) {
 		if (source !== "all" && source !== entry.source) continue;
-		const bytes = await readFile(resolve(root, "contracts", entry.source, "inputs", entry.file));
-		if (bytes.byteLength > 8_388_608 || digest(bytes) !== entry.sha256)
+		const bytes = normalizeProviderArtifact(
+			entry.format,
+			await readFile(resolve(root, "contracts", entry.source, "inputs", entry.file)),
+		);
+		if (bytes.byteLength > 8_388_608 || (entry.sha256 !== null && digest(bytes) !== entry.sha256))
 			throw new TypeError(`Schema artifact drift: ${entry.file}`);
 		texts.set(entry.file, new TextDecoder("utf-8", { fatal: true }).decode(bytes));
 	}
@@ -128,7 +153,7 @@ export async function convertProviderSchemas(source = "all"): Promise<ConvertedC
 		const input = {
 			source: entry.source,
 			origin: entry.url,
-			version: entry.sha256,
+			version: entry.sha256 ?? digest(Buffer.from(text)),
 			file: entry.file,
 			text,
 		};

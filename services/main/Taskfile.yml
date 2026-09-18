@@ -163,7 +163,7 @@ tasks:
             - yarn exec tsx scripts/inventory-database.ts {{.CLI_ARGS}}
 
     catalog:sources:inventory:
-        desc: Verify or regenerate the pinned catalog declaration inventory using a cache under repository .temp.
+        desc: Verify or regenerate the catalog declaration inventory using a cache under repository .temp.
         cmds:
             - yarn exec tsx scripts/generate-catalog-source-inventory.ts {{.CLI_ARGS}}
 

@@ -38,7 +38,7 @@ includes:
 
 tasks:
     artifacts:prepare:
-        desc: Restore pinned external inputs and regenerate the local schema artifacts.
+        desc: Restore pinned inputs and current VNDB schema, then regenerate local artifacts.
         cmds:
             - task: libraries:artifacts:prepare
             - task: artifacts:typed-anchor

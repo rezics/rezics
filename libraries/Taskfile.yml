@@ -67,7 +67,7 @@ includes:
 
 tasks:
     artifacts:fetch:
-        desc: Restore exact pinned standard and provider inputs over HTTPS.
+        desc: Restore pinned inputs over HTTPS and refresh the live VNDB schema.
         cmds:
             - task: schema-importer:fetch
               vars: { CLI_ARGS: all }

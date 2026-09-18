@@ -19,6 +19,47 @@ export function contractRecord(value: unknown): Record<string, unknown> {
 	return recordSchema.parse(value);
 }
 
+/** @alpha Normalize unordered VNDB external links and JSON keys without pinning the live schema. */
+export function normalizeProviderArtifact(format: string, bytes: Uint8Array): Buffer {
+	if (format !== "vndb") return Buffer.from(bytes);
+	const document = contractRecord(
+		JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes)),
+	);
+	if (Object.keys(contractRecord(document.api_fields)).length === 0)
+		throw new TypeError("VNDB schema has no API fields");
+	contractRecord(document.enums);
+	const extlinks = contractRecord(document.extlinks);
+	const sortedLinks = Object.fromEntries(
+		Object.entries(extlinks).map(([endpoint, definitions]) => {
+			const entries = z.array(recordSchema).parse(definitions);
+			const names = entries.map((entry) => z.string().parse(entry.name));
+			if (new Set(names).size !== names.length)
+				throw new TypeError(`Duplicate VNDB external link name: ${endpoint}`);
+			return [
+				endpoint,
+				[...entries].sort((left, right) =>
+					String(left.name) < String(right.name)
+						? -1
+						: String(left.name) > String(right.name)
+							? 1
+							: 0,
+				),
+			];
+		}),
+	);
+	const canonicalize = (value: unknown): unknown => {
+		if (Array.isArray(value)) return value.map(canonicalize);
+		if (value !== null && typeof value === "object")
+			return Object.fromEntries(
+				Object.entries(contractRecord(value))
+					.sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+					.map(([key, child]) => [key, canonicalize(child)]),
+			);
+		return value;
+	};
+	return Buffer.from(JSON.stringify(canonicalize({ ...document, extlinks: sortedLinks })) + "\n");
+}
+
 /** Hash semantic JSON independently of upstream object-key serialization order. */
 export function canonicalContractHash(value: unknown): string {
 	const canonicalize = (input: unknown): unknown => {

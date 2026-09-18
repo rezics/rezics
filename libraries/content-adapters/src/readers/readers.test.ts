@@ -1,13 +1,67 @@
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
-import { convertProviderSchemas } from "../convert";
+import { convertProviderSchemas, providerArtifacts } from "../convert";
 import { convertOpenApi, convertJsonSchema, readSchemaDocument } from "./json-schema";
 import { readPostgresDeclarations } from "./postgres-ddl";
 import { convertWikibase } from "./wikibase";
 import { convertIiif } from "./iiif";
 import { convertMediaFragment } from "./media-fragments";
+import { normalizeProviderArtifact } from "./provider-contracts";
 const source = { source: "fixture", origin: "https://example.test/schema", version: "1" };
 describe("complete schema readers", () => {
+	it("pins VNDB external-link definitions independently of upstream response order", () => {
+		const first = Buffer.from(
+			JSON.stringify({
+				api_fields: { "/vn": { id: null } },
+				enums: {},
+				extlinks: {
+					"/vn": [
+						{ name: "z", label: "Z", url_format: "https://z.test/%s" },
+						{ name: "a", label: "A", url_format: "https://a.test/%s" },
+					],
+				},
+			}),
+		);
+		const reordered = Buffer.from(
+			JSON.stringify({
+				extlinks: {
+					"/vn": [
+						{ url_format: "https://a.test/%s", label: "A", name: "a" },
+						{ label: "Z", name: "z", url_format: "https://z.test/%s" },
+					],
+				},
+				enums: {},
+				api_fields: { "/vn": { id: null } },
+			}),
+		);
+		expect(normalizeProviderArtifact("vndb", first)).toEqual(
+			normalizeProviderArtifact("vndb", reordered),
+		);
+		expect(normalizeProviderArtifact("vndb", first)).toEqual(
+			normalizeProviderArtifact("vndb", normalizeProviderArtifact("vndb", first)),
+		);
+		expect(normalizeProviderArtifact("vndb", first)).not.toEqual(
+			normalizeProviderArtifact(
+				"vndb",
+				Buffer.from(first.toString().replace("https://a.test", "https://changed.test")),
+			),
+		);
+		expect(() =>
+			normalizeProviderArtifact(
+				"vndb",
+				Buffer.from(first.toString().replace('"name":"a"', '"name":"z"')),
+			),
+		).toThrow(/Duplicate/);
+		expect(normalizeProviderArtifact("json_schema", first)).toEqual(first);
+		expect(() => normalizeProviderArtifact("vndb", Buffer.from("{}"))).toThrow();
+	});
+	it("marks only VNDB as a live, structurally validated source", async () => {
+		const artifacts = await providerArtifacts();
+		expect(artifacts.filter((entry) => entry.tracking === "latest")).toEqual([
+			expect.objectContaining({ source: "vndb", format: "vndb", sha256: null }),
+		]);
+		expect(artifacts.filter((entry) => entry.tracking !== "latest")).toHaveLength(45);
+	});
 	it("reconstructs every provider artifact, including reverse properties and operation schemas", async () => {
 		await expect(convertProviderSchemas("typo")).rejects.toThrow();
 		const contracts = await convertProviderSchemas("all");

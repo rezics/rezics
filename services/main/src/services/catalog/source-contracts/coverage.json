@@ -2,7 +2,7 @@
 	"format": "rezics.source-coverage.v1",
 	"inventory": {
 		"fieldsSha256": "d0959859bb11f507a8a699fe3c3d2a679632db9597f40fadf788231b3125f2ef",
-		"artifactsSha256": "2616df45708ca64e17e592f939d06dc9ae430a73e9e5f990dc3d80209b83edd3",
+		"artifactsSha256": "33b5baa5a192a8c9a9f62c46a9e4567f9f1bacb9b68bdf8a7eed62fc066865c7",
 		"declarations": {
 			"bangumi": 5644,
 			"vndb": 214,
