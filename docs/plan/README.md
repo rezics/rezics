@@ -6,12 +6,12 @@ Follow the [execution workflow](execution-workflow.md) for program authority, ph
 
 | Field | Current selection |
 | --- | --- |
-| Scope | Refactor the standards-to-native-model-to-Drizzle pipeline and separate content-provider adapters, selected by the maintainer on 2026-09-18 after correcting the source/model boundary. |
-| Phase | `verification` complete for this selected scope. Three package typechecks, 27 package tests, 488 affected main tests, 22 PostgreSQL scenarios, final replay/canonical SQL/drift and documentation checks passed. Broader main type/count/Group failures and product/capacity gates remain explicitly unqualified; this task does not activate their implementation. |
-| Owners | `libraries/schema`, `libraries/schema-importer`, the content-adapter owner, main database migrations and [standards-driven modeling](../architecture/schema-modeling.md). |
-| Deliverables | Explicit standard-source and native-model decisions; complete normalized vocabulary IR; reviewed domain/property/storage mappings; generated Drizzle declarations and executable validation from authored models; source-to-storage traceability; provider-contract/exchange separation with retained content consumers; main integration and migration. |
-| Exclusions | Whole-product feature/API completion, unrelated IAM redesign, frontend work and actual trillion-row ingestion. Existing native storage is reviewed input, not authority for the semantic model. |
-| Acceptance | Complete pinned-standard compilation, deterministic generated Drizzle and model artifacts, provider independence, positive/rejected native model cases, exact datatype values, real PostgreSQL installation/constraints, logical identity/relocation and affected consumer checks. Preserve existing failures explicitly. |
+| Scope | Whole-documentation reconciliation with the selected Resource, Agent, Space, language, logical-model and same-database storage contracts, requested on 2026-09-19. |
+| Phase | `verification`: documentation reconciliation is complete, with focused regressions and strict source/link checks passing. No application implementation is activated. |
+| Owners | `docs`, repository documentation entry points, applicable package/service README contracts and the owning documentation/design checkers. |
+| Deliverables | Coherent terminology and contract ownership throughout maintained docs; updated navigation and plan; preserved dated evidence and operational commands; removal of obsolete target assumptions; reproducible generated-input and documentation checks. |
+| Exclusions | Runtime/API/schema/migration changes, source-pin updates, deployment, browser QA and new capacity qualification. Published legal obligations and released evidence are not redefined by terminology maintenance. |
+| Acceptance | [Documentation evidence](../testing/README.md#documentation-reconciliation-evidence): 207 Markdown files checked; 15 checker regressions pass; strict tracked-source and exact generated-input verification passes. Product gates and capacity qualification remain unchanged. |
 
 ## Selected model revision (documentation only)
 
@@ -19,13 +19,15 @@ On 2026-09-19 the maintainer selected the integrated
 [Resource/model contracts](../architecture/schema-modeling.md),
 [standards/profile adoption](../architecture/standards-adoption.md),
 [physical fields and storage families](../architecture/database/resource-storage.md),
-[shared Space identity](../architecture/realm-collection-zone.md) and
-[Resource-targeting router/addresses](../architecture/unit-slug-addressing.md).
-The current task updates documentation only. It does not reopen runtime
-implementation, advance a gate, change source pins or qualify the new target using
-the earlier compiler results. The active execution record above retains its scope.
+[shared Space identity](../architecture/space-composition.md) and
+[Resource-targeting router/addresses](../architecture/resource-addressing.md).
+The current task completes the documentation rewrite for this selection. It does
+not reopen runtime implementation, advance a product gate, change source pins or
+qualify the new target using earlier compiler results. The completed compiler scope
+retains its [2026-09-18 evidence](../testing/schema.md), with broader failures visible
+in [known failures](../testing/known-failures.md).
 
-Resource is the selected name of the existing logical Unit contract; current
+Resource is the selected name for the logical identity/reference contract; current
 code/wire names remain implementation facts until changed together. Public Agent
 and generic Entity responsibilities are distinct. Realm/Zone share a Space root
 with separate capabilities and typed contexts; routes target Resources through
@@ -85,7 +87,7 @@ Include affected cross-module cases in each scope's verification when dependenci
 4. Replace whole-structure reads with revision-bound child pagination, coalesced metrics and bounded reverse impact/read models. Retain current 2,048/64 protections until that replacement passes tests; do not raise in-memory limits as a substitute.
 5. Qualify source-to-adoption/composition/publication/discovery and revocation/recovery journeys across domains, including freshness, workload limits and known failures before whole-program frontend acceptance.
 
-The [native Work](../architecture/database/native-work.md), [logical Unit](../architecture/database/README.md#34-unit-capabilities-across-owner-tables) and composition contracts govern all modules. Cross-database operation and unresolved Hub execution remain separate activations.
+The [native Work](../architecture/database/native-work.md), [logical Resource](../architecture/database/README.md#34-resource-capabilities-across-owner-tables) and composition contracts govern all modules. Cross-database operation and unresolved Hub execution remain separate activations.
 
 [Schema.org and Wikidata interoperability](../architecture/semantic-interoperability.md)
 is required for the full-index target. Its dependency order is M02 value/identity
@@ -126,7 +128,7 @@ This is the sole progress table. Module files detail remaining work; linked test
 | M03 | [Content and media](modules/content-and-media.md) | M01, M02 contracts | Defined | Shared domain storage, indexed media grains, exact quantities and contextual sealed selections implemented; remaining product runtime pending | [Selected schema constraints](../testing/schema.md) passed; full M03 workflows/capacity pending |
 | M04 | [Catalog](modules/catalog.md) | M01-M03 contracts | Cross-domain Work/releases and event-time adapters selected; domain mappings/source-free cases required | Pending target completion | Pending |
 | M05 | [Creation and reading](modules/creation-and-reading.md) | M02-M04 | Composition selected; Book is the first journey | Pending target completion | Pending |
-| M06 | [Community and governance](modules/community-and-governance.md) | M01-M03 | Membership, wiki composition and complete rating contexts selected; Dynamic Collections optional | Native Org/Realm enrollment uses shared admission generations with independent Realm enforcement, exact consent and Entity projections; independent Wiki/page revision and message history storage implemented; remaining community contracts pending | G2 partial; new native enrollment work unqualified; [wiki evidence](../testing/wiki-composition.md), remaining content revisions, authority/history/capacity and community contracts pending. |
+| M06 | [Community and governance](modules/community-and-governance.md) | M01-M03 | Membership, wiki composition and complete rating contexts selected; Dynamic Collections optional | Native Org/Realm enrollment uses shared admission generations with independent Realm enforcement, exact consent and current `Entity` projections; independent Wiki/page revision and message history storage implemented; remaining community contracts pending | G2 partial; new native enrollment work unqualified; [wiki evidence](../testing/wiki-composition.md), remaining content revisions, authority/history/capacity and community contracts pending. |
 | M07 | [Sources and converters](modules/sources-and-converters.md) | M01/M02 source contracts; M01-M04 native adoption | Schema.org/Wikidata full-index profiles and verification evidence/lineage intake selected alongside catalog sources; field conformance pending | `@rezics/schema-importer` compiles standards and reviewed native models; provider contracts and content readers live in `@rezics/content-adapters` with existing native catalog writers | [Compiler/adapter boundary, pinned conversions and CLI qualification](../testing/schema.md) passed. Full provider acquisition/adoption and field coverage remain separate; declaration counts do not establish native coverage. |
 | M08 | [Skill, Prompt and MCP Hub](modules/ai-hub.md) | M01-M04 | Catalog defined; execution/hosting open | Package, release, file, dependency, installation and capability declaration schemas implemented; runtime pending | [Selected registry constraints](../testing/schema.md) passed; execution/hosting remains unqualified |
 | M09 | [Search and operations](modules/search-and-operations.md) | M01 and participating events | Rating distributions, event-date indexes, source-query/export profiles and verification execution/quality indexes/exchange selected | In progress; verification runtime not activated | G2 partial; [recommendation evidence](../testing/recommendations.md), [native diagnostics](../../services/main/performance/README.md#native-failure-artifacts) and [open failures](../testing/known-failures.md); source interoperability, information verification, disclosure, delivery, capacity and restoration pending. |

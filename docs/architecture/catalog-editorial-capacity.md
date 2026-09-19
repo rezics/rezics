@@ -3,7 +3,7 @@
 Editorial summaries, Portable Text descriptions and images belong to the eight
 native catalog owners. They are optional, language-specific and independent of
 named forms. An editor cannot use this command to rename a resource or publish
-as its subject Entity. Controller-authored Entity presentation retains its
+as its subject Agent. Controller-authored Agent presentation retains its
 separate `entity.publish` boundary.
 
 Each owner has a current table and immutable revision table, both partitioned
@@ -66,7 +66,7 @@ timeouts, connection utilization and replica lag. Small functional fixtures
 prove revisions and access rules; they do not certify these latency targets.
 
 Provisioning must account for at least two data copies plus independent backup
-and WAL retention, and keep 30% disk headroom. Alert before a shard reaches 70%
+and WAL retention, and keep 30% disk headroom. Alert before the database or a separately budgeted relation reaches 70%
 of its provisioned storage or sustained p95 lock wait exceeds 100 ms. The next
 placement boundary is `(owner, owner_id hash bucket)`: copy bounded buckets,
 verify current/history counts and checksums, fence writes for each bucket, then
@@ -77,9 +77,10 @@ is made for the present single-database installation. Historical documents may
 move to an immutable archive only after exact revision reads, restoration,
 retention and recovery have an equivalent validated implementation.
 
-The current unreleased native baseline includes these tables directly. Existing
-legacy installations are not upgraded by replaying it. Fresh-target installation
-and separate offline import remain the authorized cutover procedure.
+The recorded installation baseline remains immutable. A fresh disposable target
+uses that baseline plus forward migrations; an existing deployment uses its
+qualified forward installation/recovery procedure. Target prose does not authorize
+replaying a replacement baseline over existing data.
 
 PostgreSQL's [partitioning documentation](https://www.postgresql.org/docs/current/ddl-partitioning.html)
 describes partition pruning and the requirement that partitioned unique keys

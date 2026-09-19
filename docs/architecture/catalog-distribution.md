@@ -67,7 +67,7 @@ Planning assumes 500M rows initially and 3B rows at the upper estimate, median
 1,000 export pages/s and 100 append batches/s distributed across owners. One hot
 manifest has exactly one writer; stale prefixes fail and queueing belongs to a
 bounded caller queue. Suggested initial admission is 16 concurrent append
-transactions/DB shard, 2 pending writes/package, 128 rows and roughly 180 KiB
+transactions/database, 2 pending writes/package, 128 rows and roughly 180 KiB
 maximum member input/batch (including UTF-8 original numbering and framing).
 These are deployment sizing assumptions, not an enforced service rate limiter.
 
@@ -102,7 +102,7 @@ bookmarks and must be made opaque at any external transport boundary. A hot targ
 never causes an unbounded scan to fill one response. No count(*) is on a request
 path. Per-page target permission reads deduplicate IDs and batch by owner.
 
-Partition/shard by package ID once the primary/replica data volume or p95 page
+Consider same-database partitioning by package ID before the primary/replica data volume or p95 page
 latency exceeds the deployment envelope (initial alerts: 70% disk, 100 ms p95
 read, 250 ms p95 append, 1 s oldest pending hot-package write). Owner-local keys
 preserve package placement; exact-target reverse indexing needs a separate
@@ -115,5 +115,5 @@ the model is disk-backed and bounded, but hardware throughput is not certified.
 occurrences, paged export, restore, stale writers, access isolation and SQL guard
 failures on an explicitly disposable PostgreSQL target. A 16,384-member hot
 manifest checks tail keyset index access and bounded historical reverse scans.
-Its EXPLAIN does not claim 500M-row latency from toy data. Unit
+Its EXPLAIN does not claim 500M-row latency from toy data. Resource
 tests cover target alternatives, UTF-8 bounds, quantity and batch invariants.

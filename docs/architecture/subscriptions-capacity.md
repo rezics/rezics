@@ -112,7 +112,7 @@ to global order is not sufficient evidence of acceptable Realm retrieval. Elect
 Realm-local candidate sources for the high-frequency path and preserve the same
 ordering/cursor contract in sparse and dense plans. Full-text matching and facets
 must use the displayed accepted version, including when a general Realm has a
-newer version of that Unit. Current authority gates identity, snippets, media and
+newer version of that Resource. Current authority gates identity, snippets, media and
 counts as well as bodies. Lower-bound/partial/unavailable counts stay explicit.
 
 Cache entries identify selected scope, filter/order, accepted selection/ranking

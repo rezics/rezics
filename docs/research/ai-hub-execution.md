@@ -3,7 +3,7 @@
 Catalog/package/Prompt/MCP metadata and controlled protocol tests are selected in [the Hub contract](../architecture/database/ai-hub.md). The following decisions affect an execution-enabled product and must be settled before its dependent schema/API is implemented. They do not block independent catalog work.
 
 [Connected applications](../architecture/connected-apps.md) now selects external
-clients accessing REZICS APIs/MCP, Entity connections, consent and installation
+clients accessing REZICS APIs/MCP, Agent connections, consent and installation
 delegation. The questions below concern REZICS executing uploaded artifacts,
 connecting outward to other services or hosting their runtimes. Reuse the selected
 identity/authorization foundation; do not reopen it as an unspecified Hub feature.

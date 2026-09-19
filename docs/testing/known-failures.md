@@ -2,37 +2,6 @@
 
 Keep only unresolved failures and reproduction/closure requirements here. Completed repairs belong in owning tests and Git history. These observations are dated evidence, not a claim that every current environment has the same failure.
 
-## Tracked design-input guard rejects generated schema artifacts
-
-Observed 2026-09-19 during documentation verification at baseline
-`e528fe0a824d7eefb1cad4397b942727392d70c1`. After regenerating document metadata,
-`python docs/testing/database/check_design.py --check` passes, but adding
-`--require-tracked` fails on seven intentionally ignored generated Drizzle inputs:
-
-```text
-libraries/schema/src/postgres/knowledge/descriptions.generated.ts
-libraries/schema/src/postgres/knowledge/semantic-relations.generated.ts
-libraries/schema/src/postgres/media/indexing.generated.ts
-libraries/schema/src/postgres/media/selection.generated.ts
-libraries/schema/src/postgres/vocabulary/model.generated.ts
-libraries/schema/src/postgres/vocabulary/registry.generated.ts
-libraries/schema/src/postgres/wiki/pages.generated.ts
-```
-
-The unchanged guard also fails on those same paths when given the baseline HEAD
-dependency/verification manifests. `git check-ignore -v` attributes them to the
-committed `.gitignore` rules. The [artifact preparation contract](../../libraries/schema-importer/README.md)
-intentionally regenerates these derivatives from authored models and pinned inputs;
-force-adding them would contradict their owning policy.
-
-Closure requires reconciling the tracked-input guard with reproducible artifact
-preparation: prove tracked authored inputs/pins/generators, reject unexpected
-untracked dependencies, and qualify required derivative existence/determinism after
-preparation. Do not blanket-ignore missing files or count the strict guard as passed.
-No checker assertion, ignore rule or schema artifact was changed by the documentation
-update. Document/link and deterministic design checks are separate passing evidence;
-strict tracked-input qualification remains open.
-
 ## Native facet-search abort
 
 Observed September 9-10, 2026 on Windows with Docker Desktop Linux, Bun 1.4.2, PostgreSQL 18.6, PGroonga 4.0.8 and Groonga 16.1.0. The host had an Intel Core i9-14900HX and approximately 32 GiB RAM; the container engine reported approximately 15.5 GiB. Seed: 20260909.

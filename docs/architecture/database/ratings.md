@@ -224,9 +224,9 @@ when implemented; this document specifies meaning, not production copy.
 Context definitions/revisions, observations/revisions and per-rater heads are
 owned by the rating module with concrete REF/XREV contracts. Do not implement
 ratings as unrestricted knowledge assertions: eligibility, duplicate keys,
-withdrawal and aggregation are participation invariants. Public Entity attribution
+withdrawal and aggregation are participation invariants. Public Agent attribution
 and private accountability keys follow the shared access model. Default community
-ratings count authenticated human principals; represented Entities cannot multiply
+ratings count authenticated human principals; represented Agents cannot multiply
 one principal's contribution. Institutional ratings or autonomous evaluator
 populations require distinct explicitly admitted contexts and counting rules.
 Imported provider aggregates remain `source_statistic`, not native observations.

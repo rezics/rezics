@@ -81,7 +81,7 @@ bounded query/export execution. [Dictionary D14.1](database/data-dictionary.md#d
 defines their relational responsibilities.
 
 Source nodes identify external descriptions. They are not a universal native
-Entity/Unit table, and do not require native REF allocation, accounts, votes or
+Entity/Resource table, and do not require native REF allocation, accounts, votes or
 native editing authority. A source-described chemical, planet, product or lexeme
 can be discoverable before any native domain adapter exists. Native adoption continues
 through [source lifecycle](catalog-source-lifecycle.md) and domain commands with
@@ -191,7 +191,7 @@ automatically creates a native Work. Offer/Action descriptions do not execute
 commerce or application actions. Source ratings remain dated source statistics.
 
 Public landing JSON-LD is the bounded, accepted native projection governed by
-[SEO disclosure](unit-landing-seo.md), not automatic republication of imported
+[SEO disclosure](resource-landing-seo.md), not automatic republication of imported
 markup. Emit only statements supported by that public projection. Vocabulary
 validity alone does not establish a search engine's rich-result eligibility.
 
@@ -289,7 +289,7 @@ Every supported source property, including one without a native mapping, gets:
 
 Exact source equality compares the typed source value under a pinned rule,
 including language, unit, calendar or globe where applicable. A matching hash
-requires full-value confirmation. Unit conversion, interval overlap, broad text
+requires full-value confirmation. Resource conversion, interval overlap, broad text
 search, global ordering and ontology inference are separately elected operations.
 Existence queries specify main/qualifier/reference role; combined qualifier filters
 must match one statement, and reference filters one reference group. Special

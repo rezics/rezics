@@ -23,7 +23,7 @@ of facts or the final authorization authority.
 | [Native domains](database/README.md#5-catalog-domain-model), including M04 | Authoritative domain commands, exact native revisions and adopted effective values. |
 | [Search and operations](../plan/modules/search-and-operations.md), M09 | Bounded execution, dependency invalidation, materialized index generations, queries, exchange and recovery. |
 | [Subscribe](subscriptions.md), M10 | Offering/plan terms and independent grants for eligible index access or service allocations. |
-| [Identity/access](identity-and-access.md) | Actor/Entity representation, operation authority, source disclosure and approved benefit mappings. |
+| [Identity/access](identity-and-access.md) | Principal/Agent representation, operation authority, source disclosure and approved benefit mappings. |
 
 Realm publication/moderation, site scope and factual verification are independent.
 A Realm may consume an assessment, but publication approval does not verify a
@@ -70,7 +70,7 @@ policies must expose their evidence basis and be evaluated against adjudicated c
 ## Records and invariants
 
 These are logical contracts, not six copies of every native field or a universal
-Unit table. Reuse the [dictionary](database/data-dictionary.md#d03-definitions-claims-evidence-and-acceptance)
+Resource table. Reuse the [dictionary](database/data-dictionary.md#d03-definitions-claims-evidence-and-acceptance)
 and source owners with concrete foreign keys or validated reference alternatives.
 
 | Record | Required identity and meaning |
@@ -520,7 +520,7 @@ for the executed arithmetic and its narrow scope.
 The September 15 review followed the computed bottlenecks into PostgreSQL 18,
 PGroonga/Groonga documentation and semantic-processing research. The selected
 mechanisms below refine this target; they do not install a new search engine or
-claim the current Unit-only search projection implements verified-answer indexes.
+claim the current Resource-only search projection implements verified-answer indexes.
 
 **Maintain common answer populations and orders.** Use the existing index
 definition as an operated, reusable profile. Store its selected-result membership
@@ -541,7 +541,7 @@ instead of indexing all filter combinations or users.
 
 **Select a plan for mixed filters and text.** Reuse the current Search pattern of
 bounded selective candidates versus an ordered dense fallback, but drive it from
-the requested verification profile/scope rather than global Unit order. Put the
+the requested verification profile/scope rather than global Resource order. Put the
 exact text revision and indexable scope/profile/quality signals in the serving
 projection so the search engine can evaluate the conjunction before returning
 candidates. This is derived data; no copied evidence bodies per subscriber.

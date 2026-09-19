@@ -5,7 +5,7 @@ This matrix defines G4 evidence. See the [plan's gates](README.md#acceptance-gat
 | Gate | Required evidence |
 | --- | --- |
 | Native schema | Fresh rebuild, keys/constraints, source-free commands, negative SQL, concurrent transitions and history. |
-| Logical Unit separation | Qualified generic references, owner adapters and shared Tag/relation/participation capabilities; logical table changes do not require per-kind feature rewrites or a universal parent. |
+| Logical Resource separation | Qualified generic references, owner adapters and shared Tag/relation/participation capabilities; logical table changes do not require per-kind feature rewrites or a universal parent. |
 | APIs | Eager route compilation, OpenAPI/SDK parity, allowed/denied cases and producer-to-consumer requests. |
 | Sources | Elected provider/surface roundtrips, updates/withdrawal/reapply, partial coverage, cross-source and human-override tests. |
 | Semantic interoperability | [SIO01-SIO18](../testing/source-conformance.md#schemaorg-and-wikidata-acceptance): required Schema.org syntaxes and full Wikidata model, source-query coverage before native mapping, complete statements, export fidelity, pinned datasets, incremental gap recovery and additional capacity evidence. |
@@ -17,7 +17,7 @@ This matrix defines G4 evidence. See the [plan's gates](README.md#acceptance-gat
 | Hub | Catalog/package/Prompt/MCP conformance; execution scope separately decided and tested. |
 | Authority | Revocation/ownership/erasure across content, relations, media, search, messages, exports and jobs. |
 | Mixed identity and membership | [IAM01-IAM28](../testing/identity-and-access.md): private principals, many-to-many representation, mixed grantees, Groups/custom Roles, admission generations, assignment ceilings, complete request proofs, institutional/dependent lifecycle and recovery. |
-| Connected applications | [APP01-APP14](../testing/identity-and-access.md): actual private token profile, Entity connections, consent/installation isolation, credential lifecycle, REST/MCP parity, Bun CIMD egress, bounded webhooks and quota ownership. |
+| Connected applications | [APP01-APP14](../testing/identity-and-access.md): actual private token profile, Agent connections, consent/installation isolation, credential lifecycle, REST/MCP parity, Bun CIMD egress, bounded webhooks and quota ownership. |
 | Subscribe and Realm participation, upon M10 activation | [SUB/PRO, SITE/RPLY and CAPSUB cases](../testing/subscriptions-and-pro.md): native multi-plan commerce, independent gifts, current benefit proofs, local quotas/review, fixed-site context, multi-Realm reply connections, exact-version Pro discovery and recovery. |
 | Information verification, upon cross-module activation | [FACT01-FACT36 and CAPFACT01-CAPFACT06](../testing/information-verification.md): evidence/assessment/acceptance separation, broad versus qualified answers, independent issuers and portable views, correction/privacy and empirical quality/capacity; M10 cases apply only to offered services. |
 | Reliability | Replay, fencing, cancellation, interrupted large operations, merge/split and recommendation recovery. |

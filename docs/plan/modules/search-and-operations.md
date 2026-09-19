@@ -37,7 +37,7 @@ ranking inputs, scoped delivery and entitlement revocation/recovery. Its
 [capacity envelope](../../architecture/subscriptions-capacity.md) and
 [CAPSUB cases](../../testing/subscriptions-and-pro.md#capacity-and-recovery-cases)
 apply upon activation; existing candidate ceilings and one current document per
-Unit do not qualify that extension or permit general-content fallback.
+Resource do not qualify that extension or permit general-content fallback.
 Implement the [Realm/parent reply projection](../../architecture/realm-scoped-delivery.md#physical-query-plan-and-lifecycle),
 batch authority/hydration, explicit more/partial results and fixed-site resolver.
 SITE/RPLY cases require native sparse-parent/deep-cursor plans, shared request/byte

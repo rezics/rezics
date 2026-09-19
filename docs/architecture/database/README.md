@@ -2,14 +2,12 @@
 
 Status: selected target architecture; implementation and qualification follow the [current plan](../../plan/README.md).
 
-The 2026-09-19 [integrated model revision](../schema-modeling.md) selects Resource
-as the name of the existing logical Unit contract, described Agent versus generic
-Entity responsibilities, shared Space identity and Resource-targeting routes.
-Existing Unit/Entity/Realm/Zone code names and earlier test records remain current
-implementation terminology. In retained IAM material, public Entity means the
-selected Agent responsibility, not the generic Entity store. This revision has not
-qualified the new DDL, consumers or workload. Read [standards adoption](../standards-adoption.md),
+The [native model](../schema-modeling.md) defines Resource identity, Agent and
+generic Entity responsibilities, typed values/relations, Space and explicit
+addressing. Read [standards adoption](../standards-adoption.md),
 [field/storage families](resource-storage.md) and [target acceptance](../../testing/model-contracts.md).
+Current schemas and wire names are described in the [runtime reference](../../reference/current-implementation.md);
+their existence does not qualify a target contract.
 
 This is the whole-database design authority, including private and operational state. The [execution workflow](../../plan/execution-workflow.md) owns program authority and compatibility policy; the plan owns module sequence and progress. New-system integrity, source conversion, installation, history and recovery remain required capabilities.
 
@@ -22,8 +20,9 @@ may require network; inventory/calculation checks run locally after it. Temporar
 directories and machine-local attachments are not dependencies. The
 [dependency manifest](../../testing/database/dependency-manifest.json) lists local
 documents, schema inputs, API-owner directories and supporting public sources.
-The [strict tracked-input guard mismatch](../../testing/known-failures.md#tracked-design-input-guard-rejects-generated-schema-artifacts)
-remains open; reproducible derivatives must not be force-committed to conceal it.
+The strict tracked-input check verifies exact registered derivatives against their
+production emitter and requires their authored producers in Git. Those ignored
+outputs remain generated rather than force-committed; unknown dependencies fail.
 
 [Schema.org and Wikidata interoperability](../semantic-interoperability.md) is a
 required full-index contract. Source-model preservation and queryability cover
@@ -69,8 +68,8 @@ Implement the selected contracts through the plan's design/test/API gates. Use e
 | Domain | Owns | Must not become its authority |
 | --- | --- | --- |
 | Identity and addressing | Stable native identity, routing, optional scoped addresses, correction/merge resolution | Titles, slugs, source keys, content hashes |
-| Account and participation | Private AuthPrincipals, credentials, public Entities, membership, representation and recovery | Imported people, credits, semantic classes or an unverified acting-identity claim |
-| Access and rights | Mixed-subject role bindings, scoped delegation, ownership, restrictions, current authority and exact disclosure grants | Classification, Realm display placement, source assertions or unrelated actor/Entity privileges |
+| Account and participation | Private AuthPrincipals, credentials, public Agents, membership, representation and recovery | Imported people, credits, semantic classes or an unverified acting-identity claim |
+| Access and rights | Mixed-subject role bindings, scoped delegation, ownership, restrictions, current authority and exact disclosure grants | Classification, Realm display placement, source assertions or unrelated actor/Agent privileges |
 | Catalog | Native referents and domain-specific structures | One provider's schema or a social post |
 | Knowledge and provenance | Definitions, typed assertions, evidence, acceptance, named forms, identifiers | Votes, audit logs or arbitrary JSON paths |
 | Content and assets | Editorial lineages, immutable revisions, files, manifests, asset uses | REZICS Work identity, its adoption decisions or social-publication visibility |
@@ -150,16 +149,14 @@ This preserves CONTRIBUTING's owner-local identity and concrete-FK requirements.
 
 No classification or kind gives a user a permission. “Wiki” must be expanded into independently meaningful choices: collaborative editing, encyclopedic purpose, and scope-specific selection. They can occur separately.
 
-<a id="34-unit-capabilities-across-owner-tables"></a>
 ### 3.4 Resource capabilities across owner tables
 
-Resource is the selected name for the shared logical identity/reference/capability
-contract currently called Unit. Removing the physical `unit` parent does not remove
-shared features or require a Tag, favorite or authorization implementation for every
-catalog class. Owners retain identity and lifecycle; generic feature modules own
-their behavior and persist validated references. A common reference proves a target,
-not feature eligibility or permission. [Physical field and family policy](resource-storage.md)
-defines same-database specialization without making table names part of identity.
+Resource is the common identity/reference/capability contract. Owners retain
+identity and lifecycle; generic feature modules persist validated references and
+own their behavior. A common reference proves a target, not feature eligibility
+or permission. [Physical field and family policy](resource-storage.md) keeps table
+layout out of identity without creating a universal parent or a feature service
+for every semantic class.
 
 | Boundary | Contract |
 | --- | --- |
@@ -172,7 +169,7 @@ defines same-database specialization without making table names part of identity
 
 For example, global Tag applications key subject REF/Tag, Realm applications add Realm scope, and private applications add the account. Their subject-first and Tag-first indexes support both directions without knowing how a Book or music record stores its body. Relation participants use the same reference contract with role and exact-revision validation. Following a Work does not follow every referenced edition automatically; discussing a Work does not give control of its adopted Documents. Repeated, inferred and contextual relationships retain their feature-specific semantics.
 
-Owner admission must declare supported capabilities and their rejected cases; an unknown classification can still use capabilities backed by its actual structure. New semantic classes do not change the owner registry. A new registered owner requires bridge/adapter and applicability tests, but must not require adding its nullable FK to every generic feature. This is the current logical separation acceptance criterion, independent of any future database split. [Foundation acceptance](../../testing/foundation.md#unit-capability-contract-acceptance) owns the remaining cross-feature cases; existing point-reference tests alone do not qualify all capabilities.
+Owner admission must declare supported capabilities and their rejected cases; an unknown classification can still use capabilities backed by its actual structure. New semantic classes do not change the owner registry. A new registered owner requires bridge/adapter and applicability tests, but must not require adding its nullable FK to every generic feature. This is the current logical separation acceptance criterion, independent of any future database split. [Foundation acceptance](../../testing/foundation.md#resource-capability-contract-acceptance) owns the remaining cross-feature cases; existing point-reference tests alone do not qualify all capabilities.
 
 Distinguish structural eligibility, domain-feature applicability, actor authorization and a query backend's supported operators. Engine composability is not proof that these meanings are interchangeable. Shared interfaces reduce duplicated integration code but do not establish an O(owners + features) bound on semantic exceptions, tests or query cost. The [evidence contract](design-evidence.md#identity-and-composability) records these limits.
 
@@ -196,7 +193,8 @@ The [native Work contract](native-work.md) defines the common creative object, i
 
 | Owner | Selected objects and structures | Boundary |
 | --- | --- | --- |
-| Entity | Person, organization, fictional character, software agent; public descriptions, existence dates and contextual identity assertions | An indexed person is not an account; fictional dates are not real-world lifespan. Control/participation is separately admitted. |
+| Agent | Person, organization, applicable fictional character, software agent; public descriptions, existence dates and contextual identity assertions | An indexed person is not an account; fictional dates are not real-world lifespan. Control/participation is separately admitted. |
+| Generic Entity | Resource without mandatory specialized structure; optional Recipe, Building or other admitted classifications/values | No universal parent; classification and capability do not force a new physical table. |
 | Publishing | Textual Work scopes, text/translation identities, virtual/actual catalog publications, contents, events, serialization and installments | Shared Work/release contract with independent content; ISBN identifies its applicable issued specification. |
 | Music | Composition, recording and album Work scopes where independently maintained; release groups/releases, media/tracks, credits, events, TOCs and alternatives | Work eligibility preserves these distinct referents; track occurrences and printed credits stay contextual. |
 | Program | Audiovisual Work scopes, seasons, cuts/versions, episodes, events and ordered occurrences | Episode identity differs from release position; cut/subtitle compatibility is explicit. |
@@ -353,8 +351,8 @@ canon, presentation, publication and governance are not one undifferentiated sco
 Collections organize explicit wiki/content membership. A route resolves to an
 existing Resource and uses the shared renderer; no separate ZonePage identity or
 content copy is required. Displaying a publication in multiple Zones does not create
-multiple utterances or confer access. [Space composition](../realm-collection-zone.md)
-and [addressing](../unit-slug-addressing.md) own these contracts. Dynamic Collections
+multiple utterances or confer access. [Space composition](../space-composition.md)
+and [addressing](../resource-addressing.md) own these contracts. Dynamic Collections
 remain optional. Rules have exact versions and consent history; changing them does
 not rewrite historical moderation rationale.
 
@@ -362,11 +360,11 @@ Custom themes retain their existing explicit full-trust external-live preview bo
 
 ## 10. Authentication, authority, privacy and rights
 
-The selected [identity and access contract](../identity-and-access.md) owns private AuthPrincipals, shared public Entities, many-to-many representation, membership and mixed grantees. Org and Realm each support multiple Groups, custom Roles and scoped Bindings. Account management, Entity control and security-role assignment can be granted to an Entity, AuthPrincipal or eligible member set; action-specific assurance and delegation limits remain explicit. Public attribution never exposes the private controller graph or itself authorizes an effect.
+The selected [identity and access contract](../identity-and-access.md) owns private AuthPrincipals, shared public Agents, many-to-many representation, membership and mixed grantees. Org and Realm each support multiple Groups, custom Roles and scoped Bindings. Account management, Agent control and security-role assignment can be granted to an Agent, AuthPrincipal or eligible member set; action-specific assurance and delegation limits remain explicit. Public attribution never exposes the private controller graph or itself authorizes an effect.
 
-Use the canonical @rezics/access vocabulary and independent-grant rules. A request selects direct AuthPrincipal authority or a complete, restricted representation path to an Entity with target rights. It neither unions unrelated actor/Entity powers nor requires the operator to personally hold the Entity's resource rights. Durable institutional assignments and dependent execution delegations have different revocation semantics. Default Entity selection is private convenience, not ownership or a credential. New capabilities need explicit registry review.
+Use the canonical @rezics/access vocabulary and independent-grant rules. A request selects direct AuthPrincipal authority or a complete, restricted representation path to an Agent with target rights. It neither unions unrelated actor/Agent powers nor requires the operator to personally hold the Agent's resource rights. Durable institutional assignments and dependent execution delegations have different revocation semantics. Default Agent selection is private convenience, not ownership or a credential. New capabilities need explicit registry review.
 
-[Connected applications](../connected-apps.md) owns OAuth consent, installation service principals, third-party Entity binding, credential privacy and REZICS MCP access. Ordinary GUI flows enter a valid main Entity and disclose collaboration/advanced controls only when useful; the [experience contract](../identity-and-access-experience.md) preserves all API capabilities without requiring ordinary users to understand the authorization graph. Hosted third-party accounts and uploaded-agent/MCP execution remain separately elected capabilities.
+[Connected applications](../connected-apps.md) owns OAuth consent, installation service principals, third-party Agent binding, credential privacy and REZICS MCP access. Ordinary GUI flows enter a valid main Agent and disclose collaboration/advanced controls only when useful; the [experience contract](../identity-and-access-experience.md) preserves all API capabilities without requiring ordinary users to understand the authorization graph. Hosted third-party accounts and uploaded-agent/MCP execution remain separately elected capabilities.
 
 Each authority domain has an epoch/fence row. Mutation commands acquire relevant authority fences in deterministic order, then reload policy and aggregate heads under a READ COMMITTED statement snapshot before changing data. Dependency closure includes membership generation, group ancestry, role revision, representation and App authority; revalidate discovery after locking. Dependent operations share-read fences; revoke/transfer takes conflicting exclusive fences held through commit. Authorization is not computed from an earlier REPEATABLE READ snapshot after a lock wait. For exceptional predicate invariants use SERIALIZABLE with bounded whole-command retry and idempotency. [PostgreSQL transaction isolation](https://www.postgresql.org/docs/18/transaction-iso.html)
 
@@ -414,11 +412,11 @@ Private Conversation and Message own their membership/audience and retention. Me
 
 Notification identity belongs to the recipient delivery, not the triggering event. Dedupe uses recipient + event + channel policy; read state does not change the underlying action. Mark-all uses the established recipient watermark protocol with insertion serialization so concurrently committed notifications remain unread. Provider accepted, delivered, failed and uncertain are separate delivery outcomes. Exactly-once external email is not assumed.
 
-Following, public reactions, ratings and ballots have explicit eligibility and duplicate keys. Decide the identity of the voter for each feature: an Entity for attribution and a private accountability key for duplicate/independent-approval constraints where required. Multiple delegated Entities cannot bypass that rule; distinct accounts alone do not prove distinct natural people. Retain source aggregate statistics separately. Recomputable counters use striped deltas/materializations for hot targets; vote acceptance and ballot uniqueness remain transactional.
+Following, public reactions, ratings and ballots have explicit eligibility and duplicate keys. Decide the identity of the voter for each feature: an Agent for attribution and a private accountability key for duplicate/independent-approval constraints where required. Multiple delegated Entities cannot bypass that rule; distinct accounts alone do not prove distinct natural people. Retain source aggregate statistics separately. Recomputable counters use striped deltas/materializations for hot targets; vote acceptance and ballot uniqueness remain transactional.
 
 [Rating contexts and history](ratings.md) select standing, daily and per-experience observations with separate revision history. A new observation within a context, a correction to the same observation and a different context are explicit API/GUI actions. Default summaries select each rater's latest effective observation and then an equal-rater mean; declared historical contexts may default to mean-per-rater over a named range. Raw observation distributions, submission cohorts and historical-as-of views retain their own clocks and denominators. These are complete target requirements, not an optional future daily-score extension.
 
-Personal favorites, progress, visits, preferences, blocks, notification preferences and recommendation exclusions use account-scoped keys, private read paths and indexed erasure cursors. Studio candidate/recent-visit tables are projections, not new content ownership. No account requires a preallocated matrix of all Units, permissions or notifications.
+Personal favorites, progress, visits, preferences, blocks, notification preferences and recommendation exclusions use account-scoped keys, private read paths and indexed erasure cursors. Studio candidate/recent-visit tables are projections, not new content ownership. No account requires a preallocated matrix of all Resources, permissions or notifications.
 
 ## 13. Search, recommendation, export and derived state
 
@@ -521,7 +519,7 @@ The [testing specifications](../../testing/README.md) and [backend gate](../../p
 
 ## 18. Related contract owners
 
-Owner-local identity, logical Unit capabilities, shared access vocabulary, REZICS virtual-publication Work, independent external editions, versioned rules, private/public identity separation, independent spoiler/rating/display mechanisms and exact theme installation are selected semantic contracts. They are retained for their meaning, not old-data compatibility.
+Owner-local identity, logical Resource capabilities, shared access vocabulary, REZICS virtual-publication Work, independent external editions, versioned rules, private/public identity separation, independent spoiler/rating/display mechanisms and exact theme installation are selected semantic contracts. They are retained for their meaning, not old-data compatibility.
 
 Use explicit roles, content selection, validated references, source journals and independent Threads. Each owning implementation must satisfy its target tests before APIs are treated as qualified. Do not maintain a second progress ledger here.
 
@@ -531,14 +529,14 @@ Repository owner references used for this proposal:
 
 - [CONTRIBUTING](../../../CONTRIBUTING.md), [capacity and integrity](../../architecture/data-integrity-and-workload-budgets.md), and [current catalog/source gaps](../../plan/backend-acceptance.md).
 - [Catalog owner boundaries](catalog-model.md), [names and authority](../../architecture/catalog-names-and-authority.md), and [distribution composition](../../architecture/catalog-distribution.md).
-- [Access vocabulary](../../../libraries/access/README.md), [slug addressing](../../architecture/unit-slug-addressing.md), [license ledger](../../architecture/unit-license-grants.md), and [governance decisions](../../architecture/governance-rule-decisions.md).
-- [Spoiler/rating/display distinctions](../../architecture/entity-tag-spoiler-and-measurement-decisions.md), [content structure history](../../architecture/content-structure-history.md), and [content language](../../architecture/content-language-support.md).
+- [Access vocabulary](../../../libraries/access/README.md), [slug addressing](../../architecture/resource-addressing.md), [license ledger](../../architecture/resource-license-grants.md), and [governance decisions](../../architecture/governance-rule-decisions.md).
+- [Spoiler/rating/display distinctions](../../architecture/classification-spoilers-and-measurements.md), [content structure history](../../architecture/content-structure-history.md), and [content language](../../architecture/content-language-support.md).
 - [Theme execution](../../architecture/custom-theme-full-trust-external-live.md), [notification read state](../../architecture/notification-delivery-and-read-state.md), [native merge](../../architecture/native-identity-merge.md), and [event durability](../../architecture/event-streaming.md).
 
 Reproduce design checks from the repository root:
 
 ~~~sh
-python docs/testing/database/check_design.py --check
+python -B docs/testing/database/check_design.py --check --require-tracked
 ~~~
 
-After an intentional source-map, scenario or assumption change, run --write, review generated changes, then --check. Stage intended files and run --check --require-tracked before committing. A fixed source baseline avoids invalidation from unrelated HEAD changes. The generator writes only owned architecture/testing artifacts and never accesses a database, broker, application server or user dataset.
+After an intentional source-map, scenario or assumption change, run --write, review generated changes, then --check. Stage intended files and run --check --require-tracked before committing. A fixed source baseline avoids invalidation from unrelated HEAD changes. The generator writes only owned architecture/testing artifacts and never accesses a database, broker, application server or user dataset. Prepared model derivatives are compared read-only with the production emitter; exact ignored outputs are exempt from Git tracking only when their authored inputs and recipes are tracked. See [documentation verification](../../testing/README.md#documentation-reconciliation-evidence).

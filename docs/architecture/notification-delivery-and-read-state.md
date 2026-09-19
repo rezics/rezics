@@ -7,7 +7,10 @@ Owner: Notifications
 ## Decision
 
 A notification is a typed event with a recipient, actor, optional subject, and
-kind-specific context. The write service accepts a closed discriminated union;
+kind-specific context. Its delivery recipient is an explicit private inbox or
+admitted shared-inbox scope, not an inferred unique account behind a public Agent.
+Inbox membership and current read authority are separate from public attribution;
+representation alone does not copy private account notifications to other controllers. The write service accepts a closed discriminated union;
 callers cannot persist an arbitrary event name or untyped reference bag. The
 public API does not expose the stored JSON payload. It presents a correlated
 `kind`, `context`, and `destination` union so generated clients must handle the
@@ -16,20 +19,20 @@ destination that is valid for that event.
 Destination hydration validates recipient access in bounded batches:
 
 - replies resolve to their Post;
-- new followers resolve to the actor Profile;
+- new followers resolve to the actor Agent;
 - direct messages resolve only when the recipient participates in the
   conversation, with an exact Message anchor for new notification rows;
 - report resolutions resolve only to a report owned by the recipient;
 - Realm events resolve to the subject Realm;
 - access invitations resolve only to the matching invitation and recipient;
   and
-- ownership events resolve to the subject Unit.
+- ownership events resolve to the subject Resource.
 
 Every visible row has a destination. If its referenced resource was removed,
 its historical payload is invalid, or its current access check fails, the API
 uses a recipient-scoped notification-details page rather than manufacturing an
-unsafe or broken public URL. Existing direct-message rows without a Message ID
-resolve to their conversation during the 1.4.0 cutover.
+unsafe or broken public URL. The earlier missing-Message fallback is recorded in
+the [1.4.0 procedure](../releases/1.4.0.md#notification-cutover).
 
 The notification row is a native link. Navigating an unread row starts an
 idempotent read mutation without delaying navigation. The Web cache first
@@ -79,12 +82,13 @@ measurements:
 
 - 90% of rows are visible in-app and payload JSON averages 160 bytes;
 - list pages default to 30 and have a hard maximum of 100;
-- a normal profile has tens to thousands of retained rows, while a long-tail
+- an ordinary inbox has tens to thousands of retained rows, while a long-tail
   recipient may have millions;
-- cluster-wide peaks are 50,000 notification writes/s and 100,000 notification
-  reads/s at the baseline, rising to 300,000 writes/s and 600,000 reads/s at the
-  forward estimate after sharding;
-- each database shard targets fewer than 10,000 notification writes/s;
+- delivery/read rates are independent workload inputs, not sixfold consequences
+  of the 500M-to-3B row ratio; the selected database needs measured admission
+  budgets for ordinary recipients and hot inboxes;
+- a hypothetical 50,000 deliveries/s retained for 30 days produces 129.6B rows.
+  That fleet-scale envelope is not a capacity commitment for this deployment;
 - warm service-side p95 targets are 100 ms for a 30-row list, 75 ms for a
   single read, and 75 ms for mark-all, excluding internet latency; and
 - recipient skew is adversarial: notification writes for one recipient may be
@@ -103,7 +107,7 @@ Unread-only lists additionally use the equivalent partial index requiring
 uses a deep offset. Each query reads at most 101 candidates and returns at most
 100.
 
-Hydration deduplicates at most 200 actor/subject Unit IDs and at most 100 each of
+Hydration deduplicates at most 200 actor/subject Resource IDs and at most 100 each of
 conversation, report, and invitation IDs. Those lookups run as a fixed set of
 batched index queries rather than one query per notification. Request memory
 and response construction are therefore bounded by the page maximum, not total
@@ -131,7 +135,7 @@ deduplication, actor, subject, and primary lookup indexes is approximately
 | Relation shape | Planning bytes/row | 500 million | 3 billion |
 | --- | ---: | ---: | ---: |
 | notification plus indexes | 480 B | 240 GB | 1.44 TB |
-| recipient read/count state | 160 B | profile-count dependent | profile-count dependent |
+| recipient read/count state | 160 B | inbox-count dependent | inbox-count dependent |
 
 These figures exclude table/index free space, WAL, replicas, backups, retained
 dead tuples, and temporary space for index maintenance. Provision at least 30%
@@ -140,50 +144,25 @@ variable JSON/payload distribution before procurement. A delivery commonly
 updates six indexes or partial indexes plus one aggregate heap row, so WAL and
 random-write capacity matter more than logical payload bytes alone.
 
-At 500 million rows, every online path remains an index range or point lookup,
-but a single primary must still be qualified with representative recipient
-skew, cache pressure, vacuum, and replica lag. At 3 billion rows, hash-shard by
-`recipient_profile_id`, colocating `notification_recipient_stat` and the
-recipient's notification history. UUIDv7 IDs and tuple cursors remain valid
-within the owning shard; no inbox request fans out across all shards. Terminal
-history may move to recipient/time archival partitions after the retention
-contract is defined.
+At both scales, online paths use selective recipient/time keys, with same-database
+partitions chosen for recipient locality and retention. The read/count state and
+history remain transactionally consistent; partition design must preserve the
+uniqueness and FK guarantees. Terminal history can move to archival partitions
+only under the inbox retention/disclosure contract. The current physical
+`recipient_profile_id` adapter is an implementation detail to reconcile with typed
+recipients before changing delivery behavior.
 
-Begin the partition/shard cutover no later than 150 million notification rows
-per primary shard, 2 TiB primary data volume, 70% sustained I/O, or list p95
-above 100 ms for three consecutive windows. A same-recipient hot key requires a
-delivery coalescing or digest policy when it sustains 250 writes/s, recipient
-lock-wait p95 exceeds 20 ms, or database-pool utilization exceeds 80% for five
-minutes. Raising page limits or adding an unbounded queue is not a cutover.
+Qualify representative skew, cache pressure, vacuum, WAL and replica lag. Treat
+70% sustained I/O, p95 list latency above 100 ms for three windows, and recipient
+lock-wait p95 above 20 ms as provisional investigation/admission signals, not a
+universal row-count threshold for another database. Coalescing/digest policy must
+preserve the event meanings and explicit recipient preference. Raising page limits
+or queue depth does not add database capacity.
 
-The full aggregate reconciliation is an offline maintenance operation. At the
-baseline it must run with an I/O budget against partitions; at 3 billion rows it
-must reconcile one shard/partition at a time. Online requests never depend on
-that scan.
-
-## 1.4.0 API and migration cutover
-
-The API response changes from a raw payload bag to the correlated
-`context`/`destination` contract, and read mutations return an idempotency result
-with the effective read timestamp. Deploy the API, generated clients, and Web
-application together.
-
-1. Stop pre-1.4.0 API and worker writers and take the deployment rollback
-   backup.
-2. Apply `20260811000000_notification_read_through_state.sql`. It adds only
-   nullable state columns, installs staged checks, and replaces the recipient
-   aggregate trigger; it does not rewrite the notification corpus.
-3. Deploy the 1.4.0 API, regenerated clients, Web application, and workers as
-   one coordinated release. Do not run mixed response contracts.
-4. Verify recipient scoping for conversation/report/invitation destinations,
-   mark-one idempotency, the insert-versus-mark-all race, aggregate parity,
-   recipient lock waits, and replica lag.
-5. Validate the two staged recipient-state checks with the integrity-constraint
-   command after confirming maintenance I/O headroom, then resume writers.
-
-Rollback means restoring the pre-cutover backup and complete pre-1.4.0 binary
-set. The nullable columns require no data backfill, but there is no public API
-compatibility alias for the removed payload response.
+Full aggregate reconciliation is maintenance work with a durable cursor and I/O
+budget. It processes selected partitions/ranges independently and never gates an
+ordinary read on scanning an inbox history. Cross-database placement is a separate
+future decision; 3B rows alone neither requires it nor certifies this database.
 
 ## Research basis
 

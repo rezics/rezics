@@ -8,8 +8,8 @@ verification timing. Documentation maintenance does not start implementation.
 Owners: [model contracts](../architecture/schema-modeling.md),
 [standards](../architecture/standards-adoption.md),
 [physical fields/families](../architecture/database/resource-storage.md),
-[Space](../architecture/realm-collection-zone.md),
-[addresses](../architecture/unit-slug-addressing.md) and the existing native domain
+[Space](../architecture/space-composition.md),
+[addresses](../architecture/resource-addressing.md) and the existing native domain
 contracts. Reuse source, identity, composition and graph harnesses; do not create
 a second independent notion of acceptance.
 

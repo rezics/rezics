@@ -17,7 +17,16 @@ from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parents[2]
 RETIRED = ("docs/report/", "docs/plan/pending-review/", "docs/plan/operational-refactor-20260906/", "docs/plan/database-schema-design-20260910/")
+RETIRED_FILES = {
+    "unit-slug-addressing.md", "unit-landing-seo.md", "unit-metadata-only.md",
+    "unit-license-grants.md", "unit-subject-association-reading.md",
+    "realm-collection-zone.md", "zone-composition-and-theming-decisions.md",
+    "entity-tag-spoiler-and-measurement-decisions.md",
+}
+TARGET_PREFIXES = ("docs/architecture/", "docs/plan/", "docs/research/", "docs/next-version/")
 POLICY_SECTIONS = {
+    "docs/README.md": ("start-here", "document-roles", "implementation-and-verification"),
+    "docs/architecture/README.md": ("model-and-ownership", "domain-contracts", "reading-rules"),
     "docs/plan/README.md": ("active-execution", "acceptance-gates", "modules-and-current-target-qualification"),
     "docs/plan/execution-workflow.md": ("program-authority", "phases-and-transitions", "verification-timing-and-permitted-operations", "progress-commits-and-completion"),
 }
@@ -35,12 +44,53 @@ def visible_lines(text):
         if match:
             marker = match.group(1)
             if fence is None:
-                fence = marker[0]
-            elif fence == marker[0]:
+                fence = (marker[0], len(marker))
+            elif fence[0] == marker[0] and len(marker) >= fence[1] and not line[match.end():].strip():
                 fence = None
             yield number, ""
         else:
             yield number, "" if fence else line
+
+
+def document_role(name):
+    if name == "docs/architecture/database/capacity.md" or "/generated/" in name:
+        return "generated"
+    for prefix, role in (
+        ("docs/architecture/", "target"), ("docs/plan/", "execution"),
+        ("docs/testing/", "acceptance/evidence"), ("docs/reference/", "implementation"),
+        ("docs/releases/", "release"), ("docs/legal/", "legal"),
+        ("docs/research/", "research"), ("docs/next-version/", "proposal"),
+        ("docs/operations/", "operations"), (".agents/", "agent instructions"),
+        ("services/", "implementation"), ("libraries/", "package contract"),
+        ("packages/", "package contract"), ("apps/", "application guide"),
+    ):
+        if name.startswith(prefix):
+            return role
+    return "repository guide"
+
+
+def terminology_problems(name, text):
+    """Guard definite retired target terms; preserve code, standards and evidence.
+
+    This is a drift check, not a semantic proof. Entity and Profile are valid
+    generic/model vocabulary, so only public-actor uses are rejected.
+    """
+    if not name.startswith(TARGET_PREFIXES):
+        return []
+    problems = []
+    for number, line in visible_lines(text):
+        prose = re.sub(r"(`+).*?\1", "", line)
+        prose = re.sub(r"\]\([^)]*\)", "]", prose)
+        for pattern, message in (
+            (r"\bUnits?\b", "retired logical Unit prose; use Resource or quote an exact implementation identifier"),
+            (r"\b(?:public|main|selected|operating|authorizing) (?:Entity|Entities|Profile|Profiles)\b", "public actor contract uses Agent"),
+            (r"\bProfile selector\b|\beligible Profiles\b", "public actor contract uses Agent"),
+            (r"\b[aA]n Resource\b|\b[aA] Agent\b", "incorrect article after model terminology change"),
+            (r"At 3B rows, application sharding is mandatory", "row count does not mandate a database split"),
+        ):
+            if re.search(pattern, prose):
+                problems.append(f"{name}:{number}: {message}")
+    return problems
 
 
 def anchors(path):
@@ -70,6 +120,7 @@ def main():
     checked_links = 0
     anchor_cache = {}
     local_targets = {}
+    roles = {}
     for path in docs:
         name = path.relative_to(ROOT).as_posix()
         if name in upstream_docs:
@@ -77,6 +128,11 @@ def main():
                 problems.append(f"{name}: pinned upstream documentation bytes changed")
             continue
         text = path.read_text(encoding="utf-8")
+        role = document_role(name)
+        roles[role] = roles.get(role, 0) + 1
+        problems.extend(terminology_problems(name, text))
+        if name.startswith("docs/architecture/") and path.name in RETIRED_FILES:
+            problems.append(f"{name}: retired target filename")
         for retired in RETIRED:
             if name.startswith(retired):
                 problems.append(f"{name}: retired document owner")
@@ -125,7 +181,8 @@ def main():
     if problems:
         print("\n".join(problems))
         raise SystemExit(1)
-    print(f"Documentation integrity PASS: {len(docs)} Markdown files, {checked_links} local links; current owners, English prose and policy structure checked.")
+    print(f"Documentation integrity PASS: {len(docs)} Markdown files, {checked_links} local links; role/terminology drift, English prose and policy structure checked.")
+    print("Document roles: " + json.dumps(roles, sort_keys=True))
 
 
 if __name__ == "__main__":

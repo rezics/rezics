@@ -1,224 +1,99 @@
-# Vote and reference governance
+# Votes, names and reference governance
 
-## Decision
+Status: target contract. [Names](catalog-names-and-authority.md),
+[classification](tag-paths.md), [identity/access](identity-and-access.md) and
+[ratings](database/ratings.md) own their distinct meanings. A shared tally format
+does not make every consumer use the same acceptance policy.
 
-A binary vote is a fact, not a lifecycle state. Its persisted value is `-1` or
-`1`; absence of a row means that the Profile has not voted. APIs must not turn a
-score threshold into a generic `accepted` boolean.
+## Vote facts and attribution
 
-The canonical presentation for a binary vote target is:
+A binary judgment records -1 or 1; absence means no judgment under the declared
+voter identity and scope. The vote contract declares its counting identity and
+public attribution separately. A shared Agent has one judgment where the domain
+counts Agents; an authenticated account is counted only where that domain chooses
+private-account counting. Do not infer one account from one public Agent or merge
+global and community-scoped judgments.
 
-```text
-voteSummary = {
-  positiveCount,
-  negativeCount,
-  score,
-  voteCount,
-  viewerVote,
-  asOf
-}
-```
+The common summary preserves positiveCount, negativeCount, score, voteCount,
+viewerVote and asOf. `score = positiveCount - negativeCount` and
+`voteCount = positiveCount + negativeCount`; stored exact aggregates protect
+nonnegative totals, bounds and parity. An unavailable/stale summary is explicit;
+it is not rounded into valid data. No generic `accepted` boolean is inferred from
+a score. Invitations and publication acceptance retain their own state machines.
 
-`score = positiveCount - negativeCount` and
-`voteCount = positiveCount + negativeCount`. Every binary aggregate table
-enforces `abs(score) <= voteCount`, `voteCount >= 0`, and matching score/count
-parity. The presenter rejects corrupt aggregates rather than rounding them.
-`viewerVote` is `-1`, `1`, or `null`; `asOf` is the aggregate update time and is
-`null` for an empty tally.
+## Distinct authorities
 
-This contract is now used by Unit Alias and Unit External Link resources and by
-Alias, External Link, and Unit Tag vote mutations. Other binary-vote read
-surfaces keep their existing true vote facts while they are migrated at an
-explicit public-API boundary; none may add a generic derived `accepted` state.
-Domain-specific words such as an accepted invitation remain valid because they
-describe a persisted workflow transition, not a score interpretation.
+| Target | Judgment meaning | Separate authority |
+| --- | --- | --- |
+| Name or alias candidate | Community preference/relevance under a declared voting scope | Name occurrence, spelling, language, source, officialness and accepted display/search selections. |
+| External reference | Relevance or quality of the reference | Link identity, current availability/disclosure, evidence and curation. |
+| Concept/Tag application | Scoped support, fit or spoiler judgment | Typed classification assertion and scope-specific adoption; factual classes do not require a majority vote. |
+| Expression definition/application | Support for a governed conceptual expression | Structural validation, definition revision, source correlation and explicit eligibility; score cannot make an invalid definition executable. |
+| Poll option | Poll-owned ballot and results policy | Poll membership/cardinality/visibility; not the shared binary tally. |
+| Rating | Context-admitted observation and declared scale | Private counting identity, exact context/revision, aggregation and publication citation. |
 
-## Policy and ranking are separate
+Resource identity, capability admission and grants are never vote outcomes.
+Explicit pins are curation, not additional positive votes. Wilson or another elected
+ranking function orders eligible candidates with a stable tie-breaker; the model
+must retain its version and expose the projection's freshness.
 
-Wilson lower-bound confidence orders unpinned references. The stable tie-break
-order is confidence, score, vote count, then UUID. Pinning is explicit Unit
-curation and precedes community ranking. It does not change vote totals.
+## Name/reference lists and pagination
 
-Visibility and eligibility remain domain policy:
+Native NameRecord storage supports multiple same-language forms, many languages,
+source histories and contextual names. There is no universal 128-name lifetime cap.
+Product preview slots, per-command input and list response budgets are separate
+from the number of valid stored names or references.
 
-- a newly proposed external link is active and visible immediately; the Unit
-  detail preview shows the first 16 ranked active links;
-- an Alias needs a score of at least `3`, or an explicit pin, to contribute to
-  search text; this threshold affects discovery only and is not returned as a
-  state;
-- Tag and Structure acceptance rules remain their documented domain rules and
-  do not become a shared vote status; and
-- withdrawn references are excluded from lists, previews, votes, curation,
-  requirement sources, and Alias search documents, while their identity, vote
-  history, and audit history remain stored.
+Use owner/scope/status/rank/occurrence indexes and bounded keyset pages. A ranking
+change follows the declared live-keyset or generation-bound cursor policy; do not
+fingerprint every name/vote in a large owner set for each page. Report continuation,
+partial and stale states honestly. Current disclosure is checked after candidate
+selection; a snapshot never freezes authorization.
 
-The complete vote-domain boundary is:
+Search consumes accepted named forms and any explicitly elected community-candidate
+policy. It preserves matched spelling/language and does not equate votes with
+officialness. Name or judgment changes update their affected entries incrementally
+or enqueue bounded owner/entry work; no write enumerates every localization.
 
-| Target | Authority | Shared binary tally | Policy use |
-| --- | --- | --- | --- |
-| Unit Alias | global Profiles | yes | rank every active Alias; score `>= 3` or pin admits search text |
-| Unit External Link | global Profiles | yes | rank every active link; no visibility threshold |
-| direct/effective Unit Tag | global Profiles | yes | rank the bounded Tag landscape; curation is stored separately |
-| Structure definition | global Profiles | yes | positive score is the domain validity rule |
-| Structure application | global Profiles per Unit | yes | positive definition and application scores are both required for presentation |
-| Realm Tag on Unit | Profiles within one Realm | yes | rank only inside that Realm and its enabled voting context |
-| Poll option | poll participants | no | option membership/count semantics and result-visibility policy remain Poll-owned |
-| Rating | context-admitted rater with private counting identity | no | [Context, observation and revision contract](database/ratings.md); bounded numeric scale, distinct from `-1/+1` votes and publication citations |
+## Write, projection and hot-key behavior
 
-This matrix prevents a shared transport shape from silently sharing policy or
-authority. A global vote must never be merged with a Realm-scoped vote, and a
-curator pin must never be counted as a positive vote.
+Record each vote/change/retraction under its exact voter/scope key with CAS or
+idempotency where applicable. Update the affected aggregate synchronously only
+when measured cost and contention justify it; otherwise use the existing durable
+outbox, idempotent reducers and explicit watermarks. One target's popularity must
+not lock the Resource root or serialize unrelated names/relationships.
 
-Every active Alias or External Link list is capped at 128 references per Unit
-and kind, with at most 16 pinned references. PostgreSQL triggers enforce both
-limits for direct writers; the API performs the same checks under the same
-per-Unit advisory lock so callers receive typed conflict responses. Withdrawal
-is the capacity-release operation. Lists use opaque, version-bound cursors with
-pages of 20 by default and 50 at most. A vote, proposal, curation change, or
-withdrawal can change rank, so the client restarts pagination after such a
-mutation. Each cursor also binds a SHA-256 fingerprint of every active ranking
-tuple; a concurrent vote that changes ordering invalidates the next page rather
-than allowing a duplicate or omission.
+Derived tallies and rankings have one source and a rebuild protocol. Withdrawal
+removes current eligibility without rewriting historical votes/evidence. Rebuilds
+cannot resurrect withdrawn or undisclosed facts. Authority and irreducible
+cardinality invariants remain synchronous command/database checks.
 
-This is one of the exceptional cross-row limits described by
-[Data integrity and workload budgets](./data-integrity-and-workload-budgets.md):
-it protects a shared, fully ranked public representation rather than masking an
-unbounded corpus query. API page maxima remain workload budgets and are not
-database constraints.
+## Workload and capacity
 
-## Workload assumptions
+Apply the 500M/3B-row baseline independently to votes, heads, names, links, evidence,
+history and ranking projections. At illustrative combined heap/index widths of
+144 bytes for a vote, 104 for a tally, 480 for a name and 770 for a reference, the
+respective estimates are 72/432 GB, 52/312 GB, 240 GB/1.44 TB and 385 GB/2.31 TB.
+These planning widths exclude WAL, replicas, free space, backups and variable text.
 
-The capacity baseline applies independently to every corpus-scale reference,
-vote, and aggregate relation. Planning uses 500,000,000 rows per relation and
-also estimates 3,000,000,000 rows. The active per-Unit set is strictly bounded;
-withdrawn history and vote facts are not.
+Actual workload must specify voter skew, high-degree targets, languages per owner,
+revision/withdrawal rate, read/write mix, scan/page/byte limits and freshness budget.
+Measure p95/p99, lock waits, WAL, index growth, maintenance and restore time. Use
+owner-local access and separately indexed inverse/ranking paths inside one database.
+Neither generated UUIDs nor hash partitioning alone prove uniqueness or eliminate
+reverse-query fan-out.
 
-The planning workload is:
+The current bounded-reference implementation and its earlier fixture do not qualify
+this unbounded-corpus/bounded-request target. See [implementation reference](../reference/current-implementation.md#measurements-and-reference-ranking)
+and [fixture evidence](../testing/foundation.md#historical-reference-list-fixture).
+The [1.4.0 cutover](../releases/1.4.0.md#vote-and-reference-cutover) remains a release
+record. New layouts follow the owning forward migration/rebuild contract; online
+dual-write is not required solely for old schema compatibility.
 
-- 90% reads and 10% writes at the reference API boundary;
-- ordinary list pages of 20, maximum pages of 50, and an application ranking
-  input of at most 128 active rows;
-- cluster-wide targets of 20,000 vote writes per second and 100,000 reference
-  reads per second after horizontal API scaling;
-- a service-side p95 target of 100 ms for a warm reference list and 150 ms for
-  a vote mutation, excluding internet latency;
-- a typical vote distribution with most targets below 100 votes, a long tail
-  above 10,000 votes, and adversarial hot keys; and
-- seven supported content languages, so refreshing one Unit Alias search
-  document reads a bounded localization set plus no more than 128 active
-  Aliases.
+## Acceptance
 
-These are capacity assumptions, not production measurements. Deployment load
-tests must replace them with observed rates and distributions.
-
-## Request and write costs
-
-The active list query uses the partial
-`(unit_id, pinned, position, id) WHERE withdrawn_at IS NULL` index, reads no
-more than 129 reference rows, and performs indexed joins to one aggregate and
-one viewer-vote row per reference. Application work is `O(128 log 128)` with a
-small fixed memory ceiling. A page returns at most 50 summaries; the server
-does not use offsets or retain a corpus-sized cursor set.
-
-Capacity and pin checks stop after 128 and 16 matching index entries. They do
-not execute `count(*)` over an unbounded Unit history. The advisory-lock key is
-partitioned by `(Unit, reference kind)`, so unrelated Units and Alias/External
-Link collections remain concurrent. One exceptionally active Unit can only
-serialize its own reference creation or pinning.
-
-A new vote writes one fact row and one aggregate row. Changing a vote updates
-the aggregate once by `newValue - oldValue`; no-op writes are suppressed. Alias
-aggregate changes also refresh one Unit search document. This is bounded by the
-active-reference and language limits, but votes on the same target still
-serialize on its aggregate row. Backpressure comes from the API quota layer and
-the database connection-pool bound; callers retry transient conflicts with
-jitter rather than opening an unbounded queue.
-
-## Storage and growth math
-
-The following deliberately conservative figures include heap tuple overhead
-and primary lookup indexes, but exclude free-space headroom, WAL, replicas,
-backups, and variable TOAST effects:
-
-| Relation shape | Planning bytes/row | 500 million | 3 billion |
-| --- | ---: | ---: | ---: |
-| binary vote fact | 144 B | 72 GB | 432 GB |
-| binary aggregate | 104 B | 52 GB | 312 GB |
-| Alias plus lookup indexes | 480 B | 240 GB | 1.44 TB |
-| External Link plus lookup indexes | 770 B | 385 GB | 2.31 TB |
-
-Provision at least 30% free space beyond heap and indexes, plus separate WAL,
-replica, backup, and concurrent-index-build capacity. The External Link estimate
-assumes an average normalized URL of 160 bytes; URL distribution must be
-remeasured before capacity procurement. Updating a vote produces roughly one
-fact-index update, one aggregate-indexed heap update, trigger WAL, and (for an
-Alias score change) one bounded search-document replacement.
-
-At 500 million rows, B-tree fan-out keeps equality seeks shallow and the active
-partial indexes remain proportional to active references, not withdrawn
-history. At 3 billion rows, each corpus relation must be partitioned or sharded
-before a single node approaches its storage, vacuum, checkpoint, or index-build
-budget. The natural routing keys are:
-
-- hash `(unit_id)` for Alias, External Link, and Unit-scoped Tag votes;
-- hash `(target reference id)` for their vote facts and aggregates, colocated
-  with the reference owner where possible; and
-- hash `(realm_id, unit_id)` for Realm Tag votes.
-
-UUID cursors and immutable IDs survive this cutover. Global uniqueness remains
-application-generated; no request requires a cross-shard scan. Withdrawn
-history may be moved to a cold partition after its retention window without
-changing active API behavior.
-
-## Evidence and operational thresholds
-
-Migration replay and schema reconciliation validate the partial indexes and all
-constraints. A disposable PostgreSQL 18.4/PGroonga 4.0.8 fixture used 100,128
-Alias rows across 10,001 Units, including one Unit at the exact 128-row limit.
-The 129th row was rejected by `unit_reference_active_limit`.
-
-On that fixture, `EXPLAIN (ANALYZE, BUFFERS)` for the 128-row list used one
-bitmap scan of `unit_alias_unit_position_idx`, touched six shared buffers, and
-completed in 0.131 ms. The bounded capacity read used the same index and six
-buffers, completing in 0.040 ms. The 100,128-row Alias relation occupied 33 MB,
-of which the active-position index occupied 9,328 KiB. This evidence validates
-the access shape, not the 500-million-row latency estimate; pre-production load
-tests must use production row widths, cache pressure, concurrency, and skew.
-
-The synchronous aggregate design has a known same-target hot-key ceiling. Begin
-the asynchronous cutover when any of these holds for five minutes:
-
-- one target sustains 100 vote writes per second;
-- aggregate-row lock wait p95 exceeds 25 ms;
-- vote-mutation p95 exceeds 150 ms while connection-pool utilization exceeds
-  80%; or
-- WAL or replica lag breaches the deployment SLO.
-
-The cutover is a partitioned vote-event outbox keyed by target ID, idempotent
-micro-batch reducers, and a versioned aggregate watermark exposed through
-`asOf`. Dual-write and reconcile before switching reads; retain the synchronous
-trigger until aggregate parity and lag stay within the approved window. At
-3 billion rows, partition creation, vacuum budgets, and cold-history archival
-must be complete before promotion. Crossing a threshold without that cutover
-is an explicit maintainer-approval condition, not an accepted steady state.
-
-## API and migration cutover
-
-This is a breaking public-contract release: product version `1.4.0` and API
-client version `1.8.0`.
-
-1. Deploy clients that read `voteSummary` and do not use `accepted`, flat
-   reference vote fields, or a `candidate` resource name.
-2. Pause writes or drain the old API binary. Apply
-   `20260809000000_vote_reference_contract.sql` followed by
-   `20260809000001_vote_reference_indexes.sql`; nullable columns are metadata
-   only, parity constraints are added `NOT VALID` before transactional online
-   validation, and replacement indexes build concurrently in the second step.
-3. Deploy the new API and frontend together. Old binaries are incompatible
-   with the new response shape, pagination, and withdrawal endpoint.
-4. Verify reference-limit conflicts, cursor invalidation, aggregate parity,
-   search exclusion after Alias withdrawal, destination-capacity enforcement
-   when a row's `unit_id` changes, lock waits, and replica lag.
-5. Resume writes. Rollback requires the previous binary and a database restore;
-   the public contract and withdrawn-reference lifecycle do not have a mixed-
-   version compatibility alias.
+Qualify two same-language names, a language outside the UI list, a high-degree
+owner, independent global/community judgments, explicit classification acceptance,
+stable pagination after changes, current disclosure, retraction, hot-target
+backpressure and deterministic rebuild. Preserve exact tally invariants and verify
+that projection lag does not turn into false truth or authorization.

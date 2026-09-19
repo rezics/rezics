@@ -6,7 +6,7 @@ Owner: Domain
 
 ## Decision
 
-Rezics uses `@rezics/filter` as the only public, engine-independent Unit
+Rezics uses `@rezics/filter` as the only public, engine-independent Resource
 selection contract. `UnitPredicate` is a bounded domain tree with `all`, `any`,
 and `not` composition. `UnitFilter` adds an optional positive `SearchMatch`
 alongside an optional `where: UnitPredicate`. Search is deliberately outside
@@ -20,7 +20,7 @@ query language.
 
 Feed accepts this Filter through `POST /feed/query`. The standard Feed UI emits
 only content-kind, language, Realm, and Tag predicates. Content-kind selection
-is a Feed-owned projection over supported Unit and Post kinds; an empty
+is a Feed-owned projection over supported Resource and Post kinds; an empty
 selection omits that predicate and means the default Feed universe. The backend
 contract retains the complete domain capability, including Score predicates.
 Product-specific flows such as Review lists may compose stricter Filters without
@@ -29,21 +29,21 @@ objectives (`best`, `hot`, `new`, `top`, and `rising`); Feed never exposes
 relevance.
 
 Language selection has two independent inputs. `localizationLanguages` is the
-ordered presentation preference and may fall back through the Unit's own
+ordered presentation preference and may fall back through the Resource's own
 localization order. An omitted or empty preference sequence means that the
-consumer supplies no presentation hint, so fallback starts with the Unit's
+consumer supplies no presentation hint, so fallback starts with the Resource's
 stored localization order. A positive language predicate in the list Filter
-is an eligibility and presentation boundary. For available Unit languages
+is an eligibility and presentation boundary. For available Resource languages
 `A`, ordered preferences `P`, and a selected language set `F`:
 
 - automatic presentation chooses the first member of `P ∩ A`, then the first
-  member of `A` in Unit order;
+  member of `A` in Resource order;
 - filtered presentation chooses the first member of `P ∩ F ∩ A`, then the
-  first member of `F ∩ A` in Unit order;
+  first member of `F ∩ A` in Resource order;
 - filtered presentation never hydrates the item or its localized media from a
   language outside `F`.
 
-The Feed keeps one result per Unit; selecting multiple languages never creates
+The Feed keeps one result per Resource; selecting multiple languages never creates
 one card per localization. Each canonical Feed item returns its actual
 `language` and its ordered `availableLanguages`. Search Feature Feed applies
 the same boundary when its positive expression proves that every matching
@@ -61,7 +61,7 @@ combines:
 - an internal adapter to the current search index.
 
 Resolved Filter controls emit bounded `SearchControlPredicate` values. Those
-values are trusted-control state, not another general Unit Filter: only the
+values are trusted-control state, not another general Resource Filter: only the
 Search Feature accepts them, and the server resolves them to a private
 Search-Service expression after checking the selected control against the one
 global field registry. A Filter document may narrow categories, add a fixed
@@ -77,7 +77,7 @@ may narrow the global policy for its data source, but that executable policy is
 not a persisted document or preset.
 
 The current authoritative PostgreSQL Search query implements `best` as descending global
-`recommendationBest`, then descending update time, then ascending Unit ID for
+`recommendationBest`, then descending update time, then ascending Resource ID for
 a stable tie-break. `recommendationBest` is the active recommendation
 snapshot's positive weighted engagement accumulated over the previous 24
 hours, with a missing score represented as zero. This order is not
@@ -91,7 +91,7 @@ adapter must receive the execution surface explicitly; visual appearance must
 never select a sort profile.
 
 “Search Feed” names that presentation adapter: Search Feature executes a
-`UnitFilter` with the `feed` sort profile and hydrates the selected Units into
+`UnitFilter` with the `feed` sort profile and hydrates the selected Resources into
 canonical Feed items. It is not a second Feed product, a second filtering
 schema, or a text-only execution path. In particular:
 
@@ -131,9 +131,9 @@ A Zone may also select one `local_rule_realm_id`. The referenced Realm remains
 the owner of its immutable Rule revisions; the Zone is only a policy context
 and never becomes a second Rule container. Zone-local governance may cite that
 Realm and the official Rule Realm. A missing local source means official Rules
-only. Platform-global actions on a Zone Unit still use official Rules because a
-global Unit mutation cannot be scoped to one presentation context. Zone create
-and update reject a selected Realm unless its Unit is non-deleted and its
+only. Platform-global actions on a Zone Resource still use official Rules because a
+global Resource mutation cannot be scoped to one presentation context. Zone create
+and update reject a selected Realm unless its Resource is non-deleted and its
 current immutable revision has at least one Rule; decision creation revalidates
 the source and revision under the shared Rule-publication lock.
 The shared toolbar keeps its product-wide order fixed as sort, schema-selected
@@ -151,7 +151,7 @@ common API content context, including the independent `pro.rezics.com` entrance.
 It composes the server's site predicate, hosting Zone and user Filter with AND;
 `realmIds: [A, Pro]` remains a union, not the A/Pro intersection. The same accepted
 publication selection drives text, hydration, media, facets and interaction context.
-This M10 target is not implemented by the current one-document-per-Unit text index.
+This M10 target is not implemented by the current one-document-per-Resource text index.
 
 Reply connections use the same context resolver but their own parent-local
 pagination and [explicit progress contract](realm-scoped-delivery.md#connection-api-and-cursor-semantics).
@@ -163,25 +163,27 @@ defines the separate scoped-reply projection and request envelope.
 
 ## Required Zone experience
 
-Every live Zone must have:
+A routable Zone is a Space with admitted presentation/routing capability, an
+explicit active routing generation and any configured Filter/navigation/Dock
+bindings. A root view exists only when an active `/` route resolves to an authorized
+Resource. Route resolution supplies typed context and uses the shared renderer.
 
-1. a valid, possibly empty `FilterDocument` on the Zone row; and
-2. at least one Zone Page containing a Feed Block and placed in the Zone's
-   page structure.
+Creating a Zone does not implicitly allocate a Post or content body. An ordinary
+workspace-creation command may explicitly create a default Block Resource and bind
+the root route in the same bounded transaction; it reports those separate effects.
+Another Zone can bind the same Resource without copying it. A literal `home` slug
+and a visual page tree are not required ownership records.
 
-Zone creation provisions both requirements in the same database transaction.
-The default page is published, addressed as `home`, placed in the Zone page
-structure, and owned by the Zone creator. Omitting every Filter member stores
-`{}`, which contributes no document-level condition.
+A Feed is a presentation capability a workspace preset may request, not a universal
+existence invariant for every live Zone. A wiki guide, media page or fixed-content
+site can be valid without a Feed. Readiness checks the installed service and admitted
+routing configuration, not whether every Space contains a Feed Block. Losing a
+required preset dependency produces a scoped unavailable/configuration state.
 
-Bootstrap reconciles this invariant for every Zone, not only official Zones.
-Readiness fails when any live Zone lacks either requirement. Updating or
-deleting Zone Pages may not remove the final Feed Block.
-
-Official Bootstrap data includes Book, Media, Software, Realm, and Zone
-workspaces. Book, Media, and Software are ordinary Zones, not Search capability
-profiles. Each official workspace stores its concrete selection boundary as a
-Filter document and has a Feed home page and deterministic Bootstrap identity.
+Book, Media and Software workspaces are ordinary configured Zones. Their boundary
+filters do not install query capabilities or grant target access. Bootstrap owns
+reserved infrastructure identities; it does not continually reconcile independently
+edited routes, content or user-created Spaces.
 
 ## Validation and execution
 
@@ -199,7 +201,7 @@ Search Service compiles text and authoritative domain predicates into bounded Po
 applies ranking only when the selected Search profile requests it. Compilation fails closed for
 unsupported predicates; it never silently broadens results. Viewer-relative predicates,
 including private Tags and viewer-authored Scores, require an authenticated
-Profile and evaluate to no match when one is unavailable.
+Agent and evaluate to no match when one is unavailable.
 
 PGroonga supplies text relevance only for the `relevance` profile. `best` and field orders remain
 explicit PostgreSQL sorts, so text matching cannot silently turn a Feed into a relevance-ranked
@@ -207,14 +209,14 @@ Search result.
 
 A Search Feature Feed executes all selected categories as one globally ordered result stream.
 Category is a filtering dimension, not a balancing rule: results are never round-robin interleaved
-after ranking. Its opaque keyset cursor binds the request hash, stable sort values, and Unit ID so
+after ranking. Its opaque keyset cursor binds the request hash, stable sort values, and Resource ID so
 page boundaries cannot reorder results.
 
 For `relevance`, matching relaxes frequent query words before distinctive words. Every localized
-title occupies the highest search tier; the Unit's display fallback order does not make one
+title occupies the highest search tier; the Resource's display fallback order does not make one
 language more relevant than another. Summaries, semantic descriptions, and published content
 follow in that order.
-Recommendation score, recent update time, and Unit ID act only as deterministic
+Recommendation score, recent update time, and Resource ID act only as deterministic
 tie-breaks after text relevance.
 
 Search-backed Feed responses preserve total-count exactness. A response may
@@ -231,7 +233,7 @@ Post body reads `GET /api/v1/posts/:postId`. Missing summary is represented by
 `null`; the server and clients do not manufacture an excerpt from the body.
 
 Every Feed request returns at most 50 items. Zone query Blocks use at most 20
-eager items, with at most 24 Page query Blocks and 6 Dock query Blocks. Each
+eager items, with at most 24 target-content query Blocks and 6 Dock query Blocks. Each
 item carries at most 8 attribution summaries and 8 public Realm contexts. The
 hydration query applies those per-item association limits inside PostgreSQL
 with index-routed lateral probes; it does not fetch all associations and slice
@@ -240,21 +242,21 @@ it is public and present within the bound.
 
 `unit_localization` and the association relations are planned at 500 million
 rows and estimated at 3 billion rows. Candidate selection supplies at most 50
-Unit IDs to hydration. Localization reads remain equality/index lookups, while
+Resource IDs to hydration. Localization reads remain equality/index lookups, while
 each attribution probe reads at most 8 entries from
 `credit_attribution_source_position_idx` and each Realm-context probe reads at
 most 8 entries from `realm_unit_unit_publication_status_updated_idx`. Work is
 therefore proportional to the requested page and fixed per-item bounds rather
-than corpus cardinality or a Unit's total association degree. These reads add
+than corpus cardinality or a Resource's total association degree. These reads add
 no writes, write amplification, background queue, cache invalidation, or
 whole-corpus maintenance.
 
-At the maximum Zone Page plus Dock shape, at most 600 item projections are
+At the illustrative target-content plus Dock budget, at most 600 item projections are
 validated across independently bounded Block results. Authored summaries are
 limited to 2,000 characters at write boundaries, so the summary contribution
 is at most 1.2 million characters (up to 4.8 MB in worst-case UTF-8) before
 ordinary response metadata. This is a defensive maximum, not a target response
-size; normal Pages should remain well below it. Before this decision, Post
+size; normal rendered views should remain well below it. Before this decision, Post
 bodies made the same request unbounded by content size and multiplied database
 I/O, heap retention, JSON serialization, schema validation, network transfer,
 client parsing, and rendering work.

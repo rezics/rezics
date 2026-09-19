@@ -48,7 +48,7 @@ External editions can be recorded with unknown Work/content correspondence rathe
 
 Use independent, versioned facets with definitions, examples and exclusions. Creative form, content modality, subject, genre, style and purpose can overlap. Composition, derivation and contextual roles use explicit relationships; lifecycle and governance remain separate state. A vocabulary's broader/narrower edge is not automatically structural containment, strict subtype inheritance, identity equality or permission.
 
-An interactive novel can be narrative, game, text, image and audio without creating an identity for each facet. Domain profiles specify permissible structure and attributes; shared Unit features do not require all domains to expose every profile. Dynamic definitions extend semantic data, while new structural behavior requires a validated domain contract.
+An interactive novel can be narrative, game, text, image and audio without creating an identity for each facet. Domain profiles specify permissible structure and attributes; shared Resource features do not require all domains to expose every profile. Dynamic definitions extend semantic data, while new structural behavior requires a validated domain contract.
 
 | Attribute/structure | Applicable target and interpretation |
 | --- | --- |

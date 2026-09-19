@@ -3,7 +3,7 @@
 This owner describes implemented account/API-key admission. The selected
 [connected-app contract](connected-apps.md) extends the target to client,
 installation and OAuth credential contexts, with separate autonomous scope-owned
-budgets. Rotating credentials or switching Entity must not multiply the applicable
+budgets. Rotating credentials or switching Agent must not multiply the applicable
 account/installation allowance. The current two-subject schema below does not
 establish that extension; implementation and tests remain in M01.
 

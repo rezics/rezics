@@ -47,10 +47,10 @@ Existing implementation foundations and selected target contracts are different 
 | Concern | Reuse or extend | Feature boundary |
 | --- | --- | --- |
 | Authored text, media and translations | [Document, Publication and adoption contracts](../architecture/database/data-dictionary.md#d09-publications-content-slots-threads-reviews-and-polls); current [Post foundation](../../libraries/schema/src/postgres/forum/post.ts) | No `MinecraftPost`, `GeoPost` or duplicate comment body. |
-| Identity and generic capabilities | [Logical Unit and reference contract](../architecture/database/README.md); [reference bridge](../../libraries/schema/src/postgres/knowledge/reference-value.ts) | Add eligible spatial resources through the owner registry and capability contract, without restoring a global Unit parent. |
+| Identity and generic capabilities | [Logical Resource and reference contract](../architecture/database/README.md); [reference bridge](../../libraries/schema/src/postgres/knowledge/reference-value.ts) | Add eligible spatial resources through the owner registry and capability contract, without restoring a global Resource parent. |
 | Knowledge and relationships | [Relationship Graph contract](../architecture/database/relationship-graph.md) | Evidence and semantic landmark relationships use existing assertions/participants. Geometry with indexed structural invariants has a typed spatial owner. |
 | Tags, favorites, follow and reports | Existing capability modules and their qualified reference consumers | A map result targets the same publication or named resource as its ordinary view. |
-| Realm, Collection and Zone | [Composition contract](../architecture/realm-collection-zone.md) | Realm supplies community/governance context; Collection supplies stored curation; Zone supplies navigation and presentation. |
+| Realm, Collection and Zone | [Composition contract](../architecture/space-composition.md) | Realm supplies community/governance context; Collection supplies stored curation; Zone supplies navigation and presentation. |
 | Queries and Blocks | [Filter documents](../architecture/filter-documents.md); [Block boundary](../../libraries/block/README.md) | A spatial query source and map presentation consume the existing validation and aggregate execution budgets. A map query is not automatically a Dynamic Collection. |
 | Language | [Content language support](../architecture/content-language-support.md) | Preserve contribution language, metadata language, availability and provenance. Community translations need no matching official game or book release. |
 | Jobs and recovery | [Database operational contracts](../architecture/database/README.md) | Reuse receipts, outbox, bounded jobs, fencing, disclosure and erasure mechanisms. |
@@ -73,7 +73,7 @@ Names below identify logical table families for design review, not final DDL or 
 
 World matching, semantic/canon context and social audience are independent axes. In particular, recipe applicability means that a comment may make sense in matching worlds; it does not make the comment public or make its Realm accessible.
 
-Expose a maintained space as a logical Unit only through an explicitly registered spatial owner and capability adapter. Recipes, frames, revisions and raw coordinate values do not each receive a social identity by default. Named landmarks can be tagged/followed independently; a raw point is normally a selector addressed through its complete anchor key. No preallocation of all seeds, cells, languages or coordinates is permitted.
+Expose a maintained space as a logical Resource only through an explicitly registered spatial owner and capability adapter. Recipes, frames, revisions and raw coordinate values do not each receive a social identity by default. Named landmarks can be tagged/followed independently; a raw point is normally a selector addressed through its complete anchor key. No preallocation of all seeds, cells, languages or coordinates is permitted.
 
 ## 5. Recipe matching, instance trust and change
 
@@ -100,7 +100,7 @@ The common protocol describes space, frame, selector type and interpretation. It
 - Finite numeric values, dimensionality, unit compatibility, exact frame keys and bounded payloads are validated. Shape-specific fields use typed storage or a bounded, versioned extension contract, not an unrestricted `geometry: unknown` persisted boundary.
 - Temporal validity and spatial uncertainty remain explicit. An anchor that is stale, approximate or no longer resolvable is distinguishable from a deleted publication.
 
-Native IDs and revision keys are authoritative. Public HTTPS resource addresses follow [slug addressing](../architecture/unit-slug-addressing.md); slugs and coordinate strings are optional addresses. A proposed `world:` URI is an interoperability question for later work, not a required identity or a newly claimed registered scheme.
+Native IDs and revision keys are authoritative. Public HTTPS resource addresses follow [slug addressing](../architecture/resource-addressing.md); slugs and coordinate strings are optional addresses. A proposed `world:` URI is an interoperability question for later work, not a required identity or a newly claimed registered scheme.
 
 ## 7. Publication bindings and discussion
 
@@ -167,7 +167,7 @@ Logical separation is the present requirement: source identities, spatial struct
 
 The response must satisfy every applicable current authority: publication/content selection, binding, spatial context and requested social source. Publishing a binding also checks that its geometry, recipe, instance association and query parameters can be disclosed to its audience; an empty result does not make those parameters public.
 
-Use the existing access vocabulary and backend engine. During schema design, identify independently grantable space-management and binding-management actions, add only the required keys to the canonical package, and qualify allowed/denied cases. A game adapter assertion or renderer installation cannot grant content rights. New spatial capabilities do not make every existing Unit support coordinates.
+Use the existing access vocabulary and backend engine. During schema design, identify independently grantable space-management and binding-management actions, add only the required keys to the canonical package, and qualify allowed/denied cases. A game adapter assertion or renderer installation cannot grant content rights. New spatial capabilities do not make every existing Resource support coordinates.
 
 For Earth, a published anchor is an intentionally selected subject location, not an automatic record of where the author stood. Request location access only for the relevant user action, preserve manual browsing, and keep live device/camera position outside publication metadata and ordinary analytics. No background movement history or geofence notification service is part of the initial release. Coarse location, uncertainty, delayed posting and private scopes should remain available design choices.
 

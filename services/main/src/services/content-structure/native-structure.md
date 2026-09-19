@@ -1,5 +1,9 @@
 # Native content structure boundary
 
+Implementation reference. This owner documents current code, identifiers and local
+limits. The [selected target](../../../../../docs/architecture/content-structure-history.md) and [implementation crosswalk](../../../../../docs/reference/current-implementation.md)
+define the reconciliation boundary; existing fixtures do not qualify revised semantics.
+
 This describes the current implementation, not full qualification of the selected
 [cross-domain composition protocol](../../../../../docs/architecture/database/content-composition.md).
 That target adds staged import/refresh, exact published content, local occurrence

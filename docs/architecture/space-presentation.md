@@ -1,23 +1,22 @@
 # Zone composition, aggregation and theming
 
-Selected contract for declarative Zone composition, revised 2026-09-19 for shared
-Space identity and Resource-targeting routes. The new routing/identity consumers
-remain unimplemented and unqualified; older Page-named endpoints are implementation
-facts, not an additional native Page model. The [implementation plan](../plan/README.md)
-owns activation and gates. Executable themes follow [the full-trust contract](custom-theme-full-trust-external-live.md);
-no bounded-CSS security model is selected.
+Target contract for Zone presentation on shared Space identity. Routing resolves
+an existing Resource and never allocates another content identity. The
+[plan](../plan/README.md) owns activation and gates; the [runtime reference](../reference/current-implementation.md)
+records current endpoints. Executable themes retain the
+[full-trust contract](custom-theme-full-trust-external-live.md).
 
 ## 1. Scope and positioning
 
 A Zone is a Space's routing/presentation capability: routing, navigation, docks
 and declarative views of existing Resources. A route resolves to a ResourceRef
 and explicit context, then uses the shared renderer; Block documents remain target
-content. There is no standalone ZonePage identity or copied body. A Zone with one
+content. A Zone with one
 or more Collections forms a subsite. A Realm supplies community capability, rules
 and publication context on the same Space identity schema; ordinary creation
 recommends a separate linked Realm. Shared identity does not merge their authority.
 
-[Realm, Collection and Zone composition](realm-collection-zone.md) owns these
+[Realm, Collection and Zone composition](space-composition.md) owns these
 relationships. Dynamic Collections are a separate optional query-based model;
 ordinary Collections retain explicit stored membership and ordering.
 
@@ -32,7 +31,7 @@ Composition combines list presentation, bounded query sources, page aggregate ex
 2. **Closed, non-Turing configuration.** Query capability stays inside the
    sparse `FilterDocument` / `SearchFeatureInput` contracts; no chained
    pipelines, no expression language (SMW/DPL evidence).
-3. **Reusable display copy is a Unit reference.** Block members that carry reusable
+3. **Reusable display copy is a Resource reference.** Block members that carry reusable
    user-visible text use a `labelUnitId`-style reference. Image-local alternative text and
    captions are the narrow inline exception because they describe that image instance.
 4. **Local validity stays local.** Depth, total Block count, and query-Block
@@ -66,7 +65,7 @@ Composition combines list presentation, bounded query sources, page aggregate ex
 - `itemSize: "sm" | "md" | "lg"` (default `md`) — density intent only;
   the client derives visible slide counts from container width. Persisted
   documents never store breakpoints or pixel values.
-- `headingUnitId?` — optional Label Unit rendered as the section heading.
+- `headingUnitId?` — optional Label Resource rendered as the section heading.
 - `viewAllTarget?: NavigationTarget` — optional "more" affordance.
 
 The carousel layout upgrades from the bare CSS overflow scroller to a
@@ -130,12 +129,12 @@ too many. The Filter document contract is unchanged.
 
 Semantics:
 
-- The selector resolves server-side to one Tag Unit; execution applies it
+- The selector resolves server-side to one Tag Resource; execution applies it
   to the query as a non-removable `tag` `SearchInjection` — the existing
   trusted-injection contract, no new predicate surface.
 - **Bounded candidates.** `collection` candidates are the Collection's
   Tag-kind items; `viewer-follows` candidates are the viewer's followed
-  Tag Units. Both are bounded, non-corpus sets. Initial tunable: the
+  Tag Resources. Both are bounded, non-corpus sets. Initial tunable: the
   selector considers at most the first 1,000 candidates in stable keyset
   order; larger sets sample within that window. Selectors never execute
   against corpus-scale relations.
@@ -156,7 +155,7 @@ Semantics:
 - Presentation may reference the selection: `headingUnitId` accepts the
   sentinel `"selected"` slot on derived blocks so the heading renders the
   chosen Tag's localized title, composed with an optional prefix Label
-  Unit. Dynamic headings therefore need no new i18n mechanism.
+  Resource. Dynamic headings therefore need no new i18n mechanism.
 
 ### 3.4 Tabs execution semantics
 
@@ -181,9 +180,9 @@ point is the missing piece.)
 ### 3.6 Collection membership predicate
 
 The Search field registry gains a `collection` membership field
-("Unit is an item of Collection X"), compiled against `collection_item`
+("Resource is an item of Collection X"), compiled against `collection_item`
 with its existing indexes, usable from Filter controls and injections.
-This is distinct from the existing `UnitPredicate.collection` ("this Unit
+This is distinct from the existing `UnitPredicate.collection` ("this Resource
 is a Collection whose items match"), which keeps its semantics. Dynamic,
 query-backed Collections remain out of scope, per the Collection schema's
 standing note.
@@ -356,7 +355,7 @@ corpus-scale relation, with 3,000,000,000-row estimates.
   existing bounded Search/Feed execution (candidate seed via selective
   indexes, `maxCandidatesScanned 4096`, page ≤ 20 for eager fills), run at
   concurrency 4. Cost scales with the number of blocks and the existing
-  per-query bounds, not with corpus size; at 3 B Units the governing factor
+  per-query bounds, not with corpus size; at 3 B Resources the governing factor
   remains index selectivity of the underlying Search paths, unchanged by
   this program. Hydration is ≤ 8 × 20 presentations per call, within the
   existing batch-hydration shape.

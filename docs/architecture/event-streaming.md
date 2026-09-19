@@ -80,7 +80,7 @@ with domain-specific inputs, authority, receipts and recovery.
 
 | Contract | Event stream | Task stream |
 | --- | --- | --- |
-| Meaning | An identified fact that has happened, such as source-record change or canonical Unit change. | An identified request to fetch, map or apply bounded work. |
+| Meaning | An identified fact that has happened, such as source-record change or canonical Resource change. | An identified request to fetch, map or apply bounded work. |
 | Consumer topology | Independent durable consumers per business purpose and physical stream. | Workers of one purpose share a durable pull consumer and compete for work; consumer filters in a work-queue stream do not overlap. |
 | Retention | `LimitsPolicy`; ACK advances that consumer without deleting the event for others. Initial hot-window planning input: 72 hours. | `WorkQueuePolicy`; ACK removes completed work. Failed, expired or cancelled work needs an explicit terminal disposition. |
 | Capacity failure | Bound age/bytes; reject excess new writes where needed and propagate backpressure. Retention expiry is independent of ACK progress and must be detectable. | Bound bytes and admission; do not use silent discard-old or implicit expiry to lose unhandled tasks. Use `DiscardNew` on capacity exhaustion and retain durable intent for retry. |
@@ -160,7 +160,7 @@ messages. PostgreSQL SourceCheckPlan remains the authority for business due time
 pause, freshness and source limits. Workers read due plans through selective
 indexes and enqueue bounded work transactionally. A missed or duplicated wakeup
 must not lose a due plan or create duplicate effective checks. Do not install
-hundreds of millions of broker timers corresponding to Unit subscriptions.
+hundreds of millions of broker timers corresponding to Resource subscriptions.
 
 Partition physical streams by stable source-record/target routing keys. Stream
 names and consumer counts grow with measured workload shards and business
@@ -222,7 +222,7 @@ WAL, archives, backups and free-space reserve.
 | 5,000 messages/s | 1.327104 TB | 3.981312 TB |
 | 10,000 messages/s | 2.654208 TB | 7.962624 TB |
 
-For N logical Units, b=2 source bindings/Unit, u=1% of bindings affected daily and
+For N logical Resources, b=2 source bindings/Resource, u=1% of bindings affected daily and
 e=6 emitted events/tasks per affected binding, the illustrative arrival rate is
 `N * b * u * e / 86400`: about 694 messages/s at N=500M and 4,167 at N=3B.
 This is not provider fetch rate; shared acquisition, source overlap, fan-out,

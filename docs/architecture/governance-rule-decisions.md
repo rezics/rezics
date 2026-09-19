@@ -34,7 +34,7 @@ Machine authorization and execution failures are not policy rationales.
 ## Official Rule lifecycle
 
 Bootstrap reserves the official Rule Realm identity and its access boundary,
-but Rule revisions and Rule Units are online data. Core verification therefore
+but Rule revisions and Rule Resources are online data. Core verification therefore
 never compares their IDs or contents with repository state. A separate initial
 Seed publishes starter Rules only when that Realm has no revision and never
 reconciles an existing history. Every later edit uses the ordinary immutable
@@ -47,7 +47,7 @@ Realm Rule publication path and allocates new UUIDv7 Rule identities.
 | Platform | Official Rule Realm |
 | Realm | That Realm and the official Rule Realm |
 | Zone | `zone.local_rule_realm_id`, when set, and the official Rule Realm |
-| Unit | Official Rule Realm |
+| Resource | Official Rule Realm |
 
 The server derives this set; clients cannot expand it. Source Realm IDs are
 sorted before shared transaction advisory locks are acquired. Under those
@@ -59,9 +59,9 @@ Rule Realm switch cannot authorize a decision from a stale setting. Clients do
 not auto-select a Rule.
 
 Assigning `zone.local_rule_realm_id` is fail-closed: the Realm must have a
-non-deleted Realm Unit and a current immutable revision containing at least one
+non-deleted Realm Resource and a current immutable revision containing at least one
 Rule. The assignment does not copy Rules into the Zone. Assignment holds the
-Realm Unit row and the same shared current-revision lock as decision validation,
+Realm Resource row and the same shared current-revision lock as decision validation,
 so a concurrent deletion or publication cannot invalidate the check before
 commit. Every later Zone decision revalidates each selected Rule Realm and its
 exact current revision, so a deleted, stale, or empty source cannot authorize a
@@ -91,9 +91,9 @@ retention/erasure; they are not copied into immutable public rationales.
 The minimum planning baseline is 500,000,000 decisions and the forward estimate
 is 3,000,000,000. Sizing assumes two Rule references per Rule-backed decision
 on average, a hard maximum of 32, 90% Rule-backed decisions, and 10% reversals.
-Target traffic is 5,000 decision writes/s at the
-baseline and 30,000/s at the forward estimate, with no shard accepting more
-than 1,500/s. History reads target p95 below 200 ms for 50 rows; a mutation,
+Traffic must be qualified independently of retained row count. Earlier
+5,000/30,000 decision writes/s scenarios are fleet assumptions, not a promised
+rate or a database-splitting requirement for the selected deployment. History reads target p95 below 200 ms for 50 rows; a mutation,
 including current-Rule validation, targets p95 below 500 ms.
 
 An average decision costs about 0.40 KiB of heap plus indexes and a Rule
@@ -127,21 +127,24 @@ read replicas for history, and measured autovacuum/WAL capacity. Capture
 and whenever p95 exceeds its target, primary I/O remains above 70%, or one
 index exceeds 500 GiB. Do not raise page or batch limits to conceal pressure.
 
-The 3B estimate is a horizontal cutover, not a single-node promise. Shard by a
-stable hash of the typed target identity (Unit or auth User), replicate the
-small current-Rule catalog, and maintain subject-specific read projections when
-the subject and target shard keys differ. Begin repartitioning no later than
-150M decisions per primary shard, a 2 TiB primary volume, 70% sustained I/O, or
-three consecutive p95 breaches. UUIDv7 identities and keyset cursors survive
-that cutover. Terminal history may move to time-partitioned archival shards only
-after authoritative target and subject projections are durable.
+At 3B rows, use measured same-database partitions for typed target-owned history
+and selective subject/target indexes or inverse projections. Targets can be a
+Resource or private AuthPrincipal under different policy; public Agent and private
+account are never interchangeable. Current rule validation and state transitions
+retain their transaction/lock proof. Terminal history archival preserves exact
+basis and permitted subject history.
+
+Investigate before measured storage/WAL/restore budgets or three consecutive
+latency windows fail; adjust admission, indexes, partitions or retention under the
+owner contract. A separate database needs explicit reference, uniqueness and
+transaction qualification and is not selected by this row-count estimate.
 
 ## Persistence boundaries
 
 The Rule basis applies to content actions, account enforcement and account
-state, Unit access restrictions, soft deletion, ownership overrides and claim
+state, Resource access restrictions, soft deletion, ownership overrides and claim
 decisions, identity merges, revision visibility restrictions, and platform
-address controls. Replacing or clearing an active Unit restriction is a new
+address controls. Replacing or clearing an active Resource restriction is a new
 Rule-backed policy decision; it is never an unlogged side effect of replacing
 access grants. Configuration edit summaries and API-quota change notes are not
 policy violation reasons and remain ordinary audit detail. Authentication

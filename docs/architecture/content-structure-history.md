@@ -14,18 +14,20 @@ and heads. Nodes are occurrences owned by a structure; the referenced content ha
 identity and authority. Changing metadata or restoring a Work does not implicitly restore
 all referenced structures, content or Docks.
 
-A Page Post and its exact ZonePage binding retain page identity independently of navigation,
-addressing and placement. A page need not be present in a navigation structure to exist.
-Page, address, display placement and composition mutations therefore use their own preconditions.
+A Zone route targets an independently identified Resource. Its block Document,
+route binding, navigation occurrence and presentation placement have separate
+owners and preconditions. The Resource can exist without a route and can render
+through multiple Spaces. Neither a route nor a rendered page creates a native
+ZonePage identity or forces the target to be a special Post kind.
 
 Shared history and reference protocols do not require all native objects to use one physical
 revision table. Each domain keeps complete owner/variant/revision keys and explicit public heads.
 A multi-object workflow records the exact versions it used rather than borrowing another
 aggregate's concurrency token.
 
-## Unit history storage
+## Resource history storage
 
-A logical Unit is an identity/reference/capability contract. Its domain revision describes the
+A logical Resource is an identity/reference/capability contract. Its domain revision describes the
 state owned by that aggregate, not a checkpoint of every reachable object. The existing
 `unit_revision` family is one implementation; catalog metadata and other owners have their
 own qualified revision families.
@@ -39,11 +41,11 @@ Restore creates a new authorized revision or selection and retains the old histo
 rechecks current target eligibility and disclosure. Invalid, unavailable or erased inputs
 cannot become an accepted state merely because they appeared in an older snapshot.
 
-### Unit revision contribution provenance
+### Resource revision contribution provenance
 
 Preserve accountable operator, credited contributor, method and source independently.
 Human/AI/unattributed declarations describe contribution provenance rather than infer who
-controls the resource. A credited software-agent Entity is distinct from the private account
+controls the resource. A credited software Agent is distinct from the private account
 that authorized the operation. Source acquisition does not create native accounts or grant
 participation through matching names.
 
@@ -52,7 +54,7 @@ metadata changes. History lists and contributor reverse queries use bounded page
 selective indexes; provenance does not require scanning all revisions or updating every
 past credit when a display name changes.
 
-### Unit revision visibility
+### Resource revision visibility
 
 Immutable identity/history is separate from currently permitted disclosure. Apply the
 [access vocabulary](../../libraries/access/README.md) and governance rules to content,

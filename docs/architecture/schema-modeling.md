@@ -9,16 +9,16 @@ The [plan](../plan/README.md) owns activation and verification timing.
 This owner defines the common native model and its compilation boundary.
 [Standards adoption](standards-adoption.md) owns external profiles and evidence;
 [physical storage](database/resource-storage.md) owns field and table-family choices;
-[Space composition](realm-collection-zone.md) and
-[addressing](unit-slug-addressing.md) own navigation and presentation contracts.
+[Space composition](space-composition.md) and
+[addressing](resource-addressing.md) own navigation and presentation contracts.
 
 ## Native terminology and identity
 
-**Resource** is the selected name for REZICS's managed native identity/reference/
-capability contract, previously called **Unit**. Existing code, API names and older
-qualification records still say Unit; they denote this same contract, not a second
-root model. Changing those consumers is implementation work. Neither spelling
-requires a global `resource`/`unit` parent table.
+A **Resource** is a native managed object with stable identity, a logical owner,
+an owner-specific lifecycle and declared capabilities. ResourceRef is the shared
+reference contract. Generic features do not require a global Resource parent row.
+Implementation names and qualified versions are recorded separately in the
+[runtime reference](../reference/current-implementation.md).
 
 Resource is a project choice, not an academically mandated name. Web/RDF resource
 is broader than the native contract; `schema:Thing`, `prov:Entity`, a database entity
@@ -67,7 +67,7 @@ state. Completeness is not measured by class, profile or SQL-table counts.
 | Catalog | Work/content/version/release/copy grains, recording/track occurrences, software/project/package/build distinctions, Agents, generic entities, groupings and distribution compositions. |
 | Documents and media | Document/Variant/Revision, BlockOccurrence, asset/representation/location/use, selectors, publication/adoption and payload availability. |
 | Social and personal state | Posts, replies, reviews, polls, ratings, reactions, follows, favorites, progress, messages and delivery; each retains its own state/authority. |
-| Spaces and addresses | Shared Space identity, capabilities and role-qualified contexts; mounts, route definitions, namespaces, slug bindings and address preferences. No native ZonePage identity is required. |
+| Spaces and addresses | Shared Space identity, capabilities and role-qualified contexts; mounts, route definitions, namespaces, slug bindings and address preferences. Routes do not allocate a separate page resource. |
 | Authority and governance | Private AuthPrincipal, admitted public Agent, representation, role/group grants, policy decisions, enforcement, audit, erasure and recovery. |
 | Services and operations | Hub catalog, subscriptions/entitlements, jobs/leases/attempts, receipts, outbox/delivery, projection checkpoints, export and restoration. |
 
@@ -308,58 +308,10 @@ The native model and storage lowering are REZICS engineering decisions, not
 conclusions dictated by source prestige. Qualification must exercise generated
 storage through real writes and demonstrate loss/unsupported behavior explicitly.
 
-## Current implementation decisions
+## Implementation and evidence boundary
 
-The following describes the selected 2026-09-18 compiler implementation and its
-recorded qualification, not completion of the integrated target above. Source pins
-and authored models are tracked; original inputs and generated derivatives follow
-the compiler's artifact-preparation policy.
-
-`libraries/schema/model/domains.ts` owns reviewed concept/property rules.
-`model/storage.ts` and `model/storage/` own storage layouts; the compiler emits
-55 real Drizzle table declarations including metadata, identified relation families,
-media, Wiki and description histories. Native layout refactoring used the former
-handwritten declarations as mechanical input while preserving reviewed invariants;
-that one-time refactor is not a compiler stage or semantic authority. Ongoing edits
-are authored in the model, and generated files are output only.
-
-The compiler also checks the named native writers' table/column targets and requires
-an ownership decision for each domain. Existing operational modules remain authored
-because their authority, lifecycle and query requirements are not consequences of
-an ontology. The generated model report names each such owner.
-
-Datatype validation uses an explicit XSD 1.1 subset with exact integer/decimal
-lexical handling, calendar bounds, timezones, durations and binary encodings. The
-reviewed [rdf-validate-datatype source](https://github.com/zazuko/rdf-validate-datatype/blob/master/src/validators.ts)
-on 2026-09-18 had incorrect signed-int endpoints and date regexes without calendar
-bounds; it was not adopted as a correctness authority. Unsupported types, including
-context-dependent QName/XML processing, remain explicit rather than being silently
-accepted. This is not a full XML Schema processor.
-
-SHACL Core projection is advisory and includes a machine-readable lowering report.
-RDF direct triples collapse duplicate values, while native relation occurrences
-have identities; native ordering, writer authority, CAS and erasure also cannot be
-proved by that projection. The portable native model and its actual writer remain
-authoritative. Vocabulary class descriptions contain no invented validation rules.
-
-Description commands admit at most 2,048 statement occurrences, 64 declared types
-and 8 MiB per revision. Meaning and native-reference checks use batches, not a
-query per statement. Reads address one exact object/revision and stop at the
-statement budget. The caller owns authentication, disclosure and admission quotas.
-
-At the 500M/3B **revision-row** checkpoints, an additional model UUID and a
-16-byte profile key cost approximately 33–40 bytes per populated row before
-compression/alignment differences: about 16.5–20 GB / 99–120 GB of heap payload.
-This is an estimate, excludes WAL/replication/backups, and is multiplied by the
-actual revision rate, not merely the object count. The FK references replicated
-model metadata and adds no per-content global identity allocation. The new
-meaning guard probes one object/revision and at most the selected 12 vocabulary
-releases using their keys; it never scans the corpus. Model selection's metadata
-counts are bounded by the installed reviewed model, not content cardinality.
-
-Splitting metadata and content into different databases requires local replicated
-model definitions before writes. Remote reference validation, deduplication,
-erasure delivery and cutover/rollback remain explicit protocol obligations.
-The physical-family transfer fixture exercises IDs and exact content on two
-PostgreSQL databases; it cannot establish another engine's transactions, billion-row
-throughput or a live cross-service cutover.
+[Compiler reference](../reference/current-implementation.md#schema-and-artifact-pipeline)
+records the actual packages, generated artifacts, current datatype subset and
+advisory shape projection. [Executed schema evidence](../testing/schema.md) owns
+the earlier fixture results. The [integrated acceptance](../testing/model-contracts.md)
+qualifies this target only when its named cases are executed.

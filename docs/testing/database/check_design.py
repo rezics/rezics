@@ -18,6 +18,8 @@ from decimal import Decimal
 from pathlib import Path, PureWindowsPath
 from urllib.parse import unquote, urlsplit
 
+from generated_inputs import authored_requirements, prepared_inputs, untracked_paths
+
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 ARCHITECTURE = ROOT / "docs/architecture/database"
@@ -104,7 +106,7 @@ DISPOSITIONS = {
     "D07": "Retain native owner and specialized capabilities; make classification and source contexts explicit.",
     "D08": "Reshape body/history into Document revisions; retain media identity with contextual uses, representations, locations and scoped selection.",
     "D09": "Replace overloaded post kind/root assumptions with publication, slots, origin and placement; retain poll invariants.",
-    "D10": "Retain realm/zone/structure/curation/theme ownership; bind exact revisions, scopes and generations.",
+    "D10": "Unify Realm/Zone identity as Space; retain separate capabilities, route-to-Resource bindings and exact composition revisions.",
     "D11": "Retain dedicated participation facts; explicit scope/actor uniqueness, provenance and versioned progress.",
     "D12": "Retain private conversation and recipient-delivery domains; versioned content, audience and watermark contracts.",
     "D13": "Retain rule-backed governance and reversals; complete split/erasure/correction contracts.",
@@ -474,20 +476,18 @@ def artifact_path(name):
 
 def design_documents():
     return sorted({
-        *(p for p in ARCHITECTURE.glob("*.md") if p.name != "capacity.md"),
-        *(ROOT / "docs/architecture" / name for name in (
-            "product-design-principles.md",
-            "identity-and-access.md", "connected-apps.md",
-            "identity-and-access-experience.md", "identity-access-capacity.md",
-        )),
+        ROOT / "docs/README.md",
+        *(p for p in (ROOT / "docs/architecture").rglob("*.md") if p != ARCHITECTURE / "capacity.md"),
         *(ROOT / "docs/testing").glob("*.md"),
         *(ROOT / "docs/plan").glob("*.md"),
         *(ROOT / "docs/plan/modules").glob("*.md"),
         *(ROOT / "docs/research").glob("*.md"),
+        *(ROOT / "docs/next-version").glob("*.md"),
+        *(ROOT / "docs/reference").glob("*.md"),
     }, key=lambda path: path.relative_to(ROOT).as_posix())
 
 
-def dependencies(inventory_rows, api_rows, generated_names):
+def dependencies(inventory_rows, api_rows, generated_names, prepared):
     local = set()
     network = set()
     for document in design_documents():
@@ -516,16 +516,18 @@ def dependencies(inventory_rows, api_rows, generated_names):
             local.add(path.as_posix())
     return {
         "source_baseline_commit": SOURCE_BASELINE_COMMIT,
-        "runtime": "Python 3.10+ standard library; Git only for optional --require-tracked",
+        "runtime": "Python 3.10+ standard library, Git and prepared Node/Yarn workspace for the read-only production emitter",
         "network_required_for_reproduction": False,
         "local_document_dependencies": sorted(local),
         "schema_inputs": [row["source_file"] for row in inventory_rows],
+        "prepared_schema_inputs": prepared,
         "api_owner_directory_inputs": [(API / row["api_owner"]).relative_to(ROOT).as_posix() for row in api_rows],
         "supporting_public_https_sources": sorted(network),
     }
 
 
 def artifacts():
+    prepared = prepared_inputs(ROOT)
     inventory_rows, api_rows = inventory()
     cases = scenarios()
     cap, cap_md = capacity()
@@ -544,7 +546,7 @@ def artifacts():
         assert f"## {group}." in dictionary, group
     for index in range(1, 15):
         assert f"I{index:02}" in readme
-    dependency_manifest = dependencies(inventory_rows, api_rows, set(outputs) | {"dependency-manifest.json"})
+    dependency_manifest = dependencies(inventory_rows, api_rows, set(outputs) | {"dependency-manifest.json"}, prepared)
     outputs["dependency-manifest.json"] = json.dumps(dependency_manifest, indent=2, ensure_ascii=False) + "\n"
     evidence = {
         "source_baseline_commit": SOURCE_BASELINE_COMMIT,
@@ -558,6 +560,7 @@ def artifacts():
                    "all top-level API owner directories have explicit mapping",
                    "dictionary groups and local artifact links resolve within the repository, outside temporary directories",
                    "scenario identifiers unique and every invariant family covered",
+                   "registered model schema output set and bytes match the production emitter; pinned vocabulary bytes match their manifest",
                    "3B capacity arithmetic equals six times 500M under same assumptions"],
         "not_executed": ["target DDL or migrations", "SQL behavioral/concurrency tests", "composed formal model checking",
                          "full upstream field conformance", "load/stability tests", "backup/restore drill"],
@@ -573,16 +576,14 @@ def artifacts():
 def require_tracked(outputs, dependency_manifest):
     tracked = set(subprocess.check_output(["git", "ls-files", "-z"], cwd=ROOT).decode("utf-8").split("\0"))
     required = set(dependency_manifest["local_document_dependencies"]) | set(dependency_manifest["schema_inputs"])
+    prepared = dependency_manifest["prepared_schema_inputs"]
+    # Only exact derivatives already verified against the production emitter are
+    # exempt. Unknown/untracked modules and all authored producers still fail.
+    required = authored_requirements(required, prepared)
     for name in outputs:
         required.add(artifact_path(name).relative_to(ROOT).as_posix())
     required.update(path.relative_to(ROOT).as_posix() for path in [*design_documents(), Path(__file__).resolve()])
-    missing = sorted(path for path in required if not (
-        any(name.startswith(path.rstrip("/") + "/") for name in tracked)
-        if (ROOT / path).is_dir() else path in tracked
-    ))
-    for directory in dependency_manifest["api_owner_directory_inputs"]:
-        if not any(path.startswith(directory + "/") for path in tracked):
-            missing.append(directory + "/ (no tracked contents)")
+    missing = untracked_paths(ROOT, required, dependency_manifest["api_owner_directory_inputs"], tracked)
     if missing:
         raise SystemExit("Untracked design dependencies:\n" + "\n".join(missing))
 
@@ -592,7 +593,7 @@ def main():
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--write", action="store_true")
     mode.add_argument("--check", action="store_true")
-    parser.add_argument("--require-tracked", action="store_true", help="Require all local inputs and package files in the Git index")
+    parser.add_argument("--require-tracked", action="store_true", help="Require authored inputs/recipes and package files in Git; verify registered ignored derivatives")
     args = parser.parse_args()
     outputs, evidence, dependency_manifest = artifacts()
     for name, data in outputs.items():

@@ -1,8 +1,7 @@
 # Resource addressing and Space routes
 
 Status: selected target revised 2026-09-19; implementation remains pending.
-The historical filename is retained for document navigation. Resource is the
-[selected name for the existing logical Unit contract](schema-modeling.md#native-terminology-and-identity).
+Resource follows the [native identity contract](schema-modeling.md#native-terminology-and-identity).
 Owners: Main Service and Web. Apply the [program compatibility policy](../plan/execution-workflow.md#program-authority);
 this target requires neither old URL compatibility nor legacy address transfer.
 
@@ -15,7 +14,7 @@ or a separately owned Page. The resolved Resource uses the shared rendering flow
 including Post rendering where appropriate, with explicit presentation context.
 
 Use one authoritative address model. A route definition is not a second slug store;
-a resource's localized name is not its address. The [Space contract](realm-collection-zone.md)
+a resource's localized name is not its address. The [Space contract](space-composition.md)
 owns capabilities and role-qualified contexts. A mount never grants access or
 changes content ownership, published selection or attribution.
 
@@ -133,11 +132,9 @@ be automatically elected as canonical. Identity-route fallback remains available
 where disclosure permits it. A global address never overrides a narrower site's
 selected content or authority requirements.
 
-<a id="zone-page-addresses"></a>
 ### Resource mounts and page rendering
 
-There is no selected native ZonePage identity, `post(kind=page)` ownership exception,
-or required `zone_page` parent. A route has an operational relation ID for editing
+A route has an operational relation ID for editing
 and history; the content remains the target Resource. Two Spaces may route to the
 same target, including its Block content, without copying it. Root content is an
 explicit `/` route binding; a literal `home` label has no implicit identity semantics.
@@ -229,20 +226,16 @@ or policy failed. UUIDs, labels and route parameters are not credentials. Addres
 mutations invalidate old/new paths and affected preference/mount projections; stale
 cache or reverse-link results cannot bypass current revocation.
 
-## Current implementation and required verification
+## Required verification
 
-Current `@rezics/slug` has a compile-time users/realms/zones route manifest, ASCII-only
-labels and a small fixed depth. `unit_slug_address` has target-wide canonical
-uniqueness. Zone Pages currently use `post + zone_page`. Those are implementation
-facts to replace, not additional constraints on this target; current API names and
-qualification evidence must remain explicit until affected consumers are updated.
-
-Required cases are in [model-contract acceptance](../testing/model-contracts.md):
-multi-Space preferences, UUID-shaped slugs, Unicode/encoding/case collisions,
-route ambiguity, root and nested resolution, reverse-link equivalence, stale
-versions, concurrent assignment, rename/tombstone, disabled routes, current access
-and shared Resource rendering. Backend, generated clients, navigation, SEO, search
-execution and Web adapters must change together when implementation is activated.
+[Current address behavior](../reference/current-implementation.md#routing-and-language)
+is implementation reference, not this target's authority. Required cases are in
+[model-contract acceptance](../testing/model-contracts.md): multi-Space preferences,
+UUID-shaped slugs, Unicode/encoding/case collisions, route ambiguity, root and nested
+resolution, reverse-link equivalence, stale versions, concurrent assignment,
+rename/tombstone, disabled routes, current access and shared Resource rendering.
+Backend, generated clients, navigation, SEO, search execution and Web adapters
+change together when implementation is activated.
 
 Primary basis: [Web identity/representation](https://www.w3.org/TR/webarch/),
 [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986.html),

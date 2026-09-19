@@ -5,11 +5,11 @@ The [identity contract](identity-and-access.md) and [connected-app contract](con
 own authorization. This owner applies the [product design principles](product-design-principles.md)
 to how people use those capabilities.
 
-The [selected naming/model revision](schema-modeling.md) calls the public identity
-responsibility Agent (current Entity API names) and shares Realm/Zone identity through
-Space capabilities. The familiar user tasks below remain; target consumer changes
-follow backend qualification. The UI must not infer a unique private account from
-an Agent, or infer governance/participation from a Zone presentation context.
+Public participation uses an admitted Agent. Realm and Zone are capabilities of
+Space, with ordinary community and presentation tasks kept distinct. Interfaces
+must not infer a unique private account from an Agent or infer governance from
+presentation context. Exact current UI/API identifiers live in the
+[runtime reference](../reference/current-implementation.md#identity-and-authority).
 
 ## Ordinary experience and progressive disclosure
 
@@ -21,8 +21,8 @@ Organize three task audiences, not three mandatory nested screens:
 
 | Audience | Initial experience | Available when needed |
 | --- | --- | --- |
-| Everyday use | Sign in to the valid default Entity, see current name/avatar, read/post/join, accept a clear invitation, connect or disconnect an App. | Identity switcher, personal defaults, connected-app access details. |
-| Collaboration management | Named members/teams, invite/remove, choose understandable role presets, manage one Org/Realm or shared Entity. | Custom groups, multiple roles, scoped resource selection and effective-access explanation. |
+| Everyday use | Sign in to the valid default Agent, see current name/avatar, read/post/join, accept a clear invitation, connect or disconnect an App. | Identity switcher, personal defaults, connected-app access details. |
+| Collaboration management | Named members/teams, invite/remove, choose understandable role presets, manage one Org/Realm or shared Agent. | Custom groups, multiple roles, scoped resource selection and effective-access explanation. |
 | Advanced administration/development | A dedicated management workspace for people who need it, with task-specific entry points. | Mixed recipients, custom role definitions, bounded hierarchies, representation/redelegation, client credentials, installation policy and restricted audit evidence. |
 
 Common screens expose relevant choices and a clearly named path to advanced
@@ -37,9 +37,9 @@ split and navigation with representative users; the sources do not establish its
 
 ## Defaults, attribution and recovery
 
-Onboarding admits a usable Entity and establishes the private main preference.
+Onboarding admits a usable Agent and establishes the private main preference.
 With one usable choice, or a valid saved default, enter normally without an identity
-wizard. Display the current Entity at identity-sensitive actions. More identities
+wizard. Display the current Agent at identity-sensitive actions. More identities
 appear in a switcher; keep the user's actual control/representation scope clear.
 
 Account defaults, per-app defaults, open drafts and active authorizations retain
@@ -58,11 +58,11 @@ Their product/API restrictions are not copied into REZICS.
 | User task | GUI contract | API/authority preserved |
 | --- | --- | --- |
 | Join or accept invitation | Clear destination, participation identity and terms; ordinary successful entry needs no role editor. | Exact target, recipient, admission generation, rule revision and accepted/pending outcome. |
-| Share management | Select named recipient(s), role and target; offer a useful preset. | AuthPrincipal, Entity and eligible member-set recipients are expressible through authorized selectors; private raw IDs stay hidden. |
+| Share management | Select named recipient(s), role and target; offer a useful preset. | AuthPrincipal, Agent and eligible member-set recipients are expressible through authorized selectors; private raw IDs stay hidden. |
 | Create an access group/team | Name a team, add members and select duties in one coherent flow. | Separate Group, Role and Binding ownership; multiple memberships/roles remain editable. |
 | Adjust advanced access | Scope picker, custom role editor and visible impact preview. | No lost restrictions, expiry, role revision, delegated ceilings or cross-scope semantics. |
 | Understand access | Explain which role/group or representation permits an action, or which condition blocks it. | Backend-derived provenance, redacted for the viewer; no browser-side authority inference. |
-| Connect an App/AI client | Show the selected Entity, requested activities, resources, offline use and relevant trust information; allow approval or cancellation. | Personal consent and scope installation are distinct; no approval hidden under an advanced disclosure. |
+| Connect an App/AI client | Show the selected Agent, requested activities, resources, offline use and relevant trust information; allow approval or cancellation. | Personal consent and scope installation are distinct; no approval hidden under an advanced disclosure. |
 | Remove an App or member | State the affected scope and practical effect; preserve unrelated access. | Consent, credential, installation and membership revocation are separate commands. |
 | Administer credentials | Dedicated authorized workspace, one-time secret display and clear rotation/revocation outcome. | Current administrative authority and required fresh-authentication conditions. |
 
@@ -72,8 +72,8 @@ capable editor; never silently flatten it to a preset or discard hidden fields.
 Cross-page selections, empty filtered pages with continuation, unavailable public
 labels and stale revisions retain their API semantics.
 
-Use public Entity labels where permitted and purpose-specific private recipient
-handles where needed. Do not make public Entity selection an account-enumeration
+Use public Agent labels where permitted and purpose-specific private recipient
+handles where needed. Do not make public Agent selection an account-enumeration
 endpoint. Public membership is not a controller roster. Explain consequences in
 ordinary language; keep protocol identifiers and authorization proof internals in
 restricted diagnostics rather than required user inputs.

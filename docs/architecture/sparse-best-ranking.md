@@ -2,7 +2,7 @@
 
 ## Native execution contract
 
-The current installation uses the fresh native baseline. Logical references carry an owner and identity; there is no global Unit table or Variant collapse. Feed, Search, Reviews and recommendation surfaces use native owner/shape selectors. Positive ranking reads immutable sparse scores; zero-score candidates come from each owner's indexed public rows. Request admission, residual scan ceilings, viewer preferences and current visibility checks remain separate from score construction.
+The current installation uses the fresh native baseline. Logical references carry an owner and identity; there is no global Resource table or Variant collapse. Feed, Search, Reviews and recommendation surfaces use native owner/shape selectors. Positive ranking reads immutable sparse scores; zero-score candidates come from each owner's indexed public rows. Request admission, residual scan ceilings, viewer preferences and current visibility checks remain separate from score construction.
 
 The scheduler admits at most one build at a time, at least one hour apart for a policy. It fixes a closed-hour source watermark and reads positive hourly signals from the preceding seven days with a 24-hour exponential half-life. Signals arriving or changing during construction affect a subsequent build; the watermark defines the window, not a claimed upstream transaction snapshot. Once published, score rows cannot be updated.
 

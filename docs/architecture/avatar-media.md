@@ -74,7 +74,7 @@ responsibilities:
 - `image_asset_presentation` is a child of `image_asset`, keyed by
   `(asset_id, role)`. It owns `fit`, a normalized crop rectangle, and a
   monotonically increasing `revision`.
-- Unit localization rows continue to reference only the ImageAsset identity.
+- Resource localization rows continue to reference only the ImageAsset identity.
   Attachment validation requires a ready presentation for the referenced role.
 
 Avatar and banner use the same fixed-crop strategy. Avatar is 1:1, defaults to

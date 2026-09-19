@@ -2,37 +2,35 @@
 
 ## Decision
 
-REZICS 1.4.0 replaces the previous moderation reason model with immutable rule
-references. This is a destructive contract cutover: old reports, review cases,
-content-governance actions, governance notes, and moderation notifications are
-discarded. There is no adapter, compatibility route, fallback reason, or data
-translation layer.
+Content governance records exact rule-backed decisions, reports and independently
+progressing referrals. Released cutovers are recorded in [release history](../releases/1.4.0.md#governance-cutover);
+they do not authorize deleting current reports or resetting a later installation.
 
-A reporter or authorized reviewer may select multiple rules. The only accepted
-rule sources are the Unit's current Realm context and the official Rule Realm.
-The API accepts at most two distinct rule sources and 32 distinct rules. A rule
-reference always carries all three identities needed to prove what was current
-at decision time: `sourceRealmId`, `revisionId`, and `ruleId`.
+A report or adverse decision cites the applicable community governance context
+and/or official rules. Presentation in a Zone alone does not select community
+authority. The initial operation profile admits at most two rule sources and 32
+exact rule references per command. A reference identifies the governing Space,
+immutable rule-set revision and rule occurrence, with the representation shown
+to the acknowledging participant retained where required.
 
-| Operation | Accepted rule sources | Rule requirement |
+| Operation | Applicable rule sources | Requirement |
 | --- | --- | --- |
-| Report without a Realm context | Official Rule Realm | At least one |
-| Report from a Realm context | That Realm and the official Rule Realm | At least one across either or both sources |
-| Realm adverse action | That Realm and the official Rule Realm | At least one |
-| Platform adverse action | Official Rule Realm | At least one |
-| Approve, restore, unlock, dismiss, or note | None | Rules are omitted |
+| Report without community governance context | Official rules | At least one exact rule |
+| Report under community governance | That admitted Realm capability and official rules | At least one across the selected sources |
+| Community adverse action | That governing Space and official rules | At least one exact rule |
+| Platform adverse action | Official rules | At least one exact rule |
+| Approve, restore, unlock, dismiss or note | Reversal/evidence contract | Do not invent an adverse rule basis |
 
-The server reloads the current rule revision while holding source-scoped shared
-transaction advisory locks. Concurrent reports and reviews can validate the
-same revision together, while publishing a new revision takes the matching
-exclusive lock. A stale revision or a rule no longer in that revision fails
-rather than silently changing the reporter's or reviewer's selection. The
-clients never auto-select the first rule.
+Validation acquires the current source authority/revision fences and reloads the
+selected rules after locking. Stale or no-longer-current selections return a typed
+conflict; clients preserve the user's selection rather than choosing another rule.
+The [identity](identity-and-access.md) and [Space](space-composition.md) contracts
+govern participation, representation and authority independently of classification.
 
 ## Report and case model
 
 `content_report` is one reporter submission and contains only reporter-authored
-evidence plus the exact reported Unit revision. `content_report_rule` stores its
+evidence plus the exact reported Resource revision. `content_report_rule` stores its
 many rule references. `content_report_referral` routes the submission to one
 case per responsible authority. A report selecting both Realm and official
 rules therefore remains one report with two independently progressing
@@ -60,13 +58,13 @@ License invalidation and restoration operate on individual
 target `licenseGrantId`. `restore_license` remains a reversal of that action.
 `granted` on the ledger is a recorded declaration, not a finding of legal
 validity; invalidation withdraws platform recognition of that declaration.
-See [Unit license grants](./unit-license-grants.md).
+See [Resource license grants](./resource-license-grants.md).
 
 ## Concurrency and bounded work
 
-Case creation uses an authority-and-Unit transaction advisory lock only when no
+Case creation uses an authority-and-Resource transaction advisory lock only when no
 active case exists. Established cases use a shared row lock, so reports for a
-viral Unit can proceed concurrently while a terminal case transition cannot
+viral Resource can proceed concurrently while a terminal case transition cannot
 race a new referral. Duplicate protection uses a separate
 `(case, reporter)` advisory-lock key; one reporter's retry does not serialize
 other reporters.
@@ -99,8 +97,9 @@ The planning baseline is 500,000,000 reports; the forward estimate is
 - content actions equal 8% of referrals and adverse actions cite 1.8 rules on
   average;
 - 15% of reports include details averaging 400 UTF-8 bytes;
-- normal peaks are 5,000 report writes/s at the baseline and 30,000 writes/s
-  at the forward estimate, with a per-database-shard target below 1,500 writes/s;
+- workload qualification must elect report/decision write rates separately from
+  retained row count; the earlier 5,000/30,000 writes/s scenarios are unqualified
+  fleet assumptions, not current single-database service promises;
 - queue reads target p95 below 200 ms for 50 items, report submission p95 below
   300 ms excluding external authentication, and governance actions p95 below
   500 ms.
@@ -140,32 +139,15 @@ sort or scan more than 10,000 rows, or before sustained primary I/O exceeds 70%,
 the operator must capture `EXPLAIN (ANALYZE, BUFFERS)` with production-like
 skew and add capacity rather than increasing page limits.
 
-The 3B estimate is a horizontal-cutover target, not a single-node promise.
-Shard by a stable hash of `target_unit_id` so cases, referrals, actions, and
-counter buckets for a target remain colocated. Keep current rule revisions as
-small replicated reference data. Maintain a reporter-keyed inbox projection
-for My Reports, since that access path otherwise fans out across target shards.
-UUIDv7 IDs and opaque cursors remain valid across the cutover. Move terminal
-case history to time-partitioned archival shards only after its reporter inbox
-projection is durable. Repartitioning is triggered no later than 150M reports
-per primary shard, a 2 TiB primary data volume, 70% sustained I/O, or p95 queue
-latency above 200 ms for three consecutive windows.
+The 3B estimate remains a same-database planning case. Partition target-owned
+case/referral/action history where measured access and retention justify it;
+maintain a reporter-keyed inbox index/projection for My Reports. Preserve exact
+rule revision and state-transition authority across those tables. A partitioned
+layout still consumes one deployment's storage, WAL, vacuum and recovery budget.
 
-## 1.4.0 cutover
-
-1. Stop all pre-1.4.0 API and worker processes. Mixed binaries are unsupported.
-2. Back up the database for rollback of the whole deployment, not for importing
-   old moderation data into the new model.
-3. Apply `20260809000003_content_governance_rewrite.sql`. It preserves current
-   materialized Unit and Realm Unit states and live account enforcements, then
-   drops old report, case, action, reason-bearing, aggregate, trigger, note, and
-   notification data.
-4. Deploy the 1.4.0 API, generated clients, web application, and workers as one
-   coordinated release.
-5. Run migration/schema synchronization, seed-contract, aggregate
-   reconciliation, and representative queue-plan checks before reopening
-   reporting.
-
-Rollback means restoring the pre-cutover backup and the complete pre-1.4.0
-binary set. There is intentionally no reverse data migration and no dual-write
-period.
+Trigger investigation before sustained I/O exceeds 70%, queue p95 exceeds 200 ms
+for three windows, or measured restore/index-maintenance time exceeds its budget.
+Respond with measured query/index changes, admission limits, physical table or
+partition changes and retention policy. A future database split requires its own
+transaction/reference/recovery decision; neither 150M nor 3B is a universal
+physical row limit. Published throughput remains unqualified until measured.

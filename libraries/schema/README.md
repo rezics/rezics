@@ -1,5 +1,9 @@
 # REZICS model and Drizzle schema
 
+Implementation reference. This owner documents current code, identifiers and local
+limits. The [selected target](../../docs/architecture/schema-modeling.md) and [implementation crosswalk](../../docs/reference/current-implementation.md)
+define the reconciliation boundary; existing fixtures do not qualify revised semantics.
+
 This package owns the native model and its PostgreSQL representation. Standard
 vocabularies supply semantics; reviewed REZICS decisions supply grain, validation,
 write authority and storage. Content providers supply records, not table designs.
@@ -13,7 +17,8 @@ these boundaries and the alternatives deliberately rejected.
 | `model/domains.ts` | Authored concept/property decisions: standard meanings, identity grain, cardinality, ordering, allowed values, native writer and storage target. |
 | `model/storage.ts`, `model/storage/` | Authored storage decisions for vocabulary/model metadata, identified relations, indexed media/selection, Wiki and semantic description histories. |
 | `src/model/` | Portable model contract, exact datatype validation and executable record/authority validation. |
-| `src/postgres/**/*.generated.ts` | Real Drizzle declarations emitted from the authored storage model. Do not edit. |
+| Model-declared `src/postgres/**/*.generated.ts` | Ignored Drizzle derivatives emitted from the authored storage model. Do not edit. |
+| `src/postgres/identity/auth-oauth.generated.ts` | Tracked protocol snapshot emitted by main's separate OAuth generator; it is not an ignored native-model derivative. |
 | Other `src/postgres/{domain}/*.ts` | Explicitly hand-authored native/operational Drizzle owners. Accounts, authorization, queues and payments cannot be inferred from an ontology. |
 | `src/generated/model.ts`, `src/generated/terms.ts` | Compiled reviewed model and stable standard-term UUIDs. |
 | [Model mapping report](docs/model.generated.md) | Every reviewed concept, predicate, writer, physical target and generated-table decision. |

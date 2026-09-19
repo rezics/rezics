@@ -1,108 +1,85 @@
-# Multilingual Realm Rule authoring
+# Multilingual community rule authoring
 
-## Decision
+Status: target contract. A Realm is the community capability of a Space.
+[Governance](governance-rule-decisions.md) owns exact rule consent and decisions;
+[content composition](database/content-composition.md) owns staged revisions and
+published selections. The [runtime reference](../reference/current-implementation.md)
+records the earlier array-based authoring shape and its language limits.
 
-A Realm Rule is one ordered policy with one or more language-specific
-presentations. A Rule revision is still an immutable, complete replacement,
-but each submitted Rule now has this shape:
+## Rule identity and language
 
-```json
-{
-  "localizations": [
-    { "language": "en", "title": "Be civil", "content": {} },
-    { "language": "zh", "title": "保持友善", "content": {} }
-  ]
-}
-```
+A Rule has stable Resource identity and immutable policy/content revisions. An
+ordered RuleSet revision pins the exact rules and language/representation selections
+it publishes. Language presentations are separately identified variants; their
+translation derivation and review evidence remain explicit. Consent records the
+exact applicable RuleSet/rule and, where required, the presentation actually shown.
+Adding a translation does not silently reinterpret an earlier acknowledgement.
 
-The shared localization contract requires between one and seven entries, and
-the request boundary rejects duplicate language identities. Bilingual text is
-never merged into one title or document. The authoring endpoint returns all
-localizations, while the public reading endpoint continues to choose one
-presentation from the caller's ordered language preferences.
+Content language uses the open IANA/BCP 47 contract, independently of UI locales.
+A rule must have at least one admitted readable presentation before publication;
+the installed interface's translated language list is not a storage allowlist.
+Same-language alternative variants can exist. A published presentation selector
+chooses one for its exact scope/purpose; variant identity is not just language.
 
-Publishing requires the exact current `baseRevisionId`. An advisory transaction
-lock serializes publication within one Realm; after acquiring it, the service
-reloads the current revision and returns `RealmRuleRevisionChanged` instead of
-replacing a revision based on stale authoring data. Rule array order becomes the
-persisted ordinal order, so the web editor's up and down controls require no
-separate reorder endpoint.
+The authoring API uses bounded pages/commands with explicit variant IDs, language,
+text/Document references and expected revisions. Duplicate occurrence IDs or
+ambiguous published selection are rejected. Bilingual source material is not
+silently split, combined or translated. Reading reports the actual selected
+language and fallback; an unavailable requested translation is not fabricated.
 
-## Browser draft model
+## Revision and publication protocol
 
-The selected content language is authoring state, not interface-locale state.
-Changing the interface language therefore does not select another content
-language. Changing the content language is immediate and never asks the user to
-discard the current editor.
+Small edits use a bounded atomic command. Large multilingual changes stage an
+immutable manifest through bounded batches, then seal and activate under current
+authority and the exact expected RuleSet head. Failed or incomplete staging cannot
+become a published policy. Editing one translation need not copy every rule and
+every other language into one request.
 
-Every editor draft is identified by account, Unit, feature scope, and either a
-content-language partition or a shared partition. Language-specific fields use
-separate partitions; fields such as a Zone slug, schedule, theme, or page
-placement use one shared partition. Realm Rules use one shared aggregate draft
-whose Rule entries each contain a language-keyed localization map. This avoids
-both forms of loss: unmounting a keyed language editor does not erase its draft,
-and global fields do not fork into contradictory copies per language.
+Publishing locks/reloads the current community capability, required authority and
+head after admission. A concurrent policy change returns a typed conflict; clients
+retain drafts and never substitute another current rule silently. Rule order uses
+stable occurrences and positions. Changes to language presentation, normative rule
+meaning and publication selection have distinct version/consent consequences.
 
-Drafts are retained in memory for immediate switching and in a versioned
-IndexedDB object store for reload recovery. Stored values enter application
-state only after their feature codec validates the unknown runtime value. A
-draft records the server revision used as its baseline; when that baseline no
-longer matches, the editor preserves the draft, displays a conflict warning,
-and offers an explicit discard action. Successful publication removes only the
-submitted draft partition. Stored drafts expire after 30 days when next read.
+## Draft and editor contract
+
+A draft is private to the authenticated account and is bound to the selected
+authority subject, target Resource/Space, feature, exact base revisions and variant
+or shared partition. Changing interface locale does not select another content
+variant. Changing a default Agent does not retarget a prepared publication.
+
+Language-specific draft values have stable variant identities. Shared fields such
+as rule order or route configuration have a shared draft partition. Stored draft
+payloads enter the editor only through the owning codec. Local persistence and
+expiry are explicit product policy, not evidence of server acceptance. Successful
+publication clears only the submitted draft/receipt; conflicts preserve input.
 
 ## Bounded work and capacity
 
-Rule configuration is strictly bounded to 100 Rules per revision and seven
-content languages. One maximum-size publication therefore processes at most
-700 localization rows and returns at most 700 rows from the authoring endpoint.
-The logical write fan-out is at most one revision, 100 Rule Units, 100 ownership
-rows, 100 revision membership rows, 700 localizations, one Realm Unit revision,
-and one audit event. Search and B-tree index maintenance add write amplification,
-but there is no unbounded queue, N+1 read hydration, or corpus scan. Publication
-is expected to be a low-rate administrative operation; plan for 10 sustained
-publications per second platform-wide and bursts of 100, with connection-pool
-backpressure. A single hot Realm is intentionally serialized.
+Declare separately the product bound on rules in a RuleSet, per-command rule/variant
+count, payload bytes, page size and staged-operation limits. The existing 100-rule
+policy may remain a reviewed community configuration bound; it does not imply seven
+languages or a 700-row lifetime total. No all-language authoring endpoint loads all
+variants into one response. Long sets continue through revision-bound keysets.
 
-The current revision lookup uses
-`realm_rule_revision_realm_published_idx`; its Rules use
-`realm_rule_revision_position_idx`; and localization hydration joins by the
-`unit_localization` primary key and ordered Unit index. Request work remains
-O(700) at both the 500,000,000-row planning baseline and the 3,000,000,000-row
-forward estimate. Inserts retain O(log N) index maintenance rather than scanning
-historical revisions. Memory and network input are bounded by 700 documents and
-the service-wide 128 MiB request ceiling; the same ceiling is configured across
-srvx runtimes and applies streaming backpressure. Latency should be measured with
-the maximum Rule and localization counts plus representative Portable Text
-payloads. Authoring responses contain at most those 700 documents; operators
-should alert on responses above 16 MiB and on database-pool waits above 100 ms.
+Let R be rules per selected set, L the actual average variants per rule, H retained
+changed revisions and B an admitted command batch. Current rows scale with R*L;
+history scales with actual changed variants/selections, not reader traffic. A command
+uses O(B) rows/bytes plus bounded authority/head work. Activation relies on sealed
+manifest completeness, not a whole-corpus validation scan.
 
-Historical Rule revisions grow with authoring activity, not reader traffic. If
-500 million localization rows average 1 KiB of heap, indexes, and content, the
-central estimate is roughly 0.5 TiB; three billion rows are roughly 3 TiB before
-WAL, replicas, vacuum headroom, and backups. Actual Portable Text size is the
-dominant variable and must be measured. Trigger archival or partitioning before
-a primary exceeds 2 TiB, sustained I/O exceeds 70%, or maximum-size publication
-p95 exceeds 1 second for three consecutive windows. Partition historical
-revisions and their Rule Units by stable Realm hash so current-revision reads
-remain colocated; keep the current-revision pointer and recent history online.
+Apply the 500M/3B-row baseline independently to variants, revision payloads, selections
+and consent. At an illustrative 1,024 bytes per localization row including the
+assumed index/payload contribution, those rows alone are 512 GB / 3.072 TB before
+WAL, replicas, free space and backups. This is arithmetic, not measured storage.
+Actual text sizes, skew, concurrent publication, WAL, vacuum and restoration must
+be measured. Keep current selections and history access owner-local in one database;
+partition counts follow the [storage policy](database/resource-storage.md).
 
-## 1.5.0 cutover
+## Acceptance
 
-1. Stop Rule authoring during deployment. Mixed 1.4.0 web/API/client binaries
-   are unsupported because their PUT bodies have different meanings.
-2. Back up the database. No schema or data rewrite is needed; verify that the
-   existing `unit_localization` primary key and ordering indexes are present.
-3. Deploy REZICS 1.5.0 API and workers, the generated OpenAPI clients including
-   `@rezics/api@1.9.0`, and the 1.5.0 web application as one release.
-4. Verify that a current one-language revision loads as a one-element
-   `localizations` array, publish a two-language revision, reload both languages,
-   and verify the submitted Rule order.
-5. Re-enable Rule authoring after API and web release headers both report
-   1.5.0.
-
-Rollback requires the complete 1.4.0 binary and client set. Newly published
-multilingual rows are readable by the old public fallback endpoint, but the old
-authoring UI would overwrite them with one language. Keep Rule authoring
-disabled after rollback until 1.5.0 is restored or an operator intentionally
-publishes a replacement revision through a multilingual-capable client.
+Qualify a language outside the UI list, two variants in one language, an exact
+translation source, staged multi-page editing, stale activation, consent history,
+revocation, fallback and draft recovery. Reuse MODEL09-MODEL16 and MODEL27-MODEL36.
+The [1.5.0 cutover](../releases/1.5.0.md#rule-authoring-cutover) is historical evidence,
+not the target's deployment procedure or permission to discard current rules.

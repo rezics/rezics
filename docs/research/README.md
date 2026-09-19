@@ -9,7 +9,7 @@ selected in [identity/access](../architecture/identity-and-access.md) and
 [connected applications](../architecture/connected-apps.md). Remaining adapter and
 qualification work belongs to the current plan. Offering hosted third-party
 accounts remains a deferred product decision in the connected-app boundary;
-it is not required to connect a third party's own account to an Entity.
+it is not required to connect a third party's own account to an Agent.
 
 Selected contracts and their supporting sources live in the
 [architecture evidence matrix](../architecture/database/design-evidence.md).

@@ -1,5 +1,9 @@
 # Explicit native consumption languages
 
+Implementation reference. This owner documents current code, identifiers and local
+limits. The [selected target](../../../../../docs/architecture/content-language-support.md) and [implementation crosswalk](../../../../../docs/reference/current-implementation.md)
+define the reconciliation boundary; existing fixtures do not qualify revised semantics.
+
 Publishing, Music, Program and Software resources declare consumption languages
 through the `catalog.content_consumption_languages` property. This is a separate
 editorial statement from source-record language observations, named-form language,

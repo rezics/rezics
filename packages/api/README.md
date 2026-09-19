@@ -1,5 +1,9 @@
 # @rezics/api
 
+Implementation reference. This owner documents current code, identifiers and local
+limits. The [selected target](../../docs/architecture/schema-modeling.md) and [implementation crosswalk](../../docs/reference/current-implementation.md)
+define the reconciliation boundary; existing fixtures do not qualify revised semantics.
+
 Type-safe REZICS API client generated from the public OpenAPI contract.
 
 ## Install

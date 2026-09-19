@@ -2,7 +2,7 @@
 
 This is the native catalog contract. [The database design](README.md) owns shared identity, revision, provenance and access mechanisms; [the dictionary](data-dictionary.md) names the table families. Source schemas are conformance evidence, not the definition of REZICS objects. No old schema/API/data compatibility constrains this target.
 
-The [2026-09-19 model revision](../schema-modeling.md) names the logical Unit
+The [2026-09-19 model revision](../schema-modeling.md) names the logical Resource
 contract Resource, separates described Agent from generic Entity and adds complete
 value/profile dispositions. [Storage families](resource-storage.md) are physical
 bindings, not semantic classes or new owner IDs. Current table names remain
@@ -26,7 +26,7 @@ Identify referents by the objects and operations the product supports. A new pro
 
 Known external publications and other concrete objects can exist without fabricated REZICS Work, Edition or Release parents. Creating a REZICS Work is an explicit native authoring/adoption decision. Multiple capabilities may describe one object, but independently governed identities are not merged merely because one UI shows them together.
 
-[Realm, Collection and Zone composition](../realm-collection-zone.md) defines wiki corpora, contextual "published in" relationships and the separately modeled, optional Dynamic Collection direction. A wiki ecosystem may contain many Collections; neither a topic name nor a Zone requires one universal grouping owner.
+[Realm, Collection and Zone composition](../space-composition.md) defines wiki corpora, contextual "published in" relationships and the separately modeled, optional Dynamic Collection direction. A wiki ecosystem may contain many Collections; neither a topic name nor a Zone requires one universal grouping owner.
 
 ## REZICS Work and primary version
 
@@ -57,7 +57,7 @@ subclass. Versioned definitions and typed assertions describe properties and
 contextual relations. An n-ary relation has its own identity/revision and role-bearing
 participants. Do not use untyped JSON or a triple set to bypass structural guarantees.
 
-Dynamic here means extending logical definitions and values. It does not require a physical SQL table for each class, property, Work or user. Registering a logical owner or changing its physical mapping is an explicit schema/adapter change; generic features use the [Unit capability contract](README.md#34-unit-capabilities-across-owner-tables). Queryable properties additionally need the [selected index contract](README.md#13-search-recommendation-export-and-derived-state); storing a typed value does not qualify arbitrary filtering or sorting.
+Dynamic here means extending logical definitions and values. It does not require a physical SQL table for each class, property, Work or user. Registering a logical owner or changing its physical mapping is an explicit schema/adapter change; generic features use the [Resource capability contract](README.md#34-resource-capabilities-across-owner-tables). Queryable properties additionally need the [selected index contract](README.md#13-search-recommendation-export-and-derived-state); storing a typed value does not qualify arbitrary filtering or sorting.
 
 Each field has one writer. Source-managed fixed fields record the decision and update the effective native column atomically. Structural revisions own their own values and evidence. Shared semantic export projects these authorities; it does not create a competing editable truth.
 

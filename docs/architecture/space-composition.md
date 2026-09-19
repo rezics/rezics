@@ -1,13 +1,13 @@
 # Space, Realm, Collection and Zone composition
 
-Status: shared Space identity and Resource-targeting routes selected on 2026-09-19;
-implementation and acceptance remain pending. This is the semantic owner for grouping
-and subsite composition. The [implementation plan](../plan/README.md) owns activation
-and progress. Existing Realm/Zone/Page tables are not evidence that this target is
-implemented. Resource is the [selected name of the logical Unit contract](schema-modeling.md#native-terminology-and-identity).
+Status: target contract for shared Space identity, capability-owned community and
+presentation state, and Resource-targeting routes. The [plan](../plan/README.md)
+owns activation; [runtime reference](../reference/current-implementation.md) records
+current storage/API names and [acceptance](../testing/model-contracts.md) records
+unexecuted target scenarios.
 
 [Identity and access](identity-and-access.md) owns Realm participant admission,
-multiple Groups/Teams, custom Roles, mixed AuthPrincipal/Entity recipients and
+multiple Groups/Teams, custom Roles, mixed AuthPrincipal/Agent recipients and
 representation. A Realm can govern its own members without an Org parent.
 The [experience contract](identity-and-access-experience.md) separates ordinary
 participation from collaboration and advanced administration.
@@ -47,19 +47,18 @@ governance identifies applicable authority/rules; semantic canon identifies the
 world/version in which a claim holds. These roles can use different references.
 An undifferentiated `context_id` must not transfer authority between them.
 
-The [address owner](unit-slug-addressing.md) defines SpaceMount, RouteDefinition,
+The [address owner](resource-addressing.md) defines SpaceMount, RouteDefinition,
 AddressNamespace, SlugBinding and AddressPreference, including UUID, scoped slug,
 dynamic parameters, reverse links and current disclosure. Routes resolve to
 ResourceRef and context, then use the common rendering flow. A Block document is
 content/representation of the resolved Resource, not a route's direct identity.
 
-There is no selected standalone ZonePage Resource or required `post(kind=page)`
-ownership relation. Route occurrences retain IDs/revisions for editing and history;
+Route occurrences retain IDs/revisions for editing and history;
 Document/Variant/Revision and Block occurrence identities remain with content.
 Two Spaces can present the same Resource without duplicating its body. A route
 can pin an accepted revision/selection or follow a declared publication channel;
 it cannot silently publish an editing head. External `schema:WebPage` descriptions
-remain valid even though the native ZonePage business object is removed.
+remain valid independently of the native route model.
 
 ## Wiki content and grouping relationships
 
@@ -107,7 +106,7 @@ Dynamic Collection runtime implementation is outside the required scope of this 
 
 MediaWiki category annotations create a generated page index; the index is distinct from the page annotations that determine membership. [MediaWiki category documentation](https://www.mediawiki.org/wiki/Help:Categories). Semantic MediaWiki separates query conditions, displayed properties and rendering, bounds query results, and notes that query arguments do not themselves add the queried annotations. [Inline query documentation](https://www.semantic-mediawiki.org/wiki/Results_format). PostgreSQL materialized results can be stale and require explicit refresh. [Materialized-view documentation](https://www.postgresql.org/docs/18/rules-materializedviews.html).
 
-The REZICS design below is an inference from those distinctions and the existing [stored Collection schema](../../libraries/schema/src/postgres/community/collection.ts), [Filter documents](filter-documents.md), [Filter execution](filter-feed-and-zone-experience.md) and [Zone composition](zone-composition-and-theming-decisions.md). Reuse those contracts; importing another wiki's query language or equating a materialized result with curated membership is unnecessary.
+The REZICS design below is an inference from those distinctions and the existing [stored Collection schema](../../libraries/schema/src/postgres/community/collection.ts), [Filter documents](filter-documents.md), [Filter execution](filter-feed-and-zone-experience.md) and [Zone composition](space-presentation.md). Reuse those contracts; importing another wiki's query language or equating a materialized result with curated membership is unnecessary.
 
 ### Identity, writes and results
 

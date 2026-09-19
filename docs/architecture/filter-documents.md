@@ -9,7 +9,7 @@ template, preset, capability profile, or client-selectable limit document.
 ```ts
 interface FilterDocument {
   categories?: SearchCategory[];
-  where?: UnitPredicate;
+  where?: ResourcePredicate;
   controls?: FilterDocumentControl[];
 }
 ```
@@ -60,31 +60,27 @@ they do not silently raise its candidate, posting or response limits.
 
 ## Ownership and persistence
 
-A Zone owns its `filter_document` directly. Book, Media, Software, Realm, and
-the Zone directory are ordinary Zones. Their category and predicate boundaries
-are stored as concrete Filter documents on those Zone rows; their names do not
-select server capabilities.
+The Space presentation capability owns its versioned boundary Filter. A route
+resolves a Resource and carries the admitted boundary as a trusted injection;
+the target's shared content does not acquire a different stored body or owner.
+Book, Media, Software and community directories are ordinary configured views,
+not server query-capability profiles selected by display name.
 
-Search and Feed Blocks choose one of three sources:
+Search and Feed Blocks can select global, hosting-Space or explicit inline Filter
+sources under the same parser and field registry. Global source does not remove
+the host's narrowing boundary. Filter state is declarative data, never executable
+SQL or a credential.
 
-- `global` uses `{}` and is still constrained by the hosting Zone;
-- `zone` uses the hosting Zone's Filter document;
-- `inline` carries an explicit sparse Filter document in the Block.
-
-Shared Search queries contain a FilterDocument snapshot with cursor-free query
-state and untrusted presentation hints. The snapshot makes a bearer link
-deterministic without retaining a reference to an official template. Ordinary
-Search requests may also submit a FilterDocument inline. All paths enter the
-same parser, resolver, compiler, field registry, and execution plan.
-
-Zone revisions store the same FilterDocument inside the Unit main snapshot.
-Block localizations and Dock revisions store only the unified Block source
-forms. This is important: restoring history cannot reintroduce a deleted
-SearchDocument or a template name.
+Shared queries contain a versioned Filter snapshot, cursor-free query state and
+untrusted presentation hints. Versioned Space configuration, Resource content and
+Dock revisions retain their own exact Filter inputs. Restoration cannot revive
+an unsupported format or a retired execution capability. The former released
+SearchDocument/template migration is [historical procedure](../releases/1.6.0.md#filter-document-cutover),
+not another target model or a reason to rewrite the current migration baseline.
 
 ## Validation and execution
 
-The TypeBox boundary rejects unknown members. A Unit predicate is limited to
+The TypeBox boundary rejects unknown members. A Resource predicate is limited to
 100 nodes and depth 12; Search state is limited to 100 expression nodes and
 depth 3 before compilation, 50 injections, four contexts, ten categories, and
 50 Filter control overrides. Resolution intersects categories and composes
@@ -101,8 +97,8 @@ load a corpus into one process, or compute exact whole-corpus counts.
 
 The planning baseline is 500,000,000 rows for every potentially corpus-scale
 relation and the forward estimate is 3,000,000,000 rows. Zone configuration is
-expected to be much smaller, but the migration does not rely on that
-expectation. Shared queries, Docks, Block localizations, Unit revisions, and
+expected to be much smaller, but its storage/query design does not rely on that
+expectation. Shared queries, Docks, Block localizations, Resource revisions, and
 revision content are treated as corpus-scale.
 
 Online assumptions are 10,000 Search requests per second platform-wide, a
@@ -120,71 +116,17 @@ statement budgets above. Alert when Search p95 exceeds 1.5 seconds, pool wait
 exceeds 100 ms, rejected work estimates exceed 1%, or one Zone key exceeds 10%
 of cache-miss traffic.
 
-The one-time migrator defaults to 500 rows per transaction and permits at most
-5,000. At 500 million rows, a relation requires at most 1,000,000 default-size
-batches; at three billion it requires 6,000,000. Each current-document batch is
-read by UUID keyset and written with one set-based update. Revision contents use
-the `(model, sha256)` unique index; references use the existing `content_id`
-indexes and are moved as a bounded work queue, which handles a hot deduplicated
-blob without materializing all of its references. Memory and network are
-O(batch size × average JSON bytes), never O(corpus). Operators must lower the
-batch size when sampled JSON exceeds 256 KiB; 500 such rows are already about
-128 MiB before driver overhead.
+At an illustrative 2 KiB per document, 500M/3B stored documents represent about
+1.024/6.144 TB of payload before revisions, indexes, TOAST, WAL, replicas and backup.
+Count immutable revisions and shared content references separately; deduplication
+must preserve disclosure and erasure. An execution budget limits examined work,
+not just returned rows. The 10,000 requests/s scenario is unqualified and does not
+follow from row count or cache-hit assumptions.
 
-For sizing, an illustrative 2 KiB average migrated document is roughly 1 TB of
-logical payload read at 500 million rows and 6 TB at three billion, before heap,
-indexes, WAL, replicas, vacuum headroom, and backups. Every changed current row
-creates one heap version and WAL record. Every changed immutable snapshot adds
-one canonical revision blob, rewires its indexed references, adjusts Unit
-revision byte totals, and removes the unreferenced old blob. Reserve at least
-the measured changed-payload size plus two peak WAL retention windows; do not
-infer the change ratio from fixtures. Capture row counts, average and p99 JSON
-bytes, changed ratios, WAL bytes per batch, replica lag, dead tuples, IOPS,
-network throughput, and batch latency on a production snapshot before choosing
-a batch size.
-
-The script uses a five-second lock timeout, a 30-minute statement ceiling, and
-a database advisory lock, so one database has one writer and no unbounded
-queue. It is restartable: already converted current rows validate, new revision
-blobs deduplicate by `(model, sha256)`, moved references no longer match the old
-work item, and the final DDL refuses an incomplete corpus. At 500 million rows,
-run the bulk pass before the release window on a restored production snapshot,
-measure its wall time, then schedule equivalent maintenance capacity. At three
-billion rows, run the same bounded worker independently on existing database
-shards. A single-node three-billion-row database is not an accepted target: its
-limiting resources are WAL retention, vacuum debt, and serial scan bandwidth.
-Begin hash-sharding by stable owner/Unit identity before projected cutover time
-exceeds the backup-restore objective, replica lag stays above 15 minutes, disk
-exceeds 70%, or one batch exceeds five seconds for five consecutive minutes.
-
-## 1.6.0 production cutover
-
-This is a direct development-preview replacement. No old route, schema version,
-adapter, alias, or dual-read path remains.
-
-1. Take and verify a restorable backup. On a production-size restore, record the
-   workload measurements above and run
-   `task --dir services/main filter-documents:migrate -- --yes`.
-2. Stop 1.5.x API, worker, authoring, and background writers. The release is
-   listed as a maintenance cutover; mixed binaries are unsupported.
-3. Run the database migration job. It reruns the bounded data worker to catch
-   the final delta, then Atlas executes the contract migration only after all
-   postconditions pass.
-4. Atlas makes `zone.filter_document` required, removes
-   `zone.boundary_document`, drops `zone_search_feature`, `search_document`,
-   `search_document_revision`, and `search_document_revision_head`, and deletes
-   their unreferenced revision blobs. Limit/default-only Search configuration is
-   not archived. Legacy Block templates with real category or predicate effects
-   become concrete inline Filter documents; a condition-free global template
-   becomes the global source.
-5. Deploy the 1.6.0 API, worker, generated clients, and web application
-   together. Verify `{}` resolves with no document-level condition, each
-   official work Zone returns only its own boundary, a Zone Feed continues by
-   opaque cursor, a shared query reloads, and a migrated Zone Page and Dock
-   revision can be restored.
-6. Rebuild normal projections, inspect Search latency and replica/vacuum health,
-   and then reopen traffic.
-
-Rollback after the contract migration means restoring the pre-cutover backup
-and the complete 1.5.x binary set. Recreating the removed tables from partial
-data is not a supported rollback.
+Use same-database owner/time partitions where their query and retention benefits
+are measured. Rebuild derived filter/search state with bounded, resumable batches
+and immutable version cutoffs. Full exports and rebuilds still process their
+selected corpus bytes and need separate maintenance budgets. Current schema
+installation does not require the historical SearchDocument conversion; its
+[workload record](../releases/1.6.0.md#filter-migration-workload-record) belongs to
+that release. No fixed row count mandates database splitting.

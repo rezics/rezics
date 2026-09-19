@@ -6,7 +6,7 @@ application of [Subscribe](subscriptions.md), scheduled through
 implementation phase or claim that current publication/search code passes this target.
 
 Realm remains the community, membership, rules and publication-context owner.
-[Collection/Zone composition](realm-collection-zone.md),
+[Collection/Zone composition](space-composition.md),
 [content adoption](database/content-composition.md) and
 [governance decisions](governance-rule-decisions.md) retain their responsibilities.
 [Scoped delivery](realm-scoped-delivery.md) owns independent site profiles,
@@ -75,7 +75,7 @@ attempt attached to the original submission rather than a hidden duplicate reque
 ## Metering and accounting
 
 Use the private beneficiary/accountability identity for personal meters. Public
-Entity switching, extra API tokens and multiple entitlement sources do not multiply
+Agent switching, extra API tokens and multiple entitlement sources do not multiply
 the allowance. Use a canonical meter identity independent of a policy revision:
 changing a limit cannot reset consumed usage. Platform API admission, personal
 Realm participation, and Realm/operator compute budgets are separate constraints.
@@ -118,7 +118,7 @@ dimension without exposing another user's usage.
 
 "Also publish in Pro" is an explicit destination choice or an independently
 authorized adoption. A creator's own subscription never automatically publishes
-all their content in Pro. Merely attaching a Realm reference, pinning a Unit or
+all their content in Pro. Merely attaching a Realm reference, pinning a Resource or
 quoting a private item cannot bypass source rights or destination review.
 
 The existing `realm_unit` relation supplies publication association/state. The

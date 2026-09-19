@@ -20,7 +20,7 @@ The service envelope is:
 - UUID or composite keyset pagination, never deep offset pagination;
 - no request-path corpus scan, whole-corpus sort, or corpus-sized in-process
   materialization; and
-- skew in which a popular Unit, Expression, Path, Tag, or Realm/Unit key can
+- skew in which a popular Resource, Expression, Path, Tag, or Realm/Resource key can
   receive far more traffic than the median.
 
 These are procurement and topology envelopes, not unconditional admission
@@ -38,8 +38,8 @@ The planning distribution is deliberately skewed:
 | explicit effective outputs `A` per Expression | 1-4 | 256 hard |
 | active rules from one Expression | 0-2 | 16 hard |
 | upstream/downstream Expression reach | 1-8 | 64 hard in each direction |
-| visible Applications read for one Unit | 10-100 | bounded API page/source limits |
-| accepted Applications per Unit/Expression/authority | 1 | polyhierarchy may produce several |
+| visible Applications read for one Resource | 10-100 | bounded API page/source limits |
+| accepted Applications per Resource/Expression/authority | 1 | polyhierarchy may produce several |
 | hierarchy children returned | 10-30 | API bound |
 | Path-position page | 10-20 | 50 maximum |
 | Search Tag position-availability keys | 10-20 | 50 primary keys |
@@ -52,7 +52,7 @@ would produce more than 256 Effective Tags. These are product limits, not
 benchmark fixture assumptions.
 
 Definitions are read-heavy and mutation-light. Applications and judgments are
-write-heavy corpus facts. A representative operating mix is 70% Unit landscape
+write-heavy corpus facts. A representative operating mix is 70% Resource landscape
 and search reads, 20% concept/Path reads, 8% judgment updates, and 2% definition
 or governance operations. Capacity tests must also run 100% hot-key mutation
 and popular-Tag position scans because the mean mix hides the relevant failure
@@ -62,13 +62,13 @@ modes.
 
 Let:
 
-- `U` be Units with semantic sources;
+- `U` be Resources with semantic sources;
 - `D` be direct Tag sources;
 - `P` be Path Applications;
 - `J` be sparse Application judgments;
-- `E` be distinct asserted Expressions per Unit/authority;
+- `E` be distinct asserted Expressions per Resource/authority;
 - `A` be distinct Effective Tags in an Expression closure, `A <= 256`;
-- `R` be Realm authorities that contain a Unit;
+- `R` be Realm authorities that contain a Resource;
 - `T` be Tag concepts; and
 - `Q` be immutable Path definitions.
 
@@ -104,7 +104,7 @@ relation.
 
 ## Write amplification
 
-The former preview model wrote one support fact per Profile and Path member, so
+The former preview model wrote one support fact per Agent and Path member, so
 amplification grew with `L`. The semantic model writes one Application source
 and one Expression assertion, then materializes only explicit closure outputs:
 
@@ -119,17 +119,17 @@ accepted. The first positive judgment normally mutates:
 1. one sparse judgment row;
 2. one judgment-stat row;
 3. one Path usage aggregate;
-4. one Unit/Expression assertion row; and
-5. up to `A` effective Tag rows for the Unit projection.
+4. one Resource/Expression assertion row; and
+5. up to `A` effective Tag rows for the Resource projection.
 
 The planning envelope is therefore `4 + A` focused row mutations after the
 Application row, independent of Path length and corpus size. With typical
 `A = 1, 4, 8`, that is 5, 8, or 12 focused mutations; the hard semantic ceiling
 is 260. Realm writes have the same asymptotic cost with wider keys.
 
-The current projection refresh is routed to one Unit (or one Realm/Unit) and
+The current projection refresh is routed to one Resource (or one Realm/Resource) and
 recomputes that key's direct and asserted Expressions. It never scans the
-corpus, but cost grows with semantic sources on that one Unit. A Unit exceeding
+corpus, but cost grows with semantic sources on that one Resource. A Resource exceeding
 4,096 asserted Expressions, a refresh touching more than 32 MiB of buffers, or
 a refresh p95 above 50 ms is an operational cutover threshold: move effective
 projection maintenance to the key-routed idempotent reducer described below
@@ -141,10 +141,10 @@ or Realm assertions. The worker uses `FOR UPDATE SKIP LOCKED`, advances at most
 500 assertion keys per transaction, claims at most four pages per poll, and
 retries failed pages with a delay capped at 60 seconds. A new rule revision
 resets the existing job's authority cursors under the same row lock. Search and
-Unit effective projections are therefore refreshed asynchronously without a
+Resource effective projections are therefore refreshed asynchronously without a
 synchronous corpus fan-out in the curation request.
 
-A Path definition-vote acceptance crossing or Path Unit
+A Path definition-vote acceptance crossing or Path Resource
 status/visibility/moderation/deletion crossing changes the public-position
 projection for the concept members of that Path. Its work is `O(L)`, with
 `L <= 16`, and does not depend on `T`, `Q`, or the fan-in of a popular Tag. The
@@ -199,7 +199,7 @@ Stable routing keys lead every corpus request key and future partition key:
 | Path definition and vote | `path_id` |
 | all positions for a concept | `(node_id, path_id, ordinal)` |
 | public position availability | `tag_public_position_stat(tag_id)` primary key |
-| global Applications for a Unit | `(unit_id, pinned, position, id)` |
+| global Applications for a Resource | `(unit_id, pinned, position, id)` |
 | Applications using a Sense | `(sense_id, unit_id, id)` |
 | global assertion inverse | `(expression_id, unit_id)` |
 | global effective inverse | `(tag_id, unit_id)` |
@@ -215,14 +215,14 @@ partial indexes matching their predicates. Path position, governance, and
 Application lists use keyset cursors containing every ordering column.
 
 Breadcrumb hydration receives a bounded Path ID set and reads at most 16
-members per Path. Unit landscapes read the actual source page, batch-hydrate
+members per Path. Resource landscapes read the actual source page, batch-hydrate
 Senses/Expressions/Paths, then aggregate in process; they do not issue N+1
 definition reads. Definition endpoints are separately capped because their
 datasets do not share corpus pagination semantics.
 
 ### Tag suggestion search
 
-The Unit Tag picker is a typeahead workload within the 100,000 bounded reads/s
+The Resource Tag picker is a typeahead workload within the 100,000 bounded reads/s
 deployment envelope. One request returns at most 20 semantic choices. Its
 candidate and hydration budgets are independent of `T` and `Q`:
 
@@ -273,10 +273,10 @@ The capacity fixture must capture `EXPLAIN (ANALYZE, BUFFERS, WAL, FORMAT JSON)`
 for at least:
 
 - accepted Paths containing a Tag with a UUID cursor;
-- Unit Application keyset reads;
+- Resource Application keyset reads;
 - Expression assertion inverse reads;
 - Effective Tag inverse reads;
-- Realm Unit Application reads;
+- Realm Resource Application reads;
 - active Sense and inference-rule reads;
 - ranked Tag suggestion candidates plus the direct/path pool expansion for a
   query that matches an intermediate Path member;
@@ -305,7 +305,7 @@ straight-line 500M/3B storage estimates. Results are evidence for bounded access
 paths, not proof that a small machine contains 500M physical rows.
 
 The 2026-08-29 reference run used PostgreSQL 18.4, `shared_buffers=128MB`,
-`work_mem=4MB`, 1,000 Units, 1,000 Paths, 3,997 Applications per authority,
+`work_mem=4MB`, 1,000 Resources, 1,000 Paths, 3,997 Applications per authority,
 and 256 hot-key mutations per authority. Fixture loading took 5.001 seconds and
 45,574,888 WAL bytes. Global committed 230/256 at 335.237 writes/s with 66.650
 ms terminal p95; Realm committed 230/256 at 318.454 writes/s with 68.031 ms
@@ -335,7 +335,7 @@ Its 50-key request plan must name `tag_public_position_stat_pkey` and avoid a
 corpus scan.
 
 The final 2026-08-31 projection run used the atomic migration and the same 1,000
-Unit/1,000 Path fixture. Under six concurrent writers sharing one terminal Tag,
+Resource/1,000 Path fixture. Under six concurrent writers sharing one terminal Tag,
 it committed 226/256 logical mutations (88.3%) at 159.796 writes/s with 101.223
 ms terminal p95. The bounded retry loop made 504 attempts and returned 278
 immediate backpressure decisions; there were zero deadlocks, timeouts,
@@ -371,9 +371,9 @@ it does not change production settings or treat toy-fixture latency as a
 500M-row prediction. A forced plan that still contains a sequential corpus scan
 fails, as does a route that exceeds the block or sort bounds.
 
-Realm Unit Application pages accept either the dedicated
+Realm Resource Application pages accept either the dedicated
 `realm_unit_tag_path_application_unit_route_idx` or the unique
-`realm_unit_tag_path_application_authority_key`. With Realm and Unit fixed, the
+`realm_unit_tag_path_application_authority_key`. With Realm and Resource fixed, the
 unique authority key yields at most one row per presorted Sense group; any
 incremental sort is still checked against the 50-row page plus one executor
 lookahead row.
@@ -394,7 +394,7 @@ deadlocks, timeouts, unexpected errors, or residual drift.
 Move a source family to an idempotent event outbox plus key-routed micro-batch
 reducer when any threshold is sustained for five minutes:
 
-- one Application or Unit projection key exceeds 100 attempts/s;
+- one Application or Resource projection key exceeds 100 attempts/s;
 - aggregate admission rejection exceeds 5% after bounded client retry;
 - accepted mutation p95 exceeds 150 ms;
 - effective projection refresh p95 exceeds 50 ms;
@@ -404,43 +404,40 @@ reducer when any threshold is sustained for five minutes:
 - reducer queue oldest age exceeds 60 seconds.
 
 Events carry source revision/idempotency identity. Workers claim bounded pages
-with `FOR UPDATE SKIP LOCKED`, coalesce by Unit/authority, acquire keys in UUID
+with `FOR UPDATE SKIP LOCKED`, coalesce by Resource/authority, acquire keys in UUID
 order, update aggregates in one transaction, and advance a durable watermark.
 Backpressure rejects or defers new work before queue growth becomes unbounded.
 
 ## Partitioning and 3B topology
 
-Partition before one heap or hot index exceeds the approved node IO/memory
-envelope, and no later than 100M live rows or 25% of usable node data volume for
-one corpus relation. Partition keys are the same stable routing prefixes:
+Use the selected single PostgreSQL database. Split tables by authority/lifecycle
+and consider physical partitions when measured heap/index, vacuum, restore or
+query-pruning costs justify them. Candidate keys serve different access paths:
 
-- global Unit facts: hash `unit_id`;
-- public position projection: hash `tag_id`;
-- Realm Unit facts: hash `(realm_id, unit_id)` or a stable combined routing hash;
-- assertion/effective inverse serving: separately maintained expression/Tag
-  search shards when inverse traffic no longer fits the primary Unit shard;
-- definition directory: `path_id`, `expression_id`, or vocabulary namespace.
+- Resource facts: stable Resource owner/native ID;
+- public position projection: Tag ID;
+- Realm facts: Space/context and Resource identity;
+- assertion/effective inverse serving: expression/Tag index or derived projection;
+- definition directory: Path/expression identity or vocabulary namespace.
 
-PostgreSQL unique/primary constraints on partitioned tables must include the
-partition key. Global structural and claim-key uniqueness therefore remains in
-a small definition directory when definition storage is sharded. The cutover
-uses shadow partitions, dual validation inside an explicitly versioned
-maintenance operation, checksums and count parity, then an atomic writer switch;
-it is not a public compatibility mode.
+PostgreSQL partitioned-table unique/primary keys must include every partition-key
+column. A definition directory retaining global structural uniqueness may remain
+unpartitioned with its own measured budget; it is not automatically small because
+it is called a directory. Do not remove uniqueness to obtain a partition layout.
 
-At 3B rows, application sharding is mandatory. Synchronous cross-shard
-aggregates are forbidden. Search/effective consumers receive idempotent events
-and publish watermarks; user-facing reads disclose or tolerate the documented
-bounded projection lag. Definition graph components are routed by namespace;
-cross-namespace edges go through the governed directory rather than a
-whole-graph in-memory load.
+At both 500M and 3B rows, preserve exact authority transactions and idempotent
+projection consumers with explicit watermarks. A Path threshold event carries its
+revision and the admitted at-most-16 Tag IDs; reducers apply bounded deltas in
+stable key order. Node-led raw membership and Path-led definition access retain
+separate selective indexes. Partitioning cannot make a hot Tag non-hot or make
+an inverse read local without its own access path.
 
-At 3B Tags the position projection is also sharded by the same stable hash of
-`tag_id` used for request and event routing. A Path threshold event carries its
-Path revision and the at-most-16 Tag IDs; shard-local consumers apply
-idempotent deltas in sorted key order. The raw membership authority can be
-partitioned by `node_id` for Tag-led rebuild and discovery, with a separate
-Path-led definition directory for immutable Path hydration.
+No row count makes application/database sharding mandatory. If the measured
+single-database envelope cannot serve the required workload, record the specific
+storage, WAL, latency or recovery limit and reselect capacity/workload before
+claiming acceptance. Future distribution needs separately qualified authority,
+reference, uniqueness and recovery protocols. Fresh installation needs no online
+compatibility period; existing deployments preserve their released baseline.
 
 ## Maintenance, rebuild, and migration cost
 
@@ -499,10 +496,10 @@ is intentionally rejected.
 | hot-key `55P03` | concurrent aggregate owner | bounded retry, then event reducer |
 | Tag projection drift or negative guard | missed/duplicated threshold transition | stop the affected writer, diagnose a bounded key range, and repair explicitly |
 | atomic projection precondition failure | existing Path membership or more than 100,000 Tags | stop deployment and design a separately reviewed partitioned cutover; do not bypass the guard |
-| Unit projection >32 MiB or >50 ms | one Unit has excessive semantic sources | incremental key/tag reducer and admission cap |
+| Resource projection >32 MiB or >50 ms | one Resource has excessive semantic sources | incremental key/tag reducer and admission cap |
 | corpus relation reaches 100M rows | maintenance/index risk | shadow hash partitions on stable routing key |
-| inverse index no longer resident | Tag/Expression fan-in dominates | dedicated inverse/search shard |
-| 3B estimate exceeds one-node storage/WAL | physical single-node ceiling | application sharding plus idempotent projection events |
+| inverse access misses its budget | Tag/Expression fan-in dominates | measured selective inverse index/projection and admission |
+| 3B estimate exceeds elected storage/WAL/recovery budget | measured deployment limit | revise same-database capacity/workload; separately decide future distribution |
 
 These thresholds make the limiting resource and cutover visible before the
 500M baseline is endangered; toy fixture latency alone is never accepted as

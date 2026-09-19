@@ -5,7 +5,7 @@ qualification belong to [M10](../plan/modules/subscriptions-and-pro.md), outside
 the current IAM implementation scope. This document specifies required behavior;
 it does not claim a billing integration or new authorization audience exists.
 
-Subscribe is a native capability for eligible People/Entities, Realms and other
+Subscribe is a native capability for eligible People/Agents, Realms and other
 registered resource owners. Multiple plans are part of its first implementation.
 [Realm participation policies](realm-participation-policies.md) owns quotas,
 review and the first Rezics Pro experience. [Identity/access](identity-and-access.md)
@@ -49,12 +49,12 @@ compose these invariants with the purchase and grant lifecycle below.
 ## Logical model
 
 These owners use concrete native keys and validated references, not a new global
-Unit parent, an unchecked resource-type/ID pair or a universal account level.
+Resource parent, an unchecked resource-type/ID pair or a universal account level.
 Physical families are cataloged in [D22](database/data-dictionary.md#d22-subscribe-and-participation-policy-contracts).
 
 | Concept | Identity and required meaning |
 | --- | --- |
-| Offering | Stable identity; eligible target REF, operating Entity and lifecycle. The target owns a registered Subscribe capability; eligibility is checked at creation and use. |
+| Offering | Stable identity; eligible target REF, operating Agent and lifecycle. The target owns a registered Subscribe capability; eligibility is checked at creation and use. |
 | Plan group | Offering-local group declaring either replaceable alternatives or independently purchasable plans. This describes purchase compatibility, not entitlement precedence. |
 | Plan and revision | Stable plan identity plus immutable terms/benefit selections and lifecycle. Several plans can be offered from the beginning; they need not form a linear hierarchy. |
 | Price | Exact plan revision, currency, integer minor-unit amount, billing interval and applicable price terms. Monthly/yearly prices can sell the same plan. A currency is never omitted or inferred from a browser locale. |
@@ -64,11 +64,11 @@ Physical families are cataloged in [D22](database/data-dictionary.md#d22-subscri
 | Purchase intent/receipt | Idempotent agreement to a specific purchase or plan change, expected commercial revision and verified provider result. A browser success redirect is not fulfillment. |
 
 First activation uses authenticated human accounts as private personal beneficiaries.
-Public Entity attribution and offering operation still require native participation
+Public Agent attribution and offering operation still require native participation
 and representation. The model retains payer/beneficiary separation; buying for
 other people, corporate seats, workload benefits and transferable gifts require
 separately activated consent, assignment and accounting contracts. Controlling an
-Entity never shares one controller's personal subscription with all controllers.
+Agent never shares one controller's personal subscription with all controllers.
 
 An offering may contain several scoped benefits. A cross-owner benefit requires
 the resource authority's explicit, versioned approval ceiling. The seller cannot
@@ -138,7 +138,7 @@ provider metadata, cached feature flags or a generic `isPro` field.
   the normal assignment ceilings; a plan editor cannot expand it alone.
 - Personal entitlements qualify the authenticated principal as an actor-side
   product condition. The selected authority must independently have the native
-  resource permission. Public actions also require valid Entity attribution and
+  resource permission. Public actions also require valid Agent attribution and
   representation; a personal benefit cannot fill a missing Org authority path.
 - First Pro enrollment explicitly admits the chosen public participation identity
   and the appropriate ordinary role after consent. Every protected use rechecks
@@ -204,7 +204,7 @@ it is independent from delayed expiry cleanup. Resolve erase/cancel races throug
 the native account fence and ensure a webhook cannot recreate erased identities.
 
 Ownership transfer of an offering or covered resource is explicit. Do not retarget
-its seller, beneficiary or existing billing account by changing a public Entity
+its seller, beneficiary or existing billing account by changing a public Agent
 label or resource owner. Suspend new sales when the required authority disappears;
 record continuity/termination decisions and outstanding obligations for existing
 agreements. General marketplace payouts are deferred, not implied by Subscribe.
@@ -252,7 +252,7 @@ Offer owners see only the subscriber/fulfillment information authorized for thei
 offering. Contributor assessment notes, private payment identity, other subscriptions,
 and mappings between public personas remain private. A public supporter badge or
 subscriber roster requires its own consent/disclosure policy. Payment card data
-and provider secrets do not enter public Entities or ordinary content histories.
+and provider secrets do not enter public Agents or ordinary content histories.
 
 Account erasure immediately disables private eligibility, then runs bounded
 subscription/provider cancellation and source-grant cleanup. Separate required

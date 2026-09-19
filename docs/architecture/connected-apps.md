@@ -5,21 +5,19 @@ Status: selected target capability; protocol integration and acceptance remain i
 This owner builds on [mixed authorization](identity-and-access.md). It is not a
 claim that the currently session/API-key-only bridge implements OAuth delegation.
 
-The [selected terminology revision](schema-modeling.md#native-terminology-and-identity)
-calls the public person/organization responsibility Agent and the logical Unit
-contract Resource. Entity-named protocol/implementation contracts retained here
-refer to that admitted public Agent, not generic Entity storage. The rename and
-shared Space owner require affected adapters and consumers to be qualified; this
-documentation update does not change a credential or wire contract.
+Public integrations address Agents and Resources under explicit representation.
+Realm is a Space's community capability; a presentation mount is not an installation
+or grant. Existing protocol/field spellings and qualified adapters are recorded in
+the [runtime reference](../reference/current-implementation.md#identity-and-authority).
 
 ## Scope and owners
 
-REZICS supplies a common Entity directory and verifiable, scoped representation
+REZICS supplies a common Agent directory and verifiable, scoped representation
 to its own modules and connected platforms. A third party can keep its own login
 accounts and product preferences, binding an authenticated local account to the
-Entities the user explicitly connected. Offering hosted account/credential/recovery
+Agents the user explicitly connected. Offering hosted account/credential/recovery
 infrastructure to other platforms is a deferred product decision, not required for
-Entity integration. Physical service/database separation is also a later deployment
+Agent integration. Physical service/database separation is also a later deployment
 activation; define the trust boundaries now without requiring new microservices.
 
 | Object | Responsibility |
@@ -28,37 +26,37 @@ activation; define the trust boundaries now without requiring new microservices.
 | OAuth client | Protocol identity, redirect URIs, authentication method, key/secret lifecycle and allowed protocol capabilities. An App can have multiple clients. |
 | Installation | One App's admitted instance in an account, Org or Realm scope; approved capability revision, selected resources, state and scope-owned service principal. |
 | Consent | An authenticated user's explicit delegation to a client for a selected authority subject, resources, actions and lifetime/offline conditions. |
-| External account binding | Private association of a client's verified local subject, connected Entity and representation grant; no cross-provider account merge inferred from it. |
-| Credential | A session, API key or OAuth token with its own audience, scope, validity, proof and live grant dependencies. It is not an Entity or membership. |
+| External account binding | Private association of a client's verified local subject, connected Agent and representation grant; no cross-provider account merge inferred from it. |
+| Credential | A session, API key or OAuth token with its own audience, scope, validity, proof and live grant dependencies. It is not an Agent or membership. |
 
-Use native Entity references for public app/service attribution where admitted.
-Do not equate App installation with importing a Hub package, an Entity becoming
+Use native Agent references for public app/service attribution where admitted.
+Do not equate App installation with importing a Hub package, an Agent becoming
 a Realm member, or a human accepting personal consent.
 
 ## Connection and identity privacy
 
 Connect from an authenticated local account through a state-bound authorization
 flow. Verify the issuer, token, audience and current representation authority,
-then let the user select the Entity and approve the client/resource capabilities.
-Store the exact private mapping. A supplied Entity ID, matching name/email, source
-claim or third-party assertion alone cannot seize an existing Entity.
+then let the user select the Agent and approve the client/resource capabilities.
+Store the exact private mapping. A supplied Agent ID, matching name/email, source
+claim or third-party assertion alone cannot seize an existing Agent.
 
 OIDC account identity uses validated issuer/subject, with client/sector context
-for pairwise identifiers; the public Entity ID is a separately authorized identity
-claim. Several local accounts can legitimately represent one Entity. Connecting it
+for pairwise identifiers; the public Agent ID is a separately authorized identity
+claim. Several local accounts can legitimately represent one Agent. Connecting it
 does not merge those accounts or their private settings. Conversely, disclosing one
-Entity does not authorize listing its controller's other Entities.
+Agent does not authorize listing its controller's other Agents.
 
 The external contract excludes raw global AuthPrincipal IDs from tokens, UserInfo,
 introspection visible to clients, metadata, webhooks and errors. Use audience-scoped
 private identifiers or opaque authorization references where protocol/account
 correlation is necessary. Authorized security services can resolve them privately.
-Do not replace an OIDC subject with an Entity just to conceal an account identifier:
+Do not replace an OIDC subject with an Agent just to conceal an account identifier:
 login account identity and delegated public identity have different semantics.
 
-Keep main Entity, per-application default and a consent's selected Entity separate.
+Keep main Agent, per-application default and a consent's selected Agent separate.
 Changing the default does not retarget existing grants or refresh tokens. A revoked
-connection leaves permitted existing content attributed to its original Entity
+connection leaves permitted existing content attributed to its original Agent
 but removes subsequent use of that connection's authority.
 
 ## Two execution modes
@@ -67,16 +65,16 @@ but removes subsequent use of that connection's authority.
 
 A native user connection fixes one human account, user-delegation client and
 authority subject. Direct subject selection can name only that account; represented
-selection names a separately admitted Entity. Disconnect is terminal. Multiple
-connections are not collapsed by matching names or public Entity IDs, and Org
+selection names a separately admitted Agent. Disconnect is terminal. Multiple
+connections are not collapsed by matching names or public Agent IDs, and Org
 approval cannot create personal consent for its members.
 
 Consent has its own identity and immutable approved revisions under a connection.
 Each revision captures a finite lifetime of at most 365 days, literal API/domain
-capabilities within an exact client ceiling, offline/Entity-disclosure choices,
+capabilities within an exact client ceiling, offline/Agent-disclosure choices,
 and an explicit all-scopes choice or up to 64 root/path selections. Represented
 consent retains up to eight exact representation references; direct consent retains
-none and cannot disclose an Entity merely by using a default. Count/digest and
+none and cannot disclose an Agent merely by using a default. Count/digest and
 concrete FK checks seal each collection. These are permission ceilings, not new
 resource grants or a proof that the representation works for every operation.
 
@@ -94,7 +92,7 @@ immutable approval revision; history has a separate 50-receipt page. Resource ro
 are encoded as credential-bound, 15-minute locators rather than private principal
 identifiers. Read APIs require direct private-account authority and `account:read`;
 disconnect/revoke require current direct ownership and `account:update`, an exact
-version and an operation ID. They do not require the old client, Entity or selected
+version and an operation ID. They do not require the old client, Agent or selected
 resource to remain usable. Withdrawal invalidates future use without rewriting
 content attribution, and a matching retry returns the original receipt.
 
@@ -102,7 +100,7 @@ Account erasure invalidates use immediately through the account fence, then remo
 private consent members, revisions, receipts and connections in bounded batches.
 Only an erased owner's consent can enter internal `erasing` state to detach its
 selected-revision cycle. Credential/context children must be drained first. This
-cleanup neither revokes independent Entity grants nor deletes permitted published
+cleanup neither revokes independent Agent grants nor deletes permitted published
 attribution. Runtime OAuth approval, external-account binding and complete erasure
 ordering remain part of the pending integration/qualification work.
 
@@ -112,7 +110,7 @@ In user delegation, authenticate the operator and evaluate the selected direct o
 represented authority context under the identity contract. Intersect that context's
 current authority with the client capability ceiling, user consent, token scope,
 selected resources and applicable installation policy. Do not intersect represented
-Entity permissions with unrelated direct account grants, or combine both identities'
+Agent permissions with unrelated direct account grants, or combine both identities'
 privileges opportunistically. Org/Realm approval cannot silently consent for every
 human member.
 
@@ -141,7 +139,7 @@ delegation records before admitting execution or issuing a narrowed credential.
 
 ### Native App declaration and control
 
-An App has one immutable human-account or Entity controller root. A private
+An App has one immutable human-account or Agent controller root. A private
 platform-duty account can own server-curated discovery records; installation
 workloads cannot own Apps through their private account roots. This keeps the
 App lifecycle independent from a recursive chain of installed App owners. Controllers
@@ -154,7 +152,7 @@ private controller-root and operator identifiers and paginate at 100 records.
 
 Each create/revise command seals a complete declaration: public label/description,
 literal API-entry/domain capability references, and separate offline-access and
-Entity-disclosure flags. Registered families remain distinct. A count and digest
+Agent-disclosure flags. Registered families remain distinct. A count and digest
 cover all capability rows; committed declarations and their receipts are immutable.
 Publishing a declaration is prospective, not consent or installation approval.
 Existing approvals retain their exact declaration revision when a publisher
@@ -186,7 +184,7 @@ pin a concrete installation workload and start disabled. At most one client is
 active for a workload; inactive history can remain while a replacement is prepared.
 Neither a public registration nor a metadata-document claim can choose a workload.
 
-Client terms seal a literal capability subset and offline/Entity-disclosure limits
+Client terms seal a literal capability subset and offline/Agent-disclosure limits
 from an exact App declaration. API capability members match the corresponding
 protocol scope set, and the terms retain the protocol credential epoch. A changed
 protocol security configuration requires readmission of terms before further use.
@@ -459,7 +457,7 @@ RS256 OIDC ID tokens. Keep JWT signing enabled and set the locally patched
 `forceOpaqueAccessTokens: true`. Admit user clients with server-owned
 `subject_type: "pairwise"` and a stable private `pairwiseSecret`; use authenticated
 online introspection with exact issuer/resource validation for API/MCP access.
-The public Entity claim remains a separately authorized domain claim, not the
+The public Agent claim remains a separately authorized domain claim, not the
 account subject. Never use the presented pairwise subject as a raw database user ID.
 
 Two reproducible Yarn patches against Better Auth 1.7.3 own the adapter delta:
@@ -480,7 +478,7 @@ subject exposes the raw principal even when the ID token is pairwise. Disabling
 JWT globally was rejected because public clients then receive no ID token.
 Rewriting identity claims in custom claim callbacks was rejected because reserved
 claims belong to the provider; replacing the underlying credential user with an
-Entity or synthetic per-client account would conflate identity ownership. The
+Agent or synthetic per-client account would conflate identity ownership. The
 selected patch reuses the existing opaque storage, rotation and revocation paths
 without changing account identity or adding a second credential store.
 
@@ -593,8 +591,8 @@ approval.
 
 | Primary source | Selected use and limitation |
 | --- | --- |
-| [OIDC Core 1.0, errata set 2](https://openid.net/specs/openid-connect-core-1_0.html#SubjectIDTypes), sections 5.7 and 8 | Issuer/subject identity and pairwise privacy. Shared public Entity identity and third-party binding are REZICS product contracts. |
-| [OAuth Security BCP, RFC 9700](https://www.rfc-editor.org/rfc/rfc9700.html), January 2025 | Restricted credentials and secure flows. Does not define installation or Entity authority. |
+| [OIDC Core 1.0, errata set 2](https://openid.net/specs/openid-connect-core-1_0.html#SubjectIDTypes), sections 5.7 and 8 | Issuer/subject identity and pairwise privacy. Shared public Agent identity and third-party binding are REZICS product contracts. |
+| [OAuth Security BCP, RFC 9700](https://www.rfc-editor.org/rfc/rfc9700.html), January 2025 | Restricted credentials and secure flows. Does not define installation or Agent authority. |
 | [RFC 8693](https://www.rfc-editor.org/rfc/rfc8693.html), January 2020, sections 1.1, 2.1 and 4.1 | Subject/actor delegation and exchange; no automatic input/output revocation linkage, and prior actors are informational. |
 | [GitHub user delegation](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/authenticating-with-a-github-app-on-behalf-of-a-user) and [installation tokens](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app) | Distinct personal and installation grants with resource limits; not a requirement to clone GitHub's token endpoints. |
 | [Better Auth OAuth Provider](https://better-auth.com/docs/plugins/oauth-provider), [Organization](https://better-auth.com/docs/plugins/organization), [MCP](https://better-auth.com/docs/plugins/mcp) and [CIMD](https://better-auth.com/docs/plugins/cimd), reviewed September 2026 | Protocol/adapter capabilities and their documented limitations; not proof of the REZICS composition. |

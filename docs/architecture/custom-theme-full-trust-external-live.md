@@ -7,15 +7,15 @@ Accepted: 2026-08-29
 Owners: Domain, Security, Operations
 
 This document owns executable-theme trust and authority. Declarative page
-composition and safe appearance follow [Zone composition](./zone-composition-and-theming-decisions.md).
+composition and safe appearance follow [Zone composition](./space-presentation.md).
 CSS containment is not the security boundary of the selected runtime.
 
 ## Decision
 
-REZICS implements a generic Custom Theme Unit whose immutable revisions target
+REZICS implements a generic Custom Theme Resource whose immutable revisions target
 `rezics.unit.presentation@0`. V0 has exactly one registered adapter: a `zone`
-rendered as the top-level route host. Nested Units, cards, lists, references,
-embedded Blocks, and Zone Pages do not activate a theme.
+rendered as the top-level route host. Nested Resources, cards, lists, references,
+embedded Blocks, and routed Resource views do not activate a theme.
 
 An approved revision uses execution mode `host_full_trust` and the single exact
 resource mode `external_live`. “External live” is intentionally unsealed: the
@@ -47,8 +47,8 @@ future remote bytes were approved.
 
 ## Contracts and ownership
 
-- `custom_theme` is the generic Unit subtype. Its localization and ordinary
-  ownership use existing Unit behavior.
+- `custom_theme` is the generic Resource subtype. Its localization and ordinary
+  ownership use existing Resource behavior.
 - `custom_theme_revision` stores immutable package identity, exact target,
   execution/resource modes, hashes, submitter, review state, host-scoped
   approval, and emergency state. Database triggers reject package mutation,
@@ -65,7 +65,7 @@ future remote bytes were approved.
   with immutable history. The theme may append only revision-owned
   `header.append` and `footer.append` fragments. Dock remains a Dock.
 - The Zone adapter keeps identity, top-level Dock Menu navigation, and platform
-  actions in an invariant platform Header sibling. A Unit-owned Header document
+  actions in an invariant platform Header sibling. A Resource-owned Header document
   is additive and cannot replace that adapter-owned chrome; non-Menu Dock Blocks
   remain in the main Dock composition region.
 - Zone appearance owns only safe fallback tokens and backdrop configuration.
@@ -80,7 +80,7 @@ makes it executable authority.
 
 | Operation | Required authority |
 | --- | --- |
-| Create or submit | development preview + external-live access + ordinary Custom Theme Unit create/update authority |
+| Create or submit | development preview + external-live access + ordinary Custom Theme Resource create/update authority |
 | Inspect or decide review | development preview + external-live access + Custom Theme review; reviewer differs from submitter |
 | Install or roll back | development preview + external-live access + host `unit.theme.manage` authority |
 | Receive or execute | authenticated viewer + development preview + active external-live access + viewer opt-in |
@@ -100,11 +100,11 @@ platform.custom_theme.kill
 `platform.access.manage` implies the narrow access-management capability. The
 narrow capability implies neither execution nor general platform access reads
 or writes. Its API cannot name an arbitrary capability, cannot target the
-actor, and returns only Profile selection fields plus the external-live grant.
+actor, and returns only Agent selection fields plus the external-live grant.
 Ordinary active grants expire within 90 days. The one reserved Bootstrap
 platform administrator instead holds a permanent, self-issued grant as part of
 the complete Bootstrap platform policy; this exception does not apply to other
-Profiles holding `platform.access.manage`. Renewal of an ordinary grant revokes
+Agents holding `platform.access.manage`. Renewal of an ordinary grant revokes
 the old immutable lifecycle row and inserts a new row in the same audited
 transaction.
 
@@ -118,7 +118,7 @@ The resolver emits resources only when every condition holds: authenticated
 viewer, both preview capabilities, viewer opt-in, registered top-level Zone
 adapter, exact installation, exact current host approval, supported contract,
 healthy approved revision, no safe-mode request, and global execution enabled.
-Every failure returns ordinary appearance and Unit content without theme
+Every failure returns ordinary appearance and Resource content without theme
 fragments or resource URLs. Resolved responses are private and viewer-specific.
 
 The server recognizes `?rezics-safe-theme=1`; Settings is always unthemed; and
@@ -216,14 +216,14 @@ undersized renderer fleet from accepting unbounded work.
 ## Capacity qualification
 
 Sparse host state is corpus-scale: at most one presentation row and one
-installation row per Unit. Planning covers both 500 million and 3 billion rows.
+installation row per Resource. Planning covers both 500 million and 3 billion rows.
 The representative fixture measured about 285 bytes per installation including
 all current indexes. Capacity planning therefore uses 280–360 bytes, or
 140–180 GB and 840 GB–1.08 TB respectively before replication, WAL, free space,
 and bloat. An illustrative 4 KiB presentation document is about 2.0 TB and
 12.3 TB of raw payload at those baselines, before history and TOAST overhead.
 
-Control-plane admission is explicitly bounded to 1,000 eligible Profiles, 100
+Control-plane admission is explicitly bounded to 1,000 eligible Agents, 100
 access managers, 100,000 active revisions, 10,000 queued reviews, and 1,000
 active unpinned executable/style nodes. At 512 graph nodes per active revision,
 the conservative external-resource maximum is 51.2 million rows; at an
@@ -264,35 +264,37 @@ measurements. Retention or archival may remove an object only under an approved
 evidence policy, never merely because a newer render replaced current evidence.
 
 Request paths are point lookups by `(host_unit_id, target_contract)`, revision
-ID, and current Profile capability, with keyset review/monitor queues. Warm
+ID, and current Agent capability, with keyset review/monitor queues. Warm
 presentation resolution targets p95 below 10 ms and at most three bounded data
 accesses before ordinary content projection. There is no offset pagination,
 whole-corpus revalidation, request-time installation fan-out, or renderer wait
 on external review work.
 
 An active full-trust page probes its authoritative policy immediately, at most
-once per 60 seconds, and when it becomes visible again. At the 1,000-Profile
-capability bound, one visible themed tab per Profile is about 16.7 point-lookups
-per second; three tabs is about 50 per second. Requests do not overlap within a
-tab, carry no theme-origin inventory, and are private/no-store. Before raising
-the capability bound or shortening the interval, load-test the authenticated
-policy path with the expected tab skew and add edge abuse controls; do not
-convert this safety probe into a whole-corpus scan or fan-out.
+once per 60 seconds, and when it becomes visible again. The number of eligible
+authoring Agents does not bound viewers, controllers, sessions or browser tabs.
+For N simultaneously visible tabs, periodic probes alone average N/60 per second,
+plus activation/focus bursts. For example 1,000 tabs imply about 16.7/s and 3,000
+imply 50/s; these are traffic assumptions, not consequences of the author limit.
+Requests do not overlap within one tab, carry no theme-origin inventory and are
+private/no-store. Measure actual viewer/tab skew and enforce request admission
+independently of theme-author counts. Shortening the interval requires fresh
+policy-path load evidence; no whole-corpus scan or fan-out is introduced.
 
 Browser runtime reports are untrusted operational signals. The client emits at
 most 32 structured reports per activation and omits credentials; the Worker
 accepts at most 2 KiB and only fixed lifecycle/resource/failure fields. CSP and
 integrity reports, reference evidence, drift observations, and authoritative
 server decisions remain separate corroborating sources.
-Normal activation emits three lifecycle/resource reports, so 1,000 Profiles
-opening three tabs together produces about 9,000 small reports; the defensive
+Normal activation emits three lifecycle/resource reports, so an illustrative
+3,000 simultaneous tab activations produce about 9,000 small reports; the defensive
 per-activation ceiling makes the same synchronized burst at most 96,000. The
 endpoint writes neither database rows nor a queue, and edge log sampling,
 retention, and rate limits must absorb or shed that telemetry independently of
 presentation policy and review correctness.
 
 Before a single host-state relation reaches operational storage, vacuum,
-backup, or latency limits, hash-partition/shard by `host_unit_id`. Move large
+backup, or latency limits, consider same-database hash partitions by the concrete host identity. Move large
 presentation payloads to content-addressed object storage when measured TOAST
 or relation growth warrants it. Archive terminal and bulky evidence while
 retaining bounded current monitor fields. Expansion past any control-plane
@@ -300,31 +302,12 @@ admission bound requires a new capacity review with representative skew,
 `EXPLAIN ANALYZE`, relation/index/TOAST/WAL measurements, and per-origin load
 tests.
 
-## Cutover and compatibility
+## Installation and earlier preview
 
-The prior Zone-theme migration was never included in a supported release tag,
-so it is replaced rather than adapted. There are no `/zone-themes` aliases,
-`zone_theme` Unit kinds, compatibility views, or approval inheritance. Preview
-CSS revisions must be discarded or explicitly resubmitted as a new
-host-full-trust package. Development databases that applied the old migration
-follow the [development cutover note](../operations/custom-theme-review-and-incident-response.md).
-
-## Deferred decisions
-
-A future contract is intended to replace live executable/style dependencies
-with a REZICS-hosted immutable closure. This is TSDoc-only direction, not a
-schema branch, persisted value, build pipeline, migration, or commitment.
-Likewise, `zone_page` is only the next intended top-level adapter.
-
-Public launch requires a new explicit decision about same-document privilege,
-review capacity and separation of duties, abuse response, privacy, licensing,
-accessibility, measured performance, and whether a `bounded_style` or sandboxed
-application mode is a better public product.
-
-## References
-
-- [W3C Subresource Integrity](https://www.w3.org/TR/SRI/)
-- [W3C Content Security Policy Level 3](https://www.w3.org/TR/CSP/)
-- [W3C Subresource Integrity 2](https://www.w3.org/TR/sri-2/)
-- [OWASP Server-Side Request Forgery Prevention](https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html)
-- [OWASP Third Party JavaScript Management](https://cheatsheetseries.owasp.org/cheatsheets/Third_Party_Javascript_Management_Cheat_Sheet.html)
+Target installation qualifies the admitted Resource/Space host, exact presentation
+revision, current capability and external-live policy together. Existing runtime
+identifiers and the earlier unreleased Zone-theme replacement belong to the
+[operator record](../operations/custom-theme-review-and-incident-response.md).
+That preview procedure is not standing authorization to discard current revisions
+or rewrite a completed baseline. Review evidence and grants are never inherited
+merely because a replacement package has a similar name.

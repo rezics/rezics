@@ -15,12 +15,12 @@ Auth/Self, direct-grant and membership implementation. G2-G5 status lives only i
 
 | Case | Required sequence and outcome |
 | --- | --- |
-| IAM01 | Anonymous public reads require no fabricated account/Entity and disclose only public state. Create an ordinary account, admit a usable Entity and save its main preference atomically; repeated/competing admission creates no duplicate binding or leaked private provider name. |
-| IAM02 | One AuthPrincipal represents several Entities; several principals represent one Entity with different scopes. Credential linking, controller linking and public identity are not equated. |
-| IAM03 | Import a cataloged person/organization and submit matching names/email or arbitrary Entity IDs. No control, account linking or participation is admitted from those values alone. |
-| IAM04 | Exercise public detail/list/search/error/audit/webhook and external-token surfaces. Raw principal IDs, private emails, controller sets and unrelated Entity links remain undisclosed. |
-| IAM05 | Change main/per-app defaults during two-tab editing and an OAuth refresh. Prepared attribution and consent retain their original Entity; an invalid default requires explicit selection before effect. |
-| IAM06 | Admit Entity participation and private AuthPrincipal operational membership under their separate policies. Typed roster disclosure and group eligibility remain correct without a universal public account roster. |
+| IAM01 | Anonymous public reads require no fabricated account/Agent and disclose only public state. Create an ordinary account, admit a usable Agent and save its main preference atomically; repeated/competing admission creates no duplicate binding or leaked private provider name. |
+| IAM02 | One AuthPrincipal represents several Agents; several principals represent one Agent with different scopes. Credential linking, controller linking and public identity are not equated. |
+| IAM03 | Import a cataloged person/organization and submit matching names/email or arbitrary Agent IDs. No control, account linking or participation is admitted from those values alone. |
+| IAM04 | Exercise public detail/list/search/error/audit/webhook and external-token surfaces. Raw principal IDs, private emails, controller sets and unrelated Agent links remain undisclosed. |
+| IAM05 | Change main/per-app defaults during two-tab editing and an OAuth refresh. Prepared attribution and consent retain their original Agent; an invalid default requires explicit selection before effect. |
+| IAM06 | Admit Agent participation and private AuthPrincipal operational membership under their separate policies. Typed roster disclosure and group eligibility remain correct without a universal public account roster. |
 | IAM07 | Exercise invitation/application, rule consent, active membership, mute, ban, leave and rejoin. Pending grants do nothing; rejoin creates a new generation and revives neither bans nor prior privileged group assignments. |
 | IAM08 | Admit an Org as a Realm participant without enrolling all Org members or allowing every controller to represent it. Source affiliations and following create no operational membership. |
 | IAM09 | Place a member in multiple groups and bind several roles to one group. Direct/inherited membership, root/sibling resource scopes and all-members derived sets remain distinct. |
@@ -30,25 +30,25 @@ Auth/Self, direct-grant and membership implementation. G2-G5 status lives only i
 
 | Case | Required sequence and outcome |
 | --- | --- |
-| IAM11 | A principal lacking direct target rights uses a valid scoped representation of an authorized Entity: allow. The same request with missing/stale/wrong-action/wrong-target representation is denied. |
-| IAM12 | A principal holds unrelated private rights while representing an Entity without those rights: deny. An App approved only for that Entity cannot harvest the principal's other grants. |
-| IAM13 | Grant account administration, Entity-controller management and security-role assignment to an Entity, AuthPrincipal and eligible mixed member set. Enforce each action's conditions, not a blanket recipient-type prohibition. |
-| IAM14 | Grant only publishing representation of an Entity that holds security powers. Reject account administration, controller changes and onward delegation. |
-| IAM15 | Exercise the operator's group membership while representing a different Entity. It does not automatically become the Entity's membership; explicit combined policies are checked separately. |
+| IAM11 | A principal lacking direct target rights uses a valid scoped representation of an authorized Agent: allow. The same request with missing/stale/wrong-action/wrong-target representation is denied. |
+| IAM12 | A principal holds unrelated private rights while representing an Agent without those rights: deny. An App approved only for that Agent cannot harvest the principal's other grants. |
+| IAM13 | Grant account administration, Agent-controller management and security-role assignment to an Agent, AuthPrincipal and eligible mixed member set. Enforce each action's conditions, not a blanket recipient-type prohibition. |
+| IAM14 | Grant only publishing representation of an Agent that holds security powers. Reject account administration, controller changes and onward delegation. |
+| IAM15 | Exercise the operator's group membership while representing a different Agent. It does not automatically become the Agent's membership; explicit combined policies are checked separately. |
 | IAM16 | A compound command has different incomplete rights under two identities. Reject implicit stitching; separately specified multi-party authorization can succeed only with every required proof. |
 | IAM17 | A manager can assign a named role without using its data permissions. Reject self-escalation through role edits, group enrollment, reparenting, ceiling changes or a change authorizing itself. |
 | IAM18 | Activate a new role revision. Local bindings observe the approved head; external/cross-authority ceilings do not expand. Role retirement cannot fall back to a broader default. |
 | IAM19 | Validate multi-hop representation with expiry, target/action narrowing and explicit redelegation. Reject widening, wrong edge order, cycles, unrooted mutual control and work-budget overflow. |
 | IAM20 | Revoke an issuer/operator. Durable institutional assignments survive under their owning authority; dependent execution delegations fail; pending invitations revalidate before acceptance. |
 | IAM21 | Attempt to remove the last valid recovery path, including two concurrent removals. Reject lockout; a cycle alone is not continuity. Recovery changes no historical authorship and revives no erased principal. |
-| IAM22 | The same operator uses two Entities as purported independent approvers or duplicate voters. Enforce the feature's private accountability key; distinct account IDs are not claimed as proof of distinct humans. |
+| IAM22 | The same operator uses two Agents as purported independent approvers or duplicate voters. Enforce the feature's private accountability key; distinct account IDs are not claimed as proof of distinct humans. |
 
 ## OAuth, applications and cross-platform identity
 
 | Case | Required sequence and outcome |
 | --- | --- |
-| APP01 | Connect a verified third-party local account to a selected Entity through a state-bound flow. Reject wrong issuer/audience/state, account substitution and name/email-based control claims. |
-| APP02 | Two local accounts connect the same Entity with different grants; one account connects two Entities. No account merge, private-setting transfer or unauthorized sibling disclosure occurs. |
+| APP01 | Connect a verified third-party local account to a selected Agent through a state-bound flow. Reject wrong issuer/audience/state, account substitution and name/email-based control claims. |
+| APP02 | Two local accounts connect the same Agent with different grants; one account connects two Agents. No account merge, private-setting transfer or unauthorized sibling disclosure occurs. |
 | APP03 | Inspect actual OIDC, JWT/opaque access tokens, UserInfo, introspection and errors for private global IDs. Pairwise OIDC alone is insufficient; public-client OIDC and MCP must still work under the elected privacy profile. |
 | APP04 | User delegation checks the selected direct/represented context, consent, client scopes, selected resources and applicable installation policy. Either identity's unrelated privileges stay excluded. |
 | APP05 | Issue installation credentials for two scopes of one App. Reject cross-installation use and client-controlled installation substitution; installer departure preserves scope-owned autonomous authority. |
@@ -74,7 +74,7 @@ dependencies while a command is waiting.
 | IAM23 | Revoke membership, parent group, role, representation or installation while a protected write waits. It commits before the conflicting revocation or observes the new authority. |
 | IAM24 | After acknowledged revocation, read through detail/list/search/count/export/cache and every service replica. No new request succeeds through that path; authority outages never produce stale allows. |
 | IAM25 | Revoke during a long job or stream. Subsequent protected effects follow the declared checkpoint; already delivered bytes are not claimed to be recalled. |
-| IAM26 | Erase one controller's account and private bindings/tokens. Other valid controllers, permitted Entity contributions and independent institutional assignments survive. Cleanup remains bounded. |
+| IAM26 | Erase one controller's account and private bindings/tokens. Other valid controllers, permitted Agent contributions and independent institutional assignments survive. Cleanup remains bounded. |
 | IAM27 | Restore an older database/object snapshot. Replay erasure and revocation frontiers before exposing data; stale roles/consents/delegation receipts cannot reactivate access. |
 | IAM28 | Exercise 500M/3B relation arithmetic plus representative depth, degree, hot keys, wide metadata and cold/warm plans. Measure indexes, query count/buffers, latency, unavailable decisions, WAL, queues and restore cost. |
 
@@ -85,7 +85,7 @@ or human-study workflow. The documentation refactor executes none of them.
 
 | Case | Required experience |
 | --- | --- |
-| UX01 | Ordinary onboarding/login enters the valid main Entity without a role/delegation wizard. Users can read, post and join without knowing account-principal terminology. |
+| UX01 | Ordinary onboarding/login enters the valid main Agent without a role/delegation wizard. Users can read, post and join without knowing account-principal terminology. |
 | UX02 | Switching identity makes attribution clear and preserves draft identity across tabs; lost authority preserves input and requires an explicit replacement before effect. |
 | UX03 | Invite a collaborator, select a role preset and finish from collaboration controls; advanced mixed-recipient and scope choices remain discoverable when needed. |
 | UX04 | Load an advanced API-created configuration, edit an ordinary field and save. Multiple roles, conditions, expiry, ceilings and recipient types survive; unsupported edits route to a capable editor. |
@@ -201,10 +201,10 @@ is deferred by the execution workflow; the prior count does not qualify the curr
 source revision or the new representation path evaluator.
 
 Cases cover direct versus represented selection, private-actor field rejection,
-exact representation revisions, operator/Entity UUID collisions, private-rights
+exact representation revisions, operator/Agent UUID collisions, private-rights
 exclusion, incomplete composite proofs, credential subject/basis limits, exact
 actor/permission-family/action/root/path binding, expiry, unavailable outcomes, hard denial and
-independent valid paths within one selected Entity. Conflicting duplicate basis
+independent valid paths within one selected Agent. Conflicting duplicate basis
 facts were found to admit a stale allow and now fail closed. The boundary fixture
 accepts 64 operations/bases and 256 operation facts, then rejects the next fact.
 
@@ -251,7 +251,7 @@ control versions, stable command receipts and no revival of an old generation af
 leave/rejoin. A non-member or wrong selected subject cannot use the leave transition;
 owner-managed removal remains a separate command.
 
-Cases include Entity/principal UUID collisions, missing initial admission, immutable
+Cases include Agent/principal UUID collisions, missing initial admission, immutable
 history, stale commands, replay, owner-policy denial, savepoint rollback, competing
 first admission, denial/unavailability on receipt reuse, changed receipt intent and
 expiry after demonstrated head and later audit-FK lock waits. Final-mutation
@@ -259,7 +259,7 @@ unavailability and caught failures leave no provisional generation or receipt. A
 sample and one identity with 100 further transitions record unforced exact-key
 plans and separate head/admission/event storage.
 These storage fixtures deliberately use SQL-admin policy predicates. They do not
-qualify actual invitation/rule consent, bans, Entity participation admission,
+qualify actual invitation/rule consent, bans, Agent participation admission,
 representation, public/private rosters or current management authority. Those owners
 must supply their complete policy and fence closure before runtime integration.
 
@@ -299,7 +299,7 @@ isolate this topology qualification from the pending management/ceiling policy.
 [check-access-group-memberships.ts](../../services/main/scripts/check-access-group-memberships.ts)
 on the disposable native target. It covers:
 
-- Enroll a principal and an Entity in the same scope, then assign each to two Groups; preserve their typed subject identities and direct versus inherited results.
+- Enroll a principal and an Agent in the same scope, then assign each to two Groups; preserve their typed subject identities and direct versus inherited results.
 - Reject a Group from another scope, an invented admission generation and assignment to an inactive enrollment or retired Group.
 - Leave and rejoin: retained selections for the old generation stay ineffective; a new generation needs a new explicit assignment.
 - Remove one direct selection while preserving another and inherited grants through its separate parent chain. Root and sibling Groups do not become implicit direct memberships.
@@ -343,13 +343,13 @@ assignment authority or permission to change a role/binding.
 for the storage slice below. Full current-candidate, lineage and management cases
 remain integration requirements:
 
-- Bind a role to a principal, an Entity, a Group and the derived all-members set under explicit recipient scope keys. A Group/MemberSet is a recipient set, never an authenticated caller.
+- Bind a role to a principal, an Agent, a Group and the derived all-members set under explicit recipient scope keys. A Group/MemberSet is a recipient set, never an authenticated caller.
 - Preserve target root and descendant path independently from the role-definition root and recipient scope. Cross-scope role reuse does not widen the target and requires frozen resource-authority approval.
 - Local activated role revisions affect local bindings only under current activation-impact admission. Cross-authority bindings remain inside their exact approved permission references, including prerequisites.
 - Retire role or binding; no fallback to a draft/latest role or broad preset. Stable operation receipts remain historical while runtime use requires current authority.
 - Assign several roles to the same recipient and several bindings to one subject. Deduplicate effective permission keys without negating another valid grant; hard restrictions remain conjunctive.
 - Validate inclusive start/exclusive end, invalid ranges, pending/not-yet-valid states and expiry after role/binding/recipient lock waits.
-- Match exact selected subject rather than borrowing the operator's Group membership while representing an Entity.
+- Match exact selected subject rather than borrowing the operator's Group membership while representing an Agent.
 - Direct membership-dependent bindings carry exact admission generations; exact assignment dependencies carry selection versions. Leave/rejoin and remove/reassign cannot revive them.
 - Durable institutional assignment does not depend on its creator's continuing eligibility; dependent delegation validates its declared live source chain. Private audit attribution alone creates neither dependency nor authority.
 - Serialize current reads with activation/retirement and assignment/revocation. Protect negative candidates so a newly inserted restriction or binding cannot invalidate an already accepted write.

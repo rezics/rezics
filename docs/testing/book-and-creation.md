@@ -26,7 +26,7 @@ The [cross-domain Work matrix](native-work.md) and [composition operation matrix
 | BOOK18 | Withdraw/remove content, hide identity or relinquish control through distinct operations; no guessed AO3 orphaning semantics. |
 | BOOK19 | Run one complete multi-principal author/editor/reader/moderator journey entirely through native APIs. |
 | BOOK20 | Repeat the journey under concurrent edits, source changes, failed jobs, revoked grants and cache/index lag. |
-| BOOK21 | Create and publish a metadata-only REZICS Work without ISBN, external edition or dummy Document; tag, discuss and favorite the Work through generic Unit contracts before any body is adopted. |
+| BOOK21 | Create and publish a metadata-only REZICS Work without ISBN, external edition or dummy Document; tag, discuss and favorite the Work through generic Resource contracts before any body is adopted. |
 | BOOK22 | Adopt an English original and community Chinese/Japanese contributions into the same Work with no corresponding trilingual publisher edition; preserve exact provenance, officialness, credits and independent contributor control. |
 | BOOK23 | Admit all languages by policy without preallocated language rows; distinguish that policy from particular support declarations, metadata translations and actual readable coverage. Two same-language contributions coexist with an explicit reading selection. |
 | BOOK24 | Link hardcover, paperback and ebook publications with their own identifiers/contents to one Work; no external edition becomes its primary flag and a provider language update cannot remove community adoptions. |

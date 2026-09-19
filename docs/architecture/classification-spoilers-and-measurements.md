@@ -1,16 +1,26 @@
-# Entity, Tag, spoiler, and measurement decisions
+# Resource, Tag, spoiler, and measurement decisions
 
-This document records the accepted Entity, Tag Path, spoiler, and measurement
+This document records the accepted Resource, Tag Path, spoiler, and measurement
 decisions. The dedicated Tag Path domain contract lives in
 [tag-paths.md](./tag-paths.md), and its capacity envelope lives in
 [tag-path-capacity.md](./tag-path-capacity.md). These decisions bind
 implementation; changing one requires updating this document.
 
-Two principles run through every decision below. Existing mechanisms are
-reused instead of invented: Wilson confidence, the `voteSummary` contract,
-advisory-lock projection refreshes, trigger-enforced bounds, and the
-documented release cutover sequence. And wherever one error direction is
-recoverable and the other is not, the default errs on the recoverable side.
+## Objective classification and community judgments
+
+A classification assertion says that a Resource belongs to a defined class or
+concept in a declared scope. It retains exact meaning, evidence, author/source and
+acceptance state. Recipe, Book and Novel classifications can coexist with broader
+classes without selecting a physical table. The governed Tag vocabulary may supply
+the management surface; class membership and subjective fit votes remain separate
+relations and policies. Conflicting evidence is preserved rather than resolved by
+pretending a vote total proves truth.
+
+Logical validation checks the admitted profile and structural capabilities. A Tag
+alone cannot create content-hosting ability, account control or executable authority.
+SKOS broader/narrower relationships are not automatically subclass rules. Community
+fit/spoiler judgments described below concern their declared applications and never
+silently replace objective classification or source evidence.
 
 ## Spoiler and concealment mechanisms
 
@@ -24,12 +34,12 @@ Three mechanisms answer three different questions and never feed each other:
 
 A semantic spoiler classification is a community judgment about an
 application relationship — “this Tag, Path, or appearance applies to this
-Unit, and knowing that association reveals a minor or major spoiler.” It
+Resource, and knowing that association reveals a minor or major spoiler.” It
 affects discovery, filtering, grouped presentation, API results, Realm
 policy, and safe-by-default disclosure.
 
 A content spoiler label is a whole-document statement about one authored
-post-kind Unit (“this review reveals major spoilers”), defined in “Content
+post-kind Resource (“this review reveals major spoilers”), defined in “Content
 spoiler labels” below.
 
 A concealment mark is authored inside rich content and hides one span or
@@ -66,22 +76,22 @@ other:
 
 - Age suitability of the subject matter is the existing
   `unit.content_rating` column (`general`, `r15`, `r18`, `r18g`) with the
-  per-Profile accepted-ratings preference and its existing filtering
-  semantics. A character Unit from an adult work is `r18` because of what it
+  private viewer accepted-ratings preference and its declared filtering
+  semantics. A character Resource from an adult work is `r18` because of what it
   is about, even when everything it renders is inoffensive.
 - Workplace display safety of the rendered surfaces is the NSFW display
   label defined below. It judges at-a-glance conspicuousness, not semantic
   explicitness: an `r18` erotic prose post can stay unlabeled because a
   glance at a page of text reveals nothing, while a far lower-rated image
   can carry the label because one glance at it is already the problem.
-  The same character Unit is not NSFW while its imagery stays safe. Rating
+  The same character Resource is not NSFW while its imagery stays safe. Rating
   gates who should view the subject; NSFW gates how it renders on a screen
   and what discovery systems may show. Neither field ever derives the other
   automatically.
 
 Spoiler status stays contextual (relative to the content's subjects) and
 layered across authorities, which is why spoilers use labels and judgments
-rather than another intrinsic Unit column.
+rather than another intrinsic Resource column.
 
 ## Judgment dimensions and storage
 
@@ -89,20 +99,20 @@ rather than another intrinsic Unit column.
 
 | Target | Applicability vote | Spoiler vote | Global | Realm |
 | --- | ---: | ---: | ---: | ---: |
-| Tag applied to Unit | yes | yes | yes | yes |
+| Tag applied to Resource | yes | yes | yes | yes |
 | Path definition | yes | no | yes | yes |
-| Path applied to Unit | yes | yes | yes | yes |
+| Path applied to Resource | yes | yes | yes | yes |
 | Subject association (appearance) | no | yes | yes | deferred |
 
 A Path definition asks whether the ordered semantic path is valid. A Path
-application asks whether that path describes a particular Unit. Spoiler
-status belongs only to statements about a particular Unit. A subject
+application asks whether that path describes a particular Resource. Spoiler
+status belongs only to statements about a particular Resource. A subject
 association's existence is consent-curated rather than voted, so it carries
 the spoiler dimension only (see “Association spoiler classification”).
 
 ### Independent judgments in one sparse row
 
-For every Tag or Path application target and authority, a Profile holds at
+For every Tag or Path application target and authority, an Agent holds at
 most one judgment row:
 
 ```text
@@ -116,7 +126,7 @@ check: fit_vote is not null or spoiler_level is not null
 Each mutation updates only its own dimension with its own timestamp,
 authorization, and optimistic state; clearing both dimensions deletes the
 row. `unknown` is the absence of a spoiler judgment, never an aggregating
-vote value, so abstentions cannot dilute evidence. A Profile may classify the
+vote value, so abstentions cannot dilute evidence. An Agent may classify the
 spoiler level without casting an applicability vote, provided the candidate
 application relationship exists.
 
@@ -193,13 +203,13 @@ spoiler variation; the
 and the [perspectivist survey](https://arxiv.org/abs/2601.09065) on
 distribution-preserving evaluation of ordinal judgments; and
 [GUSD, ECML-PKDD 2025](https://arxiv.org/abs/2504.17834) on genre-level
-spoiler norms and stable per-user spoiler bias, which is why per-Profile
+spoiler norms and stable per-user spoiler bias, which is why per-Agent
 judgment facts are retained for possible asynchronous reliability weighting.
 
 ## Spoiler propagation and member override
 
 A Path application's spoiler protection covers every member Tag it projects:
-a derived member's presence on the Unit is evidence of the path association,
+a derived member's presence on the Resource is evidence of the path association,
 and over-hiding is recoverable while revealing is not.
 
 The effective protection for one `(unit, tag, authority)`:
@@ -220,18 +230,18 @@ merged destructively.
 A member Tag can be overridden in each authority independently, but only
 through direct Tag evidence. A Path application is atomic: there is no
 per-member exemption inside it. This keeps definition and application votes
-auditable and matches the existing invariant that a Profile's negative
+auditable and matches the existing invariant that an Agent's negative
 direct Tag vote and positive path support cannot coexist.
 
 ## Association spoiler classification
 
-“This Entity appears in this work” can itself be the spoiler: a hidden
+“This Resource appears in this work” can itself be the spoiler: a hidden
 antagonist leaks from a character list even when every fact about the
 character is protected. The spoiler-bearing statement is the association,
-not the Entity.
+not the Resource.
 
 - Storage: `subject_association_judgment` holds one spoiler-only judgment
-  row per Profile and association (`association_id`, `profile_id`,
+  row per Agent and association (`association_id`, `profile_id`,
   `spoiler_level` 0 | 1 | 2, timestamps), cascading with the association.
   Association existence is consent-curated, so no applicability dimension
   exists; this is the degenerate single-dimension form of the shared
@@ -239,19 +249,19 @@ not the Entity.
 - Aggregation, protection, and status reuse the Wilson rules above
   unchanged. The first release ships the global authority only; Realm-scoped
   association judgments are deferred.
-- Protection applies when rendering the association, never the Unit. A
+- Protection applies when rendering the association, never the Resource. A
   work's surfaces conceal the protected appearance row — including its role,
   because “secretly the primary character” is itself a spoiler — behind the
-  viewer preference. The Entity's own page renders normally while its
+  viewer preference. The Resource's own page renders normally while its
   appearance rows toward each work are protected individually. Catalog
-  identity Units never carry an intrinsic spoiler state.
+  identity Resources never carry an intrinsic spoiler state.
 - Scope: `subject_association` only. Credit attributions and series
   relations can adopt the same pattern when demand exists.
 
 ## Content spoiler labels
 
 A content spoiler label is a whole-document spoiler statement about one
-authored post-kind Unit (post, reply, review, excerpt, wiki page). Its
+authored post-kind Resource (post, reply, review, excerpt, wiki page). Its
 implicit scope is the post's `subjectUnitId`; a reply inherits its root
 post's subject. Labels have real consequences — they hide content — so every
 assertion is a deliberate, authorized act. No vote can create or remove one,
@@ -260,11 +270,11 @@ correctly labeled document.
 
 ### Registry
 
-The registry holds four bootstrap Tag Units: the three content-spoiler
+The registry holds four bootstrap Tag Resources: the three content-spoiler
 levels (none, minor, major) and the NSFW display label defined in the next
 section. Their fixed identities join the bootstrap manifest beside the
-existing official identities, are owned by official Profiles (which excludes
-ordinary community editing), are excluded from Unit merges, and are verified
+existing official identities, are owned by official Agents (which excludes
+ordinary community editing), are excluded from Resource merges, and are verified
 by readiness inspection. Because the identifiers are literal constants,
 database triggers inline them to enforce the guards below. The registry is a
 strictly bounded control set (at most 16 identities).
@@ -273,12 +283,12 @@ strictly bounded control set (at most 16 identities).
 
 | Writer | Mechanism | Scope | Authorization |
 | --- | --- | --- | --- |
-| Author | pinned `unit_tag` on their own post | global | Unit ownership |
+| Author | pinned `unit_tag` on their own post | global | Resource ownership |
 | Realm | `realm_unit_tag` | that Realm's surfaces | `realm.tags.manage` |
 | Platform correction | pinned `unit_tag` | global | moderation capability plus a `governance_decision` audit |
 
-- Content-spoiler tags apply only to post-kind Units; a trigger rejects
-  other targets and the API returns a typed error, so catalog Units can
+- Content-spoiler tags apply only to post-kind Resources; a trigger rejects
+  other targets and the API returns a typed error, so catalog Resources can
   never receive a spoiler label. The NSFW label defines its own, wider
   applicability in its section.
 - Registry `unit_tag` rows must be pinned, and judgment rows on registry
@@ -287,7 +297,7 @@ strictly bounded control set (at most 16 identities).
 - Rows created under platform authority require platform authority to modify
   or remove; `unit.tag-curation.manage` alone is insufficient for them. The
   database enforces this through the established guarded transaction path,
-  keyed on the literal registry identifiers and official Profile identities.
+  keyed on the literal registry identifiers and official Agent identities.
   Mislabeling corrections flow report → Realm curation or platform
   moderation.
 - Registry tags are excluded from ordinary Tag picker suggestions and from
@@ -304,10 +314,10 @@ effective level = max(active sources); none counts 0
 no row at all = undeclared; renders normally
 ```
 
-Label lookup never enumerates a Unit's tags. The author and platform rows
+Label lookup never enumerates a Resource's tags. The author and platform rows
 ride the bounded pinned read (at most 16 rows) that cards already perform;
 Realm rows are keyed probes on the fixed registry identifiers (at most four
-per Unit and context). A capped enumeration is not an acceptable lookup: the
+per Resource and context). A capped enumeration is not an acceptable lookup: the
 primary key orders by random Tag UUID, so any truncation window can silently
 miss a registry row. Full tag-list queries, where they exist, may carry a
 defensive internal limit (10,000 rows) as an adversarial bound; label
@@ -321,7 +331,7 @@ embeds, and notification preview text.
 ## NSFW display label
 
 The fourth registry Tag is the NSFW display label: a single binary flag
-stating that rendering this Unit's surfaces is inappropriate for a work or
+stating that rendering this Resource's surfaces is inappropriate for a work or
 public screen. The criterion is what a glance at the rendered surface
 exposes — the conspicuousness of imagery and presentation — not the semantic
 rating of the content, so highly rated text often carries no label while
@@ -331,18 +341,18 @@ orthogonal to `unit.content_rating` (see “Spoiler and concealment
 mechanisms”), never derived from it in either direction, and carries no
 spoiler semantics.
 
-- Applicability: any public content Unit — posts and catalog Units alike.
+- Applicability: any public content Resource — posts and catalog Resources alike.
   Display safety is an intrinsic property of what a surface renders, so
-  labeling a catalog Unit NSFW does not conflict with the rule that catalog
-  Units carry no intrinsic spoiler state.
+  labeling a catalog Resource NSFW does not conflict with the rule that catalog
+  Resources carry no intrinsic spoiler state.
 - Write paths and guards reuse the content-label matrix: pinned `unit_tag`
-  under Unit curation authority (the author on their own posts; Unit
+  under Resource curation authority (the author on their own posts; Resource
   curators and platform moderation elsewhere, `unit.tag-curation.manage` is
-  deliberately not grantable to all authenticated Profiles), `realm_unit_tag`
+  deliberately not grantable to all authenticated Agents), `realm_unit_tag`
   under `realm.tags.manage` for Realm surfaces, and platform correction with
   a `governance_decision` audit. The pinned requirement, judgment rejection,
   and platform-row protection apply unchanged; there is no vote path.
-- Resolution is presence-based: any active source marks the Unit NSFW.
+- Resolution is presence-based: any active source marks the Resource NSFW.
   Lookup rides the same pinned read and fixed-identifier probes as the
   spoiler labels.
 - Rendering: visual surfaces — cards, covers, avatars, galleries, preview
@@ -352,7 +362,7 @@ spoiler semantics.
 - Discovery consequences: the label feeds adult-content signals on public
   surfaces — SafeSearch-style rating metadata and suppression of social and
   preview imagery — alongside the existing adult presentation suppression in
-  [unit-landing-seo.md](./unit-landing-seo.md), which already models adult
+  [resource-landing-seo.md](./resource-landing-seo.md), which already models adult
   responses as `presentation: null`. Notification previews and search
   snippets suppress NSFW imagery under the same enforcement rule as spoiler
   labels.
@@ -380,15 +390,15 @@ Outcome resolution per target and dimension:
   mixed state.
 
 Every result carries its state label. Global and Realm counts are never
-merged; Profile Realm subscriptions compose presentation, never scores.
+merged; Agent Realm subscriptions compose presentation, never scores.
 
 ### Required capabilities and table shapes
 
 A Realm can accept or reject a public Path definition, vote on whether a Path
-applies to a Unit, and independently classify that application's spoiler
+applies to a Resource, and independently classify that application's spoiler
 level. Realm-derived effective Tags remain separate from global effective
 Tags, and APIs and UI preserve authority and provenance on every result. Path
-Units remain public identities: a Realm contextualizes a Path, it does not
+Resources remain public identities: a Realm contextualizes a Path, it does not
 clone the Path or its member Tags.
 
 Realm-scoped storage uses dedicated typed relations:
@@ -398,7 +408,7 @@ Realm-scoped storage uses dedicated typed relations:
 - `realm_tag_path_vote` records Realm definition judgments and is gated by
   that adoption;
 - `realm_unit_tag_path_application` applies an adopted Path Sense to a Realm
-  Unit;
+  Resource;
 - `realm_unit_tag_path_application_judgment` stores the sparse fit/spoiler
   judgment row;
 - `realm_tag_judgment` stores direct Tag fit/spoiler judgments; and
@@ -416,7 +426,7 @@ are vocabulary policy set through curation capabilities — low-volume
 editorial decisions, not community votes.
 
 `directly_applicable boolean default true` marks whether a Tag may be applied
-to Units directly (the source adapter maps its `applicable` field here). Category-only
+to Resources directly (the source adapter maps its `applicable` field here). Category-only
 Tags with `false` are excluded from application suggestions — the picker
 offers to browse into their children and paths instead — and the API rejects
 direct application with a typed error. Path membership is unaffected:
@@ -431,13 +441,13 @@ contributor opens the optional spoiler judgment, and it serves as the
 protection floor while a target has zero spoiler evidence. It is never
 written as a vote and never enters aggregate counts.
 
-## Entity description
+## Resource description
 
-An Entity description is complete, localized Portable Text rather than a
+A Resource description is complete, localized Portable Text rather than a
 summary assembled from adjacent facts. Import preserves supported paragraphs,
 links, emphasis, lists, and explicit spoiler presentation marks; unsupported
 source markup is converted or rejected deliberately, never silently flattened
-into escaped HTML. The description explains who or what the Entity is;
+into escaped HTML. The description explains who or what the Resource is;
 structured metadata exposes facts such as measurements, roles, credits, and
 relationships, and the description does not repeat every adjacent metadata
 value.
@@ -456,69 +466,36 @@ never depends on the clamp.
 
 ## Structured measurements
 
-Measurements are typed facts in a dedicated Entity measurement relation, not
-formatted description strings:
+Measurements use the shared typed fact/quantity and observation contracts. A fact
+identifies subject, property meaning, quantity/value state, semantic context,
+validity, exact evidence and acceptance. An actual observation additionally names
+its procedure/instrument, feature, phenomenon time and result time. A source claim
+about a measurement is not automatically an observation or accepted truth.
 
-```text
-entity_id
-context_unit_id     nullable
-height_millimetres  nullable
-weight_grams        nullable
-bust_millimetres    nullable
-waist_millimetres   nullable
-hips_millimetres    nullable
-created_at
-updated_at
-```
+Height, mass, body dimensions, temperature and other quantities do not become
+mandatory columns of every Resource. Preserve exact number, original lexical
+value, quantity kind, unit definition, precision, uncertainty/range and unavailable
+states. Bounds are property-specific: positive mass and below-zero temperature
+do not share one generic positive-integer validator. Measurement units shown in a UI are
+presentation; conversion requires a declared comparison/conversion profile.
 
-- Cardinality is bounded and trigger-enforced: one canonical set
-  (`context_unit_id` null) plus at most eight contextual sets per Entity, in
-  the same style as the existing 128-reference cap.
-- The context identity is another Unit — the Software, Release, or other
-  Unit under which the variant holds — with
-  `UNIQUE NULLS NOT DISTINCT (entity_id, context_unit_id)`. No free-text
-  discriminator and no new Entity-variant concept.
-- Values are positive integers in canonical millimetres and grams; `null`
-  means unknown. The first release stores point values only; uncertainty,
-  approximations, and ranges stay unmodeled until real demand exists.
-- Governance is direct editing with Unit revision and audit history, not
-  votes. The UI localizes units and formats the bust–waist–hips sequence; the
-  local fixture loader decodes source HTML entities before validation;
-  Portable Text never owns or parses these values.
-- The canonical measurement row and REZICS-owned revision/audit history are
-  the only persisted authority. Local fixture source metadata is build-time
-  validation input and is not stored as a parallel production evidence chain.
+Multiple claims, contexts and measurement times may coexist. A canonical displayed
+measurement is an acceptance/display selection, not the sole persisted fact. Do
+not impose a global lifetime limit of eight contexts or collapse all unknown states
+to null. Queries select a context/property and bounded pages, report completeness,
+and retain exact revision references for comparison and history.
 
-The cardinality proof has no historical scan: `entity_measurement` is created
-empty earlier in the same unreleased cutover, and the guard migration refuses
-to install if a bounded `EXISTS ... LIMIT 1` probe finds any pre-guard row.
-After installation, each contextual insert takes one Entity-scoped transaction
-advisory lock and probes at most the existing eight contextual rows through the
-leading `(entity_id, context_unit_id)` unique index. Unrelated Entities never
-share this lock; API admission quotas provide backpressure for mutation bursts.
+A specialized measurement view may project selected values into efficient typed
+columns, but it has one source of authority and no independent editor. The current
+body-measurement layout is recorded in [implementation reference](../reference/current-implementation.md#measurements-and-reference-ranking);
+its field limits and earlier estimates do not qualify this richer target.
 
-Entity-side merge validation combines two independently guarded keys, so its
-exact destination aggregation reads at most 16 contextual rows and retains at
-most 16 UUIDs. It does not depend on corpus size. The adversarial storage
-envelope is nine rows per Entity: 4.5 billion rows at 500 million Entities and
-27 billion rows at 3 billion Entities. A contextual row plus the heap and its
-three current B-tree entries is roughly 220–300 bytes before free space, bloat,
-WAL, replicas, and backups, or about 0.99–1.35 TB and 5.94–8.10 TB respectively
-at those worst-case row counts. Real adoption is expected to be sparse, but
-capacity planning does not rely on that expectation. A contextual write
-amplifies to one heap tuple and three indexes; value-only updates remain
-eligible for HOT updates.
-
-There is no new standalone latency target: the two keyed reads remain inside
-the existing Unit-merge transaction objective. Observe measurement mutation
-latency, Entity advisory-lock waits, limit rejections, relation/index growth,
-WAL volume, and replica lag. If one Entity's lock wait consumes more than 10%
-of the existing mutation latency objective for 15 minutes, move its writes to
-an explicit queued owner path rather than weakening the bound. Before a single
-node reaches storage or index-maintenance limits, hash-partition or shard by
-`entity_id`; preserve context-addressed merge scans with a partitioned
-`(context_unit_id, entity_id)` routing projection so the 3-billion-Entity path
-does not become an all-shard fan-out.
+Capacity uses the 500M/3B baseline independently for assertions, revisions,
+observations, evidence and projections. Model actual context/history amplification
+and degree skew. Reads must not scan all claims for a subject to render a bounded
+card; reverse context/property queries require their own indexed projection. Use
+same-database partitioning or specialized indexes only after demonstrating concrete
+key/uniqueness preservation and measured cost under the owning workload policy.
 
 ## Compound-search decomposition tunables
 
@@ -547,7 +524,7 @@ of truth. One principle governs fixture translation: aggregates start honest.
 A source site's community score is validation context, never fabricated votes
 or persisted parallel provenance.
 
-- Entity descriptions convert source formatting codes to Portable Text, with
+- Resource descriptions convert source formatting codes to Portable Text, with
   source spoiler codes becoming presentation marks; unconvertible markup is
   rejected explicitly.
 - Measurements import into the structured relation with source HTML entities
@@ -559,8 +536,8 @@ or persisted parallel provenance.
 - Every semantically supported hierarchy chain may seed an immutable Path
   definition. Exact-array deduplication is left to the database, and each
   accepted definition becomes a canonical REZICS fact.
-- Each imported Unit–Tag application creates the application row plus a
-  single importer-Profile `fit` judgment; the source spoiler average rounds
+- Each imported Resource–Tag application creates the application row plus a
+  single importer-Agent `fit` judgment; the source spoiler average rounds
   to one importer spoiler judgment. Source aggregate values are not stored as
   authoritative production evidence.
 - Each imported character appearance creates its subject association plus
@@ -569,26 +546,15 @@ or persisted parallel provenance.
 - Loading rejects a partially populated database. Fixture changes require a
   local reset and full reload; there is no reconciliation or production sync.
 
-## Migration and cutover
+## Installation and acceptance
 
-The contract lands in the vendor-neutral
-`tag_path_semantic_model` breaking migration. Released history remains
-append-only, but the rejected preview contract receives no compatibility:
+Use the owning forward migration/generator workflow and retain released history.
+Development/test state can be rebuilt under the active program without a legacy
+conversion or online dual-write requirement. Current selected guard limits remain
+enforced until their replacement is implemented and qualified; documenting a
+richer model is not permission to remove a live integrity backstop.
 
-1. bounded `EXISTS` assertions fail when any preview Structure/Tag-vote fact
-   or incompatible merge operation exists;
-2. the migration removes old tables, functions, triggers, views, enum labels,
-   and `unit.kind = structure` without conversion or backfill;
-3. it creates the dedicated Tag Path, global/Realm judgments, projections,
-   labels, preferences, and measurements;
-4. canonical PostgreSQL owners install incremental aggregates, immutable
-   definition guards, bounded governance chains, and content
-   policy enforcement; and
-5. API, generated clients, and frontend deploy together. Old binaries are
-   intentionally incompatible.
-
-Rollback requires a database restore plus the previous binary. Aggregate
-parity, migration replay, lock waits, and representative query plans are
-release gates. The asynchronous outbox cutover described in
-[vote-and-reference-governance.md](./vote-and-reference-governance.md)
-remains the explicit scale path when hot-key or WAL thresholds are crossed.
+Qualify classification versus capability/authority, current disclosure, repeated
+contextual claims, typed quantities and reference validity together with
+[MODEL01-MODEL40](../testing/model-contracts.md). Dated preview/cutover instructions
+in Git or release records do not authorize deleting current production data.

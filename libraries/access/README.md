@@ -5,7 +5,7 @@ Persistence, backend authorization, API schemas, localization, bootstrap data, a
 this package; none of those consumers may define a second permission registry.
 
 The selected [identity and mixed-authorization contract](../../docs/architecture/identity-and-access.md)
-defines private AuthPrincipals, public Entities, mixed grantees, scoped representation
+defines private AuthPrincipals, public Agents, mixed grantees, scoped representation
 and persistent custom roles. [Connected applications](../../docs/architecture/connected-apps.md)
 defines credential/consent ceilings. Existing exported tuples and owner-specific
 checks are implemented contracts to reconcile through [M01](../../docs/plan/modules/foundation.md),
@@ -19,9 +19,9 @@ belong to the backend authorization engine and the owning product surfaces.
 
 - A **permission** is one independently grantable operation on a logical resource.
 - A **role** is a named collection of permissions. A role is not itself a permission.
-- A **grantee** is a typed AuthPrincipal, Entity or eligible member set. A Group collects recipients; a Role collects permissions, and a Binding fixes the target scope and conditions.
-- **Representation** permits an authenticated actor to exercise an Entity's authority within explicit limits. The actor need not personally hold the Entity's target rights, and unrelated direct rights are not pooled into that request.
-- A **scope** narrows a permission to a Unit root or descendant path.
+- A **grantee** is a typed AuthPrincipal, Agent or eligible member set. A Group collects recipients; a Role collects permissions, and a Binding fixes the target scope and conditions.
+- **Representation** permits an authenticated actor to exercise an Agent's authority within explicit limits. The actor need not personally hold the Agent's target rights, and unrelated direct rights are not pooled into that request.
+- A **scope** narrows a permission to a Resource root or descendant path.
 - A **policy** combines identity, ownership, grants, restrictions, membership, and resource state
   into a decision.
 - An **API scope** controls whether a credential may enter an API surface. It does not prove access
@@ -66,20 +66,21 @@ API credential scope or role, but it hides which mutations are actually authoriz
 
 Split two permission keys only when the product needs to grant the operations independently.
 
-- Editing a Unit and changing its lifecycle status are independently grantable, so status changes
+- Editing a Resource and changing its lifecycle status are independently grantable, so status changes
   require both `unit.update` and `unit.status.update`.
-- Editing ordinary Unit metadata and changing whether hosted work content may be presented are
+- Editing ordinary Resource metadata and changing whether hosted work content may be presented are
   independently grantable, so an actual `metadataOnly` change requires both `unit.update` and
   `unit.metadata-only.update`. Repeating the stored value is not a change.
-- Creating a direct Realm Unit and creating a Reply are independently grantable, so they use
+- Creating a direct Realm Resource and creating a Reply are independently grantable, so they use
   `realm.units.create` and `realm.post.replies.create`.
 - Updating Realm rules appends an immutable revision, but the logical operation remains
   `realm.rules.update`. Append-only storage does not create a separate publish permission.
-- Managing a Zone's Page composition, Page placement, and navigation is independently delegable
-  through `zone.pages.manage`. It does not grant theme management, general Unit editing, or
-  lifecycle authority.
+- Managing Space routes, placement and navigation is independent of editing a
+  resolved Resource's content or managing its theme. The existing `zone.pages.manage`
+  adapter must be reconciled with those operations; its old Page owner does not
+  define the target identity model.
 - Managing a Zone's tokens and curated appearance preset is independently delegable through
-  `zone.theme.manage`. It does not grant page composition, navigation, general Unit editing, or
+  `zone.theme.manage`. It does not grant page composition, navigation, general Resource editing, or
   lifecycle authority. Unreleased theme vocabulary also requires the separate platform development
   preview capability.
 
@@ -98,7 +99,11 @@ cycles.
 
 ## Persistence and transport
 
-The TypeScript tuples in this package are the current source of truth. PostgreSQL enums consume
+The TypeScript tuples in this package are the current executable source of truth.
+Examples retain actual keys such as `unit.update`; selected prose uses Resource and
+Agent. The [implementation crosswalk](../../docs/reference/current-implementation.md)
+records retained naming and consumer gaps. A documentation change does not rename
+permissions or validate the replacement Space/mixed-authority behavior. PostgreSQL enums consume
 them, migrations change stored values, API schemas expose them, and generated clients reflect the
 API. Historical migration files and generated outputs may contain copied values because they are
 artifacts, not competing registries.
@@ -128,7 +133,7 @@ applies to the requirements below.
 New resource kinds and new permission keys require an explicit access review. Do not use wildcard
 or fallback classification that grants future resources authority merely because they compile.
 
-Mixed account/Entity administration uses the same independent-grant test. Define
+Mixed account/Agent administration uses the same independent-grant test. Define
 using, assigning and editing authority separately, including representation and
 redelegation. Account management and security-role assignment are not restricted
 to AuthPrincipal recipients merely because their targets are private. Keep
@@ -137,14 +142,14 @@ operation-specific authentication, accountability and recovery requirements.
 Persistent role revisions, mixed bindings, assignment ceilings, typed membership
 and representation are target work. Policy evaluates the selected authority
 context plus hard actor/resource and credential restrictions. A public author
-label or current main Entity cannot grant access. The following specialized
+label or current main Agent cannot grant access. The following specialized
 sections describe existing permission behavior until their target replacements
 pass the corresponding acceptance cases; they are not universal limits on the
 new grantee model.
 
 ## Development preview release gate
 
-Use `platform.development_preview.access` as the single Profile eligibility gate for unreleased
+Use `platform.development_preview.access` as the single Agent eligibility gate for unreleased
 features. Do not create feature-specific preview capabilities. A preview request is allowed only
 when the caller has this platform capability and passes the feature's ordinary authorization
 checks. The backend enforces both on every request; frontend gating only removes unavailable
@@ -157,13 +162,13 @@ eligibility from becoming broad mutation authority.
 ## Custom Theme external-live delegation
 
 `platform.custom_theme.external_live.access` is a time-bounded eligibility
-gate for the full-trust external-live preview. It grants no Unit create/update,
+gate for the full-trust external-live preview. It grants no Resource create/update,
 host installation, review, kill, or general platform administration authority.
 It is conjunctive with `platform.development_preview.access` and each
 operation's ordinary permission.
 
 `platform.custom_theme.external_live.access.manage` authorizes only the narrow
-Profile selector and grant/renew/revoke endpoint. It neither implies execution
+Agent selector and grant/renew/revoke endpoint. It neither implies execution
 access nor general platform access reads or management. The request body cannot
 name a capability, the actor cannot target themself, every mutation requires a
 fresh session and optimistic revision, and an active grant must expire within
@@ -174,15 +179,15 @@ management authority so root access managers retain recovery control.
 The operational admission and recertification policy is documented in
 [`docs/operations/custom-theme-external-live-access.md`](../../docs/operations/custom-theme-external-live-access.md).
 
-## Unit ownership governance
+## Resource ownership governance
 
-Ordinary ownership transfer is Unit-scoped. The current owner derives
-`unit.ownership.transfer`, and the permission cannot be delegated through Unit grants,
+Ordinary ownership transfer is Resource-scoped. The current owner derives
+`unit.ownership.transfer`, and the permission cannot be delegated through Resource grants,
 restrictions, or invitations.
 
 Platform intervention is a separate control-plane operation. Grant
-`unit.ownership.override` once to a Profile that may reassign any Unit; do not copy it into each
-Unit's access records. `unit.ownership.override`, `unit.delete`, and `unit.restore` each imply the
+`unit.ownership.override` once to an Agent that may reassign any Resource; do not copy it into each
+Resource's access records. `unit.ownership.override`, `unit.delete`, and `unit.restore` each imply the
 read-only `unit.governance.read` prerequisite, while remaining independent mutations with
 separate endpoints, confirmations, and audit actions.
 

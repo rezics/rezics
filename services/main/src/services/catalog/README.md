@@ -1,5 +1,9 @@
 # Native catalog implementation
 
+Implementation reference. This owner documents current code, identifiers and local
+limits. The [selected target](../../../../../docs/architecture/database/catalog-model.md) and [implementation crosswalk](../../../../../docs/reference/current-implementation.md)
+define the reconciliation boundary; existing fixtures do not qualify revised semantics.
+
 Use the [current plan](../../../../../docs/plan/README.md), [catalog architecture](../../../../../docs/architecture/database/catalog-model.md) and [source conformance](../../../../../docs/testing/source-conformance.md). Code and executable tests establish current behavior; the target design is not a claim that every provider or API is qualified.
 
 ## Ownership

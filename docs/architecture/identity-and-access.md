@@ -6,21 +6,19 @@ Existing account/Self and ACL fixtures establish only their recorded behavior.
 This contract replaces their one-to-one identity and account-only grantee assumptions;
 it does not claim the replacement is implemented.
 
-Terminology update, 2026-09-19: [the integrated model](schema-modeling.md)
-selects Resource for the logical Unit contract and Agent for the described/public
-person/organization responsibility. The detailed contracts below retain
-their current Entity-named types, columns, API concepts and headings; those public
-Entities denote admitted Agents, not the new generic Entity store. Renaming and
-consumer qualification remain M01 work. No new public User/Profile identity layer
-is introduced. Private `users`/AuthPrincipal storage remains valid for credentials,
-private preferences and accountability; it is not a public authorship/ownership key.
+Public identity uses the Agent responsibility; generic Entity describes resources
+without specialized domain structure. Participation, representation and credentials
+are independently admitted. Private authentication storage owns credentials,
+preferences and accountability; it is not public authorship or ownership.
+[Runtime names](../reference/current-implementation.md#identity-and-authority) and
+dated evidence describe the implementation without redefining this target.
 
 Public activity and presentation must not reverse-map an Agent to an assumed unique
 private account. Several Principals can represent one Agent and one Principal can
 represent several Agents. Account-private state becomes public activity only through
 an explicit attributed disclosure/publication contract. Space merges the Realm/Zone
 identity owner while retaining independent capability, membership and context-role
-admission; see [Space composition](realm-collection-zone.md).
+admission; see [Space composition](space-composition.md).
 
 This owner defines identity, membership, roles, representation and authorization
 semantics. [Connected applications](connected-apps.md) owns external delegation,
@@ -33,45 +31,45 @@ shape, and [capacity](identity-access-capacity.md) owns the workload envelope.
 | Concept | Contract |
 | --- | --- |
 | AuthPrincipal | Private authenticated human or workload identity. Credential methods, private account data and enforcement remain separate from public presentation. Authentication methods can link to one principal only through verified linking. |
-| Entity | Stable public referent and, when participation is admitted, a content/interactions identity. Person, organization and service presentation reuse native Entity identity. Cataloging a referent does not admit participation or prove control. |
-| Authority subject | The AuthPrincipal or Entity whose authority a request explicitly exercises. A Group/MemberSet is a grant recipient set, not an authenticated caller. |
-| Representation | An explicit, scoped permission to exercise an Entity's authority. Multiple principals can represent an Entity and one principal can represent multiple Entities. |
-| Attribution | The identity credited for an effect. It cannot manufacture representation or resource access; public contributions require an admitted Entity and appropriate attribution authority. |
+| Agent | Stable public referent and, when participation is admitted, a content/interactions identity. Person, organization and service presentation reuse native Agent identity. Cataloging a referent does not admit participation or prove control. |
+| Authority subject | The AuthPrincipal or Agent whose authority a request explicitly exercises. A Group/MemberSet is a grant recipient set, not an authenticated caller. |
+| Representation | An explicit, scoped permission to exercise an Agent's authority. Multiple principals can represent an Agent and one principal can represent multiple Agents. |
+| Attribution | The identity credited for an effect. It cannot manufacture representation or resource access; public contributions require an admitted Agent and appropriate attribution authority. |
 
 The term principal in external authorization literature is broader than the private
-AuthPrincipal type here. An Entity can be an authorization subject and a managed
-resource. Account management, Entity control and security-role assignment may be
-granted to AuthPrincipals, Entities or eligible member sets. Operation-specific
+AuthPrincipal type here. An Agent can be an authorization subject and a managed
+resource. Account management, Agent control and security-role assignment may be
+granted to AuthPrincipals, Agents or eligible member sets. Operation-specific
 conditions, not a blanket identity-type split, constrain these capabilities.
 
-Keep authentication/account control, Entity directory/representation, resource
+Keep authentication/account control, Agent directory/representation, resource
 authorization and product preferences behind explicit module interfaces. One
 PostgreSQL authority is the initial deployment. Later independent services must
 preserve verified identity, current authority and recovery contracts; direct access
 to another service's private account tables is not an external integration API.
 
 Public resources, ordinary responses, webhooks, errors and public audit presentation
-use authorized Entity data. Raw AuthPrincipal IDs, credentials, emails, controller
-lists and links between otherwise separate Entities stay private. Internal services
+use authorized Agent data. Raw AuthPrincipal IDs, credentials, emails, controller
+lists and links between otherwise separate Agents stay private. Internal services
 receive only necessary verified context; an opaque operation or audience-scoped
 actor reference can support authorized audit correlation without publishing the
-global account graph. A publicly shared Entity intentionally permits correlation
-of that Entity across platforms, not discovery of its other controllers/personas.
+global account graph. A publicly shared Agent intentionally permits correlation
+of that Agent across platforms, not discovery of its other controllers/personas.
 
 ## Private subject and scope values
 
 The first D02 persistence layer gives a private `access_subject` value to exactly
-one AuthPrincipal or Entity through concrete restrictive foreign keys. The same
+one AuthPrincipal or Agent through concrete restrictive foreign keys. The same
 UUID in those two identity namespaces denotes two different subjects. Member sets
 remain separate grant-recipient relations and never become authenticated callers.
-Allocation neither activates Entity participation nor links a controller, creates
+Allocation neither activates Agent participation nor links a controller, creates
 a grant, chooses a default or proves current eligibility.
 
 An `access_scope` is one immutable authority root: the registered platform root,
-a private AuthPrincipal account, or an existing canonical Unit REF. Org/Entity,
+a private AuthPrincipal account, or an existing canonical Resource REF. Org/Agent,
 Realm and other public roots all reuse REF rather than adding nullable domain
 columns or parallel direct-owner aliases. This avoids two scope/fence identities
-for the same public target. Org membership and Entity control can share that
+for the same public target. Org membership and Agent control can share that
 native root while retaining independent actions, bindings and admission policy.
 Structural capability and owner eligibility belong to the consuming command;
 creating a root for a cataloged organization does not admit operational membership.
@@ -81,7 +79,7 @@ Parsed IAM UUIDs normalize hexadecimal casing before command digests, candidate
 maps and requested-authority selections are formed. Namespace discriminators stay
 distinct; this does not normalize opaque OAuth client IDs or external identifiers.
 
-The concrete `users`/Entity owner and `reference_value` foreign keys establish
+The concrete `users`/Agent owner and `reference_value` foreign keys establish
 identity integrity. Exactly-one-target checks and per-alternative unique indexes
 prevent malformed or duplicate values. Updates, retargeting, rekeying and deletion
 are rejected so later history/dependency rows cannot change meaning. Revocation,
@@ -101,51 +99,51 @@ recipient handle, mixed grant or representation path is provided by these tables
 
 The [capacity owner](identity-access-capacity.md#private-registry-cost) counts these
 registries separately from memberships, bindings and token contexts. Direct domain
-columns in every scope were rejected because they duplicate the Unit bridge and
+columns in every scope were rejected because they duplicate the Resource bridge and
 permit conflicting aliases; a discriminator plus unchecked ID was rejected because
-it cannot enforce concrete references. Keeping private accounts in the public Unit
+it cannot enforce concrete references. Keeping private accounts in the public Resource
 registry was rejected because it would conflate private authority and public identity.
 
-## Main Entity and private account state
+## Main Agent and private account state
 
-Ordinary interactive onboarding creates or selects at least one usable Entity and
-sets a private main-Entity preference. Admission proves control; it does not claim
+Ordinary interactive onboarding creates or selects at least one usable Agent and
+sets a private main-Agent preference. Admission proves control; it does not claim
 a cataloged person by name/email or expose a private provider name. A human can
-subsequently manage several Entities. Workload and recovery identities need not
+subsequently manage several Agents. Workload and recovery identities need not
 create public personas merely to obtain a credential.
 
-Account main Entity, application default Entity, request-selected authority subject
-and published attribution are different values. Validate the chosen Entity on
+Account main Agent, application default Agent, request-selected authority subject
+and published attribution are different values. Validate the chosen Agent on
 entry and at effects. A valid default enters the normal experience directly.
 An unavailable default prompts an explicit replacement before identity-sensitive
-effects; do not silently publish as another Entity. Changing a default neither
+effects; do not silently publish as another Agent. Changing a default neither
 rewrites history nor retargets an existing OAuth consent. Bind in-flight drafts,
 tabs and commands to their selected identity so switching elsewhere cannot change
 an already prepared operation.
 
 Private favorites, preferences, security settings and other account-owned data
 retain their private owner when a public identity switches. Any delegated account
-management has an explicit target/action policy; representing an Entity alone does
+management has an explicit target/action policy; representing an Agent alone does
 not grant its controllers' personal data. Erasure and loss of a controller preserve
-other valid controllers and permitted Entity contributions. Loss of every valid
+other valid controllers and permitted Agent contributions. Loss of every valid
 control path suspends sensitive participation until governed recovery; recovery
 does not revive erased accounts or old grants.
 
 ### Native subject eligibility
 
-Current subject policy reads the private registry, then concrete account/Entity
+Current subject policy reads the private registry, then concrete account/Agent
 owner rows under shared locks. Account lifecycle and enforcement writes take the
-exclusive side of the account row fence; Entity participation writes take the
-exclusive side of the Entity identity fence. Native triggers cover direct SQL
+exclusive side of the account row fence; Agent participation writes take the
+exclusive side of the Agent identity fence. Native triggers cover direct SQL
 writers as well as application commands. A missing account-state row means active
-by the account owner's contract; a missing Entity participation row means no
+by the account owner's contract; a missing Agent participation row means no
 admitted participation. These negative selections are read after the owner fence.
 The composed reader requires READ COMMITTED; merely locking an unchanged parent
 row would not refresh an older repeatable snapshot of its policy children.
 
 Erased/closed/currently suspended accounts are ineligible. Existing write versus
 contribution enforcement semantics remain explicit, independently of the authority
-subject; read eligibility does not invent a new enforcement-wide ban. Entity
+subject; read eligibility does not invent a new enforcement-wide ban. Agent
 eligibility requires an undeleted identity and active participation, without
 requiring public publication. Database time after waits controls expiry and the
 first known future policy boundary; nonfinite time and exhausted candidate reads
@@ -173,11 +171,11 @@ installation approval window and App/controller lifecycle. Account-owned workloa
 and action-specific enforcement. Org-owned workloads require an undeleted,
 participating organization; Realm-owned workloads require the undeleted Realm.
 Platform duties require the platform root. These dependencies are loaded under
-owner fences within a combined 256-account/Entity/Realm budget. Missing workload
+owner fences within a combined 256-account/Agent/Realm budget. Missing workload
 admission denies service use; missing/incomplete bounded evidence is unavailable.
 No creator-history lookup substitutes for current owner policy.
 
-Principal authentication kind is immutable from creation. Entity shape changes
+Principal authentication kind is immutable from creation. Agent shape changes
 retain the workload-owner dependency guard and require READ COMMITTED so a
 post-wait check cannot miss a newly admitted dependent workload. The workload
 admission locks its Org identity while validating the structural owner type.
@@ -213,7 +211,7 @@ ten-minute fresh-authentication window, and future/nonfinite times fail closed.
 
 Management composition verifies the actor, credential, selected subject and complete
 selected representation path before using management ownership or current role
-bindings. Private accounts have direct-principal ownership; Entity control is not
+bindings. Private accounts have direct-principal ownership; Agent control is not
 inferred from directory metadata ownership. Domain owners still provide resource
 lifecycle/restrictions, confer applicability, impact and recovery/approval policy.
 
@@ -246,16 +244,16 @@ admission requirements. Generated transports preserve these boundaries.
 
 One preference identity belongs to a private account and either its main selection
 or one concrete OAuth client. Separate unique keys preserve main/client namespaces;
-Entity is not unique, and these rows are not controller bindings. Selection is an
-explicit Entity, no default, or (for clients only) inheritance from main. A missing
+Agent is not unique, and these rows are not controller bindings. Selection is an
+explicit Agent, no default, or (for clients only) inheritance from main. A missing
 client override inherits main; explicit no-default does not. Clearing a main choice
-requires later explicit selection rather than silently picking another Entity.
+requires later explicit selection rather than silently picking another Agent.
 
 The main-choice API is direct private account ownership under `account:read` or
-`account:update`; it does not reuse a represented Entity's access to personal data.
-Reading the stored choice does not assert that the Entity is currently usable.
-Setting an Entity additionally requires an explicit current representation path
-for `access.identity.select` at that Entity's `identity` path. The credential must
+`account:update`; it does not reuse a represented Agent's access to personal data.
+Reading the stored choice does not assert that the Agent is currently usable.
+Setting an Agent additionally requires an explicit current representation path
+for `access.identity.select` at that Agent's `identity` path. The credential must
 permit both direct preference management and the selected represented context.
 This purpose-specific permission proves selection control without choosing an
 unrelated data action as a proxy or claiming access to future resources. It is
@@ -264,35 +262,35 @@ grants. Clearing the preference needs no replacement representation. Both forms
 retain operation receipts, expected versions and live authority at the effect.
 Client-specific selection remains subject to its separate admitted-client policy.
 
-Each explicit Entity preference retains up to eight user-selected representation
+Each explicit Agent preference retains up to eight user-selected representation
 references as private context hints. They have concrete immutable grant-revision
 FKs and a count/digest sealed by the preference receipt; later additions or edits
 are forbidden. No hint is authority. Resolution rechecks the credential, current
-subject/Entity policy and the same selected context, returning unset, ready or
+subject/Agent policy and the same selected context, returning unset, ready or
 selection-required. Infrastructure/integrity unavailability stays an error. A ready
 context still requires operation-specific authorization at every later effect.
 
 Keeping the selected references supports ordinary default entry without exploring
 an unbounded controller graph or enumerating Group rosters. It also preserves the
 chosen grant context across tabs and requests. When hints become unusable, the
-user can select a new context for the same Entity or explicitly choose another;
+user can select a new context for the same Agent or explicitly choose another;
 resolution never substitutes a new grant or identity. The preference remains a
 private convenience value and cannot retarget consent. Erasure removes context
 hints before their receipts, in batches of at most 500.
 
 Private account identity creation accepts explicit public names and never accepts
-an existing Entity ID or copies a private provider name. One transaction creates
-the native Entity, its direct institutional representation grant and the optional
+an existing Agent ID or copies a private provider name. One transaction creates
+the native Agent, its direct institutional representation grant and the optional
 main choice. The first creation requires a main-choice precondition. The initial
 all-scopes grant seals the current literal permission vocabulary; it gives the
 operator representation, not unrelated resource permissions. Additional identities
-use the same constructor without imposing one-Entity-per-account uniqueness.
+use the same constructor without imposing one-Agent-per-account uniqueness.
 
-An immutable account/operation receipt fixes the created Entity, initial grant and
+An immutable account/operation receipt fixes the created Agent, initial grant and
 optional main revision. A replay requires current private account admission and
 matching intent, returns that original outcome, and never renews a revoked grant
 or resets a subsequently changed default. Account erasure removes these private
-receipts in bounded batches before preference history. Public Entity lifecycle,
+receipts in bounded batches before preference history. Public Agent lifecycle,
 other controllers and institutional grants remain separate cleanup decisions.
 The legacy unique-Self consumer migration and automatic onboarding entry remain
 unqualified until they use these native owners throughout.
@@ -301,7 +299,7 @@ Commands use expected versions and stable operation IDs under the account fence,
 with exact private receipts. Current owner SQL must admit management, the client
 and chosen-identity usability; the preference store does not grant representation.
 Capture reads retain main and client versions separately and return the chosen
-Entity once. Prepared work and consents keep that Entity instead of following a
+Agent once. Prepared work and consents keep that Agent instead of following a
 later preference change. Erased accounts cannot read or mutate preferences.
 
 These histories are private convenience data with no incoming authority dependency.
@@ -316,7 +314,7 @@ Both Org and Realm own membership capabilities and can independently own many
 Groups, custom Roles and Bindings. Realm does not require an Org parent.
 
 Membership identifies an admitted subject in a declared owner scope, with lifecycle,
-revision and admission generation. Public participation can enroll Entities;
+revision and admission generation. Public participation can enroll Agents;
 private operational membership can enroll AuthPrincipals. Each owner declares its
 eligible subject types, admission policy and disclosure. Do not expose a private
 enrollment by flattening both into a public people directory. Public presentation
@@ -333,7 +331,7 @@ catalog affiliations never enroll an operational member.
 An Org participating in a Realm does not enroll every Org member or give every
 controller authority to speak for it. These effects require explicit relations.
 
-Groups contain typed AuthPrincipal/Entity members or declared subordinate groups.
+Groups contain typed AuthPrincipal/Agent members or declared subordinate groups.
 One member can join multiple groups, and one group can receive multiple roles.
 The all-members set derives from the owning membership relation; it is not a
 second writable roster. Group membership must retain any admission-generation
@@ -343,7 +341,7 @@ authorization; scope association alone adds no permissions.
 Team composes collaboration features with one Group's membership: presentation,
 mentions and work entry points do not create another roster. A technical access
 group need not have a public Team page. Group membership, control of a public
-Team Entity (if one is admitted), and management of the Group remain distinct.
+Team Agent (if one is admitted), and management of the Group remain distinct.
 
 Use same-scope, bounded, single-parent group hierarchies initially. Child members
 benefit from parent grants; parent members do not acquire child-only grants.
@@ -353,7 +351,7 @@ are separate relationships, never inferred from Org/Realm/Team names.
 
 ### Shared membership generations
 
-Use one scope/subject membership identity for both admitted Entity participation
+Use one scope/subject membership identity for both admitted Agent participation
 and private principal operations. Its current head carries a control version and
 last admission generation; an active-generation pointer is separate from that
 identity. An inactive or merely reserved identity grants nothing. Invitations,
@@ -375,7 +373,7 @@ Current child membership can use parent grants without copying rows into a secon
 roster. Parent changes serialize on their scope's tree fence and reject cycles and
 excess depth before becoming visible. Assignment impact and recovery continuity are
 additional authorization requirements, not consequences of a valid FK or acyclic
-shape. Private operational membership never becomes a public Entity roster entry
+shape. Private operational membership never becomes a public Agent roster entry
 merely because a presentation can be shown for its subject.
 
 Admission commands require current owner policy, actor eligibility and the correct
@@ -388,14 +386,14 @@ qualifies for acceptance; the shared storage primitives alone do not qualify the
 ### Realm native enrollment owner
 
 [Realm enrollment](../../services/main/src/services/realms/README.md) implements
-explicit Entity/public and principal/private admission over the shared identity.
+explicit Agent/public and principal/private admission over the shared identity.
 Its policy/application and independent enforcement heads do not create parallel
 rosters. Pending consent retains original native authority evidence; issue-time
 freshness and later credential/source liveness are separate checks. A private
 Realm's first principal invitation uses a scoped, revocable contact exchange rather
-than account identifiers or inferred Entity/account associations. Exit and
+than account identifiers or inferred Agent/account associations. Exit and
 revocation remain possible after unpublishing; new admission still requires the
-current published policy. Public active counts and Entity presentation are distinct
+current published policy. Public active counts and Agent presentation are distinct
 from private operational enrollment. That owner records physical candidate budgets,
 bounded cleanup/recovery, affected consumers and the deferred G2/G3/G5 prerequisites.
 
@@ -622,8 +620,8 @@ before/after contributions per source, logical target path and private recipient
 A contribution retains all direct/inherited paths, exact admission generation,
 selection and selection-set versions, current role activation, frozen permission
 approval, representation conditions and exact parent lineage/bases. Representation
-permissions remain a ceiling on acting for the Entity; they are not added to the
-Entity's resource permissions or the operator's unrelated direct rights. Target
+permissions remain a ceiling on acting for the Agent; they are not added to the
+Agent's resource permissions or the operator's unrelated direct rights. Target
 paths remain symbolic; no subject-by-corpus-resource ACL matrix is created.
 These are complete changed **source contributions**, not a materialized union of
 all unrelated grants or a claim that every contributed permission is currently
@@ -672,7 +670,7 @@ ceiling coverage. Deny overlays retain their own permission/path rather than
 clipping the confer request. They are not cached as approval across transactions.
 The bounded `mixed-realm-access-manager.ts` reader composes native selected-subject
 ownership, RoleBindings, retained literal grants and native member admissions for the
-nonrecursive Realm access-manager userset. It never maps an Entity to an assumed
+nonrecursive Realm access-manager userset. It never maps an Agent to an assumed
 private self-account. All-scope representation resource-policy expansion remains
 unavailable for both gains and losses; it needs a bounded owning-root inventory. Current policy outcome
 is a separate inspection field, and every response says `admission: not-admitted`.
@@ -693,7 +691,7 @@ fence closure before entry, independently establish recovery and approval policy
 and revalidate source authority, policy and all deadlines at the final effect.
 
 For representation confer, the evaluator requires current
-`access.representation.manage` at the represented Entity root. For ceiling recipient
+`access.representation.manage` at the represented Agent root. For ceiling recipient
 expansion it requires current `access.assignment-ceiling.manage` at the ceiling
 scope/path. These effects become `approval-required`; they no longer report an
 unimplemented approval owner. A complete evaluation still requires the independent
@@ -804,7 +802,7 @@ comes from `POST /api/v1/access/scopes/resolve`. Public Fetch, TanStack and
 
 | Operation | Route / input and result |
 | --- | --- |
-| Choose an admitted recipient | `GET /roster?view=admitted`; requires Group read and membership management. Current scope admissions yield Group-purpose opaque recipients, private context-local correlation keys, subject kind and exact active generation. No private account id, subject id or account/Profile association is returned. |
+| Choose an admitted recipient | `GET /roster?view=admitted`; requires Group read and membership management. Current scope admissions yield Group-purpose opaque recipients, private context-local correlation keys, subject kind and exact active generation. No private account id, subject id or account/Agent association is returned. |
 | Inspect direct/current inherited roster | `GET /roster?view=direct` or `view=inherited`; the latter includes the root's direct rows and descendants' inherited rows. Each selected path is a separate row, including duplicate direct plus inherited participation by one recipient. |
 | Inspect stale cleanup candidates | `GET /roster?view=direct&includeStale=true`; additionally requires membership management and returns physical stale selections with generation/version and terminal status. |
 | Read selection preconditions | `POST /selections/query` with `{ recipient, generation }`; returns physical selected/version, set version, active generation and terminally-stale status. An absent slot has version zero. This is not an effectiveness receipt. |
@@ -860,7 +858,7 @@ One independent accountable principal must acknowledge the **whole** exact propo
 including all changed contributions and all confer targets. Different incomplete
 approvals cannot be stitched together. The initial fixed threshold is one independent
 principal in addition to the initiating operator. Equality is private principal
-identity, not Entity identity; this is not proof of distinct natural people.
+identity, not Agent identity; this is not proof of distinct natural people.
 
 An approver inspects `/impact-reviews/:reviewId/approval-proposal` and submits its
 `proposalDigest` and `effectDigest` to `/approvals` with a retry `approvalId`.
@@ -876,9 +874,9 @@ unique key prevents persona switching from multiplying approvals.
 
 The initiating principal/subject, active selected subjects in the moved/retired subtree,
 changed recipients/dependency subjects, represented
-Entities, and their potentially controlling operators cannot supply independence.
+Agents, and their potentially controlling operators cannot supply independence.
 Controller discovery conservatively follows active representation recipients through
-at most eight layers, 256 affected subjects, 256 Entities and 256 combined
+at most eight layers, 256 affected subjects, 256 Agents and 256 combined
 grant/recipient visits. Subtree roster discovery first reads at most 4,097 indexed
 review-local subtree keys and rejects more than 4,096. For each admitted key it
 probes the existing `(group_id,membership_id,generation) WHERE selected` index,
@@ -894,7 +892,7 @@ Thus each independence evaluation has at most 4,096 bounded roster index seeks a
 join, DISTINCT or subject sort precedes the candidate limit. Dynamic
 Group recipients are conservatively covered by their active scope membership;
 conditions are not used to assert independence. This can reject an unaffected
-operator in a large/shared scope; overflow is unavailable. The native Entity and
+operator in a large/shared scope; overflow is unavailable. The native Agent and
 membership-change fences retain negative discovery. Changing any selected approver
 binding or representation contribution is rejected, so a newly conferred recipient
 or authority cannot authorize its own expansion.
@@ -903,19 +901,19 @@ or authority cannot authorize its own expansion.
 It returns only local approval IDs, deadlines, revocation flags and currently valid
 counts. Each counted approval is reauthenticated and reauthorized. The original
 approving principal may revoke its receipt with a fresh session and retry operation
-ID even after losing its selected Entity or role. Approval expiry is the earliest
+ID even after losing its selected Agent or role. Approval expiry is the earliest
 review, fresh-session, credential, source or current-policy deadline; it cannot be
 renewed under the same review/principal. Expired/revoked receipts remain historical.
 
 The `access_recovery_policy` owner selects fixed `native-repair-v1`: at least one
 currently exercisable pre-change repair path must survive at each affected logical
 root. A root is the Group scope, every effect target scope, and every represented
-Entity root. The policy is immutable; this slice exposes no command to weaken or
+Agent root. The policy is immutable; this slice exposes no command to weaken or
 disable continuity. Each path is enrolled by its own authenticated operator through
 `POST /:scope/recovery-paths`. It requires current root-level
 `access.role-binding.manage` and `access.assignment-ceiling.manage`, plus
-`access.representation.manage` for an Entity root. Ownership can supply these
-permissions, while Entity use still needs an actual authorized representation path.
+`access.representation.manage` for an Agent root. Ownership can supply these
+permissions, while Agent use still needs an actual authorized representation path.
 Registration is evidence of a current repair route, never a new grant. Its lifetime
 is at most fifteen minutes and also bounded by the fresh session and native sources.
 At most eight live candidates exist per scope; the private operator can revoke its
@@ -1015,7 +1013,7 @@ and one enabled head; built-in roles and custom roles share explicit applicabili
 Custom roles compose registered permissions, not arbitrary code or unknown strings.
 New permission keys do not enter old roles or external approvals through wildcards.
 
-A RoleBinding binds a typed recipient (AuthPrincipal, Entity or MemberSet), role,
+A RoleBinding binds a typed recipient (AuthPrincipal, Agent or MemberSet), role,
 target scope, validity and conditions. One subject can have several bindings and
 direct atomic grants remain explicit exceptions. A read-only role adds reads; it
 does not negate another valid edit grant. Matching grants combine only within the
@@ -1036,12 +1034,12 @@ recipient constraints. Role editing, privileged group enrollment, reparenting an
 representation changes must not bypass those checks. Evaluate mutation authority
 from the pre-change state; a proposed change cannot authorize itself.
 
-Ownership continuity is domain-specific. A single accountable owning Entity can
+Ownership continuity is domain-specific. A single accountable owning Agent can
 have multiple controllers; domains may also permit multiple protected owner
 relationships. Preserve at least one valid recovery path under the selected policy,
 not necessarily a direct AuthPrincipal resource grant. Cyclic control alone is no
 recovery path. Credential replacement, recovery and high-impact role changes can
-require fresh authentication or independent approval without making Entity
+require fresh authentication or independent approval without making Agent
 recipients categorically ineligible.
 
 ## Scoped role definition protocol
@@ -1057,7 +1055,7 @@ assignments implicitly. Labels such as “Owner” confer no permissions.
 A permission reference contains its registry family (`unit`, `platform` or
 `management`) and key. The family is part of the key in storage, digests, ceilings
 and operation-bound decisions. It cannot be inferred from text alone: the existing
-Unit `realm.members.manage` implies Unit read, while the identically spelled
+Resource `realm.members.manage` implies Resource read, while the identically spelled
 platform capability has a different implication closure. Flattening those values
 would lose meaning. The [canonical management vocabulary](../../libraries/access/src/management.ts)
 keeps role definition, activation, assignment and assignment-ceiling management
@@ -1170,7 +1168,7 @@ external system establishes its correctness or performance here.
 A binding's role, target root and typed recipient are immutable identity choices.
 Changing one creates a new binding. Recipient alternatives are a private subject
 value, a same-scope Group key, or the owning scope's derived all-members set. The
-latter has no copied roster. Principal and Entity recipients remain distinguishable
+latter has no copied roster. Principal and Agent recipients remain distinguishable
 through the subject registry. A Group recipient is not an authenticated operator.
 
 Target paths, validity and permission policy live in sealed immutable terms
@@ -1237,7 +1235,7 @@ owners still supply complete inherited roots, current actor/credential/represent
 facts, restriction precedence, live delegation, conditions and assignment admission.
 Mutation owners promote overlapping locks and revalidate their complete dependency
 closure. Member sets come from the selected subject; operator membership cannot
-fill a represented Entity's missing grants. Runtime adapter activation and native
+fill a represented Agent's missing grants. Runtime adapter activation and native
 acceptance remain pending.
 
 For the negative-enrollment fence, PostgreSQL 18's
@@ -1267,10 +1265,10 @@ not qualify these additions; the native binding cases remain required.
 
 ## Representation and request evaluation
 
-RepresentationGrant records represented Entity, typed delegate, allowed actions
+RepresentationGrant records represented Agent, typed delegate, allowed actions
 and target scopes, conditions, lifetime, revision and whether further delegation
-is permitted. A delegate may be an AuthPrincipal, Entity or eligible member set.
-Managing an Entity's controllers, publishing as it, exercising its security powers
+is permitted. A delegate may be an AuthPrincipal, Agent or eligible member set.
+Managing an Agent's controllers, publishing as it, exercising its security powers
 and redelegating those powers are separately grantable capabilities.
 
 Every authenticated operation carries a verified AuthPrincipal, selected authority subject, client/
@@ -1278,26 +1276,26 @@ credential limits, target/action, relevant representation evidence and attributi
 Client-supplied IDs or claims select a requested context; they do not prove it.
 
 Anonymous public reads use an explicit public-audience disclosure path; they do
-not fabricate an AuthPrincipal, membership or Entity. Protected effects require
+not fabricate an AuthPrincipal, membership or Agent. Protected effects require
 the appropriate authenticated context. An invalid explicit credential never falls
 back to a cookie, anonymous access or another identity.
 
 | Mode | Required authority |
 | --- | --- |
 | Direct | Current target permission of the authenticated AuthPrincipal. |
-| Represented | A complete valid path from that actor to the selected Entity for this action/target, and the Entity's current target permission. |
+| Represented | A complete valid path from that actor to the selected Agent for this action/target, and the Agent's current target permission. |
 
 Both modes require current actor eligibility, resource restrictions, credential
 scope, applicable App/installation policy and domain invariants. In represented
-mode the operator need not personally hold the Entity's resource permissions.
+mode the operator need not personally hold the Agent's resource permissions.
 Its unrelated private grants are also not imported into the request. A composite
 operation requiring several permissions cannot stitch incomplete proofs from
 unrelated identities together; intentionally multi-party workflows specify and
 validate each required authorization separately.
 
 Group grants match membership of the selected subject. An operator's own group
-membership is not automatically membership of the Entity it represents. Any
-supported operator-and-Entity combination is an explicit policy condition.
+membership is not automatically membership of the Agent it represents. Any
+supported operator-and-Agent combination is an explicit policy condition.
 Public attribution cannot turn a denied direct request into an authorized one.
 
 Chained representation validates each edge's type, scope, expiry, admission and
@@ -1306,7 +1304,7 @@ actors contribute no unrelated resource powers. Bound traversal, reject delegati
 cycles and preserve provenance. A graph path or historical JWT actor list alone
 is not proof that the path is authorized and current.
 
-Two Entities controlled by the same operator do not count as independent approvers.
+Two Agents controlled by the same operator do not count as independent approvers.
 Where separation of duty is required, enforce the declared private accountability
 identity as well as role eligibility. Distinct accounts do not, by themselves,
 prove distinct natural people. Keep this enforcement private and feature-specific;
@@ -1316,7 +1314,7 @@ persona switching does not multiply ballots, quota or independent approvals.
 
 ### Representation persistence protocol
 
-A representation identity fixes the represented Entity, one typed delegate and
+A representation identity fixes the represented Agent, one typed delegate and
 optional exact parent grant/terms revision. Its private control receipt advances
 sealed terms containing an explicit all-scopes or concrete-root/path target,
 half-open validity, literal approved permissions, redelegation and fresh-session conditions, and optional exact delegate
@@ -1331,12 +1329,12 @@ a recipient dependency. Explicit permission membership remains family-qualified;
 loading must remove permissions whose prerequisites are not also approved.
 
 A null parent is an institutional assignment. A dependent grant retains its
-parent's exact terms for the same represented Entity. Its effect
+parent's exact terms for the same represented Agent. Its effect
 requires that parent to be current and redelegable, and all child limits to fit
 the parent's ceiling. Parent lineage is bounded to eight edges including the child.
 Changing the selected parent revision invalidates dependent use rather than making
 old descendants follow new authority. Immutable parent choices and current-parent
-admission prevent lineage cycles. The Entity control fence serializes all grant
+admission prevent lineage cycles. The Agent control fence serializes all grant
 effects and parent revocation without synchronously updating descendants.
 
 Each dependent grant also fixes the private subject whose parent authority it uses.
@@ -1350,8 +1348,8 @@ issuer-basis dependencies are separate from the child delegate's own eligibility
 The historical operator is not substituted for the selected parent subject.
 
 All-scopes is an explicit representation target alternative for ordinary full
-Entity control. It permits only the sealed action set and still requires the
-Entity's current permission on each actual resource. It creates no resource grant,
+Agent control. It permits only the sealed action set and still requires the
+Agent's current permission on each actual resource. It creates no resource grant,
 imports no operator rights and does not approve future permission keys. Exact
 scopes retain concrete private scope FKs; all-scopes has no scope ID or relative
 path. The narrow head's target projection must match its selected sealed terms.
@@ -1359,7 +1357,7 @@ An all-scopes parent may issue a narrower concrete-scope child, subject to all
 other admission and attenuation rules. RoleBinding targets remain concrete roots.
 
 Allocating a separate representation grant for every resource was rejected because
-ordinary Entity use must cover independently authorized resources without per-object
+ordinary Agent use must cover independently authorized resources without per-object
 control fan-out. Treating the platform scope UUID as an implicit wildcard was
 rejected because it would conflate one authority root with all roots. Google IAM's
 [service-account impersonation](https://docs.cloud.google.com/iam/docs/service-account-impersonation)
@@ -1369,12 +1367,12 @@ its resources, without importing intermediate account powers. REZICS's explicit
 target union and immutable permission approvals are its own additional constraints;
 that precedent does not qualify native scope narrowing or revocation here.
 
-This lineage is distinct from a request's path through Entity delegates. The native
+This lineage is distinct from a request's path through Agent delegates. The native
 store checks structural limits and parent/admission liveness; the management owner
 must also prove that the operator may exercise/delegate the selected parent, admit
 the recipient and preserve recovery. A SQL admission expression remains mandatory
 before work, after waits and at the effect. Private actor attribution alone is not
-admission. Request path evaluation, account/Entity eligibility, private disclosure,
+admission. Request path evaluation, account/Agent eligibility, private disclosure,
 independent approval, live role-binding dependencies and erasure/recovery integration
 remain required before activating represented APIs.
 
@@ -1386,25 +1384,25 @@ choice nor the storage implementation qualifies the target race/recovery cases.
 ### Selected representation paths
 
 The selected references form a bounded request subgraph, including any intermediate
-Entity grants used by a path. A base starts at the request's represented Entity;
-an Entity delegate continues through a separately selected grant for that Entity.
+Agent grants used by a path. A base starts at the request's represented Agent;
+an Agent delegate continues through a separately selected grant for that Agent.
 Each nonterminal edge must permit redelegation and every edge must independently
 cover the requested action/root/path and fresh-session condition. A Group/member-set
 edge can terminate at the authenticated principal or continue through a represented
-Entity whose own current membership matches it. The operator's membership is not
-substituted for that Entity's membership.
+Agent whose own current membership matches it. The operator's membership is not
+substituted for that Agent's membership.
 
 The path evaluator uses trusted native grant and subject facts, with explicit
 loaded recipient scopes to distinguish nonmembership from unavailable evidence.
 It strips permissions with missing approved prerequisites, preserves denied versus
 unavailable outcomes and can select an independent valid basis when another path
 is unavailable. Breadth-first traversal retains the shortest certain/uncertain
-visit per Entity, excludes cyclic authority and bounds paths to eight edges.
+visit per Agent, excludes cyclic authority and bounds paths to eight edges.
 The returned basis covers one operation; it is not an independent resource grant
 or a reusable authorization receipt. Credential selection must approve every
 selected reference, including intermediate ones, before path evaluation.
 
-The native selection reader locks Entity controls and exact declared membership/
+The native selection reader locks Agent controls and exact declared membership/
 Group dependencies, hydrates selected terms and their literal permission members
 in batches, and evaluates current lineage after waits. Its lifecycle outcome is
 not yet the full subject/credential/representation decision: native subject policy,
@@ -1464,7 +1462,7 @@ same grantability and assignment ceilings; a seller's plan revision cannot widen
 that approval or manufacture another owner's permission.
 
 Personal benefits are verified for the authenticated private beneficiary. They do
-not supply a represented Entity's missing native authority, reveal a private
+not supply a represented Agent's missing native authority, reveal a private
 subscriber roster or share one controller's access with another controller.
 Ordinary Pro enrollment/attribution still uses this owner's explicit consent,
 membership generations and representation. Ending enrollment or changing a ban
@@ -1482,7 +1480,7 @@ this owner's acceptance when that integration is activated.
 
 API capabilities remain complete independently of GUI disclosure level. Keep one
 verified request authority context across owner adapters: direct mode derives its
-AuthPrincipal from authentication, and represented mode selects an Entity and
+AuthPrincipal from authentication, and represented mode selects an Agent and
 an explicit bounded set of representation references/revisions which the server validates. Public clients do
 not submit an internal principal ID to choose their authentication identity.
 Recipient selectors for private grants return purpose-scoped opaque handles with
@@ -1511,7 +1509,7 @@ handle was rejected because it would expose its stable private subject value.
 | Enrollment/invitations | Explicit scope, subject type/selector, terms and expected generation; accepted/pending/declined/expired/revoked outcomes remain distinct. |
 | Groups/Teams | CRUD, direct membership, parent changes and direct/inherited roster views; each authority-changing command validates its assignment impact. |
 | Roles/bindings | Built-in/custom definitions, revisions, scoped assignment, approved ceilings, expiry, retirement and paginated impact inspection. A preset uses these same commands. |
-| Representation | List/issue/narrow/revoke grants with represented Entity, delegate, action/resource limit and redelegation conditions. A display-name edit is not control transfer. |
+| Representation | List/issue/narrow/revoke grants with represented Agent, delegate, action/resource limit and redelegation conditions. A display-name edit is not control transfer. |
 | Effective access | Evaluate the explicit subject, action and resource against current authority; return allowed/denied/unavailable and viewer-safe provenance, never an unrestricted graph dump. |
 | Governance/recovery | Separate protected continuity, ownership, private account administration and independent-approval operations with typed current-state preconditions. |
 
@@ -1532,10 +1530,10 @@ be satisfied by API-key or OAuth session emulation.
 
 The [requested selection contract](../../libraries/access/src/identity.ts) has two
 forms: direct mode contains no private principal selector; represented mode fixes
-one public Entity and one to 64 unique exact representation references/revisions.
+one public Agent and one to 64 unique exact representation references/revisions.
 References are selection bases, not proof of current authority, and public selectors
 must preserve their owning privacy boundary. Several independent bases can cover
-different operations for the same Entity. A single mandatory basis was rejected
+different operations for the same Agent. A single mandatory basis was rejected
 because it would discard legitimate combinations of grants within that context.
 An empty set, repeated reference IDs or unsafe revision numbers is invalid.
 
@@ -1545,17 +1543,17 @@ subject, registry-qualified operation, exact authority-root value and normalized
 It requires actor eligibility, credential permission and the selected subject's
 resource permission for every requested operation. Represented mode additionally
 needs a valid selected representation basis for each operation. The operator's
-private rights and group membership cannot fill missing Entity decisions.
+private rights and group membership cannot fill missing Agent decisions.
 
 Credential authority is explicitly operator-wide or bound to a direct/represented
 selection. A bound credential cannot switch to private direct rights, another
-Entity or an unapproved representation basis. The server constructs this constraint
+Agent or an unapproved representation basis. The server constructs this constraint
 from the verified credential and its current domain context; a client cannot request
 operator-wide credential authority in the selection payload.
 
 Owner evaluators resolve group/role/deny precedence and action-specific conditions
 before supplying one final resource/credential decision per operation. Resource
-facts retain the operator binding even where authority belongs to an Entity, since
+facts retain the operator binding even where authority belongs to an Agent, since
 conditions can depend on that operator. A decision for a different actor, subject,
 action, root or descendant path is not interchangeable. Conflicting duplicate facts
 are unavailable, not a choice of whichever answer allows access. Representation
@@ -1595,14 +1593,14 @@ own the positive, rejected, race, privacy and workload obligations.
 | [GitHub organization roles](https://docs.github.com/en/enterprise-cloud@latest/organizations/managing-peoples-access-to-your-organization-with-roles/using-organization-roles) and [Teams](https://docs.github.com/en/organizations/organizing-members-into-teams/about-teams) | Multiple roles for people/teams; explicit direct versus inherited membership. | Product limits/pricing are not REZICS requirements. |
 | [Kubernetes RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#privilege-escalation-prevention-and-bootstrapping) | Role edits and bindings both need escalation/assignment controls. | REZICS must additionally check its Group and representation mutations. |
 | [Cedar acting-on-behalf patterns](https://docs.cedarpolicy.com/bestpractices/bp-using-the-context.html#agents-acting-on-behalf-of-a-principal) | Retain both identities while selecting the primary authorization subject. | Policy input must be authoritative; Cedar does not establish membership freshness. |
-| [Google Cloud delegation chains](https://docs.cloud.google.com/iam/docs/create-short-lived-credentials-delegated) | Each hop needs authority over the next; intermediate identities add no unrelated powers. | Service accounts are an engineering analogy, not the public Entity contract. |
+| [Google Cloud delegation chains](https://docs.cloud.google.com/iam/docs/create-short-lived-credentials-delegated) | Each hop needs authority over the next; intermediate identities add no unrelated powers. | Service accounts are an engineering analogy, not the public Agent contract. |
 | Pang et al., [Zanzibar](https://www.usenix.org/system/files/atc19-pang.pdf), USENIX ATC 2019, sections 2.1-2.2 | Usersets and ordering of authority/content updates are independent concerns. | Distributed deployment results do not qualify local SQL or cache consistency. |
 | Birgisson et al., [Macaroons](https://www.ndss-symposium.org/wp-content/uploads/2017/09/04_3_1.pdf), NDSS 2014, sections II and V-E | Delegation attenuation and revocation need explicit conditions and freshness. | No requirement to adopt macaroon token encoding. |
 
-Account-only grants were rejected because they prevent Entity-held institutional
-authority. Entity-only grants were rejected because private direct authority would
+Account-only grants were rejected because they prevent Agent-held institutional
+authority. Agent-only grants were rejected because private direct authority would
 need artificial public indirection. Unqualified union/intersection of actor and
-Entity permissions was rejected because it respectively leaks unrelated rights or
+Agent permissions was rejected because it respectively leaks unrelated rights or
 defeats delegation. Unbounded offline delegation was rejected for the selected
 revocation and work-budget requirements. These are design choices, not universal
 claims that other products cannot use those models.
@@ -1613,7 +1611,7 @@ The [assignment management owner](../../services/main/src/services/authorization
 implements Role activation/retirement, binding create/amend/revoke and immutable
 ceiling create/revoke through `/access/:scope/assignment-reviews` and their resource
 command endpoints. Definition preparation remains separate. A Role's catalog root
-is not its bindings' data target: an account-owned definition may contain Unit
+is not its bindings' data target: an account-owned definition may contain Resource
 permissions and be reused at an appropriate resource root. Applicability is checked
 at every affected binding target. Management permission never requires possession
 of the data rights being assigned.
@@ -1626,19 +1624,19 @@ shows the removed old terms and the new terms separately. Manager-role changes a
 capture attached institutional ceilings; amended manager terms do not renew their
 old ceiling dependencies. Inspection returns review-local recipient keys, not
 reusable private-principal selectors or a foreign roster. Direct recipient choice
-uses self, a participating public Entity, or a source roster admitted separately by
+uses self, a participating public Agent, or a source roster admitted separately by
 `access.membership.read`; the target manager independently needs binding or ceiling
 management at the intended target path. Raw private principal IDs are not inputs.
 
 Each command requires a fresh interactive session and exact control/definition
 revisions. A target owner may approve applicable registered permissions at their
-own root. Account and Entity owner predicates recheck the exact native root identity;
+own root. Account and Agent owner predicates recheck the exact native root identity;
 resource ownership retains its current concrete ownership record. Platform native
 IAM bootstrap is limited to the existing direct principal's current literal
 `platform.access.manage` grant and the explicit Role/binding/ceiling management
 actions. Neither a native management binding nor a represented operator's unrelated
 capability can manufacture that bootstrap source. Applicability uses explicit
-management-action sets and the canonical Unit grantability rules.
+management-action sets and the canonical Resource grantability rules.
 
 A delegated manager needs one complete current ceiling for the named role,
 recipient, target, validity and grant-end/duration conditions. Both today's role

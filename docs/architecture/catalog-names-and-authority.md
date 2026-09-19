@@ -8,7 +8,7 @@ where supplied, exact original spelling and derivation from a specific name revi
 Unicode normalization, translation/transliteration, display fallback and search
 comparison are separate operations. Report the actual selected language and fallback
 reason; no fallback creates a stored translation. Slug lookup uses its separately
-versioned [address namespace policy](unit-slug-addressing.md#assignment-contract).
+versioned [address namespace policy](resource-addressing.md#assignment-contract).
 
 Named forms keep an owner-local immutable identity, a current complete projection and
 immutable complete revision rows. Each edit advances only that form's revision;
@@ -26,7 +26,7 @@ An authority assertion targets an exact name revision and retains a named author
 role, territory, channel, context, validity interval, source evidence and review
 evidence. A source-reported official claim with no known authorizer stays a source
 claim. Verified assertions require both evidence and runtime write authority over
-the authorizing Entity. A changed name does not inherit an older approval; revoking
+the authorizing Agent. A changed name does not inherit an older approval; revoking
 or re-reviewing an assertion preserves its history. Display selection is separate.
 
 Identifier normalization is a versioned namespace policy. ISRC validates syntax;
@@ -69,13 +69,14 @@ At 2,000 edits/s and ~2 KB logical head/history/index writes, logical write volu
 is about 4 MB/s before WAL, checkpoint and replication amplification. Provision
 and observe actual WAL bytes/transaction, replica lag, page latency and lock waits.
 
-Physical ownership is the routing boundary: partition histories by owner hash and
-route owner reads to a single partition/shard; preserve owner in all foreign keys.
-Identifier lookup can route by namespace/value hash with a bounded claim directory
-when owners move to multiple shards. No whole-corpus in-memory map or deep offset
-is required. Split a shard before measured working indexes exceed its cache/storage
-budget or p95 latency exceeds target; backpressure ingest when replica lag exceeds
-the operational budget. Evidence retention never requires revision rewriting.
+The stable logical owner and native identity route name/history operations to
+same-database tables and, where justified, owner-keyed partitions. Preserve complete
+owner keys in foreign references. Identifier lookup has a separately selective
+namespace/value index; collisions remain explicit candidates. Partitioning one
+access direction does not make its inverse local. Measure cache/storage pressure,
+replica lag and p95 before changing placement or increasing admission. A future
+cross-database protocol is outside this target. Evidence retention does not require
+revision rewriting or a whole-corpus in-memory map.
 
 ## Evidence and deterministic checks
 

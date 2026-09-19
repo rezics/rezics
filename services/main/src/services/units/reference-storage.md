@@ -1,5 +1,9 @@
 # Logical references and concrete owner keys
 
+Implementation reference. This owner documents current code, identifiers and local
+limits. The [selected target](../../../../../docs/architecture/database/resource-storage.md) and [implementation crosswalk](../../../../../docs/reference/current-implementation.md)
+define the reconciliation boundary; existing fixtures do not qualify revised semantics.
+
 `unitReferenceColumns` expands a closed registry into nullable foreign-key
 alternatives. A required reference has exactly one non-null alternative. Its
 input UUID must equal that key; its owner is a generated projection. The concrete

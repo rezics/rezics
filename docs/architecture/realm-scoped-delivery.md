@@ -7,7 +7,7 @@ No runtime, query benchmark or deployed site is qualified by this document.
 [Subscribe](subscriptions.md) owns plans and independent grant sources;
 [capacity](subscriptions-capacity.md#scoped-reply-read-envelope) owns workload bounds.
 
-The [2026-09-19 Space/address target](unit-slug-addressing.md) changes routing and
+The [2026-09-19 Space/address target](resource-addressing.md) changes routing and
 shared identity representation, not this contract's independent community acceptance
 and fixed-site conjunction. Realm denotes the admitted community capability of a
 Space; a Zone route supplies presentation context and resolves to the same native
@@ -48,7 +48,7 @@ until a Pro page happens to fill.
 | --- | --- |
 | Site profile | Registered deployment identity/revision, canonical origin, fixed content predicate, default presentation Realm, optional Zone and supported endpoint classifications. It narrows the site experience; it does not own content or grant access. |
 | Presentation/discussion context | The Realm and Thread/placement whose accepted version, Rules, ordering and interaction state this response uses. One request selects one presentation context; other Realm predicates can narrow it. |
-| Authorization context | Authenticated principal, selected authority/Entity, credential ceilings and current resource/benefit proofs from the IAM owner. Site, Origin and Realm parameters never substitute for it. |
+| Authorization context | Authenticated principal, selected authority/Agent, credential ceilings and current resource/benefit proofs from the IAM owner. Site, Origin and Realm parameters never substitute for it. |
 
 For content selection, combine the site's fixed predicate, any hosting Zone boundary
 and the user's existing Filter with AND. Bind Realm ID, publication state and local
@@ -116,7 +116,7 @@ derived from arbitrary Realm slugs. Zone can supply pages/navigation and another
 narrowing boundary without becoming a security tenant or changing content identity.
 Keep routing adapters thin under the [web feature organization](web-feature-organization.md).
 
-Keep native IDs and the [slug/address registry](unit-slug-addressing.md) authoritative.
+Keep native IDs and the [slug/address registry](resource-addressing.md) authoritative.
 The site origin is presentation/deployment context, not a second canonical slug
 store. Site routing constructs links that preserve the selected context and exact
 content reference; backend presenters still return IDs and optional slug addresses.
@@ -156,7 +156,7 @@ For each destination, validate current source publication-management authority,
 `realm.post.replies.create`, exact Rule consent, metering/review policy, and the
 root/immediate parent's accepted readable placement in that destination. Supporting
 an existing author-approved acceptance is different from creating a new author's
-utterance. Generic Unit publication, republish and adoption endpoints must dispatch
+utterance. Generic Resource publication, republish and adoption endpoints must dispatch
 reply subjects through this same policy; `realm.units.create` alone is insufficient.
 An unavailable parent does not automatically publish general ancestors into Pro.
 

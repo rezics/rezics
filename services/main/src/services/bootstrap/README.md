@@ -1,5 +1,9 @@
 # Platform bootstrap
 
+Implementation reference. This owner documents current code, identifiers and local
+limits. The [selected target](../../../../../docs/architecture/space-composition.md) and [implementation crosswalk](../../../../../docs/reference/current-implementation.md)
+define the reconciliation boundary; existing fixtures do not qualify revised semantics.
+
 Bootstrap owns the reserved identity graph, not live content. The ensure command is safe to
 rerun: it inserts missing reserved IDs and writes starter copy only for identities created in
 that run. After first write, ordinary product services own mutable fields and online history.

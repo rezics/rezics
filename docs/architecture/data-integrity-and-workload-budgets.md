@@ -80,103 +80,59 @@ not support using one to prove facts about other rows. A trigger is acceptable
 only for a genuinely cross-row invariant with a selective index, a sharded
 lock key, and fixed probe work.
 
-## Whole-schema audit
+## Integrity evidence and limit taxonomy
 
-The audit inspected the 163 Drizzle tables and all 317 pre-change `CHECK`
-constraints, including nullable operands, discriminated unions, lifecycle
-pairs, aggregate equations, timestamps, JSON root shapes, and ordered values.
-The resulting schema has 334 checks on 129 tables; the increase is the 17
-fractional-position storage ceilings.
+The [earlier integrity audit](../testing/foundation.md#historical-integrity-audit)
+records its exact table/check census and nullable-value repairs. Current counts
+come from the schema inventory; counts alone do not establish correctness.
+PostgreSQL accepts a CHECK result of true or null, so a required nullable operand
+needs an explicit presence condition. A shared row invariant must hold for every
+writer, including workers and source adoption.
 
-No broad class of checks was removed. The retained checks protect persisted
-relationships or values that downstream code legitimately treats as proven.
-Full Portable Text and other evolvable document vocabularies intentionally
-remain outside PostgreSQL. Pagination maxima likewise remain API-only.
+A numeric maximum needs a named reason. Separate limits on one operation or
+selected view from limits on all facts retained about a Resource:
 
-Six constraints had real SQL three-valued-logic holes. PostgreSQL accepts a
-`CHECK` when its expression is true **or null**, so a nullable comparison such
-as `byte_size > 0` does not prove that `byte_size` exists. The repaired
-constraints now explicitly prove non-null values for:
+| Limit | Meaning and owner |
+| --- | --- |
+| Page size, candidate window, batch size, response bytes | API/query work and admission policy; never a maximum lifetime corpus degree. |
+| Selected names, pinned references or visible controls | Bounded presentation selection; underlying names/references can be paginated independently. |
+| Required row identity, uniqueness, value shape | Persisted invariant enforced by native constraints. |
+| Fractional-position external input: 512 ASCII bytes | API/generator repair-headroom budget. |
+| Fractional-position storage: 1,024 bytes | Generator and DB indexed-storage invariant. |
 
-- complete Image Object metadata;
-- an external Content Structure target URL;
-- an authentication email intent locale;
-- both sides of a moderation license transition;
-- a resolved Unit ownership claim; and
-- Font Awesome icon prefix and name values.
+The earlier reference implementation ranks its full active set and consequently
+requires 128 active/16 pinned guards. Those are [current implementation limits](../reference/current-implementation.md#measurements-and-reference-ranking),
+not the target's maximum number of multilingual names or external identifiers.
+Keep working guards until replacement keysets, ranking generations and bounded
+selection queries pass acceptance; removing a guard alone would make work
+unbounded. Target writes cannot fingerprint or rerank an entire high-degree set.
 
-These are database checks because each malformed row would invalidate a shared
-state assumption for every writer or reader. Regression tests render and
-inspect the Drizzle SQL so a future refactor cannot silently reopen the null
-path.
+## Creation-time classification and Tag applications
 
-## Limit taxonomy
+An initial create request may admit at most 32 Tag selections as an operation
+budget. The authorizing service validates all selected IDs in bounded indexed
+batches and commits the admitted applications with the Resource. This request
+limit does not cap later classification, multilingual names or Tag history.
+Objective type membership follows the [classification contract](classification-spoilers-and-measurements.md),
+with source/evidence and acceptance separate from subjective community votes.
 
-A numeric maximum needs a named reason. “The query may be slow” is not by
-itself a reason for a low product limit; the query still needs a selective
-index, keyset cursor, bounded fan-out, and evidence at target cardinality.
+A creator vote exists only when an admitted participation operation explicitly
+casts it under its voting identity. Importing a source assertion never invents an
+account or vote. At four applications per Resource, 500M/3B Resources imply
+2B/12B application rows. If an explicitly elected journey also casts one vote per
+application, that adds another 2B/12B vote rows; model that fraction independently.
+The Resource-forward and Tag-inverse indexes each have storage and WAL costs.
 
-| Existing limit | Classification | Enforcement |
-| --- | --- | --- |
-| Unit Alias/External Link: 128 active per Unit and kind | shared product/cardinality invariant | application precheck and DB trigger |
-| Unit Alias/External Link: 16 pinned per Unit and kind | shared presentation-slot invariant | application precheck and DB trigger |
-| reference page: default 20, maximum 50 | response/work budget | API only |
-| external-link preview: 16 | presentation work budget | service only |
-| revision batch: 10,000 logical commands | transaction/work-amplification budget | API and planner only |
-| fractional-position external input: 512 ASCII bytes | abuse and operational-headroom budget | API and domain generator |
-| fractional-position storage: 1,024 bytes | indexed-storage safety invariant | generator and DB `CHECK` |
+Requests use Resource/Tag keysets and bounded hydration. Popular Tags must not
+serialize unrelated Resource creation through a shared read or global aggregate.
+Keep small curated form options separate from the corpus. Measure create latency,
+lock waits, aggregate contention, relation/index bytes, WAL and replica lag.
 
-The 128/16 reference limits remain in PostgreSQL because all active references
-are ranked for cursor-version correctness and contribute to public Unit
-presentation or search. A direct writer that bypassed those bounds could make
-work unbounded for every viewer of that Unit. The trigger reads at most 128 or
-16 entries through existing partial indexes and serializes only one
-`(unit_id, reference_kind)` advisory-lock shard. The application now uses the
-same lock for creation, curation, and withdrawal. The trigger also covers
-`UPDATE OF unit_id`; moving an existing active or pinned row can no longer
-bypass the destination capacity check.
-
-Page maxima are deliberately not database constraints. They cap response
-serialization, joined-object hydration, network bytes, and per-client
-fairness. They do not excuse offset pagination, unindexed filters, or a plan
-whose cost grows with corpus size.
-
-## Creation-time Tag applications
-
-Book, Media, Software, and Realm creation accepts at most 32 distinct initial
-Tag IDs. One indexed `tag.id IN (...)` lookup proves that every requested Tag
-is public, published, approved, and not deleted; one batched insert creates the
-direct `unit_tag` applications and one batched insert records the creator's
-positive `unit_tag_vote` rows. The work is therefore `O(k)` for `k <= 32`, uses
-bounded request memory and network payloads, adds no per-Tag query loop, and
-remains inside the Unit creation transaction. Collection membership and the
-temporary single-select rule are presentation policy, not persisted
-invariants. API quotas provide admission backpressure; concurrent creates use
-different `unit_id` keys and only read shared Tag rows, so popular Tags do not
-serialize otherwise unrelated creation transactions.
-
-Capacity planning assumes an average of four direct Tags per Unit, with a
-long-tailed Tag distribution and one creator vote per initial application. At
-500 million Units this is approximately 2 billion `unit_tag` rows and 2 billion
-creator-vote rows; at 3 billion Units it is approximately 12 billion rows in
-each relation. Each application writes the relation primary key plus the
-reverse Tag index, and each vote writes its primary key plus Tag/Profile
-indexes and the existing bounded aggregate maintenance. Reads by Unit use the
-leading primary-key columns; reverse Tag reads use the `(tag_id, unit_id)`
-index and must remain keyset-paginated. The request path never loads a corpus
-slice, and the seven curated Collections are a bounded control dataset with at
-most 100 items fetched per create-form field.
-
-No new absolute latency target is introduced: this work stays within the
-existing Unit-create transaction objective and adds three bounded database
-statements. Observe create-transaction latency, lock waits, vote-aggregate
-trigger time, relation/index growth, WAL volume, replica lag, and reverse-index
-page splits. Before either relation approaches single-node storage or index
-maintenance limits, hash-partition it by `unit_id`; at the 3-billion-Unit
-estimate, route Unit-owned writes and reads to the same shard and serve global
-Tag discovery from partitioned/asynchronous projections. Partition rollout is
-a forward schema cutover with backfill and dual-read verification, not a
-whole-corpus request-path migration.
+Use owner-routed physical partitions and selective inverse projections inside the
+selected PostgreSQL database. A three-billion-Resource estimate does not select
+another database, fixed partition count or mandatory live dual-write. If measured
+hardware, maintenance or restore limits cannot satisfy the workload, expose the
+limitation and reselect placement or workload before claiming qualification.
 
 ## Fractional positions
 
@@ -186,8 +142,8 @@ UTF-8 byte length are equal after syntax validation. The contracts are:
 - external write input: canonical key and at most 512 bytes;
 - persisted/read response: canonical key and at most 1,024 bytes;
 - soft rebalance threshold: 512 bytes; and
-- hard DB invariant: `octet_length(position) <= 1024` on all 17 fractional
-  position columns.
+- hard DB invariant: `octet_length(position) <= 1024` on every admitted fractional
+  position column; the schema inventory determines the current count.
 
 The split is intentional. An API-only maximum cannot protect generated keys,
 maintenance scripts, workers, imports, or future writers. A 512-byte database
@@ -216,8 +172,8 @@ condition becomes steady state:
 - a single compaction touches more than 10,000 members; or
 - more than 0.1% of ordering mutations require compaction for 15 minutes.
 
-At 500 million and 3 billion relation rows, routing remains by the owning Unit,
-Collection, Structure, Profile, Realm, or Post key. There is no global
+At 500 million and 3 billion relation rows, routing remains by the owning Resource,
+Collection, Structure, Agent, Realm, or Post key. There is no global
 renumbering operation. A hot owner may serialize its own ordering writes, but
 unrelated owners remain independently partitionable.
 
@@ -233,7 +189,7 @@ block policy becomes an empty body. The source row is not silently rewritten.
 Every repair increments `rezics.persisted_document.repairs` with one of three
 fixed source attributes: `post.body`, `unit_localization.content`, or
 `unit_localization.description`. Posts, feeds, reviews, Content Structure,
-Realm surfaces, governance notes, Profiles, and Zone-embedded Wiki posts use
+Realm surfaces, governance notes, Agents, and Resource content rendered by Zone routes use
 this boundary. This turns historical drift into observable repair work without
 letting one row fail a complete list.
 
@@ -244,37 +200,28 @@ capability policy.
 
 ## Constraint rollout
 
-New or tightened corpus constraints are added `NOT VALID`. PostgreSQL enforces
-them for new and changed rows immediately without scanning old rows. Existing
-rows are validated later, one relation and constraint at a time. Validation is
-kept outside the deployment migration so a 500-million-row table cannot turn a
-release transaction into an unplanned I/O job.
+Constraint installation depends on its PostgreSQL kind and the elected engine
+version. For supported kinds, such as CHECK and foreign-key constraints,
+`NOT VALID` permits staged validation while protecting subsequent writes. It is
+not a general option for every constraint: primary/unique index construction and
+attachment need their own installation, duplicate detection and lock plan.
+Consult the engine's [ALTER TABLE contract](https://www.postgresql.org/docs/18/sql-altertable.html)
+and [constraint semantics](https://www.postgresql.org/docs/18/ddl-constraints.html).
 
-Inspect all staged constraints:
+A fresh disposable rebuild installs the selected schema without a legacy transfer
+requirement. A change to an existing deployment preserves released SQL and the
+installation baseline, declares actual affected relations, and budgets scan,
+index-build, lock, WAL, temporary disk and restore costs. Validate in bounded
+maintenance scopes supported by the selected constraint/partition design; do not
+assume every validation becomes partition-local automatically.
 
-```sh
-DATABASE_ADMIN_URL=... task services-main:db:constraints -- status
-```
-
-Validate exactly one allowlisted constraint after repairing any legacy rows
-and checking replica lag, database I/O, lock waits, and maintenance headroom:
-
-```sh
-DATABASE_ADMIN_URL=... task services-main:db:constraints -- \
-  validate unit_localization_position_byte_length_check
-```
-
-The command takes a five-second lock timeout, validates no second constraint,
-and is idempotent. PostgreSQL validation scans the existing relation but does
-not block ordinary concurrent reads and writes. `validate-disposable` is
-hard-restricted to the `rezics_atlas` migration-replay database and exists only
-so schema reconciliation can compare the fully validated target.
-
-At 500 million rows, validation cost is one linear heap pass per selected
-constraint plus the predicate's bounded per-row CPU. At 3 billion rows, perform
-validation per physical partition/shard and schedule it against measured I/O
-headroom; do not launch all 25 scans together. A failed validation leaves the
-constraint installed and protecting new writes, so repair can proceed forward.
+The current allowlisted operator command is documented with the
+[database migration procedure](../../README.md#database-migrations). Its status and
+single-constraint modes are implementation tools, not permission to run a whole
+corpus validation during deployment. At 500M/3B rows, account for each heap/index
+pass and monitor I/O, lock waits, vacuum and replication. A failed staged validation
+retains its actual constraint state; recovery must inspect it rather than assume
+that the release installed a fully validated invariant.
 
 ## Review checklist
 
@@ -284,7 +231,7 @@ For every new check or maximum, record:
 2. the narrowest layer that can prevent that failure for every relevant writer;
 3. SQL null semantics and whether nullable operands are proved explicitly;
 4. request-path complexity, selected index, maximum rows/bytes touched, and hot-key behavior;
-5. behavior at 500 million rows and the 3-billion-row partition/shard path;
+5. behavior at 500 million and 3 billion rows, with measured same-database partition/maintenance limits;
 6. deployment and historical-data validation cost; and
 7. the metric and threshold that triggers redesign rather than another smaller arbitrary limit.
 

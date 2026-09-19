@@ -6,7 +6,7 @@ and its pending acceptance cases.
 
 ## Domain boundary
 
-REZICS separates vocabulary structure, Unit assertions, retrieval inference,
+REZICS separates vocabulary structure, Resource assertions, retrieval inference,
 and presentation:
 
 ```text
@@ -26,8 +26,8 @@ Path != Expression != Application != Effective Tag != rendered badge
 
 A Tag is a stable concept identity. A Path is only an immutable route through
 the vocabulary graph. A Tag Expression is the proposition that can be asserted
-about a Unit. A Path Sense binds Path members to that Expression. An
-Application records that a Unit adopts one immutable Sense under one authority.
+about a Resource. A Path Sense binds Path members to that Expression. An
+Application records that a Resource adopts one immutable Sense under one authority.
 Effective Tags are rebuildable retrieval evidence, and rendered labels are
 temporary UI projections.
 
@@ -42,7 +42,7 @@ index; neither a Tag label nor its creation time supplies that date.
 Consequently, `Character Traits -> Appearance -> Hair Color -> Red` can realize
 the Expression `facetValue(Hair Color, Red)`. The Overview label is
 `Hair Color · Red`; the complete Path remains available as source explanation
-and navigation. Path membership never asserts every member about the Unit.
+and navigation. Path membership never asserts every member about the Resource.
 
 This follows the established distinction between concept identity, hierarchy
 position, indexing statement, and retrieval expansion in
@@ -56,7 +56,7 @@ position, indexing statement, and retrieval expansion in
 - `concept`: has a corresponding `tag`, may be an Expression argument, and may
   participate in retrieval;
 - `guide`: has localized guide-node labels and is organizational only. It is
-  neither a Unit nor an assertable/indexable Tag.
+  neither a Resource nor an assertable/indexable Tag.
 
 `tag_relation` is a governed adjacency revision with one of these meanings:
 
@@ -74,7 +74,7 @@ changed; a semantic correction creates another relation revision and Path.
 
 ## Structural Path identity
 
-`tag_path` has its own native identity under the logical Unit capability contract;
+`tag_path` has its own native identity under the logical Resource capability contract;
 it does not require a global `unit` parent. Its structural identity is exactly:
 
 ```text
@@ -143,12 +143,12 @@ Rule retirement preserves history and recomputes the definition-scale closure.
 Expression-target rules are cycle-checked under a serialized graph mutation.
 `tag_expression_effective_tag` stores the strongest `primary`, `entailed`, or
 `retrieval_only` evidence per Expression/Tag pair. It is a rebuildable
-definition cache, not a Unit assertion and not a display identity.
+definition cache, not a Resource assertion and not a display identity.
 
 When that closure changes for an Expression that is already asserted, the
 database upserts `tag_expression_projection_rebuild`. The worker advances
 Global and Realm assertion inverses in independent UUID keyset pages of 500,
-refreshes only the routed Unit/authority keys, and retries failed pages with a
+refreshes only the routed Resource/authority keys, and retries failed pages with a
 bounded delay. A newer definition change resets the same job's cursors after
 the in-flight transaction releases its row lock, so an older generation cannot
 silently win.
@@ -198,7 +198,7 @@ which source population is read; they never merge vote counts or identities.
 PostgreSQL incrementally maintains:
 
 - `unit_expression_assertion` and `realm_unit_expression_assertion`, aggregated
-  by Unit, authority, and Expression;
+  by Resource, authority, and Expression;
 - `unit_effective_tag` and `realm_unit_effective_tag`, with separate direct,
   primary-Expression, entailed, and retrieval-only evidence counts;
 - `tag_public_position_stat`, with one dense `bigint` total for every Tag;
@@ -225,7 +225,7 @@ drains definition-change jobs continuously with lock-skipping claims.
 Search needs to tell a reader whether a Tag has another accepted public
 vocabulary position. It does not need to aggregate `tag_path_member` on the
 request path. `tag_public_position_stat(tag_id, public_position_count,
-updated_at)` stores the total number of positions whose Path Unit is published,
+updated_at)` stores the total number of positions whose Path Resource is published,
 public, approved, not deleted, and accepted by a positive definition score with
 at least one vote.
 
@@ -263,12 +263,12 @@ breadcrumbs are not persisted.
 
 ## Surface behavior
 
-- Unit Overview renders applied Expressions, optionally grouped by declared
+- Resource Overview renders applied Expressions, optionally grouped by declared
   semantic group key. It does not render Effective Tags as source badges.
-- A badge popover first lists Applications on that Unit, their authority,
+- A badge popover first lists Applications on that Resource, their authority,
   judgments, and expandable full Paths. A collapsed second section lists other
-  accepted vocabulary positions not adopted by the Unit.
-- Associations use compact Expression projections rather than bare Entity Tags.
+  accepted vocabulary positions not adopted by the Resource.
+- Associations use compact Expression projections rather than bare Resource-to-Tag links.
 - search results show localized match reasons and distinguish direct, primary,
   entailed, and retrieval-only evidence; Tag results say that other vocabulary
   positions are available without asking readers to interpret a number;
@@ -290,7 +290,7 @@ locale. App Router entries remain thin adapters; implementation lives under
 Path position discovery uses UUID keyset pagination over
 `tag_path_member(node_id, path_id, ordinal)`, joins accepted Path vote stats,
 and hydrates members in one bounded batch. Concept Expression reads are
-definition-scale and capped. Unit landscape reads are bounded by actual source
+definition-scale and capped. Resource landscape reads are bounded by actual source
 Applications and hydrate definitions in batches.
 
 Search indexing consumes Effective Tags but returns positive match evidence

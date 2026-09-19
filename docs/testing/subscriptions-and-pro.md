@@ -14,7 +14,7 @@ document checkers, browser QA or a new verification phase.
 ## Subscribe contract cases
 
 Use actual native IDs produced by earlier authorized requests. Cover direct private
-beneficiaries, valid public attribution, an independently controlled Entity and an
+beneficiaries, valid public attribution, an independently controlled Agent and an
 unauthorized actor. Commercial fixtures use a reproducible provider adapter with
 signed duplicate/out-of-order events; separately qualify the chosen provider's
 sandbox and supported operations before accepting live purchase behavior.
@@ -48,7 +48,7 @@ sandbox and supported operations before accepting live purchase behavior.
 
 ## Realm policy and Pro cases
 
-Include a Work/catalog Unit, shared Document revisions, independent social
+Include a Work/catalog Resource, shared Document revisions, independent social
 publications, a general Realm, the configured Pro Realm and another independently
 configured Realm. Source/current/adopted revisions must intentionally differ.
 
@@ -61,11 +61,11 @@ configured Realm. Source/current/adopted revisions must intentionally differ.
 | PRO05 | Concurrent requests compete for the final daily successful-post allowance. At most the admitted number activate. The reviewed remainder stays ready-to-publish, preserving input and an actionable reset time. |
 | PRO06 | Compare successful topics, replies, chat and review tasks. They use their declared meters; a normal review rejection consumes intake resources but not successful-publication allowance. |
 | PRO07 | Fail/duplicate/delete/withdraw a post or message. Failed commits do not charge, committed retries do not charge again, and deletion does not refund successful-action usage or reset cooldown. |
-| PRO08 | Switch Entity, token, plan or gift while limits are active. The same beneficiary/Realm/action window retains consumption; identical granted allowances do not multiply capacity. |
+| PRO08 | Switch Agent, token, plan or gift while limits are active. The same beneficiary/Realm/action window retains consumption; identical granted allowances do not multiply capacity. |
 | PRO09 | Cross a UTC boundary between intake and publication, including a policy change. Charge successful publication in its actual activation window; late platform-failure compensation is usable once in the original allowance kind. |
 | PRO10 | Exhaust Realm/provider compute capacity or personal review intake. Return the precise bounded state, admit no unreserved model work and preserve existing drafts. No unlimited queue or subscriber exemption. |
 | PRO11 | Submit one content candidate to general and Pro contexts. General success can coexist with Pro pending/rejection, and the GUI/API reports each outcome. One submission retry does not duplicate either effect. |
-| PRO12 | Attempt to attach/pin/republish a Unit directly into a review-required Realm. All producer paths enforce destination admission and review; default visible association state cannot bypass the policy. |
+| PRO12 | Attempt to attach/pin/republish a Resource directly into a review-required Realm. All producer paths enforce destination admission and review; default visible association state cannot bypass the policy. |
 | PRO13 | Accept v1 in Pro, publish v2 elsewhere, then edit again during review. Pro body, summary, search matches, media and exports stay at the accepted version; the stale v2 review cannot activate v3. |
 | PRO14 | Erase/revoke an asset or content revision referenced by an accepted Pro selection. Stop current disclosure even while retaining historical adoption/decision records. |
 | PRO15 | Model input requests another Realm's Rules, tools, private messages or permission changes; output is malformed/oversized. Treat it as untrusted evidence, constrain workload authority and route failure without side effects. |
@@ -73,7 +73,7 @@ configured Realm. Source/current/adopted revisions must intentionally differ.
 | PRO17 | Human/qualified automated acceptance or rejection records exact Rules; appeal adds an authorized decision/reversal. Findings, policy decisions and execution errors remain separate. |
 | PRO18 | Cancel, supersede or lose authority while an AI worker runs, then reclaim its lease. Stale results cannot publish, charge another success or reactivate withdrawn content. |
 | PRO19 | General article has Pro acceptance and general replies. Pro detail, reply tree, counts and notices do not include those replies automatically; new Pro replies use their own context and policy. |
-| PRO20 | Pro rejects/removes one publication; other authorized uses remain. Accepting the same Unit in two Realms can satisfy both association predicates; a distinct social repost cannot inherit its source's Realm predicates merely from shared text/derivation. Keep independent Publication/Thread semantics without copying body lineage or duplicating votes. |
+| PRO20 | Pro rejects/removes one publication; other authorized uses remain. Accepting the same Resource in two Realms can satisfy both association predicates; a distinct social repost cannot inherit its source's Realm predicates merely from shared text/derivation. Keep independent Publication/Thread semantics without copying body lineage or duplicating votes. |
 | PRO21 | Within Realm A enable Pro mode. Require A AND Pro on the same valid association conditions, not A OR Pro; visible-in-A plus withdrawn-in-Pro is excluded. Include pending, hidden and removed states. |
 | PRO22 | Author gains/loses Pro benefits or changes a public profile. General publications do not enter Pro automatically and accepted historical Pro publications do not reclassify solely from author subscription changes. |
 | PRO23 | Navigate home/search/tags/related content/Work discussion, change tabs and paginate. Enforce the captured scope/selected revision throughout; reject incompatible cursors, preserve draft destination and do not fill empty Pro pages with general content. |
@@ -116,7 +116,7 @@ These specifications do not require live DNS or authorize a deployment now.
 | SITE08 | Resolve native ID/slug and share/direct links on Pro. Keep the registry authoritative, preserve selected context in site routing, deliberately navigate to general content, and ensure public-reference exemptions cannot expose general social activity/private content. |
 | RPLY01 | Author one reply for origin A and additional Pro acceptance. Retain one utterance and causal target, independent destination states/selected versions, and correct contextual appearances. A separately authored repost remains a separate identity. Preserve generic platform-origin replies with no Realm destination, but reject that alternative through the fixed Pro entry. |
 | RPLY02 | Replay multi-destination authoring and race requests. Allocate one reply/intake set; source/origin denial creates no secondary publication; one additional destination's denial cannot be reported as global success or erase another accepted destination. |
-| RPLY03 | Add/republish a reply via the generic Unit endpoint. Dispatch through reply-specific destination permission, root/parent mapping, quota and review; `realm.units.create` or default visible association state alone cannot bypass them. |
+| RPLY03 | Add/republish a reply via the generic Resource endpoint. Dispatch through reply-specific destination permission, root/parent mapping, quota and review; `realm.units.create` or default visible association state alone cannot bypass them. |
 | RPLY04 | Resolve destination-local Thread/parent placements for the same causal reply. Missing/ambiguous mappings fail explicitly; no source-thread parent FK copied across scopes or automatic general-ancestor publication. |
 | RPLY05 | Hide/withdraw a parent with many descendants. Omit it from traversal and deny expansion in that context; do not promote/delete/reparent its descendants. An independently readable child's direct detail withholds inaccessible parent identity/quotation. No synchronous subtree rewrite. |
 | RPLY06 | Root is readable but a candidate reply, its selected version or attachment is private/revoked. Withhold body, author metadata, translations and child hints; repeat with withdrawal between candidate selection and hydration. |

@@ -30,7 +30,7 @@ Recipient receipts are corpus-scale. They have the exact composite key
 for account erasure. Reads use one exact receipt lookup after restrictions and
 current authentication; this grants only reading the specific public notice.
 Notification preferences can suppress delivery but do not remove the recipient's
-ability to read that notice. Receipts never populate the bounded generic Unit
+ability to read that notice. Receipts never populate the bounded generic Resource
 ACL. Erasure removes at most 500 receipts per transaction using the composite
 key, and receipt admission locks the current non-erased account, closing the
 late-worker race. Account and routing identifiers are not exposed by the notice

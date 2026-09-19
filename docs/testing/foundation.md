@@ -1,7 +1,7 @@
 # Foundation persistence qualification
 
 The [selected identity/access and connected-app cases](identity-and-access.md)
-are a separate target matrix. The existing Self-Entity, direct-grant, organization
+are a separate target matrix. The existing Self-Agent, direct-grant, organization
 roster and Realm membership evidence recorded here qualifies its tested code only;
 it does not establish mixed grantees, many-to-many representation, OAuth/MCP or
 layered GUI acceptance. Preserve these regression records while replacing their
@@ -9,9 +9,9 @@ superseded assumptions through the current plan.
 
 The [plan](../plan/README.md) owns module progress. These fixtures qualify individual foundation contracts on a fresh disposable PostgreSQL target; they do not establish all of M01 or the backend acceptance gate.
 
-## Unit capability contract acceptance
+## Resource capability contract acceptance
 
-These additional cases specify the [logical Unit boundary](../architecture/database/README.md#34-unit-capabilities-across-owner-tables). They are pending executable qualification and are not covered merely by the reference-allocation evidence below. Run them against registered owners within one PostgreSQL authority; no cross-database fixture is required.
+These additional cases specify the [logical Resource boundary](../architecture/database/README.md#34-resource-capabilities-across-owner-tables). They are pending executable qualification and are not covered merely by the reference-allocation evidence below. Run them against registered owners within one PostgreSQL authority; no cross-database fixture is required.
 
 | Case | Required behavior |
 | --- | --- |
@@ -204,7 +204,7 @@ fixture passes 181 assertions alongside its 16 native catalog resources.
 ## Private account names in access configuration
 
 The resource API fixture changes a grant recipient's private Auth name while
-keeping its public Entity name. The access-management response must use the
+keeping its public Agent name. The access-management response must use the
 public name and must not contain the private label. The pre-fix response exposed
 the private Auth value. The fixture also rejects concurrent-query warnings from
 a single PostgreSQL client; snapshot reads now await their shared-client queries.
@@ -376,10 +376,10 @@ bounded acknowledgement cleanup and transitive disclosure remain separate work.
 [check-realm-roster.ts](../../services/main/scripts/check-realm-roster.ts).
 The [pinned run](database/realm-roster-evidence.json) passes 46 assertions,
 including 27 signed-session requests. The pre-fix endpoint returned HTTP 500
-because native Self identities had no retired Unit localization.
+because native Self identities had no retired Resource localization.
 
 The fixture checks native public names/avatars, private Auth-name exclusion,
-absent presentation, regional BCP 47 tags, withheld private Entity metadata,
+absent presentation, regional BCP 47 tags, withheld private Agent metadata,
 owner identity, ordinary denied reads and grant revocation at the exact resource
 fence. Presentation and canonical addresses use the read transaction. The
 shared Realm account checkpoint also retains current Self-revision validation.
@@ -616,7 +616,7 @@ on the disposable native schema. The [fresh-layout run](database/following-refer
 passes 61 assertions. It covers all eight catalog identity owners,
 shared public/private references, replay counters, missing targets, duplicate
 relations, wrong-account preferences, immutable preference ownership and native
-self-follow rejection. A reference UUID equal to the follower Entity UUID can
+self-follow rejection. A reference UUID equal to the follower Agent UUID can
 still name a different native target. A same-statement allocation must be visible
 to the counter trigger.
 
@@ -630,7 +630,7 @@ skipping effects. All fixture data rolls back.
 
 The migration overlay removes the dependent preference FK before replacing the
 public Follow key; PostgreSQL rejects the generator's unqualified parent-first
-order. The removed Zone capacity command targeted the retired global Unit/Profile
+order. The removed Zone capacity command targeted the retired global Resource/Agent
 schema and could not qualify this native layout. Native Zone composition capacity
 scenarios remain explicit work in M09. Reference integrity and these point/keyset
 checks do not establish complete delivery, restore or corpus-scale acceptance.
@@ -759,11 +759,11 @@ or representation paths.
 
 | Registry case | Qualified native behavior |
 | --- | --- |
-| Typed subject identity | A principal and Entity with the same UUID allocate different immutable values; repeated allocation and exact decoding preserve their types. |
+| Typed subject identity | A principal and Agent with the same UUID allocate different immutable values; repeated allocation and exact decoding preserve their types. |
 | Canonical scopes | Platform, private account and public resource scopes each reuse one value. Public roots store one REF FK and no per-domain aliases. |
 | Invalid storage | Zero/multiple alternatives, unregistered platform roots, missing concrete targets and duplicate mappings fail. |
 | Historical meaning | Retarget, rekey and deletion fail. A referenced account cannot be physically removed; a retained erased-principal tombstone keeps its exact private subject identity. |
-| No authority side effects | Subject/scope allocation creates no self binding, Entity participation or representation. Consumer authority and disclosure remain separate checks. |
+| No authority side effects | Subject/scope allocation creates no self binding, Agent participation or representation. Consumer authority and disclosure remain separate checks. |
 | Concurrent first use | Independent connections demonstrably block; commit reuses the winning subject/scope value and rollback permits a new value. |
 | Deletion race | An owner deletion holding the concrete FK lock wins; later subject admission fails without a dangling row. |
 | Stronger isolation | An established REPEATABLE READ snapshot loses concurrent scope allocation with `40001`; a fresh transaction reuses the winner. |
@@ -776,3 +776,56 @@ records selected semantics; the [capacity owner](../architecture/identity-access
 retains the independent 500M/3B estimates and validation limits. Registry integrity
 never substitutes for current actor eligibility, structural capability, scoped
 authorization, privacy, erasure/recovery or workload acceptance.
+
+## Historical reference-list fixture
+
+This retained measurement describes the earlier bounded Alias/reference layout.
+It does not establish lifetime name limits, open-language coverage or the selected
+high-degree Resource target. Original implementation identifiers are preserved.
+
+Migration replay and schema reconciliation validate the partial indexes and all
+constraints. A disposable PostgreSQL 18.4/PGroonga 4.0.8 fixture used 100,128
+Alias rows across 10,001 Resources, including one Resource at the exact 128-row limit.
+The 129th row was rejected by `unit_reference_active_limit`.
+
+On that fixture, `EXPLAIN (ANALYZE, BUFFERS)` for the 128-row list used one
+bitmap scan of `unit_alias_unit_position_idx`, touched six shared buffers, and
+completed in 0.131 ms. The bounded capacity read used the same index and six
+buffers, completing in 0.040 ms. The 100,128-row Alias relation occupied 33 MB,
+of which the active-position index occupied 9,328 KiB. This evidence validates
+the access shape, not the 500-million-row latency estimate; pre-production load
+tests must use production row widths, cache pressure, concurrency, and skew.
+
+## Historical integrity audit
+
+The earlier integrity audit recorded the following schema census and repairs.
+These counts describe that audited revision, not the current schema or the
+Resource target. The recorded null-safety principle remains applicable.
+
+The audit inspected the 163 Drizzle tables and all 317 pre-change `CHECK`
+constraints, including nullable operands, discriminated unions, lifecycle
+pairs, aggregate equations, timestamps, JSON root shapes, and ordered values.
+The resulting schema has 334 checks on 129 tables; the increase is the 17
+fractional-position storage ceilings.
+
+No broad class of checks was removed. The retained checks protect persisted
+relationships or values that downstream code legitimately treats as proven.
+Full Portable Text and other evolvable document vocabularies intentionally
+remain outside PostgreSQL. Pagination maxima likewise remain API-only.
+
+Six constraints had real SQL three-valued-logic holes. PostgreSQL accepts a
+`CHECK` when its expression is true **or null**, so a nullable comparison such
+as `byte_size > 0` does not prove that `byte_size` exists. The repaired
+constraints now explicitly prove non-null values for:
+
+- complete Image Object metadata;
+- an external Content Structure target URL;
+- an authentication email intent locale;
+- both sides of a moderation license transition;
+- a resolved Unit ownership claim; and
+- Font Awesome icon prefix and name values.
+
+These are database checks because each malformed row would invalidate a shared
+state assumption for every writer or reader. Regression tests render and
+inspect the Drizzle SQL so a future refactor cannot silently reopen the null
+path.

@@ -4,13 +4,13 @@ The native Graph API is a bounded read projection of native identities, associat
 
 ## Generic participants and capability admission
 
-Use the [logical Unit capability contract](README.md#34-unit-capabilities-across-owner-tables) for identity targets across catalog and platform owners. Persist participants through REF or the appropriate exact revision/occurrence citation; do not enumerate every owner as nullable columns in each generic association family. Predicate/role contracts decide which targets and structural capabilities are eligible. A valid reference alone does not establish role compatibility, accepted truth or permission.
+Use the [logical Resource capability contract](README.md#34-resource-capabilities-across-owner-tables) for identity targets across catalog and platform owners. Persist participants through REF or the appropriate exact revision/occurrence citation; do not enumerate every owner as nullable columns in each generic association family. Predicate/role contracts decide which targets and structural capabilities are eligible. A valid reference alone does not establish role compatibility, accepted truth or permission.
 
 Translation, subtitle, recording and software-localization relations can link a native Work, exact source/result revisions and contributing Entities through separate roles. Work aggregation, editorial selection, part coverage and release correspondence remain distinct predicates/structures. [Selected contents](content-composition.md) use their structural owner; a generic edge does not replace manifest, order or adoption integrity. Tag concepts and contextual applications share the target vocabulary while retaining their own evidence and inference rules.
 
 Family queries discover related Works, releases, derivatives and compilations. They are bounded graph reads and never supply a publication's unrecorded descendants, inherit votes/progress or grant access. An import command can record factual imported-from provenance and structural edges; creative equality/derivation claims require their own validated semantic decision. Current navigation can resolve an identity correction while exact historic participants remain unchanged.
 
-The present catalog participant tables provide a narrower catalog-only foundation. Cross-owner admission, revision citations and the generic feature queries must be qualified through the plan; a shared owner registry or a rendered graph is not evidence that every Unit capability is implemented.
+The present catalog participant tables provide a narrower catalog-only foundation. Cross-owner admission, revision citations and the generic feature queries must be qualified through the plan; a shared owner registry or a rendered graph is not evidence that every Resource capability is implemented.
 
 ## Query contract
 

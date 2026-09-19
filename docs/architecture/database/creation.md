@@ -14,7 +14,7 @@ The [native Work contract](native-work.md) applies to every creative domain. Thi
 | Series or user-curated collection | Governed Grouping/Collection identity and memberships/order; not automatically a Work or body containment. |
 | Original work | Valid without a source Work or fabricated fandom. |
 | Fandom/crossover/source work | Named grouping/source-work references and typed relationship assertions with evidence. |
-| Character appearance | Entity participation in a particular Work/expression/continuity, with role and optional coverage. |
+| Character appearance | Agent participation in a particular Work/expression/continuity, with role and optional coverage. |
 | Pairing or other relationship | Contextual association with typed participant roles; can be n-ary. |
 | Translation/adaptation/inspiration | Explicit derivation/relation with exact input where known; no inferred endorsement or control. |
 | Co-creator/pseudonym | Public credit/name plus independent private operator and editing authority. |

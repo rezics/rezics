@@ -1,5 +1,9 @@
 # Native Studio workspace
 
+Implementation reference. This owner documents current code, identifiers and local
+limits. The [selected target](../../../../../docs/architecture/studio-workspace-and-contributions.md) and [implementation crosswalk](../../../../../docs/reference/current-implementation.md)
+define the reconciliation boundary; existing fixtures do not qualify revised semantics.
+
 Catalog creation has its own `catalog_creator_since` candidate source. It is
 neither a platform ownership row nor proof of current edit authority. The eight
 catalog identity tables maintain it after creation, creator change, retirement

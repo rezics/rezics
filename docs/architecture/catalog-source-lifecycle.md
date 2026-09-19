@@ -173,7 +173,8 @@ At an estimated 600 bytes including its three indexes, this growing dependency
 family needs approximately 300 GB for 500M rows or 1.8 TB for 3B, before replication,
 WAL and bloat. With six dependencies per changed proposal, the source workload
 below implies about 52 writes/s at 500M sources or 312 writes/s at 3B, with a 10x
-burst budget. The source ID routes 64 initial hash partitions and eventual shards;
+burst budget. Source ID is a candidate same-database partition key; a previously
+suggested 64-partition layout needs measured query/maintenance qualification;
 single-proposal reads touch at most 128 rows, and reverse maintenance uses the
 dependency-binding/preparer indexes. These estimates require representative WAL,
 hot-source and p99 tests before production activation.
@@ -195,9 +196,9 @@ indexes assume UUID keys with normal B-tree tuple overhead and no extreme bloat.
 | Check plans | 216 | 108 GB | 648 GB | `routing_bucket` |
 | Check receipts / fan-out cursors | 136 | 68 GB | 408 GB | `source_record_id` |
 
-Use 256 initial hash partitions and the source ID as the eventual shard route.
-At 3B rows a family averages 11.7M rows per partition; distribution and individual
-large-source skew still need measurement. All source-record operations use its
+Choose same-database source-ID partitioning from measured query, maintenance and
+retention costs. An illustrative 256 partitions average 11.7M rows each at 3B;
+that arithmetic neither selects 256 nor proves acceptable skew or maintenance. All source-record operations use its
 ID; mapping/proposal/history pages use composite keyset indexes. Due plans use a
 DB-checked 0..1023 bucket in the primary key, allowing the scheduler's bucket
 predicate to prune its partition and use `(bucket,state,next_check_at,record)`.

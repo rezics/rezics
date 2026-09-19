@@ -32,8 +32,9 @@ Derive assertions from owning contracts and scenario matrices. Use normal author
 Useful verification-phase entry points from the repository root; these are not implementation-phase prerequisites:
 
 ~~~sh
-python docs/testing/check_docs.py
-python docs/testing/database/check_design.py --check --require-tracked
+python -B -m unittest discover -s docs/testing -p 'test_documentation.py'
+python -B docs/testing/check_docs.py
+python -B docs/testing/database/check_design.py --check --require-tracked
 yarn exec vitest run --project main
 task services-main:db:check
 task openapi:check
@@ -42,11 +43,42 @@ task openapi:check
 Use the relevant owning Taskfile and focused suites before broader integration. No API test may use a fabricated ID where a preceding create/import response should provide it. Retain positive, rejected, missing-data, conflict, retry and revocation outcomes. A fixture, generated SQL file or skipped test is not qualification.
 
 Fresh checkouts first follow the owning [artifact preparation procedure](../../libraries/schema-importer/README.md).
-The strict design `--require-tracked` check currently has a
-[recorded generated-input failure](known-failures.md#tracked-design-input-guard-rejects-generated-schema-artifacts).
-Keep that failure visible. `check_design.py --check` can separately verify generated
-design metadata and arithmetic; its success does not pass the strict tracked-input
-requirement or any target runtime/capacity gate.
+The design checker compares the registered model derivatives against the production
+emitter without writing schema, verifies pinned vocabulary bytes, and records
+producer/output digests. `--require-tracked` requires authored models, generator
+recipes, pins and all ordinary dependencies in Git. Only exact verified model
+outputs are exempt; another generator's tracked snapshot remains tracked. Missing,
+modified, symlinked and unregistered ignored files fail rather than disappear from
+the schema inventory. Preparation needs the installed Node/Yarn workspace; checks
+then run offline and never connect to a database.
+
+## Documentation reconciliation evidence
+
+The 2026-09-19 reconciliation covers maintained target architecture, execution
+plans, domain/API documentation, navigation and the implementation/release boundary.
+The Resource/Agent/Space terminology, open language model, physical field policy,
+typed relationships and same-database capacity contracts replace conflicting target
+prose. Dated fixture results, actual command identifiers, legal text and released
+SQL retain their own authority. [Current implementation](../reference/current-implementation.md)
+records concrete remaining runtime gaps.
+
+Verification for this documentation scope:
+
+- 15 focused regressions pass, covering role-aware terminology, nested source
+  fences, exact derivative registration, altered/missing/orphan/symlinked outputs,
+  tracked producers, separately tracked protocol snapshots and pinned source bytes.
+- The maintained-document check passes across 207 Markdown files, including local
+  targets/anchors, English maintainer prose and ownership/terminology guards.
+- The strict design check passes after artifact preparation and staging. Seven
+  model-emitted Drizzle modules match the production emitter exactly; twelve pinned
+  vocabulary sources match their declared bytes/digests. Inventory mapping covers
+  249 schema/SQL modules and 42 API owners, with 132 specified cross-domain scenarios.
+
+These are documentation, provenance and arithmetic results. No application, DDL,
+migration, product gate, full-standard field conformance, 3B deployment or throughput
+qualification is implied. The [model scenarios](model-contracts.md) remain
+prospective. The earlier generated-input guard failure is repaired; other backend
+[failures](known-failures.md) remain open under their own reproductions.
 
 ## Reproducibility and retention
 

@@ -1,5 +1,9 @@
 # Participation and authority
 
+Implementation reference. This owner documents current code, identifiers and local
+limits. The [selected target](../../../../../docs/architecture/identity-and-access.md) and [implementation crosswalk](../../../../../docs/reference/current-implementation.md)
+define the reconciliation boundary; existing fixtures do not qualify revised semantics.
+
 The protocols and evidence below describe the current implementation. The selected
 [identity/access contract](../../../../../docs/architecture/identity-and-access.md)
 replaces the unique Self binding as the general model with private AuthPrincipals,

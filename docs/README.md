@@ -1,29 +1,49 @@
 # Documentation
 
-- [Implementation plan](plan/README.md): active scope/phase, dependencies, gates and progress.
-- [Execution workflow](plan/execution-workflow.md): program authority and execution policy.
-- [Product design principles](architecture/product-design-principles.md): API-centered capabilities, layered GUI, capability fidelity and evidence-based design choices.
-- [Identity and access](architecture/identity-and-access.md): private AuthPrincipals, shared public Agents (current Entity API names), membership, mixed grantees and scoped representation.
-- [Connected applications](architecture/connected-apps.md): third-party public identity connections, OAuth, installations and REZICS MCP access.
-- [Subscribe](architecture/subscriptions.md): native multi-plan offerings for People/Realms, independent purchased and complimentary benefits, commercial lifecycle and authorization boundaries.
-- [Realm participation and Rezics Pro](architecture/realm-participation-policies.md): reusable quotas/review, accepted-version publication and Pro discovery; [capacity](architecture/subscriptions-capacity.md) and [acceptance](testing/subscriptions-and-pro.md) remain unqualified.
-- [Realm-scoped sites and replies](architecture/realm-scoped-delivery.md): fixed-domain API context, multi-Realm reply acceptance, authorized parent connections and scope-leading read projections.
-- [Identity and access experience](architecture/identity-and-access-experience.md): ordinary-user defaults and progressively disclosed collaboration/administration.
-- [Database architecture](architecture/database/README.md): target schema, meaning and capacity.
-- [Integrated model contracts](architecture/schema-modeling.md): Resource identity, typed values/relations, seven declarative contracts and one versioned model representation; current Unit APIs remain implementation facts.
-- [Standards adoption](architecture/standards-adoption.md): pinned versus selected profiles, semantic boundaries, conditional domain exchange and evidence/loss reporting.
-- [Physical fields and storage families](architecture/database/resource-storage.md): retained columns, Agent/generic Entity and media responsibilities, same-database table families, references and inverse reads.
-- [Space composition](architecture/realm-collection-zone.md) and [Resource addressing](architecture/unit-slug-addressing.md): shared Realm/Zone identity, role-qualified contexts, route-to-Resource rendering, Unicode/scoped slug bindings and reverse links.
-- [Schema.org and Wikidata interoperability](architecture/semantic-interoperability.md): complete source models, queryable external descriptions, native mappings, export fidelity and coverage; [capacity](architecture/semantic-interoperability-capacity.md) includes source/index amplification.
-- [Information indexing and fact verification](architecture/information-indexing-and-verification.md): broad claim discovery, evidence-based AI/code/human assessments, selectable quality indexes, independent acceptance, portable results and Subscribe services; [acceptance](testing/information-verification.md) remains pending.
-- [Native Work and release](architecture/database/native-work.md): shared product meaning across creative domains and applicable properties.
-- [Content composition](architecture/database/content-composition.md): explicit occurrences, import/refresh, published selections and read models.
-- [Rating contexts and history](architecture/database/ratings.md): standing/daily/per-experience observations, explicit context transitions, latest/history aggregation and time distributions.
-- [Event-time discovery](architecture/database/event-time.md): Tag/event identity, occurrence dates, precision, accepted facts and indexed date queries.
-- [Design evidence](architecture/database/design-evidence.md): primary sources, selected lessons, scale-report conditions and qualification limits.
-- [Testing](testing/README.md): conformance, product journeys, graph/Hub and backend qualification.
-- [Research](research/README.md): unresolved decisions that can change the target.
-- [Next-version proposals](next-version/README.md): researched candidate initiatives that are not part of the current program.
-- [Operations](operations/): deployment, recovery and incident procedures.
+The documentation has separate authorities for target design, current implementation,
+executed evidence and operations. Read a document in that role: a target is not a
+deployment claim, and an old passing fixture does not qualify a revised contract.
 
-Maintainer documentation is English. Current contracts live with their owners; completed work and rejected proposals are removed rather than archived in another documentation tree. Git retains history. Raw names, multilingual fixtures and localized product resources preserve their meaning.
+## Start here
+
+1. [Architecture map](architecture/README.md): the selected model and domain owners.
+2. [Native model](architecture/schema-modeling.md): Resource/Agent/Entity, typed
+   values and relationships, exact references and the seven declarative contracts.
+3. [Storage](architecture/database/resource-storage.md): physical fields and table
+   families within one PostgreSQL database; concrete references and inverse reads.
+4. [Space](architecture/space-composition.md) and [addresses](architecture/resource-addressing.md):
+   shared community/presentation identity, typed router, UUID/scoped slug and reverse links.
+5. [Standards adoption](architecture/standards-adoption.md): selected profiles,
+   conditional formats, coverage/loss and evidence limits.
+
+## Document roles
+
+| Owner | Authority |
+| --- | --- |
+| [Architecture](architecture/README.md) | Target meaning, invariants, operation and workload contracts. |
+| [Implementation reference](reference/README.md) | Current API/code/storage names and concrete implementation gaps. |
+| [Plan](plan/README.md) and [workflow](plan/execution-workflow.md) | Active scope/phase, dependencies, acceptance gates and progress. |
+| [Testing](testing/README.md) | Prospective cases, dated executed results, reproductions and open failures; these are separately labeled. |
+| [Operations](operations/production-deployment.md) | Commands for the actual deployment, backup/recovery and incident response. |
+| [Research](research/README.md) and [next-version proposals](next-version/README.md) | Unresolved or unselected directions, not active target obligations. |
+| [Releases](releases/README.md) | Named-version behavior and historical cutovers. |
+| [User agreement](legal/user-agreement.md) and [privacy policy](legal/privacy-policy.md) | Published legal text; architecture terminology edits do not alter legal obligations. |
+
+## Implementation and verification
+
+Use [current implementation contracts](reference/current-implementation.md) before
+mapping target concepts to the checkout. Exact identifiers in commands, code blocks,
+schema inventories and dated evidence remain implementation-spelled. They do not
+create parallel semantic models. New runtime work follows its separately activated
+scope; documentation completion does not pass product or capacity gates.
+
+Documentation checks verify local links, role boundaries, terminology and required
+ownership. Design checks reproduce inventory/dependency/capacity artifacts; they
+must distinguish tracked authored sources from registered generated derivatives.
+See [verification entry points](testing/README.md#execution-levels).
+
+Maintainer prose is English. Keep each decision with its semantic owner and update
+dependent contracts together. Replace obsolete target instructions rather than
+append an overriding note. Preserve raw multilingual examples, operational commands,
+upstream artifacts and dated evidence in their proper roles. Temporary research
+attachments are inputs to review, not dependencies of maintained documentation.

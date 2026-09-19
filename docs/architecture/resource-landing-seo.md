@@ -1,18 +1,18 @@
 # Resource landing SEO
 
-Status: v1 SEO exists; the 2026-09-19 Resource/Space/address revision below is a
-selected target requiring consumer qualification. The historical filename remains
-for document navigation. Owners: Main Service and Web.
+Status: target contract. Owners: Main Service and Web. The
+[runtime reference](../reference/current-implementation.md#routing-and-language)
+records deployed-shape assumptions separately from this design.
 
 ## Scope
 
 Provide a sanitized metadata/structured-data projection for an authorized resolved
 Resource view. A Space route targets the same Resource as an ID lookup and uses the
-shared renderer. Removing native ZonePage does not prohibit emitting a WebPage
-description for an actual rendered web representation.
+shared renderer. A WebPage description can identify an actual rendered web
+representation without introducing another native content identity.
 
 This target does not activate a sitemap, crawler or corpus-wide SEO projection.
-It follows [modeling](schema-modeling.md), [addressing](unit-slug-addressing.md) and
+It follows [modeling](schema-modeling.md), [addressing](resource-addressing.md) and
 the selected content/publication contracts. Vocabulary preservation and full source
 interoperability are independently qualified.
 
@@ -52,12 +52,11 @@ is bounded and policy-aware.
 
 ## Projection contract
 
-The existing `GET /api/v1/units/by-id/{unitId}/seo` is a current implementation entry
-point, not proof of scoped address support. Target reads supply ResourceRef and
-optional resolved address context; they return identity, exact relevant selection,
-address preference/generations, indexing decision and a bounded safe presentation
-or explicit unavailability. Update service, generated clients and Web adapters
-together when activated. Do not publish an invented new wire path in the meantime.
+Reads supply ResourceRef and optional resolved address context; they return
+identity, exact relevant selection, address preference/generations, indexing
+decision and a bounded safe presentation or explicit unavailability. Update service,
+generated clients and Web adapters together; wire paths are selected through the
+API contract rather than inferred from this conceptual description.
 
 The Web adapter checks target and resolved context before composing metadata.
 Schema.org output is a declared projection of accepted native data; simplified
@@ -73,12 +72,11 @@ returns bounded metadata. Indexes follow logical identity, namespace/key and
 resource/context preference. No request scans all languages, aliases, routes,
 owner tables or the corpus.
 
-The former v1 explanation using one global `unit` row, at most seven localization
-rows and a `zone_page` primary key does not qualify the selected owner-local,
-open-language, multi-Space target. Measure query plans, skew, bytes, cache policy
-and invalidation before publishing replacement latency/capacity evidence. Address,
-content and moderation changes invalidate relevant projections; cache keys bind
-the effective representation/context and never substitute for current disclosure.
+Measure owner-local lookup, language candidate selection, scoped address
+resolution, skew, bytes, cache policy and invalidation before publishing latency or
+capacity evidence. Address, content and moderation changes invalidate relevant
+projections. Cache keys bind effective representation/context and never substitute
+for current disclosure.
 
 ## Required verification
 

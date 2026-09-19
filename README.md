@@ -9,9 +9,10 @@ keep a work's index, discussion, and collective knowledge together.
 REZICS uses Romantic Versioning (RomVer), `PROJECT.MAJOR.MINOR`; see
 [Contributing](./CONTRIBUTING.md#versioning) for the release policy.
 
-Everything — books, games, media, posts, shelves, tags, and realms — is modeled
-as a unified `Unit`, allowing the same identity, classification, attribution, and
-social layers to work across content types and languages.
+Works, media and community content share Resource identity and capability contracts
+over domain-owned storage. The [architecture map](docs/architecture/README.md)
+defines the selected model; [implementation reference](docs/reference/current-implementation.md)
+separates it from current API names and unfinished capabilities.
 
 ## Repository structure
 
@@ -55,6 +56,7 @@ Bun 1.4.2 or newer locally.
 
 ```sh
 yarn install --immutable
+task artifacts:prepare
 task local:setup
 task dev
 ```
@@ -128,8 +130,9 @@ PostgreSQL.
 
 REZICS itself is the sole source of truth for production content. Canonical database rows and
 their REZICS-owned revision, governance, and audit history are authoritative after creation.
-There is no production content-pack import ledger, provenance mirror, synchronization path, or
-second catalog whose state can override REZICS.
+Showcase packs do not create a production synchronization authority. Native source
+observations, provenance and reviewed adoption use their own contracts; neither a
+provider record nor a fixture can independently overwrite accepted REZICS state.
 
 `rezics-showcase-packs` is a development and demo fixture repository only. Its files may populate
 a freshly reset local database for UI and integration work; they are not a production deploy

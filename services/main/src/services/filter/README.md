@@ -1,5 +1,9 @@
 # Backend Filter compilation
 
+Implementation reference. This owner documents current code, identifiers and local
+limits. The [selected target](../../../../../docs/architecture/filter-documents.md) and [implementation crosswalk](../../../../../docs/reference/current-implementation.md)
+define the reconciliation boundary; existing fixtures do not qualify revised semantics.
+
 The compilers consume validated `@rezics/filter` predicates. Candidate sets are
 internal query optimizations; callers still apply the complete predicate and
 current resource authorization. A candidate ID is not permission to disclose

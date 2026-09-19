@@ -7,7 +7,7 @@ and regions are retained. No likely-subtag expansion or Suppress-Script removal
 is applied. Only IANA Preferred-Value mappings change deprecated identities;
 registered extlangs must have an allowed prefix before canonicalization.
 
-`canonicalizeContentLanguageTag` is the existing unscoped Unit/API boundary. It
+`canonicalizeContentLanguageTag` is the current unscoped Resource/API language boundary. It
 rejects unregistered subtags, malformed tags, repeated variants, locale extensions
 and unscoped private use. `parseContentLanguageTag` additionally accepts private
 use with an explicit namespace and returns that namespace alongside the tag.
@@ -64,9 +64,11 @@ no conversion/quarantine findings. Historical revision slots, source vocabularie
 production values and stored filter documents require their own audit before
 production activation. No successful current-row audit proves those other sets.
 
-The seven-value metadata localization contract, named-form identity, scoped
-authorization assertions and VNDB-specific vocabulary mapping are not replaced by
-this parser. In particular, public BCP 47 `ta` means Tamil; a source using it for
+Some current metadata consumers still use the seven-value localization enum; this
+parser alone does not replace them. The [target language contract](../../docs/architecture/content-language-support.md)
+requires open content-language identity and independently versioned entries;
+the existing 64-entry guard is not a lifetime vocabulary/name limit. Named-form
+identity, scoped authority and VNDB-specific vocabulary mapping keep their owners. In particular, public BCP 47 `ta` means Tamil; a source using it for
 Tagalog must map its pinned vocabulary before invoking this boundary.
 
 References: [RFC 5646](https://www.rfc-editor.org/info/rfc5646/),

@@ -18,7 +18,7 @@ They are design inputs, not measurements or safe physical-layout commitments.
 | Relation family | Assumed bytes/row including indexes | 500M rows, GB | 3B rows, GB |
 | --- | --- | --- | --- |
 | Enrollment or direct group-membership edge | 240-400 | 120-200 | 720-1200 |
-| Principal/Entity or external-account binding | 224-384 | 112-192 | 672-1152 |
+| Principal/Agent or external-account binding | 224-384 | 112-192 | 672-1152 |
 | Role binding or scoped grant | 320-512 | 160-256 | 960-1536 |
 | Representation grant or live parent dependency | 384-640 | 192-320 | 1152-1920 |
 | Consent or installation scope grant | 384-640 | 192-320 | 1152-1920 |
@@ -29,20 +29,20 @@ They are design inputs, not measurements or safe physical-layout commitments.
 Count each stored dependency, selected resource and event separately. With M
 enrollments and g direct groups per enrollment, group membership adds M*g edges;
 with d explicit live dependencies per delegation, dependencies add D*d rows.
-The same principal controlling several Entities creates several representation
+The same principal controlling several Agents creates several representation
 edges, not several credential stores. An installation-specific client adds one
-client per installation, not one per API request. A shared public Entity reference
+client per installation, not one per API request. A shared public Agent reference
 does not require copying its biography or private controllers into each platform.
 
 Account-created identities add one private immutable creation receipt, indexed by
-account/operation and the created Entity/grant, alongside the separately counted
+account/operation and the created Agent/grant, alongside the separately counted
 representation and optional preference event. Use the binding estimate of 224-384
 indexed bytes per receipt until measured: 112-192 GB at 500,000,000 rows and
 672-1152 GB at 3,000,000,000 rows, excluding replication/WAL overhead. Creation and
 retry use account/operation point reads; erasure uses that account key in batches
 of at most 500. This receipt does not materialize every future controller pair.
 
-An Entity preference revision retains 1-8 private representation-reference hints;
+An Agent preference revision retains 1-8 private representation-reference hints;
 none/inherit-main revisions retain zero. Count these indexed reference rows
 separately from the preference head/event: using the 224-384-byte binding estimate,
 500,000,000 hint rows add 112-192 GB and 3,000,000,000 add 672-1152 GB before
@@ -55,7 +55,7 @@ literal capability rows. Count revisions rather than only App identities. A head
 allows at most 512 label bytes and 4,096 description bytes; capability cardinality
 is bounded by the API/domain registries and is not an embedded roster. Until measured,
 use the 224-384 indexed-byte binding estimate for each capability row: 112-192 GB
-for 500,000,000 rows or 672-1152 GB for 3,000,000,000 rows. Account/Entity inventories
+for 500,000,000 rows or 672-1152 GB for 3,000,000,000 rows. Account/Agent inventories
 use scope/App keysets; declaration and capability reads use exact composite keys.
 App disablement changes one head/epoch and does not rewrite every installed grant.
 
@@ -76,7 +76,7 @@ until measured: 112-192 GB for 500,000,000 and 672-1152 GB for 3,000,000,000 hea
 count control events separately with the security-event estimate. Direct lookup
 uses the private principal key, inventory uses owner-scope/principal keysets, and
 internal-duty lookup uses a unique system key. Native eligibility includes workload
-owner dependencies within 256 concrete account/Entity/Realm rows, retaining the
+owner dependencies within 256 concrete account/Agent/Realm rows, retaining the
 256-per-principal and 512-total enforcement limits. Revocation changes one workload
 head/epoch; token consumers invalidate old contexts without a synchronous fan-out.
 
@@ -120,7 +120,7 @@ reads use installation/revision keys with 65/9 sentinels; reverse binding/grant
 indexes support bounded impact and cleanup. Resource authorization must select
 only approved matching paths, not hydrate an entire roster. Subject eligibility
 adds at most one installation/App per active installation workload and retains
-the existing combined 256 concrete account/Entity/Realm and 512 enforcement bounds.
+the existing combined 256 concrete account/Agent/Realm and 512 enforcement bounds.
 
 Private user connections and consents have separate heads and control histories.
 Each consent revision adds literal capability rows, 0-64 selected resource paths
@@ -151,14 +151,14 @@ being qualified. Run cold/warm cache and hot scope/principal/resource distributi
 
 | Path | Required indexed shape / bounded work |
 | --- | --- |
-| Login/default | Principal and default-binding point reads, current representation/Entity validation; no scan of all controlled identities. |
+| Login/default | Principal and default-binding point reads, current representation/Agent validation; no scan of all controlled identities. |
 | Roster and group lists | Scope/subject or group/subject keysets; reverse subject/scope indexes; bounded label hydration. A filtered empty page can carry continuation. |
 | Target authorization | Target/scope/action binding candidates, selected-subject membership probes, role heads and bounded representation dependencies. No whole-roster expansion. |
-| Subject administration | Principal/Entity/grant reverse keysets; public response must not expose private recipient mappings. |
+| Subject administration | Principal/Agent/grant reverse keysets; public response must not expose private recipient mappings. |
 | Role activation | Role/revision head, scoped binding-impact pages and ceilings; no per-member ACL rewrite. Large impact review is resumable and revalidated before activation. |
 | Revocation | Exact grant/admission/installation state and epoch update, reverse dependency index, later bounded cleanup. Required live checks invalidate descendants before cleanup finishes. |
 | Token verification | Unique digest or verified audience/subject plus exact live consent/installation context; rate-limited introspection and issuer-scoped key caches. |
-| Privacy deletion | Principal/binding/token/recipient reverse indexes, child-before-parent batches; retain independent Entity and institutional assignments. |
+| Privacy deletion | Principal/binding/token/recipient reverse indexes, child-before-parent batches; retain independent Agent and institutional assignments. |
 
 Candidate evaluation and administration listing are separate APIs. Proposed initial
 execution budgets are group and representation depth at most eight each, at most
@@ -188,7 +188,7 @@ query count/buffers and qualify the resulting topology before accepting it.
 
 Group/role/representation updates serialize on affected authority keys. Shared
 reader fences must not become a global lock. A popular parent group, role head,
-Entity controller or installation can still be hot; measure fan-out, fence hold
+Agent controller or installation can still be hot; measure fan-out, fence hold
 time and cache-dependency size. Do not materialize every transitive subject/resource
 pair, or invalidate it with an unbounded synchronous fan-out on each change.
 
@@ -244,7 +244,7 @@ measuring the actual composition.
 
 The next capacity qualification must measure complete domain decisions, cold/warm
 plans, unique token-digest and reverse dependency indexes, hot clients, repeated
-introspection, expiry/rotation cleanup and retained families. Profile activation
+introspection, expiry/rotation cleanup and retained families. Agent activation
 requires bounded credential admission/retention and indexed cleanup of at most
 500 small rows per batch. Optimize private in-process verification or bounded
 shared reads if the remote protocol overhead prevents the combined target, while
@@ -291,11 +291,11 @@ from token issuance and retained grant contexts at the stated corpus baselines.
 ## Private registry cost
 
 The subject and scope registries have independent allocation density: one subject
-value per participating AuthPrincipal or Entity and one authority root per admitted
+value per participating AuthPrincipal or Agent and one authority root per admitted
 private account, public resource or platform. They are allocated on first authorized
 use, not for every catalog object automatically. Each membership, role binding,
 representation edge and token dependency remains a separate relation. Public scopes
-reuse existing REF values; count a newly needed REF under the Unit bridge inventory
+reuse existing REF values; count a newly needed REF under the Resource bridge inventory
 once, not once per access feature.
 
 Budget each registry at 96 heap bytes plus 128 index bytes per row (224 total):
@@ -604,7 +604,7 @@ revocation and combined workload measurements remain required in verification.
 
 ## Representation persistence
 
-Inventory Entity control fences, grant heads, sealed terms, permission members and
+Inventory Agent control fences, grant heads, sealed terms, permission members and
 control receipts separately. Planning bytes per row including indexes are 192,
 1,216, 608, 224 and 384 respectively. At 500M rows those relations require 96, 608,
 304, 112 and 192 GB; at 3B rows, 576, 3,648, 1,824, 672 and 1,152 GB, before bloat,
@@ -617,16 +617,16 @@ The head estimate includes 320 bytes for this basis and its subject/admission
 reverse indexes; independent heads have no entries in these partial indexes.
 It does not copy all ancestors. Each terms revision adds its own approved
 permission rows; multiply by authored revision and permission counts. An admitted
-Entity subject initializes one control fence, including before its first grant.
-Public catalog Entities without subject admission do not allocate these fences.
-Writes use an Entity-local exclusive fence, one control event, sealed terms for
+Agent subject initializes one control fence, including before its first grant.
+Public catalog Agents without subject admission do not allocate these fences.
+Writes use an Agent-local exclusive fence, one control event, sealed terms for
 create/narrow and a head advance. Revocation writes no descendant fan-out.
 
 Terms retain their explicit target kind and optional concrete scope FK; the head
 mirrors the selected target for current indexes. The terms estimate reserves
 64 bytes for this target snapshot and alignment. All-scopes stores no per-resource
 rows, while narrowing to a concrete scope updates only that grant's head/index
-projection and terms. It never materializes the Entity's resource permission set.
+projection and terms. It never materializes the Agent's resource permission set.
 
 Parent traversal reads at most nine identities to detect the eight-edge limit,
 checks exact current revisions and probes declared admission/selection dependencies.
@@ -634,7 +634,7 @@ Parent locks include Group trees, enrollments and selection sets. Institutionall
 independent grants do not query their historical issuer for liveness. Management
 snapshots point-read exact terms and at most the registered permission count.
 These are implementation bounds and storage estimates, not native performance or
-recovery acceptance. Hot Entity controls, long retained revisions, erasure reverse
+recovery acceptance. Hot Agent controls, long retained revisions, erasure reverse
 pages, expiry after waits and complete represented request paths remain to qualify.
 
 Selected request loading admits 64 exact grant references and at most 256 distinct
@@ -660,7 +660,7 @@ estimated 112 bytes per indexed enforcement: 56 GB at 500M rows and 336 GB at 3B
 rows before overheads. Expired but retained nonrevoked rows still consume the
 candidate budget; retention/reconciliation and long-history plans must be qualified.
 
-Account/Entity identity rows supply the negative policy fence without another
+Account/Agent identity rows supply the negative policy fence without another
 stored relation. Policy writes acquire those rows exclusively; request reads share
 them and use new READ COMMITTED statements. The actual lock footprint, hot-account
 contention and index scan buffers remain native verification obligations. Time
@@ -675,7 +675,7 @@ and must be measured and repaired before applicable capacity acceptance.
 
 ## Private identity preferences
 
-Plan 640 bytes per main/client preference head including account, partial namespace, Entity
+Plan 640 bytes per main/client preference head including account, partial namespace, Agent
 and client reverse indexes, and 576 bytes per private receipt including its primary
 and operation-identity keys. Each family is 320/288 GB at 500M rows and 1,920/1,728 GB
 at 3B rows, before bloat, WAL, backups, replicas and reserve. With A accounts and C

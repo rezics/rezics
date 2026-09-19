@@ -30,7 +30,7 @@ Follow [commit conventions](CONTRIBUTING.md#commits-and-verification) and the cu
 | Product capabilities, API contracts or GUI interaction design | [Product design principles](docs/architecture/product-design-principles.md) and [API/UI workflow](.agents/skills/api-ui-design/SKILL.md). |
 | Shared UI or controls | [UI conventions](libraries/ui/README.md). Use `@rezics/ui` and SharkUI; do not add another UI library. Preserve the upstream `src/ui` mirror and put project components in `src/custom`. |
 | Visible text or localization | [Localization](libraries/i18n/README.md) and [external content](.agents/skills/external-content-value/SKILL.md). Frontend strings use the owner's typed locale resources. |
-| Resource slugs, canonical links or address redirects | [Slug addressing](docs/architecture/unit-slug-addressing.md). |
+| Resource slugs, canonical links or address redirects | [Slug addressing](docs/architecture/resource-addressing.md). |
 | Schema, queries, APIs, queues, workers, caches or persisted flows | [Capacity planning](docs/architecture/data-integrity-and-workload-budgets.md#capacity-planning) when costs or workloads change; [database conventions](CONTRIBUTING.md#database-and-catalog). |
 | Permissions or grantability | [Access model](libraries/access/README.md). |
 | Aspire topology, lifecycle or diagnostics | [Aspire skill](.agents/skills/aspire/SKILL.md). |

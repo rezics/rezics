@@ -9,12 +9,12 @@ The maintainer's broad standards survey was evaluated against local revision
 Its index is research input, not a conformance count or an instruction to adopt
 all candidate frameworks. Durable decisions live in [modeling](../schema-modeling.md),
 [standards/profile adoption](../standards-adoption.md), [storage](resource-storage.md),
-[Space](../realm-collection-zone.md) and [addressing](../unit-slug-addressing.md).
+[Space](../space-composition.md) and [addressing](../resource-addressing.md).
 No maintained contract depends on the temporary research attachment.
 
 | Decision | Evidence and tradeoff | Qualification boundary |
 | --- | --- | --- |
-| Resource terminology; stable logical owner with replaceable physical binding | [Web architecture](https://www.w3.org/TR/webarch/) separates identity and representation. Resource is a selected native term, not a claim that Unit is academically invalid or all RDF resources are native objects. | Current Unit code/wire names remain; owner changes require explicit correction, while physical changes preserve logical owner. No global parent is introduced. |
+| Resource terminology; stable logical owner with replaceable physical binding | [Web architecture](https://www.w3.org/TR/webarch/) separates identity and representation. Resource is a selected native term, not an academically mandated name or a claim that all RDF resources are native objects. | Existing code/wire spellings are recorded in the implementation reference; owner changes require explicit correction, while physical changes preserve logical owner. No global parent is introduced. |
 | TS declarations compiled to one native IR | [LinkML](https://linkml.io/linkml/intro/overview.html) demonstrates rich declarations and multiple outputs; retain existing TS/compiler ownership rather than add competing schema authorities. | Compare features and codecs; generated shapes do not prove command, authorization or transaction correctness. |
 | Separate StorageBinding and ExchangeMapping | [R2RML](https://www.w3.org/TR/r2rml/) concerns relational-to-RDF mappings; [Beyond Relations](https://vldb.org/cidrdb/papers/2025/p15-deshpande.pdf) explores reversible physical mappings and CRUD. | Neither provides a completed arbitrary bidirectional native writer. First qualify finite reviewed mappings and logical/operation equivalence. |
 | Open language/typed values with explicit comparisons | [RFC 4647](https://www.rfc-editor.org/rfc/rfc4647), [Unicode normalization](https://www.unicode.org/reports/tr15/), [UCUM](https://ucum.org/ucum) and [JSON Schema validation](https://json-schema.org/draft/2020-12/json-schema-validation) address different layers. | Language fallback is not translation; unit parsing is not inferred physical conversion; structural format checks do not establish factual truth. |
