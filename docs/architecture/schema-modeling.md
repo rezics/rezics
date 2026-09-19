@@ -255,6 +255,39 @@ flowchart LR
 - Datatypes retain exact lexical values and explicit unsupported/invalid states.
   Unknown, no-value, missing, erased and invalid input remain different.
 
+## Definition resolution and caching
+
+Frontend and backend consumers cache resolved definition UUIDs for recurring
+queries, including relation and participant-role definitions such as `author`.
+Resolve a namespace-qualified stable key once, then reuse the UUID rather than
+resolving a display label on every request. A definition UUID identifies meaning;
+each relationship occurrence and each exact definition revision has a separate
+identity. Compatible revisions and translated labels retain the definition UUID;
+an incompatible meaning receives another identity under the dictionary contract.
+
+| Cached value | Key and lifetime |
+| --- | --- |
+| Stable key to definition UUID | API origin, registry identity epoch, namespace and stable key; retain across ordinary definition revisions. Never silently rebind a stable key to another meaning. |
+| Exact definition content | Same registry boundary plus definition UUID and exact revision; immutable meaning content can be reused while disclosure permits. |
+| Current revision, activation state and display labels | Separate mutable metadata; revalidate through a registry generation or response validator. Include language and applicable visibility scope in the cache key. |
+
+The registry identity epoch changes when an installation replaces its identity
+mapping, not on every vocabulary update. Clients discard mappings when that epoch
+or API origin changes; user-scoped metadata follows its own disclosure boundary.
+Resolve only the definitions required by a feature, with bounded batch lookup and
+cache eviction. A growing user vocabulary is not a mandatory full frontend preload.
+Unknown, retired and unavailable definitions remain explicit outcomes; a stale
+cache does not authorize a write. The server enforces current admission and the
+operation's exact revision/preconditions even when the client already knows the UUID.
+
+For HTTP metadata responses, ETag/If-None-Match permits revalidation without
+resending unchanged content, following [HTTP caching](https://www.rfc-editor.org/rfc/rfc9111.html#section-4.3).
+This protocol does not make mutable metadata immutable. Definition-cache hits save
+resolution work and network requests; relation-result caching has separate
+freshness and disclosure rules. [Physical access paths](database/resource-storage.md#relation-query-access-paths)
+determine the remaining relation lookup cost. These are target contracts;
+[MODEL02 and MODEL40](../testing/model-contracts.md) retain unexecuted acceptance.
+
 ## Modeling and generation contract
 
 Standard files compile into a portable ontology IR. Authored model declarations

@@ -32,8 +32,8 @@
     "api-coverage.tsv": "7b1ebf472f6a9f1ac660d34795b006d1ab69f47cbeb5034060c21a8c3dfcddf5",
     "scenarios.tsv": "4165424a131e11e59837fa93353dca0f3fb37912b59874e673bf84724731fa8b",
     "capacity.json": "8b42e8d9ec58f2af52573cd6fc81010d12bd6559076762bc8fae6ef9879cf42d",
-    "capacity.md": "09a358076d52ea2e95ccab27b07f9ee36b3f5b63c8869a17bb056fefbe1203ed",
-    "dependency-manifest.json": "07c49415457cc28b7178423e4daf57e3d06154d6109e9a6ae2c6b058b19be055"
+    "capacity.md": "616cc99f3f1964f5f4ff3ec457dc30a69cda938e61ea6c8cd48ba4eeff65d406",
+    "dependency-manifest.json": "5a8eea6452718720162e12cddf9407a26dc3a4c8c6fbdadc78d94be8f42c5c0d"
   },
   "artifact_paths": {
     "current-schema-map.tsv": "docs/testing/database/current-schema-map.tsv",
@@ -71,7 +71,7 @@
     "docs/architecture/database/native-work.md": "07d751a084d7df9d8cee90cae7b3bb2f3c56f24f716b540e911c2bc283ce3ee5",
     "docs/architecture/database/ratings.md": "72b4dd8da4a0339f1e454aa9c46300c6332271b10e8eb71441c57e19c163fa4f",
     "docs/architecture/database/relationship-graph.md": "7904ffe6f0dbba49f649d54ef87bef1f5300efeb7ef89f0fab9159f8a75a1923",
-    "docs/architecture/database/resource-storage.md": "adbece5bd7d8083b6b0492606b10a273a6c52f264a9ea45677746293e0057b85",
+    "docs/architecture/database/resource-storage.md": "b8292b191524903f192966b5d657891f210f2b1b7787f5cd43ecf457b7b0990d",
     "docs/architecture/database/temporal-capacity.md": "c655a39f7dd106b19511b564a63c301a2c7f7909b8d18574b62ab2de04022855",
     "docs/architecture/event-streaming.md": "ee29636055f3c49b6b196d6149d984d21ea503357b386f0ab1fbc4b9661e2430",
     "docs/architecture/filter-documents.md": "64f4c87e0e9414ac734b673de57b9b64f9c1e04f6de6b57891d5313b6244ba47",
@@ -94,7 +94,7 @@
     "docs/architecture/resource-license-grants.md": "ee58e0eee16167d9ae817912f068f8babd4ad22cac05af81b74a4b6520bf4387",
     "docs/architecture/resource-metadata-only.md": "565527dff8a1f5ef4402e14a3822894b64702ffdd4c488373ffdcc2cb018862e",
     "docs/architecture/resource-subject-association-reading.md": "ca2ca14dbe823a31d40211c04bb4752e257b6b093794ca6fe87ce1a9bdcc22eb",
-    "docs/architecture/schema-modeling.md": "582fce51838be7bde6a04bad95b54eb459219c7a2d47b04ac5fe56c86295ecea",
+    "docs/architecture/schema-modeling.md": "90f70091386d92f057f5c03cc9e69084c5e6821ddca3a1564553dc9ad2e07301",
     "docs/architecture/semantic-interoperability-capacity.md": "40db30a212b6fdeec8b9a0ccd965e66288ac9e936388bbb135a49ae575921ce7",
     "docs/architecture/semantic-interoperability.md": "fea7dc72ff12c3c8aed1bf11f11858aef3d8ba8a43b5332dc4508dfceec1ef61",
     "docs/architecture/space-composition.md": "d25c7b6bf3f2b8c78c2272316f50d4f5175597e749caf32b9befb45acaaf271f",
@@ -140,7 +140,7 @@
     "docs/testing/identity-and-access.md": "1730c7e13ae93e771a9b1c072310cc55ff2ede2936f8587adac3224b239af2d7",
     "docs/testing/information-verification.md": "ab6166878a46213195833469a7a3944ef79aa39b8de56c5c4cb9d75d55a89bc5",
     "docs/testing/known-failures.md": "b41fc0071b3d8bfe858db4135e45217067ceac905fa452520e529db1d3a2a69a",
-    "docs/testing/model-contracts.md": "6f86a1c48049f992d0af82b8e0c569279633117e5c6fbdcd791cdfcd7b90ac0f",
+    "docs/testing/model-contracts.md": "27c7c0f11abe9831c4adb115b0e046d2f5f7444338f0de3931ec9c239cc78623",
     "docs/testing/native-work.md": "534947fd5b77a2788dfc57287b308a4c975372956445cac2c88529f367fe08e5",
     "docs/testing/ratings-and-event-time.md": "5dbe5a8ff0115e03ba4fbb5266022d6525043bb05a6d664afe1a8dce7670c715",
     "docs/testing/recommendations.md": "09640bf8c9269bff7cd7ffa341d0f99a76e4ba056d801f4af99204d6d08af15a",
@@ -149,6 +149,6 @@
     "docs/testing/source-conformance.md": "ecf605acb82a6bb343efd97bd843e27aaa5609c626bd851253a4248d26cb824e",
     "docs/testing/subscriptions-and-pro.md": "269b7b3937f6be360b0ee7d8a93a8131e673beba5f6d478253b12853e1121da7",
     "docs/testing/wiki-composition.md": "951d79cdc5040f703b7712fae630e5c00c64719c1705cb59ddb6edbeb7237a30",
-    "docs/testing/database/check_design.py": "ee666d2944fb2ed417f5b22a26be183d44b21725ce67e597cf21850a39b437cc"
+    "docs/testing/database/check_design.py": "66a8f5aee242c417121ba731d69f8a03900240c8dae0aba3640f62ccc9833786"
   }
 }

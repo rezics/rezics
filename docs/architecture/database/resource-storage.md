@@ -148,6 +148,40 @@ one actor's incoming page, update one popular actor row for every credit, or use
 stale reverse entry to establish current authority. Extreme target degree needs
 an explicit bounded bucket/merge plan if target-local indexing stops meeting budget.
 
+### Relation query access paths
+
+A known relation-definition UUID can be used directly as a query parameter.
+Resolving `author` on every request or joining definition labels is unnecessary
+when only its identity is needed; frontend and backend consumers follow the
+[definition cache contract](../schema-modeling.md#definition-resolution-and-caching).
+Knowing only the `author` UUID still selects all author relations. Combining it
+with a subject or target key narrows the lookup to the requested object or actor.
+
+For a simple binary relation, illustrative indexes on a current-edge table or an
+equivalent read projection are:
+
+| Query | Candidate access path |
+| --- | --- |
+| Authors of one book, in credit order | `(subject_key, definition_id, position, occurrence_id)` with subject/definition equality and a stable order cursor. |
+| Works by one author | `(target_key, definition_id, occurrence_id)` with target/definition equality and a bounded page. A different result order needs its own qualified access path. |
+
+These are access-path examples, not selected DDL. Subject/target keys retain their
+complete typed-reference contract. If canonical rows store only an exact definition
+revision, a query across revisions needs an explicit access path to the stable
+definition identity; filtering one revision is not equivalent. Identified credits
+may store `author` as a participant role: correlate role/target predicates to the
+same relation revision and qualify the necessary participant/revision indexes.
+Several selective indexed joins can remain inexpensive; a table count alone does
+not determine query cost.
+
+[PostgreSQL multicolumn B-tree indexes](https://www.postgresql.org/docs/18/indexes-multicolumn.html)
+use leading equality constraints to restrict the scanned range. Qualify actual
+plans with [EXPLAIN ANALYZE and buffer statistics](https://www.postgresql.org/docs/18/using-explain.html),
+recording scanned/returned rows, filtering, ordering, pagination, skew and warm/cold
+database caches. Measure definition-resolution cache misses separately. Direct
+lookup, reverse pages, multi-role filtering and search/facets are distinct workloads;
+one fast lookup does not qualify an unbounded predicate-wide scan or aggregation.
+
 ## Capacity and replacement evidence
 
 Retain the [500M/3B-row policy](../data-integrity-and-workload-budgets.md#capacity-planning)
@@ -168,13 +202,15 @@ currently gives these planning envelopes for native heap plus indexes:
   specialized row.
 
 These ratios are arithmetic over planning widths, not PostgreSQL measurements.
-Use 2-3x as the initial like-for-like storage envelope and 3-6x when comparing the
-full identified association with a minimal current relation. The recorded rows and
-bytes support only an initial 2-5x write-work and 2-4x bounded direct-read-work
-hypothesis. Candidate DDL must measure physical bytes, WAL, p95/p99, buffer work,
-vacuum/freeze and skew before activation. The compact binary edge has a qualification
-target of at most 2x the specialized current occurrence for its admitted workload;
-its actual estimate waits for candidate columns and indexes.
+Use each profile only with its declared semantics, widths and revision density;
+the specialized versioned proxy does not establish a general storage multiplier.
+Stored rows and bytes do not yield a fixed read- or write-cost ratio. Reads depend
+on the access paths and workload above; writes depend on the actual rows/indexes
+changed, constraints, contention, projections and WAL, rather than all retained
+history. Candidate DDL must measure physical bytes, WAL, p95/p99, buffer work,
+vacuum/freeze and skew before activation. The compact binary edge's native heap
+plus index storage target is at most 2x the specialized current occurrence for its
+admitted workload; its actual estimate waits for candidate columns and indexes.
 
 No fixed 32/64/128/256 partition count is selected. Measure row/index widths, tail
 sizes, degree/skew, query pruning, p95/p99, write amplification/WAL, vacuum/freeze,

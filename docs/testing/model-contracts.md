@@ -18,7 +18,7 @@ a second independent notion of acceptance.
 | ID | Scenario | Required result |
 | --- | --- | --- |
 | MODEL01 | Reimport identical pinned artifacts and compiler/profile inputs | Stable definitions and deterministic output; no runtime dependence on current upstream bytes. |
-| MODEL02 | Retire a term still referenced by history | New-write policy changes without deleting exact historical interpretation. |
+| MODEL02 | Resolve and cache a definition; update labels/compatible revisions, retire the term, then switch API origin or registry identity epoch | Stable UUID across compatible updates; exact historical interpretation retained; mutable metadata revalidated and stale writes rejected under current admission. Mappings cannot leak across registry boundaries or silently rebind to another meaning. |
 | MODEL03 | Unknown axiom/property/extension | Preserved or explicitly rejected under the profile; no silent loss or invented enforcement. |
 | MODEL04 | Same triple in two named graphs; changed blank-node serialization | Graph boundaries and observation-scoped identity survive; selected canonicalization is reproducible, not native identity or truth. |
 | MODEL05 | JSON-LD context unavailable, changed or outside admitted retrieval | Bounded pinned replay or explicit incomplete/rejected outcome; no uncontrolled context fetch. |
@@ -76,7 +76,16 @@ a second independent notion of acceptance.
 | MODEL37 | Compact generic binary relation promoted to specialized storage; attempt repeated roles or n-ary participants in the compact layout | Logical decode equality, stable identity/revisions and equivalent allowed/rejected operations with one fenced writer; richer semantics use the identified association contract rather than opaque compact payloads. |
 | MODEL38 | Same logical owner with new physical family; attempted true owner correction | Physical placement leaves references stable; actual owner/referent correction has explicit history and no silent grant retargeting. |
 | MODEL39 | Invalid/multiple bridge target; proposed partitioned uniqueness; source-local versus inverse reads | Concrete FK and complete key rejection; per-target uniqueness proved after partitioning; inverse pages do not scatter over all source partitions. |
-| MODEL40 | Skewed incoming queries and search facets across specialized, compact-binary and identified-association relations; projection lag/rebuild, erasure and restored old events | Bounded work/current disclosure, visible freshness, idempotent replay and non-regressing revocation/erasure frontiers. Compare row/index/WAL, direct-read, projection, maintenance and restore costs at 500M/3B planning scales; a planning ratio is not measured acceptance. |
+| MODEL40 | Known-definition subject lookups, skewed incoming/multi-role queries and search facets across specialized, compact-binary and identified-association relations; projection lag/rebuild, erasure and restored old events | Bounded work/current disclosure, visible freshness, idempotent replay and non-regressing revocation/erasure frontiers. Compare row/index/WAL, direct-read, projection, maintenance and restore costs at 500M/3B planning scales; no fixed query-cost ratio follows from stored bytes. |
+
+For MODEL40, separate definition-resolution cache hits/misses from warm/cold
+database caches. Record plans, scanned/returned rows, buffer work, p95/p99 and
+ordering/keyset behavior for a book's authors and an author's works, including a
+high-degree author. Known-UUID requests avoid repeated label resolution; participant
+predicates stay correlated to one relation revision, and stable-definition queries
+cover their admitted revisions. Measure writes by changed rows/indexes and WAL;
+an accumulated history size is not an operation cost. These remain unexecuted
+qualification cases, not performance evidence.
 
 ## Integrated qualification
 
