@@ -2,6 +2,12 @@
 
 This is the native catalog contract. [The database design](README.md) owns shared identity, revision, provenance and access mechanisms; [the dictionary](data-dictionary.md) names the table families. Source schemas are conformance evidence, not the definition of REZICS objects. No old schema/API/data compatibility constrains this target.
 
+The [2026-09-19 model revision](../schema-modeling.md) names the logical Unit
+contract Resource, separates described Agent from generic Entity and adds complete
+value/profile dispositions. [Storage families](resource-storage.md) are physical
+bindings, not semantic classes or new owner IDs. Current table names remain
+implementation evidence until that revision is implemented and qualified.
+
 ## Provider-independent model
 
 Identify referents by the objects and operations the product supports. A new provider describing an existing object adds observations, mappings and evidence, not another native copy. An owner is a stable logical responsibility domain with its own physical representation; semantic class, structural capability, contextual role, lifecycle, presentation and authorization are separate dimensions.
@@ -42,7 +48,14 @@ The [evidence matrix](design-evidence.md#native-work-and-classification) records
 
 ## Fixed structure and dynamic semantics
 
-Use typed tables/FKs for domain invariants and frequently queried fields: track-to-recording, release contents, episode occurrences, dependencies and technical TOCs. Semantic classifications use governed Tag/Expression/Application identities; catalog class adapters consume that same authority. Versioned definitions and typed assertions describe properties and contextual relations without introducing a parallel editable classification system. An n-ary relation has its own identity/revision and role-bearing participants. Do not use untyped JSON or an arbitrary triple table to bypass structural guarantees.
+Use typed tables/FKs for domain invariants: track-to-recording, release contents,
+episode occurrences, dependencies and technical TOCs. Frequent queries can elect
+typed projections/indexes without creating another fact writer. Class/Concept
+definitions reuse vocabulary governance; scoped classification assertions and
+acceptance are separate from community judgments. SKOS broader does not imply
+subclass. Versioned definitions and typed assertions describe properties and
+contextual relations. An n-ary relation has its own identity/revision and role-bearing
+participants. Do not use untyped JSON or a triple set to bypass structural guarantees.
 
 Dynamic here means extending logical definitions and values. It does not require a physical SQL table for each class, property, Work or user. Registering a logical owner or changing its physical mapping is an explicit schema/adapter change; generic features use the [Unit capability contract](README.md#34-unit-capabilities-across-owner-tables). Queryable properties additionally need the [selected index contract](README.md#13-search-recommendation-export-and-derived-state); storing a typed value does not qualify arbitrary filtering or sorting.
 
@@ -56,7 +69,7 @@ Each field has one writer. Source-managed fixed fields record the decision and u
 - Music: native Work scopes over compositions, independently maintained recordings and albums where established; distinct recording, release-group/release, media/track, credit, event, TOC and artwork structures.
 - Program: native audiovisual Work scopes, seasons, cuts/versions, episodes, occurrences and distribution/broadcast context.
 - Software: native project/game Work scopes, functional variants/builds, releases, platforms/language/media, exact patch/dependency targets and contribution contexts.
-- Entity/reference: people, organizations, characters, software agents, areas/places/events/instruments, concepts and web resources required by elected sources.
+- Agent/generic Entity: described people/organizations and applicable agent subjects; generic resources without required specialized structure. Reconcile existing reference/description owners by grain for places/events/instruments/concepts/web resources; source descriptions retain independent source identity. Fictional status can contextualize people, organizations, buildings and objects.
 - Grouping: universe/world, canon/continuity, franchise, series, membership and order.
 - Distribution/media: cross-domain packages; assets/representations/locations/uses and scoped selection.
 

@@ -1,6 +1,28 @@
 # Design evidence and limits
 
-This document records the research basis for the selected [system architecture](README.md), [native Work](native-work.md) and [composition](content-composition.md) contracts. It owns source interpretation, not another implementation plan. Sources were reviewed during September 13-14, 2026. Publication dates, standards approval, prototype experiments, vendor load tests and reported production deployments are different kinds of evidence.
+This document records the research basis for the selected [system architecture](README.md), [native Work](native-work.md) and [composition](content-composition.md) contracts. It owns source interpretation, not another implementation plan. The original domain matrices record September 13-14, 2026 research; the integrated-model assessment below is dated September 19. Publication dates, standards approval, prototypes, vendor load tests and reported production deployments are different evidence.
+
+## Integrated model assessment, 2026-09-19
+
+The maintainer's broad standards survey was evaluated against local revision
+`e528fe0a824d7eefb1cad4397b942727392d70c1` and selected primary references.
+Its index is research input, not a conformance count or an instruction to adopt
+all candidate frameworks. Durable decisions live in [modeling](../schema-modeling.md),
+[standards/profile adoption](../standards-adoption.md), [storage](resource-storage.md),
+[Space](../realm-collection-zone.md) and [addressing](../unit-slug-addressing.md).
+No maintained contract depends on the temporary research attachment.
+
+| Decision | Evidence and tradeoff | Qualification boundary |
+| --- | --- | --- |
+| Resource terminology; stable logical owner with replaceable physical binding | [Web architecture](https://www.w3.org/TR/webarch/) separates identity and representation. Resource is a selected native term, not a claim that Unit is academically invalid or all RDF resources are native objects. | Current Unit code/wire names remain; owner changes require explicit correction, while physical changes preserve logical owner. No global parent is introduced. |
+| TS declarations compiled to one native IR | [LinkML](https://linkml.io/linkml/intro/overview.html) demonstrates rich declarations and multiple outputs; retain existing TS/compiler ownership rather than add competing schema authorities. | Compare features and codecs; generated shapes do not prove command, authorization or transaction correctness. |
+| Separate StorageBinding and ExchangeMapping | [R2RML](https://www.w3.org/TR/r2rml/) concerns relational-to-RDF mappings; [Beyond Relations](https://vldb.org/cidrdb/papers/2025/p15-deshpande.pdf) explores reversible physical mappings and CRUD. | Neither provides a completed arbitrary bidirectional native writer. First qualify finite reviewed mappings and logical/operation equivalence. |
+| Open language/typed values with explicit comparisons | [RFC 4647](https://www.rfc-editor.org/rfc/rfc4647), [Unicode normalization](https://www.unicode.org/reports/tr15/), [UCUM](https://ucum.org/ucum) and [JSON Schema validation](https://json-schema.org/draft/2020-12/json-schema-validation) address different layers. | Language fallback is not translation; unit parsing is not inferred physical conversion; structural format checks do not establish factual truth. |
+| Single database, documented table families and scoped addresses | [PostgreSQL partitioning](https://www.postgresql.org/docs/18/ddl-partitioning.html) and [URI Templates](https://www.rfc-editor.org/rfc/rfc6570.html) expose key/uniqueness and reverse-matching limits. | Fixed family/table/partition counts and 3B-object estimates are not performance evidence. Route/link equality depends on admitted versions and current access. |
+
+[MODEL01-MODEL40](../../testing/model-contracts.md) are the selected, unexecuted
+verification cases. No code, source pin, database or benchmark was changed by
+this documentation selection; the earlier schema/compiler evidence keeps its scope.
 
 External results establish precedents and tradeoffs. They do not prove that REZICS's combination preserves its invariants, meets its SLOs or fits the 500M/3B workload. Qualification includes semantic and relational integrity, concurrency, revocation, retries, recovery and capacity; it is not limited to constants and query plans.
 

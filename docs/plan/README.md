@@ -13,6 +13,43 @@ Follow the [execution workflow](execution-workflow.md) for program authority, ph
 | Exclusions | Whole-product feature/API completion, unrelated IAM redesign, frontend work and actual trillion-row ingestion. Existing native storage is reviewed input, not authority for the semantic model. |
 | Acceptance | Complete pinned-standard compilation, deterministic generated Drizzle and model artifacts, provider independence, positive/rejected native model cases, exact datatype values, real PostgreSQL installation/constraints, logical identity/relocation and affected consumer checks. Preserve existing failures explicitly. |
 
+## Selected model revision (documentation only)
+
+On 2026-09-19 the maintainer selected the integrated
+[Resource/model contracts](../architecture/schema-modeling.md),
+[standards/profile adoption](../architecture/standards-adoption.md),
+[physical fields and storage families](../architecture/database/resource-storage.md),
+[shared Space identity](../architecture/realm-collection-zone.md) and
+[Resource-targeting router/addresses](../architecture/unit-slug-addressing.md).
+The current task updates documentation only. It does not reopen runtime
+implementation, advance a gate, change source pins or qualify the new target using
+the earlier compiler results. The active execution record above retains its scope.
+
+Resource is the selected name of the existing logical Unit contract; current
+code/wire names remain implementation facts until changed together. Public Agent
+and generic Entity responsibilities are distinct. Realm/Zone share a Space root
+with separate capabilities and typed contexts; routes target Resources through
+fixed, UUID, namespace-slug or admitted resolver bindings, with no native ZonePage.
+Content languages are independent of UI locales. The deployment remains one
+database with separate physical tables; table/partition counts are unqualified
+configuration candidates, not capacity or throughput claims.
+
+Dependency order for a separately activated implementation scope:
+
+1. Reconcile current owners/fields/references and source pins against the seven
+   native contracts; record per-field writer, value/language, query and exchange
+   dispositions without rewriting released SQL or the installation baseline.
+2. Complete shared values, names, references, assertions/acceptance and identified
+   relations, then generic Recipe and retained provider/grain round-trips.
+3. Integrate shared Space, typed routing/scoped addresses, public Agent authority
+   and affected API/SDK/navigation/SEO consumers through their operation contracts.
+4. Admit elected time/quantity/geometry/observation/dataset profiles with explicit
+   preservation, validation, query and export limits; specialty workflows remain
+   conditional rather than mandatory dependencies of every Resource.
+5. Qualify physical specialization, inverse projections and measured workload/
+   recovery using [MODEL01-MODEL40](../testing/model-contracts.md) and owning module
+   cases. Semantic correctness, installation and capacity are separate results.
+
 ## Document ownership
 
 | Owner | Authority |

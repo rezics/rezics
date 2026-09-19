@@ -7,6 +7,20 @@ native decisions/Drizzle lowering, and content adapters. Full vocabulary preserv
 is not native-model or whole-source-workflow qualification. The execution plan owns
 scope and phase.
 
+The 2026-09-19 [integrated model](schema-modeling.md) and
+[standards-adoption matrix](standards-adoption.md) extend the selected target,
+not the scope of that executed evidence. This document remains the source-instance
+owner for Schema.org/Wikidata; additional vocabulary/value modules and conditional
+domain formats have independent profiles and activation. Current artifact counts
+do not measure native workflows or all source syntaxes.
+
+Generic descriptions must permit supported instances of previously unmapped classes
+such as Recipe without a new physical table or a fabricated unrelated classification.
+Pin and report the generic write/read/query/export profile and unresolved semantics.
+Source preservation, generic native editing, specialized native mapping and product
+operations have separate coverage. [Integrated acceptance](../testing/model-contracts.md)
+adds cross-language, occurrence, value, provenance and Space/address cases.
+
 ## Meaning of full compatibility
 
 REZICS must ingest, preserve, query and export the complete supported source

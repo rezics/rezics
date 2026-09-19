@@ -1,272 +1,252 @@
-# Unit slug addressing
+# Resource addressing and Space routes
 
-Status: Accepted
-
-Owners: Main Service and Web
-
-Apply the [program's compatibility policy](../plan/execution-workflow.md#program-authority)
-to old URLs, APIs, IDs and stored address rows; legacy address conversion is outside scope.
+Status: selected target revised 2026-09-19; implementation remains pending.
+The historical filename is retained for document navigation. Resource is the
+[selected name for the existing logical Unit contract](schema-modeling.md#native-terminology-and-identity).
+Owners: Main Service and Web. Apply the [program compatibility policy](../plan/execution-workflow.md#program-authority);
+this target requires neither old URL compatibility nor legacy address transfer.
 
 ## Decision
 
-A Unit ID is the immutable identity of a Unit. A slug address is an optional,
-mutable, human-facing address that resolves to that identity. Slugs improve
-navigation and presentation; they do not replace IDs in stored relationships,
-authorization, mutations, cache identities, or document references.
+Keep stable native identity, scoped address assignment, route matching, reverse
+link generation and representation selection separate. UUIDs and slugs resolve to
+the same Resource contract. A Space route binds a Resource, not a Document payload
+or a separately owned Page. The resolved Resource uses the shared rendering flow,
+including Post rendering where appropriate, with explicit presentation context.
 
-The database-backed address registry remains the authority for canonical and
-redirect addresses. This contract does not add another slug store.
+Use one authoritative address model. A route definition is not a second slug store;
+a resource's localized name is not its address. The [Space contract](realm-collection-zone.md)
+owns capabilities and role-qualified contexts. A mount never grants access or
+changes content ownership, published selection or attribution.
 
 ## Terminology
 
-- `unitId`: the globally unique UUIDv7 identity of a Unit.
-- `slug`: one validated label within a scope.
-- `scopeUnitId`: the Unit ID of the label's direct namespace or parent. It is
-  address containment, not an ownership or authorization claim.
-- `canonicalPath`: the complete current backend path, including its top-level
-  namespace, for example `users/alice` or `users/alice/favorites`.
-- `slugAddress`: the public, atomic projection of `slug`, `scopeUnitId`, and
-  `canonicalPath`, or `null` when no public canonical address is available.
+| Model | Identity, fields and responsibility |
+| --- | --- |
+| SpaceMount | Stable mount ID, admitted site/origin and base path, Space reference, state and revision. Existing fixed-site profiles remain valid input; arbitrary-domain hosting is not activated. |
+| RouteDefinition | Space-local route ID, immutable revisions, pattern AST, typed parameters, target binding, reverse-link contract, current activation and work limits. It is an operational relation, not a Page Resource. |
+| AddressNamespace | Stable namespace ID, owning authority/scope, policy revision and allowed target/assignment rules. A namespace need not be inferred from a mutable path segment. |
+| SlugBinding | Namespace, original label, normalized lookup key, target ResourceRef, binding identity/generation, state and history. An assigned spelling is not native identity. |
+| AddressPreference | Resource plus explicit site/Space/address purpose and optional language dimension; selects one usable route/binding. Preference does not change ownership or make other valid addresses false. |
+| ResolvedResourceView | ResourceRef, route/mount/address revisions, typed parameters, role-qualified contexts and the selected authorized representation. No second content identity is allocated. |
 
 ## Invariants
 
-- Persist Unit relationships, Block and Portable Text references, navigation
-  references, authorization subjects, mutation targets, and query cache
-  identities by Unit ID.
-- A canonical slug address is optional. APIs must represent absence explicitly
-  as `slugAddress: null`; they must not publish a slug without its direct scope
-  and canonical path.
-- Only canonical addresses are projected in ordinary resource responses.
-  Redirect address IDs and other registry internals remain administrative.
-- Frontend-visible resource summaries that can render a Unit link should carry
-  both the Unit ID and its nullable slug address. Backend presenters do not
-  construct frontend URLs.
-- Localized titles and names remain display copy. A slug may be shown as a
-  handle where the product calls for one, but it does not replace localized
-  content.
+- Persist resource links, grants, mutations and content references using stable
+  identity or the appropriate exact revision/occurrence reference, never a slug.
+- A native resource can exist and be read by admitted ID lookup without any slug.
+- Canonical preference is scoped. One resource may have different preferred
+  addresses in different Spaces/namespaces; it has no mandatory global slug.
+- A normalized label has at most one occupied binding in its namespace. Active
+  aliases and tombstones participate in reservation, not just current canonicals.
+- A namespace/route/presentation association grants no read, edit, participation
+  or publication authority over the target.
+- Route pattern publication and slug assignment have atomic conflict checks,
+  expected versions, idempotent receipts and independently versioned history.
+- Renderer and link builder consume the same admitted routing/address contracts.
+  Neither guesses SQL owners, manually concatenates unescaped input, or resolves
+  one UUID by scanning all owner tables.
 
 ## Lookup contract
 
-Read APIs may provide two explicit lookup forms:
+The following describes the target shape, not an implemented SDK declaration:
 
 ```ts
-type UnitLookup =
-	| { readonly by: "id"; readonly unitId: string }
-	| {
-			readonly by: "slug";
-			readonly scopeUnitId: string;
-			readonly slug: string;
-	  };
+type ResourceLookup =
+  | { by: "id"; id: Uuid }
+  | { by: "slug"; namespace: AddressNamespaceRef; label: string };
+
+type RouteTarget =
+  | { kind: "fixed"; resource: ResourceRef }
+  | { kind: "uuid"; parameter: string }
+  | { kind: "slug"; parameter: string; namespace: AddressNamespaceRef }
+  | { kind: "resolver"; resolver: RegisteredResolverRef; bindings: ParameterBindings };
 ```
 
-An endpoint must not infer `idOrSlug` from one string. A valid slug can resemble
-a UUID, and the two inputs carry different proof obligations.
+Parameter declarations choose lookup mode. A UUID-shaped slug remains a slug in
+a slug parameter; there is no `idOrSlug` heuristic. UUID-only lookup uses the native
+locator and owner validation. Slug lookup uses its explicit namespace and binding
+generation. Both recheck actual target existence, eligibility and disclosure.
+Writes are ID-addressed except dedicated address-management commands.
 
-When an ID and slug are both known, reads use the ID. Writes remain ID-addressed
-except for dedicated slug-management commands. A scoped lookup receives only
-the direct `scopeUnitId` and `slug`; UUID uniqueness makes ancestor IDs
-unnecessary for locating the direct namespace. The backend must still validate
-the target kind, requested scope ancestry, visibility, and object-level
-authorization before returning the target.
-
-Cold browser navigation still resolves the complete public path because a URL
-does not contain the direct scope UUID. After resolution, feature data is loaded
-and cached by Unit ID.
+Resolvers are registered, versioned capabilities with validated inputs, output
+ResourceRef, authority and query/time/fan-out budgets. They are not user-supplied
+JavaScript, SQL or unrestricted regular expressions. A nested namespace resolver
+must state how the parent is resolved and bound its work; it cannot infer ownership
+from path ancestry. Unknown, unavailable, invalid, conflicted and unsupported
+outcomes remain distinct internally and follow the public disclosure contract.
 
 ## Public route contract
 
-The compile-time route manifest in `@rezics/slug` is the executable authority
-for enabled mappings. Backend namespace labels remain plural. Each enabled kind
-has two deliberately distinct frontend address forms:
+```text
+Request URL
+  -> admitted site/Space mount
+  -> route revision and typed parameter parsing
+  -> fixed / UUID / namespace-slug / registered resolver
+  -> stable ResourceRef and role-qualified contexts
+  -> current authorization and published representation selection
+  -> shared Resource renderer
+```
 
-| Backend namespace | Long ID route     | Short slug route | Target  | Status  |
-| ----------------- | ----------------- | ---------------- | ------- | ------- |
-| `users`           | `/user/{unitId}`  | `/u/{slug}`      | Profile | Enabled |
-| `realms`          | `/realm/{unitId}` | `/r/{slug}`      | Realm   | Enabled |
-| `zones`           | `/zone/{unitId}`  | `/z/{slug}`      | Zone    | Enabled |
+First support literal segments, declared single-segment parameters and a terminal
+remainder parameter. Prefer literals over parameters and parameters over remainder
+matches. Reject unresolved overlaps at activation, including UUID versus slug
+patterns with identical positions; do not rely on insertion order or an arbitrary
+priority number. Reserved platform/management routes cannot be captured by user
+patterns. The normalized AST is authoritative; compiled matching/index data is
+version-bound and rebuildable.
 
-The long route is the stable, always-available identity route. The short route
-exists only for a public slug and is the preferred canonical browser URL while
-that slug exists. Canonical selection is therefore state-dependent:
+Illustrative patterns, not newly installed application URLs:
 
-- An addressed Unit renders at its short slug route. Visiting its long ID route
-  permanently redirects to the current short route while preserving any
-  supported route suffix.
-- An unaddressed Unit renders at its long ID route; there is no slug route to
-  redirect to.
-- A retained former slug temporarily redirects to the Unit's current short
-  route while its Redirect record remains active. It is not a permanent alias;
-  after retention and quarantine policy permits an audited release, the label
-  may be reassigned.
+| Pattern | Resolution |
+| --- | --- |
+| `/id/{id:uuid}` | Explicit native UUID lookup. |
+| `/articles/{slug}` | Slug lookup in the route's declared article namespace. |
+| `/about` | Fixed ResourceRef. |
+| `/books/{id:uuid}/chapter/{chapter:slug}` | Declared parent resolver followed by a parent-qualified namespace lookup, with a bounded resolution path. |
 
-The backend field `canonicalPath` names the current path in the slug registry;
-it does not imply that frontend slug paths use the long ID-route prefix.
+Route publication stages and validates a complete Space routing generation before
+atomic activation; clients cannot observe half a conflicting route update. Bound
+pattern bytes, segment count, candidate matches, resolver work and response hydration
+in the admitted profile. Requests use Space/prefix indexes or compiled per-Space
+matching, not a corpus-wide route scan. Storage/cache keys include the routing
+generation and relevant target, content, language and policy state.
 
-### Zone Page addresses
+### Reverse links and canonical preference
 
-A Zone Page's immutable Unit ID and its `zone_page.zone_id` ownership relation
-are authoritative. Its Zone-scoped slug is optional and independent of the
-optional `page-structure` visual index.
+A link request includes ResourceRef and address context. The result contains the
+resolved preference/route/binding generation, typed parameters and a usable address,
+or explicit unavailability. Ordinary resource summaries expose a bounded selected
+address; enumerating all aliases is a separate paginated operation.
 
-| Page state             | Browser route                                             |
-| ---------------------- | --------------------------------------------------------- |
-| slug is exactly `home` | the owning Zone root: `/z/{zoneSlug}` or `/zone/{zoneId}` |
-| another slug exists    | `/z/{zoneSlug}/{pageSlug}` or `/zone/{zoneId}/{pageSlug}` |
-| no slug exists         | `/zone/{zoneId}/page/{pageId}`                            |
+For a supported reversible route, under the same admitted routing/address versions
+and applicable access/availability conditions:
 
-The `home` segment is canonicalized away: visiting a Zone Page through
-`.../home` permanently redirects to the owning Zone root when the Zone address
-itself is canonical. At most one Page in a Zone holds the canonical `home`
-address. Assigning it to another Page removes that role from the former Page;
-it does not retain `home` as a redirect to the former homepage.
+```text
+resolve(link(resource, context, preference)).resource == resource
+```
 
-Zone Page navigation references and mutations store Page Unit IDs. Rendering
-prefers the current slug route, but falls back to the long Page ID route when a
-slug is absent. The Zone child labels `manage`, `page`, `posts`, and `search` are
-reserved for application routes and cannot be assigned as Page slugs.
+Renaming, retirement or authority changes may subsequently produce a redirect,
+gone or denied result; the invariant is not permission to ignore current state.
+A resolver without a supported reverse contract is an inbound-only route and cannot
+be automatically elected as canonical. Identity-route fallback remains available
+where disclosure permits it. A global address never overrides a narrower site's
+selected content or authority requirements.
+
+<a id="zone-page-addresses"></a>
+### Resource mounts and page rendering
+
+There is no selected native ZonePage identity, `post(kind=page)` ownership exception,
+or required `zone_page` parent. A route has an operational relation ID for editing
+and history; the content remains the target Resource. Two Spaces may route to the
+same target, including its Block content, without copying it. Root content is an
+explicit `/` route binding; a literal `home` label has no implicit identity semantics.
+
+Representation/Document revisions remain owned by the target's content contract.
+Route publication must state whether it pins an exact accepted selection or follows
+an admitted publication channel; it never silently follows a mutable draft head.
+Fragment selectors retain exact content/representation interpretation. Navigation
+links name stable targets and address context, not Page surrogate identities.
 
 ### Post interaction addresses
 
-Every interactive Post kind uses the same ID-addressed interaction family.
-Ordinary Posts, Replies, Reviews, and Wiki Posts render globally at
-`/posts/{postId}` and use `/posts/{postId}/edit` for management. Review and Wiki
-are Post kinds, not separate browser detail resources.
-
-A Zone may preserve its presentation context around the same globally unique
-Post ID:
-
-| Zone state  | Contextual Post route           |
-| ----------- | ------------------------------- |
-| addressed   | `/z/{zoneSlug}/posts/{postId}`  |
-| unaddressed | `/zone/{zoneId}/posts/{postId}` |
-
-These routes do not create a second Post identity or a Zone-owned Post route
-family. They select a Zone presentation context while all Post interaction and
-data access remains ID-addressed. Zone Pages are the explicit exception: they
-also have `post.kind = page`, but keep the Page routes documented above because
-their interaction model is Page composition, not Post detail.
-
-Scoped Post slugs are not implemented. If one Post later receives a different
-human-facing slug in each Zone, the address registry must support multiple
-canonical addresses per target in distinct scopes. That future lookup must not
-change the globally unique Post ID used by relationships, APIs, mutations, or
-cache keys.
+Posts, replies, reviews and other admitted resources use their ordinary identity,
+content selection and interaction contracts after route resolution. Space context
+may narrow disclosure or choose a presentation; it does not create another Post,
+duplicate its body or implicitly enroll it in community governance. A bound target
+need not be a Post: capability/presentation adapters choose its rendering.
 
 ### Fixed site origins
 
-The selected [fixed-site delivery contract](realm-scoped-delivery.md#same-origin-site-adapter)
-serves the same native IDs/route families from one frontend codebase at both
-`rezics.com` and `pro.rezics.com` in the first release, with different site profiles.
-Keep site/content context through resolution, redirects,
-query keys and share links without adding a second slug store. Validate contextual
-availability before emitting a canonical redirect or private metadata. Frontend
-routing receives the registered site origin; backend presenters still return native
-IDs and optional slug addresses. A fixed Pro page does not redirect to a general
-body merely because that body has a valid global address.
+Preserve the [fixed-site delivery contract](realm-scoped-delivery.md#same-origin-site-adapter):
+one frontend codebase can use distinct admitted site profiles. Mount and preference
+resolution carry that context through redirects, query keys and share links, without
+another slug registry. A Pro route cannot redirect to an otherwise valid general
+body to bypass its scope conjunction. This model does not activate domain hosting.
 
 ### Content-language variants
 
-A content-language version is a presentation of the same Unit identity, not a
-different route or slug. Detail routes use an optional singular
-`?language={contentLanguage}` override. Omitting `language` means automatic
-selection from the viewer's ordered preferences followed by Unit order.
-Switching versions replaces only this parameter and preserves route context,
-such as `realmId`, suffixes, and fragments.
+Language/format selection does not create another Resource identity. Content language
+uses the open content-language policy, not the UI locale enum. A route may expose a
+typed language parameter or use explicit preferences; return the actual selected
+language and fallback state. Named content variants and exact revision links retain
+their own meaning. A requested unavailable translation is not fabricated.
 
-List-wide language selection uses the plural `?languages=ja,ko` parameter and
-forms the hard display boundary documented in _Filter, Feed, Search, and Zone
-experience_. A list card that came from such a boundary links to its displayed
-version with singular `language`; its overflow menu may link directly to any
-value returned by `availableLanguages`. A stale explicit language override may
-fall back for rendering only long enough to notify the user and restore the
-automatic URL. Language parameters never participate in Unit identity,
-canonical slug lookup, authorization, or mutation targets. Presentation query
-keys and cursors must include the effective language decision so differently
-localized responses cannot share cached data.
-
-Candidates such as Collection `/collection` and `/c`, Entity `/entity` and
-`/e`, Tag `/tag` and `/t`, Post slug aliases `/post` and `/p`, Poll `/poll` and
-`/q`, Book `/book` and `/b`, Software `/software` and `/s`, Media `/media` and
-`/m`, Review `/review` and `/rv`, and Series `/series` and `/sr` are not enabled
-or reserved. Adding a candidate to documentation must not install a namespace
-or route.
+The route profile declares which query parameters affect representation, reverse
+links and address preference. Unrecognized query strings do not alter lookup mode.
+Canonical omission/inclusion of language is a presentation/SEO decision, not an
+identity rule. Preserve allowed suffixes/fragments through redirects and bind caches
+and cursors to the effective language/representation choice.
 
 ## Collections and Favorites
 
-Top-level Collection slug routing is disabled. Favorites remains ID-addressed
-unless a separate decision enables a public, shareable address.
-
-If enabled later, the system Favorites Collection uses slug `favorites`
-directly under its owning Profile Unit:
-
-```text
-scopeUnitId = ownerProfile.id
-canonicalPath = users/{profileSlug}/favorites
-```
-
-It would render at `/u/{profileSlug}/favorites`; an ID-only fallback would use
-`/user/{profileId}/favorites`. It never routes through `/collection` or `/c`.
-Future user-owned Collection slugs follow the same Profile-scoped policy.
-User-scope route labels such as `content`, `favorites`, `following`, `settings`,
-`edit`, and `new` must be reserved from arbitrary child addresses; `favorites`
-may only target that Profile's system Favorites Collection.
+Collections remain independent curation resources. A public Collection can be routed
+when eligible and authorized. Private Favorites do not become public or obtain a
+slug merely because a Space can render them. The existing route manifest's enabled
+surfaces remain current implementation facts until target activation; documenting
+a namespace or pattern does not install it.
 
 ## Assignment contract
 
-- A signed-in Profile may assign only its own label in `users` through the
-  temporary first-party `/api/users/me/profile-slug` command. This command
-  requires an interactive session but no additional Unit permission or platform
-  capability.
-- Temporary self-service governance rejects the Profile reserved-label list
-  owned by `@rezics/slug`. It accepts the first assignment and an idempotent
-  repeat, but rejects a later rename.
-- Realm, Zone, Zone Page, and platform slug mutations remain behind the
-  development-preview capability in addition to their ordinary resource or
-  platform authority.
-- Callers provide a label, never a scope, for these resource-specific commands;
-  the backend fixes and proves the namespace.
-- Platform-authorized commands cannot move an enabled Profile, Realm, or Zone outside its
-  fixed public namespace; otherwise an ID response and browser route could
-  disagree about its canonical address.
-- Other kinds and namespace operations remain platform-governed. There is no
-  public Collection or Favorites assignment command while those routes are
-  disabled.
+An admitted namespace policy declares assignment/rename authority, target eligibility,
+Unicode normalization, case comparison, reserved labels, byte/character budgets,
+URI serialization and history rules. Namespace creation is separately authorized;
+supplying a namespace ID in a request proves no control over it.
+
+Selected new native default: Unicode NFC lookup keys with case-sensitive comparison,
+retaining the original label. NFC is REZICS policy, not a requirement that all URI
+paths be normalized. Other case policies require explicit versioned namespaces.
+Do not apply NFKC, transliteration, simplified/traditional conversion or confusable
+skeletons as general identity equivalence. Language tags remain independently
+case-insensitive under their own standard.
+
+The executable profile must specify admitted character classes and indexed UTF-8
+byte ceilings before activation. Reject path separators, dot-segment ambiguity,
+control characters and invalid encoding under that profile. Parse URL structure
+before decoding parameters, decode once, and reject decoded separators where the
+parameter is a single slug segment. Slug creation receives a label, not pre-escaped
+path syntax. Reverse links serialize each segment with the same parser/profile.
+Policy upgrades preflight collisions rather than silently rebinding names.
 
 ## Lifecycle and security
 
-- Slugs are explicitly assigned; localized titles do not silently generate or
-  rename addresses.
-- The current Profile reserved-label and assign-once rules are removable
-  service-level governance. They are deliberately not database constraints. A
-  later release may replace them with a supported, audited rename lifecycle.
-- An unaddressed Unit remains ID-only. The registry supports retaining former
-  top-level addresses during authorized renames, but ordinary Profile
-  self-service currently cannot invoke that lifecycle. Zone Page addresses are
-  the documented exception: they may be removed because the Page retains its
-  stable `/zone/{zoneId}/page/{pageId}` route.
-- Renames retain the former address as a temporary Redirect record. Retained
-  addresses issue temporary redirects and may be released for reuse through an
-  audited platform action. The automated retention and quarantine schedule remains
-  a separate policy decision; clients must not cache former-slug redirects as
-  permanent.
-- Public path and scoped lookup return not found for an unavailable scope,
-  target, wrong target kind, or unauthorized resource without disclosing which
-  check failed.
-- UUIDs and hard-to-guess slugs are not authorization. Every resolved Unit goes
-  through the same object-level authorization policy as an ID lookup.
-- Address changes invalidate Unit-ID projections, the old path, the new path,
-  and affected ancestor-path projections.
+Slugs are explicitly assigned; titles do not silently generate or rename addresses.
+A rename atomically creates/selects the new binding and retains the old binding for
+the original resource as an alias or tombstone. The selected default forbids automatic
+reuse and ordinary reassignment of an occupied historical label to another resource.
+Exceptional release would need a separately selected governance/retention contract;
+it is not implicitly authorized by expiry or an old implementation endpoint.
 
-## Required verification
+Bindings have immutable history/generations. Aliases resolve through stable target
+identity and the current allowed preference rather than forming arbitrary redirect
+chains. Tombstones reserve the label without disclosing unavailable content. Choose
+HTTP status/cache lifetime according to the actual binding permanence and visibility;
+identity stability alone does not justify permanently caching every contextual redirect.
 
-- The route manifest has unique backend namespace, long ID, and short slug
-  prefixes.
-- ID and scoped-slug reads resolve to the same Unit and response contract.
-- Wrong-scope and wrong-kind lookups fail without cross-resource disclosure.
-- Nested direct-scope lookup works without ancestor IDs while full-path lookup
-  still validates every public ancestor.
-- Current-slug rendering, temporary former-slug redirects, addressed-ID
-  canonical redirects, and unaddressed-ID rendering behave as documented
-  without dropping supported route suffixes.
-- Stored content references remain ID-based while their rendered links prefer
-  an enabled canonical slug address.
+Check current mount, namespace, target and representation disclosure before returning
+redirect locations or metadata. Public failures cannot reveal which private target
+or policy failed. UUIDs, labels and route parameters are not credentials. Address
+mutations invalidate old/new paths and affected preference/mount projections; stale
+cache or reverse-link results cannot bypass current revocation.
+
+## Current implementation and required verification
+
+Current `@rezics/slug` has a compile-time users/realms/zones route manifest, ASCII-only
+labels and a small fixed depth. `unit_slug_address` has target-wide canonical
+uniqueness. Zone Pages currently use `post + zone_page`. Those are implementation
+facts to replace, not additional constraints on this target; current API names and
+qualification evidence must remain explicit until affected consumers are updated.
+
+Required cases are in [model-contract acceptance](../testing/model-contracts.md):
+multi-Space preferences, UUID-shaped slugs, Unicode/encoding/case collisions,
+route ambiguity, root and nested resolution, reverse-link equivalence, stale
+versions, concurrent assignment, rename/tombstone, disabled routes, current access
+and shared Resource rendering. Backend, generated clients, navigation, SEO, search
+execution and Web adapters must change together when implementation is activated.
+
+Primary basis: [Web identity/representation](https://www.w3.org/TR/webarch/),
+[RFC 3986](https://www.rfc-editor.org/rfc/rfc3986.html),
+[RFC 6570](https://www.rfc-editor.org/rfc/rfc6570.html),
+[RFC 9110](https://www.rfc-editor.org/rfc/rfc9110.html) and
+[Unicode normalization](https://www.unicode.org/reports/tr15/). They inform syntax
+and protocol behavior; namespace lifecycle, precedence and admission are native choices.

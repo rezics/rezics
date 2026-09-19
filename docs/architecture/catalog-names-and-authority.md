@@ -1,5 +1,15 @@
 # Named forms, identifier claims and scoped authority
 
+The [integrated value/model contract](schema-modeling.md#shared-value-contracts)
+extends this target across every Resource owner, including currently closed
+metadata-localization paths. Content languages are independent of UI locales;
+the selected target is not the old seven-value enum. Retain explicit base direction
+where supplied, exact original spelling and derivation from a specific name revision.
+Unicode normalization, translation/transliteration, display fallback and search
+comparison are separate operations. Report the actual selected language and fallback
+reason; no fallback creates a stored translation. Slug lookup uses its separately
+versioned [address namespace policy](unit-slug-addressing.md#assignment-contract).
+
 Named forms keep an owner-local immutable identity, a current complete projection and
 immutable complete revision rows. Each edit advances only that form's revision;
 withdrawal and restoration append state revisions. Credits and source observations

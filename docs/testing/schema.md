@@ -1,5 +1,11 @@
 # Standards/model and shared-schema qualification
 
+This is the executed 2026-09-18 scope, not qualification of the revised
+[2026-09-19 model](../architecture/schema-modeling.md). Its inventory counts and
+results remain historical evidence for that implementation. Resource/Agent naming,
+shared Space, open metadata languages, scoped routing and additional profiles
+require the unexecuted [MODEL01-MODEL40](model-contracts.md) cases and owning checks.
+
 The 2026-09-18 refactor replaces the former vocabulary/provider-schema mixture
 with standard vocabularies, authored native decisions and generated Drizzle.
 The [modeling contract](../architecture/schema-modeling.md),

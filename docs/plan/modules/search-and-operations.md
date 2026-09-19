@@ -4,6 +4,9 @@ Dependencies: M01 and module event contracts. Owners: database architecture sect
 
 ## Remaining work
 
+- Qualify the [selected storage-family target](../../architecture/database/resource-storage.md) with actual row/index/WAL and maintenance profiles. Keep one database; candidate partition counts and earlier object-to-row estimates are not deployment acceptance.
+- Implement target-organized incoming relation projections with authoritative revision/home pointers, declared freshness, current disclosure, bounded hydration and hot-target plans. Qualify MODEL37-MODEL40; an index on each source partition alone does not establish bounded reverse queries.
+
 - Qualify policy-aware candidates, multilingual names/filters, relation constraints, facets and bounded pagination with explicit incomplete results.
 - Qualify the [researched performance remedies](../../architecture/information-indexing-and-verification.md#selected-performance-remedies): profile/scope-leading member orders, joint searchable quality signals, cost-selected candidate paths and bounded physical-index routing. Treat the current 50,000 posting threshold as an estimate, compare observed work, and qualify engine-side timeout/cancellation rather than claiming an enforced posting-visit ceiling.
 - Implement [information verification execution and indexes](../../architecture/information-indexing-and-verification.md): bounded methods on the existing task/outbox/receipt infrastructure, exact assessment artifacts, independent index/policy generations, broad versus accepted queries and current invalidation fences. Ordinary answer queries do not run an LLM.

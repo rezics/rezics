@@ -6,6 +6,22 @@ Existing account/Self and ACL fixtures establish only their recorded behavior.
 This contract replaces their one-to-one identity and account-only grantee assumptions;
 it does not claim the replacement is implemented.
 
+Terminology update, 2026-09-19: [the integrated model](schema-modeling.md)
+selects Resource for the logical Unit contract and Agent for the described/public
+person/organization responsibility. The detailed contracts below retain
+their current Entity-named types, columns, API concepts and headings; those public
+Entities denote admitted Agents, not the new generic Entity store. Renaming and
+consumer qualification remain M01 work. No new public User/Profile identity layer
+is introduced. Private `users`/AuthPrincipal storage remains valid for credentials,
+private preferences and accountability; it is not a public authorship/ownership key.
+
+Public activity and presentation must not reverse-map an Agent to an assumed unique
+private account. Several Principals can represent one Agent and one Principal can
+represent several Agents. Account-private state becomes public activity only through
+an explicit attributed disclosure/publication contract. Space merges the Realm/Zone
+identity owner while retaining independent capability, membership and context-role
+admission; see [Space composition](realm-collection-zone.md).
+
 This owner defines identity, membership, roles, representation and authorization
 semantics. [Connected applications](connected-apps.md) owns external delegation,
 [the experience contract](identity-and-access-experience.md) owns GUI layering,

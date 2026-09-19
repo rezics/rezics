@@ -2,6 +2,13 @@
 
 This dictionary specifies target ownership, keys, cardinalities, critical fields, write protocols and access paths. It is a relational specification, not executable SQL. Current code is implementation evidence: retain fields only when their semantics belong to the target, without old-contract compatibility. Every current module has a disposition in [schema coverage](../../testing/database/current-schema-map.tsv). Authentication/provider details remain in their owning contracts instead of an independently maintained duplicate.
 
+The 2026-09-19 [model contract](../schema-modeling.md) selects Resource (the existing
+logical Unit contract), described Agent versus generic Entity, shared Space and
+typed addresses. [Field/storage policy](resource-storage.md) governs retained
+columns and physical families. Implementation-spelled table names below identify
+responsibility families, not proof of the new schema. Earlier Unit names denote
+Resource; retained public-Entity IAM names denote Agent, not generic Entity.
+
 Notation: PK is primary key, UQ is unique key, FK is concrete foreign key, REV means an immutable owner-local revision key, REF means the validated reference_value, and XREV means revision_reference. R is the owning aggregate/route key. Composite references include all owner/manifest/variant keys named below. “Current” rows are small mutable heads with CAS version; history rows are append-only except separately governed erasure of sensitive payloads. Common created/recorded times and operation references are implicit where stated in README section 4. A field marked optional must have an explicit absence meaning in its owning contract.
 
 ## D01. Native identity, reference values and addresses
@@ -16,8 +23,11 @@ Notation: PK is primary key, UQ is unique key, FK is concrete foreign key, REV m
 | citation | PK id; kind; exactly one REF/XREV/occurrence_reference/external_reference; optional fragment selector revision | Discriminator and non-null checks; fragment source is exact revision; cited identity visibility checked on reads | PK; chosen target reverse index |
 | external_reference | PK id; provider/namespace, exact external key or normalized URL, original spelling, resolution state | Unknown external target stays external; resolving appends resolution evidence rather than rewriting old citations | UQ namespace/key as appropriate; normalized URL hash plus collision check |
 | external_reference_resolution | PK reference_id, sequence; target REF, source observation, state, operation | Known absent/unresolved/conflicted/resolved are distinct; history retained | reference_id, sequence DESC |
-| slug_namespace | PK id; registered root label or concrete scope REF, normalization policy revision | Exactly one namespace form; root labels are control data, never fabricated native identities; namespace existence does not grant write authority | root label UQ; scope REF UQ |
-| unit_slug_address | PK namespace, normalized slug; target REF, canonical/redirect/tombstone state, original spelling | Atomic collision check; partial UQ canonical target within a namespace; no slug-derived identity | namespace/slug and target reverse |
+| address_namespace | PK id; root or scoped authority, namespace key, normalization/assignment policy REV | Namespace meaning survives path changes; multiple declared namespaces may share a Space; no authority from existence alone | Root key or scope/key UQ |
+| slug_binding / binding_revision | Binding ID/generation; namespace, original label, normalized key, target REF, active/alias/tombstone state | Atomic namespace/key collision check including reservations; immutable assignment history; no automatic historical-label reuse | Namespace/key lookup; target/namespace reverse |
+| address_preference | Resource REF, site/Space/purpose and declared language dimension; route/binding generation, CAS | One selected usable preference per exact scope; no target-wide global canonical uniqueness | Resource/context point lookup |
+| space_mount / revision | Mount ID, site/origin/base path, Space FK, state/version | Admitted origins and deterministic nonconflicting mounting; mounting does not grant content access | Origin/prefix and Space reverse |
+| space_route / route_revision | Space/route PK; active REV; pattern AST, typed parameters, target binding, reverse-link contract and budgets | Fixed/UUID/namespace-slug/registered resolver union; output ResourceRef; staged conflict check and activation; no Page identity | Space/prefix matching; route/version; target reverse for fixed bindings |
 | identity_resolution / resolution_event | PK original REF for head; PK original REF, sequence for events; target REF, decision, epoch | No self/cyclic accepted resolution; original references stable; no automatic grant transfer | original REF; target reverse index; bounded path resolution |
 | correction_case / correction_item | PK case; PK case,item; original keys, destinations, field/occurrence assignment, ambiguity, phase/cursor | Merge, split and owner relocation require complete reviewed assignments or explicit retained/ambiguous outcomes | case,status,item keyset |
 
@@ -78,13 +88,21 @@ Independent catalog intake and participant construction retain separate admissio
 
 ## D03. Definitions, claims, evidence and acceptance
 
+Class membership, Concept/Tag application, structural capability and physical
+placement are distinct. Reuse definition/vocabulary governance without making
+community votes the mandatory acceptance policy for factual classification.
+Record Assertion, provenance, signature/assessment and AcceptanceDecision
+separately. [Shared values](../schema-modeling.md#shared-value-contracts) define
+quantity, temporal, geometry, observation and language semantics; none is reduced
+to an unqualified string/number or a generic timestamp.
+
 | Relation | Key / fields | Invariant | Query / partition owner |
 | --- | --- | --- | --- |
-| definition, definition_revision | PK definition id; namespace/key UQ; revision PK definition,id; kind, value type, domain/range contract, cardinality, qualifier schema | Frozen meaning; semantic change gets new identity; extensions are data contracts, not executable SQL | Definition PK and namespace/key; bounded control data |
+| definition, definition_revision | PK definition id; namespace/key UQ; revision PK definition,id; kind, value type, domain/range contract, cardinality, qualifier schema | Meaning revisions are immutable; incompatible concepts use another term identity; translations do not change meaning; extensions are data contracts, not executable SQL | Definition PK and namespace/key; installed model metadata has declared admission bounds |
 | semantic_context | PK id; context type, exact canon/world/time interpretation, optional parent | Context is not governance scope; parent cycle policy declared | PK; parent index |
 | fact_slot | PK subject REF, slot_id; property identity/contract, context, language/variant dimensions | Canonical slot uniqueness; no random keys to evade one-value semantics | Subject/property/context unique key; property/value read projections |
 | assertion | PK subject REF, assertion_id; slot_id, claimant, state, contract revision, typed value alternative, validity, operation | Exactly one legal value alternative or explicit absence state; original claim immutable | Subject/slot/assertion; claimant and exact target reverse |
-| typed_value / sensitive_value | PK id; boolean/numeric/quantity/date/text/reference alternatives, precision/unit/calendar; payload availability | Values preserve zero/false/empty; sensitive data can be erased without changing the claim into unknown | PK; only elected typed predicates indexed |
+| typed_value / sensitive_value | Owned value key; boolean/exact numeric/quantity/temporal/geometry/language-text/reference alternatives, lexical evidence, precision/unit/quantity kind/calendar/CRS/direction; availability | Preserve zero/false/empty and explicit absence states; declared comparisons/conversions; erasure does not become unknown; not every scalar is a Resource | Owner key; only elected typed predicates indexed |
 | source_observation_evidence | PK observation, evidence_id; field path/span, transform version, payload receipt | Exact immutable observation; no overwrite by newer source fetch | Observation/path; payload/erasure cursor |
 | assertion_support | PK assertion key, support_id; evidence or independent claim, supports/refutes relation, state | Multiple supports coexist; source withdrawal removes only owned support | Assertion/support and evidence reverse |
 | acceptance_decision | PK slot key, decision_id; scope, state, policy revision, basis, validity, expected predecessor, sealed | Single accepted value per single-valued slot/scope/valid slice; conflict is explicit | Slot/scope/history |
@@ -135,9 +153,15 @@ never grant acceptance. Growing families and artifacts use the owning
 
 ## D04. Names, identifiers and language
 
+Content-language values use the open pinned IANA policy independently of UI locales.
+Keep base direction, same-language name occurrences, original spelling and exact
+derivation. Normalization, translation/transliteration, search comparison and
+fallback are different operations. Fallback reports actual language and reason.
+The old seven-value metadata contract is implementation to replace, not a target limit.
+
 | Relation family | Key / fields | Contract | Access |
 | --- | --- | --- | --- |
-| <owner>_named_form / named_form_revision | Owner, form id, revision; text, BCP 47 tag, script, sort form, usage, context, validity | Same-language alternatives allowed; original spelling retained; sealed versions | Owner/form/history; bounded owner lists |
+| <owner>_named_form / named_form_revision | Owner, form id, revision; text, BCP 47 tag, direction, sort form, role/usage, context, validity, exact derivation | Same-language alternatives allowed; original spelling retained; sealed versions; display selection is separate | Owner/form/history; bounded owner lists |
 | <owner>_identifier_claim / revision | Owner, claim id/revision; namespace, exact/normalized value, syntax validation, claimant/evidence | Nonunique claimed value by default; authoritative uniqueness is namespace-specific | Namespace/value hash+exact comparison; owner claims |
 | <owner>_name_authority / revision | Exact name REV, authority entity, scope, evidence, active state | Officialness is scoped and revision-specific; changed name does not inherit old approval | Name/scope; authority reverse |
 | <owner>_name_selection | Owner, scope, display purpose, language; selected form REV | Explicit fallback policy; selection does not change officialness | Owner/scope/language UQ |
@@ -196,7 +220,7 @@ Specialized indexes remain parent-local and on elected reverse targets. Technica
 | software_participation / revision / credit occurrences | Person/character/organization, role, alias, release/context, language and evidence | Voice actor-character-work/release is one scoped relation; no uncorrelated binary reconstruction |
 | software_patch_target, software_release_animation | Typed patch/dependency target, compatibility/version selector; animation attributes | Patch is not full replacement by default; range claim differs from resolved dependency |
 | software_record_revision, component_revision, source correspondence | Exact record/component native snapshots | Stale source applications compare local head and human epoch |
-| entity_catalog_profile / revision | Person/organization/character/software-agent structural metadata | Source claims, birth/death/fictional calendars separated from account lifecycle |
+| agent identity / applicable profile; generic entity identity | Described person/organization responsibility and generic Resource storage are separate; specialized structure only where required by capability | Classification does not grant participation, force relocation or make biographical dates account lifecycle; reconcile current `entity_catalog_profile` explicitly |
 | grouping_class_assignment, order_profile, order_entry, command_revision | Universe/canon/franchise/series role and versioned membership/order | Multiple contextual memberships; no implicit containment/permission |
 | reference_concept, web_resource, area/code, place, instrument, event, profile_revision | Native concepts and supporting referents with typed metadata; events have revisioned actual/planned temporal roles, state, precision/calendar and source decisions | Cross-source reuse; [event-time](event-time.md) adapters retain one writer and exact occurrence identity; external resources are not trusted executable content |
 
@@ -279,11 +303,16 @@ Editing a comment into an article keeps document/publication identities. Selecti
 
 ## D10. Realm, Zone, structure, curation and themes
 
+[Space composition](../realm-collection-zone.md) selects shared identity and
+capability-owned states. Realm and Zone remain product presets; the following
+families do not impose exclusive semantic classification or duplicate roots.
+
 | Relation family | Keys / fields | Contract / access |
 | --- | --- | --- |
-| realm, realm_unit, realm_pin; D02 membership/groups/roles | Community identity; typed enrollment and multiple access groups/custom roles; independent publication/curation and stable placement | Admission generations, representation and mixed grantees follow D02; Realm participation, Collection membership, accepted content and pinned display remain distinct |
+| space, space_capability; community placement/pin; D02 membership/groups/roles | One Space identity/control; independent community/routing capability admission and generations; explicit placements | Realm/Zone presets can coexist but ordinary creation recommends separate linked Spaces; retirement of one capability does not erase the other |
 | realm_rule_revision, realm_rule, rule_acceptance | Realm/exact rule revision/rule; account acknowledgement of exact version | New rules do not rewrite past decisions or imply retroactive acceptance |
-| zone, zone_page, unit_dock | Zone identity; page/subsite infrastructure, Collection presentations, chosen rule Realm, dock composition/contract | One Zone can compose several Collections; one Collection can appear in several Zones; display does not transfer identity or authority |
+| space route/mount (D01), dock/navigation/presentation bindings | Existing target Resource REF, exact selection/channel policy and role-qualified Space context | Shared rendering, no ZonePage Resource or duplicated body; several Spaces can present one Resource; display conveys no authority |
+| context_binding | Subject REF, context reference, role definition, scope/selection and revision | Presentation, publication, governance and semantic canon remain distinguishable; no authority inference across roles |
 | content_structure, structure_manifest, node/occurrence | Owner/structure/head; manifest; occurrence id, same-manifest parent, target REV/citation, rank, coverage, local label/number/credit | Explicit local contents; identity-only references are navigation/unknown content, not exact body promises; validated navigation is acyclic; no implicit nested expansion |
 | structure_revision/head, dock_revision/head, collection_structure_revision/head | Exact owner/subaggregate revision, generation, operation | Unrelated root edits do not copy all children; restore selects sealed generation |
 | composition_import / import_correspondence | Operation, exact source structure REV/path, destination structure/expected head, staged manifest, source-to-destination occurrence map | Durable phased operation; retry reuses mappings; refresh compares base/source/local edits and retains established occurrence identities |

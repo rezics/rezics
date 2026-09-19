@@ -3,13 +3,17 @@
 - [Implementation plan](plan/README.md): active scope/phase, dependencies, gates and progress.
 - [Execution workflow](plan/execution-workflow.md): program authority and execution policy.
 - [Product design principles](architecture/product-design-principles.md): API-centered capabilities, layered GUI, capability fidelity and evidence-based design choices.
-- [Identity and access](architecture/identity-and-access.md): private AuthPrincipals, shared public Entities, membership, mixed grantees and scoped representation.
-- [Connected applications](architecture/connected-apps.md): third-party Entity connections, OAuth, installations and REZICS MCP access.
+- [Identity and access](architecture/identity-and-access.md): private AuthPrincipals, shared public Agents (current Entity API names), membership, mixed grantees and scoped representation.
+- [Connected applications](architecture/connected-apps.md): third-party public identity connections, OAuth, installations and REZICS MCP access.
 - [Subscribe](architecture/subscriptions.md): native multi-plan offerings for People/Realms, independent purchased and complimentary benefits, commercial lifecycle and authorization boundaries.
 - [Realm participation and Rezics Pro](architecture/realm-participation-policies.md): reusable quotas/review, accepted-version publication and Pro discovery; [capacity](architecture/subscriptions-capacity.md) and [acceptance](testing/subscriptions-and-pro.md) remain unqualified.
 - [Realm-scoped sites and replies](architecture/realm-scoped-delivery.md): fixed-domain API context, multi-Realm reply acceptance, authorized parent connections and scope-leading read projections.
 - [Identity and access experience](architecture/identity-and-access-experience.md): ordinary-user defaults and progressively disclosed collaboration/administration.
 - [Database architecture](architecture/database/README.md): target schema, meaning and capacity.
+- [Integrated model contracts](architecture/schema-modeling.md): Resource identity, typed values/relations, seven declarative contracts and one versioned model representation; current Unit APIs remain implementation facts.
+- [Standards adoption](architecture/standards-adoption.md): pinned versus selected profiles, semantic boundaries, conditional domain exchange and evidence/loss reporting.
+- [Physical fields and storage families](architecture/database/resource-storage.md): retained columns, Agent/generic Entity and media responsibilities, same-database table families, references and inverse reads.
+- [Space composition](architecture/realm-collection-zone.md) and [Resource addressing](architecture/unit-slug-addressing.md): shared Realm/Zone identity, role-qualified contexts, route-to-Resource rendering, Unicode/scoped slug bindings and reverse links.
 - [Schema.org and Wikidata interoperability](architecture/semantic-interoperability.md): complete source models, queryable external descriptions, native mappings, export fidelity and coverage; [capacity](architecture/semantic-interoperability-capacity.md) includes source/index amplification.
 - [Information indexing and fact verification](architecture/information-indexing-and-verification.md): broad claim discovery, evidence-based AI/code/human assessments, selectable quality indexes, independent acceptance, portable results and Subscribe services; [acceptance](testing/information-verification.md) remains pending.
 - [Native Work and release](architecture/database/native-work.md): shared product meaning across creative domains and applicable properties.

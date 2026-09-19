@@ -2,11 +2,28 @@
 
 Status: selected target architecture; implementation and qualification follow the [current plan](../../plan/README.md).
 
+The 2026-09-19 [integrated model revision](../schema-modeling.md) selects Resource
+as the name of the existing logical Unit contract, described Agent versus generic
+Entity responsibilities, shared Space identity and Resource-targeting routes.
+Existing Unit/Entity/Realm/Zone code names and earlier test records remain current
+implementation terminology. In retained IAM material, public Entity means the
+selected Agent responsibility, not the generic Entity store. This revision has not
+qualified the new DDL, consumers or workload. Read [standards adoption](../standards-adoption.md),
+[field/storage families](resource-storage.md) and [target acceptance](../../testing/model-contracts.md).
+
 This is the whole-database design authority, including private and operational state. The [execution workflow](../../plan/execution-workflow.md) owns program authority and compatibility policy; the plan owns module sequence and progress. New-system integrity, source conversion, installation, history and recovery remain required capabilities.
 
 Read [the dictionary](data-dictionary.md), [native Work](native-work.md), [catalog model](catalog-model.md), [composition](content-composition.md), [creation](creation.md), [Graph API](relationship-graph.md), [ratings](ratings.md), [event-time discovery](event-time.md), [Hub](ai-hub.md), [design evidence](design-evidence.md), [schema coverage](../../testing/database/current-schema-map.tsv), [API coverage](../../testing/database/api-coverage.tsv), [scenarios](../../testing/database/scenarios.tsv), and [capacity](capacity.md). The [design checker](../../testing/database/check_design.py) verifies coverage and arithmetic, not SQL behavior or source conformance.
 
-Dependency policy: a clean Git checkout contains every local design/reproduction input. Temporary directories and machine-local attachments are not dependencies. Public HTTPS references support research; inventory/calculation reproduction needs no network. The [dependency manifest](../../testing/database/dependency-manifest.json) lists local documents, schema inputs, API-owner directories and public sources.
+Dependency policy: Git contains authored decisions, generators and source pins;
+the [artifact preparation procedure](../../../libraries/schema-importer/README.md)
+restores ignored source artifacts and generates ignored derivatives. First preparation
+may require network; inventory/calculation checks run locally after it. Temporary
+directories and machine-local attachments are not dependencies. The
+[dependency manifest](../../testing/database/dependency-manifest.json) lists local
+documents, schema inputs, API-owner directories and supporting public sources.
+The [strict tracked-input guard mismatch](../../testing/known-failures.md#tracked-design-input-guard-rejects-generated-schema-artifacts)
+remains open; reproducible derivatives must not be force-committed to conceal it.
 
 [Schema.org and Wikidata interoperability](../semantic-interoperability.md) is a
 required full-index contract. Source-model preservation and queryability cover
@@ -33,7 +50,7 @@ Selected defaults:
 
 | Decision | Default |
 | --- | --- |
-| Native ownership | Publishing, music, program, software, entity, grouping, reference and distribution remain meaningful owners; content/social/platform owners are explicit. |
+| Native ownership | Publishing, music, program, software, Agent, generic Entity, grouping/distribution and content/platform responsibilities are explicit; reconcile existing reference/description owners by grain. Physical media families do not redefine stable logical owner keys. |
 | User-facing kinds | Mutable classifications, presentation choices, contextual roles and workflow choices; never a single exclusive enum controlling every capability. |
 | Authored text | Document identity and immutable revisions for short comments, articles, chapters, rules and other content requiring content-level history. |
 | REZICS Work | Common native creative identity and continuity across domains; Work/release similarities and differences belong to the native Work contract. |
@@ -58,7 +75,7 @@ Implement the selected contracts through the plan's design/test/API gates. Use e
 | Knowledge and provenance | Definitions, typed assertions, evidence, acceptance, named forms, identifiers | Votes, audit logs or arbitrary JSON paths |
 | Content and assets | Editorial lineages, immutable revisions, files, manifests, asset uses | REZICS Work identity, its adoption decisions or social-publication visibility |
 | Social publishing | Publications, reviews, replies, discussions, polls | Catalog editions, facts or generic relation predicates |
-| Community and presentation | Realm membership/rules, Zone pages/docks/themes, curation | Global identity, content ownership, implicit execution rights |
+| Community and presentation | Shared Space identity; Realm membership/rules, Zone routes/docks/themes, explicit context roles and Collection curation | Global identity, content ownership, implicit execution rights |
 | Discovery and participation | Tags, judgments, ratings, following, collections, favorites, progress | Imported statistics or universal engagement counts |
 | Communication | Conversations, messages, recipient notifications, delivery/read state | Public Threads or provider delivery receipts |
 | Governance and correction | Reports, cases, rule-backed decisions, enforcement, reversals, merge/split cases | Content edits or source synchronization |
@@ -100,7 +117,13 @@ Owner means a stable logical responsibility domain. Public logical references id
 
 An owner table keeps identity and lifecycle. Large editable structures have their own heads and versions; editing a name must not update the root or every other facet. A typed structural anchor remains when historical references depend on it; retirement changes its active capability state, not the meaning of its past revisions. Type-sensitive accepted links pin a capability witness and epoch. Current reads compare that witness with the live capability epoch and return pending/invalid when it no longer applies; they do not wait for an unbounded reverse-edge rewrite to stop treating stale links as verified. A paginated job then revalidates affected links.
 
-Unknown classification is allowed. An unknown referent can be represented under the reference owner without fabricated Work/Release parents. Reclassification within supported capabilities preserves identity. If evidence requires a different logical owner, use an explicit correction/relocation case: preserve the original typed identity and history, establish the new owner representation, and append resolution with field-level assignments. Old IDs remain resolvable. This is not an unchecked update of a discriminator, and references or grants are not silently retargeted.
+Unknown classification is allowed. A generic Entity can represent an unknown
+referent without fabricated Work/Release parents; the existing reference/description
+implementations require explicit grain/owner reconciliation. Reclassification or
+specialized storage within the same owner preserves identity. If evidence requires
+a different logical owner, use an explicit correction: preserve exact history and
+append resolution with field-level assignments. This governs new-system history,
+not a requirement for legacy transfer. References and grants are not silently retargeted.
 
 ### 3.2 Generic references without a universal entity parent
 
@@ -118,7 +141,7 @@ This preserves CONTRIBUTING's owner-local identity and concrete-FK requirements.
 
 | Dimension | Examples | Storage and change |
 | --- | --- | --- |
-| Semantic classification | Novel, character, software, hard science fiction, Event, AI model | Governed Tag/Expression/Application and scope decision; catalog classification adapters use this same authority, not a parallel class taxonomy. |
+| Semantic classification | Novel, character, software, hard science fiction, Event, AI model | Class/Concept definitions and scoped classification assertions/acceptance use shared vocabulary governance; community judgments are separate. SKOS broader is not automatically subclass. |
 | Structural capability | Recording, executable package, ordered contents | Typed owner structure and versioned capability contract; validated activation/retirement. |
 | Contextual role | Reply, chapter, encyclopedia body, creator | Reply target, occurrence or content slot; belongs to the relationship. |
 | Presentation | Compact note, article layout, picture presentation | Versioned presentation configuration. |
@@ -127,9 +150,16 @@ This preserves CONTRIBUTING's owner-local identity and concrete-FK requirements.
 
 No classification or kind gives a user a permission. “Wiki” must be expanded into independently meaningful choices: collaborative editing, encyclopedic purpose, and scope-specific selection. They can occur separately.
 
-### 3.4 Unit capabilities across owner tables
+<a id="34-unit-capabilities-across-owner-tables"></a>
+### 3.4 Resource capabilities across owner tables
 
-Unit remains the shared logical identity/reference/capability contract. Removing the physical `unit` parent does not remove shared features or require a Tag, favorite or authorization implementation for every catalog class. Owners retain identity and lifecycle; generic feature modules own their behavior and persist validated references. A common reference proves a target, not feature eligibility or permission.
+Resource is the selected name for the shared logical identity/reference/capability
+contract currently called Unit. Removing the physical `unit` parent does not remove
+shared features or require a Tag, favorite or authorization implementation for every
+catalog class. Owners retain identity and lifecycle; generic feature modules own
+their behavior and persist validated references. A common reference proves a target,
+not feature eligibility or permission. [Physical field and family policy](resource-storage.md)
+defines same-database specialization without making table names part of identity.
 
 | Boundary | Contract |
 | --- | --- |
@@ -315,7 +345,18 @@ Collections own explicit curated membership and ordering, with public or private
 
 Tags remain concepts; tag applications and judgments are contextual evidence. Tag paths, senses, expression ASTs and inference rules retain dedicated validity and governance. Inference projections pin rule generation and can be rebuilt; they do not overwrite direct applications. Hierarchical predicates declare whether cycles are allowed. Semantic spoiler judgments, whole-content labels, concealment marks, content rating and workplace display safety remain independent axes as required by current policy.
 
-Realm represents community grouping and owns membership, governance/rules and local selections. A wiki corpus, including a Realm's wiki pages, can be organized as one or more Collections; an explicit "published in" relationship can also express its publication context. Zone supplies page/navigation/dock and subsite infrastructure, composing one or more Collections into a user-facing subsite with an appropriate rule Realm. Displaying a publication in multiple Zones does not create multiple utterances or confer access. [Realm, Collection and Zone composition](../realm-collection-zone.md) owns these distinctions and the optional, separately modeled Dynamic Collection guide. Dynamic Collection implementation is not a gate for this refactor. Rules have immutable exact versions, stable selected rule identities and versioned acceptance records. A rule change does not retroactively change a historical moderation rationale.
+Realm and Zone capabilities share one Space identity. Realm owns community admission,
+rules and local publication selections; Zone owns routes, navigation, docks and
+presentation. Ordinary use recommends separate community and presentation Spaces
+linked explicitly. Both can supply Resource context with declared roles; semantic
+canon, presentation, publication and governance are not one undifferentiated scope.
+Collections organize explicit wiki/content membership. A route resolves to an
+existing Resource and uses the shared renderer; no separate ZonePage identity or
+content copy is required. Displaying a publication in multiple Zones does not create
+multiple utterances or confer access. [Space composition](../realm-collection-zone.md)
+and [addressing](../unit-slug-addressing.md) own these contracts. Dynamic Collections
+remain optional. Rules have exact versions and consent history; changing them does
+not rewrite historical moderation rationale.
 
 Custom themes retain their existing explicit full-trust external-live preview boundary, exact revision/host installation, review evidence, time-bounded eligibility and emergency kill control. Ordinary content references, software classification or publication do not authorize execution. Observed external bytes are not claimed to be a sealed transitive dependency closure. Presentation documents and their histories remain owned by the host/presentation domain.
 

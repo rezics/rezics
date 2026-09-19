@@ -5,6 +5,13 @@ Status: selected target capability; protocol integration and acceptance remain i
 This owner builds on [mixed authorization](identity-and-access.md). It is not a
 claim that the currently session/API-key-only bridge implements OAuth delegation.
 
+The [selected terminology revision](schema-modeling.md#native-terminology-and-identity)
+calls the public person/organization responsibility Agent and the logical Unit
+contract Resource. Entity-named protocol/implementation contracts retained here
+refer to that admitted public Agent, not generic Entity storage. The rename and
+shared Space owner require affected adapters and consumers to be qualified; this
+documentation update does not change a credential or wire contract.
+
 ## Scope and owners
 
 REZICS supplies a common Entity directory and verifiable, scoped representation

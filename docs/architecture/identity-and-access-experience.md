@@ -5,6 +5,12 @@ The [identity contract](identity-and-access.md) and [connected-app contract](con
 own authorization. This owner applies the [product design principles](product-design-principles.md)
 to how people use those capabilities.
 
+The [selected naming/model revision](schema-modeling.md) calls the public identity
+responsibility Agent (current Entity API names) and shares Realm/Zone identity through
+Space capabilities. The familiar user tasks below remain; target consumer changes
+follow backend qualification. The UI must not infer a unique private account from
+an Agent, or infer governance/participation from a Zone presentation context.
+
 ## Ordinary experience and progressive disclosure
 
 For ordinary identity tasks, users should not need to understand AuthPrincipal,

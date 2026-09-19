@@ -4,6 +4,9 @@ Dependencies: M01-M03. Owners: dictionary D09-D13 and existing access, rule and 
 
 ## Remaining work
 
+- Implement the selected [Space contract](../../architecture/realm-collection-zone.md) when this scope is activated: one identity owner, separate Realm/community and Zone/routing capability state, independent retirement/recovery, and presentation/publication/governance/canon context roles. Ordinary creation recommends separate linked community and presentation Spaces.
+- Replace native ZonePage ownership with versioned route-to-Resource bindings and shared rendering. Update address, navigation, Block execution, SEO and retained consumers together; multi-Space reuse must not copy content, select drafts or confer authority. Qualify MODEL29-MODEL36 before claiming the new flow complete.
+
 - Implement Org and Realm membership policies over the [shared identity/access model](../../architecture/identity-and-access.md), including Entity participation versus private operational membership, admission generations, all-members sets, multiple Groups/Teams and custom role bindings. Preserve mute/ban history independently from rejoin and do not infer Org-wide enrollment into a Realm.
 - Qualify Entity-held and directly assigned administration, privileged group changes, role edits, constrained representation and private independent-approval/accountability rules through the [target cases](../../testing/identity-and-access.md). Scope App installation management through M01's shared protocol owner.
 

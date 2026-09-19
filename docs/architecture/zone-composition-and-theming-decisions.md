@@ -1,15 +1,21 @@
 # Zone composition, aggregation and theming
 
-Current contract for declarative Zone composition. The [implementation plan](../plan/README.md) owns remaining work and backend/frontend gates. Executable themes follow [the full-trust contract](custom-theme-full-trust-external-live.md); no bounded-CSS security model is selected.
+Selected contract for declarative Zone composition, revised 2026-09-19 for shared
+Space identity and Resource-targeting routes. The new routing/identity consumers
+remain unimplemented and unqualified; older Page-named endpoints are implementation
+facts, not an additional native Page model. The [implementation plan](../plan/README.md)
+owns activation and gates. Executable themes follow [the full-trust contract](custom-theme-full-trust-external-live.md);
+no bounded-CSS security model is selected.
 
 ## 1. Scope and positioning
 
-A Zone provides REZICS's page and subsite infrastructure: routing, navigation,
-docks and declarative presentation over the shared corpus. A Zone combined with
-one or more Collections forms a user-facing subsite. A wiki's article corpus can
-span several Collections, including separately maintained projects in a modding
-ecosystem. A Realm supplies community grouping, rules and publication context
-where needed; those responsibilities do not move into Zone tables.
+A Zone is a Space's routing/presentation capability: routing, navigation, docks
+and declarative views of existing Resources. A route resolves to a ResourceRef
+and explicit context, then uses the shared renderer; Block documents remain target
+content. There is no standalone ZonePage identity or copied body. A Zone with one
+or more Collections forms a subsite. A Realm supplies community capability, rules
+and publication context on the same Space identity schema; ordinary creation
+recommends a separate linked Realm. Shared identity does not merge their authority.
 
 [Realm, Collection and Zone composition](realm-collection-zone.md) owns these
 relationships. Dynamic Collections are a separate optional query-based model;
@@ -135,8 +141,9 @@ Semantics:
   against corpus-scale relations.
 - **Seeded randomness.** `time-bucket` derives the pick from the
   server-owned resource context, canonical `BlockPath`, and bucket. For a
-  Page this context already includes the route's Page Unit ID; for the main
-  Dock it includes the Zone Unit ID and Dock slot. These values remain
+  routed view this context includes Space, route revision, resolved Resource
+  and representation selection; for the main Dock it includes Space and Dock
+  slot. These values remain
   outside document JSON. The pick is deterministic within the bucket,
   reproducible, and shareable across viewers, so the block stays cacheable
   (this is the direct answer to the DPL `randomcount` prohibition).
@@ -190,9 +197,13 @@ the existing depth/count rules:
 
 | Host policy | maxQueryBlocks |
 | --- | --- |
-| Zone Page | 24 |
+| Resource with Block-presentation capability | 24 |
 | Dock | 6 |
 | Wiki Post Portable Text | 6 |
+
+These are content-capability write policies, not new restrictions installed by
+mounting a route. Routing does not change a shared document's validity. Aggregate
+read/execution admission independently bounds the combined mounted surfaces.
 
 Wiki Posts already embed `unit-list` structurally; the budget makes that
 existing capability safe rather than newly granting it. Existing
@@ -225,23 +236,24 @@ BlockPath =
 
 Keyed paths survive sibling reordering. Moving a Block to another container
 changes its path, which is a document revision change and is already covered
-by revision binding. Page Unit IDs, Zone Unit IDs, and Dock ownership remain
-in database rows and request context; they are never copied into Page or Dock
+by revision binding. Resolved Resource IDs, Space/route revisions and Dock ownership remain
+in database rows and request context; they are never copied into content or Dock
 JSON. A renderer may carry that ownership in an in-memory envelope for
 authorization, logging, cache partitioning, or seeded execution.
 
 ### 3.9 Ownership context is not Block identity
 
-The aggregate and continuation routes obtain the owning Zone and Page from
-their URL path and load the main Dock through that Zone. A request names an
-executable Block only by its `BlockPath` inside that already selected document.
-There is therefore no persisted or request-level
-`{ documentKind, documentId, blockKey }` identity tuple, and no document UUID is
-injected into Page or Dock JSON.
+The aggregate and continuation routes consume the server's resolved Resource view:
+Space/mount/route revision, target Resource, typed parameters and selected content
+revision. The server revalidates that binding and current authority; a client cannot
+replace the target with an unrelated Resource. The main Dock comes from the Space's
+admitted presentation binding. A request identifies an executable Block by its
+`BlockPath` within the selected surface. No ownership UUID is injected into Block
+JSON; a Block path alone cannot select another document or authorize execution.
 
-Page, Dock, Wiki, comment, and future recommendation documents validate their
+Resource, Dock, Wiki, comment, and future recommendation documents validate their
 own sibling arrays independently. Mounting them together does not cause a
-second write validation. The runtime compositor may load Page and Dock together
+second write validation. The runtime compositor may load target content and Dock together
 to allocate a bounded execution budget and return results in separate `page`
 and `dock` branches; that is scheduling, not cross-document identity or
 validity. Comments remain a separate renderer and do not enter this aggregate.
@@ -250,15 +262,16 @@ validity. Comments remain a separate renderer and do not enter this aggregate.
 
 ### 4.1 Contract
 
-One new endpoint executes a rendered surface's eager query blocks in one
-request:
+The target aggregate operation executes a resolved Resource surface's eager query
+blocks in one request. This is a proposed transport shape, not an installed endpoint;
+`page` names a rendered response surface, not a Page Resource:
 
 ```
-POST /search/zones/:zoneId/pages/:pageId/execute
-body: { pageRevision?, includeDock?: boolean = true,
+POST /search/spaces/:spaceId/routes/:routeId/execute
+body: { resolution: ResolvedViewReference, includeDock?: boolean = true,
         pageBlocks?: [{ path: BlockPath, state? }],
         dockBlocks?: [{ path: BlockPath, state? }] }
-→ { pageRevision,
+→ { target: ResourceRef, routeRevision, contentRevision,
     page: { results: [{ path,
         outcome:
           { kind: "ok", items, nextCursor?, selected? }
@@ -268,7 +281,7 @@ body: { pageRevision?, includeDock?: boolean = true,
 ```
 
 - **Persisted-query semantics.** The server resolves every executed query
-  from the stored Page or Dock document; the request may only name a
+  from the resolved Resource's selected content or Dock document; the request may only name a
   runtime-validated path inside the corresponding response branch and
   per-Block continuation state. Clients cannot inject queries, so the
   endpoint adds no new query attack surface and inherits each Block's
@@ -280,18 +293,17 @@ body: { pageRevision?, includeDock?: boolean = true,
 - The Zone mounts the independently stored Dock as two presentation regions:
   top-level menu Blocks in the Zone header (including its mobile portal), and
   every other top-level Dock Block in a separate Dock composition region before
-  Page content. Both regions retain `surface = dock`; they do not become Page
-  Blocks and are not revalidated against the Page.
-- `pageRevision` binds results to the document revision the client
-  rendered; a mismatch returns the current revision so the client refetches
-  the projection. `GET /zones/:zoneId/render` is unchanged and remains the
-  cache-friendly projection read.
+  target content. Both regions retain `surface = dock`; they do not become target
+  Blocks and are not revalidated against the target's content.
+- The resolved-view reference binds target, route revision, typed parameters and
+  content selection to what the client rendered. A changed/retired binding returns
+  a typed stale/unavailable outcome and requires resolution again; it never executes
+  against a silently substituted target. The shared projection remains a read operation.
 - **Dual cursors.** Each block result carries its own opaque `nextCursor`;
-  in-block paging continues on the surface-owned routes
-  `/search/zones/:zoneId/dock/block-executions`,
-  `/search/zones/:zoneId/pages/:pageId/block-executions`, and their
-  `feed-block-executions` counterparts. Those bodies contain only `path`,
-  continuation `state`, an optional derived-selection seed, and localization
+  in-block paging continues through the Space-Dock and resolved-Resource execution
+  operations and their Feed counterparts.
+  Their transport is qualified with the routing migration. Bodies contain the
+  resolved-view reference, `path`, continuation `state`, an optional derived-selection seed, and localization
   hints. They contain neither a document discriminator nor client-supplied
   Filter injections.
   Derived blocks echo the `selected` reference (hydrated with the standard

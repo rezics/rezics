@@ -7,6 +7,13 @@ No runtime, query benchmark or deployed site is qualified by this document.
 [Subscribe](subscriptions.md) owns plans and independent grant sources;
 [capacity](subscriptions-capacity.md#scoped-reply-read-envelope) owns workload bounds.
 
+The [2026-09-19 Space/address target](unit-slug-addressing.md) changes routing and
+shared identity representation, not this contract's independent community acceptance
+and fixed-site conjunction. Realm denotes the admitted community capability of a
+Space; a Zone route supplies presentation context and resolves to the same native
+Resource. It cannot replace publication/governance roles or redirect to a general
+body that fails this site's boundary. These consumer changes remain unqualified.
+
 ## Decision and first release
 
 The first release deploys both `https://rezics.com` and `https://pro.rezics.com`

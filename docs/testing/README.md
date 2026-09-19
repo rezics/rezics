@@ -6,6 +6,7 @@ This directory owns test scenarios and evidence. Follow the [active scope](../pl
 | --- | --- |
 | [Database scenarios](database/scenarios.tsv) | Cross-domain invariant cases; specifications until executed against the target. |
 | [Shared schema and converters](schema.md) | Complete shared Drizzle storage, pinned multi-source declarations, real PostgreSQL integrity and bounded relocation evidence. |
+| [Integrated model contracts](model-contracts.md) | Unexecuted MODEL01-MODEL40: Resource/value/relationship contracts, standards coverage/loss, open languages, shared Space, scoped routing, physical specialization and recovery. |
 | [Foundation persistence](foundation.md) | Concrete reference constraints, immutable allocation, concurrency and selective lookup evidence. |
 | [Identity, access and connected apps](identity-and-access.md) | Pending mixed-principal/Entity, groups/roles/representation, OAuth/MCP, privacy, revocation and layered-GUI acceptance; older Self fixtures are not qualification. |
 | [Subscribe and Realm participation](subscriptions-and-pro.md) | Selected M10 SUB/PRO, SITE/RPLY, capacity and experience scenarios: multi-plan commerce, independent gifts, local policies, fixed-site context and authorized multi-Realm reply delivery; runtime activation and qualification remain pending. |
@@ -39,6 +40,13 @@ task openapi:check
 ~~~
 
 Use the relevant owning Taskfile and focused suites before broader integration. No API test may use a fabricated ID where a preceding create/import response should provide it. Retain positive, rejected, missing-data, conflict, retry and revocation outcomes. A fixture, generated SQL file or skipped test is not qualification.
+
+Fresh checkouts first follow the owning [artifact preparation procedure](../../libraries/schema-importer/README.md).
+The strict design `--require-tracked` check currently has a
+[recorded generated-input failure](known-failures.md#tracked-design-input-guard-rejects-generated-schema-artifacts).
+Keep that failure visible. `check_design.py --check` can separately verify generated
+design metadata and arithmetic; its success does not pass the strict tracked-input
+requirement or any target runtime/capacity gate.
 
 ## Reproducibility and retention
 

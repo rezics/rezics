@@ -1,110 +1,89 @@
-# Unit landing SEO
+# Resource landing SEO
 
-Status: Implemented (v1)
-
-Owners: Main Service and Web
+Status: v1 SEO exists; the 2026-09-19 Resource/Space/address revision below is a
+selected target requiring consumer qualification. The historical filename remains
+for document navigation. Owners: Main Service and Web.
 
 ## Scope
 
-This first release provides server-rendered metadata and structured data for every publicly
-addressable Unit landing kind:
+Provide a sanitized metadata/structured-data projection for an authorized resolved
+Resource view. A Space route targets the same Resource as an ID lookup and uses the
+shared renderer. Removing native ZonePage does not prohibit emitting a WebPage
+description for an actual rendered web representation.
 
-`profile`, `book`, `software`, `media`, `video`, `audio`, `entity`, `tag`, `structure`, `series`,
-`zone`, `zone_page`, `collection`, `post`, `poll`, and `realm`.
-
-It deliberately does not add a sitemap, discovery feed, crawler queue, or corpus-wide SEO
-projection. The optional `?language` parameter selects presentation only and is excluded from the
-canonical URL. Unit localizations are peers: there is no primary-language field or semantic
-primary version. Resolution uses the existing ordered fallback contract:
-
-1. a valid explicit `?language` value is tried first;
-2. an authenticated request then uses the Profile's ordered language preferences;
-3. the active interface language is tried next;
-4. remaining supported browser `Accept-Language` preferences follow; and
-5. the Unit's localization position order deterministically selects the presentation only when
-   none of those hints are available on the Unit.
-
-Canonical-address redirects preserve a valid explicit language parameter even though that
-parameter is not part of the canonical identity.
+This target does not activate a sitemap, crawler or corpus-wide SEO projection.
+It follows [modeling](schema-modeling.md), [addressing](unit-slug-addressing.md) and
+the selected content/publication contracts. Vocabulary preservation and full source
+interoperability are independently qualified.
 
 ## Indexing policy
 
 | State | Metadata | Structured data | Robots |
 | --- | --- | --- | --- |
-| Public, approved, published General or R15 Unit with a title | Localized authored projection | Emitted | `index, follow` |
-| Unlisted General or R15 Unit with a title | Localized authored projection | Omitted | `noindex` |
-| R18 or R18G Unit | Generic restricted copy only | Omitted | `noindex, noarchive, noimageindex, nosnippet` |
-| Private, draft, archived, removed, deleted, unsupported, missing, or failed projection | Generic unavailable copy only | Omitted | `noindex, noarchive, noimageindex, nosnippet` |
+| Public, approved, published General or R15 Resource with usable presentation | Authorized localized projection | Emitted under an elected profile | `index, follow` |
+| Unlisted General or R15 Resource | Authorized localized projection | Omitted | `noindex` |
+| R18 or R18G Resource | Generic restricted copy only | Omitted | `noindex, noarchive, nosnippet` |
+| Private, draft, archived, removed, deleted, unsupported, missing or failed projection | Generic unavailable copy only | Omitted | `noindex, noarchive, nosnippet` |
 
-The Main Service checks classification before reading localization, artwork, description, or
-context. Adult-authored fields therefore cannot cross the SEO response boundary. The Web layer
-also models adult responses as `presentation: null`, so it cannot accidentally construct social
-cards or JSON-LD from those fields.
+Check current disclosure and content-rating policy before loading or exposing
+titles, bodies, artwork, canonical locations or context. Neither a public Space
+mount nor stale search/address data can disclose a restricted target. Preserve
+`presentation: null` for unavailable/restricted projections and fail closed on
+invalid identity, route or representation bindings.
 
 ## Canonical addresses
 
-Unit IDs remain immutable identities. Canonical addresses follow
-[Unit slug addressing](./unit-slug-addressing.md): Profile, Realm, Zone, and Zone Page prefer their
-current canonical slug address and otherwise use their long ID route. Other enabled landing kinds
-use their existing ID-addressed route. Former slugs redirect before metadata is constructed.
+Canonical selection consumes AddressPreference with explicit site/Space/purpose
+context. The same Resource may have a preferred address in several Spaces. Do not
+read a target-wide canonical slug or reconstruct a Page-owned URL. A route's
+operational ID is not content identity, and `/` is an explicit root binding.
 
-Zone Page `home` canonicalizes to the owning Zone root. Another addressed Zone Page uses its
-Zone-scoped slug; an unaddressed Page uses `/zone/{zoneId}/page/{pageId}`. A Zone Page breadcrumb
-includes its owning Zone when that parent canonical path is available.
+The SEO profile elects the preferred web representation for the requested scope;
+aliases resolve before metadata emission. Redirects recheck current visibility
+and preserve permitted parameters/fragments. A fixed Pro site's conjunction cannot
+be bypassed by redirecting to a general address for the same Resource.
+
+Resource identity is independent of presentation language. The route/SEO profile
+declares which language/format parameters participate in its canonical address;
+the v1 convention of omitting `language` is not a universal identity rule. Report
+actual selected language and fallback. Multilingual variants use the open language
+contract, not a seven-language lifetime limit. Available alternate-address metadata
+is bounded and policy-aware.
 
 ## Projection contract
 
-`GET /api/v1/units/by-id/{unitId}/seo` is a read-only, sanitized public projection. A successful
-response contains immutable identity, kind, classification, publication timestamps, indexing
-decision, and either:
+The existing `GET /api/v1/units/by-id/{unitId}/seo` is a current implementation entry
+point, not proof of scoped address support. Target reads supply ResourceRef and
+optional resolved address context; they return identity, exact relevant selection,
+address preference/generations, indexing decision and a bounded safe presentation
+or explicit unavailability. Update service, generated clients and Web adapters
+together when activated. Do not publish an invented new wire path in the meantime.
 
-- a bounded localized presentation for General/R15 content; or
-- `presentation: null` for adult or incomplete content.
-
-The Web adapter verifies that the returned Unit ID and kind match the route before using any
-presentation. Backend failure, an invalid response, or an identity mismatch fails closed to the
-generic unavailable `noindex` document. Metadata includes a canonical link, localized title and
-description, Open Graph and Twitter fields, and robots directives. Indexable pages additionally
-emit a Schema.org graph containing a WebPage or CollectionPage, breadcrumbs, and an applicable
-main entity.
+The Web adapter checks target and resolved context before composing metadata.
+Schema.org output is a declared projection of accepted native data; simplified
+output records unsupported/lost semantics through its export profile. It cannot
+claim full source import or lossless preservation of qualified relationships.
 
 ## Workload and capacity
 
-The [full interoperability target](semantic-interoperability.md) adds versioned
-source ingestion, querying and export independently of this implemented SEO slice.
-Future vocabulary projections must preserve this public disclosure boundary and
-use accepted native facts. Existing JSON-LD output does not qualify Schema.org
-input profiles, complete vocabulary mappings or Wikidata source compatibility.
+Retain the [500M/3B planning policy](data-integrity-and-workload-budgets.md#capacity-planning).
+A request resolves a bounded address path and target, selects an admitted number
+of language candidates, batch-hydrates necessary presentation dependencies and
+returns bounded metadata. Indexes follow logical identity, namespace/key and
+resource/context preference. No request scans all languages, aliases, routes,
+owner tables or the corpus.
 
-The sizing baseline is 500,000,000 Units and the planning estimate is 3,000,000,000 Units. The SEO
-request path does no corpus scan, count, deep offset, recursive lookup, or unbounded fan-out.
+The former v1 explanation using one global `unit` row, at most seven localization
+rows and a `zone_page` primary key does not qualify the selected owner-local,
+open-language, multi-Space target. Measure query plans, skew, bytes, cache policy
+and invalidation before publishing replacement latency/capacity evidence. Address,
+content and moderation changes invalidate relevant projections; cache keys bind
+the effective representation/context and never substitute for current disclosure.
 
-Per cold request, the maximum database work is:
+## Required verification
 
-1. one `unit.id` primary-key lookup;
-2. at most seven `unit_localization` candidates, bounded by the complete ContentLanguage contract,
-   using the `(unit_id, position, language)` index; and
-3. at most one kind-specific context row, using the Entity or Zone Page primary key, or
-   `credit_attribution_source_position_idx` for a Post.
-
-Canonical slug resolution is also bounded: target-to-canonical lookup uses
-`unit_slug_address_target_canonical_key`. The dedicated Zone Page address projections use the
-`zone_page` primary key for ID routes and the unique `(scope_unit_id, slug)` address constraint for
-slug routes; a retained redirect adds one canonical-target lookup. They do not require the owning
-Zone to have a short address, so `/zone/{zoneId}/{pageSlug}` remains valid without falling back to
-listing every Page in the Zone. The asymptotic request cost is indexed point/range lookup plus a
-constant fan-out of seven, so corpus growth from 500 million to 3 billion rows does not increase
-rows returned or application memory. The requested language list does not enlarge that bound.
-
-The response performs no writes, adds no database objects, and causes no write amplification,
-queue growth, migration cost, or maintenance scan. Description extraction touches only the chosen
-localization row and truncates its normalized result to 600 characters before crossing the service
-boundary. Web rendering memoizes duplicate work within one React server request but intentionally
-uses `cache: no-store` across requests, avoiding stale classification after moderation changes.
-
-Latency is therefore dominated by a small fixed number of indexed database round trips and image
-URL presentation. Expected skew follows ordinary Unit page popularity; there is no global hot key.
-Database connection-pool admission is the existing backpressure boundary. If traffic later exceeds
-a single database partition, Unit-ID-derived sharding keeps the Unit and localization reads local;
-the optional context lookup can be separately cached or colocated without changing this public
-contract. No sitemap-scale batch or whole-corpus cache is required by this release.
+Use [model-contract acceptance](../testing/model-contracts.md) for multiple Space
+addresses, exact target/representation agreement, Unicode/UUID lookup, reverse-link
+and stale-generation behavior, aliases/tombstones, unavailable translations and
+revocation before metadata/redirect delivery. Existing v1 acceptance remains limited
+to its recorded contracts; target checks are not yet executed.

@@ -4,6 +4,9 @@ Dependencies: M01. Owners: dictionary D03-D04/D11, [Tag Path architecture](../..
 
 ## Remaining work
 
+- Complete the [seven model contracts](../../architecture/schema-modeling.md#seven-contracts-and-one-model-representation) and [standards/profile dispositions](../../architecture/standards-adoption.md), separating semantic/data/binding versions and TS/API authoring from one runtime IR. Complete generic instance operations for unmapped classes, including Recipe, rather than treating vocabulary registration as native coverage.
+- Qualify names/direction, exact values, temporal/quantity/geometry/observation contracts, classification acceptance separate from community judgments, and MODEL01-MODEL25. New value/profile modules are explicit capabilities; they do not imply complete OWL/SHACL/SPARQL execution or new physical tables per class.
+
 - Qualify fact slots, typed assertions, evidence/support, scope decisions, n-ary associations and participant type witnesses.
 - Implement [verification assessment and policy semantics](../../architecture/information-indexing-and-verification.md): exact target/input/method revisions, evidence dependence, distinct run/verdict states, competing issuers, correction/dispute and independent acceptance. Reuse D03/D14.1 without a universal claim-subject owner or duplicate native effective writer.
 - Define qualified claim-class methods, quality signals and calibration populations; separate source support, factual acceptance, native adoption and publication. Preserve abstention, unavailable evidence, temporal scope and unknown dependence through APIs. Qualify the M02 portions of [FACT01-FACT36](../../testing/information-verification.md), including same-value human support and false-merge correction.

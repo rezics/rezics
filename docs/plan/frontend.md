@@ -8,6 +8,15 @@ feature contracts specify the actual controls and evidence, not a fixed layer co
 
 ## Remaining experiences
 
+The [2026-09-19 target](../architecture/schema-modeling.md) changes core naming,
+Space ownership and addresses; it does not activate frontend work. Once the selected
+APIs are qualified, migrate Resource/Agent references and the shared resolved-Resource
+renderer together. UUID/scoped-slug/fixed/dynamic routes carry typed context and
+representation selection. Do not recreate a native ZonePage or a second body store;
+two Spaces may display the same Resource with independent address preferences.
+Backend resolution owns address interpretation; frontend code must not guess UUID
+versus slug or construct a global canonical path from a display title.
+
 - Identity and access: follow the [layered GUI contract](../architecture/identity-and-access-experience.md). Ordinary users enter a valid main Entity and complete reading/posting/joining/App connection without learning Principal, Binding or delegation internals. Collaboration controls provide named members/teams and role presets; dedicated advanced workspaces expose mixed recipients, multiple custom roles, scopes, representation, client/installation management and restricted diagnostics.
 - Preserve advanced API-created configuration through ordinary edits, explicit identity selection across drafts/tabs and materially complete consent. The approximately 90% ordinary-user audience is a design priority, not measured success or permission to discard advanced API capabilities. Qualify [UX01-UX08](../testing/identity-and-access.md#experience-acceptance) after backend acceptance under the authorized rendered/human-study workflow.
 

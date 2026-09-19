@@ -9,6 +9,9 @@ domain adapter; implementation activation still follows the active plan.
 
 ## Remaining work
 
+- Apply [standards admission and evidence](../../architecture/standards-adoption.md): pin normative/artifact/parser/profile identities independently; report source preservation, generic operations, native writes, queries, validation, exports and workflows separately. Extend current manifests/registries rather than create another provider importer or copy every research candidate into dependencies.
+- Add explicit ExchangeMapping losses and the integrated Recipe/names/quantity/fragments/credits/source-withdrawal cases from [MODEL01-MODEL25](../../testing/model-contracts.md). Full source graphs, repository-qualified identities and unmapped instances remain distinct from native acceptance.
+
 - Complete MusicBrainz, Cover Art Archive, VNDB, Bangumi and elected book/Open Library converters; treat archive/dump/API/media surfaces separately.
 - Complete Schema.org and Wikidata as required full-index families: pinned full vocabulary, JSON-LD/Microdata/RDFa profiles, all selected Wikidata entity kinds/datatypes and complete statement models. JSON-LD-first and Item-only milestones remain partial.
 - Build immutable parsed source representations and coverage inventories that preserve external identity, grouping, values, source order and unmatched terms. Qualify namespace-specific acquisition, contexts, shape/lexical data and malformed/unknown inputs; update the owning source inventories when implemented.

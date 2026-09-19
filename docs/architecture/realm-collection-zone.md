@@ -1,6 +1,10 @@
-# Realm, Collection and Zone composition
+# Space, Realm, Collection and Zone composition
 
-This is the semantic owner for grouping and subsite composition. The [implementation plan](../plan/README.md) owns activation and progress. These concepts compose through explicit relationships; they are not interchangeable identities or an exclusive classification hierarchy.
+Status: shared Space identity and Resource-targeting routes selected on 2026-09-19;
+implementation and acceptance remain pending. This is the semantic owner for grouping
+and subsite composition. The [implementation plan](../plan/README.md) owns activation
+and progress. Existing Realm/Zone/Page tables are not evidence that this target is
+implemented. Resource is the [selected name of the logical Unit contract](schema-modeling.md#native-terminology-and-identity).
 
 [Identity and access](identity-and-access.md) owns Realm participant admission,
 multiple Groups/Teams, custom Roles, mixed AuthPrincipal/Entity recipients and
@@ -12,14 +16,50 @@ participation from collaboration and advanced administration.
 
 | Concept | Responsibility | Relationship meaning |
 | --- | --- | --- |
-| Realm | Community grouping, participants, rules, publication context and local selections | Groups people and content under an explicit community/governance context. |
+| Space | One native Resource identity, lifecycle and admitted capability configuration | Shared identity storage for Realm and Zone capabilities; not a global Resource parent. |
+| Realm | Community capability/preset: participants, rules, publication context and local selections | Groups people and content under explicit governance; capabilities and membership have independent admission/state. |
 | Collection | Maintained grouping of content or other eligible resources, with explicit stored membership and ordering | Records intentional curation; public and private Collections are both possible. |
-| Zone | Pages, routing, navigation, docks, presentation and subsite infrastructure | Composes and presents resources, including one or more Collections, subject to current access. |
+| Zone | Routing/presentation capability/preset: URL paths, navigation, docks and subsite infrastructure | Routes to existing Resources, including Collections, and renders them with explicit presentation context. |
 | Dynamic Collection | A separately identified, versioned selection rule whose results are computed from native state | Describes a changing result set; it has no implicit stored Collection membership. |
 
 Realm and Collection are both ways to represent grouping relationships. The catalog's Grouping owner also remains available for independently indexed referents such as franchises, series and continuities. Choosing one representation does not manufacture the identities, governance, curation or publishing rights of another.
 
-A user-facing subsite can be composed from a Zone and one or more Collections, with a Realm where community membership, governance or publication context is needed. This supports the composition needed for a Fandom-like wiki service without making the Zone the identity of the wiki corpus. A Collection can appear in several Zones; a Zone can present several Collections. Neither mounting nor removing a Collection copies or deletes its content.
+A user-facing subsite can be composed from a Zone and one or more Collections,
+with a Realm where community membership, governance or publication context is
+needed. Realm and Zone share the selected `space` identity table; membership,
+rules, routes and navigation remain separate capability-owned relations rather
+than duplicate Realm and Zone roots. One Space may admit both capabilities, but
+ordinary product flows recommend a separate community Realm and presentation Zone
+with an explicit relationship. A wiki/site is normally established with a Zone;
+Tag classification does not substitute for its routing or content curation.
+
+A Collection can appear in several Zones; a Zone can present several Collections.
+Neither mounting nor removing a Collection copies or deletes its content. Capability
+retirement preserves Space identity/history and cannot erase the other capability's
+state or silently disable its valid references. Deletion/recovery must account for
+both sets of dependents. A semantic Zone/Realm label does not activate capabilities.
+
+## Context roles and routing
+
+Both Realm and Zone can provide a Resource context. Bind its role explicitly:
+presentation chooses a view; publication identifies an accepted content selection;
+governance identifies applicable authority/rules; semantic canon identifies the
+world/version in which a claim holds. These roles can use different references.
+An undifferentiated `context_id` must not transfer authority between them.
+
+The [address owner](unit-slug-addressing.md) defines SpaceMount, RouteDefinition,
+AddressNamespace, SlugBinding and AddressPreference, including UUID, scoped slug,
+dynamic parameters, reverse links and current disclosure. Routes resolve to
+ResourceRef and context, then use the common rendering flow. A Block document is
+content/representation of the resolved Resource, not a route's direct identity.
+
+There is no selected standalone ZonePage Resource or required `post(kind=page)`
+ownership relation. Route occurrences retain IDs/revisions for editing and history;
+Document/Variant/Revision and Block occurrence identities remain with content.
+Two Spaces can present the same Resource without duplicating its body. A route
+can pin an accepted revision/selection or follow a declared publication channel;
+it cannot silently publish an editing head. External `schema:WebPage` descriptions
+remain valid even though the native ZonePage business object is removed.
 
 ## Wiki content and grouping relationships
 
@@ -40,7 +80,15 @@ A Realm's wiki pages may be organized as one or more Collections. The same conte
 
 The relationship must identify its subject, publication/grouping context, state and relevant scope or exact revision. A semantic assertion that something was published in a context is evidence, not authorization to publish or adopt it there. An actual platform publication transition remains owned by the publication/Realm command. Define which accepted relationship the query consumes; a title, tag or source claim cannot silently become an effective publication placement.
 
-Collection items reference the native content, Publication or other eligible resource. Document history, author release and scope adoption keep their existing owners. A Zone Page is a presentation/page resource and can display that content; it does not replace the article's identity or editorial history. An item removed from a Collection may remain published in a Realm, and an item withdrawn from a Realm may remain in a Collection's retained history while current disclosure follows policy. A Collection whose meaning is exactly "currently published in this Realm" should be an explicit query-based selection when supported, rather than an independently edited mirror.
+Collection items reference the native content, Publication or other eligible resource.
+Document history, author release and scope adoption keep their existing owners.
+A Zone route presents the referenced Resource through the shared renderer; its URL
+does not replace the article's identity or editorial history. An item removed from
+a Collection may remain published in a Realm, and an item withdrawn from a Realm
+may remain in a Collection's retained history while current disclosure follows
+policy. A Collection whose meaning is exactly "currently published in this Realm"
+should be an explicit query-based selection when supported, rather than an
+independently edited mirror.
 
 Content membership in a Collection or Zone placement grants no edit, ownership, publication, read or execution authority. Realm participant membership can select an explicitly configured authorization audience under the identity/access contract; admission alone does not imply every management or content right. Public Collection and Zone pages disclose only authorized members, bodies, media and history. Realm governance scope, semantic/canon context, Collection membership and Zone placement remain separately queryable.
 
