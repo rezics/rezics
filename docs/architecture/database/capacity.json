@@ -1991,6 +1991,87 @@
       "standalone_3b_rows_native_bytes": 672000000000
     }
   ],
+  "relationship_comparison": {
+    "assumptions_only": true,
+    "decimal_units": true,
+    "inputs": {
+      "association_identity_native_bytes_per_row": 208,
+      "association_revision_native_bytes_per_row": 272,
+      "association_participant_native_bytes_per_row": 336,
+      "structural_occurrence_native_bytes_per_row": 352
+    },
+    "profiles": [
+      {
+        "key": "specialized_current_occurrence",
+        "label": "Specialized current occurrence",
+        "formula": "structural_occurrence",
+        "average_physical_rows_per_relation": 1.0,
+        "native_bytes_per_relation": 352,
+        "comparator": "specialized_current_occurrence",
+        "relative_to_comparator": 1.0,
+        "relative_to_specialized_current": 1.0,
+        "native_bytes_at_500m_relations": 176000000000,
+        "native_bytes_at_3b_relations": 1056000000000
+      },
+      {
+        "key": "generic_current_binary_association",
+        "label": "Generic current binary association",
+        "formula": "identity + revision + 2 participants",
+        "average_physical_rows_per_relation": 4.0,
+        "native_bytes_per_relation": 1152,
+        "comparator": "specialized_current_occurrence",
+        "relative_to_comparator": 3.272727,
+        "relative_to_specialized_current": 3.272727,
+        "native_bytes_at_500m_relations": 576000000000,
+        "native_bytes_at_3b_relations": 3456000000000
+      },
+      {
+        "key": "specialized_versioned_binary_proxy",
+        "label": "Specialized versioned binary proxy",
+        "formula": "identity + 1.5 specialized revisions",
+        "average_physical_rows_per_relation": 2.5,
+        "native_bytes_per_relation": 736,
+        "comparator": "specialized_versioned_binary_proxy",
+        "relative_to_comparator": 1.0,
+        "relative_to_specialized_current": 2.090909,
+        "native_bytes_at_500m_relations": 368000000000,
+        "native_bytes_at_3b_relations": 2208000000000
+      },
+      {
+        "key": "generic_versioned_binary_association",
+        "label": "Generic versioned binary association",
+        "formula": "identity + 1.5 revisions + 3 participants",
+        "average_physical_rows_per_relation": 5.5,
+        "native_bytes_per_relation": 1624,
+        "comparator": "specialized_versioned_binary_proxy",
+        "relative_to_comparator": 2.206522,
+        "relative_to_specialized_current": 4.613636,
+        "native_bytes_at_500m_relations": 812000000000,
+        "native_bytes_at_3b_relations": 4872000000000
+      },
+      {
+        "key": "generic_versioned_three_participant_association",
+        "label": "Generic versioned three-participant association",
+        "formula": "identity + 1.5 revisions + 4.5 participants",
+        "average_physical_rows_per_relation": 7.0,
+        "native_bytes_per_relation": 2128,
+        "comparator": "specialized_versioned_binary_proxy",
+        "relative_to_comparator": 2.891304,
+        "relative_to_specialized_current": 6.045455,
+        "native_bytes_at_500m_relations": 1064000000000,
+        "native_bytes_at_3b_relations": 6384000000000
+      }
+    ],
+    "catalog_scenario": {
+      "association_native_bytes_per_root": 6384,
+      "structural_native_bytes_per_root": 2112,
+      "association_to_structural_ratio": 3.023,
+      "association_native_bytes_at_500m_roots": 3192000000000,
+      "association_native_bytes_at_3b_roots": 19152000000000,
+      "structural_native_bytes_at_500m_roots": 1056000000000,
+      "structural_native_bytes_at_3b_roots": 6336000000000
+    }
+  },
   "scenario_totals": [
     {
       "scenario": "catalog",

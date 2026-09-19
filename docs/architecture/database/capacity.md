@@ -101,6 +101,24 @@ Native provision uses a 2x free-space/bloat/rebuild allowance, separately for ea
 | event_time | event_temporal_projection | 1.5 | 128 | 192 | 0 | 0.240 | 1.440 | 160.0 | 0.960 |
 | event_time | event_topic_binding | 0.25 | 96 | 128 | 0 | 0.028 | 0.168 | 112.0 | 0.672 |
 
+## Specialized and generic relationship comparison
+
+This comparison isolates the modeled native heap and index bytes for several physical relationship shapes. A specialized current occurrence has less behavior than an identified, versioned association. The specialized versioned binary row is an arithmetic proxy using the association-identity width plus 1.5 specialized occurrence rows; it is not selected DDL or a measurement. Compare profiles with the same required semantics before attributing the whole difference to dynamic definitions.
+
+| Physical profile | Planning formula | Avg physical rows/relation | Native B/relation | 500M relations TB | 3B relations TB | Declared comparator | Ratio | Versus current specialized |
+| --- | --- | ---: | ---: | ---: | ---: | --- | ---: | ---: |
+| Specialized current occurrence | structural_occurrence | 1 | 352 | 0.176 | 1.056 | Specialized current occurrence | 1.00x | 1.00x |
+| Generic current binary association | identity + revision + 2 participants | 4 | 1,152 | 0.576 | 3.456 | Specialized current occurrence | 3.27x | 3.27x |
+| Specialized versioned binary proxy | identity + 1.5 specialized revisions | 2.5 | 736 | 0.368 | 2.208 | Specialized versioned binary proxy | 1.00x | 2.09x |
+| Generic versioned binary association | identity + 1.5 revisions + 3 participants | 5.5 | 1,624 | 0.812 | 4.872 | Specialized versioned binary proxy | 2.21x | 4.61x |
+| Generic versioned three-participant association | identity + 1.5 revisions + 4.5 participants | 7 | 2,128 | 1.064 | 6.384 | Specialized versioned binary proxy | 2.89x | 6.05x |
+
+At the catalog scenario's recorded densities, the three association roles total 6,384 native bytes/root, compared with 2,112 bytes/root for the separately modeled structural-occurrence family (3.02x). That is 3.192/19.152 TB at 500M/3B catalog roots for association roles and 1.056/6.336 TB for structural occurrences. At the scenario's 2x operational provision plus one equally provisioned replica, those relationship-role totals become 12.768/76.608 TB and 4.224/25.344 TB respectively. These families have different semantics and recorded densities; the scenario ratio is a capacity comparison, not a claim that one can replace the other.
+
+The row and byte counts support an initial hypothesis of roughly 2-5x write work for a generic relation at comparable semantics, and roughly 2-4x database work for a bounded direct relation read that must traverse participant/revision indexes. They do not predict wall-clock latency, WAL, cache behavior, vacuum cost or search latency. Measure those values on candidate DDL under representative predicate/degree skew. Search and facet requests use an explicit flattened projection rather than foreground joins across canonical relation tables, so projection query cost is evaluated separately from canonical write amplification and freshness.
+
+A compact generic binary edge is a selected physical strategy but has no byte estimate here until candidate DDL and indexes exist. Its qualification target is no more than 2x the specialized current occurrence for its admitted current-value workload; exceeding that target requires either a narrower layout or promotion to a specialized relation.
+
 ## Media density and optional hosting
 
 Per media-bearing subject, assume 4 contextual asset uses, 3.2 distinct assets after authorized sharing, 1.05 content revisions per asset, and 1 original plus 2 previews per revision. Locations average 1.25 per representation. Use histories average 1.1 revisions, with 1.25 roles, 2 applicability entries and 1.5 source-support rows per use revision. Two display slots with 1.3 historical selections are modeled separately from gallery membership. These are adjustable density assumptions, not source/API limits.

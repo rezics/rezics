@@ -94,6 +94,30 @@ not complete DDL. Evidence/history/acceptance and domain structures have additio
 owners. Adding an ontology class or a new relation definition does not create a
 table for every class or every pair of endpoint types.
 
+Use three physical relationship strategies behind the same logical definition
+contract. Selecting a definition does not by itself select the largest layout.
+
+| Physical strategy | Admit when | Required boundary |
+| --- | --- | --- |
+| Specialized structural relation | Stable meaning/cardinality, high volume or hot reads/writes justify dedicated typed columns and concrete FKs | The table owns its invariant and transaction; logical definition/occurrence identity remains stable across placement changes. |
+| Compact generic binary edge | A long-tail relation is binary and current-oriented, has no repeated participant role and does not need an independently revised relation node | Store typed source/target references, exact definition revision, context/state and admitted typed qualifiers in one occurrence row. Keep source/predicate and target/predicate access paths; do not emulate n-ary or historical semantics with opaque payloads. |
+| Identified association | The relation is n-ary, repeats roles, has independent identity/history, valid-time/context, ordered participants, qualifiers, evidence or acceptance | Use the head/revision/participant/qualifier contract and correlate every participant predicate to the same exact relation revision. |
+
+API and TS declarations expose one logical relation definition and its admitted
+operations; they do not expose a physical table name. A definition can be promoted
+from a compact edge to a specialized relation after measured volume, skew or access
+cost justifies it. Promotion preserves meaning, occurrence identity, order, exact
+references and allowed/rejected operations, builds and reconciles the replacement,
+then fences the old writer before authority switches. It does not leave two editable
+authorities or require a table for every ontology term.
+
+Search and facet requests consume a flattened, generation-bound projection of
+accepted visible values and relationships. They do not perform foreground joins
+over arbitrary canonical association tables. Schema-driven attribute requirements
+and dynamic filter presentation are useful catalog precedents, but public seller
+schemas do not reveal a retailer's canonical storage or establish generic-relation
+performance; the evidence boundary is recorded in [design evidence](design-evidence.md#composition-and-system-operations).
+
 Choose the relationship home by its declared edit/transaction scope: a video's
 credit is video-owned even when its performer is an Agent. Each occurrence has one
 authoritative home; symmetric and cross-domain definitions must also specify one.
@@ -131,6 +155,26 @@ for each growing relation. Distinguish objects, physical rows, bytes and request
 per second. Names, participants, source observations, revisions, evidence and
 incoming projections multiply independently. Existing [capacity scenarios](capacity.md)
 are estimates for their recorded layouts; do not silently reuse them for this target.
+
+The generated [relationship comparison](capacity.md#specialized-and-generic-relationship-comparison)
+currently gives these planning envelopes for native heap plus indexes:
+
+- a generic current binary association is 1,152 bytes, or 3.27x one 352-byte
+  specialized current occurrence;
+- a generic versioned binary association is 1,624 bytes, or 2.21x the 736-byte
+  specialized versioned proxy with the same 1.5-revision assumption; and
+- the catalog's 1.5-revision, three-participant association profile is 2,128
+  bytes, or 2.89x that versioned binary proxy and 6.05x the less capable current
+  specialized row.
+
+These ratios are arithmetic over planning widths, not PostgreSQL measurements.
+Use 2-3x as the initial like-for-like storage envelope and 3-6x when comparing the
+full identified association with a minimal current relation. The recorded rows and
+bytes support only an initial 2-5x write-work and 2-4x bounded direct-read-work
+hypothesis. Candidate DDL must measure physical bytes, WAL, p95/p99, buffer work,
+vacuum/freeze and skew before activation. The compact binary edge has a qualification
+target of at most 2x the specialized current occurrence for its admitted workload;
+its actual estimate waits for candidate columns and indexes.
 
 No fixed 32/64/128/256 partition count is selected. Measure row/index widths, tail
 sizes, degree/skew, query pruning, p95/p99, write amplification/WAL, vacuum/freeze,

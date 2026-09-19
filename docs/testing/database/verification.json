@@ -5,6 +5,7 @@
   "specified_cross_domain_scenarios": 132,
   "invariant_families": 14,
   "capacity_row_roles": 71,
+  "capacity_relationship_profiles": 5,
   "capacity_scales": [
     500000000,
     3000000000
@@ -15,7 +16,8 @@
     "dictionary groups and local artifact links resolve within the repository, outside temporary directories",
     "scenario identifiers unique and every invariant family covered",
     "registered model schema output set and bytes match the production emitter; pinned vocabulary bytes match their manifest",
-    "3B capacity arithmetic equals six times 500M under same assumptions"
+    "3B capacity arithmetic equals six times 500M under same assumptions",
+    "specialized and generic relationship profiles derive from the registered catalog row-role widths"
   ],
   "not_executed": [
     "target DDL or migrations",
@@ -29,9 +31,9 @@
     "current-schema-map.tsv": "a8e4261e798acb08a227e38c49a87e2c42c9671cae2a33405e4b8cc88cc7d87d",
     "api-coverage.tsv": "7b1ebf472f6a9f1ac660d34795b006d1ab69f47cbeb5034060c21a8c3dfcddf5",
     "scenarios.tsv": "4165424a131e11e59837fa93353dca0f3fb37912b59874e673bf84724731fa8b",
-    "capacity.json": "16e9149a672cd46034d7daf8ff824e3e98019088203e84a68c9bc88eb0539efc",
-    "capacity.md": "aac974b6d7a532c5f66752795b61e47bc117cdfb95b011e6893761e119459a1d",
-    "dependency-manifest.json": "92917890056f24993d6357fb8487a74f8bc9ef3a600f083f2c484594b039abc0"
+    "capacity.json": "8b42e8d9ec58f2af52573cd6fc81010d12bd6559076762bc8fae6ef9879cf42d",
+    "capacity.md": "09a358076d52ea2e95ccab27b07f9ee36b3f5b63c8869a17bb056fefbe1203ed",
+    "dependency-manifest.json": "07c49415457cc28b7178423e4daf57e3d06154d6109e9a6ae2c6b058b19be055"
   },
   "artifact_paths": {
     "current-schema-map.tsv": "docs/testing/database/current-schema-map.tsv",
@@ -64,12 +66,12 @@
     "docs/architecture/database/content-composition.md": "a2cd996961915650cf49e2728206b24c98b5a4d9cd84d5c3a3875f697c22ce99",
     "docs/architecture/database/creation.md": "49d110c745bfabdb6d34cf0b867ce26b07afe15b0065313ad6702790357a98cf",
     "docs/architecture/database/data-dictionary.md": "f6cef79c74c7132407ecf46ebcfc548f7fb0d13e32e01b566d0ef408eccd315e",
-    "docs/architecture/database/design-evidence.md": "e562ba1c766974b0881729e8bca130f0033d01cb0e28cdf8780b61a46fe3e4e0",
+    "docs/architecture/database/design-evidence.md": "a4b1ddc942177f6d8ecf5d0d5482e1a0fbffcb2c6a0eed3cc51593d4c288e277",
     "docs/architecture/database/event-time.md": "173f3f0af0eb97ce5e1cb1732d98209d565ba339e0b1a6cdc6aaf2cb29fd7888",
     "docs/architecture/database/native-work.md": "07d751a084d7df9d8cee90cae7b3bb2f3c56f24f716b540e911c2bc283ce3ee5",
     "docs/architecture/database/ratings.md": "72b4dd8da4a0339f1e454aa9c46300c6332271b10e8eb71441c57e19c163fa4f",
     "docs/architecture/database/relationship-graph.md": "7904ffe6f0dbba49f649d54ef87bef1f5300efeb7ef89f0fab9159f8a75a1923",
-    "docs/architecture/database/resource-storage.md": "71d4e9eec714c9a83ba0256d66d7e5b463612212fdac799fd5b1c318b142d8ec",
+    "docs/architecture/database/resource-storage.md": "adbece5bd7d8083b6b0492606b10a273a6c52f264a9ea45677746293e0057b85",
     "docs/architecture/database/temporal-capacity.md": "c655a39f7dd106b19511b564a63c301a2c7f7909b8d18574b62ab2de04022855",
     "docs/architecture/event-streaming.md": "ee29636055f3c49b6b196d6149d984d21ea503357b386f0ab1fbc4b9661e2430",
     "docs/architecture/filter-documents.md": "64f4c87e0e9414ac734b673de57b9b64f9c1e04f6de6b57891d5313b6244ba47",
@@ -129,7 +131,7 @@
     "docs/reference/zone-styling-contract-v1.md": "8954e7701d726307d2b8175e30d9578c2fb722ecd232672e8a1899591a451b90",
     "docs/research/README.md": "ae15482787446845470c998092cfae6b3b899a841a9cb38d2ab3141827a5cffc",
     "docs/research/ai-hub-execution.md": "8d7f1a65d7ec57c857fca06dbc4fd655eadc3448588f9b8e2de42dbee0d0063f",
-    "docs/testing/README.md": "4d9a2357f61206206605c26f69fd0f858a1cd696abf171f964058f5a9c276a92",
+    "docs/testing/README.md": "3929a0461d40ad576285e579c01b8d4477ed51498c486ebc3bb07affbe2cbdd8",
     "docs/testing/ai-hub.md": "e26dbe58f28fe78b51a81bd54bfe47a7d267d97f6e18a15f46239bbb58f0c971",
     "docs/testing/backend-integration.md": "ac945d735bb9bea4b28ea6c013f95bcdc00ec915b5827f761bc0f2dcd4da3d47",
     "docs/testing/book-and-creation.md": "816c02882891f8c278d111cd03bed152efdc9146bd783ae443bb0b3475af8915",
@@ -138,7 +140,7 @@
     "docs/testing/identity-and-access.md": "1730c7e13ae93e771a9b1c072310cc55ff2ede2936f8587adac3224b239af2d7",
     "docs/testing/information-verification.md": "ab6166878a46213195833469a7a3944ef79aa39b8de56c5c4cb9d75d55a89bc5",
     "docs/testing/known-failures.md": "b41fc0071b3d8bfe858db4135e45217067ceac905fa452520e529db1d3a2a69a",
-    "docs/testing/model-contracts.md": "9b519ad8c3345db8963a5c7c93d5a57168c73e4bc8774588998f20d85e0bd005",
+    "docs/testing/model-contracts.md": "6f86a1c48049f992d0af82b8e0c569279633117e5c6fbdcd791cdfcd7b90ac0f",
     "docs/testing/native-work.md": "534947fd5b77a2788dfc57287b308a4c975372956445cac2c88529f367fe08e5",
     "docs/testing/ratings-and-event-time.md": "5dbe5a8ff0115e03ba4fbb5266022d6525043bb05a6d664afe1a8dce7670c715",
     "docs/testing/recommendations.md": "09640bf8c9269bff7cd7ffa341d0f99a76e4ba056d801f4af99204d6d08af15a",
@@ -147,6 +149,6 @@
     "docs/testing/source-conformance.md": "ecf605acb82a6bb343efd97bd843e27aaa5609c626bd851253a4248d26cb824e",
     "docs/testing/subscriptions-and-pro.md": "269b7b3937f6be360b0ee7d8a93a8131e673beba5f6d478253b12853e1121da7",
     "docs/testing/wiki-composition.md": "951d79cdc5040f703b7712fae630e5c00c64719c1705cb59ddb6edbeb7237a30",
-    "docs/testing/database/check_design.py": "ee7cae8f03e698d2084b234380d424079ac4e3659d77fd907aab9c5b203d29c9"
+    "docs/testing/database/check_design.py": "ee666d2944fb2ed417f5b22a26be183d44b21725ce67e597cf21850a39b437cc"
   }
 }

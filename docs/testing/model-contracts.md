@@ -73,10 +73,10 @@ a second independent notion of acceptance.
 
 | ID | Scenario | Required result |
 | --- | --- | --- |
-| MODEL37 | Generic relation promoted to native storage | Logical decode equality, stable identity/revisions, duplicates/order/language/evidence, equivalent allowed/rejected operations and one fenced writer. |
+| MODEL37 | Compact generic binary relation promoted to specialized storage; attempt repeated roles or n-ary participants in the compact layout | Logical decode equality, stable identity/revisions and equivalent allowed/rejected operations with one fenced writer; richer semantics use the identified association contract rather than opaque compact payloads. |
 | MODEL38 | Same logical owner with new physical family; attempted true owner correction | Physical placement leaves references stable; actual owner/referent correction has explicit history and no silent grant retargeting. |
 | MODEL39 | Invalid/multiple bridge target; proposed partitioned uniqueness; source-local versus inverse reads | Concrete FK and complete key rejection; per-target uniqueness proved after partitioning; inverse pages do not scatter over all source partitions. |
-| MODEL40 | Skewed incoming queries, projection lag/rebuild, erasure and restored old events | Bounded work/current disclosure, visible freshness, idempotent replay and non-regressing revocation/erasure frontiers. Record row/index/WAL/maintenance/restore costs at 500M/3B planning scales. |
+| MODEL40 | Skewed incoming queries and search facets across specialized, compact-binary and identified-association relations; projection lag/rebuild, erasure and restored old events | Bounded work/current disclosure, visible freshness, idempotent replay and non-regressing revocation/erasure frontiers. Compare row/index/WAL, direct-read, projection, maintenance and restore costs at 500M/3B planning scales; a planning ratio is not measured acceptance. |
 
 ## Integrated qualification
 

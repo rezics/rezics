@@ -73,6 +73,8 @@ Verification for this documentation scope:
   model-emitted Drizzle modules match the production emitter exactly; twelve pinned
   vocabulary sources match their declared bytes/digests. Inventory mapping covers
   249 schema/SQL modules and 42 API owners, with 132 specified cross-domain scenarios.
+  The capacity generator also derives five specialized/generic relationship profiles
+  from registered row-role widths; these remain planning arithmetic, not load evidence.
 
 These are documentation, provenance and arithmetic results. No application, DDL,
 migration, product gate, full-standard field conformance, 3B deployment or throughput

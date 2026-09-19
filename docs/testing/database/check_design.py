@@ -430,6 +430,110 @@ def capacity():
         low = totals[(scenario, 500_000_000)]
         high = totals[(scenario, 3_000_000_000)]
         assert all(high[k] == 6 * low[k] for k in low)
+
+    catalog_roles = {
+        name: {"rows_per_root": Decimal(factor), "native_bytes_per_row": heap + indexes}
+        for scenario, name, factor, heap, indexes, _ in FAMILIES
+        if scenario == "catalog"
+    }
+    association_identity = catalog_roles["association_identity"]["native_bytes_per_row"]
+    association_revision = catalog_roles["association_revision"]["native_bytes_per_row"]
+    association_participant = catalog_roles["association_participant"]["native_bytes_per_row"]
+    structural_occurrence = catalog_roles["structural_occurrence"]["native_bytes_per_row"]
+
+    relationship_profiles = [
+        {
+            "key": "specialized_current_occurrence",
+            "label": "Specialized current occurrence",
+            "formula": "structural_occurrence",
+            "average_physical_rows_per_relation": Decimal("1"),
+            "native_bytes_per_relation": structural_occurrence,
+            "comparator": "specialized_current_occurrence",
+        },
+        {
+            "key": "generic_current_binary_association",
+            "label": "Generic current binary association",
+            "formula": "identity + revision + 2 participants",
+            "average_physical_rows_per_relation": Decimal("4"),
+            "native_bytes_per_relation": association_identity + association_revision + 2 * association_participant,
+            "comparator": "specialized_current_occurrence",
+        },
+        {
+            "key": "specialized_versioned_binary_proxy",
+            "label": "Specialized versioned binary proxy",
+            "formula": "identity + 1.5 specialized revisions",
+            "average_physical_rows_per_relation": Decimal("2.5"),
+            "native_bytes_per_relation": int(association_identity + Decimal("1.5") * structural_occurrence),
+            "comparator": "specialized_versioned_binary_proxy",
+        },
+        {
+            "key": "generic_versioned_binary_association",
+            "label": "Generic versioned binary association",
+            "formula": "identity + 1.5 revisions + 3 participants",
+            "average_physical_rows_per_relation": Decimal("5.5"),
+            "native_bytes_per_relation": int(
+                association_identity
+                + Decimal("1.5") * association_revision
+                + Decimal("3") * association_participant
+            ),
+            "comparator": "specialized_versioned_binary_proxy",
+        },
+        {
+            "key": "generic_versioned_three_participant_association",
+            "label": "Generic versioned three-participant association",
+            "formula": "identity + 1.5 revisions + 4.5 participants",
+            "average_physical_rows_per_relation": Decimal("7"),
+            "native_bytes_per_relation": int(
+                association_identity
+                + Decimal("1.5") * association_revision
+                + Decimal("4.5") * association_participant
+            ),
+            "comparator": "specialized_versioned_binary_proxy",
+        },
+    ]
+    relationship_profile_map = {profile["key"]: profile for profile in relationship_profiles}
+    for profile in relationship_profiles:
+        native_bytes = profile["native_bytes_per_relation"]
+        comparator_bytes = relationship_profile_map[profile["comparator"]]["native_bytes_per_relation"]
+        profile["relative_to_comparator"] = round(native_bytes / comparator_bytes, 6)
+        profile["relative_to_specialized_current"] = round(native_bytes / structural_occurrence, 6)
+        profile["native_bytes_at_500m_relations"] = native_bytes * 500_000_000
+        profile["native_bytes_at_3b_relations"] = native_bytes * 3_000_000_000
+        profile["average_physical_rows_per_relation"] = float(profile["average_physical_rows_per_relation"])
+
+    association_role_names = {
+        "association_identity", "association_revision", "association_participant"
+    }
+    association_native_bytes_per_catalog_root = int(sum(
+        role["rows_per_root"] * role["native_bytes_per_row"]
+        for name, role in catalog_roles.items()
+        if name in association_role_names
+    ))
+    structural_native_bytes_per_catalog_root = int(
+        catalog_roles["structural_occurrence"]["rows_per_root"] * structural_occurrence
+    )
+    relationship_comparison = {
+        "assumptions_only": True,
+        "decimal_units": True,
+        "inputs": {
+            "association_identity_native_bytes_per_row": association_identity,
+            "association_revision_native_bytes_per_row": association_revision,
+            "association_participant_native_bytes_per_row": association_participant,
+            "structural_occurrence_native_bytes_per_row": structural_occurrence,
+        },
+        "profiles": relationship_profiles,
+        "catalog_scenario": {
+            "association_native_bytes_per_root": association_native_bytes_per_catalog_root,
+            "structural_native_bytes_per_root": structural_native_bytes_per_catalog_root,
+            "association_to_structural_ratio": round(
+                association_native_bytes_per_catalog_root / structural_native_bytes_per_catalog_root, 3
+            ),
+            "association_native_bytes_at_500m_roots": association_native_bytes_per_catalog_root * 500_000_000,
+            "association_native_bytes_at_3b_roots": association_native_bytes_per_catalog_root * 3_000_000_000,
+            "structural_native_bytes_at_500m_roots": structural_native_bytes_per_catalog_root * 500_000_000,
+            "structural_native_bytes_at_3b_roots": structural_native_bytes_per_catalog_root * 3_000_000_000,
+        },
+    }
     lines = ["# Capacity model: assumptions and reproducible arithmetic", "",
              "Generated by check_design.py. All widths, densities, throughputs and retention windows below are planning assumptions. No PostgreSQL size, benchmark or restore time was measured.", "",
              "The catalog scenario counts native catalog roots; social counts publications; messages counts messages; media counts media-bearing subjects; ratings counts observations; event_time counts concrete events. These are separate synthetic mixes, not the same number of all REZICS records. Do not add scenario totals without deciding the actual mix and deduplicating shared identity/reference/revision/audit/selection rows. The [temporal envelope](temporal-capacity.md) defines rating/event densities, sparse-tail sensitivity, concurrency, query budgets and recovery obligations.", "",
@@ -447,7 +551,24 @@ def capacity():
     for scenario, name, factor, heap, indexes, payload in FAMILIES:
         width = heap + indexes
         lines.append(f"| {scenario} | {name} | {factor} | {heap} | {indexes} | {payload} | {float(Decimal(factor) * 500_000_000 * width) / 1e12:.3f} | {float(Decimal(factor) * 3_000_000_000 * width) / 1e12:.3f} | {500_000_000 * width / 1e9:.1f} | {3_000_000_000 * width / 1e12:.3f} |")
-    lines += ["", "## Media density and optional hosting", "",
+    lines += ["", "## Specialized and generic relationship comparison", "",
+              "This comparison isolates the modeled native heap and index bytes for several physical relationship shapes. A specialized current occurrence has less behavior than an identified, versioned association. The specialized versioned binary row is an arithmetic proxy using the association-identity width plus 1.5 specialized occurrence rows; it is not selected DDL or a measurement. Compare profiles with the same required semantics before attributing the whole difference to dynamic definitions.", "",
+              "| Physical profile | Planning formula | Avg physical rows/relation | Native B/relation | 500M relations TB | 3B relations TB | Declared comparator | Ratio | Versus current specialized |",
+              "| --- | --- | ---: | ---: | ---: | ---: | --- | ---: | ---: |"]
+    for profile in relationship_profiles:
+        comparator = relationship_profile_map[profile["comparator"]]["label"]
+        lines.append(
+            f"| {profile['label']} | {profile['formula']} | {profile['average_physical_rows_per_relation']:g} | "
+            f"{profile['native_bytes_per_relation']:,} | {profile['native_bytes_at_500m_relations'] / 1e12:.3f} | "
+            f"{profile['native_bytes_at_3b_relations'] / 1e12:.3f} | {comparator} | "
+            f"{profile['relative_to_comparator']:.2f}x | {profile['relative_to_specialized_current']:.2f}x |"
+        )
+    catalog_relationship = relationship_comparison["catalog_scenario"]
+    lines += ["",
+              f"At the catalog scenario's recorded densities, the three association roles total {association_native_bytes_per_catalog_root:,} native bytes/root, compared with {structural_native_bytes_per_catalog_root:,} bytes/root for the separately modeled structural-occurrence family ({catalog_relationship['association_to_structural_ratio']:.2f}x). That is {catalog_relationship['association_native_bytes_at_500m_roots'] / 1e12:.3f}/{catalog_relationship['association_native_bytes_at_3b_roots'] / 1e12:.3f} TB at 500M/3B catalog roots for association roles and {catalog_relationship['structural_native_bytes_at_500m_roots'] / 1e12:.3f}/{catalog_relationship['structural_native_bytes_at_3b_roots'] / 1e12:.3f} TB for structural occurrences. At the scenario's 2x operational provision plus one equally provisioned replica, those relationship-role totals become {catalog_relationship['association_native_bytes_at_500m_roots'] * 4 / 1e12:.3f}/{catalog_relationship['association_native_bytes_at_3b_roots'] * 4 / 1e12:.3f} TB and {catalog_relationship['structural_native_bytes_at_500m_roots'] * 4 / 1e12:.3f}/{catalog_relationship['structural_native_bytes_at_3b_roots'] * 4 / 1e12:.3f} TB respectively. These families have different semantics and recorded densities; the scenario ratio is a capacity comparison, not a claim that one can replace the other.", "",
+              "The row and byte counts support an initial hypothesis of roughly 2-5x write work for a generic relation at comparable semantics, and roughly 2-4x database work for a bounded direct relation read that must traverse participant/revision indexes. They do not predict wall-clock latency, WAL, cache behavior, vacuum cost or search latency. Measure those values on candidate DDL under representative predicate/degree skew. Search and facet requests use an explicit flattened projection rather than foreground joins across canonical relation tables, so projection query cost is evaluated separately from canonical write amplification and freshness.", "",
+              "A compact generic binary edge is a selected physical strategy but has no byte estimate here until candidate DDL and indexes exist. Its qualification target is no more than 2x the specialized current occurrence for its admitted current-value workload; exceeding that target requires either a narrower layout or promotion to a specialized relation.", "",
+              "## Media density and optional hosting", "",
               "Per media-bearing subject, assume 4 contextual asset uses, 3.2 distinct assets after authorized sharing, 1.05 content revisions per asset, and 1 original plus 2 previews per revision. Locations average 1.25 per representation. Use histories average 1.1 revisions, with 1.25 roles, 2 applicability entries and 1.5 source-support rows per use revision. Two display slots with 1.3 historical selections are modeled separately from gallery membership. These are adjustable density assumptions, not source/API limits.", "",
               "The binary envelope assumes every original is hosted at 2 MB average and every preview at 150 KB average; media External payload TB above therefore represents 100% hosting. Metadata-only indexing does not require this binary allocation. Use independent original and preview admission fractions; cached thumbnails can be common even when originals remain external. No global cross-rights-domain dedupe saving is assumed.", "",
               "| Media-bearing subjects | All originals + previews TB | 1% originals + 1% previews TB | 1% originals + 10% previews TB |",
@@ -467,6 +588,7 @@ def capacity():
               "The target is single PostgreSQL initially, but the dense catalog upper scenario cannot be certified on unspecified hardware. If restore lower bound exceeds the proposed four-hour RTO, select a warm recovery replica/snapshot strategy or revise the accepted RTO before activation. Partitioning cannot shorten transfer below available bandwidth or provide cross-node FKs.", "",
               "Qualification must measure root/child distributions, hot-key skew, serialized edits per aggregate, query candidate budgets, index/TOAST bytes, vacuum/freeze lag, logical/physical WAL, replica lag, connection and memory ceilings, queue age, erasure cost, index rebuild and restore. Primary alert thresholds and cutover actions are in README section 15."]
     return {"assumptions_only": True, "decimal_units": True, "families": rows,
+            "relationship_comparison": relationship_comparison,
             "scenario_totals": [{"scenario": s, "roots": n, **v} for (s, n), v in sorted(totals.items())]}, "\n".join(lines) + "\n"
 
 
@@ -555,13 +677,15 @@ def artifacts():
         "specified_cross_domain_scenarios": len(cases),
         "invariant_families": 14,
         "capacity_row_roles": len(FAMILIES),
+        "capacity_relationship_profiles": len(cap["relationship_comparison"]["profiles"]),
         "capacity_scales": [500_000_000, 3_000_000_000],
         "checks": ["all current non-test schema TS/SQL files have explicit reviewed mapping",
                    "all top-level API owner directories have explicit mapping",
                    "dictionary groups and local artifact links resolve within the repository, outside temporary directories",
                    "scenario identifiers unique and every invariant family covered",
                    "registered model schema output set and bytes match the production emitter; pinned vocabulary bytes match their manifest",
-                   "3B capacity arithmetic equals six times 500M under same assumptions"],
+                   "3B capacity arithmetic equals six times 500M under same assumptions",
+                   "specialized and generic relationship profiles derive from the registered catalog row-role widths"],
         "not_executed": ["target DDL or migrations", "SQL behavioral/concurrency tests", "composed formal model checking",
                          "full upstream field conformance", "load/stability tests", "backup/restore drill"],
         "sha256": {name: hashlib.sha256(data.encode()).hexdigest() for name, data in outputs.items()},
