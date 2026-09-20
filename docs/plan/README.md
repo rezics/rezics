@@ -7,7 +7,7 @@ Follow the [execution workflow](execution-workflow.md) for program authority, ph
 | Field | Current selection |
 | --- | --- |
 | Scope | Retained backend foundation integrity after live-source tooling commit `437385f63`: reproduce and repair the recorded main IAM/Org/Realm TypeScript and Group-command fixture failures before dependent native workflows. |
-| Phase | `verification`: current Realm enrollment passes 187 native assertions / 132 HTTP requests and the scoped TypeScript check; 142 related unit tests pass. Main TypeScript remains failed with 110 errors in five older fixtures and three seed writes. Review and commit this checkpoint, then continue their repair. |
+| Phase | `repair`: native Realm checkpoint `7b402913d` passes its listed command/HTTP paths. Reconcile the remaining five fixtures and seed writers with native account/Org authority; main integrity still has 110 errors. The retained erasure entry must admit a direct private principal without manufacturing a Self identity. |
 | Owners | Main identity/access, Org/Realm authority and retained callers/fixtures; shared access/reference contracts only where required by the repair. |
 | Deliverables | Correct typed authority inputs and native persistence ownership, consistent rejected Group-command outcomes, affected positive/denied regressions and honest remaining backend qualification. |
 | Exclusions | Broad Resource/Space/address renaming, unrelated feature activation, UI redesign, full-application browser QA, deployment and full M01/product/capacity acceptance. |

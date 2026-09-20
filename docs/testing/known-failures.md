@@ -49,7 +49,12 @@ five stale membership/account/recovery/capacity/roster fixtures (107 errors) and
 three seed writes through read-only Realm presentation views.
 
 Reconcile those fixtures with the native Org/Realm enrollment commands, exact
-membership generations and branded `PrincipalRequestContext` credential proofs.
+membership generations and branded `PrincipalRequestContext` credential proofs. The
+retained `eraseOwnAccount` entry still requires legacy participation and an
+Auth/Self binding, although the erasure job already permits a null `selfEntityId`.
+Reconcile its credential admission and worker precondition with native direct
+principal lifecycle before qualifying the new account/Org erasure cases; do not
+create a public Self merely to erase a private account.
 Seed must use native persistence owners and preserve consent/enforcement history;
 restoring removed membership tables, casting old authority objects or making
 presentation views writable does not repair the selected contract. Preserve the
