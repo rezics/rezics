@@ -1,3 +1,4 @@
+import { createFixtureSessionContext } from "./native-enrollment-fixture";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
@@ -27,6 +28,7 @@ import { imageAsset, imageObject } from "@rezics/schema/postgres/media/image";
 import { post } from "@rezics/schema/postgres/forum/post";
 import { Authorization } from "../src/services/authorization";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
+import { updateEntityPresentation } from "../src/services/participation/presentation";
 import {
 	runWithParticipationAuthority,
 	type ParticipationAuthority,
@@ -81,6 +83,7 @@ async function actor(tx: DatabaseTransaction, name: string) {
 		actingEntityId: self.id,
 		authorizationRevision: self.authorizationRevision,
 	};
+	await updateEntityPresentation(tx, authority, { language: "en", expectedRevision: 0, name });
 	return { account, self, authority };
 }
 
@@ -125,7 +128,7 @@ try {
 				actingEntityId: organization.entityId,
 				grant: { id: security.id, revision: security.revision },
 			};
-			await issueParticipationGrant(tx, organizationAuthority, {
+			const otherGrant = await issueParticipationGrant(tx, organizationAuthority, {
 				recipient: { kind: "auth", authUserId: other.account.id },
 				actingEntityId: organization.entityId,
 				capability: "entity.publish",
@@ -137,8 +140,8 @@ try {
 				organization.entityId,
 			);
 			check(
-				managedGrants.length,
-				4,
+				managedGrants.map((row) => row.grant.id).sort(),
+				[...organization.grants.map((grant) => grant.id), otherGrant.id].sort(),
 				"exact security authority reads grants issued to other principals",
 			);
 			check(
@@ -469,8 +472,8 @@ try {
 					objects = objects.filter((row) => !keys.has(`${row.key}:${row.versionId}`));
 				},
 			};
-			await runWithParticipationAuthority(human.authority, () =>
-				eraseOwnAccount(tx, human.authority),
+			await runWithParticipationAuthority(human.authority, async () =>
+				eraseOwnAccount(tx, await createFixtureSessionContext(tx, human.authority.principal.authUserId)),
 			);
 			await assert.rejects(
 				tx.transaction((nested) =>

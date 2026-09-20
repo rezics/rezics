@@ -1,3 +1,5 @@
+import principalSession from "../../auth/principal-session";
+import { runAccessTransaction } from "../../authorization/transaction";
 import Elysia from "elysia";
 import { z } from "zod";
 import session from "../../auth/session";
@@ -61,6 +63,7 @@ import organizationMembershipApi from "./membership";
 /** @alpha Account and delegated participation, kept distinct from public catalog metadata. */
 export default new Elysia({ prefix: "/participation", name: "participation-api" })
 	.use(session)
+	.use(principalSession)
 	.use(organizationMembershipApi)
 	.get(
 		"/organizations",
@@ -342,9 +345,10 @@ export default new Elysia({ prefix: "/participation", name: "participation-api" 
 		{
 			detail: { operationId: "eraseOwnAccount", tags: ["Participation"] },
 			response: AccountErasureResponseSchema,
-			access: "fresh-session-only",
+			// A private erasure request needs a fresh session, not email verification.
+			principalAccess: { permission: null, fresh: true, write: false },
 		},
-		({ participation }) => runParticipationTransaction((tx) => eraseOwnAccount(tx, participation)),
+		({ principalContext }) => runAccessTransaction((tx) => eraseOwnAccount(tx, principalContext)),
 	)
 	.post(
 		"/entities/:id/recover",

@@ -1,3 +1,4 @@
+import { createFixtureSessionContext } from "./native-enrollment-fixture";
 import { createFixtureRestrictionDecision } from "./unit-access-fixture";
 import assert from "node:assert/strict";
 import { setTimeout } from "node:timers/promises";
@@ -181,7 +182,7 @@ export async function checkFavoriteConcurrency(connectionString: string) {
 		await race(
 			(tx) =>
 				saveFavorite(tx, authority, targetId, { expectedRevision: 2, note: "before closure" }),
-			(tx) => runWithParticipationAuthority(authority, () => eraseOwnAccount(tx, authority)),
+			(tx) => runWithParticipationAuthority(authority, async () => eraseOwnAccount(tx, await createFixtureSessionContext(tx, authority.principal.authUserId))),
 			"success",
 		);
 		await assert.rejects(

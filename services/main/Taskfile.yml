@@ -527,6 +527,12 @@ tasks:
             - test -n "${DATABASE_ADMIN_URL:-}"
             - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-account-participation.ts
 
+    db:native-account-erasure:check:
+        desc: Verify direct-principal account erasure, fresh credential fences and no-Self worker completion.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-native-account-erasure.ts
+
     db:realm-membership:check:
         desc: Verify Realm membership transitions, rule consent and current authority under cross-connection races on the disposable target.
         cmds:

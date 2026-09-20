@@ -53,7 +53,11 @@ import {
 } from "@rezics/schema/postgres/documents/progress";
 import { recommendationEvent, recommendationExclusion } from "@rezics/schema/postgres/discovery/recommendation";
 import { studioResourceVisit, studioAuthEditorCandidate } from "@rezics/schema/postgres/community/studio";
-import { ParticipationDenied, requireParticipation, type ParticipationAuthority } from "./policy";
+import type { PrincipalRequestContext } from "../auth/principal-context";
+import { readFirstPartyCredentialAuthority } from "../auth/credential-authority";
+import { ensureAccountAuthenticationAllowed } from "../auth/account-state";
+import { AccessDenied } from "../authorization/http-errors";
+import { requireAccessAdmission } from "../authorization/transaction";
 import {
 	MaximumActiveParticipationGrants,
 	MaximumControlledServicePrincipals,
@@ -61,15 +65,14 @@ import {
 } from "./lifecycle";
 
 /**
- * Immediately invalidates the actual human account and removes its self binding.
+ * Immediately invalidates the directly authenticated human account and removes any retained self binding.
  * Published Entity authorship and immutable private operator evidence remain truthful.
  * Private data deletion resumes in bounded worker transactions and never blocks on final-controller transfer.
  * @alpha
  */
-export async function eraseOwnAccount(tx: DatabaseTransaction, authority: ParticipationAuthority) {
-	if (authority.principal.kind !== "auth" || authority.grant)
-		throw new ParticipationDenied("Account erasure requires the operator's own fresh session");
-	const authUserId = authority.principal.authUserId;
+export async function eraseOwnAccount(tx: DatabaseTransaction, context: PrincipalRequestContext) {
+	if (context.selection.mode !== "direct") throw new AccessDenied();
+	const authUserId = context.principalId;
 	const [account] = await tx
 		.select()
 		.from(users)
@@ -77,24 +80,21 @@ export async function eraseOwnAccount(tx: DatabaseTransaction, authority: Partic
 		.limit(1)
 		.for("update");
 	if (!account || account.principalKind !== "human" || account.erasedAt)
-		throw new ParticipationDenied("Account is unavailable");
-	await requireParticipation(tx, authority, "entity.security", {
-		owner: "entity",
-		id: authority.actingEntityId,
-	});
+		throw new AccessDenied();
+	await ensureAccountAuthenticationAllowed(authUserId, tx);
 	const [binding] = await tx
 		.select()
 		.from(authEntity)
 		.where(eq(authEntity.authUserId, authUserId))
-		.limit(1);
-	if (!binding || binding.entityId !== authority.actingEntityId)
-		throw new ParticipationDenied("Account erasure cannot use a delegated Entity");
+		.limit(1)
+		.for("update");
 	const grants = await tx
 		.select()
 		.from(participationGrant)
 		.where(and(eq(participationGrant.authUserId, authUserId), isNull(participationGrant.revokedAt)))
 		.orderBy(participationGrant.id)
-		.limit(MaximumActiveParticipationGrants + 1);
+		.limit(MaximumActiveParticipationGrants + 1)
+		.for("update");
 	if (grants.length > MaximumActiveParticipationGrants)
 		throw new Error("Account participation grant bound is violated");
 	const serviceActors = await tx
@@ -104,14 +104,23 @@ export async function eraseOwnAccount(tx: DatabaseTransaction, authority: Partic
 			and(eq(servicePrincipal.createdByAuthUserId, authUserId), isNull(servicePrincipal.revokedAt)),
 		)
 		.orderBy(servicePrincipal.id)
-		.limit(MaximumControlledServicePrincipals + 1);
+		.limit(MaximumControlledServicePrincipals + 1)
+		.for("update");
 	if (serviceActors.length > MaximumControlledServicePrincipals)
 		throw new Error("Account service principal bound is violated");
-	const now = new Date();
+	// Recheck the actual credential after the account and bounded cleanup waits.
+	// Erasure retains the fresh-session-only policy without requiring verified email
+	// or control of a public identity. API keys and represented requests cannot erase.
+	const credential = await readFirstPartyCredentialAuthority(tx, {
+		proof: context.credentialProof(), selection: context.selection, apiPermission: null,
+		requireFreshSession: true, requireVerifiedEmail: false,
+	});
+	await requireAccessAdmission(tx, credential.admission);
+	const now = credential.evaluatedAt;
 	await tx
 		.insert(accountErasure)
-		.values({ authUserId, selfEntityId: binding.entityId, priorEmail: account.email });
-	await tx
+		.values({ authUserId, selfEntityId: binding?.entityId ?? null, priorEmail: account.email });
+	const [erased] = await tx
 		.update(users)
 		.set({
 			erasedAt: now,
@@ -121,7 +130,9 @@ export async function eraseOwnAccount(tx: DatabaseTransaction, authority: Partic
 			emailVerified: false,
 			registrationContentLanguage: "en",
 		})
-		.where(eq(users.id, authUserId));
+		.where(and(eq(users.id, authUserId), credential.admission))
+		.returning({ id: users.id });
+	if (!erased) throw new AccessDenied();
 	await tx.delete(authEntity).where(eq(authEntity.authUserId, authUserId));
 	for (const grant of grants) {
 		await tx
@@ -137,7 +148,7 @@ export async function eraseOwnAccount(tx: DatabaseTransaction, authority: Partic
 	}
 	const controlledEntityIds = [
 		...new Set([
-			binding.entityId,
+			...(binding ? [binding.entityId] : []),
 			...grants
 				.filter((grant) => grant.capability === "entity.security")
 				.map((grant) => grant.actingEntityId),
@@ -235,7 +246,7 @@ export async function dispatchAccountErasureBatch(
 			.limit(1)
 			.for("share");
 		if (!closedAccount?.erasedAt) throw new Error("Private erasure requires a closed Auth account");
-		if (!job.selfEntityId || !job.priorEmail)
+		if (!job.priorEmail)
 			throw new Error("Incomplete erasure job lost its private deletion keys");
 		let result: { deleted: number; empty: boolean };
 		switch (job.stage) {

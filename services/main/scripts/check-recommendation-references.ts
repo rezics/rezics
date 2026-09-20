@@ -1,3 +1,4 @@
+import { createFixtureSessionContext } from "./native-enrollment-fixture";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
@@ -303,8 +304,8 @@ try {
 				"point filtering uses a selective account/reference index",
 			);
 
-			await runWithParticipationAuthority(owner.authority, () =>
-				eraseOwnAccount(tx, owner.authority),
+			await runWithParticipationAuthority(owner.authority, async () =>
+				eraseOwnAccount(tx, await createFixtureSessionContext(tx, owner.authority.principal.authUserId)),
 			);
 			check(
 				await matches(first.id, owner.account.id),

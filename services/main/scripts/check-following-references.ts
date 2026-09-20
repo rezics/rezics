@@ -1,3 +1,4 @@
+import { createFixtureSessionContext } from "./native-enrollment-fixture";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
@@ -566,8 +567,8 @@ try {
 				false,
 				"The keyset ordering matches the index without sorting the candidate range",
 			);
-			await runWithParticipationAuthority(owner.authority, () =>
-				eraseOwnAccount(tx, owner.authority),
+			await runWithParticipationAuthority(owner.authority, async () =>
+				eraseOwnAccount(tx, await createFixtureSessionContext(tx, owner.authority.principal.authUserId)),
 			);
 			let erased = false;
 			for (let page = 0; page < 100; page++) {

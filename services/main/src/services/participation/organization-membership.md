@@ -5,8 +5,11 @@ Org enrollment uses the canonical Entity resource `access_scope`, typed
 by Groups, member sets, bindings and representation. The old Self/account roster
 and invitation tables are replaced by forward migrations, without transfer or
 parallel writes. The completed installation baseline and released SQL remain
-unchanged. This is implementation evidence only; native acceptance remains deferred
-under the [execution workflow](../../../../../docs/plan/execution-workflow.md).
+unchanged. The [native command/HTTP checkpoint](../../../../../docs/testing/database/native-account-org-evidence.json)
+qualifies creation, selected manager authority, public/private consent, admission
+generations, source revocation and private erasure. Recovery, capacity and complete
+cross-module qualification remain open under the
+[execution workflow](../../../../../docs/plan/execution-workflow.md).
 
 ## Authority and identity
 

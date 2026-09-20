@@ -1,813 +1,829 @@
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
+import { randomUUID, createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { setTimeout } from "node:timers/promises";
-import { serializeSignedCookie } from "better-call";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
+import { z } from "zod";
+import { serializeSignedCookie } from "better-call";
 import { initializeObservability } from "@rezics/observability";
-import { users, sessions } from "@rezics/schema/postgres/identity/auth";
-import { accountErasure, participationGrant } from "@rezics/schema/postgres/access/participation";
+import { database, type DatabaseTransaction } from "../src/services/database";
+import { users } from "@rezics/schema/postgres/identity/auth";
+import { accountErasure } from "@rezics/schema/postgres/access/participation";
 import {
-	organizationMembership,
-	organizationMembershipEvent,
-	organizationMembershipInvitation,
+	accessMembership,
+	accessMembershipEvent,
+} from "@rezics/schema/postgres/access/access-membership";
+import {
+	organizationEnrollmentInvitation,
+	organizationEnrollmentReview,
 } from "@rezics/schema/postgres/access/organization-membership";
-import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
-import { acceptMembershipInvitation } from "../src/services/participation/membership";
+import { PrincipalRequestContext } from "../src/services/auth/principal-context";
+import { allocateAccessSubject } from "../src/services/authorization/identities";
+import { applyAccessMembershipCommand } from "../src/services/authorization/memberships";
+import { applyAccessRepresentationCommand } from "../src/services/authorization/representations";
+import { ManagementAuthorityDenied } from "../src/services/authorization/management-authority";
 import {
-	MembershipInvitationSchema,
+	acceptMembershipInvitation,
+	listOrganizationMembers,
+} from "../src/services/participation/membership";
+import {
 	MembershipInvitationPageSchema,
+	MembershipReceiptSchema,
 	OrganizationMemberPageSchema,
-	OrganizationMemberSchema,
+	MembershipRecipientSchema,
+	MembershipContactSchema,
+	MembershipHistorySchema,
 } from "../src/services/participation/membership-contracts";
 import {
-	CreatedOrganizationSchema,
-	GrantSelectionSchema,
-	ManagedOrganizationsSchema,
-} from "../src/services/api/participation/schema";
-import {
-	issueParticipationGrant,
-	revokeParticipationGrant,
-} from "../src/services/participation/commands";
-import {
-	eraseOwnAccount,
-	dispatchAccountErasureBatch,
-} from "../src/services/participation/erasure";
-import { type ParticipationAuthority } from "../src/services/participation/policy";
+	assertNativeEnrollmentFixture,
+	fixturePrincipalContext,
+	fixtureMembershipManager,
+} from "./native-enrollment-fixture";
 
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString || process.env.REZICS_DISPOSABLE_MIGRATION_FIXTURE !== "1")
-	throw new Error("Explicit disposable membership fixture required");
-const target = new URL(connectionString);
-if (
-	!["localhost", "127.0.0.1", "[::1]"].includes(target.hostname) ||
-	!/^\/rezics_atlas(?:_[a-z0-9_]+)?$/u.test(target.pathname) ||
-	target.port === "15432"
-)
-	throw new Error("Membership qualification requires an isolated loopback Atlas target");
+assertNativeEnrollmentFixture();
 const observability = initializeObservability({
-	service: { name: "rezics-membership-qualification", version: "1.0.0", environment: "tooling" },
+	service: { name: "rezics-native-org-membership", version: "1.0.0", environment: "tooling" },
 });
-const { database } = await import("../src/services/database");
 const { auth } = await import("../src/services/auth");
 const { default: api } = await import("../src/services/api");
+const { dispatchAccountErasureBatch } = await import("../src/services/participation/erasure");
+const { reconcileOrganizationEnrollmentBatch } = await import(
+	"../src/services/participation/membership-worker"
+);
 api.compile();
-const context = await auth.$context;
-const racePool = new Pool({ connectionString, max: 5, statement_timeout: 20_000 });
-const raceDatabase = drizzle({ client: racePool });
-const fixtureAccounts: { id: string; authority: ParticipationAuthority }[] = [];
-let assertions = 0;
-
+const authContext = await auth.$context;
+const pool = new Pool({
+	connectionString: process.env.DATABASE_URL,
+	max: 4,
+	statement_timeout: 15000,
+});
+const peer = drizzle({ client: pool });
+const prefix = "/participation/membership";
+let assertions = 0,
+	httpChecks = 0;
 function check(actual: unknown, expected: unknown, message: string) {
 	assert.deepEqual(actual, expected, message);
 	assertions++;
 }
-async function rejected(operation: Promise<unknown>) {
-	await assert.rejects(operation);
-	assertions++;
-}
-async function actor(label: string) {
-	const person = await database.transaction(async (tx) => {
-		const [account] = await tx
-			.insert(users)
-			.values({ name: label, email: `${crypto.randomUUID()}@example.invalid`, emailVerified: true })
-			.returning();
-		assert.ok(account);
-		const self = await ensureSelfEntityInTransaction(tx, account);
-		const authority: ParticipationAuthority = {
-			principal: { kind: "auth", authUserId: account.id },
-			actingEntityId: self.id,
-			authorizationRevision: self.authorizationRevision,
-		};
-		return { account, self, authority };
-	});
-	fixtureAccounts.push({ id: person.account.id, authority: person.authority });
-	const session = await context.internalAdapter.createSession(person.account.id);
-	const cookie = (
-		await serializeSignedCookie(
-			context.authCookies.sessionToken.name,
-			session.token,
-			context.secret,
-			{ path: "/" },
-		)
-	).split(";")[0];
-	assert.ok(cookie);
-	return { ...person, cookie };
-}
-type Actor = Awaited<ReturnType<typeof actor>>;
-type Selection = { actingEntityId: string; grant: { id: string; revision: number } };
-
+type HttpActor = { cookie: string; context: PrincipalRequestContext };
 async function request(
 	method: string,
 	path: string,
-	body: unknown,
 	status: number,
-	person?: Actor,
-	selection?: Selection,
-) {
-	const headers = new Headers({ Accept: "application/json" });
-	if (person) headers.set("Cookie", person.cookie);
-	if (selection) headers.set("X-Rezics-Participation", JSON.stringify(selection));
-	if (body !== undefined) headers.set("Content-Type", "application/json");
+	person?: HttpActor,
+	body?: unknown,
+): Promise<unknown> {
 	const response = await api.fetch(
 		new Request(`http://localhost:3001/api/v1${path}`, {
 			method,
-			headers,
+			headers: {
+				...(person
+					? {
+							Cookie: person.cookie,
+							"X-Rezics-Authority": JSON.stringify(person.context.selection),
+						}
+					: {}),
+				...(body === undefined ? {} : { "Content-Type": "application/json" }),
+			},
 			...(body === undefined ? {} : { body: JSON.stringify(body) }),
 		}),
 	);
 	const text = await response.text();
-	assert.equal(response.status, status, `${method} ${path}: ${text.slice(0, 1200)}`);
-	assertions++;
-	return text ? (JSON.parse(text) as unknown) : null;
+	check(response.status, status, `${method} ${path}: ${text.slice(0, 1600)}`);
+	httpChecks++;
+	return text ? JSON.parse(text) : null;
 }
-const prefix = "/participation/membership";
-async function invite(owner: Actor, selection: Selection, recipient: Actor, expiresAt?: string) {
-	return MembershipInvitationSchema.parse(
+async function actor(name: string) {
+	const [account] = await database
+		.insert(users)
+		.values({
+			name: `Private ${name}`,
+			email: `${randomUUID()}@org-fixture.invalid`,
+			emailVerified: true,
+		})
+		.returning();
+	assert.ok(account);
+	const session = await authContext.internalAdapter.createSession(account.id),
+		directContext = fixturePrincipalContext(session);
+	const [cookie] = (
+		await serializeSignedCookie(
+			authContext.authCookies.sessionToken.name,
+			session.token,
+			authContext.secret,
+			{ path: "/" },
+		)
+	).split(";");
+	assert.ok(cookie);
+	const identity = z
+		.object({
+			entityId: z.uuid(),
+			representation: z.object({ id: z.uuid(), revision: z.number() }),
+		})
+		.parse(
+			await request(
+				"POST",
+				"/account/identities",
+				200,
+				{ cookie, context: directContext },
+				{
+					operationId: randomUUID(),
+					names: [{ language: "en", value: name }],
+					main: { expectedVersion: 0 },
+				},
+			),
+		);
+	const context = new PrincipalRequestContext(
+		account.id,
+		{
+			mode: "represented",
+			entityId: identity.entityId,
+			representations: [identity.representation],
+		},
+		directContext.credentialProof(),
+	);
+	return { account, session, cookie, context, directContext, identity };
+}
+type Actor = Awaited<ReturnType<typeof actor>>;
+const direct = (person: Actor): HttpActor => ({
+	cookie: person.cookie,
+	context: person.directContext,
+});
+const entityRecipient = (person: Actor) => ({
+	kind: "entity" as const,
+	entityId: person.identity.entityId,
+});
+type Recipient = z.infer<typeof MembershipRecipientSchema>;
+async function organization(owner: Actor) {
+	const result = z
+		.strictObject({
+			entityId: z.uuid(),
+			scopeId: z.uuid(),
+			representation: z.strictObject({ id: z.uuid(), revision: z.number().int() }),
+		})
+		.parse(
+			await request("POST", `${prefix}/organizations`, 200, direct(owner), {
+				name: "Native fixture organization",
+				language: "en",
+			}),
+		);
+	return {
+		...result,
+		manager: {
+			cookie: owner.cookie,
+			context: new PrincipalRequestContext(
+				owner.account.id,
+				{
+					mode: "represented",
+					entityId: result.entityId,
+					representations: [result.representation],
+				},
+				owner.directContext.credentialProof(),
+			),
+		},
+	};
+}
+type Org = Awaited<ReturnType<typeof organization>>;
+const invitationReceipt = MembershipReceiptSchema.extend({
+	invitationId: z.uuid(),
+	revision: z.number().int().positive(),
+	state: z.literal("pending"),
+});
+async function invite(manager: HttpActor, org: Org, recipient: Recipient, expiresAt?: string) {
+	const body = { recipient, operationId: randomUUID(), ...(expiresAt ? { expiresAt } : {}) };
+	const receipt = invitationReceipt.parse(
 		await request(
 			"POST",
-			`${prefix}/organizations/${selection.actingEntityId}/invitations`,
-			{ recipientEntityId: recipient.self.id, ...(expiresAt ? { expiresAt } : {}) },
+			`${prefix}/organizations/${org.entityId}/invitations`,
 			200,
-			owner,
-			selection,
+			manager,
+			body,
 		),
 	);
+	return { body, receipt };
 }
-async function drainErasure(authUserId: string) {
-	for (let index = 0; index < 120; index++) {
+async function incoming(person: HttpActor) {
+	return MembershipInvitationPageSchema.parse(
+		await request("GET", `${prefix}/me/invitations`, 200, person),
+	);
+}
+async function accept(person: HttpActor, invitationId: string) {
+	const item = (await incoming(person)).items.find((item) => item.id === invitationId);
+	assert.ok(item);
+	const body = {
+		operationId: randomUUID(),
+		expectedRevision: item.revision,
+		expectedMembershipVersion: item.membershipVersion,
+		consent: true as const,
+	};
+	return {
+		body,
+		receipt: MembershipReceiptSchema.parse(
+			await request("POST", `${prefix}/invitations/${invitationId}/accept`, 200, person, body),
+		),
+	};
+}
+async function roster(manager: HttpActor, org: Org) {
+	return OrganizationMemberPageSchema.parse(
+		await request("GET", `${prefix}/organizations/${org.entityId}/members`, 200, manager),
+	);
+}
+async function subject(person: Actor, kind: "entity" | "principal" = "entity") {
+	return database.transaction((tx) =>
+		allocateAccessSubject(tx, {
+			kind,
+			id: kind === "entity" ? person.identity.entityId : person.account.id,
+		}),
+	);
+}
+async function member(org: Org, subjectId: string) {
+	return (
+		await database
+			.select()
+			.from(accessMembership)
+			.where(
+				and(eq(accessMembership.scopeId, org.scopeId), eq(accessMembership.subjectId, subjectId)),
+			)
+	)[0];
+}
+async function drain(id: string) {
+	for (let step = 0; step < 150; step++) {
 		await database
 			.update(accountErasure)
 			.set({ availableAt: new Date(0) })
-			.where(eq(accountErasure.authUserId, authUserId));
-		const progressed = await dispatchAccountErasureBatch({ authUserId });
-		assert.ok(progressed <= 500);
-		const [job] = await database
-			.select({ stage: accountErasure.stage })
-			.from(accountErasure)
-			.where(eq(accountErasure.authUserId, authUserId));
-		if (job?.stage === "complete") return;
+			.where(eq(accountErasure.authUserId, id));
+		const count = await dispatchAccountErasureBatch({ authUserId: id });
+		assert.ok(count <= 500);
+		assertions++;
+		if (
+			(await database.select().from(accountErasure).where(eq(accountErasure.authUserId, id)))[0]
+				?.stage === "complete"
+		)
+			return;
 	}
-	throw new Error("Membership erasure failed to reach completion within bounded stages");
+	throw new Error("Org erasure failed to finish bounded worker stages");
 }
-function deferred<T>() {
-	let resolve!: (value: T) => void;
-	const promise = new Promise<T>((complete) => {
-		resolve = complete;
-	});
-	return { promise, resolve };
-}
-async function waitForBlocked(pid: number, blockerPid: number) {
-	for (let index = 0; index < 100; index++) {
-		const result = await racePool.query<{ blocked: boolean }>(
-			"select $2::integer = any(pg_blocking_pids($1)) as blocked",
-			[pid, blockerPid],
-		);
-		if (result.rows[0]?.blocked) {
+async function blocked(pid: number, by: number) {
+	const end = Date.now() + 5000;
+	while (Date.now() < end) {
+		if (
+			(
+				await pool.query<{ blocked: boolean }>(
+					"select $2::integer=any(pg_blocking_pids($1)) as blocked",
+					[pid, by],
+				)
+			).rows[0]?.blocked
+		) {
 			assertions++;
 			return;
 		}
 		await setTimeout(10);
 	}
-	throw new Error("Expected concurrent membership authority to block on its transaction fence");
+	throw new Error("Expected original invitation authority contention");
 }
-
-try {
-	// These small dummy fixtures commit so signed sessions and separate SQL connections see the same rows.
-	// Private data is erased below; immutable public/operator evidence remains only in this disposable target.
-	const owner = await actor("Membership fixture owner");
-	const alice = await actor("Membership fixture Alice");
-	const bob = await actor("Membership fixture Bob");
-	const carol = await actor("Membership fixture Carol");
-	const organization = CreatedOrganizationSchema.parse(
-		await request(
-			"POST",
-			"/participation/organizations",
-			{ name: "Membership fixture organization", language: "en" },
-			200,
-			owner,
-		),
-	);
-	const memberGrant = organization.grants.find((grant) => grant.capability === "entity.membership");
-	const securityGrant = organization.grants.find((grant) => grant.capability === "entity.security");
-	const publishGrant = organization.grants.find((grant) => grant.capability === "entity.publish");
-	assert.ok(memberGrant && securityGrant && publishGrant);
-	const selection = {
-		actingEntityId: organization.entityId,
-		grant: { id: memberGrant.id, revision: memberGrant.revision },
-	};
-	const security = {
-		actingEntityId: organization.entityId,
-		grant: { id: securityGrant.id, revision: securityGrant.revision },
-	};
-	const publication = {
-		actingEntityId: organization.entityId,
-		grant: { id: publishGrant.id, revision: publishGrant.revision },
-	};
-	const securityAuthority: ParticipationAuthority = { ...owner.authority, ...security };
-	const rosterPath = `${prefix}/organizations/${organization.entityId}/members`;
-	await request("GET", rosterPath, undefined, 401);
-	await request("GET", rosterPath, undefined, 403, owner, security);
-	await request("GET", rosterPath, undefined, 403, owner, publication);
-	await request("GET", rosterPath, undefined, 403, bob);
-	await request(
-		"POST",
-		"/participation/grants",
-		{
-			recipient: { kind: "account", entityId: alice.self.id },
-			actingEntityId: owner.self.id,
-			capability: "entity.membership",
-			target: { owner: "entity", id: owner.self.id },
-		},
-		403,
-		owner,
-	);
-	check(
-		OrganizationMemberPageSchema.parse(
-			await request("GET", rosterPath, undefined, 200, owner, selection),
-		).items.length,
-		0,
-		"Creating the organization does not silently enroll its controller",
-	);
-	const delegatedMembership = GrantSelectionSchema.parse(
-		await request(
-			"POST",
-			"/participation/grants",
-			{
-				recipient: { kind: "account", entityId: bob.self.id },
-				actingEntityId: organization.entityId,
-				capability: "entity.membership",
-				target: { owner: "entity", id: organization.entityId },
-			},
-			200,
-			owner,
-			security,
-		),
-	);
-	check(
-		OrganizationMemberPageSchema.parse(
-			await request("GET", rosterPath, undefined, 200, bob, {
-				actingEntityId: organization.entityId,
-				grant: delegatedMembership,
-			}),
-		).items.length,
-		0,
-		"A membership manager is not silently enrolled in the roster",
-	);
-	const catalogGrant = GrantSelectionSchema.parse(
-		await request(
-			"POST",
-			"/participation/grants",
-			{
-				recipient: { kind: "account", entityId: carol.self.id },
-				actingEntityId: carol.self.id,
-				capability: "catalog.edit",
-				target: { owner: "entity", id: organization.entityId },
-			},
-			200,
-			owner,
-		),
-	);
-	await request("GET", rosterPath, undefined, 403, carol, {
-		actingEntityId: carol.self.id,
-		grant: catalogGrant,
+async function race<T>(
+	writer: (tx: DatabaseTransaction) => Promise<unknown>,
+	reader: (tx: DatabaseTransaction) => Promise<T>,
+	observe: (promise: Promise<T>) => Promise<unknown>,
+) {
+	const held = Promise.withResolvers<number>(),
+		release = Promise.withResolvers<void>(),
+		started = Promise.withResolvers<number>();
+	const writing = peer.transaction(async (tx) => {
+		await writer(tx);
+		held.resolve(
+			(await tx.execute<{ pid: number }>(sql`select pg_backend_pid() as pid`)).rows[0]!.pid,
+		);
+		await release.promise;
 	});
-	check(
-		ManagedOrganizationsSchema.parse(
-			await request(
-				"GET",
-				"/participation/organizations?capability=entity.membership",
-				undefined,
-				200,
-				owner,
-			),
-		).items.some((item) => item.entityId === organization.entityId),
-		true,
-		"Membership managers can locate their exact organization role",
+	void writing.catch(held.reject);
+	const holder = await held.promise;
+	const reading = peer.transaction(async (tx) => {
+		started.resolve(
+			(await tx.execute<{ pid: number }>(sql`select pg_backend_pid() as pid`)).rows[0]!.pid,
+		);
+		return reader(tx);
+	});
+	void reading.catch(started.reject);
+	const observed = observe(reading);
+	void observed.catch(() => {});
+	try {
+		await blocked(await started.promise, holder);
+	} finally {
+		release.resolve();
+		await writing;
+		await observed;
+	}
+}
+async function revokeControl(tx: DatabaseTransaction, owner: Actor, org: Org) {
+	return applyAccessRepresentationCommand(
+		tx,
+		{
+			operation: "revoke",
+			entityId: org.entityId,
+			grantId: org.representation.id,
+			expectedVersion: org.representation.revision,
+			operationId: randomUUID(),
+			operatorAuthUserId: owner.account.id,
+			authoritySubjectId: await allocateAccessSubject(tx, {
+				kind: "principal",
+				id: owner.account.id,
+			}),
+		},
+		sql<boolean>`true`,
 	);
-	await request(
-		"POST",
-		`${prefix}/organizations/${organization.entityId}/invitations`,
-		{ recipientEntityId: alice.self.id, recipientAuthUserId: alice.account.id },
-		422,
-		owner,
-		selection,
-	);
-	const invitation = await invite(owner, selection, alice);
+}
+try {
+	const owner = await actor("Org owner"),
+		alice = await actor("Public Alice"),
+		bob = await actor("Public Bob"),
+		carol = await actor("Public Carol");
+	const org = await organization(owner),
+		path = `${prefix}/organizations/${org.entityId}`;
+	await request("GET", `${path}/members`, 401);
+	await request("GET", `${path}/members`, 403, owner);
+	await request("GET", `${path}/members`, 403, direct(owner));
+	await request("GET", `${path}/members`, 403, bob);
 	check(
-		(await invite(owner, selection, alice)).id,
-		invitation.id,
-		"Repeating a pending invitation does not create another identity",
-	);
-	check(
-		JSON.stringify(invitation).includes(alice.account.id) ||
-			JSON.stringify(invitation).includes(owner.account.id),
-		false,
-		"Invitation wire response excludes private Auth identities",
-	);
-	check(
-		MembershipInvitationPageSchema.parse(
-			await request("GET", `${prefix}/me/invitations`, undefined, 200, bob),
-		).items.length,
+		(await roster(org.manager, org)).items.length,
 		0,
-		"An unrelated inbox remains private",
+		"Org creation grants explicit control without enrolling its controller",
+	);
+	const manager = await database.transaction((tx) =>
+		fixtureMembershipManager(tx, bob.session, { owner: "entity", id: org.entityId }),
+	);
+	const directManager = { cookie: bob.cookie, context: manager.context };
+	check(
+		(await roster(directManager, org)).items.length,
+		0,
+		"a directly granted native manager is not enrolled either",
+	);
+	await request("GET", `${path}/members`, 403, bob);
+	const directory = z
+		.object({ items: z.array(z.object({ entityId: z.uuid() })) })
+		.parse(await request("GET", `${prefix}/managed-organizations`, 200, direct(owner)));
+	check(
+		directory.items.some((row) => row.entityId === org.entityId),
+		true,
+		"native control is discoverable independently from public Self",
+	);
+	await request("POST", `${path}/invitations`, 422, org.manager, {
+		recipient: entityRecipient(alice),
+		recipientAuthUserId: alice.account.id,
+		operationId: randomUUID(),
+	});
+	const invitation = await invite(org.manager, org, entityRecipient(alice));
+	check(
+		invitationReceipt.parse(
+			await request("POST", `${path}/invitations`, 200, org.manager, invitation.body),
+		),
+		invitation.receipt,
+		"retry uses the same immutable operation receipt",
+	);
+	await request("POST", `${path}/invitations`, 409, org.manager, {
+		...invitation.body,
+		operationId: randomUUID(),
+	});
+	check((await incoming(bob)).items.length, 0, "another public subject cannot see the invitation");
+	check(
+		(await incoming(direct(alice))).items.length,
+		0,
+		"a principal inbox does not borrow its Entity invitation",
+	);
+	const inbox = await incoming(alice);
+	check(
+		inbox.items[0]?.id,
+		invitation.receipt.invitationId,
+		"the addressed represented Entity sees its invitation",
 	);
 	check(
-		MembershipInvitationPageSchema.parse(
-			await request("GET", `${prefix}/me/invitations`, undefined, 200, alice),
-		).items[0]?.id,
-		invitation.id,
-		"Only the addressed account sees the incoming invitation",
+		JSON.stringify(inbox).includes(alice.account.id) ||
+			JSON.stringify(inbox).includes(owner.account.id),
+		false,
+		"invitations expose no private operator IDs",
 	);
 	await request(
 		"POST",
-		`${prefix}/invitations/${invitation.id}/accept`,
-		{ expectedRevision: 1 },
+		`${prefix}/invitations/${invitation.receipt.invitationId}/accept`,
 		404,
 		bob,
+		{ operationId: randomUUID(), expectedRevision: 1, expectedMembershipVersion: 0, consent: true },
 	);
-	await rejected(
+	await request(
+		"POST",
+		`${prefix}/invitations/${invitation.receipt.invitationId}/accept`,
+		422,
+		alice,
+		{ operationId: randomUUID(), expectedRevision: 1, expectedMembershipVersion: 0 },
+	);
+	const aliceSubject = await subject(alice),
+		bobSubject = await subject(bob);
+	await assert.rejects(
 		database.transaction((tx) =>
 			tx
-				.update(organizationMembershipInvitation)
-				.set({
-					state: "accepted",
-					revision: 2,
-					resolvedAt: new Date(),
-					resolvedByAuthUserId: bob.account.id,
-				})
-				.where(eq(organizationMembershipInvitation.id, invitation.id)),
+				.update(organizationEnrollmentInvitation)
+				.set({ recipientSubjectId: bobSubject })
+				.where(eq(organizationEnrollmentInvitation.id, invitation.receipt.invitationId)),
 		),
 	);
-	await rejected(
+	assertions++;
+	await assert.rejects(
 		database.transaction((tx) =>
 			tx
-				.update(organizationMembershipInvitation)
-				.set({ recipientEntityId: bob.self.id })
-				.where(eq(organizationMembershipInvitation.id, invitation.id)),
+				.update(organizationEnrollmentInvitation)
+				.set({ state: "accepted", revision: 2, resolvedAt: new Date() })
+				.where(eq(organizationEnrollmentInvitation.id, invitation.receipt.invitationId)),
 		),
 	);
-	await rejected(
+	assertions++;
+	await assert.rejects(
 		database.transaction((tx) =>
-			tx.insert(organizationMembership).values({
-				organizationEntityId: organization.entityId,
-				memberAuthUserId: alice.account.id,
-				memberEntityId: alice.self.id,
-				acceptedInvitationId: invitation.id,
-				joinedAt: new Date(),
-			}),
+			applyAccessMembershipCommand(
+				tx,
+				{
+					operation: "admit",
+					scopeId: org.scopeId,
+					subjectId: aliceSubject,
+					expectedVersion: 0,
+					operationId: randomUUID(),
+					operatorAuthUserId: alice.account.id,
+					authoritySubjectId: aliceSubject,
+				},
+				sql<boolean>`true`,
+			),
 		),
 	);
-	const beforeGrants = await database
-		.select({ id: participationGrant.id })
-		.from(participationGrant)
-		.where(eq(participationGrant.authUserId, alice.account.id));
-	const accepted = MembershipInvitationSchema.parse(
-		await request(
-			"POST",
-			`${prefix}/invitations/${invitation.id}/accept`,
-			{ expectedRevision: 1 },
-			200,
-			alice,
-		),
-	);
-	check(accepted.state, "accepted", "The recipient explicitly accepts");
-	await request(
-		"POST",
-		`${prefix}/invitations/${invitation.id}/accept`,
-		{ expectedRevision: 1 },
-		409,
-		alice,
+	assertions++;
+	const accepted = await accept(alice, invitation.receipt.invitationId);
+	check(
+		[accepted.receipt.state, accepted.receipt.activeGeneration],
+		["accepted", 1],
+		"explicit recipient acceptance creates a generation",
 	);
 	check(
-		(
-			await database
-				.select({ id: participationGrant.id })
-				.from(participationGrant)
-				.where(eq(participationGrant.authUserId, alice.account.id))
-		).length,
-		beforeGrants.length,
-		"Acceptance grants no publishing, security or catalog authority",
-	);
-	await request(
-		"POST",
-		"/participation/acting",
-		{
-			actingEntityId: organization.entityId,
-			capability: "entity.publish",
-			target: { owner: "entity", id: organization.entityId },
-		},
-		403,
-		alice,
-	);
-	const roster = OrganizationMemberPageSchema.parse(
-		await request("GET", rosterPath, undefined, 200, owner, selection),
-	);
-	check(
-		roster.items.map((member) => member.memberEntityId),
-		[alice.self.id],
-		"The manager sees public member identities after consent",
-	);
-	check(
-		JSON.stringify(roster).includes(alice.account.id),
-		false,
-		"Roster wire response excludes Auth identities",
-	);
-	await request("PATCH", "/account/me/preferences", { interfaceLocale: "ja" }, 200, alice);
-	await request("PATCH", "/account/me/preferences", { interfaceLocale: "en" }, 200, owner);
-	const ownPreferences = await request(
-		"GET",
-		"/account/me/preferences",
-		undefined,
-		200,
-		owner,
-		selection,
-	);
-	assert.ok(
-		ownPreferences && typeof ownPreferences === "object" && "interfaceLocale" in ownPreferences,
-	);
-	check(
-		ownPreferences.interfaceLocale,
-		"en",
-		"Managing a roster does not select a member's private preferences",
-	);
-	await request(
-		"POST",
-		`${prefix}/organizations/${organization.entityId}/members/${alice.self.id}/remove`,
-		{ expectedRevision: 99 },
-		409,
-		owner,
-		selection,
-	);
-	check(
-		OrganizationMemberSchema.parse(
+		MembershipReceiptSchema.parse(
 			await request(
 				"POST",
-				`${prefix}/organizations/${organization.entityId}/members/${alice.self.id}/remove`,
-				{ expectedRevision: 1 },
+				`${prefix}/invitations/${invitation.receipt.invitationId}/accept`,
 				200,
-				owner,
-				selection,
+				alice,
+				accepted.body,
 			),
-		).revision,
-		2,
-		"Manager removal advances the member revision",
-	);
-	const rejoin = await invite(owner, selection, alice);
-	await request(
-		"POST",
-		`${prefix}/invitations/${rejoin.id}/accept`,
-		{ expectedRevision: 1 },
-		200,
-		alice,
-	);
-	check(
-		OrganizationMemberPageSchema.parse(
-			await request("GET", `${prefix}/me/organizations`, undefined, 200, alice),
-		).items[0]?.revision,
-		3,
-		"A new accepted invitation rejoins the same membership identity",
+		),
+		accepted.receipt,
+		"acceptance receipt replay creates no duplicate admission",
 	);
 	await request(
 		"POST",
-		`${prefix}/me/organizations/${organization.entityId}/leave`,
-		{ expectedRevision: 3 },
-		200,
+		`${prefix}/invitations/${invitation.receipt.invitationId}/accept`,
+		409,
 		alice,
+		{ ...accepted.body, operationId: randomUUID() },
 	);
-	const events = await database
-		.select()
-		.from(organizationMembershipEvent)
-		.where(
-			and(
-				eq(organizationMembershipEvent.organizationEntityId, organization.entityId),
-				eq(organizationMembershipEvent.memberAuthUserId, alice.account.id),
-			),
-		)
-		.orderBy(organizationMembershipEvent.revision);
+	await request("GET", `${path}/members`, 403, alice);
+	const joined = await roster(org.manager, org);
 	check(
-		events.map((event) => event.operation),
-		["join", "remove", "join", "leave"],
-		"Rejoin preserves all prior membership transitions",
+		joined.items.map((row) => row.recipient),
+		[entityRecipient(alice)],
+		"membership grants no manager role or private account identity",
 	);
 	check(
-		events.map((event) => event.operatorAuthUserId),
-		[alice.account.id, owner.account.id, alice.account.id, alice.account.id],
-		"Transition evidence preserves each actual operator",
+		joined.items[0]?.memberName,
+		"Public Alice",
+		"public names are independent from private sign-in labels",
 	);
-	await rejected(
+	check(
+		JSON.stringify(joined).includes(alice.account.id),
+		false,
+		"roster metadata excludes private account IDs",
+	);
+	await request("GET", "/account/main-identity", 403, org.manager);
+	for (const person of [alice, owner]) {
+		const choice = z.object({ entityId: z.uuid() }).parse(
+			await request("GET", "/account/main-identity", 200, {
+				cookie: person.cookie, context: person.directContext,
+			}),
+		);
+		check(choice.entityId, person.identity.entityId, "direct private settings retain their account owner");
+	}
+	await request("POST", `${path}/members/remove`, 409, org.manager, {
+		operationId: randomUUID(),
+		expectedMembershipVersion: 99,
+		recipient: entityRecipient(alice),
+	});
+	const removed = MembershipReceiptSchema.parse(
+		await request("POST", `${path}/members/remove`, 200, org.manager, {
+			operationId: randomUUID(),
+			expectedMembershipVersion: accepted.receipt.version,
+			recipient: entityRecipient(alice),
+		}),
+	);
+	check(removed.activeGeneration, null, "manager removal ends only the active generation");
+	const secondInvite = await invite(org.manager, org, entityRecipient(alice));
+	const rejoined = await accept(alice, secondInvite.receipt.invitationId);
+	check(
+		[rejoined.receipt.membershipId, rejoined.receipt.activeGeneration],
+		[accepted.receipt.membershipId, 2],
+		"rejoin retains identity and allocates a new generation",
+	);
+	await request("POST", `${prefix}/me/organizations/${org.entityId}/leave`, 200, alice, {
+		operationId: randomUUID(),
+		expectedMembershipVersion: rejoined.receipt.version,
+	});
+	const history = MembershipHistorySchema.parse(
+		await request("POST", `${path}/history`, 200, org.manager, {
+			recipient: entityRecipient(alice),
+		}),
+	);
+	check(
+		history.items.map((row) => row.operation).sort(),
+		["admit", "admit", "leave", "remove"].sort(),
+		"shared admission history retains every transition",
+	);
+	assert.ok(accepted.receipt.membershipId);
+	await assert.rejects(
 		database.transaction((tx) =>
 			tx
-				.delete(organizationMembershipEvent)
-				.where(eq(organizationMembershipEvent.memberAuthUserId, alice.account.id)),
+				.delete(accessMembershipEvent)
+				.where(eq(accessMembershipEvent.membershipId, accepted.receipt.membershipId!)),
 		),
 	);
-	const declined = await invite(owner, selection, bob);
+	assertions++;
+
+	const declined = await invite(org.manager, org, entityRecipient(bob));
 	await request(
 		"POST",
-		`${prefix}/invitations/${declined.id}/decline`,
-		{ expectedRevision: 1 },
+		`${prefix}/invitations/${declined.receipt.invitationId}/decline`,
 		200,
 		bob,
+		{ expectedRevision: 1, operationId: randomUUID() },
 	);
+	await request("POST", `${prefix}/invitations/${declined.receipt.invitationId}/accept`, 409, bob, {
+		expectedRevision: 2,
+		expectedMembershipVersion: 0,
+		consent: true,
+		operationId: randomUUID(),
+	});
+	const cancelled = await invite(org.manager, org, entityRecipient(carol));
 	await request(
 		"POST",
-		`${prefix}/invitations/${declined.id}/accept`,
-		{ expectedRevision: 2 },
-		409,
-		bob,
-	);
-	const cancelled = await invite(owner, selection, carol);
-	await request(
-		"POST",
-		`${prefix}/organizations/${organization.entityId}/invitations/${cancelled.id}/cancel`,
-		{ expectedRevision: 1 },
+		`${path}/invitations/${cancelled.receipt.invitationId}/revoke`,
 		403,
 		owner,
-		security,
+		{ expectedRevision: 1, operationId: randomUUID() },
 	);
 	await request(
 		"POST",
-		`${prefix}/organizations/${organization.entityId}/invitations/${cancelled.id}/cancel`,
-		{ expectedRevision: 1 },
+		`${path}/invitations/${cancelled.receipt.invitationId}/revoke`,
 		200,
-		owner,
-		selection,
+		org.manager,
+		{ expectedRevision: 1, operationId: randomUUID() },
 	);
 	await request(
 		"POST",
-		`${prefix}/invitations/${cancelled.id}/accept`,
-		{ expectedRevision: 2 },
+		`${prefix}/invitations/${cancelled.receipt.invitationId}/accept`,
 		409,
 		carol,
+		{ expectedRevision: 2, expectedMembershipVersion: 0, consent: true, operationId: randomUUID() },
 	);
-	const expiring = await invite(owner, selection, bob, new Date(Date.now() + 2000).toISOString());
-	await setTimeout(2200);
-	await request(
-		"POST",
-		`${prefix}/invitations/${expiring.id}/accept`,
-		{ expectedRevision: 1 },
-		409,
-		bob,
+	const expiring = await invite(
+		org.manager,
+		org,
+		entityRecipient(bob),
+		new Date(Date.now() + 1500).toISOString(),
 	);
-	const afterExpiry = await invite(owner, selection, bob);
-	check(afterExpiry.id === expiring.id, false, "Expired invitations do not reopen on reissue");
+	await setTimeout(1600);
+	await request("POST", `${prefix}/invitations/${expiring.receipt.invitationId}/accept`, 403, bob, {
+		expectedRevision: 1,
+		expectedMembershipVersion: 0,
+		consent: true,
+		operationId: randomUUID(),
+	});
+	const replacement = await invite(org.manager, org, entityRecipient(bob));
+	check(
+		replacement.receipt.invitationId === expiring.receipt.invitationId,
+		false,
+		"expired identities are never reopened",
+	);
 	check(
 		(
 			await database
 				.select()
-				.from(organizationMembershipInvitation)
-				.where(eq(organizationMembershipInvitation.id, expiring.id))
+				.from(organizationEnrollmentInvitation)
+				.where(eq(organizationEnrollmentInvitation.id, expiring.receipt.invitationId))
 		)[0]?.state,
 		"expired",
-		"Admission reclaims only its bounded expired pending set",
+		"bounded reissue reclaims expired pending state",
 	);
 
-	// Acceptance completes before revocation: the revoker must wait for the committed effect.
-	const acceptedBeforeRevoke = deferred<number>(),
-		releaseAcceptance = deferred<void>(),
-		revokerPid = deferred<number>();
-	const accepting = raceDatabase.transaction(async (tx) => {
-		await acceptMembershipInvitation(tx, bob.authority, afterExpiry.id, 1);
-		acceptedBeforeRevoke.resolve(
-			(await tx.execute<{ pid: number }>(sql`select pg_backend_pid() as pid`)).rows[0]!.pid,
+	// Private principal enrollment requires explicit scoped contact, not an inferred public Entity link.
+	const privateAlice = direct(alice);
+	const contact = MembershipContactSchema.parse(
+		await request("POST", `${path}/contacts`, 200, privateAlice),
+	);
+	const resolved = z
+		.object({ recipient: MembershipRecipientSchema })
+		.parse(
+			await request("POST", `${path}/recipients`, 200, org.manager, { contact: contact.contact }),
 		);
-		await releaseAcceptance.promise;
-	});
-	await Promise.race([acceptedBeforeRevoke.promise, accepting]);
-	const revoking = raceDatabase.transaction(async (tx) => {
-		const result = await tx.execute<{ pid: number }>(sql`select pg_backend_pid() as pid`);
-		revokerPid.resolve(result.rows[0]!.pid);
-		await revokeParticipationGrant(
-			tx,
-			securityAuthority,
-			selection.grant.id,
-			selection.grant.revision,
-		);
-	});
-	try {
-		await waitForBlocked(await revokerPid.promise, await acceptedBeforeRevoke.promise);
-	} finally {
-		releaseAcceptance.resolve();
-	}
-	await Promise.all([accepting, revoking]);
+	check(resolved.recipient.kind, "principal", "private contact yields a manager-scoped selector");
 	check(
-		(
-			await database
-				.select()
-				.from(organizationMembership)
-				.where(
-					and(
-						eq(organizationMembership.organizationEntityId, organization.entityId),
-						eq(organizationMembership.memberAuthUserId, bob.account.id),
-					),
-				)
-		)[0]?.removedAt,
-		null,
-		"An already accepted membership survives later issuer grant revocation",
+		JSON.stringify(resolved).includes(alice.account.id),
+		false,
+		"selector disclosure does not reveal the Auth key",
 	);
-
-	const replacementGrant = await database.transaction((tx) =>
-		issueParticipationGrant(tx, securityAuthority, {
-			recipient: { kind: "auth", authUserId: owner.account.id },
-			actingEntityId: organization.entityId,
-			capability: "entity.membership",
-			target: { owner: "entity", id: organization.entityId },
+	const privateInvite = await invite(org.manager, org, resolved.recipient);
+	await request("POST", `${prefix}/contacts/${contact.id}/revoke`, 200, privateAlice);
+	await request(
+		"POST",
+		`${prefix}/invitations/${privateInvite.receipt.invitationId}/accept`,
+		403,
+		privateAlice,
+		{ expectedRevision: 1, expectedMembershipVersion: 0, consent: true, operationId: randomUUID() },
+	);
+	await request(
+		"POST",
+		`${path}/invitations/${privateInvite.receipt.invitationId}/revoke`,
+		200,
+		org.manager,
+		{ expectedRevision: 1, operationId: randomUUID() },
+	);
+	const newContact = MembershipContactSchema.parse(
+		await request("POST", `${path}/contacts`, 200, privateAlice),
+	);
+	const newRecipient = z.object({ recipient: MembershipRecipientSchema }).parse(
+		await request("POST", `${path}/recipients`, 200, org.manager, {
+			contact: newContact.contact,
 		}),
 	);
-	const replacement = { actingEntityId: organization.entityId, grant: replacementGrant };
-	const deniedInvitation = await invite(owner, replacement, carol);
-	const revokedBeforeAcceptance = deferred<number>(),
-		releaseRevocation = deferred<void>(),
-		accepterPid = deferred<number>();
-	const revokeFirst = raceDatabase.transaction(async (tx) => {
-		await revokeParticipationGrant(
-			tx,
-			securityAuthority,
-			replacementGrant.id,
-			replacementGrant.revision,
-		);
-		revokedBeforeAcceptance.resolve(
-			(await tx.execute<{ pid: number }>(sql`select pg_backend_pid() as pid`)).rows[0]!.pid,
-		);
-		await releaseRevocation.promise;
-	});
-	await Promise.race([revokedBeforeAcceptance.promise, revokeFirst]);
-	const acceptAfter = raceDatabase.transaction(async (tx) => {
-		const result = await tx.execute<{ pid: number }>(sql`select pg_backend_pid() as pid`);
-		accepterPid.resolve(result.rows[0]!.pid);
-		return acceptMembershipInvitation(tx, carol.authority, deniedInvitation.id, 1);
-	});
-	const deniedAccept = assert.rejects(acceptAfter);
-	try {
-		await waitForBlocked(await accepterPid.promise, await revokedBeforeAcceptance.promise);
-	} finally {
-		releaseRevocation.resolve();
-	}
-	await Promise.all([revokeFirst, deniedAccept]);
+	const privateAccepted = await accept(
+		privateAlice,
+		(await invite(org.manager, org, newRecipient.recipient)).receipt.invitationId,
+	);
+	check(
+		privateAccepted.receipt.activeGeneration,
+		1,
+		"private principal and public Entity have distinct admissions",
+	);
+
+	const acceptingBody = {
+		operationId: randomUUID(),
+		expectedRevision: replacement.receipt.revision,
+		expectedMembershipVersion: 0,
+		consent: true as const,
+	};
+	await race(
+		(tx) =>
+			acceptMembershipInvitation(tx, bob.context, replacement.receipt.invitationId, acceptingBody),
+		(tx) => revokeControl(tx, owner, org),
+		async (result) => {
+			await result;
+			assertions++;
+		},
+	);
+	check(
+		(await member(org, bobSubject))?.activeGeneration,
+		1,
+		"accepted institutional membership survives later issuer revocation",
+	);
+	const staleOrg = await organization(owner);
+	const staleInvitation = await invite(staleOrg.manager, staleOrg, entityRecipient(carol));
+	await race(
+		(tx) => revokeControl(tx, owner, staleOrg),
+		(tx) =>
+			acceptMembershipInvitation(tx, carol.context, staleInvitation.receipt.invitationId, {
+				operationId: randomUUID(),
+				expectedRevision: 1,
+				expectedMembershipVersion: 0,
+				consent: true,
+			}),
+		(result) => assert.rejects(result, ManagementAuthorityDenied),
+	);
 	assertions++;
 	check(
-		(
-			await database
-				.select()
-				.from(organizationMembership)
-				.where(
-					and(
-						eq(organizationMembership.organizationEntityId, organization.entityId),
-						eq(organizationMembership.memberAuthUserId, carol.account.id),
-					),
-				)
-		).length,
-		0,
-		"A revoked invitation source cannot create membership after waiting",
-	);
-	check(
-		MembershipInvitationPageSchema.parse(
-			await request("GET", `${prefix}/me/invitations`, undefined, 200, carol),
-		).items.find((item) => item.id === deniedInvitation.id)?.state,
-		"invalidated",
-		"The recipient sees revoked-source invitation state",
-	);
-	await database.transaction((tx) => eraseOwnAccount(tx, owner.authority));
-	await drainErasure(owner.account.id);
-	check(
-		(
-			await database
-				.select()
-				.from(organizationMembership)
-				.where(
-					and(
-						eq(organizationMembership.organizationEntityId, organization.entityId),
-						eq(organizationMembership.memberAuthUserId, bob.account.id),
-					),
-				)
-		)[0]?.removedAt,
+		(await member(staleOrg, await subject(carol)))?.activeGeneration ?? null,
 		null,
-		"Erasing an inviter preserves a different person's accepted membership",
+		"revoked original invitation authority cannot admit after waiting",
+	);
+	const staleItem = (await incoming(carol)).items.find(
+		(row) => row.id === staleInvitation.receipt.invitationId,
+	);
+	check(
+		staleItem?.availability,
+		"deny",
+		"unusable original authority remains explicitly denied for acceptance",
+	);
+	await database
+		.update(organizationEnrollmentReview)
+		.set({ dueAt: new Date(0) })
+		.where(eq(organizationEnrollmentReview.invitationId, staleInvitation.receipt.invitationId));
+	await reconcileOrganizationEnrollmentBatch();
+	check(
+		(await incoming(carol)).items.find((row) => row.id === staleInvitation.receipt.invitationId)
+			?.state,
+		"invalidated",
+		"bounded reconciliation records the terminal invalidation without granting membership",
+	);
+
+	// Erasure affects private subjects and evidence, not another person's accepted Entity admission.
+	const liveOrg = await organization(owner);
+	await accept(
+		bob,
+		(await invite(liveOrg.manager, liveOrg, entityRecipient(bob))).receipt.invitationId,
+	);
+	await invite(liveOrg.manager, liveOrg, entityRecipient(carol));
+	await request("POST", "/participation/account/erase", 200, direct(owner));
+	await drain(owner.account.id);
+	check(
+		(await member(liveOrg, bobSubject))?.activeGeneration,
+		1,
+		"inviter erasure preserves an accepted public Entity admission",
 	);
 	check(
 		(
 			await database
 				.select()
-				.from(organizationMembershipInvitation)
+				.from(organizationEnrollmentInvitation)
 				.where(
 					and(
-						eq(organizationMembershipInvitation.invitedByAuthUserId, owner.account.id),
-						eq(organizationMembershipInvitation.state, "pending"),
+						eq(organizationEnrollmentInvitation.invitedByAuthUserId, owner.account.id),
+						eq(organizationEnrollmentInvitation.state, "pending"),
 					),
 				)
 		).length,
 		0,
-		"Sender erasure drains pending invitation state",
+		"erasure drains the inviter's pending authority evidence",
 	);
-	await database.transaction((tx) => eraseOwnAccount(tx, alice.authority));
-	await drainErasure(alice.account.id);
+	const privateSubject = await subject(alice, "principal");
+	await request("POST", "/participation/account/erase", 200, direct(alice));
+	await drain(alice.account.id);
 	check(
-		(
-			await database
-				.select()
-				.from(organizationMembership)
-				.where(eq(organizationMembership.memberAuthUserId, alice.account.id))
-		).length,
-		0,
-		"Own erasure removes inactive roster rows",
-	);
-	check(
-		(
-			await database
-				.select()
-				.from(organizationMembershipEvent)
-				.where(eq(organizationMembershipEvent.memberAuthUserId, alice.account.id))
-		).length,
-		0,
-		"Own erasure removes membership transition history",
+		(await member(org, privateSubject))?.activeGeneration,
+		null,
+		"private principal erasure ends private membership",
 	);
 	check(
 		(
 			await database
 				.select()
-				.from(organizationMembershipInvitation)
-				.where(eq(organizationMembershipInvitation.recipientAuthUserId, alice.account.id))
-		).length,
-		0,
-		"Own erasure removes received invitations after dependent history",
+				.from(organizationEnrollmentInvitation)
+				.where(eq(organizationEnrollmentInvitation.recipientSubjectId, privateSubject))
+		).every((row) => row.authority === null),
+		true,
+		"private recipient erasure clears credential evidence while retaining minimal native anchors",
 	);
-	const repository = new URL("../../../", import.meta.url);
-	const sourceDigests: Record<string, string> = {};
+	check(
+		(await member(org, aliceSubject))?.activeGeneration,
+		null,
+		"the earlier public departure remains ended without resurrecting a generation",
+	);
+
+	// Direct manager proof is still current independently from the erased original controller.
+	check(
+		(
+			await database.transaction((tx) =>
+				listOrganizationMembers(tx, manager.context, org.entityId, {}),
+			)
+		).items.some(
+			(row) => row.recipient.kind === "entity" && row.recipient.entityId === bob.identity.entityId,
+		),
+		true,
+		"institutional direct management does not depend on the original creator's account",
+	);
+	const root = new URL("../../../", import.meta.url),
+		sources: Record<string, string> = {};
 	for (const path of [
-		"services/main/Taskfile.yml",
 		"services/main/scripts/check-organization-membership.ts",
+		"services/main/scripts/native-enrollment-fixture.ts",
 		"services/main/src/services/participation/membership.ts",
-		"services/main/src/services/participation/membership-contracts.ts",
-		"services/main/src/services/participation/commands.ts",
-		"services/main/src/services/participation/policy.ts",
-		"services/main/src/services/participation/organizations.ts",
+		"services/main/src/services/participation/membership-worker.ts",
+		"services/main/src/services/participation/organization-control.ts",
 		"services/main/src/services/participation/erasure.ts",
 		"services/main/src/services/api/participation/membership.ts",
-		"services/main/src/services/auth/entity.ts",
-		"libraries/schema/src/postgres/access/organization-membership.ts",
-		"services/main/src/services/database/schema/postgres/organization-membership.sql",
 		"services/main/src/services/database/migrations/atlas.sum",
 	])
-		sourceDigests[path] = createHash("sha256")
-			.update(await readFile(new URL(path, repository)))
+		sources[path] = createHash("sha256")
+			.update(await readFile(new URL(path, root)))
 			.digest("hex");
-	const runtime = await database.execute(
-		sql`select version() as postgres, current_setting('default_transaction_isolation') as default_isolation`,
-	);
 	console.info(
 		JSON.stringify({
-			check: "organization-membership",
 			baseCommit: execFileSync("git", ["rev-parse", "HEAD"], {
-				cwd: fileURLToPath(repository),
+				cwd: fileURLToPath(root),
 				encoding: "utf8",
 			}).trim(),
-			sourceDigests,
-			node: process.version,
-			platform: `${process.platform}/${process.arch}`,
-			runtime: runtime.rows[0],
+			sources,
 			assertions,
-			signedSessionHttp: true,
-			crossConnectionRevocationRaces: true,
-			noEmailOrMessageDelivery: true,
-			disposablePublicAuditFixtures: fixtureAccounts.length,
+			httpChecks,
+			node: process.version,
+			scope:
+				"Native Org creation/control, public/private consent, stable admissions/receipts, original-source revocation races and account erasure; direct fixture manager grants use SQL-admin setup",
 		}),
 	);
-} catch (cause) {
-	let detail: unknown = cause;
-	while (detail instanceof Error && detail.cause) detail = detail.cause;
-	console.error(detail);
-	process.exitCode = 1;
 } finally {
-	for (const account of fixtureAccounts) {
-		try {
-			const [stored] = await database
-				.select({ erasedAt: users.erasedAt })
-				.from(users)
-				.where(eq(users.id, account.id));
-			if (stored && !stored.erasedAt)
-				await database.transaction((tx) => eraseOwnAccount(tx, account.authority));
-			if (stored) await drainErasure(account.id);
-		} catch (cause) {
-			console.error(
-				"Disposable membership fixture private cleanup failed",
-				cause instanceof Error ? cause.message.slice(0, 300) : cause,
-			);
-			process.exitCode = 1;
-		}
-	}
-	if (fixtureAccounts.length)
-		await database.delete(sessions).where(
-			inArray(
-				sessions.userId,
-				fixtureAccounts.map((account) => account.id),
-			),
-		);
-	await racePool.end();
+	await pool.end();
 	await database.$client.end();
 	await observability.shutdown();
 }

@@ -1,4 +1,5 @@
-import { randomUUID } from "node:crypto";
+import { sessions } from "@rezics/schema/postgres/identity/auth";
+import { randomBytes, randomUUID } from "node:crypto";
 import type { AccessPermission } from "@rezics/access";
 import type { UnitReference } from "@rezics/reference";
 import type { DatabaseTransaction } from "../src/services/database";
@@ -40,6 +41,21 @@ export function fixturePrincipalContext(session: FixtureSession) {
 		{ mode: "direct" },
 		captureSessionCredentialProof(session),
 	);
+}
+
+/** Create an actual disposable session for storage fixtures that previously supplied unproved actor objects. @internal */
+export async function createFixtureSessionContext(tx: DatabaseTransaction, authUserId: string) {
+	assertNativeEnrollmentFixture();
+	const [session] = await tx
+		.insert(sessions)
+		.values({
+			userId: authUserId,
+			token: randomBytes(32).toString("base64url"),
+			expiresAt: new Date(Date.now() + 3_600_000),
+		})
+		.returning();
+	if (!session) throw new Error("Fixture session creation failed");
+	return fixturePrincipalContext(session);
 }
 
 const membershipPermissions: AccessPermission[] = [

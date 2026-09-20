@@ -41,20 +41,30 @@ The September 8 convergence qualification recorded a PostgreSQL SIGILL during At
 
 ## Main IAM qualification after schema extraction
 
-The 2026-09-20 [native Realm repair](database/realm-native-enrollment-evidence.json),
-following the [foundation repair](database/foundation-integrity-repair-evidence.json),
-reduces the owning main TypeScript result from 160 to **110 errors**. Reproduce
+The 2026-09-20 [native account/Org repair](database/native-account-org-evidence.json),
+following the [Realm](database/realm-native-enrollment-evidence.json) and
+[foundation](database/foundation-integrity-repair-evidence.json) repairs,
+reduces the owning main TypeScript result from 160 to **100 errors**. Reproduce
 with `task services-main:typecheck`. The remaining failures are concentrated in
-five stale membership/account/recovery/capacity/roster fixtures (107 errors) and
+four stale account/recovery/capacity/roster fixtures (97 errors) and
 three seed writes through read-only Realm presentation views.
 
 Reconcile those fixtures with the native Org/Realm enrollment commands, exact
-membership generations and branded `PrincipalRequestContext` credential proofs. The
-retained `eraseOwnAccount` entry still requires legacy participation and an
-Auth/Self binding, although the erasure job already permits a null `selfEntityId`.
-Reconcile its credential admission and worker precondition with native direct
-principal lifecycle before qualifying the new account/Org erasure cases; do not
-create a public Self merely to erase a private account.
+membership generations and branded `PrincipalRequestContext` credential proofs.
+Native account erasure now accepts a fresh direct session without a public Self;
+its worker and native Org/Realm cleanup pass their listed focused cases. Full
+account and mixed-controller lifecycle qualification remains separate.
+
+The Org fixture's attempted legacy `PATCH /account/me/preferences` on a native
+account returned 500: `resolveInteractiveSession` invokes `ensureSelfEntity`,
+whose official-Zone follow initialization fails the concrete Zone reference FK on
+the unseeded native target. That route still silently constructs a Self. Migrate
+retained private preferences and their account fixture to private principal
+authority/default initialization; qualify the actual official seed separately.
+The native Org fixture checks direct `/account/main-identity` isolation and rejects
+represented private-setting reads; that passing check does not close the legacy
+locale-preference failure.
+
 Seed must use native persistence owners and preserve consent/enforcement history;
 restoring removed membership tables, casting old authority objects or making
 presentation views writable does not repair the selected contract. Preserve the

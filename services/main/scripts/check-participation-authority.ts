@@ -1,3 +1,4 @@
+import { createFixtureSessionContext } from "./native-enrollment-fixture";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
@@ -416,7 +417,7 @@ try {
 				"First public presentation",
 				"Session self identity must use the selected immutable name revision",
 			);
-			await eraseOwnAccount(tx, human.authority);
+			await eraseOwnAccount(tx, await createFixtureSessionContext(tx, human.authority.principal.authUserId));
 			await assert.rejects(
 				runWithParticipationAuthority(human.authority, () =>
 					createCatalogIdentity(

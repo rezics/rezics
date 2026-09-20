@@ -1,3 +1,4 @@
+import { createFixtureSessionContext } from "./native-enrollment-fixture";
 import assert from "node:assert/strict";
 import { setTimeout } from "node:timers/promises";
 import { createHash } from "node:crypto";
@@ -317,8 +318,8 @@ try {
 				cte: await signals(cteTarget.id),
 				metrics: await metrics(),
 			};
-			await runWithParticipationAuthority(stranger.authority, () =>
-				eraseOwnAccount(tx, stranger.authority),
+			await runWithParticipationAuthority(stranger.authority, async () =>
+				eraseOwnAccount(tx, await createFixtureSessionContext(tx, stranger.authority.principal.authUserId)),
 			);
 			let complete = false;
 			for (let page = 0; page < 100; page++) {

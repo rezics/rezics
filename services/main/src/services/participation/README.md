@@ -79,12 +79,19 @@ language variant and revision. A selected name points to an immutable named-form
 revision, so a catalog name edit cannot silently change a participant's selected
 public name. Presentation and grant histories retain the actual private operator.
 
-Account erasure first closes the Auth identity, clears login PII and removes its
-self binding. It revokes the bounded outstanding grants and suspends public
-identities that lose their last human controller. A currently authorized platform
-security manager can resolve a recovery with recorded evidence and a new explicit
-grant. Public authorship survives; recovering public identity does not recover
-the previous account's journal, inbox or credentials. Private deletion uses a
+Account erasure requires the actual human account's direct selection and a fresh
+interactive session, including for an unverified account. It revalidates the
+credential after account/cleanup locks and at the closing write. Represented
+selection and API keys are rejected. No public Self or representation is required
+or created. Erasure closes the Auth identity, clears login PII and removes any
+retained self binding; a job may therefore have no `selfEntityId`. Retained legacy
+grants still receive bounded revocation and last-controller cleanup. Native
+credential/principal eligibility immediately denies the erased account's authority;
+institutional public Entity admissions and another operator's authority survive.
+Recovery never restores the previous account's journal, inbox or credentials.
+The [native account and Org evidence](../../../../../docs/testing/database/native-account-org-evidence.json)
+qualifies the listed paths, not the complete mixed-controller recovery frontier.
+Private deletion uses a
 durable job and 500-row transactions. A batch cannot advance past rows merely
 because `SKIP LOCKED` skipped them. Database guards prevent new private rows for
 erased accounts. Auth rows remain PII-free audit identities, rather than breaking

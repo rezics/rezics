@@ -125,6 +125,13 @@ The query sample derives UUIDv8 targets from its generated account ID and intege
 and row overhead. Whole-table heap/index bytes can include other fixture entries.
 The [pinned run](database/favorites-evidence.json) records 49 lifecycle assertions and four observed races. Its 2,000-entry sample averaged 1,200 tuple bytes; whole-table heap/index allocation was 2,777,088/344,064 bytes. The 31-row page used 101 shared buffer hits and the two required indexes.
 
+The 2026-09-20 [retained-consumer rerun](database/native-account-org-evidence.json)
+passes 50 assertions and the same four observed races after erasure adopts actual
+stored session proofs. The fixture explicitly supplies public names and compares
+the exact issued grants; the removed `entity.membership` capability is no longer
+counted. Its 2,000-entry plan retains both required indexes. These retained
+Self/Favorites consumers do not qualify native account onboarding.
+
 Retain the [private workload estimates](../../services/main/src/services/participation/README.md#private-workload-estimates-and-remaining-qualification)
 at both 500M and 3B rows; these samples do not qualify sustained load or restoration.
 
@@ -217,23 +224,48 @@ snapshot's label and transaction behavior, not all private-data disclosure paths
 [check-organization-membership.ts](../../services/main/scripts/check-organization-membership.ts)
 on the retained disposable native target. It uses signed sessions, actual HTTP
 responses and PostgreSQL writes, with two connections for each revocation order.
-The blocking probe identifies the exact expected transaction. The [pinned run](database/membership-evidence.json) passes 76 assertions and completes private fixture cleanup.
+The blocking probe identifies the exact expected transaction. The
+[native run](database/native-account-org-evidence.json) passes 197 assertions,
+including 70 HTTP requests. It creates public identities and the Org through their
+native APIs; direct moderator RoleBindings use privileged fixture setup.
 
 Cases cover exact membership-manager authority, separation from publishing,
-security and catalog editing, no automatic controller enrollment, private inboxes,
-public recipient identities, repeated pending invitations, recipient-only consent,
+security and catalog editing, no automatic controller enrollment, separate private
+principal/Entity inboxes, public recipient identities, operation-id retries,
+duplicate pending conflicts, recipient-only consent,
 stale revisions, removal/rejoin/leave history, decline/cancel/expiry terminal
 states, and both accept-before-revoke and revoke-before-accept outcomes. Accepted
-membership adds no control grants. Sender erasure preserves another account's
-accepted membership; member erasure removes its private membership/event/invitation
-state. No invitation email or message is delivered.
+membership adds no control grants. Private contacts and encrypted selectors do not
+disclose Auth IDs; revoked contacts cannot admit. Direct account settings retain
+their owner and reject represented selection. Sender erasure preserves another
+account's accepted Entity membership; private-principal erasure closes its admission
+and scrubs credential evidence while retaining minimal audit anchors. No invitation
+email or message is delivered.
 
-The fixture erases its four dummy accounts' private state at completion and retains
-only permitted public/operator records in the disposable database. This qualifies
-the tested lifecycle protocols; 500M/3B load remains a separate acceptance case;
-the generation and suspended-binding cases are covered by the fixture below.
+The fixture completes erasure for the two accounts whose cleanup it tests; other
+dummy actors remain only in the disposable database. The earlier
+[76-assertion run](database/membership-evidence.json) applies to the retired
+Self/roster contract. Recovery, suspension and pending-capacity fixtures below still
+require native reconciliation; their old results do not qualify this checkpoint.
+The tested lifecycle protocols do not establish 500M/3B load acceptance.
 The [membership owner](../../services/main/src/services/participation/organization-membership.md)
 retains the 1,000-pending limits, storage estimates and workload assumptions.
+
+## Native private account erasure
+
+`task services-main:db:native-account-erasure:check` runs
+[check-native-account-erasure.ts](../../services/main/scripts/check-native-account-erasure.ts).
+The [2026-09-20 evidence](database/native-account-org-evidence.json) records 232
+assertions, including six HTTP requests and repeated worker batch bounds. An
+unverified private account erases with its own fresh session without creating a
+public Self; the worker accepts a null `selfEntityId` and completes all stages.
+Represented requests, explicit API-key bearers, rotated credentials and freshness
+expiry during an observed account-lock wait are rejected without partial jobs.
+Both credential-use/erasure orderings are fenced. Public identity survives;
+private Realm admission ends and its consent/notification evidence is scrubbed.
+This proves selected native and retained cleanup paths, not all private owners,
+external storage providers, recovery frontiers or capacity. The legacy locale
+preference route remains a [recorded failure](known-failures.md#main-iam-qualification-after-schema-extraction).
 
 ## Membership generation, suspension and recovery expiry
 

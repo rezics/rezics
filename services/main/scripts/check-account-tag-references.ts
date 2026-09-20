@@ -1,3 +1,4 @@
+import { createFixtureSessionContext } from "./native-enrollment-fixture";
 import { NsfwContentLabelId } from "../src/services/bootstrap/data/content-labels";
 import assert from "node:assert/strict";
 import { z } from "zod";
@@ -254,8 +255,8 @@ try {
 				true,
 				"another account may independently use the same immutable target and Tag",
 			);
-			await runWithParticipationAuthority(owner.authority, () =>
-				eraseOwnAccount(tx, owner.authority),
+			await runWithParticipationAuthority(owner.authority, async () =>
+				eraseOwnAccount(tx, await createFixtureSessionContext(tx, owner.authority.principal.authUserId)),
 			);
 			check(
 				await matches(first.id, owner.self.id),
