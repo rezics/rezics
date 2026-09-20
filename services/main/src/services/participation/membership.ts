@@ -3,7 +3,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { and, eq, gt, inArray, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { PrincipalRequestContext } from "../auth/principal-session";
+import { PrincipalRequestContext } from "../auth/principal-context";
 import { users } from "@rezics/schema/postgres/identity/auth";
 import { accessMembership, accessMembershipEvent } from "@rezics/schema/postgres/access/access-membership";
 import {

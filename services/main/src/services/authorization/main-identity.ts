@@ -1,6 +1,6 @@
 import { and, eq, isNull, sql } from "drizzle-orm";
 import type { RequestedAuthoritySelection } from "@rezics/access";
-import type { PrincipalRequestContext } from "../auth/principal-session";
+import type { PrincipalRequestContext } from "../auth/principal-context";
 import { readFirstPartyCredentialAuthority } from "../auth/credential-authority";
 import { allocateAccessScope } from "./identities";
 import { allocateReferenceValue } from "../units/reference-value";

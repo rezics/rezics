@@ -1,5 +1,5 @@
 import { createHash, createHmac } from "node:crypto";
-import type { PrincipalRequestContext } from "../auth/principal-session";
+import type { PrincipalRequestContext } from "../auth/principal-context";
 import { env } from "../config";
 import type { accessMembership } from "@rezics/schema/postgres/access/access-membership";
 import { createPrivateRecipientSelectors, type PrivateRecipientContext } from "./recipient-selectors";

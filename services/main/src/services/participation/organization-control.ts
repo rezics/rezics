@@ -110,7 +110,7 @@ export async function establishOrganizationEnrollmentControl(
 
 /** Newly created Org governance is available to private accounts without creating a public Self. @alpha */
 export async function createNativeOrganization(
-	context: import("../auth/principal-session").PrincipalRequestContext,
+	context: import("../auth/principal-context").PrincipalRequestContext,
 	input: { name: string; language: string },
 ) {
 	const { runAccessTransaction } = await import("../authorization/transaction");

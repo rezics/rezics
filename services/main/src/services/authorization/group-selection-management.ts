@@ -1,6 +1,6 @@
 import { and, eq, gt, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
-import type { PrincipalRequestContext } from "../auth/principal-session";
+import type { PrincipalRequestContext } from "../auth/principal-context";
 import type { DatabaseTransaction } from "../database";
 import { env } from "../config";
 import { accessGroup, accessGroupTree } from "@rezics/schema/postgres/access/access-group";

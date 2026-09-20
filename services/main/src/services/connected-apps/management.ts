@@ -1,5 +1,5 @@
 import { and, eq, gt, sql, type SQL } from "drizzle-orm";
-import type { PrincipalRequestContext } from "../auth/principal-session";
+import type { PrincipalRequestContext } from "../auth/principal-context";
 import type { DatabaseTransaction } from "../database";
 import { connectedApp, connectedAppEvent } from "@rezics/schema/postgres/integrations/connected-app";
 import { users } from "@rezics/schema/postgres/identity/auth";

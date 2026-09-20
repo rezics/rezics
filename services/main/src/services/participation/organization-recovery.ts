@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
-import type { PrincipalRequestContext } from "../auth/principal-session";
+import type { PrincipalRequestContext } from "../auth/principal-context";
 import type { DatabaseTransaction } from "../database";
 import { allocateAccessScope, resolveAccessSubject } from "../authorization/identities";
 import { readManagementAuthority } from "../authorization/management-authority";

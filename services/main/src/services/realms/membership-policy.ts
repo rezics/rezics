@@ -3,7 +3,7 @@ import { resolveAccessSubject } from "../authorization/identities";
 import { realmEnrollment, realmEnrollmentContact } from "@rezics/schema/postgres/realms/realm-enrollment";
 import { eq, sql } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
-import { PrincipalRequestContext } from "../auth/principal-session";
+import { PrincipalRequestContext } from "../auth/principal-context";
 import { realm } from "@rezics/schema/postgres/realms/realm";
 import { accessGroupTree } from "@rezics/schema/postgres/access/access-group";
 import { accessRoleBindingScope } from "@rezics/schema/postgres/access/access-role-binding";
@@ -13,6 +13,7 @@ import { readManagementAuthority } from "../authorization/management-authority";
 import { AccessChanged, AccessRecordUnavailable, AccessDenied } from "../authorization/http-errors";
 import { requireAccessAdmission } from "../authorization/transaction";
 import { currentRealmRuleRevisionReadLock } from "./rule-revision-lock";
+import { lockUnitAccessState } from "../authorization/unit/access-lock";
 export {
 	enrollmentSubjectAuthority,
 	membershipRecipients,
@@ -26,6 +27,9 @@ export async function realmEnrollmentScope(
 	mutation: boolean,
 	expectedControlRevision?: number,
 ) {
+	// Ownership can be absent for this recipient. Fence the root before any rule,
+	// scope or member reads so a concurrent ownership transfer cannot admit departure.
+	await lockUnitAccessState(tx, [realmId], "shared");
 	await tx.execute(currentRealmRuleRevisionReadLock(realmId));
 	const [record] = await tx.select().from(realm).where(eq(realm.id, realmId)).for("share");
 	if (!record) throw new AccessRecordUnavailable();

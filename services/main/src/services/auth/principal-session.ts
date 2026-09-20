@@ -1,3 +1,4 @@
+import { PrincipalRequestContext } from "./principal-context";
 import Elysia from "elysia";
 import type { RequestedAuthoritySelection } from "@rezics/access";
 import { RequestedAuthoritySelectionSchema } from "../authorization/authority-context";
@@ -10,7 +11,7 @@ import type { ApiPermission } from "@rezics/schema/contracts/native/api-permissi
 import { enforceApiQuota } from "./api-quota/limit-store";
 import { apiRouteOperationId, resolveApiQuotaOperation } from "./api-quota/operation";
 import { getApiTokenQuotaOverride, resolveApiAccountQuotaPolicy, resolveApiTokenQuotaPolicy } from "./api-quota/policy-service";
-import { AuthenticationRequired, InteractiveSessionRequired } from "./errors";
+import { InteractiveSessionRequired } from "./errors";
 import session, { trackRequestLimitLease } from "./session";
 
 /** Explicit authority selection, independent from public presentation or mutable defaults. @internal */
@@ -21,16 +22,6 @@ export function requestedAuthorityHeader(headers: Headers): RequestedAuthoritySe
 		if (Buffer.byteLength(raw, "utf8") > 8192) throw new AccessInputInvalid();
 		return RequestedAuthoritySelectionSchema.parse(JSON.parse(raw));
 	} catch { throw new AccessInputInvalid(); }
-}
-/** Private authenticated context; credential digests cannot appear through object serialization. @internal */
-export class PrincipalRequestContext {
-	readonly #proof: FirstPartyCredentialProof;
-	constructor(readonly principalId: string, readonly selection: RequestedAuthoritySelection, proof: FirstPartyCredentialProof) {
-		if (proof.principalId !== principalId) throw new AuthenticationRequired();
-		this.#proof = Object.freeze({ ...proof });
-	}
-	/** Revalidate this proof inside every protected effect's transaction. @internal */
-	credentialProof(): Readonly<FirstPartyCredentialProof> { return this.#proof; }
 }
 
 /** Management/account entry policy; domain and recipient authorization remain with their owners. @internal */

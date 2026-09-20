@@ -1,6 +1,6 @@
 import { and, eq, gt, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
-import { PrincipalRequestContext } from "../auth/principal-session";
+import { PrincipalRequestContext } from "../auth/principal-context";
 import type { DatabaseTransaction } from "../database";
 import { accessRepresentation } from "@rezics/schema/postgres/access/access-representation";
 import { accessRoleBinding } from "@rezics/schema/postgres/access/access-role-binding";

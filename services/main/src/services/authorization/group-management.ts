@@ -4,7 +4,7 @@ import { advanceGroupImpactEvaluation, inspectGroupImpactEvaluation } from "./gr
 import type { z } from "zod";
 import { groupImpactPermission, beginGroupImpactDiscovery, advanceGroupImpactDiscovery, inspectGroupImpactDiscovery, lockGroupImpactReview, groupImpactSummary, type GroupImpactProposalSchema } from "./group-impact-discovery";
 import { and, eq, gt, sql, type SQL } from "drizzle-orm";
-import type { PrincipalRequestContext } from "../auth/principal-session";
+import type { PrincipalRequestContext } from "../auth/principal-context";
 import type { DatabaseTransaction } from "../database";
 import { accessGroup, accessGroupEvent, accessGroupTree } from "@rezics/schema/postgres/access/access-group";
 import { accessRoleBindingScope } from "@rezics/schema/postgres/access/access-role-binding";

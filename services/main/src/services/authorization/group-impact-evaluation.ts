@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { and, eq, gt } from "drizzle-orm";
 import { z } from "zod";
-import type { PrincipalRequestContext } from "../auth/principal-session";
+import type { PrincipalRequestContext } from "../auth/principal-context";
 import type { DatabaseTransaction } from "../database";
 import { accessGroupImpactEvaluation as evaluations, accessGroupImpactEffect as effects } from "@rezics/schema/postgres/access/access-group-impact";
 import { lockCompleteGroupImpactDiscovery, readGroupImpactFacts, revalidateGroupImpactDiscovery, retainGroupImpactWitness,

@@ -2,7 +2,7 @@ import { lockAccessMembershipScopePolicy } from "./memberships";
 import { readMixedRealmAccessManager } from "./mixed-realm-access-manager";
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import { AccessManagementPermissionDefinitions, PlatformCapabilityDefinitions, UnitPermissionDefinitions, isUnitPermissionApplicable, isUnitPermissionDelegable, scopeCovers, type AccessManagementPermission } from "@rezics/access";
-import type { PrincipalRequestContext } from "../auth/principal-session";
+import type { PrincipalRequestContext } from "../auth/principal-context";
 import type { DatabaseTransaction } from "../database";
 import { unitAccessRestriction } from "@rezics/schema/postgres/access/access";
 import { accessSubject } from "@rezics/schema/postgres/access/access-identity";

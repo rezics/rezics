@@ -1,7 +1,7 @@
 import type { AccessManagementPermissionValues } from "@rezics/access";
 import type { UnitReference } from "@rezics/reference";
 import { eq, sql } from "drizzle-orm";
-import type { PrincipalRequestContext } from "../auth/principal-session";
+import type { PrincipalRequestContext } from "../auth/principal-context";
 import { unitOwnerTable } from "@rezics/schema/postgres/shared/unit-reference-columns";
 import { allocateReferenceValue } from "../units/reference-value";
 import { allocateAccessScope } from "./identities";

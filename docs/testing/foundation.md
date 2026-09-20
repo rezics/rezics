@@ -341,36 +341,36 @@ under the unchanged 500M/3B workload envelope; this run is not load acceptance.
 
 `task services-main:db:realm-membership:check` runs
 [check-realm-membership.ts](../../services/main/scripts/check-realm-membership.ts).
-The [pinned fresh run](database/realm-membership-evidence.json) passes 65 assertions,
-including 28 signed-session requests. The fixture exercises join, departure and moderator requests,
-current rule acknowledgements and independent-connection authority races. Its
-first pre-fix HTTP result changed a muted member back to active on a repeated
-join. Departure must also retain muted/banned/removed moderation rows so a
-leave/rejoin sequence cannot remove a restriction.
+The [2026-09-20 native run](database/realm-native-enrollment-evidence.json) passes
+187 assertions including 132 actual HTTP requests. Public identities come from
+the native account API; domain calls use real session proofs and explicit selected
+representations rather than old participation objects. The run covers ordinary
+and approval joins, exact rule consent, stable retries and generations, independent
+mute/ban retention, private principal admission, scoped contact/invitation renewal,
+contact revocation, and denied lifecycle/owner/authority transitions.
 
-Cases include open/approval admission, preserving an already active member,
-private/draft/deleted/moderation-removed rejection, explicit and implicit rule
-consent, ordinary departure, owner-departure denial and authorized moderation.
-Race cases cover a changed join policy, an existing or newly inserted ban,
-new required rules, admission before moderation, manager-grant revocation and
-ownership assignment before departure. Probes identify the exact blocker;
-stale Self-binding revisions must fail. Fixture records remain only in the
-explicitly disposable database, with external email delivery disabled by log mode.
+Two-connection cases observe the exact blocker for policy, existing/new ban,
+required-rule, moderator-binding and ownership changes. The Realm resource fence
+now precedes rule/scope/member reads, protecting absent ownership rows as well as
+present ones. A waiting old-policy request conflicts and must explicitly retry;
+revoked credentials or representation never become current authority. Account
+identity creation is exercised through HTTP; direct moderator role/binding setup
+uses SQL-admin fixture primitives and does not qualify grant issuance policy.
 
-The [Realm projection fixture](../../services/main/scripts/check-realm-governance-projection.ts)
-passes 55 assertions covering governance and counters. It checks active-member counter transitions, relocation, deletion, missing
-counter/underflow failures and parent-Realm deletion. The pre-fix decrement tried
-to insert a negative value and failed its CHECK before conflict handling. The
-forward migration installs an UPDATE-based decrement while preserving fail-closed
-counter integrity. Both fixtures pass in the full fresh database check: six migrations and 15,618 SQL
-statements, canonical SQL and constraint verification, healthy indexes and no schema drift.
-
-The [Realm owner](../../services/main/src/services/realms/README.md) records the
-lock protocol, moderation retention and workload estimates. Native roster
-presentation/paging, target member revisions, rule-backed moderation history,
-bounded acknowledgement cleanup and transitive disclosure remain separate work.
+The earlier [65-assertion / 28-request evidence](database/realm-membership-evidence.json)
+qualifies only the old writable-roster/Self contract. Its rule/follow and removed
+state semantics are not acceptance for the current explicit consent and independent
+enforcement model. The earlier Realm projection fixture's 55 assertions and
+six-migration/15,618-statement installation likewise retain their historical scope.
+The current [Realm owner](../../services/main/src/services/realms/README.md) defines
+native presentation, paging, retention and workload requirements. Full roster,
+projection, recovery/erasure, 500M/3B and frontend qualification remain open.
 
 ## Native Realm rosters and bounded paging
+
+The evidence below describes the earlier roster implementation. Its fixture is
+still being reconciled with the native enrollment/generation model; it does not
+qualify the current private/public roster contract.
 
 `task services-main:db:realm-roster:check` runs
 [check-realm-roster.ts](../../services/main/scripts/check-realm-roster.ts).
@@ -394,9 +394,9 @@ returns 513 candidate/lookahead rows, uses 12 shared buffers and has no Sort.
 No planner flags force an index. The sample and its prior attempts remain only
 in the disposable target; these timings are not 500M/3B load acceptance.
 
-OpenAPI and all SDKs include nullable native presentation language,
-`afterProfileId` and `nextCursor`. Consuming this traversal in the frontend is
-part of G5. The [Realm owner](../../services/main/src/services/realms/README.md#disclosure-and-retained-consumers)
+The recorded transports included nullable native presentation language,
+`afterProfileId` and `nextCursor`. Current native cursors and their frontend
+consumers require separate G3/G5 qualification. The [Realm owner](../../services/main/src/services/realms/README.md#disclosure-and-retained-consumers)
 records pagination and disclosure semantics, workload estimates and skew limits.
 
 ## Public reviewed merge reference fixture

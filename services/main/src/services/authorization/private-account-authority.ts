@@ -1,7 +1,7 @@
 import { eq, sql } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
 import { users } from "@rezics/schema/postgres/identity/auth";
-import type { PrincipalRequestContext } from "../auth/principal-session";
+import type { PrincipalRequestContext } from "../auth/principal-context";
 import { readFirstPartyCredentialAuthority } from "../auth/credential-authority";
 import { allocateAccessSubject } from "./identities";
 import { readAccessSubjectEligibility } from "./subject-eligibility";

@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { and, eq, gt, inArray, isNull, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import type { AccessManagementPermission } from "@rezics/access";
-import { PrincipalRequestContext } from "../auth/principal-session";
+import { PrincipalRequestContext } from "../auth/principal-context";
 import { readFirstPartyCredentialAuthority } from "../auth/credential-authority";
 import type { DatabaseTransaction } from "../database";
 import { accessGroupImpactReview as reviews, accessGroupImpactWitness as witnesses, accessGroupImpactEffect, accessImpactFence, accessGroupImpactNode } from "@rezics/schema/postgres/access/access-group-impact";

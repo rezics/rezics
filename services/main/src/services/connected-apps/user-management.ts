@@ -1,6 +1,6 @@
 import { and, eq, gt } from "drizzle-orm";
 import { z } from "zod";
-import type { PrincipalRequestContext } from "../auth/principal-session";
+import type { PrincipalRequestContext } from "../auth/principal-context";
 import type { DatabaseTransaction } from "../database";
 import { accessSubject } from "@rezics/schema/postgres/access/access-identity";
 import { oauthClientAuthority } from "@rezics/schema/postgres/integrations/oauth-client-authority";

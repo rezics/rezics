@@ -6,7 +6,7 @@ Realm enrollment owns policy inputs to the shared `access_membership` identity a
 representation and manager authority. The selected
 [identity/access contract](../../../../../docs/architecture/identity-and-access.md)
 and [execution phase](../../../../../docs/plan/execution-workflow.md) govern acceptance.
-This implementation has source review and generated artifacts, not G2/G3 qualification.
+The [native enrollment run](../../../../../docs/testing/database/realm-native-enrollment-evidence.json) qualifies the stated command/HTTP cases. Full module, roster, recovery, capacity and frontend acceptance remain separate.
 
 ## Identity and state
 
@@ -41,7 +41,9 @@ Read them with `GET /realms/:realmId/membership` for the selected subject or
 
 - `POST /membership` takes `consent: true` and the exact `ruleRevisionId` (null
   declines optional acknowledgement; a required current revision must match). Open Realms admit; approval Realms
-  retain a pending request. A live native manager invitation supplies admission
+  retain a pending request. Public Entity requests retain the existing follow
+  side effect independently of admission; private principal requests create no
+  public Entity follow. A live native manager invitation supplies admission
   authority for private Realms and approval-policy joins. A current native manager
   can instead authorize their own explicitly consenting private-Realm enrollment.
 - `PATCH /members` takes a typed Entity recipient or private opaque selector and
@@ -71,7 +73,9 @@ Realm control revision, exact rules, invitation deadline and contact consent mus
 still match. Preparatory acknowledgement cannot extend an invitation's deadline.
 
 Commands retain complete native authority and pair/tree/control fences before the
-effect. `prepareEnrollmentRecovery` reuses bounded reverse impact and original
+effect. The Realm resource access fence is held before rule/scope/member reads,
+including when the selected subject has no ownership row; ownership transfer
+cannot race a departure using an unfenced negative lookup. `prepareEnrollmentRecovery` reuses bounded reverse impact and original
 native recovery paths before and after membership/enforcement changes. Departure
 may intentionally end its own management/representation source: the final check
 retains live credential, actor/selected-subject policy, Realm control and selected
@@ -176,15 +180,21 @@ with `task services-main:db:generate:typed -- realm_enrollment`; fresh installat
 replay the retained history and this forward migration. No legacy data transfer or
 dual write is provided.
 
-Required next-phase work: migrate the existing Realm membership/roster/rule and
-projection fixtures (including `seed/service.ts`, whose old roster writes are
-fixture work), author stateful API/contact/receipt and rejected-source scenarios,
-then run owning TypeScript/deterministic checks, native replay and G2/G3 cases.
-Include competing join/approval, source replacement, stale revisions, contact
-revocation, last-clock expiry, leave/rejoin privilege non-revival, moderation
-counter transitions, private disclosure, physical-candidate skew, erasure restart
-and recovery continuity. OpenAPI/Fetch/TanStack/public SDK artifacts are generated,
-not typechecked or runtime-qualified.
+The 2026-09-20 native enrollment run passes 187 assertions, including 132 HTTP
+requests, over a fresh 59-migration installation. Public identities are created
+through the native account API; selected contexts carry actual session proofs.
+It covers public/private admission, exact rule consent, private contact/invitation
+and revocation, generation/receipt behavior, independent enforcement, and observed
+policy/ban/rule/moderator/ownership races. The scoped TypeScript check and 142
+related unit tests pass. The older Self/writable-roster evidence does not qualify
+this replacement. Direct moderator role/binding setup remains SQL-admin fixture
+construction, not product grant-issuance acceptance.
+
+Remaining work includes the separate roster and projection fixtures, native seed
+writers, Org integration, generation-bound privilege non-revival, broader source
+replacement/last-clock expiry, physical-candidate skew, erasure restart and
+recovery continuity. Full main TypeScript remains unqualified. OpenAPI/Fetch/
+TanStack/public SDK and retained frontend acceptance remain separate.
 
 Existing web hooks mechanically capture native main Entity authority and explicit
 preconditions, preserve rule confirmation, and use explicit moderation operations.
@@ -192,6 +202,5 @@ A missing/unusable native main context requires the account identity selection
 flow; there is no Self-to-account fallback. A new private membership/contact UI,
 advanced Entity selection and invitation/application management journeys remain
 frontend design prerequisites, excluded from this task. The retained public
-controls require later Storybook and affected workspace qualification. No tests,
-fixtures, typechecks, lint validation, builds, replay/checks or rendered QA were run
-in this implementation phase.
+controls require later Storybook and affected workspace qualification. The native run above does not qualify rendered interactions or these remaining
+frontend journeys.

@@ -1,6 +1,6 @@
 import { and, desc, eq, gt, sql } from "drizzle-orm";
 import type { AccessPermission } from "@rezics/access";
-import type { PrincipalRequestContext } from "../auth/principal-session";
+import type { PrincipalRequestContext } from "../auth/principal-context";
 import { accessRole, accessRoleEvent, accessRoleRevision } from "@rezics/schema/postgres/access/access-role";
 import { applyAccessRoleCommand, readAccessRoleSnapshot } from "./roles";
 import { readManagementAuthority } from "./management-authority";

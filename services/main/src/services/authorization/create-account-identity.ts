@@ -3,7 +3,7 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import { AccessPermissionValues } from "@rezics/access";
 import { ContentLanguageValues } from "@rezics/i18n";
-import type { PrincipalRequestContext } from "../auth/principal-session";
+import type { PrincipalRequestContext } from "../auth/principal-context";
 import type { DatabaseTransaction } from "../database";
 import { accountIdentityAdmission } from "@rezics/schema/postgres/identity/account-identity-admission";
 import { users } from "@rezics/schema/postgres/identity/auth";

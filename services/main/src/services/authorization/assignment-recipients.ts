@@ -1,7 +1,7 @@
 import { createHash, createHmac } from "node:crypto";
 import { and, eq, gt, sql } from "drizzle-orm";
 import { z } from "zod";
-import type { PrincipalRequestContext } from "../auth/principal-session";
+import type { PrincipalRequestContext } from "../auth/principal-context";
 import type { DatabaseTransaction } from "../database";
 import { env } from "../config";
 import { entityIdentity } from "@rezics/schema/postgres/catalog/identity";

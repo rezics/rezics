@@ -41,10 +41,11 @@ The September 8 convergence qualification recorded a PostgreSQL SIGILL during At
 
 ## Main IAM qualification after schema extraction
 
-The 2026-09-20 [foundation repair evidence](database/foundation-integrity-repair-evidence.json)
-reduces the owning main TypeScript result from 160 to **124 errors**. Reproduce
+The 2026-09-20 [native Realm repair](database/realm-native-enrollment-evidence.json),
+following the [foundation repair](database/foundation-integrity-repair-evidence.json),
+reduces the owning main TypeScript result from 160 to **110 errors**. Reproduce
 with `task services-main:typecheck`. The remaining failures are concentrated in
-six stale membership/account/recovery/capacity/roster fixtures (121 errors) and
+five stale membership/account/recovery/capacity/roster fixtures (107 errors) and
 three seed writes through read-only Realm presentation views.
 
 Reconcile those fixtures with the native Org/Realm enrollment commands, exact

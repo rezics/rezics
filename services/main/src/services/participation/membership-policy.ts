@@ -2,7 +2,7 @@ import { groupAuthoritySourceDigest } from "../authorization/group-impact-evalua
 import { createHash } from "node:crypto";
 import { eq, sql, type SQL } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
-import { PrincipalRequestContext } from "../auth/principal-session";
+import { PrincipalRequestContext } from "../auth/principal-context";
 import { readFirstPartyCredentialAuthority } from "../auth/credential-authority";
 import { allocateAccessScope, allocateAccessSubject } from "../authorization/identities";
 import { allocateReferenceValue } from "../units/reference-value";

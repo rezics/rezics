@@ -3,7 +3,7 @@ import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
 import { unitOwnership, realmMember } from "../database/schema";
 import { and, eq, gt, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
-import type { PrincipalRequestContext } from "../auth/principal-session";
+import type { PrincipalRequestContext } from "../auth/principal-context";
 import type { DatabaseTransaction } from "../database";
 import { accessMembership } from "@rezics/schema/postgres/access/access-membership";
 import {

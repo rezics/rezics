@@ -8,7 +8,7 @@ import {
 import { requireAccessAdmission } from "../authorization/transaction";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
-import type { PrincipalRequestContext } from "../auth/principal-session";
+import type { PrincipalRequestContext } from "../auth/principal-context";
 import { realmRule, unitLocalization } from "../database/schema";
 import {
 	resolvedUnitLocalizationLanguage,

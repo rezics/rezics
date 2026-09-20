@@ -6,7 +6,7 @@ import { createHash } from "node:crypto";
 import { and, eq, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { PrincipalRequestContext } from "../auth/principal-session";
+import { PrincipalRequestContext } from "../auth/principal-context";
 import {
 	realmEnrollment,
 	realmEnforcement,

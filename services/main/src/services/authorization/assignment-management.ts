@@ -9,7 +9,7 @@ import {
 	accessPermissionCeilingCovers,
 	type AccessPermission,
 } from "@rezics/access";
-import type { PrincipalRequestContext } from "../auth/principal-session";
+import type { PrincipalRequestContext } from "../auth/principal-context";
 import type { DatabaseTransaction } from "../database";
 import { env } from "../config";
 import { accessRole } from "@rezics/schema/postgres/access/access-role";

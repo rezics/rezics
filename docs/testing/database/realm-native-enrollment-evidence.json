@@ -1,0 +1,98 @@
+{
+  "baseCommit": "97efc04ada4dbed4eb7b160033162fb87ba16c24",
+  "sourceDigests": {
+    "services/main/scripts/check-realm-membership.ts": "c2b27f53be531e15c7cf67b876aaec53b9a42b00798b1a57dadfa7776a71583b",
+    "services/main/scripts/native-enrollment-fixture.ts": "fe7e2151d1c68f5bf830d9f3c928bc9291d53a68e8287731136936c6accfba32",
+    "services/main/src/services/realms/membership.ts": "bc1e0f75d4c0f1fb5675300338f3f446049f128e0ee9cfb3b21edf9fa7fbcd73",
+    "services/main/src/services/realms/membership-policy.ts": "61bde7e64e63c048fea069c98c157839c2943a24656074792c060d5ad32cf47a",
+    "services/main/src/services/realms/roster.ts": "a3e961c62f49c25f7a05104306e48bcbc299af9b8d496b0a4df44cc3d1ca0c86",
+    "services/main/src/services/api/realms/membership.ts": "421dadce2674ab1fcdd307c2e7dddc1c833f86c7f3275227cf4208778839c891",
+    "services/main/src/services/database/migrations/atlas.sum": "15401ee9cffb9ba06fb6353c03e94e18a42afdeb7715b6824b751420cb52051c"
+  },
+  "node": "v26.8.2",
+  "checks": 187,
+  "httpChecks": 132,
+  "scope": "Realm native enrollment/HTTP, explicit consent, generations, enforcement, credential/representation revocation and concurrency; account identities use the native API; direct moderator role/binding setup is SQL-admin",
+  "date": "2026-09-20",
+  "changedSourceDigests": {
+    "services/main/scripts/check-realm-membership.ts": "c2b27f53be531e15c7cf67b876aaec53b9a42b00798b1a57dadfa7776a71583b",
+    "services/main/scripts/native-enrollment-fixture.test.ts": "87871ea1a6c1d2d441785da512dc5a7f3f3eae19b1579ece8339bafc4836a392",
+    "services/main/scripts/native-enrollment-fixture.ts": "fe7e2151d1c68f5bf830d9f3c928bc9291d53a68e8287731136936c6accfba32",
+    "services/main/src/services/auth/principal-context.ts": "adc331b79d7f2428fc69a5a5d16366d617590838af16ecbbfa18a5a5fe324fdb",
+    "services/main/src/services/auth/principal-session.ts": "9b10fe63725b01d3117324c5bfa210ed9e1fc90840d4bb2e53ac1701559c4bf7",
+    "services/main/src/services/authorization/assignment-management.ts": "30e590da9bd8a4d13186c2b6e8cdac0cdc1da85b45de74c425c30a4bc84c6209",
+    "services/main/src/services/authorization/assignment-recipients.ts": "84db5391920dc0bb50fa8b14c3464ffdac18cd462100b3cb2447884321f7bf41",
+    "services/main/src/services/authorization/create-account-identity.ts": "b7fbbddaeed4d5d12ffab954da16f109eddc1741c846ac6f865e1c2bbe5a9816",
+    "services/main/src/services/authorization/group-admission.ts": "f2b67b1fdee68c9896cc4f46572a35dae755d4af2fe8c7bda4fc6ea58e655d6d",
+    "services/main/src/services/authorization/group-impact-evaluation.ts": "28a1645fda92ad0df7432f2fd8bde4f11f012cf3fa06043edb40d233a0afbbe6",
+    "services/main/src/services/authorization/group-impact-policy.ts": "573092e97d198fefbfe364dd0f0713d56e04321a4b1a019aab2c78cce7731a7e",
+    "services/main/src/services/authorization/group-management.ts": "ea0c4cd0770e7ed95f83b46b8dc26c42e21f05dd999bfa91096f9331b70b9497",
+    "services/main/src/services/authorization/group-recipient-selectors.ts": "99a27fc3550ac0ecce902a7b5fb7b1afeb6c4bee0792edfafe92e411b93ffebb",
+    "services/main/src/services/authorization/group-selection-management.ts": "ee908707dffe8b2380dea9a4d06510abe2befef6838cb235f9eaedbc825cf2cf",
+    "services/main/src/services/authorization/main-identity.ts": "be1efd8676eb95f0bb114b5ba0446cc8348679691a2d408b79f859820bdd902c",
+    "services/main/src/services/authorization/private-account-authority.ts": "54f6f0d42fef847ad615f5d4206f33b78d0c9d4d329a83cc0046061fd4aa7a52",
+    "services/main/src/services/authorization/role-management.ts": "c6e9284480aaee506ba84129e324aa69123db771efd1b51c72c97eb669d12d38",
+    "services/main/src/services/authorization/scope-management.ts": "6f975b6b207da3c721b9ce331a3f76b2e5394ae4604f323d707f37f99c1678b6",
+    "services/main/src/services/connected-apps/management.ts": "45c0ab3e2483218adf28db9261a43a88d8e88e82fa8c758a8c1e3f890a4c8fac",
+    "services/main/src/services/connected-apps/user-management.ts": "2db5c16100261924b78f723bb4230c108e3038e43fde7b36b7d04cc863232717",
+    "services/main/src/services/participation/membership-directory.ts": "d82936cecc81f5f0e5a8a10e7326326301357a9739d5ce8fcd894b7cb76cf512",
+    "services/main/src/services/participation/membership-policy.ts": "05f8885ef301abcede1d8364a14f582d05b28c47e8e937537cfa9613e3735552",
+    "services/main/src/services/participation/membership.ts": "1d9f041f8b9e424971f1497e7ffdf49f70c31366187d0daf80ae3bca1d92f363",
+    "services/main/src/services/participation/organization-control.ts": "8126cc44b40ca42723a614caaa4e9ac7288f3f2160d96cc0f601c7c7af1bd140",
+    "services/main/src/services/participation/organization-recovery.ts": "b8a58852a624a4a83119957a8f712346bbb5399ec821a69cfba58862f8ca8090",
+    "services/main/src/services/realms/enrollment-rules.ts": "96be79ceea1436e8ce6215bdea8009db224fc5deeef358f37f47f1e44b37e7e3",
+    "services/main/src/services/realms/membership-contact.ts": "fd827b3a52695c9f3024c65a065b805a15aef0d96491f7682e2885ddf4c0c965",
+    "services/main/src/services/realms/membership-policy.ts": "61bde7e64e63c048fea069c98c157839c2943a24656074792c060d5ad32cf47a",
+    "services/main/src/services/realms/membership.ts": "bc1e0f75d4c0f1fb5675300338f3f446049f128e0ee9cfb3b21edf9fa7fbcd73",
+    "services/main/src/services/realms/roster.ts": "a3e961c62f49c25f7a05104306e48bcbc299af9b8d496b0a4df44cc3d1ca0c86"
+  },
+  "nativeCommand": "DATABASE_ADMIN_URL=<disposable loopback rezics_atlas target> task services-main:db:realm-membership:check",
+  "installation": {
+    "migrations": 59,
+    "sqlStatements": 18914,
+    "baseline": "operational-native-20260908",
+    "image": "rezics-postgres:18.6-pgroonga-4.0.8",
+    "hostPort": 55433,
+    "composeProject": "rezics-goal-enrollment",
+    "engine": "Podman Docker API; read-only private initialization-script copy with SELinux Z labeling"
+  },
+  "unit": {
+    "files": 18,
+    "tests": 142,
+    "passed": true,
+    "command": "yarn exec vitest run --project main services/main/scripts/native-enrollment-fixture.test.ts services/main/src/services/authorization services/main/src/services/participation services/main/src/services/realms services/main/src/services/auth/entity.test.ts services/main/src/services/following/service.test.ts"
+  },
+  "typecheck": {
+    "fixtureAndImportedDependencies": "passed with the repository TypeScript settings",
+    "mainPassed": false,
+    "mainErrors": 110,
+    "remainingFiles": {
+      "scripts/check-account-participation.ts": 39,
+      "scripts/check-membership-capacity.ts": 24,
+      "scripts/check-membership-recovery.ts": 28,
+      "scripts/check-organization-membership.ts": 10,
+      "scripts/check-realm-roster.ts": 6,
+      "src/services/seed/service.ts": 3
+    },
+    "mainCommand": "task services-main:typecheck"
+  },
+  "coveredCases": [
+    "Explicit public identity creation through the native account API and selected representation headers",
+    "Open and approval-policy consent, receipt retries, stale versions and new generations after departure",
+    "Mute/ban retention through departure and rejoin; clearing enforcement does not reenroll",
+    "Private direct principal admission without public Entity roster/follow leakage",
+    "Private contact for an unknown Realm, manager-bound recipient resolution, invitation, contact revocation, renewed consent and private approval-policy admission",
+    "Required exact rules and explicit consent even under legacy implicit-follow metadata",
+    "Wrong selected authority cannot borrow direct moderator role permissions",
+    "Policy, existing/new ban and required-rule races; changed policy requires an explicit fresh retry",
+    "Admission before moderation, direct-role revocation and ownership-before-departure races with observed blockers",
+    "Revoked representation and expired credential rejection",
+    "Typed HTTP failures remain distinct from storage/integrity failures"
+  ],
+  "limits": [
+    "Realm creation and direct moderator grant issuance use privileged disposable setup; their product creation/assignment policies are not qualified by this run.",
+    "The light PrincipalRequestContext retains the same private proof and current-effect validation requirements; moving it does not itself authenticate a caller.",
+    "Full main integrity remains failed; Org/roster/recovery/capacity/seed fixtures still require reconciliation.",
+    "No complete M01, erasure/recovery frontier, load/capacity or frontend gate is claimed."
+  ]
+}
