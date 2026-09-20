@@ -1,0 +1,43 @@
+{
+  "baseCommit": "e0c9da90ce9209b5d0ad1fa7e72042c91aa2f551",
+  "sourceDigests": {
+    "services/main/scripts/check-membership-capacity.ts": "d2f34185cb0523b7d3b4bfbc96582d3f89b00a3a0235234e477c6266a3978ffb",
+    "services/main/scripts/native-enrollment-fixture.ts": "8ce36f80bd86701e684ea7f863c681155ebb3124292ba448ac8e92087636f3be",
+    "services/main/src/services/participation/membership.ts": "1d9f041f8b9e424971f1497e7ffdf49f70c31366187d0daf80ae3bca1d92f363",
+    "services/main/src/services/participation/organization-control.ts": "8126cc44b40ca42723a614caaa4e9ac7288f3f2160d96cc0f601c7c7af1bd140",
+    "services/main/src/services/authorization/create-account-identity.ts": "b7fbbddaeed4d5d12ffab954da16f109eddc1741c846ac6f865e1c2bbe5a9816",
+    "libraries/schema/src/postgres/access/organization-membership.ts": "ff4aae4fd1f859f92be2bc95b15289a40952e287054fb0061c127881b6bf5071",
+    "services/main/src/services/database/schema/postgres/organization-membership.sql": "fcc68fb8bcb429914b78555d45cc93ed028f3cd1df02fc4704cfbb4c84334c12",
+    "services/main/src/services/database/migrations/atlas.sum": "15401ee9cffb9ba06fb6353c03e94e18a42afdeb7715b6824b751420cb52051c"
+  },
+  "node": "v26.8.2",
+  "runtime": {
+    "postgres": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+    "default_isolation": "read committed"
+  },
+  "checks": 17,
+  "organizationPendingLimit": 1000,
+  "recipientPendingLimit": 1000,
+  "exactLastSlotRaces": 2,
+  "scope": "Native identity/Org commands, same-operation retry, independent Org/Entity pending caps in commands and SQL, expiry/revocation reclamation and exact last-slot races. Setup commits only to the disposable target; no HTTP, delivery, load or private-contact capacity claim.",
+  "date": "2026-09-20",
+  "command": "DATABASE_ADMIN_URL=<disposable loopback rezics_atlas target> task services-main:db:membership-capacity:check",
+  "installation": "Same retained PostgreSQL 18.6 / PGroonga 4.0.8 disposable 59-migration target as realm-native-enrollment-evidence.json; no schema changes.",
+  "typecheck": {
+    "fixtureAndImportedDependencies": "passed with repository tsconfig.base.json, noEmit and Node types",
+    "mainPassed": false,
+    "mainErrors": 31,
+    "remainingFiles": {
+      "scripts/check-membership-recovery.ts": 28,
+      "src/services/seed/service.ts": 3
+    },
+    "command": "task services-main:typecheck"
+  },
+  "limits": [
+    "Setup uses actual native account-identity and Org domain commands with stored fixture sessions; no HTTP authentication/transport acceptance is claimed.",
+    "Recipient capacity is tested for public Entity subjects. The separate private-contact admission cap is not qualified here.",
+    "Setup uses independently committed commands, avoiding one corpus-sized fixture transaction. Dummy rows remain only in the explicitly disposable target.",
+    "Counts are offline fixture assertions. The 1,000-row online bounds and two observed races do not qualify throughput or the retained 500M/3B workload.",
+    "Full main integrity, native recovery, seed and private-preference migration remain open."
+  ]
+}

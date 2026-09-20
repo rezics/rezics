@@ -292,19 +292,26 @@ suspension, restoration frontiers or load. Pending-admission saturation is cover
 
 `task services-main:db:membership-capacity:check` runs
 [check-membership-capacity.ts](../../services/main/scripts/check-membership-capacity.ts).
-The [pinned run](database/membership-capacity-evidence.json) passes 15 assertions:
-organization and recipient pending counts stop at 1,000 in both domain commands
-and direct SQL; repeats reuse an existing pending invitation at capacity;
-cancellation and expiry reclaim slots without reopening terminal identities.
-Two independent connections compete for the last organization slot and then the
-last recipient slot across different organizations. Each loser demonstrably
-waits for the exact winner, rechecks the bound and fails without exceeding 1,000.
+The [native run](database/membership-native-capacity-evidence.json) passes 17
+assertions. Scope and recipient-subject pending counts stop at 1,000 in domain
+commands and direct SQL. Repeating the same operation returns its original receipt
+at capacity; a new operation does not inherit that retry identity. Revocation and
+expiry reclaim slots without reopening terminal invitation identities; expiry also
+scrubs the retained authority evidence.
 
-Setup uses native account/organization commands and keeps each controller below
-its separate grant limit. Dummy setup rows commit only to the disposable database
-so the race clients can see them; reset that target to remove them. This proves
-admission bounds and reclamation semantics, not 500M/3B throughput or sustained
-flood handling. The existing membership storage, keyset and erasure budgets remain.
+Two independent connections compete for the last Org slot and then the last
+Entity-recipient slot across different Orgs. Each loser demonstrably waits for the
+exact winner, rechecks the bound and fails without exceeding 1,000. Direct SQL
+assertions require the native capacity SQLSTATE/message, preserving other integrity
+failures as failures.
+
+Setup calls native account-identity and Org commands using actual stored fixture
+sessions. It commits bounded commands separately so a large setup does not retain
+all source locks in one transaction. Dummy rows remain only in the disposable
+database. This qualifies pending admission/reclamation, not HTTP entry policy,
+private-contact capacity, 500M/3B throughput or sustained flooding. The earlier
+[15-assertion run](database/membership-capacity-evidence.json) covers only its
+retired Self/grant contract.
 
 ## Current platform account and session authority
 

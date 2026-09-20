@@ -41,17 +41,18 @@ The September 8 convergence qualification recorded a PostgreSQL SIGILL during At
 
 ## Main IAM qualification after schema extraction
 
-The 2026-09-20 [native roster repair](database/realm-native-roster-evidence.json),
-following [account enforcement](database/account-native-participation-evidence.json),
+The 2026-09-20 [native capacity repair](database/membership-native-capacity-evidence.json),
+following [native roster](database/realm-native-roster-evidence.json),
+[account enforcement](database/account-native-participation-evidence.json),
 the [native account/Org](database/native-account-org-evidence.json),
 [Realm](database/realm-native-enrollment-evidence.json) and
 [foundation](database/foundation-integrity-repair-evidence.json) repairs,
-reduces the owning main TypeScript result from 160 to **55 errors**. Reproduce
+reduces the owning main TypeScript result from 160 to **31 errors**. Reproduce
 with `task services-main:typecheck`. The remaining failures are concentrated in
-two stale recovery/capacity fixtures (52 errors) and
+the stale recovery fixture (28 errors) and
 three seed writes through read-only Realm presentation views.
 
-Reconcile those fixtures with the native Org/Realm enrollment commands, exact
+Reconcile the remaining fixture with the native Org/Realm enrollment commands, exact
 membership generations and branded `PrincipalRequestContext` credential proofs.
 Native account erasure now accepts a fresh direct session without a public Self;
 its worker and native Org/Realm cleanup pass their listed focused cases. Full
