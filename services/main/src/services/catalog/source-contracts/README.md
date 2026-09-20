@@ -1,40 +1,47 @@
 # Source declaration dispositions
 
-The selected [live validation contract](../../../../../../docs/testing/source-conformance.md#live-acquisition-and-validation) replaces fixed provider-version prerequisites with current acquired inputs and ignored run inventories. Authored dispositions remain versioned and new/changed fields need review. The commands and counts below describe the current tooling until that implementation checkpoint is qualified.
-
-`fields.jsonl` is a generated inventory of pinned source declarations. Its 8,412
-entries include schema wrappers, upstream account fields and repeated vocabulary
-shapes. This number is **not** the number of required native catalog facts.
-`coverage.json` is a hand-reviewed exact-path disposition manifest. The current
-selection records 22 decisions: 15 required native gaps, three source-only fields
-and four exclusions. The other 8,390 declarations remain explicitly unreviewed.
-No native implementation is certified by this selection.
+The [live validation contract](../../../../../../docs/testing/source-conformance.md#live-acquisition-and-validation)
+uses current acquired inputs and ignored inventories. `fields.jsonl`, `inventory.json`
+and `report.json` are generated locally; none is an upstream version prerequisite
+for future runs. `coverage.json` owns reviewed exact-path decisions and the source
+shape each decision expects. A changed field must be reviewed; whole-artifact
+byte changes do not invalidate unrelated decisions.
 
 Run from the repository root:
 
-```powershell
-# Validate the manifest/pins and inspect unresolved work; expected exit 0.
-bun services/main/scripts/check-catalog-source-coverage.ts --inspect
-# Require complete dispositions and evidence; currently expected exit 1.
-bun services/main/scripts/check-catalog-source-coverage.ts
-# Include every missing exact path and native gap in machine-readable output.
-bun services/main/scripts/check-catalog-source-coverage.ts --inspect --json
-# Narrow deterministic checks; no database, network or application server.
-node node_modules/vitest/vitest.mjs run --config services/main/vitest.config.ts services/main/scripts/catalog-source-coverage.test.ts
+```sh
+# Check script types, then fetch current contracts and report known incomplete coverage.
+task services-main:catalog:sources:typecheck
+task services-main:catalog:sources:live -- --inspect
+# Regenerate/replay the last completed all-provider acquisition offline.
+task services-main:catalog:sources:inventory
+task services-main:catalog:sources:inventory -- --check
+# Require complete native dispositions/evidence; known gaps currently reject it.
+task services-main:catalog:sources:coverage
+# Include every unresolved exact path; also retained in ignored report.json.
+task services-main:catalog:sources:coverage -- --inspect --json
 ```
 
-The default qualification command fails for missing entries, native gaps,
-duplicate/unknown paths, circular or absent dependencies, pin/count drift and
-missing/stale evidence. Inspect mode allows known incomplete coverage but still
-fails invalid manifests, pin drift and broken evidence/dependencies. Neither mode
-downloads source artifacts or regenerates declarations. Use the existing inventory
-generator for source changes, then review the changed declarations and update the
-manifest pin deliberately. Do not replace missing entries with automatic rules.
+The default qualification command fails for missing decisions, native gaps,
+duplicate/removed paths, changed reviewed shapes, circular/absent dependencies and
+missing/stale native evidence. Inspect mode permits explicitly reported missing
+coverage but still rejects malformed decisions, changed/removed reviewed fields
+and invalid evidence. Neither mode silently fetches new inputs or reuses a failed
+network attempt as current compatibility. The live task fetches first and stops
+on failure; ordinary offline replay reports its acquisition time/run identity.
+
+Acquisition stores raw input bytes, a completed run receipt and failed-run
+diagnostics in the adapter's ignored input directory. Native declaration generation
+uses one completed all-provider run, preserves source surfaces and validates
+cross-document references. Its ignored inventory receipt binds the exact generated
+bytes to that acquisition; a changed/mixed/stale pair is rejected before evaluating
+coverage. Source schema and native coverage are separate results.
 
 ## Decisions and evidence
 
-Each entry identifies exactly `(source, contract, path)` and supplies a semantic
-reason. Parent objects, references and wildcards never cover descendant entries.
+Each entry identifies exactly `(source, contract, path)`, supplies a semantic
+reason, and records `sourceShape` (shape, reference, repetition and nullability).
+These are reviewed parser/mapping expectations, not a fixed remote version. Parent objects, references and wildcards never cover descendant entries.
 
 | Disposition | Meaning |
 | --- | --- |
@@ -60,7 +67,7 @@ detect a dishonest semantic claim merely because the referenced code exists.
 The denominator reports only reviewed required native paths and remains explicitly
 incomplete until every declaration has a valid disposition. Structural expansion
 and source-only/excluded metadata do not inflate native coverage. Even a complete
-declaration review does not cover facts absent from the pinned schemas, such as
+declaration review does not cover facts absent from the observed schemas, such as
 undeclared infobox values or the required novel translation/serialization cases
 not established by Open Library types. The [source conformance specification](../../../../../../docs/testing/source-conformance.md)
 and [Book/creation suite](../../../../../../docs/testing/book-and-creation.md) own
@@ -71,9 +78,9 @@ compatibility obligation.
 
 This is an offline control dataset, not corpus processing. Inputs are limited to
 20,000 declarations and 20,000 dispositions; every dependency list has at most
-256 entries, each file is at most 8 MB and all files together at most 64 MB. Exact
+256 entries. Coverage metadata/evidence files are at most 8 MB each and 64 MB together. The shared acquisition separately admits at most 128 artifacts, 8 MB each and 32 MB per run. Exact
 identity lookup and dependency traversal are O(declarations + dependency edges);
-canonical pin sorting is O(declarations log declarations). Evidence files are read
+canonical inventory sorting is O(declarations log declarations). Evidence files are read
 and hashed once per distinct path. Text checks run per evidence reference within these bounds.
 There are no database scans, queues or 500M/3B-record operations. Exceeding these
 metadata limits fails closed and requires a deliberate bound review; target

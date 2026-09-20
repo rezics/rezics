@@ -25,7 +25,7 @@ not exempt that domain from the common Work contract.
 | Schema.org full-index follow-on | Pinned normative vocabulary including retired terms, JSON-LD/Microdata/RDFa input profiles, multiple types, named/anonymous graphs, collections, Role structures and mixed vocabularies; native mapping and public JSON-LD are separate outputs. |
 | Wikidata full-index follow-on | Complete statements and datatypes across Items, Properties, Lexemes/Forms/Senses and EntitySchemas; terms, sitelinks/badges, rank, snak states, qualifiers/reference groups, revisions, redirects, dumps and incremental reconciliation. Inventory each namespace's acquisition surface. |
 
-The current [source artifact inventory](../../libraries/content-adapters/contracts/catalog/artifacts.lock.json) and [field inventory](../../services/main/src/services/catalog/source-contracts/fields.jsonl) are inputs to reviewed mapping. Declaration counts, raw dumps and old reports are not evidence that every field is supported.
+The current [source artifact inventory](../../libraries/content-adapters/contracts/catalog/sources.json) and [field inventory](../../services/main/src/services/catalog/source-contracts/README.md) are inputs to reviewed mapping. Declaration counts, raw dumps and old reports are not evidence that every field is supported.
 
 The complete Schema.org/Wikidata inventories remain separately activated
 implementation/verification deliverables. Selected Recipe/Book/domain exchanges
@@ -74,6 +74,48 @@ migration history are outside this external-site validation policy.
 | LIVE07 | Report actual source/surface/fieldset coverage and native gaps; acquisition/parse success cannot become full native-conformance success. |
 
 ## Per-field disposition
+
+### Live tooling evidence, 2026-09-20
+
+The current acquisition/declaration-tooling checkpoint passes 37 focused tests
+across content adapters and main's source inventory/coverage scripts, including
+ten fresh-fetch/partial-failure/replay cases. Adapter TypeScript and the owning
+`catalog:sources:typecheck` pass. Root offline artifact generation and the captured
+inventory check pass. These results qualify the tooling behavior, not native
+domain acquisition/adoption or corpus-scale operation.
+
+The actual HTTPS acquisition completed at `2026-09-20T06:26:08.834Z`, run
+`bd5d3e2b-bc02-4145-9a39-77f5c661d4dc`: 46 current contract inputs from Bangumi,
+VNDB, MusicBrainz and Open Library. Conversion produced 699 contract records with
+11,057 structured fields; the separate native-disposition inventory contains
+8,415 declarations. Those inventories have different purposes/denominators.
+The current Open Library model added `audiences`, `genres` and `subgenres` under
+`/type/work` relative to the earlier recorded input; new fields remain explicit
+review work rather than triggering an upstream hash-lock update.
+
+Inspect mode reports no malformed/changed reviewed decisions, but native coverage
+is **unqualified**: 22 reviewed declarations, 8,393 unreviewed declarations and 15
+explicit native mapping gaps. The default qualification command was checked to
+exit 1 for these gaps; inspect mode does not turn them into a passing product gate.
+Raw inputs, generated inventories and the full report remain in ignored storage.
+
+Reproduce from the repository root during verification:
+
+```sh
+task libraries:content-adapters:typecheck
+task services-main:catalog:sources:typecheck
+task libraries:content-adapters:fetch-contracts -- all
+task artifacts:generate
+task services-main:catalog:sources:inventory -- --check
+task services-main:catalog:sources:coverage -- --inspect
+yarn exec vitest run --project content-adapters --project main libraries/content-adapters/src services/main/scripts/catalog-source-inventory.test.ts services/main/scripts/catalog-source-coverage.test.ts
+```
+
+`task services-main:catalog:sources:live -- --inspect` combines a fresh acquisition,
+declaration generation and the diagnostic coverage check. Future observations can
+change these counts; no recorded run is a pin for future compatibility checks.
+
+### Disposition contract
 
 Every elected source field/object records its observed source contract/run, source
 identity/meaning, native mapping where applicable, owning commands, queries,

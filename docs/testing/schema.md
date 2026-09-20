@@ -96,9 +96,7 @@ For alternate ports set both `POSTGRES_MIGRATION_HOST_PORT` and
 `POSTGRES_MIGRATION_LOCAL_PORT`. Set `ATLAS_DEV_DATABASE_URL` to the fixture's
 `rezics_atlas_dev` database for the owning structural drift check. The full main
 `db:check` includes the schema database harness after earlier main-domain checks.
-The fresh-checkout preparation downloads exact-byte pinned standards and 45 provider
-contracts, plus the latest structurally validated VNDB schema (with unordered
-external-link definitions normalized but no fixed checksum),
+The historical run above used pinned standards and 45 provider contracts plus a live VNDB schema. Current fresh-checkout preparation restores the normative standards and dynamically fetches every elected provider into ignored run storage (with observed digests and separate VNDB normalization),
 and regenerates ignored artifacts and the missing local typed migration
 anchor. Later `task artifacts:generate` runs
 offline from the restored inputs; individual `fetch` tasks can repair missing or

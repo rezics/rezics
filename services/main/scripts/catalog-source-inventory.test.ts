@@ -10,7 +10,7 @@ import {
 	splitSqlColumns,
 } from "@rezics/content-adapters/readers/provider-contracts";
 
-describe("pinned source contract inventory", () => {
+describe("source contract declaration inventory", () => {
 	it("applies declared SQL keys instead of guessing references from column names", () => {
 		const fields = inventoryMusicBrainz(
 			"CREATE TABLE track (id SERIAL, recording INTEGER, title TEXT);\nCREATE TABLE recording (id SERIAL);",

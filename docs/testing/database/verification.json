@@ -33,7 +33,7 @@
     "scenarios.tsv": "4165424a131e11e59837fa93353dca0f3fb37912b59874e673bf84724731fa8b",
     "capacity.json": "8b42e8d9ec58f2af52573cd6fc81010d12bd6559076762bc8fae6ef9879cf42d",
     "capacity.md": "616cc99f3f1964f5f4ff3ec457dc30a69cda938e61ea6c8cd48ba4eeff65d406",
-    "dependency-manifest.json": "54c0aae47f523f2f77273514e956dbf7d6ad34d33bc6ced66ef33bf7bb5eddee"
+    "dependency-manifest.json": "88734bfef0fab947f53cfbdca07625d545913221a405cb3c4e2d974479175fb1"
   },
   "artifact_paths": {
     "current-schema-map.tsv": "docs/testing/database/current-schema-map.tsv",
@@ -113,7 +113,7 @@
     "docs/next-version/README.md": "ae76328b40a7ec9c2eb1e2b543afc9af7554a7e52da6095d4e39e670d004a0f4",
     "docs/next-version/world-comments-feasibility.md": "d5fc28e8c73efef846d8993edbc0a4f41e4ca2f258388dd7fef1c15d62c25ba8",
     "docs/next-version/world-comments.md": "9e61745dbb8e6e2747b409a742a335ca80139ad5b1ad8be63251e11880bdbdbe",
-    "docs/plan/README.md": "bd14b601a5538f444d77f6b2c5372262bd24202970bedb3777aa153619847aa5",
+    "docs/plan/README.md": "ef0cc18727dd8256baf254a1dbaa2b726333b4431ff21f406ab0366067b11c16",
     "docs/plan/backend-acceptance.md": "eff052e8bfd421616e39cd5492f9ea6d5afec73ac84768e75263a9b2390c81a4",
     "docs/plan/execution-workflow.md": "203be6f04135e1abc7a5cb343b92e48a94ab37d5a367596e7b82ed328613564f",
     "docs/plan/frontend.md": "3efec121b4af58e171d912ce0bc8d39d56316466b83d2448466ac5010c0c21b7",
@@ -128,11 +128,11 @@
     "docs/plan/modules/sources-and-converters.md": "c36e3379bae5e1a455371cff3fcc452ad914685bf992f78423d5dab687cb9607",
     "docs/plan/modules/subscriptions-and-pro.md": "b6dbf89122727aa0f3e7419e385e2fa782f1ad82c76d78be056feb8e4008fa22",
     "docs/reference/README.md": "c1890d320c257db376a7acd8cee6a74d79ee25ae4ac4bde015364ad8d399a926",
-    "docs/reference/current-implementation.md": "00b0d34f55e83ef969ed5da8b5ebc75bb79fd0e41ecaa71224038d4aaa6883a6",
+    "docs/reference/current-implementation.md": "0e1e205a7049baf433babb1de327d95d3233187e39f093ad6d04c977c430d12d",
     "docs/reference/zone-styling-contract-v1.md": "8954e7701d726307d2b8175e30d9578c2fb722ecd232672e8a1899591a451b90",
     "docs/research/README.md": "ae15482787446845470c998092cfae6b3b899a841a9cb38d2ab3141827a5cffc",
     "docs/research/ai-hub-execution.md": "8d7f1a65d7ec57c857fca06dbc4fd655eadc3448588f9b8e2de42dbee0d0063f",
-    "docs/testing/README.md": "df2e57b33e8f3f95251f8732840ebac8c7d26ecd157dd19891319f2b7e233332",
+    "docs/testing/README.md": "03dd31840adf0fc135ef3d89366fe9ef9e100dc605359d8d5a997e99a291af45",
     "docs/testing/ai-hub.md": "e26dbe58f28fe78b51a81bd54bfe47a7d267d97f6e18a15f46239bbb58f0c971",
     "docs/testing/backend-integration.md": "839904ea26b482cacdb4e8714cdf827a0b97c722d69ab75c017d183b03710acf",
     "docs/testing/book-and-creation.md": "2c11fb9a6f08475d10c85190dfc4a874687379f73bc95b25d8651f83626e26a6",
@@ -147,8 +147,8 @@
     "docs/testing/recipes.md": "a9cdb79e8c9e16b2754eab81154a95916b8d38c9f5c3733e635fd008cd87a6e7",
     "docs/testing/recommendations.md": "09640bf8c9269bff7cd7ffa341d0f99a76e4ba056d801f4af99204d6d08af15a",
     "docs/testing/relationship-graph.md": "894859fa72a616701d161d81dee4aed8411938b77916bc35b996289619e5a961",
-    "docs/testing/schema.md": "f2eadd0f7279fa40c5b840ebddfc67bb1d374f52a7fcd9978ec3b8641738a82b",
-    "docs/testing/source-conformance.md": "0ba690eef29e73d12e0bc1aa1af98bc22bc941f8094af40878f180716db52d7d",
+    "docs/testing/schema.md": "2575e16355a6b82cff87aa107b5111e364046f34b227827591306fa5228e5164",
+    "docs/testing/source-conformance.md": "5c8f421580ad4140c401026f97f13224347a23f27d0c4b4cb3c6bb36454542ff",
     "docs/testing/subscriptions-and-pro.md": "269b7b3937f6be360b0ee7d8a93a8131e673beba5f6d478253b12853e1121da7",
     "docs/testing/wiki-composition.md": "951d79cdc5040f703b7712fae630e5c00c64719c1705cb59ddb6edbeb7237a30",
     "docs/testing/database/check_design.py": "66a8f5aee242c417121ba731d69f8a03900240c8dae0aba3640f62ccc9833786"

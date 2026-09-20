@@ -1,6 +1,6 @@
 # Content adapters and provider contracts
 
-The 2026-09-20 target uses [live external-site validation](../../docs/testing/source-conformance.md#live-acquisition-and-validation) for all providers: current API/contracts, ignored inputs/inventories/run reports and scripted drift detection. Normative vocabulary pins belong to schema-importer. The pinned-provider preparation described below is the current implementation pending the next authorized checkpoint, not the selected validation policy.
+External-site compatibility follows [live validation](../../docs/testing/source-conformance.md#live-acquisition-and-validation): fetch current API/contracts, retain ignored run inputs and diagnose declaration drift. Normative vocabulary pins remain in schema-importer.
 
 These sources describe **external content**, not REZICS's schema design. This owner
 contains shared parsers, format contracts and exchange conversion. Standards/model
@@ -22,23 +22,31 @@ reader reuse does not imply all external fields have approved native mappings.
 Provider schemas can reveal missing capabilities and drive conformance tests,
 but cannot create native tables or decide native referent/identity automatically.
 
-`contracts/catalog/artifacts.lock.json` lists 45 exact-byte SHA-256-pinned inputs
-and the live [VNDB `/schema`](https://api.vndb.org/kana#simple-requests) endpoint.
-`contracts/{provider}/inputs/` restores them by URL. Every network preparation
-fetches the latest VNDB response and validates its structure and inherited fields,
-without claiming a fixed checksum; only its unordered external-link arrays and
-JSON object keys are normalized. New VNDB fields still need a reviewed inventory
-and coverage update. The other 45 inputs retain exact upstream bytes. Generated
-contract inventories live in `generated/`; both directories are ignored by Git.
-The inventories preserve fields, syntax, references and unknown facets
-for adapter development. There is no provider-contract database schema and no
-native DDL/migration command in this package. Native field dispositions remain in
-main's source-contract owner with their independent evidence requirements.
+`contracts/catalog/sources.json` contains acquisition definitions with current
+upstream URLs and no expected upstream-content hashes. Each network preparation
+fetches every selected input anew. Raw responses and their observed digests/times
+are stored under ignored `contracts/catalog/inputs/runs/<run-id>/`; `current.json`
+is replaced atomically only after all selected inputs are acquired and parsed.
+Failed runs retain diagnostics and cannot publish a partial current acquisition.
+A provider-only capture cannot supply an all-provider conversion. This capture
+is bounded local observation, not a transaction spanning all upstream services.
+
+Conversion verifies the recorded run's bytes, retains VNDB unordered-link/key
+normalization separately from raw evidence, and writes ignored `generated/`
+inventories. Offline replay identifies its captured run and makes no claim that
+it has contacted the site again. New fields and changed shapes still require
+reviewed native dispositions; acquisition/parse success is not native conformance.
+
+The main source owner generates ignored declaration files and run reports from the
+same acquisition. Git retains scripts, current URL definitions, authored mapping
+expectations and native evidence. There is no provider-contract database schema
+or native DDL/migration command in this package.
 
 ```sh
-task artifacts:prepare # fresh checkout: fetch pins and regenerate both packages
+task artifacts:prepare # restore vocabularies, fetch current providers, generate local outputs
 task libraries:content-adapters:fetch-contracts -- all
-task libraries:content-adapters:contracts -- all
+task libraries:content-adapters:contracts -- all # replay the completed local acquisition
+task services-main:catalog:sources:live -- --inspect # fresh inputs and explicit pending mappings
 task libraries:content-adapters:convert -- wikibase /absolute/entity.json /absolute/result.json
 task libraries:content-adapters:convert -- iiif /absolute/manifest.json /absolute/result.json
 task libraries:content-adapters:convert -- media-fragments 'https://example.org/video#t=1.25,9'

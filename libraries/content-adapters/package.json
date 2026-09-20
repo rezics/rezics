@@ -6,7 +6,8 @@
 	"license": "AGPL-3.0-only",
 	"exports": {
 		".": "./src/index.ts",
-		"./readers/*": "./src/readers/*.ts"
+		"./readers/*": "./src/readers/*.ts",
+		"./acquisition": "./src/acquisition.ts"
 	},
 	"dependencies": {
 		"@rezics/content-language": "workspace:*",

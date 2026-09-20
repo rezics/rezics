@@ -1,145 +1,39 @@
-import { createHash } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
+import { readFile, writeFile } from "node:fs/promises";
+import { join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parse as parseYaml } from "yaml";
-import { z } from "zod";
+import { digest } from "@rezics/schema/identity";
+import {
+	fetchProviderSchemas,
+	readProviderAcquisition,
+} from "@rezics/content-adapters/acquisition";
 
 import {
 	applyMusicBrainzKeys,
 	assertSchemaReferencesComplete,
 	assertUniqueSourceFields,
-	CatalogSourceValues,
 	contractRecord,
 	inventoryJsonSchema,
 	inventoryMusicBrainz,
 	inventoryOpenLibrary,
 	inventoryVndb,
-	normalizeProviderArtifact,
 	type SourceContractField,
 } from "@rezics/content-adapters/readers/provider-contracts";
 
 const directory = fileURLToPath(
 	new URL("../src/services/catalog/source-contracts/", import.meta.url),
 );
-// Bangumi common reuses staff definitions through YAML aliases. Pinned artifacts
-// are checksum-checked before parsing; keep a finite alias budget for those definitions.
+// Bangumi common reuses staff definitions through YAML aliases; bound expansion.
 const yamlOptions = { maxAliasCount: 10_000 } as const;
-const artifactSchema = z
-	.strictObject({
-		file: z.string().regex(/^[a-z0-9][a-z0-9._-]+$/u),
-		source: z.enum(CatalogSourceValues),
-		format: z.enum([
-			"openapi",
-			"json_schema",
-			"vndb",
-			"musicbrainz_sql",
-			"musicbrainz_foreign_keys",
-			"musicbrainz_primary_keys",
-			"openlibrary_type",
-			"archive",
-			"vocabulary",
-		]),
-		url: z.url(),
-		tracking: z.literal("latest").optional(),
-		sha256: z
-			.string()
-			.regex(/^[a-f0-9]{64}$/u)
-			.nullable(),
-	})
-	.refine(
-		(entry) =>
-			entry.tracking === "latest"
-				? entry.source === "vndb" && entry.format === "vndb" && entry.sha256 === null
-				: entry.sha256 !== null,
-		{ message: "Only the live VNDB schema may omit a SHA-256 pin" },
-	);
 
-function sha256(bytes: Uint8Array): string {
-	return createHash("sha256").update(bytes).digest("hex");
-}
-
-/** Read reviewed artifacts as data only; no upstream SQL, Python or wiki text is executed. */
-export async function generateCatalogSourceInventory(
-	cache: string,
-	fetchMissing: boolean,
-): Promise<string> {
-	const artifacts = z
-		.array(artifactSchema)
-		.max(128)
-		.parse(
-			JSON.parse(
-				await readFile(
-					new URL(
-						"../../../libraries/content-adapters/contracts/catalog/artifacts.lock.json",
-						import.meta.url,
-					),
-					"utf8",
-				),
-			),
-		);
+/** @internal Inventory one captured run as data; downloaded declarations are never executed. */
+export async function generateCatalogSourceInventory() {
+	const { receipt, inputs } = await readProviderAcquisition("all");
 	let fields: SourceContractField[] = [];
 	let musicBrainzForeignKeys: string | undefined;
 	let musicBrainzPrimaryKeys: string | undefined;
 	const schemaDocuments = new Map<string, unknown>();
-	let totalBytes = 0;
-	for (const artifact of artifacts) {
-		const path = join(cache, artifact.file);
-		const download = async (): Promise<Buffer> => {
-			const url = new URL(artifact.url);
-			if (
-				url.protocol !== "https:" ||
-				!["raw.githubusercontent.com", "api.vndb.org"].includes(url.hostname)
-			)
-				throw new Error(`Unreviewed contract artifact host: ${url.hostname}`);
-			const response = await fetch(url, {
-				headers: { "User-Agent": "edge/REZICS-schema-audit (2026.09.07; +https://www.rezics.com)" },
-				signal: AbortSignal.timeout(30_000),
-				redirect: "error",
-			});
-			if (!response.ok || !response.body)
-				throw new Error(`Contract download returned ${response.status}`);
-			const chunks: Uint8Array[] = [];
-			let length = 0;
-			for await (const chunk of response.body) {
-				length += chunk.length;
-				if (length > 8_000_000) throw new Error("Source contract artifact exceeds 8 MB");
-				chunks.push(chunk);
-			}
-			const downloaded = normalizeProviderArtifact(artifact.format, Buffer.concat(chunks));
-			if (artifact.sha256 !== null && sha256(downloaded) !== artifact.sha256)
-				throw new Error(`Source contract changed: ${artifact.file}`);
-			if (artifact.tracking === "latest") inventoryVndb(JSON.parse(downloaded.toString("utf8")));
-			await mkdir(dirname(path), { recursive: true });
-			await writeFile(path, downloaded);
-			return downloaded;
-		};
-		const readCached = () =>
-			readFile(
-				new URL(
-					`../../../libraries/content-adapters/contracts/${artifact.source}/inputs/${artifact.file}`,
-					import.meta.url,
-				),
-			).catch(() => readFile(path));
-		const bytes = normalizeProviderArtifact(
-			artifact.format,
-			fetchMissing && artifact.tracking === "latest"
-				? await download()
-				: await readCached().catch((error: unknown) => {
-						if (
-							!fetchMissing ||
-							!(error instanceof Error && "code" in error && error.code === "ENOENT")
-						)
-							throw error;
-						return download();
-					}),
-		);
-		totalBytes += bytes.length;
-		if (bytes.length > 8_000_000 || totalBytes > 32_000_000)
-			throw new Error("Pinned source contracts exceed the reviewed artifact budget");
-		if (artifact.sha256 !== null && sha256(bytes) !== artifact.sha256)
-			throw new Error(`Source contract checksum differs: ${artifact.file}`);
-		const text = bytes.toString("utf8");
+	for (const { artifact, text } of inputs) {
 		switch (artifact.format) {
 			case "vndb":
 				fields.push(...inventoryVndb(JSON.parse(text)));
@@ -154,7 +48,7 @@ export async function generateCatalogSourceInventory(
 				musicBrainzPrimaryKeys = text;
 				break;
 			case "openlibrary_type":
-				// Pinned .type files mix JSON with flow maps using single quotes and
+				// Upstream .type files mix JSON with flow maps using single quotes and
 				// True/False. This subset is parsed as data, never evaluated as Python.
 				fields.push(...inventoryOpenLibrary(parseYaml(text, yamlOptions)));
 				break;
@@ -229,27 +123,39 @@ export async function generateCatalogSourceInventory(
 		const right = JSON.stringify([b.source, b.contract, b.path]);
 		return left < right ? -1 : left > right ? 1 : 0;
 	});
-	return `${fields.map((field) => JSON.stringify(field)).join("\n")}\n`;
+	return { receipt, text: `${fields.map((field) => JSON.stringify(field)).join("\n")}\n` };
 }
 
 async function main(): Promise<void> {
-	const [cacheArgument, ...flags] = process.argv.slice(2);
-	if (!cacheArgument || flags.some((flag) => !["--fetch", "--check"].includes(flag)))
-		throw new Error(
-			"Usage: generate-catalog-source-inventory.ts <cache-under-.temp> [--fetch] [--check]",
-		);
-	const cache = resolve(cacheArgument);
-	const temporaryRoot = fileURLToPath(new URL("../../../.temp/", import.meta.url));
-	if (!cache.startsWith(temporaryRoot))
-		throw new Error("Source artifact cache must be under repository .temp/");
-	const output = await generateCatalogSourceInventory(cache, flags.includes("--fetch"));
+	const flags = process.argv.slice(2);
+	if (flags.some((flag) => !["--fetch", "--check"].includes(flag)))
+		throw new Error("Usage: generate-catalog-source-inventory.ts [--fetch] [--check]");
+	if (flags.includes("--fetch")) await fetchProviderSchemas("all");
+	const { receipt, text } = await generateCatalogSourceInventory();
 	const target = join(directory, "fields.jsonl");
+	const receiptPath = join(directory, "inventory.json");
+	const inventory =
+		JSON.stringify(
+			{
+				format: "rezics.source-inventory.v1",
+				acquisition: receipt,
+				fieldsSha256: digest(Buffer.from(text)),
+			},
+			null,
+			"\t",
+		) + "\n";
 	if (flags.includes("--check")) {
-		if ((await readFile(target, "utf8")) !== output)
-			throw new Error("Generated source inventory is stale");
-	} else await writeFile(target, output, "utf8");
+		if (
+			(await readFile(target, "utf8")) !== text ||
+			(await readFile(receiptPath, "utf8")) !== inventory
+		)
+			throw new Error("Generated source inventory is stale for the captured run");
+	} else {
+		await writeFile(target, text, "utf8");
+		await writeFile(receiptPath, inventory, "utf8");
+	}
 	console.info(
-		`Verified ${output.trimEnd().split("\n").length} source field entries; native mapping qualification is separate`,
+		`Generated ${text.trimEnd().split("\n").length} source declarations from run ${receipt.runId}; native mapping qualification is separate`,
 	);
 }
 

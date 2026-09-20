@@ -1,0 +1,14 @@
+{
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		"noEmit": true,
+		"types": ["node"]
+	},
+	"files": [
+		"scripts/catalog-source-coverage.ts",
+		"scripts/check-catalog-source-coverage.ts",
+		"scripts/generate-catalog-source-inventory.ts",
+		"scripts/catalog-source-coverage.test.ts",
+		"scripts/catalog-source-inventory.test.ts"
+	]
+}

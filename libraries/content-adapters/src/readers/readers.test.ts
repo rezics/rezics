@@ -9,7 +9,7 @@ import { convertMediaFragment } from "./media-fragments";
 import { normalizeProviderArtifact } from "./provider-contracts";
 const source = { source: "fixture", origin: "https://example.test/schema", version: "1" };
 describe("complete schema readers", () => {
-	it("pins VNDB external-link definitions independently of upstream response order", () => {
+	it("normalizes VNDB external-link definitions independently of upstream response order", () => {
 		const first = Buffer.from(
 			JSON.stringify({
 				api_fields: { "/vn": { id: null } },
@@ -55,12 +55,17 @@ describe("complete schema readers", () => {
 		expect(normalizeProviderArtifact("json_schema", first)).toEqual(first);
 		expect(() => normalizeProviderArtifact("vndb", Buffer.from("{}"))).toThrow();
 	});
-	it("marks only VNDB as a live, structurally validated source", async () => {
+	it("uses current acquisition definitions for every provider without content pins", async () => {
 		const artifacts = await providerArtifacts();
-		expect(artifacts.filter((entry) => entry.tracking === "latest")).toEqual([
-			expect.objectContaining({ source: "vndb", format: "vndb", sha256: null }),
-		]);
-		expect(artifacts.filter((entry) => entry.tracking !== "latest")).toHaveLength(45);
+		expect(new Set(artifacts.map((entry) => entry.source))).toEqual(
+			new Set(["bangumi", "vndb", "musicbrainz", "openlibrary"]),
+		);
+		expect(artifacts.every((entry) => !("sha256" in entry) && !("tracking" in entry))).toBe(true);
+		expect(
+			artifacts
+				.filter((entry) => entry.url.includes("raw.githubusercontent.com"))
+				.every((entry) => entry.url.includes("/HEAD/")),
+		).toBe(true);
 	});
 	it("reconstructs every provider artifact, including reverse properties and operation schemas", async () => {
 		await expect(convertProviderSchemas("typo")).rejects.toThrow();

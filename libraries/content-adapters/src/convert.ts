@@ -1,6 +1,3 @@
-import { readFile, mkdir, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import { digest, schemaId, stableJson } from "@rezics/schema/identity";
 import {
@@ -8,7 +5,6 @@ import {
 	inventoryOpenLibrary,
 	inventoryVndb,
 	applyMusicBrainzKeys,
-	normalizeProviderArtifact,
 	type SourceContractField,
 } from "./readers/provider-contracts";
 import { convertJsonSchema, convertOpenApi, readSchemaDocument } from "./readers/json-schema";
@@ -16,74 +12,8 @@ import type { ConvertedContract } from "./model";
 import { readPostgresDeclarations } from "./readers/postgres-ddl";
 import { convertBangumiArchive, convertBangumiVocabulary } from "./readers/bangumi";
 
-const root = fileURLToPath(new URL("../", import.meta.url));
-const artifact = z
-	.strictObject({
-		file: z.string().regex(/^[a-z0-9][a-z0-9._-]+$/),
-		source: z.enum(["bangumi", "vndb", "musicbrainz", "openlibrary"]),
-		format: z.string(),
-		url: z.url(),
-		tracking: z.literal("latest").optional(),
-		sha256: z
-			.string()
-			.regex(/^[a-f0-9]{64}$/)
-			.nullable(),
-	})
-	.refine(
-		(entry) =>
-			entry.tracking === "latest"
-				? entry.source === "vndb" && entry.format === "vndb" && entry.sha256 === null
-				: entry.sha256 !== null,
-		{ message: "Only the live VNDB schema may omit a SHA-256 pin" },
-	);
-export async function providerArtifacts() {
-	return z
-		.array(artifact)
-		.parse(
-			JSON.parse(await readFile(resolve(root, "contracts/catalog/artifacts.lock.json"), "utf8")),
-		);
-}
-
-/** @alpha Fetch pinned inputs and the live VNDB schema; downloaded SQL and expressions are never evaluated. */
-export async function fetchProviderSchemas(source = "all") {
-	z.enum(["all", "bangumi", "musicbrainz", "vndb", "openlibrary"]).parse(source);
-	for (const entry of await providerArtifacts()) {
-		if (source !== "all" && source !== entry.source) continue;
-		const path = resolve(root, "contracts", entry.source, "inputs", entry.file);
-		if (entry.sha256 !== null) {
-			try {
-				const cached = await readFile(path);
-				const normalized = normalizeProviderArtifact(entry.format, cached);
-				if (digest(normalized) === entry.sha256) {
-					if (digest(cached) !== entry.sha256) await writeFile(path, normalized);
-					continue;
-				}
-			} catch (error) {
-				if (!(error instanceof Error && "code" in error && error.code === "ENOENT")) throw error;
-			}
-		}
-		const response = await fetch(entry.url, {
-			signal: AbortSignal.timeout(30_000),
-			redirect: "error",
-			headers: { "User-Agent": "REZICS-schema/2 (+https://rezics.com)" },
-		});
-		if (!response.ok || !response.body)
-			throw new Error(`Schema fetch failed: ${entry.source}/${entry.file}: ${response.status}`);
-		const parts: Uint8Array[] = [];
-		let size = 0;
-		for await (const part of response.body) {
-			size += part.byteLength;
-			if (size > 8_388_608) throw new RangeError("Schema artifact exceeds 8 MiB");
-			parts.push(part);
-		}
-		const bytes = normalizeProviderArtifact(entry.format, Buffer.concat(parts));
-		if (entry.sha256 !== null && digest(bytes) !== entry.sha256)
-			throw new TypeError(`Pinned schema changed: ${entry.file}`);
-		if (entry.tracking === "latest") inventoryVndb(JSON.parse(bytes.toString("utf8")));
-		await mkdir(resolve(path, ".."), { recursive: true });
-		await writeFile(path, bytes);
-	}
-}
+import { readProviderAcquisition } from "./acquisition";
+export { providerArtifacts, fetchProviderSchemas } from "./acquisition";
 
 function fromFields(
 	input: { source: string; origin: string; version: string; file: string; text: string },
@@ -132,28 +62,27 @@ function fromFields(
 }
 
 /** @alpha Convert every selected provider contract and retain its full structured syntax alongside field declarations. */
-export async function convertProviderSchemas(source = "all"): Promise<ConvertedContract[]> {
+export async function convertProviderSchemas(
+	source = "all",
+	acquisition?: Awaited<ReturnType<typeof readProviderAcquisition>>,
+): Promise<ConvertedContract[]> {
 	z.enum(["all", "bangumi", "musicbrainz", "vndb", "openlibrary"]).parse(source);
-	const artifacts = await providerArtifacts(),
-		result: ConvertedContract[] = [];
-	const texts = new Map<string, string>();
-	for (const entry of artifacts) {
-		if (source !== "all" && source !== entry.source) continue;
-		const bytes = normalizeProviderArtifact(
-			entry.format,
-			await readFile(resolve(root, "contracts", entry.source, "inputs", entry.file)),
-		);
-		if (bytes.byteLength > 8_388_608 || (entry.sha256 !== null && digest(bytes) !== entry.sha256))
-			throw new TypeError(`Schema artifact drift: ${entry.file}`);
-		texts.set(entry.file, new TextDecoder("utf-8", { fatal: true }).decode(bytes));
-	}
+	const captured = acquisition ?? (await readProviderAcquisition(source));
+	const inputs = captured.inputs.filter(
+		(input) => source === "all" || input.artifact.source === source,
+	);
+	if (!inputs.length || (source === "all" && captured.receipt.scope !== "all"))
+		throw new Error("Captured acquisition does not cover the requested providers");
+	const artifacts = inputs.map((input) => input.artifact);
+	const result: ConvertedContract[] = [];
+	const texts = new Map(inputs.map((input) => [input.artifact.file, input.text]));
 	for (const entry of artifacts) {
 		const text = texts.get(entry.file);
 		if (text === undefined) continue;
 		const input = {
 			source: entry.source,
 			origin: entry.url,
-			version: entry.sha256 ?? digest(Buffer.from(text)),
+			version: digest(Buffer.from(text)),
 			file: entry.file,
 			text,
 		};

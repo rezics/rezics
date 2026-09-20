@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import re
 import json
-import hashlib
 import subprocess
 import sys
 import unicodedata
@@ -113,20 +112,12 @@ def main():
     names = set(subprocess.check_output(["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"], cwd=ROOT).decode("utf-8").split("\0"))
     docs = sorted(ROOT / name for name in names if name.endswith(".md") and (ROOT / name).is_file())
     problems = []
-    # Upstream machine-schema Markdown is an exact pinned input. Its relative
-    # links belong to its upstream repository, not our maintained documentation.
-    source_pins = json.loads((ROOT / "libraries/content-adapters/contracts/catalog/artifacts.lock.json").read_text())
-    upstream_docs = {f"libraries/content-adapters/contracts/{entry['source']}/inputs/{entry['file']}": entry["sha256"] for entry in source_pins if entry["file"].endswith(".md")}
     checked_links = 0
     anchor_cache = {}
     local_targets = {}
     roles = {}
     for path in docs:
         name = path.relative_to(ROOT).as_posix()
-        if name in upstream_docs:
-            if hashlib.sha256(path.read_bytes()).hexdigest() != upstream_docs[name]:
-                problems.append(f"{name}: pinned upstream documentation bytes changed")
-            continue
         text = path.read_text(encoding="utf-8")
         role = document_role(name)
         roles[role] = roles.get(role, 0) + 1

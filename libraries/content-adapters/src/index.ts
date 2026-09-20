@@ -1,5 +1,6 @@
 export * from "./model";
 export * from "./convert";
+export * from "./acquisition";
 export * from "./readers/provider-contracts";
 export * from "./readers/json-schema";
 export * from "./readers/postgres-ddl";

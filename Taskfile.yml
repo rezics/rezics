@@ -38,15 +38,17 @@ includes:
 
 tasks:
     artifacts:prepare:
-        desc: Restore pinned inputs and current VNDB schema, then regenerate local artifacts.
+        desc: Restore normative vocabulary pins, fetch current providers and regenerate local artifacts.
         cmds:
             - task: libraries:artifacts:prepare
+            - task: services-main:catalog:sources:inventory
             - task: artifacts:typed-anchor
 
     artifacts:generate:
         desc: Regenerate artifacts offline after pinned inputs have been restored.
         cmds:
             - task: libraries:artifacts:generate
+            - task: services-main:catalog:sources:inventory
             - task: artifacts:typed-anchor
 
     artifacts:typed-anchor:

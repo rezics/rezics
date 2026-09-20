@@ -73,7 +73,7 @@ sops-age.key
 /.VSCodeCounter/
 /example-gitignore/
 
-# Reconstruct pinned external schema inputs and derived inventories locally.
+# Restore normative vocabularies and fetch current external-site inputs locally.
 /libraries/schema-importer/sources/*.ttl
 /libraries/schema-importer/sources/*.rdf
 /libraries/schema-importer/registry/
@@ -89,3 +89,8 @@ sops-age.key
 /libraries/schema/docs/tables/
 /libraries/schema/schema-catalogue.generated.json
 /services/main/src/services/database/typed-schema.generated.json
+
+# Current external-site observations and generated declaration inventories.
+/services/main/src/services/catalog/source-contracts/fields.jsonl
+/services/main/src/services/catalog/source-contracts/inventory.json
+/services/main/src/services/catalog/source-contracts/report.json

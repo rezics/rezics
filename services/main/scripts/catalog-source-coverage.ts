@@ -50,7 +50,11 @@ const nativeMappingSchema = z.discriminatedUnion("status", [
 		}),
 	}),
 ]);
-const common = { ...identitySchema.shape, reason: explanation };
+const common = {
+	...identitySchema.shape,
+	sourceShape: SourceContractFieldSchema.omit({ source: true, contract: true, path: true }),
+	reason: explanation,
+};
 const dispositionSchema = z.discriminatedUnion("disposition", [
 	z.strictObject({ ...common, disposition: z.literal("native"), mapping: nativeMappingSchema }),
 	z.strictObject({ ...common, disposition: z.literal("source-only") }),
@@ -70,17 +74,7 @@ const dispositionSchema = z.discriminatedUnion("disposition", [
 
 /** @internal The declaration inventory is bounded schema metadata, never corpus rows. */
 export const SourceCoverageManifestSchema = z.strictObject({
-	format: z.literal("rezics.source-coverage.v1"),
-	inventory: z.strictObject({
-		fieldsSha256: sha256,
-		artifactsSha256: sha256,
-		declarations: z.strictObject({
-			bangumi: z.number().int().nonnegative(),
-			vndb: z.number().int().nonnegative(),
-			musicbrainz: z.number().int().nonnegative(),
-			openlibrary: z.number().int().nonnegative(),
-		}),
-	}),
+	format: z.literal("rezics.source-coverage.v2"),
 	entries: z.array(dispositionSchema).max(20_000),
 });
 export type SourceCoverageManifest = z.infer<typeof SourceCoverageManifestSchema>;
@@ -91,15 +85,18 @@ export function sourceFieldKey(field: Identity): string {
 	return JSON.stringify([field.source, field.contract, field.path]);
 }
 
-/** @internal Validate before hashing; order and platform line endings do not change the pin. */
+/** @internal Validate before hashing; order and platform line endings do not change the recorded digest. */
 export function parseCoverageInventory(value: unknown): SourceContractField[] {
 	const fields = z.array(SourceContractFieldSchema).min(1).max(20_000).parse(value);
 	assertUniqueSourceFields(fields);
 	return fields;
 }
 
-/** @internal Pins declarations separately from the reviewed native-fact denominator. */
-export function sourceCoveragePin(fields: readonly SourceContractField[], artifacts: unknown) {
+/** @internal Describes the observed inventory separately from the reviewed native-fact denominator. */
+export function sourceCoverageInventory(
+	fields: readonly SourceContractField[],
+	artifacts: unknown,
+) {
 	const declarations = { bangumi: 0, vndb: 0, musicbrainz: 0, openlibrary: 0 };
 	for (const field of fields) declarations[field.source]++;
 	return {
@@ -132,21 +129,23 @@ export function evaluateSourceCoverage(
 	evidenceFiles: ReadonlyMap<string, string> = new Map(),
 ) {
 	assertUniqueSourceFields(fields);
-	const pin = sourceCoveragePin(fields, artifacts);
+	const inventory = sourceCoverageInventory(fields, artifacts);
 	const issues: string[] = [];
-	if (manifest.inventory.fieldsSha256 !== pin.fieldsSha256)
-		issues.push("Inventory field hash drift");
-	if (manifest.inventory.artifactsSha256 !== pin.artifactsSha256)
-		issues.push("Artifact pin hash drift");
-	for (const source of CatalogSourceValues)
-		if (manifest.inventory.declarations[source] !== pin.declarations[source])
-			issues.push(`Declaration count drift: ${source}`);
-	const inventoryKeys = new Set(fields.map(sourceFieldKey));
+	const inventoryFields = new Map(fields.map((field) => [sourceFieldKey(field), field]));
+	const inventoryKeys = new Set(inventoryFields.keys());
 	const entries = new Map<string, SourceCoverageManifest["entries"][number]>();
 	for (const entry of manifest.entries) {
 		const key = sourceFieldKey(entry);
 		if (entries.has(key)) issues.push(`Duplicate disposition: ${key}`);
-		if (!inventoryKeys.has(key)) issues.push(`Unknown source field: ${key}`);
+		if (!inventoryKeys.has(key)) issues.push(`Removed or unknown source field: ${key}`);
+		const observed = inventoryFields.get(key);
+		if (observed) {
+			const { source: _source, contract: _contract, path: _path, ...shape } = observed;
+			if (canonicalContractHash(shape) !== canonicalContractHash(entry.sourceShape))
+				issues.push(
+					`Source field shape drift: ${key}; expected ${JSON.stringify(entry.sourceShape)}, observed ${JSON.stringify(shape)}`,
+				);
+		}
 		entries.set(key, entry);
 	}
 	const missing = fields.filter((field) => !entries.has(sourceFieldKey(field))).map(sourceFieldKey);
@@ -236,11 +235,11 @@ export function evaluateSourceCoverage(
 	}
 	const denominatorComplete = missing.length === 0 && issues.length === 0;
 	return {
-		format: "rezics.source-coverage-result.v1" as const,
+		format: "rezics.source-coverage-result.v2" as const,
 		qualified: denominatorComplete && nativeGaps.length === 0,
 		qualificationScope:
 			"Reviewed declaration dispositions and evidence integrity only; runtime/schema acceptance is separate.",
-		inventory: pin,
+		inventory,
 		reviewedDeclarations: entries.size,
 		dispositions,
 		nativeDenominator: { reviewedRequiredPaths: requiredNative, complete: denominatorComplete },

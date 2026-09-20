@@ -1,6 +1,9 @@
-import { readFile, realpath, stat } from "node:fs/promises";
+import { readFile, realpath, stat, writeFile } from "node:fs/promises";
 import { isAbsolute, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { z } from "zod";
+import { digest } from "@rezics/schema/identity";
+import { readProviderAcquisition } from "@rezics/content-adapters/acquisition";
 import {
 	evaluateSourceCoverage,
 	parseCoverageInventory,
@@ -37,7 +40,20 @@ export async function checkCatalogSourceCoverage(root: string = repository) {
 			.split(/\r?\n/u)
 			.map((line) => JSON.parse(line)),
 	);
-	const artifacts: unknown = JSON.parse(await read("libraries/content-adapters/contracts/catalog/artifacts.lock.json"));
+	const inventory = z
+		.strictObject({
+			format: z.literal("rezics.source-inventory.v1"),
+			acquisition: z.unknown(),
+			fieldsSha256: z.string().regex(/^[a-f0-9]{64}$/u),
+		})
+		.parse(JSON.parse(await read(`${contracts}/inventory.json`)));
+	if (digest(Buffer.from(inventoryText)) !== inventory.fieldsSha256)
+		throw new Error("Generated source inventory differs from its captured run receipt");
+	const { receipt } = await readProviderAcquisition("all", {
+		directory: resolve(canonicalRoot, "libraries/content-adapters/contracts/catalog/inputs"),
+	});
+	if (JSON.stringify(inventory.acquisition) !== JSON.stringify(receipt))
+		throw new Error("Generated inventory is not from the current captured run; regenerate it");
 	const manifest = SourceCoverageManifestSchema.parse(
 		JSON.parse(await read(`${contracts}/coverage.json`)),
 	);
@@ -54,7 +70,11 @@ export async function checkCatalogSourceCoverage(root: string = repository) {
 			// The evaluator reports a missing reference for each affected field/role.
 		}
 	}
-	return evaluateSourceCoverage(fields, artifacts, manifest, evidence);
+	return {
+		...evaluateSourceCoverage(fields, receipt, manifest, evidence),
+		acquisition: receipt,
+		freshness: "Captured run only; live qualification requires a preceding fresh acquisition.",
+	};
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
@@ -65,12 +85,21 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
 				"Usage: bun services/main/scripts/check-catalog-source-coverage.ts [--inspect] [--json]",
 			);
 		const report = await checkCatalogSourceCoverage();
+		await writeFile(
+			resolve(repository, contracts, "report.json"),
+			JSON.stringify(report, null, "\t") + "\n",
+		);
 		console.log(
 			JSON.stringify(
 				arguments_.includes("--json")
 					? report
 					: {
 							...report,
+							acquisition: {
+								runId: report.acquisition.runId,
+								completedAt: report.acquisition.completedAt,
+								artifacts: report.acquisition.artifacts.length,
+							},
 							missing: { count: report.missing.length, first: report.missing.slice(0, 10) },
 							nativeGaps: {
 								count: report.nativeGaps.length,

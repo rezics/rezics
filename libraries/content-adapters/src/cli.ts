@@ -2,6 +2,7 @@ import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { fetchProviderSchemas, convertProviderSchemas } from "./convert";
+import { readProviderAcquisition } from "./acquisition";
 import { convertWikibase } from "./readers/wikibase";
 import { convertIiif } from "./readers/iiif";
 import { convertMediaFragment } from "./readers/media-fragments";
@@ -11,15 +12,31 @@ const write = async (path: string, value: unknown) => {
 	await mkdir(dirname(path), { recursive: true });
 	await writeFile(path, JSON.stringify(value, null, "\t") + "\n");
 };
-if (command === "fetch-contracts") await fetchProviderSchemas(source ?? "all");
-else if (command === "contracts") {
-	const records = await convertProviderSchemas(source ?? "all");
+if (command === "fetch-contracts") {
+	const receipt = await fetchProviderSchemas(source ?? "all");
+	console.info(
+		JSON.stringify({
+			runId: receipt.runId,
+			scope: receipt.scope,
+			artifacts: receipt.artifacts.length,
+			completedAt: receipt.completedAt,
+		}),
+	);
+} else if (command === "contracts") {
+	const acquisition = await readProviderAcquisition(source ?? "all");
+	const records = await convertProviderSchemas(source ?? "all", acquisition);
 	for (const provider of [...new Set(records.map((record) => record.source))])
 		await write(
 			resolve(root, `generated/${provider}/contracts.json`),
 			records.filter((record) => record.source === provider),
 		);
 	const coverage = {
+		acquisition: {
+			runId: acquisition.receipt.runId,
+			completedAt: acquisition.receipt.completedAt,
+			scope: acquisition.receipt.scope,
+		},
+		freshness: "Captured run; no new network observation during conversion",
 		sources: [...new Set(records.map((record) => record.source))],
 		contracts: records.length,
 		fields: records.reduce((n, r) => n + r.fields.length, 0),

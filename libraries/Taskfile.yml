@@ -67,7 +67,7 @@ includes:
 
 tasks:
     artifacts:fetch:
-        desc: Restore pinned inputs over HTTPS and refresh the live VNDB schema.
+        desc: Restore normative vocabulary pins and fetch current provider contracts over HTTPS.
         cmds:
             - task: schema-importer:fetch
               vars: { CLI_ARGS: all }
@@ -83,7 +83,7 @@ tasks:
               vars: { CLI_ARGS: all }
 
     artifacts:prepare:
-        desc: Restore pinned inputs and regenerate all ignored schema artifacts.
+        desc: Restore normative vocabularies, fetch current providers and generate ignored artifacts.
         cmds:
             - task: artifacts:fetch
             - task: artifacts:generate

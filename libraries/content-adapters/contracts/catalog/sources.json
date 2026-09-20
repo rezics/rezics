@@ -1,0 +1,278 @@
+[
+	{
+		"file": "bangumi-openapi.yaml",
+		"source": "bangumi",
+		"format": "openapi",
+		"url": "https://raw.githubusercontent.com/bangumi/server/HEAD/openapi/v0.yaml"
+	},
+	{
+		"file": "bangumi-avatar.yaml",
+		"source": "bangumi",
+		"format": "json_schema",
+		"url": "https://raw.githubusercontent.com/bangumi/server/HEAD/openapi/components/avatar.yaml"
+	},
+	{
+		"file": "bangumi-creator.yaml",
+		"source": "bangumi",
+		"format": "json_schema",
+		"url": "https://raw.githubusercontent.com/bangumi/server/HEAD/openapi/components/creator.yaml"
+	},
+	{
+		"file": "bangumi-episode.yaml",
+		"source": "bangumi",
+		"format": "json_schema",
+		"url": "https://raw.githubusercontent.com/bangumi/server/HEAD/openapi/components/episode.yaml"
+	},
+	{
+		"file": "bangumi-episode_collection_type.yaml",
+		"source": "bangumi",
+		"format": "json_schema",
+		"url": "https://raw.githubusercontent.com/bangumi/server/HEAD/openapi/components/episode_collection_type.yaml"
+	},
+	{
+		"file": "bangumi-error_detail.yaml",
+		"source": "bangumi",
+		"format": "json_schema",
+		"url": "https://raw.githubusercontent.com/bangumi/server/HEAD/openapi/components/error_detail.yaml"
+	},
+	{
+		"file": "bangumi-get-user-episodes-collection.yaml",
+		"source": "bangumi",
+		"format": "json_schema",
+		"url": "https://raw.githubusercontent.com/bangumi/server/HEAD/openapi/components/get-user-episodes-collection.yaml"
+	},
+	{
+		"file": "bangumi-page.yaml",
+		"source": "bangumi",
+		"format": "json_schema",
+		"url": "https://raw.githubusercontent.com/bangumi/server/HEAD/openapi/components/page.yaml"
+	},
+	{
+		"file": "bangumi-subject_cat_anime.yaml",
+		"source": "bangumi",
+		"format": "json_schema",
+		"url": "https://raw.githubusercontent.com/bangumi/server/HEAD/openapi/components/subject_cat_anime.yaml"
+	},
+	{
+		"file": "bangumi-subject_cat_book.yaml",
+		"source": "bangumi",
+		"format": "json_schema",
+		"url": "https://raw.githubusercontent.com/bangumi/server/HEAD/openapi/components/subject_cat_book.yaml"
+	},
+	{
+		"file": "bangumi-subject_cat_game.yaml",
+		"source": "bangumi",
+		"format": "json_schema",
+		"url": "https://raw.githubusercontent.com/bangumi/server/HEAD/openapi/components/subject_cat_game.yaml"
+	},
+	{
+		"file": "bangumi-subject_cat_real.yaml",
+		"source": "bangumi",
+		"format": "json_schema",
+		"url": "https://raw.githubusercontent.com/bangumi/server/HEAD/openapi/components/subject_cat_real.yaml"
+	},
+	{
+		"file": "bangumi-subject_collection_type.yaml",
+		"source": "bangumi",
+		"format": "json_schema",
+		"url": "https://raw.githubusercontent.com/bangumi/server/HEAD/openapi/components/subject_collection_type.yaml"
+	},
+	{
+		"file": "bangumi-subject_image.yaml",
+		"source": "bangumi",
+		"format": "json_schema",
+		"url": "https://raw.githubusercontent.com/bangumi/server/HEAD/openapi/components/subject_image.yaml"
+	},
+	{
+		"file": "bangumi-subject_tags.yaml",
+		"source": "bangumi",
+		"format": "json_schema",
+		"url": "https://raw.githubusercontent.com/bangumi/server/HEAD/openapi/components/subject_tags.yaml"
+	},
+	{
+		"file": "bangumi-subject_type.yaml",
+		"source": "bangumi",
+		"format": "json_schema",
+		"url": "https://raw.githubusercontent.com/bangumi/server/HEAD/openapi/components/subject_type.yaml"
+	},
+	{
+		"file": "bangumi-subject_v0.yaml",
+		"source": "bangumi",
+		"format": "json_schema",
+		"url": "https://raw.githubusercontent.com/bangumi/server/HEAD/openapi/components/subject_v0.yaml"
+	},
+	{
+		"file": "bangumi-subject_v0_slim.yaml",
+		"source": "bangumi",
+		"format": "json_schema",
+		"url": "https://raw.githubusercontent.com/bangumi/server/HEAD/openapi/components/subject_v0_slim.yaml"
+	},
+	{
+		"file": "bangumi-user.yaml",
+		"source": "bangumi",
+		"format": "json_schema",
+		"url": "https://raw.githubusercontent.com/bangumi/server/HEAD/openapi/components/user.yaml"
+	},
+	{
+		"file": "bangumi-user_group.yaml",
+		"source": "bangumi",
+		"format": "json_schema",
+		"url": "https://raw.githubusercontent.com/bangumi/server/HEAD/openapi/components/user_group.yaml"
+	},
+	{
+		"file": "bangumi-user_subject_collection.yaml",
+		"source": "bangumi",
+		"format": "json_schema",
+		"url": "https://raw.githubusercontent.com/bangumi/server/HEAD/openapi/components/user_subject_collection.yaml"
+	},
+	{
+		"file": "bangumi-user_subject_collection_modify_payload.yaml",
+		"source": "bangumi",
+		"format": "json_schema",
+		"url": "https://raw.githubusercontent.com/bangumi/server/HEAD/openapi/components/user_subject_collection_modify_payload.yaml"
+	},
+	{
+		"file": "bangumi-wiki_v0.yaml",
+		"source": "bangumi",
+		"format": "json_schema",
+		"url": "https://raw.githubusercontent.com/bangumi/server/HEAD/openapi/components/wiki_v0.yaml"
+	},
+	{
+		"file": "vndb-schema.json",
+		"source": "vndb",
+		"format": "vndb",
+		"url": "https://api.vndb.org/kana/schema"
+	},
+	{
+		"file": "musicbrainz-tables.sql",
+		"source": "musicbrainz",
+		"format": "musicbrainz_sql",
+		"url": "https://raw.githubusercontent.com/metabrainz/musicbrainz-server/HEAD/admin/sql/CreateTables.sql"
+	},
+	{
+		"file": "bangumi-archive.md",
+		"source": "bangumi",
+		"format": "archive",
+		"url": "https://raw.githubusercontent.com/bangumi/Archive/HEAD/README.md"
+	},
+	{
+		"file": "bangumi-common-subject_relations.yml",
+		"source": "bangumi",
+		"format": "vocabulary",
+		"url": "https://raw.githubusercontent.com/bangumi/common/HEAD/subject_relations.yml"
+	},
+	{
+		"file": "bangumi-common-subject_staffs.yml",
+		"source": "bangumi",
+		"format": "vocabulary",
+		"url": "https://raw.githubusercontent.com/bangumi/common/HEAD/subject_staffs.yml"
+	},
+	{
+		"file": "bangumi-common-person_relations.yml",
+		"source": "bangumi",
+		"format": "vocabulary",
+		"url": "https://raw.githubusercontent.com/bangumi/common/HEAD/person_relations.yml"
+	},
+	{
+		"file": "bangumi-common-subject_platforms.yml",
+		"source": "bangumi",
+		"format": "vocabulary",
+		"url": "https://raw.githubusercontent.com/bangumi/common/HEAD/subject_platforms.yml"
+	},
+	{
+		"file": "bangumi-common-wiki_template.yml",
+		"source": "bangumi",
+		"format": "vocabulary",
+		"url": "https://raw.githubusercontent.com/bangumi/common/HEAD/wiki_template.yml"
+	},
+	{
+		"file": "openlibrary-work.type",
+		"source": "openlibrary",
+		"format": "openlibrary_type",
+		"url": "https://raw.githubusercontent.com/internetarchive/openlibrary/HEAD/openlibrary/plugins/openlibrary/types/work.type"
+	},
+	{
+		"file": "openlibrary-edition.type",
+		"source": "openlibrary",
+		"format": "openlibrary_type",
+		"url": "https://raw.githubusercontent.com/internetarchive/openlibrary/HEAD/openlibrary/plugins/openlibrary/types/edition.type"
+	},
+	{
+		"file": "openlibrary-author.type",
+		"source": "openlibrary",
+		"format": "openlibrary_type",
+		"url": "https://raw.githubusercontent.com/internetarchive/openlibrary/HEAD/openlibrary/plugins/openlibrary/types/author.type"
+	},
+	{
+		"file": "openlibrary-author_role.type",
+		"source": "openlibrary",
+		"format": "openlibrary_type",
+		"url": "https://raw.githubusercontent.com/internetarchive/openlibrary/HEAD/openlibrary/plugins/openlibrary/types/author_role.type"
+	},
+	{
+		"file": "openlibrary-toc_item.type",
+		"source": "openlibrary",
+		"format": "openlibrary_type",
+		"url": "https://raw.githubusercontent.com/internetarchive/openlibrary/HEAD/openlibrary/plugins/openlibrary/types/toc_item.type"
+	},
+	{
+		"file": "openlibrary-translated_string.type",
+		"source": "openlibrary",
+		"format": "openlibrary_type",
+		"url": "https://raw.githubusercontent.com/internetarchive/openlibrary/HEAD/openlibrary/plugins/openlibrary/types/translated_string.type"
+	},
+	{
+		"file": "openlibrary-link.type",
+		"source": "openlibrary",
+		"format": "openlibrary_type",
+		"url": "https://raw.githubusercontent.com/internetarchive/openlibrary/HEAD/openlibrary/plugins/openlibrary/types/link.type"
+	},
+	{
+		"file": "openlibrary-language.type",
+		"source": "openlibrary",
+		"format": "openlibrary_type",
+		"url": "https://raw.githubusercontent.com/internetarchive/openlibrary/HEAD/openlibrary/plugins/openlibrary/types/language.type"
+	},
+	{
+		"file": "openlibrary-series.type",
+		"source": "openlibrary",
+		"format": "openlibrary_type",
+		"url": "https://raw.githubusercontent.com/internetarchive/openlibrary/HEAD/openlibrary/plugins/openlibrary/types/series.type"
+	},
+	{
+		"file": "openlibrary-volume.type",
+		"source": "openlibrary",
+		"format": "openlibrary_type",
+		"url": "https://raw.githubusercontent.com/internetarchive/openlibrary/HEAD/openlibrary/plugins/openlibrary/types/volume.type"
+	},
+	{
+		"file": "openlibrary-subject.type",
+		"source": "openlibrary",
+		"format": "openlibrary_type",
+		"url": "https://raw.githubusercontent.com/internetarchive/openlibrary/HEAD/openlibrary/plugins/openlibrary/types/subject.type"
+	},
+	{
+		"file": "openlibrary-place.type",
+		"source": "openlibrary",
+		"format": "openlibrary_type",
+		"url": "https://raw.githubusercontent.com/internetarchive/openlibrary/HEAD/openlibrary/plugins/openlibrary/types/place.type"
+	},
+	{
+		"file": "openlibrary-redirect.type",
+		"source": "openlibrary",
+		"format": "openlibrary_type",
+		"url": "https://raw.githubusercontent.com/internetarchive/openlibrary/HEAD/openlibrary/plugins/openlibrary/types/redirect.type"
+	},
+	{
+		"file": "musicbrainz-createfkconstraints.sql",
+		"source": "musicbrainz",
+		"format": "musicbrainz_foreign_keys",
+		"url": "https://raw.githubusercontent.com/metabrainz/musicbrainz-server/HEAD/admin/sql/CreateFKConstraints.sql"
+	},
+	{
+		"file": "musicbrainz-createprimarykeys.sql",
+		"source": "musicbrainz",
+		"format": "musicbrainz_primary_keys",
+		"url": "https://raw.githubusercontent.com/metabrainz/musicbrainz-server/HEAD/admin/sql/CreatePrimaryKeys.sql"
+	}
+]

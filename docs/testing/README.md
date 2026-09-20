@@ -93,7 +93,7 @@ Post content, and selects current external-site validation. Recipe, BOOK31-BOOK3
 COMP25-COMP27 and LIVE01-LIVE07 are prospective acceptance cases, not runtime passes.
 
 The existing 15 documentation/design regressions pass. The maintained-document
-check passes for 209 Markdown files and 1,226 local links. After regenerating the
+check passes for 209 Markdown files and their local links. After regenerating the
 owning design artifacts, strict tracked-input and exact generated-output checks
 pass; the inventory remains 249 schema/SQL modules, 42 API owners and 132 existing
 cross-domain database scenarios. No product, live-source or capacity gate is

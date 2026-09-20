@@ -3,7 +3,7 @@ import {
 	coverageEvidenceHash,
 	evaluateSourceCoverage,
 	parseCoverageInventory,
-	sourceCoveragePin,
+	sourceCoverageInventory,
 	SourceCoverageManifestSchema,
 } from "./catalog-source-coverage";
 import { checkCatalogSourceCoverage } from "./check-catalog-source-coverage";
@@ -44,9 +44,20 @@ const gap = {
 const sourceOnly = { ...identity, path: "staff.role", reason, disposition: "source-only" };
 const manifest = (entries: unknown[]) =>
 	SourceCoverageManifestSchema.parse({
-		format: "rezics.source-coverage.v1",
-		inventory: sourceCoveragePin(fields, artifacts),
-		entries,
+		format: "rezics.source-coverage.v2",
+		entries: entries.map((entry) =>
+			Object.assign(
+				{
+					sourceShape: {
+						shape: "documented_value",
+						reference: null,
+						repeated: null,
+						nullable: null,
+					},
+				},
+				entry,
+			),
+		),
 	});
 
 describe("reviewed source coverage gate", () => {
@@ -83,23 +94,35 @@ describe("reviewed source coverage gate", () => {
 
 	it("rejects wildcard and unknown entries instead of prefix covering descendants", () => {
 		const result = evaluateSourceCoverage(fields, artifacts, manifest([{ ...gap, path: "*" }]));
-		expect(result.issues).toContain('Unknown source field: ["vndb","/vn","*"]');
+		expect(result.issues).toContain('Removed or unknown source field: ["vndb","/vn","*"]');
 		expect(result.missing).toHaveLength(2);
 	});
 
-	it("detects field-shape, artifact and declaration-count drift independently", () => {
-		const pinned = manifest([gap, sourceOnly]);
-		pinned.inventory.declarations.vndb = 1;
+	it("accepts fresh artifact bytes but diagnoses changed, new and removed fields", () => {
+		const reviewed = manifest([gap, sourceOnly]);
+		const refreshed = evaluateSourceCoverage(
+			fields,
+			[{ source: "vndb", sha256: "b".repeat(64) }],
+			reviewed,
+		);
+		expect(refreshed.issues).toEqual([]);
+		expect(refreshed.qualified).toBe(false); // The native gap remains independently visible.
 		const changed = fields.map((field) => ({ ...field, nullable: true }));
-		const result = evaluateSourceCoverage(changed, [], pinned);
-		expect(result.issues).toEqual([
-			"Inventory field hash drift",
-			"Artifact pin hash drift",
-			"Declaration count drift: vndb",
-		]);
+		const result = evaluateSourceCoverage(changed, [], reviewed);
+		expect(result.issues).toHaveLength(2);
+		expect(result.issues.every((issue) => issue.startsWith("Source field shape drift:"))).toBe(
+			true,
+		);
 		expect(result.qualified).toBe(false);
-		expect(sourceCoveragePin([...fields].reverse(), artifacts)).toEqual(
-			sourceCoveragePin(fields, artifacts),
+		const added = parseCoverageInventory([...fields, { ...fields[0], path: "new_field" }]);
+		expect(evaluateSourceCoverage(added, artifacts, reviewed).missing).toContain(
+			'["vndb","/vn","new_field"]',
+		);
+		expect(evaluateSourceCoverage(fields.slice(0, 1), artifacts, reviewed).issues).toContain(
+			'Removed or unknown source field: ["vndb","/vn","staff.role"]',
+		);
+		expect(sourceCoverageInventory([...fields].reverse(), artifacts)).toEqual(
+			sourceCoverageInventory(fields, artifacts),
 		);
 	});
 
@@ -269,16 +292,14 @@ describe("reviewed source coverage gate", () => {
 		expect(absent.issues).toContain('Missing disposition dependency: ["vndb","/vn","staff.role"]');
 	});
 
-	it("keeps committed four-source coverage unqualified with explicit known gaps", async () => {
+	it("keeps captured four-source coverage unqualified with explicit known gaps", async () => {
 		const result = await checkCatalogSourceCoverage();
-		expect(result.inventory.declarations).toEqual({
-			bangumi: 5644,
-			vndb: 214,
-			musicbrainz: 2437,
-			openlibrary: 117,
-		});
+		for (const count of Object.values(result.inventory.declarations))
+			expect(count).toBeGreaterThan(0);
+		expect(result.acquisition.scope).toBe("all");
+		expect(result.acquisition.runId).toBeTruthy();
 		expect(result.issues).toEqual([]);
-		expect(result.missing.length).toBeGreaterThan(8_000);
+		expect(result.missing.length).toBeGreaterThan(0);
 		expect(result.nativeGaps.length).toBeGreaterThan(0);
 		expect(result.nativeEvidenceRecorded).toBe(0);
 		expect(result.nativeDenominator.complete).toBe(false);

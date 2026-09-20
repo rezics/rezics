@@ -1,15 +1,5 @@
 {
-	"format": "rezics.source-coverage.v1",
-	"inventory": {
-		"fieldsSha256": "d0959859bb11f507a8a699fe3c3d2a679632db9597f40fadf788231b3125f2ef",
-		"artifactsSha256": "33b5baa5a192a8c9a9f62c46a9e4567f9f1bacb9b68bdf8a7eed62fc066865c7",
-		"declarations": {
-			"bangumi": 5644,
-			"vndb": 214,
-			"musicbrainz": 2437,
-			"openlibrary": 117
-		}
-	},
+	"format": "rezics.source-coverage.v2",
 	"entries": [
 		{
 			"source": "bangumi",
@@ -21,6 +11,12 @@
 				"status": "gap",
 				"requirement": "Scoped source-key binding to a checked owner-local catalog identity.",
 				"gap": "Final source-key routing, binding uniqueness, canonical query and semantic export evidence are not qualified."
+			},
+			"sourceShape": {
+				"shape": "integer",
+				"reference": null,
+				"repeated": false,
+				"nullable": false
 			}
 		},
 		{
@@ -33,6 +29,12 @@
 				"status": "gap",
 				"requirement": "Owner-local named forms with explicit source evidence and supported editing/query/export.",
 				"gap": "Selected importer fixtures do not qualify the final native named-form contract or all downstream consumers."
+			},
+			"sourceShape": {
+				"shape": "string",
+				"reference": null,
+				"repeated": false,
+				"nullable": false
 			}
 		},
 		{
@@ -45,6 +47,12 @@
 				"status": "gap",
 				"requirement": "Preserve ordered entries and map each elected semantic field to fixed native structures or governed typed assertions.",
 				"gap": "Generic value-node preservation is insufficient; nested declarations and actual infobox field semantics each need independent dispositions and native query/export fixtures."
+			},
+			"sourceShape": {
+				"shape": "reference",
+				"reference": "./wiki_v0.yaml",
+				"repeated": false,
+				"nullable": false
 			}
 		},
 		{
@@ -57,6 +65,12 @@
 				"status": "gap",
 				"requirement": "Immutable source revision evidence linked to exact native adopted revisions and restoration behavior.",
 				"gap": "A stored historical wiki string alone does not prove native revision adoption, historical queries or restore semantics."
+			},
+			"sourceShape": {
+				"shape": "string",
+				"reference": null,
+				"repeated": false,
+				"nullable": false
 			}
 		},
 		{
@@ -64,14 +78,26 @@
 			"contract": "component:bangumi-subject_v0.yaml",
 			"path": "rating.rank",
 			"disposition": "source-only",
-			"reason": "This is Bangumi's ranking at observation time, not an independent REZICS rank or catalog identity fact. Preserve with provider and snapshot scope; never recompute it from REZICS ratings. This disposition does not certify observation retention or export implementation."
+			"reason": "This is Bangumi's ranking at observation time, not an independent REZICS rank or catalog identity fact. Preserve with provider and snapshot scope; never recompute it from REZICS ratings. This disposition does not certify observation retention or export implementation.",
+			"sourceShape": {
+				"shape": "integer",
+				"reference": null,
+				"repeated": false,
+				"nullable": false
+			}
 		},
 		{
 			"source": "bangumi",
 			"contract": "component:bangumi-subject_v0.yaml",
 			"path": "locked",
 			"disposition": "source-only",
-			"reason": "Bangumi's source-edit lock is provider workflow metadata. It can inform ingestion evidence but cannot grant or deny REZICS authoring permissions. This disposition is a scope decision, not a claim that lock handling is implemented."
+			"reason": "Bangumi's source-edit lock is provider workflow metadata. It can inform ingestion evidence but cannot grant or deny REZICS authoring permissions. This disposition is a scope decision, not a claim that lock handling is implemented.",
+			"sourceShape": {
+				"shape": "boolean",
+				"reference": null,
+				"repeated": false,
+				"nullable": false
+			}
 		},
 		{
 			"source": "vndb",
@@ -83,6 +109,12 @@
 				"status": "gap",
 				"requirement": "Represent the referent, variant and credit context implied by each scoped source entry using provider-independent native semantics.",
 				"gap": "The existing software_edition slice is provisional; exact edition child paths and cross-provider/source-free semantics remain unqualified."
+			},
+			"sourceShape": {
+				"shape": "selectable_object",
+				"reference": null,
+				"repeated": null,
+				"nullable": null
 			}
 		},
 		{
@@ -95,6 +127,12 @@
 				"status": "gap",
 				"requirement": "Resolve credit participation to its checked source-scoped context and elected native referent.",
 				"gap": "No final native owner/field/write/query/export fixture chain is pinned for this contextual identity."
+			},
+			"sourceShape": {
+				"shape": "documented_value",
+				"reference": null,
+				"repeated": null,
+				"nullable": null
 			}
 		},
 		{
@@ -107,6 +145,12 @@
 				"status": "gap",
 				"requirement": "A versioned credit-role definition and qualified participation on the correct native object.",
 				"gap": "Complete role vocabulary, alias resolution, context, canonical queries and export evidence remain unqualified."
+			},
+			"sourceShape": {
+				"shape": "documented_value",
+				"reference": null,
+				"repeated": null,
+				"nullable": null
 			}
 		},
 		{
@@ -119,6 +163,12 @@
 				"status": "gap",
 				"requirement": "Scoped native availability and language roles using the pinned source-to-BCP-47 mapping.",
 				"gap": "Nested language roles, qualifiers, distribution scope and native query/export roundtrips still need exact dispositions and evidence."
+			},
+			"sourceShape": {
+				"shape": "selectable_object",
+				"reference": null,
+				"repeated": null,
+				"nullable": null
 			}
 		},
 		{
@@ -126,21 +176,39 @@
 			"contract": "/ulist",
 			"path": "notes",
 			"disposition": "out-of-scope",
-			"reason": "Personal list notes are user-owned activity, potentially private. Public catalog conformance neither imports them nor supplies consent for a personal-library import product. Other /ulist paths remain individually unreviewed."
+			"reason": "Personal list notes are user-owned activity, potentially private. Public catalog conformance neither imports them nor supplies consent for a personal-library import product. Other /ulist paths remain individually unreviewed.",
+			"sourceShape": {
+				"shape": "documented_value",
+				"reference": null,
+				"repeated": null,
+				"nullable": null
+			}
 		},
 		{
 			"source": "vndb",
 			"contract": "/ulist",
 			"path": "vote",
 			"disposition": "out-of-scope",
-			"reason": "An individual user's vote is user activity rather than a public catalog fact. A consented personal-history importer would require a separate contract and authorization; this scope decision excludes only this exact path."
+			"reason": "An individual user's vote is user activity rather than a public catalog fact. A consented personal-history importer would require a separate contract and authorization; this scope decision excludes only this exact path.",
+			"sourceShape": {
+				"shape": "documented_value",
+				"reference": null,
+				"repeated": null,
+				"nullable": null
+			}
 		},
 		{
 			"source": "musicbrainz",
 			"contract": "artist",
 			"path": "id",
 			"disposition": "source-only",
-			"reason": "This source database surrogate is needed to resolve MusicBrainz dump foreign keys, but must not be installed as a REZICS person/organization primary key. Resolution still requires the separate stable source identity and native binding contract."
+			"reason": "This source database surrogate is needed to resolve MusicBrainz dump foreign keys, but must not be installed as a REZICS person/organization primary key. Resolution still requires the separate stable source identity and native binding contract.",
+			"sourceShape": {
+				"shape": "SERIAL",
+				"reference": null,
+				"repeated": false,
+				"nullable": false
+			}
 		},
 		{
 			"source": "musicbrainz",
@@ -152,6 +220,12 @@
 				"status": "gap",
 				"requirement": "A source binding to the selected person or organization owner with checked type and merge behavior.",
 				"gap": "Final owner alternatives, source identifier uniqueness and edit/query/export evidence are not pinned."
+			},
+			"sourceShape": {
+				"shape": "UUID",
+				"reference": null,
+				"repeated": false,
+				"nullable": false
 			}
 		},
 		{
@@ -164,6 +238,12 @@
 				"status": "gap",
 				"requirement": "Person/group named-form semantics distinct from exact credited-as participation names.",
 				"gap": "Complete alias, sorting, writing-system and credit-context native evidence has not been qualified."
+			},
+			"sourceShape": {
+				"shape": "VARCHAR",
+				"reference": null,
+				"repeated": false,
+				"nullable": false
 			}
 		},
 		{
@@ -176,6 +256,12 @@
 				"status": "gap",
 				"requirement": "Native ordered credit composition with exact credited spellings, join phrases and constituent identities.",
 				"gap": "Existing streamed credit fixtures do not qualify all relationships, names, canonical edits and semantic export contracts."
+			},
+			"sourceShape": {
+				"shape": "VARCHAR",
+				"reference": null,
+				"repeated": false,
+				"nullable": false
 			}
 		},
 		{
@@ -183,14 +269,26 @@
 			"contract": "editor",
 			"path": "email",
 			"disposition": "out-of-scope",
-			"reason": "An upstream editor email is account data, outside public catalog conformance. Never import it into REZICS Auth or preserve it in a catalog raw-payload fallback."
+			"reason": "An upstream editor email is account data, outside public catalog conformance. Never import it into REZICS Auth or preserve it in a catalog raw-payload fallback.",
+			"sourceShape": {
+				"shape": "VARCHAR(64)",
+				"reference": null,
+				"repeated": false,
+				"nullable": true
+			}
 		},
 		{
 			"source": "musicbrainz",
 			"contract": "editor",
 			"path": "password",
 			"disposition": "out-of-scope",
-			"reason": "An upstream credential is outside catalog semantics and must not enter REZICS Auth or catalog observation storage. Its presence in CREATE TABLE inventory is not permission to ingest it."
+			"reason": "An upstream credential is outside catalog semantics and must not enter REZICS Auth or catalog observation storage. Its presence in CREATE TABLE inventory is not permission to ingest it.",
+			"sourceShape": {
+				"shape": "VARCHAR(128)",
+				"reference": null,
+				"repeated": false,
+				"nullable": false
+			}
 		},
 		{
 			"source": "openlibrary",
@@ -202,6 +300,12 @@
 				"status": "gap",
 				"requirement": "Native book-work contributions with checked people/organization references, order and roles.",
 				"gap": "The selected work import does not qualify every author-role field, native edit, query or export behavior."
+			},
+			"sourceShape": {
+				"shape": "/type/author_role",
+				"reference": "/type/author_role",
+				"repeated": true,
+				"nullable": true
 			}
 		},
 		{
@@ -214,6 +318,12 @@
 				"status": "gap",
 				"requirement": "Validated publication identifiers on the elected native publication/distribution referent with ambiguity handling.",
 				"gap": "Duplicate or malformed source identifiers and complete native query/export evidence are not qualified."
+			},
+			"sourceShape": {
+				"shape": "/type/string",
+				"reference": "/type/string",
+				"repeated": true,
+				"nullable": true
 			}
 		},
 		{
@@ -226,6 +336,12 @@
 				"status": "gap",
 				"requirement": "Native publication language roles linked to reviewed source language vocabulary mappings.",
 				"gap": "Source vocabulary resolution, multilingual publication fixtures and native query/export coverage remain unqualified."
+			},
+			"sourceShape": {
+				"shape": "/type/language",
+				"reference": "/type/language",
+				"repeated": true,
+				"nullable": true
 			}
 		},
 		{
@@ -238,6 +354,12 @@
 				"status": "gap",
 				"requirement": "Evidence-scoped original-language assertions separate from native publication consumption languages.",
 				"gap": "Multiple origin languages, disputed evidence, canonical edits and semantic roundtrip evidence remain unqualified."
+			},
+			"sourceShape": {
+				"shape": "/type/language",
+				"reference": "/type/language",
+				"repeated": true,
+				"nullable": true
 			}
 		}
 	]

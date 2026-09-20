@@ -162,13 +162,26 @@ tasks:
         cmds:
             - yarn exec tsx scripts/inventory-database.ts {{.CLI_ARGS}}
 
+    catalog:sources:typecheck:
+        desc: Type-check the source acquisition/inventory/coverage scripts and their regression contracts.
+        cmds:
+            - yarn exec tsc --noEmit -p tsconfig.source-contracts.json
+
     catalog:sources:inventory:
-        desc: Verify or regenerate the catalog declaration inventory using a cache under repository .temp.
+        desc: Generate ignored declaration inventory from a captured run; --fetch gets current inputs.
         cmds:
             - yarn exec tsx scripts/generate-catalog-source-inventory.ts {{.CLI_ARGS}}
 
+    catalog:sources:live:
+        desc: Fetch current provider contracts, generate declarations and check native coverage; --inspect reports pending mappings.
+        cmds:
+            - task: catalog:sources:inventory
+              vars: { CLI_ARGS: --fetch }
+            - task: catalog:sources:coverage
+              vars: { CLI_ARGS: "{{.CLI_ARGS}}" }
+
     catalog:sources:coverage:
-        desc: Check pinned source dispositions and evidence; --inspect reports unresolved coverage without qualifying it.
+        desc: Check current field shapes and authored dispositions; --inspect reports unresolved coverage.
         cmds:
             - yarn exec tsx scripts/check-catalog-source-coverage.ts {{.CLI_ARGS}}
 

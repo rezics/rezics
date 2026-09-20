@@ -33,8 +33,7 @@ Drizzle modules, model reports and selected inventories are intentionally ignore
 The separate OAuth generator retains its reviewed protocol snapshot in Git.
 Track source pins, authored models and emitters. A fresh checkout uses
 `task artifacts:prepare`; later offline regeneration uses `task artifacts:generate`.
-Provider preparation also refreshes the live VNDB contract under its own validation
-policy, so it is not identical to restoring an immutable vocabulary artifact.
+The 2026-09-20 provider preparation revision fetches current contracts for all elected providers into ignored run storage, with fresh acquisition and separate field-shape/coverage diagnostics. It does not restore immutable provider-content pins; normative vocabulary preparation remains separate.
 
 The generated schema is consumed by main. Other native/operational declarations
 remain hand-authored. Migration SQL and the completed installation baseline stay
