@@ -335,10 +335,12 @@ enforcement, Realm authority, restoration or 500M/3B throughput.
 
 `task services-main:db:account-participation:check` runs
 [check-account-participation.ts](../../services/main/scripts/check-account-participation.ts).
-The [pinned run](database/account-participation-evidence.json) passes 68 assertions,
-including five signed-session API requests. Its first pre-fix case admitted a
-banned recipient to an organization. Membership changes now apply the shared
-account write policy to each operator and, at acceptance, the captured inviter.
+The [native authority rerun](database/account-native-participation-evidence.json)
+passes 69 assertions, including five signed-session API requests. Native membership
+uses stored session proofs and explicit represented subjects; the retained Self
+binding does not authorize it. The earlier [68-assertion run](database/account-participation-evidence.json)
+applies to its old membership contract. Current native admission checks account
+write eligibility for each operator and, at acceptance, the captured inviter.
 
 Cases cover ban/suspension denial for invite, accept, decline, cancel, remove and
 leave; read-only inbox/roster access; silence allowing membership while blocking
@@ -349,9 +351,10 @@ holds its account fence until commit and survives later enforcement. Every race
 identifies the exact expected blocker; later contributions are denied.
 
 The HTTP sequence issues an enforcement through governance, checks the declared
-`AccountRestricted` response and permitted private inbox read, reverses the
-produced enforcement ID, and accepts the original pending invitation. Generated
-OpenAPI and all three SDKs carry the membership error union. Scenario transactions
+native `AccessDenied` response and permitted subject inbox read, reverses the
+produced enforcement ID, and accepts the original pending invitation with explicit
+consent and membership-version preconditions. Native HTTP selection remains fixed
+to the invited Entity. Scenario transactions
 roll back; race/API actors and first-party rule setup remain only in the
 explicitly disposable database. No external invitation or message is delivered.
 
@@ -362,8 +365,10 @@ preserving Favorites revisions. The pre-fix service accepted an update during
 an active ban. Favorites now checks current account state after its account and
 binding locks and applies the account write policy to mutations. Independent
 connections exercise enforcement-first and Favorite-first commit orders without
-losing a previously committed entry. Account-state restoration also re-enables
-membership acceptance when the original invitation's other authority remains valid.
+losing a previously committed entry. Account suspension revokes its session; the
+fixture rejects that exact old proof both before and after account restoration.
+A newly authenticated session can accept when the invitation and representation
+remain valid. Restoring sign-in state never restores a revoked credential.
 
 This qualifies the tested account-state and enforcement paths, separate from
 binding recovery, Realm membership and whole restoration-frontier coverage. The membership owner records added query demand

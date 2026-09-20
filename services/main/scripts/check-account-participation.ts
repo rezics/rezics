@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
@@ -23,9 +23,20 @@ import {
 	realmRuleRevision,
 	accountEnforcement,
 	accountEnforcementAction,
-	organizationMembership,
-	organizationMembershipInvitation,
 } from "../src/services/database/schema";
+import { accessMembership } from "@rezics/schema/postgres/access/access-membership";
+import { organizationEnrollmentInvitation } from "@rezics/schema/postgres/access/organization-membership";
+import { CredentialAuthorityDenied } from "../src/services/auth/credential-authority";
+import { PrincipalRequestContext } from "../src/services/auth/principal-context";
+import { createFixtureSessionContext } from "./native-enrollment-fixture";
+import {
+	allocateAccessScope,
+	allocateAccessSubject,
+} from "../src/services/authorization/identities";
+import { allocateReferenceValue } from "../src/services/units/reference-value";
+import { applyAccessRepresentationCommand } from "../src/services/authorization/representations";
+import { ManagementAuthorityDenied } from "../src/services/authorization/management-authority";
+import type { RequestedAuthoritySelection } from "@rezics/access";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import { createGovernanceDecision } from "../src/services/governance/decision-service";
 import { Authorization } from "../src/services/authorization";
@@ -73,8 +84,9 @@ function check(actual: unknown, expected: unknown, message: string) {
 async function rejected(
 	tx: DatabaseTransaction,
 	work: (nested: DatabaseTransaction) => Promise<unknown>,
+	expected: typeof AccountRestricted | typeof ManagementAuthorityDenied = AccountRestricted,
 ) {
-	await assert.rejects(tx.transaction(work), AccountRestricted);
+	await assert.rejects(tx.transaction(work), expected);
 	checks++;
 }
 async function favoriteTarget(tx: DatabaseTransaction) {
@@ -97,7 +109,48 @@ async function actor(tx: DatabaseTransaction, name: string) {
 		actingEntityId: self.id,
 		authorizationRevision: self.authorizationRevision,
 	};
-	return { account, self, authority };
+	const direct = await createFixtureSessionContext(tx, account.id);
+	const principalSubjectId = await allocateAccessSubject(tx, { kind: "principal", id: account.id });
+	const subjectId = await allocateAccessSubject(tx, { kind: "entity", id: self.id });
+	const scopeId = await allocateAccessScope(tx, {
+		kind: "resource",
+		referenceValueId: await allocateReferenceValue(tx, { owner: "entity", id: self.id }),
+	});
+	// Privileged fixture setup: native membership authority is explicit, never derived from the Self binding.
+	const representation = await applyAccessRepresentationCommand(
+		tx,
+		{
+			operation: "create",
+			entityId: self.id,
+			grantId: randomUUID(),
+			expectedVersion: 0,
+			operationId: randomUUID(),
+			operatorAuthUserId: account.id,
+			authoritySubjectId: principalSubjectId,
+			recipient: { kind: "subject", subjectId: principalSubjectId },
+			parent: null,
+			terms: {
+				target: { kind: "scope", scopeId, path: ["memberships"] },
+				validFrom: new Date(),
+				validUntil: null,
+				canRedelegate: false,
+				requireFreshSession: false,
+				permissions: [{ family: "management", key: "access.membership.participate" }],
+				recipientEligibility: null,
+			},
+		},
+		sql<boolean>`true`,
+	);
+	const context = new PrincipalRequestContext(
+		account.id,
+		{
+			mode: "represented",
+			entityId: self.id,
+			representations: [{ id: representation.grantId, revision: representation.termsRevision }],
+		},
+		direct.credentialProof(),
+	);
+	return { account, self, authority, context, subjectId };
 }
 type Actor = Awaited<ReturnType<typeof actor>>;
 async function organization(tx: DatabaseTransaction, owner: Actor) {
@@ -107,14 +160,17 @@ async function organization(tx: DatabaseTransaction, owner: Actor) {
 			language: "en",
 		}),
 	);
-	const grant = created.grants.find((g) => g.capability === "entity.membership");
-	assert.ok(grant);
-	const authority: ParticipationAuthority = {
-		...owner.authority,
-		actingEntityId: created.entityId,
-		grant: { id: grant.id, revision: grant.revision },
-	};
-	return { ...created, authority };
+	assert.ok(created.native);
+	const context = new PrincipalRequestContext(
+		owner.account.id,
+		{
+			mode: "represented",
+			entityId: created.entityId,
+			representations: [created.native.representation],
+		},
+		owner.context.credentialProof(),
+	);
+	return { ...created, scopeId: created.native.scopeId, context };
 }
 const rule = await database.transaction(async (tx) => {
 	const operator = await actor(tx, "Account fixture rule operator");
@@ -243,63 +299,131 @@ try {
 				owner = await actor(tx, "Enforcement inviter"),
 				guest = await actor(tx, "Enforcement recipient");
 			const org = await organization(tx, owner);
-			const pending = await inviteOrganizationMember(tx, org.authority, org.entityId, {
-				recipientEntityId: guest.self.id,
+			const pending = await inviteOrganizationMember(tx, org.context, org.entityId, {
+				operationId: randomUUID(),
+				recipient: { kind: "entity", entityId: guest.self.id },
 			});
+			assert.ok(pending.invitationId);
 			const ban = await enforce(tx, operator, guest, "ban");
-			await rejected(tx, (nested) =>
-				acceptMembershipInvitation(nested, guest.authority, pending.id, 1),
+			await rejected(
+				tx,
+				(nested) =>
+					acceptMembershipInvitation(nested, guest.context, pending.invitationId!, {
+						operationId: randomUUID(),
+						expectedRevision: 1,
+						expectedMembershipVersion: 0,
+						consent: true,
+					}),
+				ManagementAuthorityDenied,
 			);
-			await rejected(tx, (nested) =>
-				declineMembershipInvitation(nested, guest.authority, pending.id, 1),
+			await rejected(
+				tx,
+				(nested) =>
+					declineMembershipInvitation(nested, guest.context, pending.invitationId!, {
+						operationId: randomUUID(),
+						expectedRevision: 1,
+					}),
+				ManagementAuthorityDenied,
 			);
 			await rejected(tx, (nested) => contribute(nested, guest));
 			check(
-				(await listOwnMembershipInvitations(tx, guest.authority, {})).items.some(
-					(i) => i.id === pending.id,
+				(await listOwnMembershipInvitations(tx, guest.context, {})).items.some(
+					(i) => i.id === pending.invitationId!,
 				),
 				true,
 				"an enforced account can still read its private inbox",
 			);
 			await revoke(tx, operator, ban);
 			check(
-				(await acceptMembershipInvitation(tx, guest.authority, pending.id, 1)).state,
+				(
+					await acceptMembershipInvitation(tx, guest.context, pending.invitationId!, {
+						operationId: randomUUID(),
+						expectedRevision: 1,
+						expectedMembershipVersion: 0,
+						consent: true,
+					})
+				).state,
 				"accepted",
 				"revocation restores membership admission",
 			);
 			const suspension = await enforce(tx, operator, owner, "suspension");
 			const other = await actor(tx, "Other enforcement recipient");
-			await rejected(tx, (nested) =>
-				inviteOrganizationMember(nested, org.authority, org.entityId, {
-					recipientEntityId: other.self.id,
-				}),
+			await rejected(
+				tx,
+				(nested) =>
+					inviteOrganizationMember(nested, org.context, org.entityId, {
+						operationId: randomUUID(),
+						recipient: { kind: "entity", entityId: other.self.id },
+					}),
+				ManagementAuthorityDenied,
 			);
-			await rejected(tx, (nested) =>
-				removeOrganizationMember(nested, org.authority, org.entityId, guest.self.id, 1),
+			await rejected(
+				tx,
+				(nested) =>
+					removeOrganizationMember(nested, org.context, org.entityId, {
+						operationId: randomUUID(),
+						expectedMembershipVersion: 1,
+						recipient: { kind: "entity", entityId: guest.self.id },
+					}),
+				ManagementAuthorityDenied,
 			);
 			check(
-				(await listOrganizationMembers(tx, org.authority, org.entityId, {})).items.length,
+				(await listOrganizationMembers(tx, org.context, org.entityId, {})).items.length,
 				1,
 				"enforcement does not turn roster read authority into a write grant",
 			);
 			await revoke(tx, operator, suspension);
-			const otherPending = await inviteOrganizationMember(tx, org.authority, org.entityId, {
-				recipientEntityId: other.self.id,
+			const otherPending = await inviteOrganizationMember(tx, org.context, org.entityId, {
+				operationId: randomUUID(),
+				recipient: { kind: "entity", entityId: other.self.id },
 			});
+			assert.ok(otherPending.invitationId);
 			const bannedManager = await enforce(tx, operator, owner, "ban");
-			await rejected(tx, (nested) =>
-				cancelMembershipInvitation(nested, org.authority, org.entityId, otherPending.id, 1),
+			await rejected(
+				tx,
+				(nested) =>
+					cancelMembershipInvitation(
+						nested,
+						org.context,
+						org.entityId,
+						otherPending.invitationId!,
+						{ operationId: randomUUID(), expectedRevision: 1 },
+					),
+				ManagementAuthorityDenied,
 			);
-			await rejected(tx, (nested) =>
-				acceptMembershipInvitation(nested, other.authority, otherPending.id, 1),
+			await rejected(
+				tx,
+				(nested) =>
+					acceptMembershipInvitation(nested, other.context, otherPending.invitationId!, {
+						operationId: randomUUID(),
+						expectedRevision: 1,
+						expectedMembershipVersion: 0,
+						consent: true,
+					}),
+				ManagementAuthorityDenied,
 			);
 			await revoke(tx, operator, bannedManager);
 			const guestBan = await enforce(tx, operator, guest, "ban");
-			await rejected(tx, (nested) => leaveOrganization(nested, guest.authority, org.entityId, 1));
+			await rejected(
+				tx,
+				(nested) =>
+					leaveOrganization(nested, guest.context, org.entityId, {
+						operationId: randomUUID(),
+						expectedMembershipVersion: 1,
+					}),
+				ManagementAuthorityDenied,
+			);
 			await revoke(tx, operator, guestBan);
 			const silence = await enforce(tx, operator, other, "silence");
 			check(
-				(await acceptMembershipInvitation(tx, other.authority, otherPending.id, 1)).state,
+				(
+					await acceptMembershipInvitation(tx, other.context, otherPending.invitationId!, {
+						operationId: randomUUID(),
+						expectedRevision: 1,
+						expectedMembershipVersion: 0,
+						consent: true,
+					})
+				).state,
 				"accepted",
 				"silence permits membership writes",
 			);
@@ -364,9 +488,11 @@ try {
 				operator.account.id,
 				operator.authority,
 			);
-			const invitation = await inviteOrganizationMember(tx, org.authority, org.entityId, {
-				recipientEntityId: favoriteOwner.self.id,
+			const invitation = await inviteOrganizationMember(tx, org.context, org.entityId, {
+				operationId: randomUUID(),
+				recipient: { kind: "entity", entityId: favoriteOwner.self.id },
 			});
+			assert.ok(invitation.invitationId);
 			await replacePlatformUserAccountState({
 				authorization,
 				targetUserId: favoriteOwner.account.id,
@@ -384,17 +510,45 @@ try {
 				...favoriteReads,
 				(nested: DatabaseTransaction) =>
 					saveFavorite(nested, favoriteOwner.authority, favoriteId, { expectedRevision: 2 }),
-				(nested: DatabaseTransaction) =>
-					acceptMembershipInvitation(nested, favoriteOwner.authority, invitation.id, 1),
 			]) {
 				await assert.rejects(tx.transaction<unknown>(work), AccountSuspended);
 				checks++;
 			}
+			await assert.rejects(
+				tx.transaction((nested) =>
+					acceptMembershipInvitation(nested, favoriteOwner.context, invitation.invitationId!, {
+						operationId: randomUUID(),
+						expectedRevision: 1,
+						expectedMembershipVersion: 0,
+						consent: true,
+					}),
+				),
+				CredentialAuthorityDenied,
+			);
+			checks++;
 			await replacePlatformUserAccountState({
 				authorization,
 				targetUserId: favoriteOwner.account.id,
 				command: { state: "active", expectedRevision: 1, rules: [rule] },
 			});
+			await assert.rejects(
+				tx.transaction((nested) =>
+					acceptMembershipInvitation(nested, favoriteOwner.context, invitation.invitationId!, {
+						operationId: randomUUID(),
+						expectedRevision: 1,
+						expectedMembershipVersion: 0,
+						consent: true,
+					}),
+				),
+				CredentialAuthorityDenied,
+			);
+			checks++;
+			const renewed = await createFixtureSessionContext(tx, favoriteOwner.account.id);
+			const restoredContext = new PrincipalRequestContext(
+				favoriteOwner.account.id,
+				favoriteOwner.context.selection,
+				renewed.credentialProof(),
+			);
 			check(
 				(await saveFavorite(tx, favoriteOwner.authority, favoriteId, { expectedRevision: 2 }, 1))
 					.revision,
@@ -402,9 +556,16 @@ try {
 				"account restoration re-enables a permitted Favorite restore",
 			);
 			check(
-				(await acceptMembershipInvitation(tx, favoriteOwner.authority, invitation.id, 1)).state,
+				(
+					await acceptMembershipInvitation(tx, restoredContext, invitation.invitationId!, {
+						operationId: randomUUID(),
+						expectedRevision: 1,
+						expectedMembershipVersion: 0,
+						consent: true,
+					})
+				).state,
 				"accepted",
-				"restored sign-in status re-enables membership consent",
+				"restored sign-in status and a new session re-enable membership consent",
 			);
 			await replacePlatformUserAccountState({
 				authorization,
@@ -447,9 +608,11 @@ try {
 				owner = await actor(tx, "Concurrent inviter"),
 				guest = await actor(tx, "Concurrent recipient");
 			const org = await organization(tx, owner);
-			const invitation = await inviteOrganizationMember(tx, org.authority, org.entityId, {
-				recipientEntityId: guest.self.id,
+			const invitation = await inviteOrganizationMember(tx, org.context, org.entityId, {
+				operationId: randomUUID(),
+				recipient: { kind: "entity", entityId: guest.self.id },
 			});
+			assert.ok(invitation.invitationId);
 			return { operator, guest, org, invitation, favoriteId: await favoriteTarget(tx) };
 		});
 		const held = Promise.withResolvers<number>(),
@@ -469,13 +632,21 @@ try {
 				(await tx.execute<{ pid: number }>(sql`select pg_backend_pid() as pid`)).rows[0]!.pid,
 			);
 			return operation === "membership"
-				? acceptMembershipInvitation(tx, setup.guest.authority, setup.invitation.id, 1)
+				? acceptMembershipInvitation(tx, setup.guest.context, setup.invitation.invitationId!, {
+						operationId: randomUUID(),
+						expectedRevision: 1,
+						expectedMembershipVersion: 0,
+						consent: true,
+					})
 				: operation === "favorite"
 					? saveFavorite(tx, setup.guest.authority, setup.favoriteId, { expectedRevision: 0 })
 					: contribute(tx, setup.guest);
 		});
 		void mutation.catch(waiting.reject);
-		const denied = assert.rejects(mutation, AccountRestricted);
+		const denied = assert.rejects(
+			mutation,
+			operation === "membership" ? ManagementAuthorityDenied : AccountRestricted,
+		);
 		void denied.catch(() => {});
 		try {
 			await blocked(await waiting.promise, holder);
@@ -490,11 +661,11 @@ try {
 			(
 				await raceDb
 					.select()
-					.from(organizationMembership)
+					.from(accessMembership)
 					.where(
 						and(
-							eq(organizationMembership.organizationEntityId, setup.org.entityId),
-							eq(organizationMembership.memberAuthUserId, setup.guest.account.id),
+							eq(accessMembership.scopeId, setup.org.scopeId),
+							eq(accessMembership.subjectId, setup.guest.subjectId),
 						),
 					)
 			).length,
@@ -505,8 +676,8 @@ try {
 			(
 				await raceDb
 					.select()
-					.from(organizationMembershipInvitation)
-					.where(eq(organizationMembershipInvitation.id, setup.invitation.id))
+					.from(organizationEnrollmentInvitation)
+					.where(eq(organizationEnrollmentInvitation.id, setup.invitation.invitationId!))
 			)[0]?.state,
 			"pending",
 			"denied admission does not consume the invitation",
@@ -530,9 +701,11 @@ try {
 				owner = await actor(tx, "Admission-first inviter"),
 				guest = await actor(tx, "Admission-first recipient");
 			const org = await organization(tx, owner);
-			const invitation = await inviteOrganizationMember(tx, org.authority, org.entityId, {
-				recipientEntityId: guest.self.id,
+			const invitation = await inviteOrganizationMember(tx, org.context, org.entityId, {
+				operationId: randomUUID(),
+				recipient: { kind: "entity", entityId: guest.self.id },
 			});
+			assert.ok(invitation.invitationId);
 			return { operator, guest, org, invitation, favoriteId: await favoriteTarget(tx) };
 		});
 		const held = Promise.withResolvers<number>(),
@@ -541,7 +714,17 @@ try {
 		const admitted = raceDb.transaction(async (tx) => {
 			const result =
 				operation === "membership"
-					? await acceptMembershipInvitation(tx, setup.guest.authority, setup.invitation.id, 1)
+					? await acceptMembershipInvitation(
+							tx,
+							setup.guest.context,
+							setup.invitation.invitationId!,
+							{
+								operationId: randomUUID(),
+								expectedRevision: 1,
+								expectedMembershipVersion: 0,
+								consent: true,
+							},
+						)
 					: operation === "favorite"
 						? await saveFavorite(tx, setup.guest.authority, setup.favoriteId, {
 								expectedRevision: 0,
@@ -575,8 +758,8 @@ try {
 			(
 				await raceDb
 					.select()
-					.from(organizationMembershipInvitation)
-					.where(eq(organizationMembershipInvitation.id, setup.invitation.id))
+					.from(organizationEnrollmentInvitation)
+					.where(eq(organizationEnrollmentInvitation.id, setup.invitation.invitationId!))
 			)[0]?.state,
 			operation === "membership" ? "accepted" : "pending",
 			"later enforcement preserves the committed admission outcome",
@@ -637,9 +820,11 @@ const http = await database.transaction(async (tx) => {
 		grantedByAuthUserId: operator.account.id,
 	});
 	const org = await organization(tx, owner);
-	const invitation = await inviteOrganizationMember(tx, org.authority, org.entityId, {
-		recipientEntityId: guest.self.id,
+	const invitation = await inviteOrganizationMember(tx, org.context, org.entityId, {
+		operationId: randomUUID(),
+		recipient: { kind: "entity", entityId: guest.self.id },
 	});
+	assert.ok(invitation.invitationId);
 	return { operator, guest, invitation };
 });
 const operatorCookie = await cookie(http.operator),
@@ -651,12 +836,14 @@ async function request(
 	body: unknown,
 	expectedStatus: number,
 	token: string,
+	selection?: RequestedAuthoritySelection,
 ) {
 	const response = await api.fetch(
 		new Request(`http://localhost:3001/api/v1${path}`, {
 			method,
 			headers: {
 				Cookie: token,
+				...(selection ? { "X-Rezics-Authority": JSON.stringify(selection) } : {}),
 				...(body === undefined ? {} : { "Content-Type": "application/json" }),
 			},
 			...(body === undefined ? {} : { body: JSON.stringify(body) }),
@@ -677,17 +864,25 @@ try {
 	);
 	const denied = await request(
 		"POST",
-		`/participation/membership/invitations/${http.invitation.id}/accept`,
-		{ expectedRevision: 1 },
+		`/participation/membership/invitations/${http.invitation.invitationId!}/accept`,
+		{ operationId: randomUUID(), expectedRevision: 1, expectedMembershipVersion: 0, consent: true },
 		403,
 		guestCookie,
+		http.guest.context.selection,
 	);
 	check(
 		denied.error.code,
-		"AccountRestricted",
+		"AccessDenied",
 		"HTTP membership returns the declared enforcement error",
 	);
-	await request("GET", "/participation/membership/me/invitations", undefined, 200, guestCookie);
+	await request(
+		"GET",
+		"/participation/membership/me/invitations",
+		undefined,
+		200,
+		guestCookie,
+		http.guest.context.selection,
+	);
 	await request(
 		"POST",
 		`/governance/account-enforcements/${effect.id}/revoke`,
@@ -697,10 +892,11 @@ try {
 	);
 	const accepted = await request(
 		"POST",
-		`/participation/membership/invitations/${http.invitation.id}/accept`,
-		{ expectedRevision: 1 },
+		`/participation/membership/invitations/${http.invitation.invitationId!}/accept`,
+		{ operationId: randomUUID(), expectedRevision: 1, expectedMembershipVersion: 0, consent: true },
 		200,
 		guestCookie,
+		http.guest.context.selection,
 	);
 	check(accepted.state, "accepted", "HTTP revocation restores the pending invitation's admission");
 } finally {
