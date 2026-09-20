@@ -41,3 +41,15 @@ phase permits it, and refreshes an existing typed anchor after success. It retai
 its target-protection preconditions. `db:check`, static checks and test fixtures
 remain unchanged and deferred to verification. Generated metadata contains no gate
 status; acceptance remains in the plan and testing owners.
+
+The structural drift checker constrains only its source/dev catalog connections
+with `max_parallel_workers_per_gather=0`; the default Atlas dev URL uses the same
+setting. A 2026-09-20 check over the large native catalogue exhausted the fixture
+container's 64 MiB shared-memory mount during parallel constraint inspection.
+Serial comparison returned `Schemas are synced`. This limits parallel shared-memory
+demand during offline metadata inspection; it is not evidence for query-planner
+or 500M/3B workload performance.
+After a normalization failure, Atlas may retain temporary tables and refuse the
+next run as not clean. Inspect the completed process, then recreate only the
+explicitly disposable dev database before retrying; never reset the source to
+clear normalization state.

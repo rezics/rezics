@@ -80,24 +80,6 @@ do not omit catalog targets or restore a universal revision owner merely to pass
 coverage. Rerun the complete coverage profile on an empty installed target and
 qualify its governance/report paths. The observed failed transaction rolled back.
 
-## Native governance projection fixture
-
-The 2026-09-20 full `task services-main:db:check` replays all 60 migrations and
-18,947 SQL statements, then reaches
-`check-realm-governance-projection.ts` after the native reference, IAM, private
-consumer, recommendation, rule-decision and primary-contribution checks pass.
-It fails at line 59 with PostgreSQL `42P01`: the fixture still inserts into the
-removed `realm_member` table. The [seed checkpoint](database/native-seed-integrity-evidence.json)
-retains completed steps and the failed boundary.
-
-Reconcile counter transitions with shared membership generations, explicit consent
-and independent Realm enforcement. Preserve missing-counter/underflow failures,
-rejoin/departure, immutable membership identity and the independent latest-governance
-projection assertions. A read-only Entity projection is not a replacement writer.
-After repair, rerun the complete database check; downstream canonical schema,
-constraint, search, Drizzle drift and importer checks were not reached in this run.
-The separate successful Realm and Group fixtures do not close this full-task failure.
-
 ## Online exact-count policy inventory
 
 Observed 2026-09-18 with `task services-main:counts:check`: 14 reported query

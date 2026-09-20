@@ -539,6 +539,12 @@ tasks:
             - test -n "${DATABASE_ADMIN_URL:-}"
             - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-realm-membership.ts
 
+    db:realm-governance-projection:check:
+        desc: Verify native enrollment counters and immutable latest-governance projections on a disposable target.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-realm-governance-projection.ts
+
     db:realm-roster:check:
         desc: Verify native Realm member presentation, bounded cursor traversal, query plans and current read authority.
         cmds:

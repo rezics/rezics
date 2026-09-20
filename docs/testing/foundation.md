@@ -39,11 +39,24 @@ task services-main:db:fixture:stop
 
 Use the configured `POSTGRES_MIGRATION_LOCAL_PORT` if it differs from 5433. Preparation resets only the Compose `postgres-migration-test` service, validates/replays the preserved baseline and forward migrations, and leaves the database running. It does not qualify domain behavior by itself. This is the same exclusive lane used by migration generation and `db:check`; finish active domain fixtures before resetting it. The application development database is separate. The full `db:check` remains required for changed migrations/canonical SQL and schema-drift verification.
 
+PGroonga-bearing databases must not be copied using an unqualified default
+`CREATE DATABASE ... TEMPLATE ...` operation. The 2026-09-20 task-owned copy on
+PostgreSQL 18.6/PGroonga 4.0.8 failed its first indexed name insert with
+`PGrnLookupWithSize: object isn't found`. Only that empty copy was replaced by a
+fresh migration replay; the source database remained intact. The
+[PGroonga maintainer's explanation](https://github.com/pgroonga/pgroonga/issues/335#issuecomment-1545828883)
+distinguishes PostgreSQL's default WAL-copy strategy from explicit `FILE_COPY`.
+The existing schema-importer fixture uses `STRATEGY FILE_COPY` and qualifies it
+through its own native writes; a successful ordinary table read alone does not
+qualify a copied search index. Keep production backup/restore acceptance with
+its [operations owner](../operations/postgresql-backup-recovery.md).
+
 ## Native seed integrity
 
 The [2026-09-20 checkpoint](database/native-seed-integrity-evidence.json) records
-native demo population and retained failed coverage/full-database qualification
-separately. Run `task services-main:db:install -- --yes --suppress-credential-output`
+native demo population and the coverage/full-database failures observed at that
+checkpoint separately. The later native governance projection checkpoint below
+closes that recorded full-database failure; coverage report evidence remains open. Run `task services-main:db:install -- --yes --suppress-credential-output`
 on an isolated empty local database with its own object-storage bucket, then
 `task services-main:db:seed -- --profile demo`. The owning command includes
 projection rebuilds, aggregate reconciliation and `db:seed:check`; after repairing
@@ -451,11 +464,45 @@ The earlier [65-assertion / 28-request evidence](database/realm-membership-evide
 qualifies only the old writable-roster/Self contract. Its rule/follow and removed
 state semantics are not acceptance for the current explicit consent and independent
 enforcement model. The earlier Realm projection fixture's 55 assertions and
-six-migration/15,618-statement installation likewise retain their historical scope.
+six-migration/15,618-statement installation likewise retain their historical scope;
+the current native counter/projection checkpoint follows below.
 The current [Realm owner](../../services/main/src/services/realms/README.md) defines
 native presentation, paging, retention and workload requirements. The roster
 checkpoint below qualifies its listed read paths; broader projection, recovery/erasure,
 500M/3B and frontend qualification remain open.
+
+## Native Realm counter and governance projections
+
+`task services-main:db:realm-governance-projection:check` uses
+[check-realm-governance-projection.ts](../../services/main/scripts/check-realm-governance-projection.ts)
+and records [native projection evidence](database/realm-native-governance-projection-evidence.json).
+The 71-assertion fixture uses stored credentials, explicit representation and
+production enrollment commands. It verifies pending/approved counts, idempotent
+receipt replay, independent mute/clear, stable membership identity across rejoin,
+private-principal exclusion from public counts, and exact missing-counter and
+underflow rejection. Scope retargeting, membership deletion and hard Realm deletion
+with retained history are rejected. Soft deletion preserves history while an
+explicit departure removes the active count.
+
+The complete `task services-main:db:check` subsequently passes all 60 migrations
+and 18,947 SQL statements, reference/IAM/private-consumer/recommendation/governance
+fixtures, Realm enrollment, structure budgets, merge review, canonical SQL,
+constraint validation, search-index health, structural drift and the native
+schema-importer. The importer retains 4,693 terms and 26,393 quads and verifies
+idempotent import, exact meanings, immutable relation/adoption history,
+concurrency, export/restore and physical relocation. This qualifies the listed
+current database sequence, not coverage report APIs, frontend or corpus workload.
+The final drift-tool connection policy also passes a separate unchanged-schema
+comparison; the evidence distinguishes it from the already-running full task.
+
+The original latest-governance pointer cases remain: current action selection by
+chronological order and UUID tie-break, wrong-Realm action rejection, immutable
+case/action identity and timestamps, and non-state actions that do not replace the
+state projection. The one outer transaction is rolled back. Deferred constraints
+are flushed after each complete enrollment command before testing another
+generation in that transaction; every effect is therefore validated against its
+own exact consent/receipt. This is not production grant-issuance, concurrent load
+or complete governance/report acceptance.
 
 ## Native Realm rosters and bounded paging
 

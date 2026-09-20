@@ -197,9 +197,13 @@ observed RoleBinding revocation race. Its 10,001/100,000 candidate samples use
 inactive policy heads for query skew, not fabricated admissions or load acceptance.
 The owning public query replaces the unused old raw-profile/limit schema.
 
-Remaining work includes broader projection fixtures, native seed writers,
-generation-bound privilege non-revival, broader source replacement/last-clock
-expiry, hot-scope workload, erasure restart and recovery continuity. Full main TypeScript remains unqualified. OpenAPI/Fetch/
+The [native counter/governance fixture](../../../../../docs/testing/database/realm-native-governance-projection-evidence.json)
+adds 71 assertions over consent-driven counts, independent enforcement, immutable
+scopes/generations, deletion retention and current governance pointers. The native
+demo seed and main TypeScript checkpoint also pass. The complete 60-migration
+database sequence now passes; coverage report revision evidence remains open. Remaining
+work includes broader source replacement/last-clock expiry, hot-scope workload,
+erasure restart and recovery continuity. OpenAPI/Fetch/
 TanStack/public SDK and retained frontend acceptance remain separate.
 
 Existing web hooks mechanically capture native main Entity authority and explicit

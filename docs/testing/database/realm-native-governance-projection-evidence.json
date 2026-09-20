@@ -1,0 +1,167 @@
+{
+  "baseCommit": "44da919bae5a76a8f05ed3cac24b9db9f38a8fe0",
+  "sourceDigests": {
+    "services/main/scripts/check-realm-governance-projection.ts": "5c08cdbfea079d2a0c810f727664bb346d4afb1633ef10dfaccd5cf37d1ac998",
+    "services/main/src/services/realms/membership.ts": "bc1e0f75d4c0f1fb5675300338f3f446049f128e0ee9cfb3b21edf9fa7fbcd73",
+    "services/main/src/services/realms/membership-notifications.ts": "008339a32c579441b9879455bac35285a033b0941bdb0b2a8ce46a8a8dc89f6d",
+    "services/main/src/services/database/schema/postgres/realm-enrollment.sql": "e5c09faccd2d886f6df45f8e9ddc42f8748c260814d5f2e3a6e96cc04f33a8c3",
+    "services/main/src/services/database/migrations/atlas.sum": "47ee12fdd50ed3592768e517a025b7ada81d3adb4cd925092751074e09ad200a"
+  },
+  "assertions": 71,
+  "rollback": true,
+  "scope": "Native public/private enrollment counters, approval, independent enforcement and retained generations; latest governance projection, exact scope and immutable evidence. Fixture ownership/grants are privileged setup; no concurrent throughput claim.",
+  "date": "2026-09-20",
+  "command": "DATABASE_ADMIN_URL=<disposable installed target> task services-main:db:realm-governance-projection:check",
+  "installation": {
+    "postgres": "18.6",
+    "pgroonga": "4.0.8",
+    "migrations": 60,
+    "target": "rezics_atlas_seed_coverage_goal",
+    "hostPort": 55433,
+    "fixtureEffects": "all rolled back",
+    "freshReplay": true
+  },
+  "changedSourceDigests": {
+    "services/main/Taskfile.yml": "b78b2c001949b84cd7487d99bb04a69fd1cd79572740aea78dd8a20e605f74a3",
+    "services/main/scripts/check-realm-governance-projection.ts": "5c08cdbfea079d2a0c810f727664bb346d4afb1633ef10dfaccd5cf37d1ac998",
+    "services/main/scripts/native-enrollment-fixture.ts": "8ce36f80bd86701e684ea7f863c681155ebb3124292ba448ac8e92087636f3be",
+    "services/main/src/services/seed/enrollment.ts": "f3d720ec6e02bbee0dc3153f9ef37361e5780de24351b2d649d2e29ac93a9ee9",
+    "services/main/atlas.hcl": "c658146f46557508dd2c4d90107c3e2c620560f932f6ca5493af2a9a42dcbde7",
+    "services/main/scripts/check-database-schema-drift.ts": "8f31f056d7a5e5ca450e48699d1793cf3b47433552d4e77d566437c728fc7fc7"
+  },
+  "typecheck": {
+    "command": "task services-main:typecheck",
+    "passed": true
+  },
+  "additionalChecks": {
+    "contentStructureBudgets": {
+      "assertions": 5,
+      "passed": true,
+      "includesConcurrentAdmission": true
+    },
+    "mergeReviewApplication": {
+      "assertions": 137,
+      "passed": true
+    },
+    "canonicalPostgreSqlSchema": {
+      "command": "task services-main:db:postgres-schema",
+      "passed": true
+    },
+    "searchIndexes": {
+      "command": "yarn exec tsx scripts/search-index.ts check",
+      "passed": true
+    },
+    "structuralDrift": {
+      "command": "yarn exec tsx scripts/check-database-schema-drift.ts",
+      "passed": true,
+      "result": "Schemas are synced, no changes to be made.",
+      "source": "rezics_atlas_seed_goal",
+      "normalizationDatabase": "rezics_atlas_dev_governance",
+      "connectionOptions": "max_parallel_workers_per_gather=0 on both source and dev URLs",
+      "priorAttempts": [
+        "Default parallel catalog inspection hit PostgreSQL 53100 at 62 MiB of the 64 MiB container /dev/shm limit.",
+        "The failed normalizer retained temporary tables; reuse was rejected as not clean. Only the task-owned normalization database was recreated before the final run."
+      ],
+      "limit": "Serial catalog inspection establishes schema equality, not parallel-query capacity or workload performance.",
+      "finalOwnedTool": "Final script rerun passed without manual source/dev options; inspected child connection arguments both contain max_parallel_workers_per_gather=0."
+    },
+    "fullDatabase": {
+      "command": "task services-main:db:check",
+      "passed": true,
+      "exitCode": 0,
+      "migrations": 60,
+      "sqlStatements": 18947,
+      "shadowPort": 55434,
+      "normalizationOverride": "ATLAS_DEV_DATABASE_URL=<same isolated shadow instance>/rezics_atlas_dev",
+      "completedScripts": [
+        "scripts/check-baseline-epoch.ts",
+        "scripts/check-auth-identity.ts",
+        "scripts/check-reference-values.ts",
+        "scripts/check-access-identities.ts",
+        "scripts/check-access-roles.ts",
+        "scripts/check-access-memberships.ts",
+        "scripts/check-access-groups.ts",
+        "scripts/check-access-group-memberships.ts",
+        "scripts/check-access-role-bindings.ts",
+        "scripts/check-private-account-lifecycle.ts",
+        "scripts/check-following-references.ts",
+        "scripts/check-studio-visit-references.ts",
+        "scripts/check-access-expiry.ts",
+        "scripts/check-unit-read-scopes.ts",
+        "scripts/check-account-tag-references.ts",
+        "scripts/check-recommendation-references.ts",
+        "scripts/check-recommendation-event-intake.ts",
+        "scripts/check-governance-rule-decisions.ts",
+        "scripts/check-revision-primary-contribution.ts",
+        "scripts/check-realm-governance-projection.ts",
+        "scripts/check-realm-membership.ts",
+        "scripts/check-content-structure-budgets.ts",
+        "scripts/check-merge-review-application.ts",
+        "scripts/check-postgres-schema.ts",
+        "scripts/validate-integrity-constraints.ts",
+        "scripts/search-index.ts",
+        "scripts/check-database-schema-drift.ts",
+        "../../libraries/schema-importer/scripts/check-postgres.ts"
+      ],
+      "importerCases": [
+        "complete main fixture clones and replays idempotently",
+        "all official vocabularies import as structured graphs without implicit adoption",
+        "reviewed models install atomically with exact meaning bindings",
+        "native description writes enforce and retain the actual generated model",
+        "profiled relations preserve model context and reject an alternate native writer",
+        "31 native schema invariants",
+        "domain media, wiki, description and message integrity",
+        "repeating a full import preserves identities and row counts",
+        "vocabulary selection CAS remains separate from native model selection",
+        "independent relation IDs retain duplicate endpoints and separate proposal/adoption",
+        "review and source links remain attached to the old exact relation revision",
+        "ordering is numeric and preserves integers beyond JavaScript's safe range",
+        "translations exceed 32 languages without touching semantic revisions or assertions",
+        "concurrent adoption admits one writer and rejects stale selection",
+        "storage rejects mismatched definitions, cross-relation revisions and mutable history",
+        "rejected compound writes roll back edit and assertion together",
+        "database guards reject cyclic history, malformed references and corrupt artifact bytes",
+        "complete PostgreSQL export rebuilds on another database with the same IDs",
+        "the same Drizzle relation contract splits into another table family and database",
+        "new aliases cannot steal a previously assigned logical identity",
+        "description values preserve exact decimals and explicitly unsupported datatypes",
+        "a valid model hash cannot disguise a definition from the wrong vocabulary release",
+        "the CLI stages, explicitly selects and exports the exact installed model"
+      ],
+      "importerTerms": 4693,
+      "retainedQuads": 26393,
+      "shadowCleanup": "Owning task removed the temporary shadow container after success.",
+      "inspectionPolicyTiming": "The full task started its drift child before the final serial-inspection setting was saved. It passed with default parallel settings on the clean shadow. The final committed inspector was separately rerun successfully with its automatically applied serial source/dev options on the retained seed target."
+    }
+  },
+  "coveredCases": [
+    "Approval-pending rows contribute zero; approved public members increment once and exact command receipt retries do not duplicate the count.",
+    "Mute/clear changes count independently from admission; repeated clear preserves the count. Muting survives departure/rejoin until explicitly cleared.",
+    "Departure and separate admission into another Realm preserve both count projections; no direct scope move is allowed.",
+    "The membership identity survives a new generation; direct identity deletion and foreign-scope mutation are rejected.",
+    "Missing and underflowed counters reject an actual native leave. The fixture rolls corruption back without weakening the guard.",
+    "Private-principal enrollment and departure never alter public Entity membership counts.",
+    "Hard deletion of a referenced Realm is rejected; soft deletion retains enrollment/history until explicit departure.",
+    "Original latest-governance pointer cases retain timestamp/UUID ordering, foreign Realm/wrong action rejection and immutable action/case evidence.",
+    "Deferred consent/history constraints run after each complete enrollment command before later generations in the rollback transaction."
+  ],
+  "limits": [
+    "No HTTP, role/representation issuance policy, concurrent throughput, 500M/3B load or complete governance/report gate is claimed.",
+    "The final projection run uses the rebuilt empty installed coverage target. Other tail checks use the populated seed target; these distinct environments are not a single fresh whole-system acceptance run.",
+    "Coverage seed still requires native catalog report revision evidence and all retained consumers; this fixture does not remove that requirement.",
+    "Latest-governance SQL cases qualify projection/immutability constraints, not the product decision-command authorization or report-evidence API."
+  ],
+  "environmentRepair": {
+    "failedCopy": "rezics_atlas_seed_coverage_goal created previously with default CREATE DATABASE TEMPLATE strategy",
+    "observed": "PGrnLookupWithSize: object is not found during the first indexed entity_named_form insert",
+    "ownerAction": "Only the empty task-owned copy was dropped and recreated from migration replay; source seed database was preserved.",
+    "source": "https://github.com/pgroonga/pgroonga/issues/335#issuecomment-1545828883",
+    "existingSupportedRecipe": "libraries/schema-importer/scripts/check-postgres.ts explicitly uses STRATEGY FILE_COPY and validates native writes in its own run.",
+    "rebuildVerified": "The fresh 60-migration installation and the entire 71-assertion projection fixture pass; indexed entity-name writes succeed and fixture effects roll back."
+  },
+  "documentation": {
+    "linksAndOwnership": "passed: python docs/testing/check_docs.py",
+    "designArtifacts": "passed: python docs/testing/database/check_design.py --check after owning --write refresh",
+    "phaseAdvance": "Only the plan phase and its generated document digest advance after the checks; verified runtime and fixtures are unchanged."
+  }
+}

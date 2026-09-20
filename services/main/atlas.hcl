@@ -8,7 +8,8 @@ data "external_schema" "drizzle" {
 }
 
 env "main" {
-	dev = "postgres://postgres:postgres@localhost:5433/rezics_atlas_dev?search_path=public&sslmode=disable"
+	// Offline catalog normalization does not qualify parallel-query performance.
+	dev = "postgres://postgres:postgres@localhost:5433/rezics_atlas_dev?search_path=public&sslmode=disable&options=-c%20max_parallel_workers_per_gather%3D0"
 
 	schema {
 		src = data.external_schema.drizzle.url

@@ -33,18 +33,32 @@ if (!connectionString) throw new Error("DATABASE_ADMIN_URL is required");
 const sourceUrl = new URL(connectionString);
 if (!["postgres:", "postgresql:"].includes(sourceUrl.protocol))
 	throw new Error("DATABASE_ADMIN_URL must use the PostgreSQL protocol");
-sourceUrl.searchParams.set("search_path", "public");
-const devUrlInput=process.env.ATLAS_DEV_DATABASE_URL;
-const devArguments:string[]=[];
-if(devUrlInput) {
-	const devUrl=new URL(devUrlInput);
-	if(!["postgres:","postgresql:"].includes(devUrl.protocol) || !["localhost","127.0.0.1","[::1]"].includes(devUrl.hostname)
-		|| devUrl.port==="15432" || !/^\/rezics_atlas_(?:dev(?:_|$)|[a-z0-9_]*diffdev(?:_|$))/u.test(devUrl.pathname))
+// Atlas compares metadata for thousands of native tables/constraints. Parallel
+// catalog scans can exhaust a small fixture container's DSM; this offline check
+// proves structural equality, not query-planner or workload performance.
+function configureCatalogInspection(url: URL): void {
+	url.searchParams.set("search_path", "public");
+	url.searchParams.set(
+		"options",
+		`${url.searchParams.get("options") ?? ""} -c max_parallel_workers_per_gather=0`.trim(),
+	);
+}
+configureCatalogInspection(sourceUrl);
+const devUrlInput = process.env.ATLAS_DEV_DATABASE_URL;
+const devArguments: string[] = [];
+if (devUrlInput) {
+	const devUrl = new URL(devUrlInput);
+	if (
+		!["postgres:", "postgresql:"].includes(devUrl.protocol) ||
+		!["localhost", "127.0.0.1", "[::1]"].includes(devUrl.hostname) ||
+		devUrl.port === "15432" ||
+		!/^\/rezics_atlas_(?:dev(?:_|$)|[a-z0-9_]*diffdev(?:_|$))/u.test(devUrl.pathname)
+	)
 		throw new Error("Atlas normalization requires an explicit disposable loopback dev database");
-	if(devUrl.port===sourceUrl.port && devUrl.pathname===sourceUrl.pathname)
+	if (devUrl.port === sourceUrl.port && devUrl.pathname === sourceUrl.pathname)
 		throw new Error("Atlas dev database must differ from the schema being checked");
-	devUrl.searchParams.set("search_path","public");
-	devArguments.push("--dev-url",devUrl.toString());
+	configureCatalogInspection(devUrl);
+	devArguments.push("--dev-url", devUrl.toString());
 }
 
 const result = await runAtlas([
