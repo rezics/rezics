@@ -9,7 +9,6 @@ const transactionInsert = vi.hoisted(() => vi.fn());
 const insertValues = vi.hoisted(() => vi.fn());
 const onConflictDoNothing = vi.hoisted(() => vi.fn());
 const insertReturning = vi.hoisted(() => vi.fn());
-const acknowledgeCurrentRealmRulesOnFollow = vi.hoisted(() => vi.fn());
 const createNotification = vi.hoisted(() => vi.fn());
 
 vi.mock("../auth/account-state", () => ({
@@ -43,10 +42,15 @@ vi.mock("../units/reference-value", async (original) => ({
 		target: { owner: "post" as const, id: TargetUnitId },
 	})),
 }));
-vi.mock("../realms/service", () => ({ acknowledgeCurrentRealmRulesOnFollow }));
 vi.mock("../notifications/service", () => ({ createNotification }));
 
-import { users, authEntity, unitMergeRedirect } from "../database/schema";
+import {
+	users,
+	authEntity,
+	unitMergeRedirect,
+	unitFollow,
+	accountFollowPreference,
+} from "../database/schema";
 import { FollowableUnitOwnerValues } from "@rezics/schema/postgres/shared/contract-values";
 import { UnitNotFound } from "../units/errors";
 import { UserFollowBlocked, UserSelfFollowForbidden } from "./errors";
@@ -125,8 +129,6 @@ describe("followUnit", () => {
 				}),
 		);
 		ensureCanRead.mockClear();
-		acknowledgeCurrentRealmRulesOnFollow.mockReset();
-		acknowledgeCurrentRealmRulesOnFollow.mockResolvedValue(undefined);
 		createNotification.mockReset();
 		createNotification.mockResolvedValue(undefined);
 	});
@@ -151,13 +153,10 @@ describe("followUnit", () => {
 		expect(onConflictDoNothing).toHaveBeenCalledTimes(2);
 		if (kind === "entity") expect(transactionSelect).toHaveBeenCalledTimes(4);
 		else expect(transactionSelect).toHaveBeenCalledTimes(3);
-		if (kind === "realm")
-			expect(acknowledgeCurrentRealmRulesOnFollow).toHaveBeenCalledWith(
-				expect.anything(),
-				TargetUnitId,
-				FollowerProfileId,
-			);
-		else expect(acknowledgeCurrentRealmRulesOnFollow).not.toHaveBeenCalled();
+		expect(transactionInsert.mock.calls.map(([table]) => table)).toEqual([
+			unitFollow,
+			accountFollowPreference,
+		]); // Following never enrolls a subject or records rule consent.
 		if (kind === "entity")
 			expect(createNotification).toHaveBeenCalledWith(expect.anything(), {
 				kind: "new_follower",

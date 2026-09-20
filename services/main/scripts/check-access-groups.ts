@@ -126,9 +126,12 @@ try {
 	equal(await run(rootCommand), root);
 	await assert.rejects(run({ ...rootCommand, expectedVersion: 1 }), AccessGroupConflict);
 	assertions++;
-	await rejected(run(move(root.groupId, root.groupId)), "23514");
-	await rejected(run(move(root.groupId, child.groupId)), "23514");
-	await rejected(run(retire(root.groupId)), "23514");
+	await assert.rejects(run(move(root.groupId, root.groupId)), AccessGroupConflict);
+	assertions++;
+	await assert.rejects(run(move(root.groupId, child.groupId)), AccessGroupConflict);
+	assertions++;
+	await assert.rejects(run(retire(root.groupId)), AccessGroupConflict);
+	assertions++;
 	const otherOperator = randomUUID();
 	await first.query("insert into users(id,name,email) values ($1,'Other Group operator',$2)", [
 		otherOperator,
@@ -153,19 +156,36 @@ try {
 			.version,
 		"1",
 	);
-	await first.query("begin");
-	await first.query(
-		"insert into access_group_event(group_id,version,operation_id,request_digest,operation,state_after,parent_after_id,label,operator_auth_user_id,authority_subject_id) values ($1,2,$2,repeat('0',64),'reparent','active',$3,'Fixture Group',$4,$5)",
-		[root.groupId, randomUUID(), foreign.groupId, operatorAuthUserId, authoritySubjectId],
-	);
-	await rejected(
-		first.query("update access_group set version=2,parent_id=$1 where id=$2", [
-			foreign.groupId,
-			root.groupId,
-		]),
-		"23514",
-	);
-	await first.query("rollback");
+	// Exercise the SQL backstop as well as the command-level conflict above.
+	for (const invalid of [
+		{ operation: "reparent", state: "active", parentId: root.groupId },
+		{ operation: "reparent", state: "active", parentId: child.groupId },
+		{ operation: "reparent", state: "active", parentId: foreign.groupId },
+		{ operation: "retire", state: "retired", parentId: null },
+	]) {
+		await first.query("begin");
+		await first.query(
+			"insert into access_group_event(group_id,version,operation_id,request_digest,operation,state_after,parent_after_id,label,operator_auth_user_id,authority_subject_id) values ($1,2,$2,repeat('0',64),$3,$4,$5,'Fixture Group',$6,$7)",
+			[
+				root.groupId,
+				randomUUID(),
+				invalid.operation,
+				invalid.state,
+				invalid.parentId,
+				operatorAuthUserId,
+				authoritySubjectId,
+			],
+		);
+		await rejected(
+			first.query("update access_group set version=2,parent_id=$1,state=$2 where id=$3", [
+				invalid.parentId,
+				invalid.state,
+				root.groupId,
+			]),
+			"23514",
+		);
+		await first.query("rollback");
+	}
 	await assert.rejects(run(create(foreign.groupId)), AccessGroupConflict);
 	assertions++;
 	await assert.rejects(run(move(child.groupId, root.groupId)), AccessGroupConflict);
@@ -217,10 +237,25 @@ try {
 	const chain = [await run(create())];
 	for (let i = 1; i < 8; i++) chain.push(await run(create(chain[i - 1]!.groupId)));
 	equal(await height(chain[0]!.groupId), 8);
-	await rejected(run(create(chain[7]!.groupId)), "23514");
+	await assert.rejects(run(create(chain[7]!.groupId)), AccessGroupConflict);
+	assertions++;
 	const branch = await run(create()),
 		leaf = await run(create(branch.groupId));
-	await rejected(run(move(branch.groupId, chain[6]!.groupId)), "23514");
+	await assert.rejects(run(move(branch.groupId, chain[6]!.groupId)), AccessGroupConflict);
+	assertions++;
+	await first.query("begin");
+	await first.query(
+		"insert into access_group_event(group_id,version,operation_id,request_digest,operation,state_after,parent_after_id,label,operator_auth_user_id,authority_subject_id) values ($1,2,$2,repeat('0',64),'reparent','active',$3,'Fixture Group',$4,$5)",
+		[branch.groupId, randomUUID(), chain[6]!.groupId, operatorAuthUserId, authoritySubjectId],
+	);
+	await rejected(
+		first.query("update access_group set version=2,parent_id=$1 where id=$2", [
+			chain[6]!.groupId,
+			branch.groupId,
+		]),
+		"23514",
+	);
+	await first.query("rollback");
 	await run(move(chain[7]!.groupId, null));
 	equal(await height(chain[0]!.groupId), 7);
 	await run(move(branch.groupId, chain[4]!.groupId));
@@ -244,7 +279,8 @@ try {
 	const competitor = peer.transaction((tx) =>
 		applyAccessGroupCommand(tx, move(b.groupId, a.groupId), sql<boolean>`true`),
 	);
-	const cycle = rejected(competitor, "23514");
+	const cycle = assert.rejects(competitor, AccessGroupConflict);
+	assertions++;
 	await blocked(secondPid, firstPid);
 	release.resolve();
 	await writer;

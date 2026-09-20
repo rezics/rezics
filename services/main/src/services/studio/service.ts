@@ -74,12 +74,6 @@ type RealmSubject = {
 	readonly realmRelation: "member" | "access_manager";
 };
 
-type RawRealmSubject = {
-	readonly realmId: string;
-	readonly realmRelation: string;
-	readonly sourceLimitExceeded: boolean;
-};
-
 type RawWorkspaceCandidate = {
 	readonly unitId: string;
 	readonly sourceKind: string;
@@ -133,11 +127,6 @@ function dateValue(value: unknown, field: string): Date {
 	if (!parsed || Number.isNaN(parsed.getTime()))
 		throw new TypeError(`Studio ${field} is not a valid date`);
 	return parsed;
-}
-
-function realmRelation(value: string): RealmSubject["realmRelation"] {
-	if (value === "member" || value === "access_manager") return value;
-	throw new TypeError("Studio Realm subject relation is invalid");
 }
 
 function unitOwnerValue(value: string | null): UnitOwner | undefined {

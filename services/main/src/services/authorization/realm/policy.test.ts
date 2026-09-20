@@ -19,7 +19,10 @@ describe("realm policy", () => {
 		["published", "private", "pending", true],
 		["published", "private", "active", true],
 		["published", "private", "banned", false],
-		["published", "public", "removed", false],
+		["published", "public", "removed", true],
+		["published", "private", "removed", false],
+		["published", "public", "banned", false],
+		["published", "public", "muted", true],
 		["draft", "public", "active", false],
 	] as const)("allows joining %s/%s as %s: %s", (status, visibility, membership, expected) => {
 		expect(isRealmJoinable(status, visibility, membership)).toBe(expected);

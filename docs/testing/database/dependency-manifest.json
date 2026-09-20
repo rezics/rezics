@@ -133,6 +133,7 @@
     "docs/testing/database/favorites-evidence.json",
     "docs/testing/database/following-authority-evidence.json",
     "docs/testing/database/following-reference-evidence.json",
+    "docs/testing/database/foundation-integrity-repair-evidence.json",
     "docs/testing/database/membership-capacity-evidence.json",
     "docs/testing/database/membership-evidence.json",
     "docs/testing/database/membership-recovery-evidence.json",

@@ -13,7 +13,10 @@ describe("getRealmParticipationCondition", () => {
 		if (!condition) throw new Error("Realm participation condition was not constructed");
 		const query = new PgDialect().sqlToQuery(condition);
 
-		expect(query.sql).toContain('"realm_member"');
+		expect(query.sql).toContain('"current_realm_entity_membership"');
+		expect(query.sql).not.toContain('"realm_member"');
+		expect(query.sql).toContain("public.realm_enforcement");
+		expect(query.sql).toContain("e.state in ('muted','banned')");
 		expect(query.sql).toContain('"unit_access_grant"');
 		expect(query.sql).toContain('"unit_access_restriction"');
 		expect(query.sql).toContain('"platform_capability_grant"');

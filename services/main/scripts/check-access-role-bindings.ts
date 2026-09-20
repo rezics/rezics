@@ -145,6 +145,7 @@ try {
 		targetPath: [] as string[],
 		validFrom: from,
 		validUntil: until,
+		recipientEligibility: null,
 		permissionPolicy: { mode: "local-role" as const },
 	};
 	const create = (

@@ -122,7 +122,7 @@ export function compileGroupImpactDelta(review: GroupImpactReview, facts: { ordi
 	function groupPath(groupId: string, scopeId: string, after: boolean): string[] {
 		const result: string[] = []; let key: string | null = groupId;
 		while (key !== null) {
-			charge(); const row = required(groups.get(key));
+			charge(); const row: z.infer<typeof group> = required(groups.get(key));
 			if (row.scope_id !== scopeId || result.includes(key) || result.length >= 8) throw new GroupImpactDeltaUnavailable("missing");
 			if (row.state !== "active" || (after && key === review.groupId && review.operation === "retire")) return [];
 			result.push(key); key = after && review.operation === "reparent" && key === review.groupId ? review.proposedParentId : row.parent_id;

@@ -1,3 +1,4 @@
+import { IssueGrantInputSchema } from "./commands";
 import { describe, expect, it } from "vitest";
 import {
 	ParticipationAuthoritySchema,
@@ -90,13 +91,16 @@ describe("current participation authority", () => {
 			validateGrant({ ...grant, ...change }, authority, "catalog.edit", target, new Date()),
 		).toThrow(ParticipationDenied);
 	});
-	it("does not promote catalog editing to publishing, membership or security authority", () => {
-		for (const capability of [
-			"entity.publish",
-			"entity.membership",
-			"entity.security",
-			"proposal.adopt",
-		] as const)
+	it("does not promote catalog editing to publishing, adoption or security authority", () => {
+		expect(
+			IssueGrantInputSchema.safeParse({
+				recipient: { kind: "auth", authUserId: actor },
+				actingEntityId: entity,
+				capability: "entity.membership",
+				target: { owner: "entity", id: entity },
+			}).success,
+		).toBe(false);
+		for (const capability of ["entity.publish", "entity.security", "proposal.adopt"] as const)
 			expect(() => validateGrant(grant, authority, capability, target, new Date())).toThrow(
 				ParticipationDenied,
 			);

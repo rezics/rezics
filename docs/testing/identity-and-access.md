@@ -293,6 +293,14 @@ history and cross-scope reparenting, exact receipt replay after retirement,
 UTF-8 payload bounds and the reviewed-tree precondition. SQL-admin predicates
 isolate this topology qualification from the pending management/ceiling policy.
 
+The 2026-09-20 [foundation repair run](database/foundation-integrity-repair-evidence.json)
+passes 80 assertions after distinguishing command-level `AccessGroupConflict`
+from raw SQLSTATE rejection. Direct SQL additionally proves self/subtree cycles,
+foreign-scope parenting, depth overflow and non-leaf retirement remain denied.
+The earlier 76-assertion evidence retains its tested revision. The new run uses a
+fresh 59-migration PostgreSQL 18.6/PGroonga 4.0.8 installation and does not qualify
+management APIs, complete backend integrity or historical engine-crash causes.
+
 ## Generation-bound Group assignment cases
 
 `task services-main:db:access-group-memberships:check` runs
@@ -371,11 +379,10 @@ assignment ceilings, recipient eligibility, validity-time decisions or delegatio
 lineage. Exact snapshot reads are management hydration, not proof of access.
 
 Before the September 15 execution-workflow change, an isolated RoleBinding run
-passed 85 assertions. The subsequent `task services-main:db:check` failed when
-another fixture had already created the foreign Group namespace: a wrong-scope
-Group reference reached its FK before the expected typed creation conflict.
-The implementation now validates new recipient references before insertion and
-checks that a reserved binding identity matches its create command. Related
-assertions were authored before the workflow change but have not been executed.
-The next fixture replay was stopped when validation was paused. These additions
-remain unqualified; resume their checks under the plan's verification phase.
+passed 85 assertions. The 2026-09-20 [foundation repair run](database/foundation-integrity-repair-evidence.json)
+passes the current 91 assertions, including new-recipient validation, reserved
+identity consistency and explicit null membership eligibility for institutional
+fixture bindings. Raw SQL constraints, expiry waits and concurrent read/retirement
+checks remain enforced. This storage fixture does not qualify complete candidate
+matching, live assignment ceilings, credential-backed management or delegation
+lineage.

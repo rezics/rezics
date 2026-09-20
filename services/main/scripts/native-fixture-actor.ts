@@ -18,7 +18,7 @@ export async function runWithNativeFixtureActor<T>(
 		.where(eq(users.id, authUserId))
 		.limit(1);
 	if (!account) throw new Error("Native fixture account is missing");
-	const self = await ensureSelfEntityInTransaction(tx, { ...account, image: null });
+	const self = await ensureSelfEntityInTransaction(tx, { id: account.id });
 	return runWithParticipationAuthority(
 		{
 			principal: { kind: "auth", authUserId },

@@ -61,11 +61,16 @@ beforeEach(() => {
 describe("Auth self Entity lifecycle", () => {
 	it("creates distinct public identity and private preferences without publishing email", async () => {
 		const result = await ensureSelfEntity(account, "zh-Hans");
-		expect(result).toEqual({ id, name: "Reader", authorizationRevision: 1 });
+		expect(result).toEqual({ id, name: null, authorizationRevision: 1 });
 		expect(state.inserts.get(authEntity)).toEqual([{ authUserId: account.id, entityId: id }]);
 		expect(state.inserts.get(accountPreference)).toEqual([
 			{ authUserId: account.id, interfaceLocale: "zh-Hans", preferredLanguages: ["ja"] },
 		]);
+		expect(state.create).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ names: [] }),
+		);
+		expect(JSON.stringify(state.create.mock.calls)).not.toContain(account.name);
 		expect(JSON.stringify(state.create.mock.calls)).not.toContain(account.email);
 	});
 	it("preserves the existing public name instead of recreating identity or synchronizing login name", async () => {
@@ -87,7 +92,8 @@ describe("Auth self Entity lifecycle", () => {
 		expect(state.create).not.toHaveBeenCalled();
 	});
 	it("does not expose a provider sign-in name that is the private email address", async () => {
-		const result = await ensureSelfEntity({ ...account, name: account.email });
+		const privateAccount = { ...account, name: account.email };
+		const result = await ensureSelfEntity(privateAccount);
 		expect(result.name).toBeNull();
 		expect(state.create).toHaveBeenCalledWith(
 			expect.anything(),

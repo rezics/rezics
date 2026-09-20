@@ -41,29 +41,21 @@ The September 8 convergence qualification recorded a PostgreSQL SIGILL during At
 
 ## Main IAM qualification after schema extraction
 
-Observed 2026-09-18 during the [shared schema qualification](schema.md). The clean
-base before shared schema extraction had 167 TypeScript errors; the replacement
-retains 160 existing IAM/Org/Realm errors, with no new file/error-code categories.
-`task services-main:typecheck` reproduces them. They include old membership
-fixtures/authority inputs, omitted role-binding eligibility and writes through
-current Entity presentation views. The two schema packages type-check separately. The same 160 errors were
-reproduced on 2026-09-20 after source-tooling commit `437385f63`, using the owning
-main typecheck. They remain concentrated in retained membership/account/recovery
-fixtures, role-binding eligibility, Realm APIs, seed/presentation writes and
-related authority consumers. Adapter and source-tooling checks pass separately;
-that focused evidence does not qualify these native consumers. The active repair
-scope must retain the branded request-context proof and native write ownership,
-not restore removed membership tables or satisfy the compiler with casts.
+The 2026-09-20 [foundation repair evidence](database/foundation-integrity-repair-evidence.json)
+reduces the owning main TypeScript result from 160 to **124 errors**. Reproduce
+with `task services-main:typecheck`. The remaining failures are concentrated in
+six stale membership/account/recovery/capacity/roster fixtures (121 errors) and
+three seed writes through read-only Realm presentation views.
 
-After a fresh complete migration replay, Auth, concrete references, access
-identities and roles passed. The outdated membership assertion was repaired to
-the existing reserved-identity contract and its focused check passed. Continuing
-the main database checks reached `scripts/check-access-groups.ts:129`, which
-expects a raw constraint-code rejection while the Group command reports
-`AccessGroupConflict`. The broader Group/API gate remains unqualified. Reconcile
-the intended command error contract and retained callers/fixtures, then complete
-the remaining main checks; do not relax the storage denial or count this as a
-passing whole-backend result.
+Reconcile those fixtures with the native Org/Realm enrollment commands, exact
+membership generations and branded `PrincipalRequestContext` credential proofs.
+Seed must use native persistence owners and preserve consent/enforcement history;
+restoring removed membership tables, casting old authority objects or making
+presentation views writable does not repair the selected contract. Preserve the
+original denied, concurrent, revocation, privacy and recovery scenarios when
+updating the fixtures. Full main integrity and the broader Group/Org/Realm/API
+qualification remain open; the passing focused storage and unit cases do not
+qualify these remaining consumers.
 
 ## Online exact-count policy inventory
 

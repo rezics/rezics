@@ -110,7 +110,12 @@ export default new Elysia({ name: "realm-native-membership" })
 		},
 		({ principalContext, params, query }) =>
 			runAccessTransaction((tx) =>
-				readRealmEnrollmentRules(tx, principalContext, params.realmId, query.localizationLanguages),
+				readRealmEnrollmentRules(
+					tx,
+					principalContext,
+					params.realmId,
+					query.localizationLanguages ?? [],
+				),
 			),
 	)
 	.get(

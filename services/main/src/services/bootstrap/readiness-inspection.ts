@@ -46,7 +46,6 @@ import {
 	CuratedCreationTagCollectionManifest,
 	OfficialRealmAvatarAsset,
 	OfficialZoneManifest,
-	RezicsScoreRealmManifest,
 } from "./data";
 
 export async function inspectInitialInstallationBundle() {

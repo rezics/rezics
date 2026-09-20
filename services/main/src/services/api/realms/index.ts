@@ -35,7 +35,6 @@ import {
 	realm,
 	realmPin,
 	realmRule,
-	realmRuleRevision,
 	realmScoreContext,
 	realmStat,
 	realmTagContext,
@@ -107,10 +106,7 @@ import { contentReviewCaseAdvisoryLock } from "../reports/advisory-lock";
 import { RevisionContextBody } from "../schema";
 import {
 	IdResponse,
-	MembershipResponse,
 	NoContentResponse,
-	RealmMemberListResponse,
-	RealmMemberResponse,
 	RealmPinListResponse,
 	RealmPinResponse,
 	RealmRuleRevisionResponse,
@@ -152,15 +148,12 @@ import {
 	encodeRealmUnitModerationCursor,
 } from "./moderation-pagination";
 import { planRealmPinMove } from "./pin-ordering";
-import { requireCurrentRealmRuleRevision } from "./rule-acknowledgement";
 import {
-	AcknowledgeRealmRulesBody,
 	ApplyRealmPolicyTagBody,
 	CreateRealmBody,
 	CreateRealmPinBody,
 	CreateRealmTagContextBody,
 	CreateRealmWikiBody,
-	ListRealmMembersQuery,
 	ListRealmTagContextsQuery,
 	ListRealmUnitsQuery,
 	ListRealmsQuery,
@@ -168,13 +161,11 @@ import {
 	MoveRealmPinsBody,
 	PutRealmTagContextBody,
 	RealmDetailQuery,
-	RealmMemberParams,
 	RealmPagesResponse,
 	RealmParams,
 	RealmPinParams,
 	RealmPinsQuery,
 	RealmPolicyTagResponse,
-	RealmRuleRevisionParams,
 	RealmRulesQuery,
 	RealmTagContextListResponse,
 	RealmTagContextParams,
@@ -197,7 +188,6 @@ import {
 	SaveRealmTaxonomyDraftBody,
 	SetRealmScoreContextBody,
 	UpdateRealmBody,
-	UpdateRealmMemberBody,
 	UpdateRealmPagesBody,
 	UpdateRealmRulesBody,
 	UpdateRealmTagVotingBody,

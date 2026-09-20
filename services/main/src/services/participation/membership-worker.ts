@@ -1,6 +1,6 @@
 import { organizationInvitationAvailability } from "./membership";
 import { randomUUID } from "node:crypto";
-import { and, eq, gt, inArray, isNull, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
 import { database } from "../database";
 import { users } from "@rezics/schema/postgres/identity/auth";
