@@ -903,6 +903,18 @@ tasks:
         cmds:
             - yarn exec tsx scripts/check-seed.ts {{.CLI_ARGS}}
 
+    db:seed-target:check:
+        desc: Verify empty installed seed admission, registered workload exclusions and concurrent preflight fencing on a disposable target.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-seed-target.ts
+
+    db:conversation-stats:check:
+        desc: Verify direct/group conversation statistics initialization on a disposable target.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-conversation-stats.ts
+
     db:seed:search:check:
         desc: Verify official Zone fixtures against authoritative PostgreSQL Search.
         cmds:

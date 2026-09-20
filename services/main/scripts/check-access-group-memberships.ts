@@ -324,6 +324,8 @@ try {
 	await first.query("insert into entity_identity(id,shape) values($1,'unknown')", [
 		operatorAuthUserId,
 	]);
+	// Same UUID does not make the public Entity inherit private account eligibility.
+	await first.query("insert into entity_participation(entity_id) values($1)", [operatorAuthUserId]);
 	const entitySubject = await db.transaction((tx) =>
 		allocateAccessSubject(tx, { kind: "entity", id: operatorAuthUserId }),
 	);
@@ -452,7 +454,7 @@ try {
 	const joining = peer.transaction((tx) =>
 		applyAccessGroupMembershipCommand(tx, command(groups[66]!.groupId, 2), sql<boolean>`true`),
 	);
-	const inactive = assert.rejects(joining, AccessGroupMembershipConflict);
+	const inactive = assert.rejects(joining, AccessGroupMembershipAdmissionDenied);
 	await blocked(secondPid, firstPid);
 	leaveRelease.resolve();
 	await leaving;

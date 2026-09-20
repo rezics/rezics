@@ -146,6 +146,7 @@
     "docs/testing/database/native-account-org-evidence.json",
     "docs/testing/database/native-facet-linux-evidence.json",
     "docs/testing/database/native-merge-evidence.json",
+    "docs/testing/database/native-seed-integrity-evidence.json",
     "docs/testing/database/oauth-privacy-evidence.json",
     "docs/testing/database/participation-evidence.json",
     "docs/testing/database/platform-user-authority-evidence.json",

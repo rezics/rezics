@@ -1,3 +1,4 @@
+import { verifySeedEnrollments } from "./enrollment-verification";
 import { readSeedIdentityIds } from "./fixture-target";
 import { seedFixtureIdentityId } from "./identity";
 import { CatalogNameTables } from "@rezics/schema/postgres/knowledge/names";
@@ -62,6 +63,7 @@ export async function verifySeedDatabase(
 	assertLocalDatabaseUrl(env.DATABASE_URL);
 	assertPlatformCoreReady(await inspectPlatformCore());
 	const identityIds = await readSeedIdentityIds(database);
+	await verifySeedEnrollments(database);
 	const coverageContractQueries = [
 		{
 			name: "Shared Search query",

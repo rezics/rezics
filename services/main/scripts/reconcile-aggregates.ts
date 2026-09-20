@@ -121,7 +121,7 @@ const checks: readonly { name: string; query: SQL }[] = [
 						and reply_unit.moderation_status = 'approved') as visible_descendant_count
 				from post target
 				left join post_reply reply on reply.parent_post_id = target.id or reply.root_post_id = target.id
-				left join unit reply_unit on reply_unit.id = reply.post_id
+				left join post reply_unit on reply_unit.id = reply.post_id
 				group by target.id
 			)
 			select count(*)::text as drift_count from expected
@@ -199,50 +199,6 @@ const checks: readonly { name: string; query: SQL }[] = [
 		`,
 	},
 	{
-		name: "book_chapter_stats",
-		query: sql`
-			with eligible as (
-				select node.id as node_id, structure.owner_unit_id as book_unit_id,
-					content_unit.status = 'published'
-						and content_unit.visibility in ('public', 'unlisted') as public_eligible
-				from content_structure_node node
-				join content_structure structure on structure.id = node.structure_id
-				join unit content_unit on content_unit.id = node.content_unit_id
-				join post content_post on content_post.id = content_unit.id
-				where structure.kind = 'book.contents' and structure.deleted_at is null
-					and node.deleted_at is null and content_unit.kind = 'post'
-					and content_unit.deleted_at is null and content_post.kind = 'chapter'
-			), expected_book as (
-				select book_unit_id, count(*) as all_count,
-					count(*) filter (where public_eligible) as public_count
-				from eligible group by book_unit_id
-			), book_drift as (
-				select 1 from expected_book
-				full join book_chapter_stat using (book_unit_id)
-				where coalesce(expected_book.all_count, 0) is distinct from
-					coalesce(book_chapter_stat.all_count, 0)
-					or coalesce(expected_book.public_count, 0) is distinct from
-						coalesce(book_chapter_stat.public_count, 0)
-			), expected_progress as (
-				select progress.profile_id, eligible.book_unit_id,
-					count(*) as all_completed_count,
-					count(*) filter (where eligible.public_eligible) as public_completed_count
-				from eligible
-				join content_structure_node_progress progress on progress.node_id = eligible.node_id
-				group by progress.profile_id, eligible.book_unit_id
-			), progress_drift as (
-				select 1 from expected_progress
-				full join book_chapter_progress_stat using (profile_id, book_unit_id)
-				where coalesce(expected_progress.all_completed_count, 0) is distinct from
-					coalesce(book_chapter_progress_stat.all_completed_count, 0)
-					or coalesce(expected_progress.public_completed_count, 0) is distinct from
-						coalesce(book_chapter_progress_stat.public_completed_count, 0)
-			)
-			select ((select count(*) from book_drift) +
-				(select count(*) from progress_drift))::text as drift_count
-		`,
-	},
-	{
 		name: "book_localized_content_metric_stat",
 		query: sql`
 			with expected as (
@@ -253,7 +209,7 @@ const checks: readonly { name: string; query: SQL }[] = [
 				join content_structure structure on structure.id = node.structure_id
 					and structure.owner_unit_id = node.owner_unit_id
 				join post content_post on content_post.id = node.content_unit_id
-				join unit content_unit on content_unit.id = node.content_unit_id
+				join post content_unit on content_unit.id = node.content_unit_id
 				join unit_localization localization on localization.unit_id = node.content_unit_id
 				join unit_localization_content_metric metric
 					on metric.unit_id = node.content_unit_id
@@ -291,19 +247,16 @@ const checks: readonly { name: string; query: SQL }[] = [
 				union all
 				select target_id, 0, 0, count(*), 0, 0, 0, 0, 0, 0 from (
 					select reply.root_post_id as target_id
-					from post_reply reply join unit reply_unit on reply_unit.id = reply.post_id
+					from post_reply reply join post reply_unit on reply_unit.id = reply.post_id
 					where reply_unit.deleted_at is null
 					union all
 					select reply.parent_post_id
-					from post_reply reply join unit reply_unit on reply_unit.id = reply.post_id
+					from post_reply reply join post reply_unit on reply_unit.id = reply.post_id
 					where reply.parent_post_id is not null and reply_unit.deleted_at is null
 				) reply_target group by target_id
 				union all
-				select item.unit_id, 0, 0, 0, count(*), 0, 0, 0, 0, 0
-				from collection_item item
-				join profile_favorites_collection favorites
-					on favorites.collection_id = item.collection_id
-				group by item.unit_id
+				select public.reference_value_native_id(target_reference_id), 0, 0, 0, count(*), 0, 0, 0, 0, 0
+				from account_favorite group by target_reference_id
 				union all
 				select unit_id, 0, 0, 0, 0, count(*), 0, 0, 0, 0
 				from unit_share group by unit_id
@@ -357,19 +310,19 @@ const checks: readonly { name: string; query: SQL }[] = [
 						is distinct from (conversation_stat.last_message_id,
 							conversation_stat.last_message_at)
 			), participant_expected as (
-				select conversation.id as conversation_id, participant.profile_id,
+				select conversation.id as conversation_id, participant.auth_user_id,
 					latest.id as last_message_id, latest.created_at as last_message_at,
 					coalesce(latest.created_at, conversation.created_at) as sort_at
 				from conversation
-				cross join lateral (values (conversation.participant_low_profile_id),
-					(conversation.participant_high_profile_id)) participant(profile_id)
+				cross join lateral (select recipient.auth_user_id from (values (conversation.participant_low_auth_user_id),
+					(conversation.participant_high_auth_user_id)) recipient(auth_user_id) where conversation.kind='direct') participant
 				left join lateral (
 					select id, created_at from message where conversation_id = conversation.id
 					order by created_at desc, id desc limit 1
 				) latest on true
 			), participant_drift as (
 				select 1 from participant_expected
-				full join conversation_participant_stat using (conversation_id, profile_id)
+				full join conversation_participant_stat using (conversation_id, auth_user_id)
 				where participant_expected.conversation_id is null
 					or conversation_participant_stat.conversation_id is null
 					or row(participant_expected.last_message_id,
@@ -390,7 +343,7 @@ const advisoryChecks: readonly { name: string; query: SQL }[] = [
 		name: "notification_unread_count",
 		query: sql`
 			with expected as (
-				select profile.id as profile_id,
+				select users.id as auth_user_id,
 					count(notification.id) filter (
 						where notification.in_app_visible and notification.read_at is null
 							and (read_state.read_through_created_at is null
@@ -398,40 +351,41 @@ const advisoryChecks: readonly { name: string; query: SQL }[] = [
 								or (notification.created_at = read_state.read_through_created_at
 									and notification.id > read_state.read_through_id))
 					) as unread_count
-				from profile
+				from users
 				left join notification_recipient_stat read_state
-					on read_state.profile_id = profile.id
-				left join notification on notification.recipient_profile_id = profile.id
-				group by profile.id
+					on read_state.auth_user_id = users.id
+				left join notification on notification.recipient_auth_user_id = users.id
+				group by users.id
 			)
 			select count(*)::text as drift_count from expected
-			full join notification_recipient_stat using (profile_id)
-			where expected.profile_id is null or notification_recipient_stat.profile_id is null
-				or expected.unread_count is distinct from notification_recipient_stat.unread_count
+			full join notification_recipient_stat using (auth_user_id)
+			-- The private counter is allocated on first notification; an absent zero is valid.
+			where expected.auth_user_id is null
+				or expected.unread_count is distinct from coalesce(notification_recipient_stat.unread_count, 0)
 		`,
 	},
 	{
 		name: "conversation_unread_count",
 		query: sql`
 			with expected as (
-				select conversation.id as conversation_id, participant.profile_id,
+				select conversation.id as conversation_id, participant.auth_user_id,
 					count(unread.id) filter (where unread.id is not null) as unread_count
 				from conversation
-				cross join lateral (values (conversation.participant_low_profile_id),
-					(conversation.participant_high_profile_id)) participant(profile_id)
+				cross join lateral (select recipient.auth_user_id from (values (conversation.participant_low_auth_user_id),
+					(conversation.participant_high_auth_user_id)) recipient(auth_user_id) where conversation.kind='direct') participant
 				left join conversation_read read_state
 					on read_state.conversation_id = conversation.id
-					and read_state.profile_id = participant.profile_id
+					and read_state.auth_user_id = participant.auth_user_id
 				left join message marker on marker.id = read_state.last_read_message_id
 				left join message unread on unread.conversation_id = conversation.id
-					and unread.sender_profile_id <> participant.profile_id
+					and unread.sender_auth_user_id <> participant.auth_user_id
 					and unread.deleted_at is null
 					and (marker.id is null or (unread.created_at, unread.id) >
 						(marker.created_at, marker.id))
-				group by conversation.id, participant.profile_id
+				group by conversation.id, participant.auth_user_id
 			)
 			select count(*)::text as drift_count from expected
-			full join conversation_participant_stat using (conversation_id, profile_id)
+			full join conversation_participant_stat using (conversation_id, auth_user_id)
 			where expected.conversation_id is null or conversation_participant_stat.conversation_id is null
 				or expected.unread_count is distinct from conversation_participant_stat.unread_count
 		`,

@@ -1,3 +1,5 @@
+SET search_path TO public;
+
 -- Private conversation membership uses Auth; public sender identity is an immutable snapshot.
 CREATE OR REPLACE FUNCTION public.participation_guard_conversation()
 RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$

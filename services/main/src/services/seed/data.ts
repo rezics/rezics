@@ -84,7 +84,8 @@ export const SeedPlan = {
 	realmUnitFollows: 300,
 	realmRuleRevisions: 12,
 	realmRules: 36,
-	realmRuleAcceptances: 180,
+	// Required join rules may add acknowledgements beyond this per-Realm coverage floor.
+	minimumRealmRuleAcceptances: 180,
 	realmPins: 72,
 	realmUnits: 600,
 	capabilityGrants: 80,

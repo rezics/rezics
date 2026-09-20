@@ -16,15 +16,18 @@ function transactionWithExistingRows(input: {
 	const where = vi.fn(() => ({ limit }));
 	const from = vi.fn(() => ({ where }));
 	const select = vi.fn(() => ({ from }));
-	return { transaction: { select } as unknown as DatabaseTransaction, select };
+	const execute = vi.fn().mockResolvedValue({ rows: [] });
+	return { transaction: { select, execute } as unknown as DatabaseTransaction, select, execute };
 }
 
 describe("Fixture Seed target preflight", () => {
 	it("accepts the post-Bootstrap target before platform infrastructure is seeded", async () => {
-		const { transaction, select } = transactionWithExistingRows({});
+		const { transaction, select, execute } = transactionWithExistingRows({});
 
 		await expect(assertFixtureSeedTargetEmpty(transaction)).resolves.toBeUndefined();
 		expect(select).toHaveBeenCalledTimes(UnitOwnerValues.length + 1);
+		expect(execute).toHaveBeenCalledTimes(1);
+		expect(execute.mock.invocationCallOrder[0]).toBeLessThan(select.mock.invocationCallOrder[0]!);
 	});
 
 	it("rejects an existing non-Bootstrap user", async () => {

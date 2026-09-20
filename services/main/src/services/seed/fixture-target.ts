@@ -1,4 +1,5 @@
-import { notInArray } from "drizzle-orm";
+import { PlatformWorkloadDefinitions } from "../authorization/workload-principals";
+import { and, notInArray, sql } from "drizzle-orm";
 
 import { UnitOwnerValues, type UnitOwner } from "@rezics/reference";
 import {
@@ -47,10 +48,20 @@ export async function readSeedIdentityIds(
  * Platform infrastructure is seeded only after this preflight succeeds.
  */
 export async function assertFixtureSeedTargetEmpty(tx: DatabaseTransaction): Promise<void> {
+	// READ COMMITTED native commands require a seed-run fence before empty-target observations.
+	await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended('rezics-fixture-seed',0))`);
 	const [existingUser] = await tx
 		.select({ id: users.id })
 		.from(users)
-		.where(notInArray(users.id, [...BootstrapAuthUserIds]))
+		.where(
+			and(
+				notInArray(users.id, [...BootstrapAuthUserIds]),
+				sql`not (${users.principalKind}='service' and exists(
+				select 1 from public.workload_principal w join public.access_scope s on s.id=w.owner_scope_id
+				where w.auth_user_id=${users.id} and w.purpose='system' and w.system_key=any(${sql.param(Object.keys(PlatformWorkloadDefinitions))}::text[])
+				and w.version>0 and s.platform_root='platform'))`,
+			),
+		)
 		.limit(1);
 	if (existingUser)
 		throw new Error("Seed requires an empty database; run `task --yes local:reset`");

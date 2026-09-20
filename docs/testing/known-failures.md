@@ -41,20 +41,11 @@ The September 8 convergence qualification recorded a PostgreSQL SIGILL during At
 
 ## Main IAM qualification after schema extraction
 
-The 2026-09-20 [native recovery checkpoint](database/membership-native-recovery-evidence.json)
-reduces the owning main TypeScript result from 160 to **3 errors**, all in
-`src/services/seed/service.ts`. Reproduce with `task services-main:typecheck`.
-The seed still inserts into the read-only Realm membership and rule-acceptance
-presentation views. Replace those writes with native shared admission, explicit
-synthetic consent, independent enforcement and exact generation-bound rule history.
-Do not restore removed tables, cast old actor objects or make the views writable.
-Qualify the seed against a separate empty installed disposable target; the current
-qualification database intentionally retains fixture actors and is not an empty seed target.
-
-The native Org/Realm, account lifecycle/enforcement, roster, pending capacity and
-recovery checkpoints qualify their listed commands and HTTP paths. They do not
-qualify the seed, all private account consumers, mixed-controller recovery or full
-M01/API/retained-web acceptance.
+The 2026-09-20 [native seed repair](database/native-seed-integrity-evidence.json)
+closes the remaining three seed TypeScript errors; `task services-main:typecheck`
+passes. Seed enrollment now uses current native consent/admission/approval/mute and
+exact rule history. This static result does not qualify all main consumers or M01.
+The listed native checkpoints retain their scoped evidence and limitations.
 
 The Org fixture's attempted legacy `PATCH /account/me/preferences` on a native
 account returned 500: `resolveInteractiveSession` invokes `ensureSelfEntity`,
@@ -66,8 +57,46 @@ The native Org fixture checks direct `/account/main-identity` isolation and reje
 represented private-setting reads; that passing check does not close the legacy
 locale-preference failure.
 
-Full main integrity and private-account onboarding remain open until their owning
-checks pass; scoped native fixture success does not close these consumers.
+Private-account onboarding and full runtime integrity remain open until their
+owning checks pass; scoped native fixture success does not close these consumers.
+
+## Native seed and report revision evidence
+
+On 2026-09-20, an empty installed target successfully populated the `demo` profile,
+rebuilt its derived projections and passed native seed postconditions plus all 12
+required aggregate groups. Both advisory unread checks also report zero drift.
+The [seed evidence](database/native-seed-integrity-evidence.json) records the exact
+commands, generated conversation-statistics repair and qualification limits.
+
+`task services-main:db:seed -- --profile coverage` reaches governance, then fails
+with `Seed governance target is missing its Unit revision head`. Native catalog
+owners have their own history; `seedHistory` deliberately does not manufacture
+common Unit revisions for them. The report API still reads `unit_revision_head`,
+and `content_report.reported_revision_id` has a concrete FK to `unit_revision`.
+Reconcile the report's exact evidence model, persistence constraints, API/SDK
+responses and native catalog/platform consumers together. Preserve rule citations,
+referrals, visibility, rejected stale/foreign evidence and capacity constraints;
+do not omit catalog targets or restore a universal revision owner merely to pass
+coverage. Rerun the complete coverage profile on an empty installed target and
+qualify its governance/report paths. The observed failed transaction rolled back.
+
+## Native governance projection fixture
+
+The 2026-09-20 full `task services-main:db:check` replays all 60 migrations and
+18,947 SQL statements, then reaches
+`check-realm-governance-projection.ts` after the native reference, IAM, private
+consumer, recommendation, rule-decision and primary-contribution checks pass.
+It fails at line 59 with PostgreSQL `42P01`: the fixture still inserts into the
+removed `realm_member` table. The [seed checkpoint](database/native-seed-integrity-evidence.json)
+retains completed steps and the failed boundary.
+
+Reconcile counter transitions with shared membership generations, explicit consent
+and independent Realm enforcement. Preserve missing-counter/underflow failures,
+rejoin/departure, immutable membership identity and the independent latest-governance
+projection assertions. A read-only Entity projection is not a replacement writer.
+After repair, rerun the complete database check; downstream canonical schema,
+constraint, search, Drizzle drift and importer checks were not reached in this run.
+The separate successful Realm and Group fixtures do not close this full-task failure.
 
 ## Online exact-count policy inventory
 

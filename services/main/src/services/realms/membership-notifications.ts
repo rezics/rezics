@@ -17,6 +17,8 @@ export async function notifyRealmEnrollment(
 		basis: RealmEnrollmentNotificationBasis | null;
 	},
 ) {
+	// Preserve the Entity self-notification rule before resolving its private inbox.
+	if (input.recipient.kind === "entity" && input.recipient.id === input.actorEntityId) return;
 	let principalId: string;
 	let eligibility: SQL<boolean | null>;
 	if (input.recipient.kind === "principal") {

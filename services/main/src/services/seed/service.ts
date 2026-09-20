@@ -20,7 +20,9 @@ import {
 import { createHash } from "node:crypto";
 import { authEntity } from "@rezics/schema/postgres/access/participation";
 import { selfAuthUserIdForEntity } from "../participation/account-query";
-import { createParticipantIdentity } from "../participation/identity";
+import { createSeedParticipant, seedRealmEnrollment } from "./enrollment";
+import type { PrincipalRequestContext } from "../auth/principal-context";
+import { firstPartyAuthorityMetadata } from "../auth/credential-authority";
 
 import { defaultKeyHasher } from "@better-auth/api-key";
 import {
@@ -73,7 +75,7 @@ import {
 import { createNavigationStructure } from "../content-structure/navigation";
 import { createContentStructure, insertContentStructureNode } from "../content-structure/service";
 import { loadContentStructureSnapshot } from "../content-structure/storage";
-import { database, type DatabaseTransaction } from "../database";
+import { database, withDatabaseTransactionContext, type DatabaseTransaction } from "../database";
 import {
 	accountEnforcement,
 	accountEnforcementAction,
@@ -111,10 +113,8 @@ import {
 	accountRealmTagSubscription,
 	accountUnitTag,
 	realm,
-	realmMember,
 	realmPin,
 	realmRule,
-	realmRuleAcceptance,
 	realmRuleRevision,
 	realmScoreContext,
 	realmTagContext,
@@ -205,6 +205,8 @@ interface CreatedUnit extends UnitDescriptor {
 
 interface CreatedProfile {
 	id: string;
+	context: PrincipalRequestContext;
+	emailVerified: boolean;
 	authUserId: string;
 	name: string;
 	email: string;
@@ -520,6 +522,7 @@ async function seedProfiles(
 			name: index === 0 ? "REZICS Demo" : data.name(language),
 			email: index === 0 ? DemoCredentials.email : `seed-user-${position(index)}@example.test`,
 			emailVerified: index === 0 || index % 5 !== 0,
+			registrationContentLanguage: language,
 			image: index === 0 ? null : data.fakerByLanguage[language].image.avatar(),
 			createdAt,
 			updatedAt: createdAt,
@@ -527,21 +530,23 @@ async function seedProfiles(
 	});
 	const returnedUsers: (typeof users.$inferSelect)[] = [];
 	for (const batch of chunks(userInputs)) {
-		returnedUsers.push(...(await tx.insert(users).values(batch).returning()));
+		returnedUsers.push(...(await tx.insert(users)
+			.values(batch.map((input) => ({ ...input, emailVerified: true }))).returning()));
 	}
 	const userByEmail = new Map(returnedUsers.map((value) => [value.email, value]));
 	const profiles: CreatedProfile[] = [];
 	for (const [index, input] of userInputs.entries()) {
 		const account = userByEmail.get(input.email);
 		if (!account) throw new Error("Seed Auth account insertion failed");
-		const native = await createParticipantIdentity(tx, {
-			shape: "person",
-			operatorAuthUserId: account.id,
-			names: [{ language: itemAt(data.languages(index), 0), value: input.name }],
+		const native = await createSeedParticipant(tx, account.id, {
+			language: itemAt(data.languages(index), 0),
+			value: input.name,
 		});
 		await tx.insert(authEntity).values({ authUserId: account.id, entityId: native.id });
 		profiles.push({
 			id: native.id,
+			context: native.context,
+			emailVerified: input.emailVerified,
 			authUserId: account.id,
 			name: input.name,
 			email: input.email,
@@ -573,16 +578,10 @@ async function seedProfiles(
 		}),
 		(batch) => tx.insert(accountPreference).values(batch),
 	);
-	await writeBatches(
-		profiles.map((value) => ({
-			realmId: OfficialRealmUnitIds.score,
-			profileId: value.id,
-			state: "active" as const,
-			joinedAt: value.createdAt,
-			updatedAt: value.createdAt,
-		})),
-		(batch) => tx.insert(realmMember).values(batch),
-	);
+	for (const profile of profiles)
+		await seedRealmEnrollment(tx, {
+			realmId: OfficialRealmUnitIds.score, context: profile.context, state: "active",
+		});
 	await tx
 		.insert(accountFavoritesState)
 		.values(profiles.map((profile) => ({ authUserId: profile.authUserId })));
@@ -608,6 +607,7 @@ async function seedProfiles(
 		rateLimitMax: 300,
 		requestCount: 0,
 		permissions: JSON.stringify(toApiKeyPermissions(ApiPermissionValues)),
+		metadata: JSON.stringify(firstPartyAuthorityMetadata({ mode: "operator" })),
 		createdAt: demo.createdAt,
 		updatedAt: demo.createdAt,
 	});
@@ -1871,18 +1871,16 @@ async function seedStructure(
 						? profiles.find((value) => value.id === realmUnit.ownerProfileId)
 						: itemAt(otherProfiles, realmIndex * 7 + index - 1);
 				if (!member) throw new Error(`Missing owner profile for Realm ${realmUnit.id}`);
-				const joinedAt = latestDate(realmUnit.createdAt, member.createdAt);
 				return {
 					realmId: realmUnit.id,
 					profileId: member.id,
-					state: itemAt(["active", "active", "active", "pending", "muted"] as const, index),
-					joinedAt,
-					updatedAt: joinedAt,
+					state: itemAt([
+						"active", "active", "active", realmIndex % 3 === 0 ? "pending" : "active", "muted",
+					] as const, index),
 				};
 			},
 		);
 	});
-	await writeBatches(memberRows, (batch) => tx.insert(realmMember).values(batch));
 	await writeBatches(
 		unitFixtures.realms.flatMap((realmUnit, realmIndex) =>
 			Array.from(
@@ -1949,17 +1947,26 @@ async function seedStructure(
 		(batch) => insertSeedPlatformRows(tx, { owner: "realm_rule", rows: batch }),
 	);
 	await insertUnitDetails(tx, data, ruleUnits);
-	await writeBatches(
-		revisions.flatMap((revision, revisionIndex) =>
-			Array.from({ length: SeedPlan.realmRuleAcceptances / revisions.length }, (_, index) => ({
-				revisionId: revision.id,
-				profileId: itemAt(profiles, revisionIndex * 7 + index).id,
-				language: itemAt(data.languages(revisionIndex + index), 0),
-				acceptedAt: revision.publishedAt,
-			})),
-		),
-		(batch) => tx.insert(realmRuleAcceptance).values(batch),
-	);
+	const profilesById = new Map(profiles.map((profile) => [profile.id, profile]));
+	for (const [realmIndex, realmUnit] of unitFixtures.realms.entries()) {
+		const manager = profilesById.get(realmUnit.ownerProfileId);
+		const revision = revisions.find((value) => value.realmId === realmUnit.id);
+		if (!manager || !revision) throw new Error("Seed Realm authority or rules are missing");
+		let optionalAcknowledgements = 0;
+		const selectedMembers = memberRows.filter((value) => value.realmId === realmUnit.id);
+		for (const [memberIndex, member] of selectedMembers.entries()) {
+			const participant = profilesById.get(member.profileId);
+			if (!participant) throw new Error("Seed Realm participant is missing");
+			const acknowledge = revision.requireOnJoin ||
+				(member.state !== "pending" && optionalAcknowledgements < SeedPlan.minimumRealmRuleAcceptances / revisions.length);
+			if (acknowledge && member.state !== "pending") optionalAcknowledgements++;
+			await seedRealmEnrollment(tx, {
+				realmId: realmUnit.id, context: participant.context,
+				manager: manager.context, state: member.state,
+				...(acknowledge ? { rule: { id: revision.id, language: itemAt(data.languages(realmIndex + memberIndex), 0) } } : {}),
+			});
+		}
+	}
 	const realmTargets = [
 		...unitFixtures.works,
 		...unitFixtures.series,
@@ -2269,18 +2276,29 @@ async function seedCommunications(
 	profiles: readonly CreatedProfile[],
 	content: SeedContent,
 ): Promise<void> {
-	const conversationInputs = Array.from({ length: SeedPlan.conversations }, (_, index) => {
-		const first = itemAt(profiles, Math.floor(index / 10));
-		const second = itemAt(profiles, 10 + (index % 10));
-		const [low, high] = first.authUserId < second.authUserId ? [first, second] : [second, first];
-		return {
-			participantLowAuthUserId: low.authUserId,
-			participantLowEntityId: low.id,
-			participantHighAuthUserId: high.authUserId,
-			participantHighEntityId: high.id,
-			createdAt: data.pastDate(120, 1),
-		};
-	});
+	const blocks = await tx.select().from(accountEntityBlock)
+		.where(inArray(accountEntityBlock.blockerAuthUserId, profiles.map((profile) => profile.authUserId)))
+		.limit(profiles.length + 1);
+	if (blocks.length > profiles.length) throw new Error("Seed conversation block budget exceeded");
+	const blocked = new Set(blocks.map((block) => `${block.blockerAuthUserId}:${block.blockedEntityId}`));
+	const seenPairs = new Set<string>();
+	const conversationInputs: (typeof conversation.$inferInsert)[] = [];
+	// At most 50 * 49 candidates; retain the requested count without creating blocked DMs.
+	for (let distance = 1; distance < profiles.length && conversationInputs.length < SeedPlan.conversations; distance++) {
+		for (let index = 0; index < profiles.length && conversationInputs.length < SeedPlan.conversations; index++) {
+			const first = itemAt(profiles, index), second = itemAt(profiles, index + distance);
+			const [low, high] = first.authUserId < second.authUserId ? [first, second] : [second, first];
+			const key = `${low.authUserId}:${high.authUserId}`;
+			if (seenPairs.has(key) || blocked.has(`${first.authUserId}:${second.id}`) || blocked.has(`${second.authUserId}:${first.id}`)) continue;
+			seenPairs.add(key);
+			conversationInputs.push({
+				participantLowAuthUserId: low.authUserId, participantLowEntityId: low.id,
+				participantHighAuthUserId: high.authUserId, participantHighEntityId: high.id,
+				createdAt: data.pastDate(120, 1),
+			});
+		}
+	}
+	if (conversationInputs.length !== SeedPlan.conversations) throw new Error("Seed has too few eligible conversation pairs");
 	const conversations: CreatedConversation[] = [];
 	for (const batch of chunks(conversationInputs)) {
         const inserted=await tx.insert(conversation).values(batch).returning({
@@ -3287,7 +3305,7 @@ export class DatabaseSeedService {
 		const data = createSeedData(options.referenceTime);
 		const demoPasswordHash = await hashPassword(DemoCredentials.password);
 		await database.transaction(
-			async (tx) => {
+			async (tx) => withDatabaseTransactionContext(tx, async () => {
 				await assertFixtureSeedTargetEmpty(tx);
 				await seedPlatformInfrastructure(tx);
 
@@ -3332,8 +3350,11 @@ export class DatabaseSeedService {
 					await seedHistory(tx, data, profiles, unitFixtures, content);
 				}
 				await assertPreparedFixtureIdentitiesStored(tx);
-			},
-			{ isolationLevel: "serializable" },
+				// Model withdrawal after the synthetic authored effects, preserving unverified-account scenarios.
+				const unverified = profiles.filter((profile) => !profile.emailVerified).map((profile) => profile.authUserId);
+				if (unverified.length) await tx.update(users).set({ emailVerified: false }).where(inArray(users.id, unverified));
+			}),
+			{ isolationLevel: "read committed" },
 		);
 		const result = {
 			profile: options.profile,

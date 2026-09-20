@@ -28,12 +28,12 @@
     "backup/restore drill"
   ],
   "sha256": {
-    "current-schema-map.tsv": "a8e4261e798acb08a227e38c49a87e2c42c9671cae2a33405e4b8cc88cc7d87d",
+    "current-schema-map.tsv": "5fbc12f8acff45c04c850a088e1b819d18bd796f4179e28fd5d119aeb8a30989",
     "api-coverage.tsv": "7b1ebf472f6a9f1ac660d34795b006d1ab69f47cbeb5034060c21a8c3dfcddf5",
     "scenarios.tsv": "4165424a131e11e59837fa93353dca0f3fb37912b59874e673bf84724731fa8b",
     "capacity.json": "8b42e8d9ec58f2af52573cd6fc81010d12bd6559076762bc8fae6ef9879cf42d",
     "capacity.md": "616cc99f3f1964f5f4ff3ec457dc30a69cda938e61ea6c8cd48ba4eeff65d406",
-    "dependency-manifest.json": "b24483f63e4135950e0b9769794a76c5d82df76d88c93a72fccef4d67d4dc9d4"
+    "dependency-manifest.json": "2fa05aa13fe482fc26d096c83ad7fea31f4b59bb2e2c8542079a070bebaf4429"
   },
   "artifact_paths": {
     "current-schema-map.tsv": "docs/testing/database/current-schema-map.tsv",
@@ -113,7 +113,7 @@
     "docs/next-version/README.md": "ae76328b40a7ec9c2eb1e2b543afc9af7554a7e52da6095d4e39e670d004a0f4",
     "docs/next-version/world-comments-feasibility.md": "d5fc28e8c73efef846d8993edbc0a4f41e4ca2f258388dd7fef1c15d62c25ba8",
     "docs/next-version/world-comments.md": "9e61745dbb8e6e2747b409a742a335ca80139ad5b1ad8be63251e11880bdbdbe",
-    "docs/plan/README.md": "2df90b5da3d32632c94ffaccd7255f4935bbb16979a85c8ffa8900beab5b327c",
+    "docs/plan/README.md": "9ffac5a0b63f602fb47edfb3c24979753031608fe6a68520aaf1c9b7300bb0b0",
     "docs/plan/backend-acceptance.md": "eff052e8bfd421616e39cd5492f9ea6d5afec73ac84768e75263a9b2390c81a4",
     "docs/plan/execution-workflow.md": "203be6f04135e1abc7a5cb343b92e48a94ab37d5a367596e7b82ed328613564f",
     "docs/plan/frontend.md": "3efec121b4af58e171d912ce0bc8d39d56316466b83d2448466ac5010c0c21b7",
@@ -137,10 +137,10 @@
     "docs/testing/backend-integration.md": "839904ea26b482cacdb4e8714cdf827a0b97c722d69ab75c017d183b03710acf",
     "docs/testing/book-and-creation.md": "2c11fb9a6f08475d10c85190dfc4a874687379f73bc95b25d8651f83626e26a6",
     "docs/testing/content-composition.md": "193a92888634f69cba13939f023d8a67dca1c5b7b86685abed4ba0f7493b144a",
-    "docs/testing/foundation.md": "9dfd7121f3bad86587b1740e093b43c62ef35fc103edda3048c8e5a732ff2567",
+    "docs/testing/foundation.md": "72d006343e75dd710b9caba9ec7ff4365858a4659612707337f98d8c1fd212ee",
     "docs/testing/identity-and-access.md": "48249fa7f5567d746923f1f1c828763743a3361b0672e6ab5b0ccfd052cbf4fc",
     "docs/testing/information-verification.md": "ab6166878a46213195833469a7a3944ef79aa39b8de56c5c4cb9d75d55a89bc5",
-    "docs/testing/known-failures.md": "29e50f569d67c7deeb0843a6b375f19c338d826720522f162a92b629798002a9",
+    "docs/testing/known-failures.md": "1d4e730bbcf1524120a6ecaf1bf1731db35b2ee1891bb7a0949afbba8f247b98",
     "docs/testing/model-contracts.md": "669cf263fe8e77b0efa8db3908e3a9d27e22cff2ed3bd0dc2a08535c48d38572",
     "docs/testing/native-work.md": "23418e6d7d879445b44384cfa4157e99d063d65ae1638a0771adeff7a6cd4bdd",
     "docs/testing/ratings-and-event-time.md": "5dbe5a8ff0115e03ba4fbb5266022d6525043bb05a6d664afe1a8dce7670c715",

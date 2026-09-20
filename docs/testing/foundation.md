@@ -39,6 +39,41 @@ task services-main:db:fixture:stop
 
 Use the configured `POSTGRES_MIGRATION_LOCAL_PORT` if it differs from 5433. Preparation resets only the Compose `postgres-migration-test` service, validates/replays the preserved baseline and forward migrations, and leaves the database running. It does not qualify domain behavior by itself. This is the same exclusive lane used by migration generation and `db:check`; finish active domain fixtures before resetting it. The application development database is separate. The full `db:check` remains required for changed migrations/canonical SQL and schema-drift verification.
 
+## Native seed integrity
+
+The [2026-09-20 checkpoint](database/native-seed-integrity-evidence.json) records
+native demo population and retained failed coverage/full-database qualification
+separately. Run `task services-main:db:install -- --yes --suppress-credential-output`
+on an isolated empty local database with its own object-storage bucket, then
+`task services-main:db:seed -- --profile demo`. The owning command includes
+projection rebuilds, aggregate reconciliation and `db:seed:check`; after repairing
+an audit-only failure, rerun that check and the postconditions against the same
+committed seed without reinserting it.
+
+`db:seed-target:check` requires an empty installed disposable Atlas target. Six
+native assertions recognize only the three registered platform workload duties,
+reject unrelated human/service accounts and observe the exact seed-run lock
+between competing preflights. A populated target still rejects a second run.
+`db:conversation-stats:check` rolls back its five direct/group assertions: one
+conversation statistic, exactly two private direct participants with zero bigint
+counts, and no implicit direct participants for a group conversation.
+
+The generated forward migration corrects the direct conversation initializer's
+four-values/three-columns defect; released history and the installation baseline
+remain unchanged. Native Realm self-approval suppresses same-Entity notification
+before private inbox routing. The seed invariant reader checks actual identity
+receipts, main choices, consent, operation receipts, shared admission generations,
+approval policy, separate enforcement and exact rule revision/language.
+
+The recorded demo has 1,855 native resources, one ready recommendation snapshot,
+zero missing localized metrics, 50 native account choices and 290 enrollment heads.
+It retains 16 pending applications, 48 mutes, 202 active-generation rule consents
+and nine accounts whose email verification is withdrawn after authored fixture
+effects. Twelve required aggregate groups and two advisory unread checks have no
+drift. This is a bounded development fixture, not 500M/3B capacity acceptance.
+Coverage's catalog report revision failure remains a
+[separate required repair](known-failures.md#native-seed-and-report-revision-evidence).
+
 ## Canonical reference values
 
 The executable owner is [check-reference-values.ts](../../services/main/scripts/check-reference-values.ts). `task services-main:db:check` installs the preserved baseline plus forward migrations, runs the reference fixture with the other integrity fixtures and checks canonical SQL and Drizzle drift. To repeat just this fixture against an already installed, isolated `rezics_atlas` database, provide its `DATABASE_ADMIN_URL` and run `task services-main:db:references:check`. The script rejects the development port and non-disposable database names. Its rows are disposable; the full replay task removes the container afterwards.
