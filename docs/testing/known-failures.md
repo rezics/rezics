@@ -46,7 +46,14 @@ base before shared schema extraction had 167 TypeScript errors; the replacement
 retains 160 existing IAM/Org/Realm errors, with no new file/error-code categories.
 `task services-main:typecheck` reproduces them. They include old membership
 fixtures/authority inputs, omitted role-binding eligibility and writes through
-current Entity presentation views. The two schema packages type-check separately.
+current Entity presentation views. The two schema packages type-check separately. The same 160 errors were
+reproduced on 2026-09-20 after source-tooling commit `437385f63`, using the owning
+main typecheck. They remain concentrated in retained membership/account/recovery
+fixtures, role-binding eligibility, Realm APIs, seed/presentation writes and
+related authority consumers. Adapter and source-tooling checks pass separately;
+that focused evidence does not qualify these native consumers. The active repair
+scope must retain the branded request-context proof and native write ownership,
+not restore removed membership tables or satisfy the compiler with casts.
 
 After a fresh complete migration replay, Auth, concrete references, access
 identities and roles passed. The outdated membership assertion was repaired to

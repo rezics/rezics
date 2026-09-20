@@ -6,12 +6,12 @@ Follow the [execution workflow](execution-workflow.md) for program authority, ph
 
 | Field | Current selection |
 | --- | --- |
-| Scope | Live external-site acquisition and scripted declaration validation, the first implementation checkpoint after documentation commit `37e8afb19`, authorized on 2026-09-20. |
-| Phase | `verification`: 37 focused tests, adapter/source-script TypeScript, actual current-provider acquisition/conversion and offline generation pass. Review/stage this checkpoint and qualify final documentation/generated-input integrity before committing. |
-| Owners | `libraries/content-adapters`, main catalog source-contract scripts, owning Taskfiles and documentation/design input consumers. |
-| Deliverables | Current URLs without external-content pins; fresh bounded fetches and per-run receipts in ignored storage; no partial/stale acquisition success; ignored generated field inventories; explicit source-shape/coverage drift with retained authored mappings and native evidence. |
-| Exclusions | Native domain/API/schema/migration redesign, closure of all native mapping gaps, corpus-scale ingestion, deployment and browser QA. Normative vocabulary pins remain compiler dependencies. |
-| Acceptance | [Live tooling evidence](../testing/source-conformance.md#live-tooling-evidence-2026-09-20) records the passing tool checks and actual acquisition. Native coverage remains unqualified: 8,393 unreviewed declarations and 15 explicit native gaps in that run. No product/capacity gate is inferred. |
+| Scope | Retained backend foundation integrity after live-source tooling commit `437385f63`: reproduce and repair the recorded main IAM/Org/Realm TypeScript and Group-command fixture failures before dependent native workflows. |
+| Phase | `repair`: owning main TypeScript reproduced the same 160 recorded errors on 2026-09-20. Repair affected authority inputs, native writers and fixtures; preserve branded request-context proofs and rejected-state invariants. The completed source-tooling evidence remains separate. |
+| Owners | Main identity/access, Org/Realm authority and retained callers/fixtures; shared access/reference contracts only where required by the repair. |
+| Deliverables | Correct typed authority inputs and native persistence ownership, consistent rejected Group-command outcomes, affected positive/denied regressions and honest remaining backend qualification. |
+| Exclusions | Broad Resource/Space/address renaming, unrelated feature activation, UI redesign, full-application browser QA, deployment and full M01/product/capacity acceptance. |
+| Acceptance | Owning main TypeScript and affected deterministic/native checks; preserve current authority and denial invariants. The [recorded regressions](../testing/known-failures.md#main-iam-qualification-after-schema-extraction) close only with reproduced repairs. |
 
 ## First-stage product and indexing scope
 
