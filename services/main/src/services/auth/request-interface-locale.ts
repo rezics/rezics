@@ -4,7 +4,7 @@ import { DefaultStoredUiLocale, isUiLocale, matchUiLocaleTag, type UiLocale } fr
 
 const UiLocaleCookieName = "NEXT_LOCALE";
 
-/** Resolves the concrete UI locale carried by the request that creates a Profile. */
+/** Resolves the concrete UI locale carried by the request that initializes private preferences. */
 export function resolveRequestUiLocale(headers: Headers): UiLocale {
 	const cookieHeader = headers.get("cookie");
 	if (cookieHeader) {

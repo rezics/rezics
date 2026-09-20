@@ -47,16 +47,6 @@ passes. Seed enrollment now uses current native consent/admission/approval/mute 
 exact rule history. This static result does not qualify all main consumers or M01.
 The listed native checkpoints retain their scoped evidence and limitations.
 
-The Org fixture's attempted legacy `PATCH /account/me/preferences` on a native
-account returned 500: `resolveInteractiveSession` invokes `ensureSelfEntity`,
-whose official-Zone follow initialization fails the concrete Zone reference FK on
-the unseeded native target. That route still silently constructs a Self. Migrate
-retained private preferences and their account fixture to private principal
-authority/default initialization; qualify the actual official seed separately.
-The native Org fixture checks direct `/account/main-identity` isolation and rejects
-represented private-setting reads; that passing check does not close the legacy
-locale-preference failure.
-
 Private-account onboarding and full runtime integrity remain open until their
 owning checks pass; scoped native fixture success does not close these consumers.
 
@@ -73,9 +63,10 @@ with `Seed governance target is missing its Unit revision head`. Native catalog
 owners have their own history; `seedHistory` deliberately does not manufacture
 common Unit revisions for them. The report API still reads `unit_revision_head`,
 and `content_report.reported_revision_id` has a concrete FK to `unit_revision`.
-Reconcile the report's exact evidence model, persistence constraints, API/SDK
-responses and native catalog/platform consumers together. Preserve rule citations,
-referrals, visibility, rejected stale/foreign evidence and capacity constraints;
+The maintainer selected [exact reported-component revisions](../architecture/content-governance.md#exact-reported-content-evidence),
+without a whole-catalog copy per report. Implement its persistence constraints,
+API/SDK responses and native catalog/platform consumers together. Preserve rule citations,
+referrals, visibility, rejected foreign evidence/stale authority and capacity constraints;
 do not omit catalog targets or restore a universal revision owner merely to pass
 coverage. Rerun the complete coverage profile on an empty installed target and
 qualify its governance/report paths. The observed failed transaction rolled back.

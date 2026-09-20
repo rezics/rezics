@@ -1,9 +1,15 @@
+import principalSession from "../../auth/principal-session";
+import { resolveRequestUiLocale } from "../../auth/request-interface-locale";
+import {
+	readOwnPreferences,
+	updateOwnDisplayPreferences,
+	updateOwnPrivacyPreferences,
+	replaceOwnPreferences,
+} from "../../account/preferences";
 import { referenceValueIdForNativeId } from "../../units/reference-value";
 import { unitStateRelation } from "../../units/state-relation";
 import { readUnitPresentationsInTransaction } from "../../units/presentation-reader";
 import { DevelopmentPreviewCapability, PlatformCapabilityValues } from "@rezics/access";
-import { parseLicenseId } from "@rezics/license";
-import { OfficialRealmUnitIds } from "@rezics/slug";
 import { and, desc, eq, isNull, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Elysia from "elysia";
@@ -55,7 +61,7 @@ import {
 	PublicEntityProfileResponse,
 	toApiErrorResponse,
 } from "../schema/response";
-import { PreferencesNotFound, UserSelfBlockForbidden } from "./errors";
+import { UserSelfBlockForbidden } from "./errors";
 import {
 	EntityActivityQuery,
 	EntityPresentationQuery,
@@ -73,7 +79,6 @@ import {
 	UpdatePrivacyPreferencesBody,
 	UserIdParams,
 	UserLookupParams,
-	parseCollectionConfig,
 } from "./schema";
 
 const ProfileNotFoundResponse = toApiErrorResponse(["CatalogReferenceNotFound"]);
@@ -91,30 +96,28 @@ const PersonalStateForbiddenResponse = toApiErrorResponse([
 	"ApiTokenPermissionRequired",
 ]);
 
-function presentPreferences(preference: typeof accountPreference.$inferSelect) {
-	return {
-		interfaceLocale: preference.interfaceLocale,
-		chineseContentDisplay: preference.chineseContentDisplay,
-		defaultLicenses: preference.defaultLicenses.map(parseLicenseId),
-		defaultRealmManageMode: preference.defaultRealmManageMode,
-		defaultScoreRealmId: preference.defaultScoreRealmId ?? OfficialRealmUnitIds.score,
-		scoreVisibility: preference.scoreVisibility,
-		progressVisibility: preference.progressVisibility,
-		collectionConfig: parseCollectionConfig(preference.collectionConfig),
-		personalizedFeed: preference.personalizedFeed,
-		customThemesEnabled: preference.customThemesEnabled,
-		filterFeedByPreferredLanguages: preference.filterFeedByPreferredLanguages,
-		alwaysShowSpoilers: preference.alwaysShowSpoilers,
-		alwaysShowNsfw: preference.alwaysShowNsfw,
-		contentRatings: preference.contentRatings,
-		preferredLanguages: preference.preferredLanguages,
-	};
-}
+// These account-owned routes share current credential and private-principal policy failures.
+const PrivatePreferenceFailureResponses = {
+	[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["AccessInputInvalid"]),
+	[StatusCodes.UNAUTHORIZED]: toApiErrorResponse([
+		"AuthenticationRequired",
+		"InteractiveSessionRequired",
+	]),
+	[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+		"AccessDenied",
+		"AccountClosed",
+		"AccountSuspended",
+		"ApiTokenPermissionRequired",
+	]),
+	[StatusCodes.CONFLICT]: toApiErrorResponse(["AccessChanged"]),
+	[StatusCodes.SERVICE_UNAVAILABLE]: toApiErrorResponse(["AccessUnavailable"]),
+};
 
 const activityScoreRealm = alias(realm, "profile_activity_score_realm");
 
 export default new Elysia({ name: "account-entity-api" })
 	.use(session)
+	.use(principalSession)
 	.get(
 		"/account/me",
 		{
@@ -235,32 +238,21 @@ export default new Elysia({ name: "account-entity-api" })
 	.get(
 		"/account/me/preferences",
 		{
-			access: "account:read",
-			response: {
-				[StatusCodes.OK]: PreferencesResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PreferencesNotFound"]),
-			},
+			principalAccess: { permission: "account:read", fresh: false, write: false },
+			response: { ...PrivatePreferenceFailureResponses, [StatusCodes.OK]: PreferencesResponse },
 			detail: { summary: "Current user preferences", tags: ["Users"] },
 		},
-		async ({ user }) => {
-			const [preference] = await database
-				.select()
-				.from(accountPreference)
-				.where(eq(accountPreference.authUserId, user.id))
-				.limit(1);
-			if (!preference) throw new PreferencesNotFound();
-			return presentPreferences(preference);
-		},
+		({ principalContext, request }) =>
+			readOwnPreferences(principalContext, resolveRequestUiLocale(request.headers)),
 	)
 	.patch(
 		"/account/me/privacy",
 		{
-			access: "session-only",
+			principalAccess: { permission: null, fresh: false, write: false },
 			body: UpdatePrivacyPreferencesBody,
 			response: {
+				...PrivatePreferenceFailureResponses,
 				[StatusCodes.OK]: PrivacyPreferencesResponse,
-				[StatusCodes.UNAUTHORIZED]: toApiErrorResponse(["InteractiveSessionRequired"]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PreferencesNotFound"]),
 			},
 			detail: {
 				operationId: "updateCurrentUserPrivacy",
@@ -268,98 +260,34 @@ export default new Elysia({ name: "account-entity-api" })
 				tags: ["Users", "First-party Preview"],
 			},
 		},
-		async ({ user, body }) => {
-			const [preference] = await database
-				.update(accountPreference)
-				.set({
-					...(body.scoreVisibility === undefined ? {} : { scoreVisibility: body.scoreVisibility }),
-					...(body.progressVisibility === undefined
-						? {}
-						: { progressVisibility: body.progressVisibility }),
-				})
-				.where(eq(accountPreference.authUserId, user.id))
-				.returning({
-					scoreVisibility: accountPreference.scoreVisibility,
-					progressVisibility: accountPreference.progressVisibility,
-				});
-			if (!preference) throw new PreferencesNotFound();
-			return preference;
-		},
+		({ principalContext, request, body }) =>
+			updateOwnPrivacyPreferences(principalContext, body, resolveRequestUiLocale(request.headers)),
 	)
 	.patch(
 		"/account/me/preferences",
 		{
-			access: "account:update",
+			principalAccess: { permission: "account:update", fresh: false, write: false },
 			body: UpdateDisplayPreferencesBody,
-			response: {
-				[StatusCodes.OK]: PreferencesResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PreferencesNotFound"]),
-			},
+			response: { ...PrivatePreferenceFailureResponses, [StatusCodes.OK]: PreferencesResponse },
 			detail: { summary: "Update current user display preferences", tags: ["Users"] },
 		},
-		async ({ user, body }) => {
-			const [preference] = await database
-				.update(accountPreference)
-				.set({
-					...(body.interfaceLocale === undefined ? {} : { interfaceLocale: body.interfaceLocale }),
-					...(body.chineseContentDisplay === undefined
-						? {}
-						: { chineseContentDisplay: body.chineseContentDisplay }),
-					...(body.alwaysShowSpoilers === undefined
-						? {}
-						: { alwaysShowSpoilers: body.alwaysShowSpoilers }),
-					...(body.alwaysShowNsfw === undefined ? {} : { alwaysShowNsfw: body.alwaysShowNsfw }),
-					...(body.customThemesEnabled === undefined
-						? {}
-						: { customThemesEnabled: body.customThemesEnabled }),
-				})
-				.where(eq(accountPreference.authUserId, user.id))
-				.returning();
-			if (!preference) throw new PreferencesNotFound();
-			return presentPreferences(preference);
-		},
+		({ principalContext, request, body }) =>
+			updateOwnDisplayPreferences(principalContext, body, resolveRequestUiLocale(request.headers)),
 	)
 	.put(
 		"/account/me/preferences",
 		{
-			access: "write:account:update",
+			principalAccess: { permission: "account:update", fresh: false, write: true },
 			body: ReplacePreferencesBody,
 			response: {
+				...PrivatePreferenceFailureResponses,
 				[StatusCodes.OK]: PreferencesResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"ParticipationDenied",
-					"RealmCapabilityRequired",
-				]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PreferencesNotFound"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["AccessRecordUnavailable"]),
 			},
 			detail: { summary: "Replace current user preferences", tags: ["Users"] },
 		},
-		async ({ user, authorization, body }) => {
-			await authorization.realm.ensureParticipation(body.defaultScoreRealmId);
-			return database.transaction(async (tx) => {
-				const [preference] = await tx
-					.update(accountPreference)
-					.set({
-						interfaceLocale: body.interfaceLocale,
-						chineseContentDisplay: body.chineseContentDisplay,
-						defaultLicenses: body.defaultLicenses,
-						defaultRealmManageMode: body.defaultRealmManageMode,
-						defaultScoreRealmId: body.defaultScoreRealmId,
-						collectionConfig: body.collectionConfig,
-						personalizedFeed: body.personalizedFeed,
-						customThemesEnabled: body.customThemesEnabled,
-						filterFeedByPreferredLanguages: body.filterFeedByPreferredLanguages,
-						alwaysShowSpoilers: body.alwaysShowSpoilers,
-						alwaysShowNsfw: body.alwaysShowNsfw,
-						contentRatings: body.contentRatings,
-						preferredLanguages: body.preferredLanguages,
-					})
-					.where(eq(accountPreference.authUserId, user.id))
-					.returning();
-				if (!preference) throw new PreferencesNotFound();
-				return presentPreferences(preference);
-			});
-		},
+		({ principalContext, request, body }) =>
+			replaceOwnPreferences(principalContext, body, resolveRequestUiLocale(request.headers)),
 	)
 	.get(
 		"/account/me/following",

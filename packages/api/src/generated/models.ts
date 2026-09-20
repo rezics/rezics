@@ -72952,13 +72952,70 @@ export type GetApiAccountMePreferencesStatus200 = {
 	preferredLanguages: GetApiAccountMePreferencesStatus200PreferredLanguagesEnum[];
 };
 
-export type GetApiAccountMePreferencesStatus404 = {
+export type GetApiAccountMePreferencesStatus400 = {
 	error: {
 		/**
-		 * @default 'PreferencesNotFound'
+		 * @default 'AccessInputInvalid'
 		 * @type string
 		 */
-		code: "PreferencesNotFound";
+		code: "AccessInputInvalid";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const GetApiAccountMePreferencesStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type GetApiAccountMePreferencesStatus401ErrorCodeEnum =
+	(typeof GetApiAccountMePreferencesStatus401ErrorCodeEnum)[keyof typeof GetApiAccountMePreferencesStatus401ErrorCodeEnum];
+
+export type GetApiAccountMePreferencesStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: GetApiAccountMePreferencesStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const GetApiAccountMePreferencesStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	AccountClosed: "AccountClosed",
+	AccountSuspended: "AccountSuspended",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+} as const;
+
+export type GetApiAccountMePreferencesStatus403ErrorCodeEnum =
+	(typeof GetApiAccountMePreferencesStatus403ErrorCodeEnum)[keyof typeof GetApiAccountMePreferencesStatus403ErrorCodeEnum];
+
+export type GetApiAccountMePreferencesStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: GetApiAccountMePreferencesStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type GetApiAccountMePreferencesStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
 		message: string;
 		details?: void;
 	};
@@ -72984,6 +73041,19 @@ export type GetApiAccountMePreferencesStatus429 = {
 
 export type GetApiAccountMePreferencesStatus500 = InternalError;
 
+export type GetApiAccountMePreferencesStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
 export type GetApiAccountMePreferencesOptions = {
 	body?: never;
 	path?: never;
@@ -72993,9 +73063,13 @@ export type GetApiAccountMePreferencesOptions = {
 
 export type GetApiAccountMePreferencesResponses = {
 	"200": GetApiAccountMePreferencesStatus200;
-	"404": GetApiAccountMePreferencesStatus404;
+	"400": GetApiAccountMePreferencesStatus400;
+	"401": GetApiAccountMePreferencesStatus401;
+	"403": GetApiAccountMePreferencesStatus403;
+	"409": GetApiAccountMePreferencesStatus409;
 	"429": GetApiAccountMePreferencesStatus429;
 	"500": GetApiAccountMePreferencesStatus500;
+	"503": GetApiAccountMePreferencesStatus503;
 };
 
 /**
@@ -73003,9 +73077,13 @@ export type GetApiAccountMePreferencesResponses = {
  */
 export type GetApiAccountMePreferencesResponse =
 	| GetApiAccountMePreferencesStatus200
-	| GetApiAccountMePreferencesStatus404
+	| GetApiAccountMePreferencesStatus400
+	| GetApiAccountMePreferencesStatus401
+	| GetApiAccountMePreferencesStatus403
+	| GetApiAccountMePreferencesStatus409
 	| GetApiAccountMePreferencesStatus429
-	| GetApiAccountMePreferencesStatus500;
+	| GetApiAccountMePreferencesStatus500
+	| GetApiAccountMePreferencesStatus503;
 
 export const PatchApiAccountMePreferencesStatus200InterfaceLocaleEnum = {
 	en: "en",
@@ -73125,15 +73203,72 @@ export type PatchApiAccountMePreferencesStatus200 = {
 	preferredLanguages: PatchApiAccountMePreferencesStatus200PreferredLanguagesEnum[];
 };
 
-export type PatchApiAccountMePreferencesStatus400 = MalformedRequestBody;
+export type PatchApiAccountMePreferencesStatus400 =
+	| {
+			error: {
+				/**
+				 * @default 'AccessInputInvalid'
+				 * @type string
+				 */
+				code: "AccessInputInvalid";
+				message: string;
+				details?: void;
+			};
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
-export type PatchApiAccountMePreferencesStatus404 = {
+export const PatchApiAccountMePreferencesStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type PatchApiAccountMePreferencesStatus401ErrorCodeEnum =
+	(typeof PatchApiAccountMePreferencesStatus401ErrorCodeEnum)[keyof typeof PatchApiAccountMePreferencesStatus401ErrorCodeEnum];
+
+export type PatchApiAccountMePreferencesStatus401 = {
 	error: {
 		/**
-		 * @default 'PreferencesNotFound'
+		 * @default 'AuthenticationRequired'
 		 * @type string
 		 */
-		code: "PreferencesNotFound";
+		code: PatchApiAccountMePreferencesStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const PatchApiAccountMePreferencesStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	AccountClosed: "AccountClosed",
+	AccountSuspended: "AccountSuspended",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+} as const;
+
+export type PatchApiAccountMePreferencesStatus403ErrorCodeEnum =
+	(typeof PatchApiAccountMePreferencesStatus403ErrorCodeEnum)[keyof typeof PatchApiAccountMePreferencesStatus403ErrorCodeEnum];
+
+export type PatchApiAccountMePreferencesStatus403 = {
+	error: {
+		/**
+		 * @default 'AccessDenied'
+		 * @type string
+		 */
+		code: PatchApiAccountMePreferencesStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type PatchApiAccountMePreferencesStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
 		message: string;
 		details?: void;
 	};
@@ -73160,6 +73295,19 @@ export type PatchApiAccountMePreferencesStatus429 = {
 };
 
 export type PatchApiAccountMePreferencesStatus500 = InternalError;
+
+export type PatchApiAccountMePreferencesStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
 
 export const PatchApiAccountMePreferencesRequestInterfaceLocaleEnum = {
 	en: "en",
@@ -73202,10 +73350,13 @@ export type PatchApiAccountMePreferencesOptions = {
 export type PatchApiAccountMePreferencesResponses = {
 	"200": PatchApiAccountMePreferencesStatus200;
 	"400": PatchApiAccountMePreferencesStatus400;
-	"404": PatchApiAccountMePreferencesStatus404;
+	"401": PatchApiAccountMePreferencesStatus401;
+	"403": PatchApiAccountMePreferencesStatus403;
+	"409": PatchApiAccountMePreferencesStatus409;
 	"422": PatchApiAccountMePreferencesStatus422;
 	"429": PatchApiAccountMePreferencesStatus429;
 	"500": PatchApiAccountMePreferencesStatus500;
+	"503": PatchApiAccountMePreferencesStatus503;
 };
 
 /**
@@ -73214,10 +73365,13 @@ export type PatchApiAccountMePreferencesResponses = {
 export type PatchApiAccountMePreferencesResponse =
 	| PatchApiAccountMePreferencesStatus200
 	| PatchApiAccountMePreferencesStatus400
-	| PatchApiAccountMePreferencesStatus404
+	| PatchApiAccountMePreferencesStatus401
+	| PatchApiAccountMePreferencesStatus403
+	| PatchApiAccountMePreferencesStatus409
 	| PatchApiAccountMePreferencesStatus422
 	| PatchApiAccountMePreferencesStatus429
-	| PatchApiAccountMePreferencesStatus500;
+	| PatchApiAccountMePreferencesStatus500
+	| PatchApiAccountMePreferencesStatus503;
 
 export const PutApiAccountMePreferencesStatus200InterfaceLocaleEnum = {
 	en: "en",
@@ -73337,11 +73491,47 @@ export type PutApiAccountMePreferencesStatus200 = {
 	preferredLanguages: PutApiAccountMePreferencesStatus200PreferredLanguagesEnum[];
 };
 
-export type PutApiAccountMePreferencesStatus400 = MalformedRequestBody;
+export type PutApiAccountMePreferencesStatus400 =
+	| {
+			error: {
+				/**
+				 * @default 'AccessInputInvalid'
+				 * @type string
+				 */
+				code: "AccessInputInvalid";
+				message: string;
+				details?: void;
+			};
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const PutApiAccountMePreferencesStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type PutApiAccountMePreferencesStatus401ErrorCodeEnum =
+	(typeof PutApiAccountMePreferencesStatus401ErrorCodeEnum)[keyof typeof PutApiAccountMePreferencesStatus401ErrorCodeEnum];
+
+export type PutApiAccountMePreferencesStatus401 = {
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: PutApiAccountMePreferencesStatus401ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
 
 export const PutApiAccountMePreferencesStatus403ErrorCodeEnum = {
-	ParticipationDenied: "ParticipationDenied",
-	RealmCapabilityRequired: "RealmCapabilityRequired",
+	AccessDenied: "AccessDenied",
+	AccountClosed: "AccountClosed",
+	AccountSuspended: "AccountSuspended",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
 } as const;
 
 export type PutApiAccountMePreferencesStatus403ErrorCodeEnum =
@@ -73350,7 +73540,7 @@ export type PutApiAccountMePreferencesStatus403ErrorCodeEnum =
 export type PutApiAccountMePreferencesStatus403 = {
 	error: {
 		/**
-		 * @default 'ParticipationDenied'
+		 * @default 'AccessDenied'
 		 * @type string
 		 */
 		code: PutApiAccountMePreferencesStatus403ErrorCodeEnum;
@@ -73363,10 +73553,23 @@ export type PutApiAccountMePreferencesStatus403 = {
 export type PutApiAccountMePreferencesStatus404 = {
 	error: {
 		/**
-		 * @default 'PreferencesNotFound'
+		 * @default 'AccessRecordUnavailable'
 		 * @type string
 		 */
-		code: "PreferencesNotFound";
+		code: "AccessRecordUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type PutApiAccountMePreferencesStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
 		message: string;
 		details?: void;
 	};
@@ -73393,6 +73596,19 @@ export type PutApiAccountMePreferencesStatus429 = {
 };
 
 export type PutApiAccountMePreferencesStatus500 = InternalError;
+
+export type PutApiAccountMePreferencesStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
 
 export const PutApiAccountMePreferencesRequestInterfaceLocaleEnum = {
 	en: "en",
@@ -73526,11 +73742,14 @@ export type PutApiAccountMePreferencesOptions = {
 export type PutApiAccountMePreferencesResponses = {
 	"200": PutApiAccountMePreferencesStatus200;
 	"400": PutApiAccountMePreferencesStatus400;
+	"401": PutApiAccountMePreferencesStatus401;
 	"403": PutApiAccountMePreferencesStatus403;
 	"404": PutApiAccountMePreferencesStatus404;
+	"409": PutApiAccountMePreferencesStatus409;
 	"422": PutApiAccountMePreferencesStatus422;
 	"429": PutApiAccountMePreferencesStatus429;
 	"500": PutApiAccountMePreferencesStatus500;
+	"503": PutApiAccountMePreferencesStatus503;
 };
 
 /**
@@ -73539,11 +73758,14 @@ export type PutApiAccountMePreferencesResponses = {
 export type PutApiAccountMePreferencesResponse =
 	| PutApiAccountMePreferencesStatus200
 	| PutApiAccountMePreferencesStatus400
+	| PutApiAccountMePreferencesStatus401
 	| PutApiAccountMePreferencesStatus403
 	| PutApiAccountMePreferencesStatus404
+	| PutApiAccountMePreferencesStatus409
 	| PutApiAccountMePreferencesStatus422
 	| PutApiAccountMePreferencesStatus429
-	| PutApiAccountMePreferencesStatus500;
+	| PutApiAccountMePreferencesStatus500
+	| PutApiAccountMePreferencesStatus503;
 
 export const UpdateCurrentUserPrivacyStatus200ScoreVisibilityEnum = {
 	public: "public",
@@ -73568,28 +73790,72 @@ export type UpdateCurrentUserPrivacyStatus200 = {
 	progressVisibility: UpdateCurrentUserPrivacyStatus200ProgressVisibilityEnum;
 };
 
-export type UpdateCurrentUserPrivacyStatus400 = MalformedRequestBody;
+export type UpdateCurrentUserPrivacyStatus400 =
+	| {
+			error: {
+				/**
+				 * @default 'AccessInputInvalid'
+				 * @type string
+				 */
+				code: "AccessInputInvalid";
+				message: string;
+				details?: void;
+			};
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const UpdateCurrentUserPrivacyStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type UpdateCurrentUserPrivacyStatus401ErrorCodeEnum =
+	(typeof UpdateCurrentUserPrivacyStatus401ErrorCodeEnum)[keyof typeof UpdateCurrentUserPrivacyStatus401ErrorCodeEnum];
 
 export type UpdateCurrentUserPrivacyStatus401 = {
 	error: {
 		/**
-		 * @default 'InteractiveSessionRequired'
+		 * @default 'AuthenticationRequired'
 		 * @type string
 		 */
-		code: "InteractiveSessionRequired";
+		code: UpdateCurrentUserPrivacyStatus401ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
 	requestId: string;
 };
 
-export type UpdateCurrentUserPrivacyStatus404 = {
+export const UpdateCurrentUserPrivacyStatus403ErrorCodeEnum = {
+	AccessDenied: "AccessDenied",
+	AccountClosed: "AccountClosed",
+	AccountSuspended: "AccountSuspended",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+} as const;
+
+export type UpdateCurrentUserPrivacyStatus403ErrorCodeEnum =
+	(typeof UpdateCurrentUserPrivacyStatus403ErrorCodeEnum)[keyof typeof UpdateCurrentUserPrivacyStatus403ErrorCodeEnum];
+
+export type UpdateCurrentUserPrivacyStatus403 = {
 	error: {
 		/**
-		 * @default 'PreferencesNotFound'
+		 * @default 'AccessDenied'
 		 * @type string
 		 */
-		code: "PreferencesNotFound";
+		code: UpdateCurrentUserPrivacyStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type UpdateCurrentUserPrivacyStatus409 = {
+	error: {
+		/**
+		 * @default 'AccessChanged'
+		 * @type string
+		 */
+		code: "AccessChanged";
 		message: string;
 		details?: void;
 	};
@@ -73599,6 +73865,19 @@ export type UpdateCurrentUserPrivacyStatus404 = {
 export type UpdateCurrentUserPrivacyStatus422 = ValidationError;
 
 export type UpdateCurrentUserPrivacyStatus500 = InternalError;
+
+export type UpdateCurrentUserPrivacyStatus503 = {
+	error: {
+		/**
+		 * @default 'AccessUnavailable'
+		 * @type string
+		 */
+		code: "AccessUnavailable";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
 
 export const UpdateCurrentUserPrivacyRequestScoreVisibilityEnum = {
 	public: "public",
@@ -73634,9 +73913,11 @@ export type UpdateCurrentUserPrivacyResponses = {
 	"200": UpdateCurrentUserPrivacyStatus200;
 	"400": UpdateCurrentUserPrivacyStatus400;
 	"401": UpdateCurrentUserPrivacyStatus401;
-	"404": UpdateCurrentUserPrivacyStatus404;
+	"403": UpdateCurrentUserPrivacyStatus403;
+	"409": UpdateCurrentUserPrivacyStatus409;
 	"422": UpdateCurrentUserPrivacyStatus422;
 	"500": UpdateCurrentUserPrivacyStatus500;
+	"503": UpdateCurrentUserPrivacyStatus503;
 };
 
 /**
@@ -73646,9 +73927,11 @@ export type UpdateCurrentUserPrivacyResponse =
 	| UpdateCurrentUserPrivacyStatus200
 	| UpdateCurrentUserPrivacyStatus400
 	| UpdateCurrentUserPrivacyStatus401
-	| UpdateCurrentUserPrivacyStatus404
+	| UpdateCurrentUserPrivacyStatus403
+	| UpdateCurrentUserPrivacyStatus409
 	| UpdateCurrentUserPrivacyStatus422
-	| UpdateCurrentUserPrivacyStatus500;
+	| UpdateCurrentUserPrivacyStatus500
+	| UpdateCurrentUserPrivacyStatus503;
 
 export const GetApiAccountMeFollowingOwner = {
 	publishing: "publishing",

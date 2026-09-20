@@ -1,3 +1,4 @@
+import type { ApiPermission } from "@rezics/schema/contracts/native/api-permissions";
 import { getPublicEntitySummariesByIds } from "../participation/presentation";
 import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
 import { unitOwnership, realmMember } from "../database/schema";
@@ -66,11 +67,13 @@ export async function readRealmEnrollment(
 	context: PrincipalRequestContext,
 	realmId: string,
 	target?: z.infer<typeof MembershipRecipientSchema>,
+	/** Owning operation entry scope; native subject/Realm disclosure policy is unchanged. */
+	apiPermission: Extract<ApiPermission, "access:read" | "account:update"> = "access:read",
 ) {
 	const scope = await realmEnrollmentScope(tx, realmId, false);
 	const authority = target
-		? await realmMembershipAuthority(tx, context, scope, false)
-		: await enrollmentSubjectAuthority(tx, context, false);
+		? await realmMembershipAuthority(tx, context, scope, false, false, apiPermission)
+		: await enrollmentSubjectAuthority(tx, context, false, false, apiPermission);
 	let disclosureAdmission = authority.admission;
 	const subjectId = target
 		? (await realmEnrollmentRecipient(tx, context, scope.scopeId, target)).subjectId
@@ -106,7 +109,14 @@ export async function readRealmEnrollment(
 		!["invited", "pending"].includes(head?.state ?? "")
 	) {
 		try {
-			const manager = await realmMembershipAuthority(tx, context, scope, false);
+			const manager = await realmMembershipAuthority(
+				tx,
+				context,
+				scope,
+				false,
+				false,
+				apiPermission,
+			);
 			disclosureAdmission = sql`(${disclosureAdmission}) and (${manager.admission})`;
 		} catch (error) {
 			try {

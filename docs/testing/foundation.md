@@ -87,6 +87,43 @@ drift. This is a bounded development fixture, not 500M/3B capacity acceptance.
 Coverage's catalog report revision failure remains a
 [separate required repair](known-failures.md#native-seed-and-report-revision-evidence).
 
+## Native private preferences
+
+The [private preference checkpoint](database/native-account-preferences-evidence.json)
+qualifies `task services-main:db:native-account-preferences:check` on the task-owned
+installed PostgreSQL target. Signed sessions use the ordinary implicit direct
+context; represented selections are explicitly rejected. The previous preference
+route's implicit Self/official-Zone initialization failure is closed for these four
+routes. Whole-account onboarding and the other retained unique-Self consumers
+remain separate requirements.
+
+The fixture covers lazy defaults with independent UI/content languages, unchanged
+saved settings after later headers, account isolation, no implicit public identity
+or follows, unverified personal controls, verified full replacement, actual operator
+API keys and session-only privacy, native Realm disclosure without admission grants,
+unchanged withdrawn defaults and expired credentials. Observed cross-connection
+account-lock waits prove that session rotation and account erasure defeat a waiting
+preference write. Setup creates disposable actors, Realms and a rule-backed write
+restriction; it is not evidence for public creation or enforcement administration.
+
+The existing preference table remains one row per private account. Initial access
+adds at most one row; subsequent reads and mutations use its account primary key.
+Only changing the Realm hint adds bounded native disclosure checks under the
+owning enrollment/control fences. No catalog scan or copied public aggregate is
+introduced. Earlier corpus sizing assumptions remain 500M/3B; this functional
+fixture does not qualify account-scale write throughput, storage or recovery.
+
+OpenAPI and all three generated consumers retain successful preference fields and
+advertise native rejected/unavailable outcomes. Affected main/API, SDK and web
+checks are recorded with the evidence. Eight locale resources now provide the five
+native access messages; the retained German organization label uses its approved
+term without changing visible wording. Two scoped Storybook privacy-form states
+exercise real generated-client failures, keep the edited choice and present the
+localized error: Traditional Chinese/light at 390×844 and English/dark at 1280×900.
+Actual screenshots were inspected for readable feedback, wrapping and controls;
+these mocked component states do not qualify whole-application authentication,
+onboarding, source conversion or M01/G5.
+
 ## Canonical reference values
 
 The executable owner is [check-reference-values.ts](../../services/main/scripts/check-reference-values.ts). `task services-main:db:check` installs the preserved baseline plus forward migrations, runs the reference fixture with the other integrity fixtures and checks canonical SQL and Drizzle drift. To repeat just this fixture against an already installed, isolated `rezics_atlas` database, provide its `DATABASE_ADMIN_URL` and run `task services-main:db:references:check`. The script rejects the development port and non-disposable database names. Its rows are disposable; the full replay task removes the container afterwards.

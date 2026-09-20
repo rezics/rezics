@@ -1397,9 +1397,13 @@ import type {
 	GetApiAccountMeFollowingStatus500,
 	GetApiAccountMeOptions,
 	GetApiAccountMePreferencesStatus200,
-	GetApiAccountMePreferencesStatus404,
+	GetApiAccountMePreferencesStatus400,
+	GetApiAccountMePreferencesStatus401,
+	GetApiAccountMePreferencesStatus403,
+	GetApiAccountMePreferencesStatus409,
 	GetApiAccountMePreferencesStatus429,
 	GetApiAccountMePreferencesStatus500,
+	GetApiAccountMePreferencesStatus503,
 	GetApiAccountMeStatus200,
 	GetApiAccountMeStatus404,
 	GetApiAccountMeStatus422,
@@ -2822,10 +2826,13 @@ import type {
 	PatchApiAccountMePreferencesOptions,
 	PatchApiAccountMePreferencesStatus200,
 	PatchApiAccountMePreferencesStatus400,
-	PatchApiAccountMePreferencesStatus404,
+	PatchApiAccountMePreferencesStatus401,
+	PatchApiAccountMePreferencesStatus403,
+	PatchApiAccountMePreferencesStatus409,
 	PatchApiAccountMePreferencesStatus422,
 	PatchApiAccountMePreferencesStatus429,
 	PatchApiAccountMePreferencesStatus500,
+	PatchApiAccountMePreferencesStatus503,
 	PatchApiAccountMeStatus200,
 	PatchApiAccountMeStatus400,
 	PatchApiAccountMeStatus403,
@@ -3741,11 +3748,14 @@ import type {
 	PutApiAccountMePreferencesOptions,
 	PutApiAccountMePreferencesStatus200,
 	PutApiAccountMePreferencesStatus400,
+	PutApiAccountMePreferencesStatus401,
 	PutApiAccountMePreferencesStatus403,
 	PutApiAccountMePreferencesStatus404,
+	PutApiAccountMePreferencesStatus409,
 	PutApiAccountMePreferencesStatus422,
 	PutApiAccountMePreferencesStatus429,
 	PutApiAccountMePreferencesStatus500,
+	PutApiAccountMePreferencesStatus503,
 	PutApiApiQuotaPoliciesAccountsByUserIdOptions,
 	PutApiApiQuotaPoliciesAccountsByUserIdStatus200,
 	PutApiApiQuotaPoliciesAccountsByUserIdStatus400,
@@ -4909,9 +4919,11 @@ import type {
 	UpdateCurrentUserPrivacyStatus200,
 	UpdateCurrentUserPrivacyStatus400,
 	UpdateCurrentUserPrivacyStatus401,
-	UpdateCurrentUserPrivacyStatus404,
+	UpdateCurrentUserPrivacyStatus403,
+	UpdateCurrentUserPrivacyStatus409,
 	UpdateCurrentUserPrivacyStatus422,
 	UpdateCurrentUserPrivacyStatus500,
+	UpdateCurrentUserPrivacyStatus503,
 	UpdateRealmMemberOptions,
 	UpdateRealmMemberStatus200,
 	UpdateRealmMemberStatus400,
@@ -35556,9 +35568,13 @@ export function getApiAccountMePreferencesQueryOptions(
 	return queryOptions<
 		GetApiAccountMePreferencesStatus200,
 		ResponseErrorConfig<
-			| GetApiAccountMePreferencesStatus404
+			| GetApiAccountMePreferencesStatus400
+			| GetApiAccountMePreferencesStatus401
+			| GetApiAccountMePreferencesStatus403
+			| GetApiAccountMePreferencesStatus409
 			| GetApiAccountMePreferencesStatus429
 			| GetApiAccountMePreferencesStatus500
+			| GetApiAccountMePreferencesStatus503
 		>,
 		GetApiAccountMePreferencesStatus200,
 		typeof queryKey
@@ -35588,9 +35604,13 @@ export function useGetApiAccountMePreferences<
 			QueryObserverOptions<
 				GetApiAccountMePreferencesStatus200,
 				ResponseErrorConfig<
-					| GetApiAccountMePreferencesStatus404
+					| GetApiAccountMePreferencesStatus400
+					| GetApiAccountMePreferencesStatus401
+					| GetApiAccountMePreferencesStatus403
+					| GetApiAccountMePreferencesStatus409
 					| GetApiAccountMePreferencesStatus429
 					| GetApiAccountMePreferencesStatus500
+					| GetApiAccountMePreferencesStatus503
 				>,
 				TData,
 				TQueryData,
@@ -35614,9 +35634,13 @@ export function useGetApiAccountMePreferences<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiAccountMePreferencesStatus404
+			| GetApiAccountMePreferencesStatus400
+			| GetApiAccountMePreferencesStatus401
+			| GetApiAccountMePreferencesStatus403
+			| GetApiAccountMePreferencesStatus409
 			| GetApiAccountMePreferencesStatus429
 			| GetApiAccountMePreferencesStatus500
+			| GetApiAccountMePreferencesStatus503
 		>
 	> & { queryKey: TQueryKey };
 
@@ -35636,10 +35660,13 @@ export function patchApiAccountMePreferencesMutationOptions<TContext = unknown>(
 		PatchApiAccountMePreferencesStatus200,
 		ResponseErrorConfig<
 			| PatchApiAccountMePreferencesStatus400
-			| PatchApiAccountMePreferencesStatus404
+			| PatchApiAccountMePreferencesStatus401
+			| PatchApiAccountMePreferencesStatus403
+			| PatchApiAccountMePreferencesStatus409
 			| PatchApiAccountMePreferencesStatus422
 			| PatchApiAccountMePreferencesStatus429
 			| PatchApiAccountMePreferencesStatus500
+			| PatchApiAccountMePreferencesStatus503
 		>,
 		PatchApiAccountMePreferencesOptions,
 		TContext
@@ -35661,10 +35688,13 @@ export function usePatchApiAccountMePreferences<TContext>(
 			PatchApiAccountMePreferencesStatus200,
 			ResponseErrorConfig<
 				| PatchApiAccountMePreferencesStatus400
-				| PatchApiAccountMePreferencesStatus404
+				| PatchApiAccountMePreferencesStatus401
+				| PatchApiAccountMePreferencesStatus403
+				| PatchApiAccountMePreferencesStatus409
 				| PatchApiAccountMePreferencesStatus422
 				| PatchApiAccountMePreferencesStatus429
 				| PatchApiAccountMePreferencesStatus500
+				| PatchApiAccountMePreferencesStatus503
 			>,
 			PatchApiAccountMePreferencesOptions,
 			TContext
@@ -35680,10 +35710,13 @@ export function usePatchApiAccountMePreferences<TContext>(
 		PatchApiAccountMePreferencesStatus200,
 		ResponseErrorConfig<
 			| PatchApiAccountMePreferencesStatus400
-			| PatchApiAccountMePreferencesStatus404
+			| PatchApiAccountMePreferencesStatus401
+			| PatchApiAccountMePreferencesStatus403
+			| PatchApiAccountMePreferencesStatus409
 			| PatchApiAccountMePreferencesStatus422
 			| PatchApiAccountMePreferencesStatus429
 			| PatchApiAccountMePreferencesStatus500
+			| PatchApiAccountMePreferencesStatus503
 		>,
 		PatchApiAccountMePreferencesOptions,
 		TContext
@@ -35693,10 +35726,13 @@ export function usePatchApiAccountMePreferences<TContext>(
 		PatchApiAccountMePreferencesStatus200,
 		ResponseErrorConfig<
 			| PatchApiAccountMePreferencesStatus400
-			| PatchApiAccountMePreferencesStatus404
+			| PatchApiAccountMePreferencesStatus401
+			| PatchApiAccountMePreferencesStatus403
+			| PatchApiAccountMePreferencesStatus409
 			| PatchApiAccountMePreferencesStatus422
 			| PatchApiAccountMePreferencesStatus429
 			| PatchApiAccountMePreferencesStatus500
+			| PatchApiAccountMePreferencesStatus503
 		>,
 		PatchApiAccountMePreferencesOptions,
 		TContext
@@ -35711,10 +35747,13 @@ export function usePatchApiAccountMePreferences<TContext>(
 		PatchApiAccountMePreferencesStatus200,
 		ResponseErrorConfig<
 			| PatchApiAccountMePreferencesStatus400
-			| PatchApiAccountMePreferencesStatus404
+			| PatchApiAccountMePreferencesStatus401
+			| PatchApiAccountMePreferencesStatus403
+			| PatchApiAccountMePreferencesStatus409
 			| PatchApiAccountMePreferencesStatus422
 			| PatchApiAccountMePreferencesStatus429
 			| PatchApiAccountMePreferencesStatus500
+			| PatchApiAccountMePreferencesStatus503
 		>,
 		PatchApiAccountMePreferencesOptions,
 		TContext
@@ -35732,11 +35771,14 @@ export function putApiAccountMePreferencesMutationOptions<TContext = unknown>(
 		PutApiAccountMePreferencesStatus200,
 		ResponseErrorConfig<
 			| PutApiAccountMePreferencesStatus400
+			| PutApiAccountMePreferencesStatus401
 			| PutApiAccountMePreferencesStatus403
 			| PutApiAccountMePreferencesStatus404
+			| PutApiAccountMePreferencesStatus409
 			| PutApiAccountMePreferencesStatus422
 			| PutApiAccountMePreferencesStatus429
 			| PutApiAccountMePreferencesStatus500
+			| PutApiAccountMePreferencesStatus503
 		>,
 		PutApiAccountMePreferencesOptions,
 		TContext
@@ -35758,11 +35800,14 @@ export function usePutApiAccountMePreferences<TContext>(
 			PutApiAccountMePreferencesStatus200,
 			ResponseErrorConfig<
 				| PutApiAccountMePreferencesStatus400
+				| PutApiAccountMePreferencesStatus401
 				| PutApiAccountMePreferencesStatus403
 				| PutApiAccountMePreferencesStatus404
+				| PutApiAccountMePreferencesStatus409
 				| PutApiAccountMePreferencesStatus422
 				| PutApiAccountMePreferencesStatus429
 				| PutApiAccountMePreferencesStatus500
+				| PutApiAccountMePreferencesStatus503
 			>,
 			PutApiAccountMePreferencesOptions,
 			TContext
@@ -35778,11 +35823,14 @@ export function usePutApiAccountMePreferences<TContext>(
 		PutApiAccountMePreferencesStatus200,
 		ResponseErrorConfig<
 			| PutApiAccountMePreferencesStatus400
+			| PutApiAccountMePreferencesStatus401
 			| PutApiAccountMePreferencesStatus403
 			| PutApiAccountMePreferencesStatus404
+			| PutApiAccountMePreferencesStatus409
 			| PutApiAccountMePreferencesStatus422
 			| PutApiAccountMePreferencesStatus429
 			| PutApiAccountMePreferencesStatus500
+			| PutApiAccountMePreferencesStatus503
 		>,
 		PutApiAccountMePreferencesOptions,
 		TContext
@@ -35792,11 +35840,14 @@ export function usePutApiAccountMePreferences<TContext>(
 		PutApiAccountMePreferencesStatus200,
 		ResponseErrorConfig<
 			| PutApiAccountMePreferencesStatus400
+			| PutApiAccountMePreferencesStatus401
 			| PutApiAccountMePreferencesStatus403
 			| PutApiAccountMePreferencesStatus404
+			| PutApiAccountMePreferencesStatus409
 			| PutApiAccountMePreferencesStatus422
 			| PutApiAccountMePreferencesStatus429
 			| PutApiAccountMePreferencesStatus500
+			| PutApiAccountMePreferencesStatus503
 		>,
 		PutApiAccountMePreferencesOptions,
 		TContext
@@ -35811,11 +35862,14 @@ export function usePutApiAccountMePreferences<TContext>(
 		PutApiAccountMePreferencesStatus200,
 		ResponseErrorConfig<
 			| PutApiAccountMePreferencesStatus400
+			| PutApiAccountMePreferencesStatus401
 			| PutApiAccountMePreferencesStatus403
 			| PutApiAccountMePreferencesStatus404
+			| PutApiAccountMePreferencesStatus409
 			| PutApiAccountMePreferencesStatus422
 			| PutApiAccountMePreferencesStatus429
 			| PutApiAccountMePreferencesStatus500
+			| PutApiAccountMePreferencesStatus503
 		>,
 		PutApiAccountMePreferencesOptions,
 		TContext
@@ -35834,9 +35888,11 @@ export function updateCurrentUserPrivacyMutationOptions<TContext = unknown>(
 		ResponseErrorConfig<
 			| UpdateCurrentUserPrivacyStatus400
 			| UpdateCurrentUserPrivacyStatus401
-			| UpdateCurrentUserPrivacyStatus404
+			| UpdateCurrentUserPrivacyStatus403
+			| UpdateCurrentUserPrivacyStatus409
 			| UpdateCurrentUserPrivacyStatus422
 			| UpdateCurrentUserPrivacyStatus500
+			| UpdateCurrentUserPrivacyStatus503
 		>,
 		UpdateCurrentUserPrivacyOptions,
 		TContext
@@ -35859,9 +35915,11 @@ export function useUpdateCurrentUserPrivacy<TContext>(
 			ResponseErrorConfig<
 				| UpdateCurrentUserPrivacyStatus400
 				| UpdateCurrentUserPrivacyStatus401
-				| UpdateCurrentUserPrivacyStatus404
+				| UpdateCurrentUserPrivacyStatus403
+				| UpdateCurrentUserPrivacyStatus409
 				| UpdateCurrentUserPrivacyStatus422
 				| UpdateCurrentUserPrivacyStatus500
+				| UpdateCurrentUserPrivacyStatus503
 			>,
 			UpdateCurrentUserPrivacyOptions,
 			TContext
@@ -35878,9 +35936,11 @@ export function useUpdateCurrentUserPrivacy<TContext>(
 		ResponseErrorConfig<
 			| UpdateCurrentUserPrivacyStatus400
 			| UpdateCurrentUserPrivacyStatus401
-			| UpdateCurrentUserPrivacyStatus404
+			| UpdateCurrentUserPrivacyStatus403
+			| UpdateCurrentUserPrivacyStatus409
 			| UpdateCurrentUserPrivacyStatus422
 			| UpdateCurrentUserPrivacyStatus500
+			| UpdateCurrentUserPrivacyStatus503
 		>,
 		UpdateCurrentUserPrivacyOptions,
 		TContext
@@ -35891,9 +35951,11 @@ export function useUpdateCurrentUserPrivacy<TContext>(
 		ResponseErrorConfig<
 			| UpdateCurrentUserPrivacyStatus400
 			| UpdateCurrentUserPrivacyStatus401
-			| UpdateCurrentUserPrivacyStatus404
+			| UpdateCurrentUserPrivacyStatus403
+			| UpdateCurrentUserPrivacyStatus409
 			| UpdateCurrentUserPrivacyStatus422
 			| UpdateCurrentUserPrivacyStatus500
+			| UpdateCurrentUserPrivacyStatus503
 		>,
 		UpdateCurrentUserPrivacyOptions,
 		TContext
@@ -35909,9 +35971,11 @@ export function useUpdateCurrentUserPrivacy<TContext>(
 		ResponseErrorConfig<
 			| UpdateCurrentUserPrivacyStatus400
 			| UpdateCurrentUserPrivacyStatus401
-			| UpdateCurrentUserPrivacyStatus404
+			| UpdateCurrentUserPrivacyStatus403
+			| UpdateCurrentUserPrivacyStatus409
 			| UpdateCurrentUserPrivacyStatus422
 			| UpdateCurrentUserPrivacyStatus500
+			| UpdateCurrentUserPrivacyStatus503
 		>,
 		UpdateCurrentUserPrivacyOptions,
 		TContext

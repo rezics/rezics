@@ -129,6 +129,32 @@ other valid controllers and permitted Agent contributions. Loss of every valid
 control path suspends sensitive participation until governed recovery; recovery
 does not revive erased accounts or old grants.
 
+### Private display and privacy preferences
+
+Reading or changing private account preferences requires the direct authenticated
+principal; representing an Agent does not select its controller's settings. These
+operations do not create an Agent, bind a legacy Self or initialize public follows.
+A missing preference row initializes lazily from the request UI locale and the
+account's registration content language, independently. Later headers and partial
+updates preserve existing values and unnamed fields.
+
+GET uses `account:read`; display PATCH and full preference PUT use `account:update`.
+Privacy PATCH remains interactive-session-only, with no bearer-to-cookie fallback.
+Reading, display and privacy controls remain available before email verification
+and during a contribution write restriction. Full replacement requires verified
+email and current account write eligibility. All paths revalidate the exact
+credential and account state under their transaction fences; closed/erased
+accounts cannot initialize, read or change preferences.
+
+A newly selected default Score Realm must be published, approved and disclosed to
+the direct principal. Private Realm disclosure retains native enrollment/manager
+policy while using the owning `account:update` API entry permission. The saved
+Realm is a preference hint and grants no membership or contribution authority.
+An unchanged hint survives later Realm withdrawal and unrelated preference edits;
+echoing the implicit default preserves its stored null. Actual Score/Post writes
+must validate their own context and current authority before effect. The existing
+picker/onboarding consumers retain their separate migration and acceptance scope.
+
 ### Native subject eligibility
 
 Current subject policy reads the private registry, then concrete account/Agent

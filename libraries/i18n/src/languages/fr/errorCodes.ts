@@ -13,6 +13,11 @@ const { forms: zoneTerms } = frTerminology.zone;
 const { forms: entityTerms } = frTerminology.entity;
 
 export default {
+	AccessChanged: "Les droits d’accès ou les données ont changé. Actualisez et réessayez.",
+	AccessDenied: "Vous n’avez pas l’autorisation d’effectuer cette action.",
+	AccessInputInvalid: "Vérifiez votre sélection et réessayez.",
+	AccessRecordUnavailable: "Cet élément n’est pas disponible.",
+	AccessUnavailable: "Vos droits d’accès n’ont pas pu être vérifiés. Réessayez.",
 	GovernanceDeliveryCapacityExceeded:
 		"La file d’envoi des notifications est occupée. Réessayez cette action de gouvernance dans un instant.",
 	CatalogSourceRequestLimited: "Cette source reçoit trop de requêtes. Réessayez plus tard.",

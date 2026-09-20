@@ -12,6 +12,11 @@ const { forms: unitSlugTerms } = koTerminology.unitSlug;
 const { forms: zoneTerms } = koTerminology.zone;
 
 export default {
+	AccessChanged: "권한 또는 데이터가 변경되었습니다. 새로고침 후 다시 시도하세요.",
+	AccessDenied: "이 작업을 수행할 권한이 없습니다.",
+	AccessInputInvalid: "선택한 내용을 확인하고 다시 시도하세요.",
+	AccessRecordUnavailable: "이 항목을 이용할 수 없습니다.",
+	AccessUnavailable: "권한을 확인할 수 없습니다. 다시 시도하세요.",
 	GovernanceDeliveryCapacityExceeded:
 		"알림 전송 대기열이 혼잡합니다. 잠시 후 이 관리 작업을 다시 시도하세요.",
 	CatalogSourceRequestLimited: "이 출처에 요청이 너무 많이 몰렸습니다. 나중에 다시 시도하세요.",

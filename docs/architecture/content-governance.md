@@ -30,7 +30,9 @@ govern participation, representation and authority independently of classificati
 ## Report and case model
 
 `content_report` is one reporter submission and contains only reporter-authored
-evidence plus the exact reported Resource revision. `content_report_rule` stores its
+evidence plus an exact revision reference to the reported content component.
+The Resource remains the case target; component history does not imply a revision
+covering the entire Resource. `content_report_rule` stores its
 many rule references. `content_report_referral` routes the submission to one
 case per responsible authority. A report selecting both Realm and official
 rules therefore remains one report with two independently progressing
@@ -59,6 +61,56 @@ target `licenseGrantId`. `restore_license` remains a reversal of that action.
 `granted` on the ledger is a recorded declaration, not a finding of legal
 validity; invalidation withdraws platform recognition of that declaration.
 See [Resource license grants](./resource-license-grants.md).
+
+## Exact reported content evidence
+
+On 2026-09-20 the maintainer selected exact references to the reported part over
+copying a whole catalog snapshot for each report. Catalog names, identifiers,
+editorial content, assertions/relations and domain components can have independent
+histories. A catalog root change or name revision cannot stand in for all of them.
+Retain native Post/other content revision evidence where that owner's revision
+actually captures the reported representation.
+
+A report's evidence must identify the target Resource, the admitted component kind
+and identity, and its immutable revision using the complete owning key. Submission
+must validate that relationship and the reporter's current disclosure authority.
+Reject missing, foreign or mismatched evidence; never silently substitute the latest
+revision. A historical revision is not invalid merely because a newer revision exists;
+any current-selection precondition belongs to the originating operation. Later
+edits must not change what reviewers inspect. History retention and
+restricted disclosure must preserve that evidence without exposing private content
+or treating an unavailable representation as an empty successful response. Exact
+rule citations, reporter identity, authority-specific referrals and case transitions
+remain independent of the content evidence reference.
+
+This choice retains narrow reproducible evidence and avoids repeated aggregate
+copies. The alternatives are a whole-catalog snapshot per report (copies unrelated
+components and requires a coherent aggregate capture), or a live Resource pointer
+(does not preserve the reported content). Neither is the selected default. Ordinary
+chapter/Post references can continue following eligible publication heads; reporting
+is one of the explicitly exact citation operations.
+
+The [W3C Web Annotation model](https://www.w3.org/TR/annotation-model/#specific-resources)
+separates a source from the selected part, and its
+[State model](https://www.w3.org/TR/annotation-model/#states) identifies a desired
+representation. This supports the distinction, without requiring RDF storage or
+establishing the REZICS persistence design. Mastodon's
+[report service](https://github.com/mastodon/mastodon/blob/main/app/services/report_service.rb)
+selects visible statuses under a target account; it is an example of scoped report
+evidence, not proof of immutable component revisions. These primary sources were
+reviewed on 2026-09-20; the REZICS choice and invariants above are our design decision.
+
+Implementation remains open: the current report FK/API assumes `unit_revision`,
+while the shared catalog revision registry currently admits only named forms and
+identifier claims. Define and implement the reportable component alternatives,
+concrete ownership/revision constraints, retention/disclosure, bounded reference
+cardinality, API/SDK/reviewer consumers and seed together. Qualify native content
+and catalog reports, edits after submission, foreign/unknown evidence and stale authority rejection,
+referrals and actual storage/query costs before closing the
+[coverage failure](../testing/known-failures.md#native-seed-and-report-revision-evidence).
+Do not manufacture common `unit_revision` history or omit catalog targets to make it pass.
+The capacity estimates below describe the earlier scalar `unit_revision` reference;
+re-estimate and measure the selected component storage before capacity acceptance.
 
 ## Concurrency and bounded work
 

@@ -14,6 +14,11 @@ const { forms: zoneTerms } = zhHansTerminology.zone;
 const { forms: entityTerms } = zhHansTerminology.entity;
 
 export default {
+	AccessChanged: "权限或数据已变更，请刷新后重试。",
+	AccessDenied: "你没有执行此操作的权限。",
+	AccessInputInvalid: "请检查你的选择后重试。",
+	AccessRecordUnavailable: "此项目不可用。",
+	AccessUnavailable: "目前无法确认你的权限，请重试。",
 	GovernanceDeliveryCapacityExceeded: "通知发送队列繁忙，请稍后重试此治理操作。",
 	CatalogSourceRequestLimited: "该来源收到的请求过多，请稍后重试。",
 	CatalogSourceUnavailable: "该来源暂时不可用，请稍后重试。",

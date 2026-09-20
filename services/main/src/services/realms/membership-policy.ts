@@ -1,6 +1,10 @@
+import type { ApiPermission } from "@rezics/schema/contracts/native/api-permissions";
 import { groupAuthoritySourceDigest } from "../authorization/group-impact-evaluation";
 import { resolveAccessSubject } from "../authorization/identities";
-import { realmEnrollment, realmEnrollmentContact } from "@rezics/schema/postgres/realms/realm-enrollment";
+import {
+	realmEnrollment,
+	realmEnrollmentContact,
+} from "@rezics/schema/postgres/realms/realm-enrollment";
 import { eq, sql } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
 import { PrincipalRequestContext } from "../auth/principal-context";
@@ -68,6 +72,7 @@ export async function realmMembershipAuthority(
 	scope: Awaited<ReturnType<typeof realmEnrollmentScope>>,
 	mutation: boolean,
 	fresh = mutation,
+	apiPermission: ApiPermission = mutation ? "access:manage" : "access:read",
 ) {
 	return readManagementAuthority(
 		tx,
@@ -77,7 +82,7 @@ export async function realmMembershipAuthority(
 			scopeId: scope.scopeId,
 			path: ["memberships"],
 			permission: mutation ? "access.membership.manage" : "access.membership.read",
-			apiPermission: mutation ? "access:manage" : "access:read",
+			apiPermission,
 			requireFreshSession: fresh,
 			mutation,
 		},

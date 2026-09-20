@@ -1,3 +1,4 @@
+import type { ApiPermission } from "@rezics/schema/contracts/native/api-permissions";
 import { groupAuthoritySourceDigest } from "../authorization/group-impact-evaluation";
 import { createHash } from "node:crypto";
 import { eq, sql, type SQL } from "drizzle-orm";
@@ -111,11 +112,12 @@ export async function enrollmentSubjectAuthority(
 	context: PrincipalRequestContext,
 	mutation: boolean,
 	fresh = mutation,
+	apiPermission: ApiPermission = mutation ? "access:manage" : "access:read",
 ) {
 	const credential = await readFirstPartyCredentialAuthority(tx, {
 		proof: context.credentialProof(),
 		selection: context.selection,
-		apiPermission: mutation ? "access:manage" : "access:read",
+		apiPermission,
 		requireFreshSession: fresh,
 		requireVerifiedEmail: mutation,
 	});
@@ -134,7 +136,7 @@ export async function enrollmentSubjectAuthority(
 				scopeId,
 				path: ["memberships"],
 				permission: "access.membership.participate",
-				apiPermission: mutation ? "access:manage" : "access:read",
+				apiPermission,
 				requireFreshSession: fresh,
 				mutation,
 			},

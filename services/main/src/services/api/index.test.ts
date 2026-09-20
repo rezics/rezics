@@ -24,7 +24,8 @@ describe("API root", () => {
 	it("preserves the credentialed CORS contract for actual and preflight requests", async () => {
 		const trustedOrigin = "http://localhost:3000";
 		const allowedMethods = "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS";
-		const allowedHeaders = "Content-Type, Authorization, Accept-Language, X-Rezics-Participation";
+		const allowedHeaders =
+			"Content-Type, Authorization, Accept-Language, X-Rezics-Participation, X-Rezics-Authority";
 		const exposedHeaders = "X-Request-Id, Retry-After";
 		const actual = await api.handle(
 			new Request("http://localhost/api/v1/health", {
@@ -37,7 +38,7 @@ describe("API root", () => {
 				headers: {
 					Origin: trustedOrigin,
 					"Access-Control-Request-Method": "PUT",
-					"Access-Control-Request-Headers": "content-type, authorization",
+					"Access-Control-Request-Headers": "content-type, authorization, x-rezics-authority",
 				},
 			}),
 		);
@@ -471,6 +472,25 @@ describe("API root", () => {
 			const forbidden = document.paths[path]?.[method]?.responses?.[StatusCodes.FORBIDDEN];
 			expect(JSON.stringify(forbidden)).toContain("PlatformCapabilityRequired");
 		}
+	});
+
+	it("documents current private preference rejection states without a missing-default failure", () => {
+		const document = toOpenAPISchema(api);
+		for (const [path, method] of [
+			["/api/v1/account/me/preferences", "get"],
+			["/api/v1/account/me/preferences", "patch"],
+			["/api/v1/account/me/preferences", "put"],
+			["/api/v1/account/me/privacy", "patch"],
+		] as const) {
+			const responses = document.paths[path]?.[method]?.responses;
+			expect(JSON.stringify(responses?.[403])).toContain("AccessDenied");
+			expect(JSON.stringify(responses?.[503])).toContain("AccessUnavailable");
+			expect(JSON.stringify(responses?.[401])).toContain("InteractiveSessionRequired");
+			expect(JSON.stringify(responses)).not.toContain("PreferencesNotFound");
+		}
+		expect(
+			JSON.stringify(document.paths["/api/v1/account/me/preferences"]?.put?.responses?.[404]),
+		).toContain("AccessRecordUnavailable");
 	});
 
 	it("rejects API tokens before the first-party account privacy handler", async () => {

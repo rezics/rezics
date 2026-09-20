@@ -28,7 +28,7 @@ export default {
 		emptyMembers: "Noch keine Mitglieder.",
 		emptyOrganizations: `Du bist keiner ${deTerminology.entity.forms.organizationLabel} beigetreten.`,
 		emptyManagement: "Du verwaltest derzeit keine Mitgliederlisten.",
-		acceptPrompt: "Wenn du annimmst, tritt dein angemeldetes Konto dieser Organisation als privates Mitglied bei.",
+		acceptPrompt: `Wenn du annimmst, tritt dein angemeldetes Konto dieser ${deTerminology.entity.forms.organizationLabel} als privates Mitglied bei.`,
 		removePrompt:
 			"Durch das Entfernen dieses Mitglieds enden dessen Mitgliedschaft und alle davon abhängigen Zugriffsrechte.",
 		leavePrompt:

@@ -14,6 +14,12 @@ const { forms: zoneTerms } = deTerminology.zone;
 const { forms: entityTerms } = deTerminology.entity;
 
 export default {
+	AccessChanged:
+		"Zugriffsrechte oder Daten haben sich geändert. Lade die Seite neu und versuche es erneut.",
+	AccessDenied: "Du hast keine Berechtigung für diese Aktion.",
+	AccessInputInvalid: "Prüfe deine Auswahl und versuche es erneut.",
+	AccessRecordUnavailable: "Dieser Eintrag ist nicht verfügbar.",
+	AccessUnavailable: "Deine Zugriffsrechte konnten nicht geprüft werden. Versuche es erneut.",
 	GovernanceDeliveryCapacityExceeded:
 		"Die Warteschlange für Benachrichtigungen ist ausgelastet. Versuche diese Verwaltungsaktion in Kürze erneut.",
 	CatalogSourceRequestLimited: "Diese Quelle erhält zu viele Anfragen. Versuche es später erneut.",

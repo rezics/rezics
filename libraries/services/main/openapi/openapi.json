@@ -92713,8 +92713,8 @@
 							}
 						}
 					},
-					"404": {
-						"description": "Response for status 404",
+					"400": {
+						"description": "Response for status 400",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -92724,8 +92724,94 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "PreferencesNotFound",
-													"enum": ["PreferencesNotFound"],
+													"default": "AccessInputInvalid",
+													"enum": ["AccessInputInvalid"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"enum": ["AuthenticationRequired", "InteractiveSessionRequired"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": [
+														"AccessDenied",
+														"AccountClosed",
+														"AccountSuspended",
+														"ApiTokenPermissionRequired"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": ["AccessChanged"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -92776,6 +92862,33 @@
 						"description": "Unexpected internal failure",
 						"content": {
 							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
 						}
 					}
 				},
@@ -92909,15 +93022,39 @@
 						}
 					},
 					"400": {
-						"description": "Request body could not be parsed",
+						"description": "Response for status 400",
 						"content": {
 							"application/json": {
-								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"properties": {
+												"error": {
+													"type": "object",
+													"properties": {
+														"code": {
+															"default": "AccessInputInvalid",
+															"enum": ["AccessInputInvalid"],
+															"type": "string"
+														},
+														"message": { "type": "string" },
+														"details": {}
+													},
+													"required": ["code", "message"]
+												},
+												"requestId": { "type": "string" }
+											},
+											"required": ["error", "requestId"]
+										},
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
+								}
 							}
 						}
 					},
-					"404": {
-						"description": "Response for status 404",
+					"401": {
+						"description": "Response for status 401",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -92927,8 +93064,67 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "PreferencesNotFound",
-													"enum": ["PreferencesNotFound"],
+													"default": "AuthenticationRequired",
+													"enum": ["AuthenticationRequired", "InteractiveSessionRequired"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessDenied",
+													"enum": [
+														"AccessDenied",
+														"AccountClosed",
+														"AccountSuspended",
+														"ApiTokenPermissionRequired"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": ["AccessChanged"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -92985,6 +93181,33 @@
 						"description": "Unexpected internal failure",
 						"content": {
 							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
 						}
 					}
 				},
@@ -93183,10 +93406,61 @@
 						}
 					},
 					"400": {
-						"description": "Request body could not be parsed",
+						"description": "Response for status 400",
 						"content": {
 							"application/json": {
-								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"properties": {
+												"error": {
+													"type": "object",
+													"properties": {
+														"code": {
+															"default": "AccessInputInvalid",
+															"enum": ["AccessInputInvalid"],
+															"type": "string"
+														},
+														"message": { "type": "string" },
+														"details": {}
+													},
+													"required": ["code", "message"]
+												},
+												"requestId": { "type": "string" }
+											},
+											"required": ["error", "requestId"]
+										},
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"enum": ["AuthenticationRequired", "InteractiveSessionRequired"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
 							}
 						}
 					},
@@ -93201,8 +93475,13 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "ParticipationDenied",
-													"enum": ["ParticipationDenied", "RealmCapabilityRequired"],
+													"default": "AccessDenied",
+													"enum": [
+														"AccessDenied",
+														"AccountClosed",
+														"AccountSuspended",
+														"ApiTokenPermissionRequired"
+													],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -93228,8 +93507,35 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "PreferencesNotFound",
-													"enum": ["PreferencesNotFound"],
+													"default": "AccessRecordUnavailable",
+													"enum": ["AccessRecordUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": ["AccessChanged"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -93286,6 +93592,33 @@
 						"description": "Unexpected internal failure",
 						"content": {
 							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
 						}
 					}
 				},
@@ -93346,10 +93679,34 @@
 						}
 					},
 					"400": {
-						"description": "Request body could not be parsed",
+						"description": "Response for status 400",
 						"content": {
 							"application/json": {
-								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"properties": {
+												"error": {
+													"type": "object",
+													"properties": {
+														"code": {
+															"default": "AccessInputInvalid",
+															"enum": ["AccessInputInvalid"],
+															"type": "string"
+														},
+														"message": { "type": "string" },
+														"details": {}
+													},
+													"required": ["code", "message"]
+												},
+												"requestId": { "type": "string" }
+											},
+											"required": ["error", "requestId"]
+										},
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
+								}
 							}
 						}
 					},
@@ -93364,8 +93721,8 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "InteractiveSessionRequired",
-													"enum": ["InteractiveSessionRequired"],
+													"default": "AuthenticationRequired",
+													"enum": ["AuthenticationRequired", "InteractiveSessionRequired"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -93380,8 +93737,8 @@
 							}
 						}
 					},
-					"404": {
-						"description": "Response for status 404",
+					"403": {
+						"description": "Response for status 403",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -93391,8 +93748,40 @@
 											"type": "object",
 											"properties": {
 												"code": {
-													"default": "PreferencesNotFound",
-													"enum": ["PreferencesNotFound"],
+													"default": "AccessDenied",
+													"enum": [
+														"AccessDenied",
+														"AccountClosed",
+														"AccountSuspended",
+														"ApiTokenPermissionRequired"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessChanged",
+													"enum": ["AccessChanged"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -93417,6 +93806,33 @@
 						"description": "Unexpected internal failure",
 						"content": {
 							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					},
+					"503": {
+						"description": "Response for status 503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "AccessUnavailable",
+													"enum": ["AccessUnavailable"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
 						}
 					}
 				},

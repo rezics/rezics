@@ -1,0 +1,384 @@
+{
+  "baseCommit": "d5945b60534e769dd5756dbb21c1603b80f70dc0",
+  "sourceDigests": {
+    "services/main/scripts/check-native-account-preferences.ts": "2908fdfb44c2bd1387506d26fc6579260491f778bdf37baa4861e5596801d1ec",
+    "services/main/src/services/account/preferences.ts": "e46a7f44ac1835c4d7773345c0407bd38736032d0abc540e65d171ca53a70ff0",
+    "services/main/src/services/account/preference-contracts.ts": "cd33c55a95aed32e64676f6e25667b5c51dc805fdf370fd9f83cf7ff119326d6",
+    "services/main/src/services/participation/membership-policy.ts": "d6e1f42de9262e6b56eae45244758dc431eeda0b34f46f8aa079e4f09a2c1e35",
+    "services/main/src/services/realms/membership-policy.ts": "73316cdbc1ef736c63b6ddd1df49dc61b9e5b9d1c954cc689b1a5d44330041fb",
+    "services/main/src/services/realms/roster.ts": "5368731244f9ccb1e91e16f04c52534daa91455084e83b9a23254b10871d0c75",
+    "services/main/src/services/api/users/index.ts": "a42bfcb4f242ad06c9ddacada91a5747d0c5bb67498401b34d6a6493fd2579eb",
+    "services/main/src/services/api/users/schema.ts": "893d5621b728dbda22ee788bf5ff9dc58f713f8533b16d439b702f753cd0f213",
+    "services/main/src/services/database/migrations/atlas.sum": "47ee12fdd50ed3592768e517a025b7ada81d3adb4cd925092751074e09ad200a"
+  },
+  "assertions": 72,
+  "httpChecks": 32,
+  "scope": "Native private settings initialization/HTTP, direct selection, verified-write versus personal controls, API key/session policy, Realm hints and exact credential/erasure lock races. Privileged actor/Realm/enforcement setup is fixture-only; no whole-account onboarding or frontend acceptance.",
+  "date": "2026-09-20",
+  "command": "DATABASE_ADMIN_URL=<isolated installed fixture> task services-main:db:native-account-preferences:check",
+  "installation": {
+    "postgres": "18.6",
+    "pgroonga": "4.0.8",
+    "migrations": 60,
+    "target": "rezics_atlas_seed_coverage_goal",
+    "hostPort": 55433,
+    "fixtureEffects": "committed only on the task-owned disposable target; it is no longer empty for seed coverage",
+    "schemaChanges": false
+  },
+  "concurrentRaces": [
+    "exact session token rotation wins account-lock wait; preference remains unchanged",
+    "direct account erasure wins account-lock wait; waiting private update rejects"
+  ],
+  "checks": {
+    "mainTypecheck": {
+      "command": "task services-main:typecheck",
+      "passed": true
+    },
+    "preferenceAuthUnits": {
+      "command": "yarn exec vitest run --project main services/main/src/services/api/users/schema.test.ts services/main/src/services/auth/request-interface-locale.test.ts services/main/src/services/auth/entity.test.ts",
+      "tests": 22,
+      "passed": true
+    },
+    "apiContractUnits": {
+      "command": "yarn exec vitest run --project main services/main/src/services/api/index.test.ts",
+      "tests": 36,
+      "passed": true
+    },
+    "realmRoster": {
+      "command": "task services-main:db:realm-roster:check",
+      "assertions": 433,
+      "httpChecks": 211,
+      "passed": true,
+      "sourceDigests": {
+        "services/main/scripts/check-realm-roster.ts": "a0be6740e1f6a57b6a103cb74affe69639d04237ea80b8143bbcb344d09411fa",
+        "services/main/scripts/native-enrollment-fixture.ts": "8ce36f80bd86701e684ea7f863c681155ebb3124292ba448ac8e92087636f3be",
+        "services/main/src/services/realms/roster.ts": "5368731244f9ccb1e91e16f04c52534daa91455084e83b9a23254b10871d0c75",
+        "services/main/src/services/realms/roster-contracts.ts": "6a3ccfb5d278ad6b043638e66249e4af0b979be4acadaaeae6e3581f8c8ba757",
+        "services/main/src/services/api/realms/schema.ts": "9d77b7497120608320c87342e4f93268f66a3b5561ceb60de33d32d6dbba35f6",
+        "services/main/src/services/api/realms/schema.test.ts": "46061bc18817a740bc6c2aedfcc5cd7091480de7c1513ef3b3ada6cd48525b47",
+        "services/main/src/services/realms/membership.ts": "bc1e0f75d4c0f1fb5675300338f3f446049f128e0ee9cfb3b21edf9fa7fbcd73",
+        "services/main/src/services/realms/membership-policy.ts": "73316cdbc1ef736c63b6ddd1df49dc61b9e5b9d1c954cc689b1a5d44330041fb",
+        "services/main/src/services/api/realms/membership.ts": "d4ee5b3c7ea61c73b06b67650657e9c598d89204fe623e312f42e1e4b211f539",
+        "services/main/src/services/participation/presentation.ts": "19849feb2fe7a5dc3ed3a9eace943343f476f0767f5051f26a615fe3b0e1db4d",
+        "services/main/src/services/database/migrations/atlas.sum": "47ee12fdd50ed3592768e517a025b7ada81d3adb4cd925092751074e09ad200a"
+      },
+      "sampleCandidates": 10001,
+      "backgroundCandidates": 100000,
+      "queryPlan": {
+        "concentrated": {
+          "QUERY PLAN": [
+            {
+              "Plan": {
+                "Node Type": "Limit",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 0.29,
+                "Total Cost": 4.42,
+                "Plan Rows": 51,
+                "Plan Width": 988,
+                "Actual Startup Time": 0.008,
+                "Actual Total Time": 0.016,
+                "Actual Rows": 51,
+                "Actual Loops": 1,
+                "Disabled": false,
+                "Shared Hit Blocks": 4,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Shared I/O Read Time": 0,
+                "Shared I/O Write Time": 0,
+                "Local I/O Read Time": 0,
+                "Local I/O Write Time": 0,
+                "Temp I/O Read Time": 0,
+                "Temp I/O Write Time": 0,
+                "Plans": [
+                  {
+                    "Node Type": "Index Scan",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Scan Direction": "Forward",
+                    "Index Name": "realm_enrollment_pkey",
+                    "Relation Name": "realm_enrollment",
+                    "Alias": "realm_enrollment",
+                    "Startup Cost": 0.29,
+                    "Total Cost": 810.55,
+                    "Plan Rows": 10001,
+                    "Plan Width": 988,
+                    "Actual Startup Time": 0.008,
+                    "Actual Total Time": 0.013,
+                    "Actual Rows": 51,
+                    "Actual Loops": 1,
+                    "Disabled": false,
+                    "Index Cond": "(scope_id = '01a0bec1-dd3d-72dc-a5cd-c97ff9772253'::uuid)",
+                    "Rows Removed by Index Recheck": 0,
+                    "Index Searches": 1,
+                    "Shared Hit Blocks": 4,
+                    "Shared Read Blocks": 0,
+                    "Shared Dirtied Blocks": 0,
+                    "Shared Written Blocks": 0,
+                    "Local Hit Blocks": 0,
+                    "Local Read Blocks": 0,
+                    "Local Dirtied Blocks": 0,
+                    "Local Written Blocks": 0,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0,
+                    "Shared I/O Read Time": 0,
+                    "Shared I/O Write Time": 0,
+                    "Local I/O Read Time": 0,
+                    "Local I/O Write Time": 0,
+                    "Temp I/O Read Time": 0,
+                    "Temp I/O Write Time": 0
+                  }
+                ]
+              },
+              "Planning": {
+                "Shared Hit Blocks": 1,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Shared I/O Read Time": 0,
+                "Shared I/O Write Time": 0,
+                "Local I/O Read Time": 0,
+                "Local I/O Write Time": 0,
+                "Temp I/O Read Time": 0,
+                "Temp I/O Write Time": 0
+              },
+              "Planning Time": 0.046,
+              "Triggers": [],
+              "Execution Time": 0.029
+            }
+          ]
+        },
+        "selective": {
+          "QUERY PLAN": [
+            {
+              "Plan": {
+                "Node Type": "Limit",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 0.42,
+                "Total Cost": 19.53,
+                "Plan Rows": 51,
+                "Plan Width": 710,
+                "Actual Startup Time": 0.029,
+                "Actual Total Time": 0.038,
+                "Actual Rows": 51,
+                "Actual Loops": 1,
+                "Disabled": false,
+                "Shared Hit Blocks": 4,
+                "Shared Read Blocks": 1,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Shared I/O Read Time": 0.009,
+                "Shared I/O Write Time": 0,
+                "Local I/O Read Time": 0,
+                "Local I/O Write Time": 0,
+                "Temp I/O Read Time": 0,
+                "Temp I/O Write Time": 0,
+                "Plans": [
+                  {
+                    "Node Type": "Index Scan",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Scan Direction": "Forward",
+                    "Index Name": "realm_enrollment_pkey",
+                    "Relation Name": "realm_enrollment",
+                    "Alias": "realm_enrollment",
+                    "Startup Cost": 0.42,
+                    "Total Cost": 3662.43,
+                    "Plan Rows": 9772,
+                    "Plan Width": 710,
+                    "Actual Startup Time": 0.028,
+                    "Actual Total Time": 0.033,
+                    "Actual Rows": 51,
+                    "Actual Loops": 1,
+                    "Disabled": false,
+                    "Index Cond": "(scope_id = '01a0bec1-dd3d-72dc-a5cd-c97ff9772253'::uuid)",
+                    "Rows Removed by Index Recheck": 0,
+                    "Index Searches": 1,
+                    "Shared Hit Blocks": 4,
+                    "Shared Read Blocks": 1,
+                    "Shared Dirtied Blocks": 0,
+                    "Shared Written Blocks": 0,
+                    "Local Hit Blocks": 0,
+                    "Local Read Blocks": 0,
+                    "Local Dirtied Blocks": 0,
+                    "Local Written Blocks": 0,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0,
+                    "Shared I/O Read Time": 0.009,
+                    "Shared I/O Write Time": 0,
+                    "Local I/O Read Time": 0,
+                    "Local I/O Write Time": 0,
+                    "Temp I/O Read Time": 0,
+                    "Temp I/O Write Time": 0
+                  }
+                ]
+              },
+              "Planning": {
+                "Shared Hit Blocks": 139,
+                "Shared Read Blocks": 3,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Shared I/O Read Time": 0.021,
+                "Shared I/O Write Time": 0,
+                "Local I/O Read Time": 0,
+                "Local I/O Write Time": 0,
+                "Temp I/O Read Time": 0,
+                "Temp I/O Write Time": 0
+              },
+              "Planning Time": 23.049,
+              "Triggers": [],
+              "Execution Time": 0.071
+            }
+          ]
+        }
+      }
+    },
+    "webPreferenceUnits": {
+      "command": "yarn exec vitest run --project web apps/web/features/preferences/model/presentation-preferences.test.ts apps/web/features/preferences/data/use-presentation-preferences.test.tsx apps/web/features/preferences/server/initial-presentation-preferences.server.test.ts apps/web/features/privacy/model/resource-visibility.test.ts",
+      "tests": 19,
+      "passed": true
+    },
+    "localizedErrorUnits": {
+      "command": "yarn exec vitest run --project web apps/web/i18n/errors.test.ts",
+      "tests": 6,
+      "passed": true
+    },
+    "localePolicy": {
+      "command": "task libraries:i18n:policy:check",
+      "passed": true
+    },
+    "finalGeneratedConsumers": {
+      "generation": {
+        "command": "task openapi:generate",
+        "passed": true,
+        "outputs": [
+          "OpenAPI",
+          "Fetch SDK",
+          "TanStack Query SDK",
+          "public SDK"
+        ]
+      },
+      "sdkTypechecks": {
+        "command": "task libraries:openapi:typecheck libraries:openapi-fetch:typecheck libraries:openapi-tanstack-query:typecheck packages-api:typecheck",
+        "passed": true
+      },
+      "webTypecheck": {
+        "command": "task apps-web:typecheck",
+        "passed": true
+      },
+      "contractComparison": {
+        "changedOperations": [
+          "GET /api/v1/account/me/preferences",
+          "PATCH /api/v1/account/me/preferences",
+          "PUT /api/v1/account/me/preferences",
+          "PATCH /api/v1/account/me/privacy"
+        ],
+        "requestAndSuccessSchemasUnchanged": true,
+        "scope": "Compared parsed OpenAPI to base commit; only these four operations changed."
+      }
+    },
+    "storybook": {
+      "command": "task apps-web:storybook:capture -- features/settings/pages/privacy-settings-page.stories.tsx",
+      "tests": 2,
+      "passed": true,
+      "a11y": "error-level assertions enabled; zero violations",
+      "reviewed": true,
+      "states": [
+        {
+          "storyId": "settings-pages-privacy-settings-page--denied-keeps-choice",
+          "locale": "zh-Hant",
+          "theme": "light",
+          "viewport": "390x844",
+          "outcome": "Actual form retains private selection and enabled save control; localized denial is visible without overlap or clipping."
+        },
+        {
+          "storyId": "settings-pages-privacy-settings-page--unavailable-keeps-choice",
+          "locale": "en",
+          "theme": "dark",
+          "viewport": "1280x900",
+          "outcome": "Actual form retains private selection and enabled save control; localized temporary failure fits above the save action."
+        }
+      ],
+      "discovery": "Official storybook tools stories changed --no-attach returned the two new story IDs; unrelated shared-import results were not treated as a full visual scope.",
+      "screenshotRetention": "Inspected temporary PNGs are not committed.",
+      "runtime": "Installed missing Playwright Chromium/headless shell 153.0.8010.12 (v1243) using the owning browser task."
+    },
+    "documentation": {
+      "commands": [
+        "python -B -m unittest discover -s docs/testing -p test_documentation.py",
+        "python -B docs/testing/check_docs.py"
+      ],
+      "tests": 15,
+      "passed": true
+    }
+  },
+  "repairsDuringVerification": [
+    "Added required API-key fixture timestamps; chose explicit fixture locale instead of assuming the platform default is English.",
+    "Retained account:update entry permission for private Realm hint disclosure while preserving native subject/manager authority.",
+    "Updated the retained CORS test to include the existing X-Rezics-Authority header.",
+    "Added the five native access errors to all eight locales; replaced one existing German organization term literal with its approved termbase expression.",
+    "Documented the four preference operations’ native rejection responses and regenerated consumers."
+  ],
+  "limitations": [
+    "No full-application browser/onboarding acceptance; other unique-Self consumers remain open.",
+    "No full database replay repeated because this checkpoint changes no schema or canonical SQL; prior full 60-migration qualification retains its own evidence.",
+    "No corpus-scale performance, production storage or recovery qualification.",
+    "Exact catalog report evidence is selected in architecture but persistence/API/reviewer implementation and empty-target seed coverage remain open."
+  ],
+  "changedSourceDigests": {
+    "apps/web/features/settings/pages/privacy-settings-page.stories.tsx": "fc5f55a0ca570a0427febdf6d7d595c237ea640cf8b333655a3aaf731261024b",
+    "libraries/i18n/src/languages/de/errorCodes.ts": "e6ec011cfb143b45db748b01e1496e9d92a135ef7ebfc8f6e87ae7fa6c6887ff",
+    "libraries/i18n/src/languages/de/settings.ts": "0627c5301ff3a15f91aeb28f8932510c9234bac4d32c54eb71a4775ff89a94a5",
+    "libraries/i18n/src/languages/en/errorCodes.ts": "5351654d2a5592bcf0c01b65492b24bb7ed520bf4888b36b97d7667f447aed17",
+    "libraries/i18n/src/languages/es/errorCodes.ts": "87a29d65b9e1dd05a0a5f4ea5fc861e5f173163f171c852a45bfe2f5aea51a26",
+    "libraries/i18n/src/languages/fr/errorCodes.ts": "126a5c6ad6f7bffa40b480a1e154d3b4d03dbf1edea5c21bf1f43a0272f05ca9",
+    "libraries/i18n/src/languages/ja/errorCodes.ts": "549dd667474b2555ac2eb45fa88708c814a2cc6317dbe519ea556c3a001b35bf",
+    "libraries/i18n/src/languages/ko/errorCodes.ts": "1d06fed3741f2439c9845503f0c248aaa63553bb82eba98f697e3944578c31a8",
+    "libraries/i18n/src/languages/zh-Hans/errorCodes.ts": "551fae5a4572d2775d9840b1e283382e71f78028ea35dd7e27b9dbad19ded864",
+    "libraries/i18n/src/languages/zh-Hant/errorCodes.ts": "76a07744a700d0942f2bd6aafae78595aed4fe855d882b82198e6e86d6081ede",
+    "libraries/services/main/openapi-fetch/src/generated/models.ts": "1a0845903e554da214ab022a8de28e22f89bfd63fcff8381b5a1ed15bcbe62c7",
+    "libraries/services/main/openapi-tanstack-query/src/generated/hooks.ts": "d1b52c556d4143c360312c161836ed0230830806803f3444e1466d68de067d50",
+    "libraries/services/main/openapi-tanstack-query/src/generated/models.ts": "1a0845903e554da214ab022a8de28e22f89bfd63fcff8381b5a1ed15bcbe62c7",
+    "libraries/services/main/openapi/openapi.json": "bad558b3413ac4e993351fec56afd9c70f24d04ed29b8da96373d2c85e491f0f",
+    "packages/api/src/generated/models.ts": "1a0845903e554da214ab022a8de28e22f89bfd63fcff8381b5a1ed15bcbe62c7",
+    "services/main/Taskfile.yml": "8a423adcb0b4878c69d7a76b83a0f9dc155f1da861f44d3b9a30f5d8bb2c81d5",
+    "services/main/scripts/check-native-account-preferences.ts": "2908fdfb44c2bd1387506d26fc6579260491f778bdf37baa4861e5596801d1ec",
+    "services/main/src/services/account/preference-contracts.ts": "cd33c55a95aed32e64676f6e25667b5c51dc805fdf370fd9f83cf7ff119326d6",
+    "services/main/src/services/account/preferences.ts": "e46a7f44ac1835c4d7773345c0407bd38736032d0abc540e65d171ca53a70ff0",
+    "services/main/src/services/api/index.test.ts": "d6c6aad6b23201de963a81756b76428bd710e777afe94530f64200bfa0baffd0",
+    "services/main/src/services/api/users/index.ts": "a42bfcb4f242ad06c9ddacada91a5747d0c5bb67498401b34d6a6493fd2579eb",
+    "services/main/src/services/api/users/schema.ts": "893d5621b728dbda22ee788bf5ff9dc58f713f8533b16d439b702f753cd0f213",
+    "services/main/src/services/auth/request-interface-locale.ts": "90a6f6ea42f97352c2de1f55f732b32f36350b8e419054c585e28419af0e41fe",
+    "services/main/src/services/participation/membership-policy.ts": "d6e1f42de9262e6b56eae45244758dc431eeda0b34f46f8aa079e4f09a2c1e35",
+    "services/main/src/services/realms/membership-policy.ts": "73316cdbc1ef736c63b6ddd1df49dc61b9e5b9d1c954cc689b1a5d44330041fb",
+    "services/main/src/services/realms/roster.ts": "5368731244f9ccb1e91e16f04c52534daa91455084e83b9a23254b10871d0c75"
+  }
+}

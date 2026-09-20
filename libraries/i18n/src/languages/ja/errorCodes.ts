@@ -14,6 +14,11 @@ const { forms: zoneTerms } = jaTerminology.zone;
 const { forms: entityTerms } = jaTerminology.entity;
 
 export default {
+	AccessChanged: "権限またはデータが変更されました。更新してからもう一度お試しください。",
+	AccessDenied: "この操作を行う権限がありません。",
+	AccessInputInvalid: "選択内容を確認して、もう一度お試しください。",
+	AccessRecordUnavailable: "この項目は利用できません。",
+	AccessUnavailable: "権限を確認できませんでした。もう一度お試しください。",
 	GovernanceDeliveryCapacityExceeded:
 		"通知配信キューが混み合っています。しばらくしてからこの管理操作を再試行してください。",
 	CatalogSourceRequestLimited:

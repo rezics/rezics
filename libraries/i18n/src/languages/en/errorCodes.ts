@@ -14,6 +14,11 @@ const { forms: zoneTerms } = enTerminology.zone;
 const { forms: entityTerms } = enTerminology.entity;
 
 export default {
+	AccessChanged: "Access or data changed. Refresh and try again.",
+	AccessDenied: "You do not have permission to do this.",
+	AccessInputInvalid: "Check your selection and try again.",
+	AccessRecordUnavailable: "This item is unavailable.",
+	AccessUnavailable: "Your access could not be verified. Try again.",
 	GovernanceDeliveryCapacityExceeded:
 		"The notification delivery queue is busy. Retry this governance action shortly.",
 	CatalogSourceRequestLimited: "This source is receiving too many requests. Try again later.",

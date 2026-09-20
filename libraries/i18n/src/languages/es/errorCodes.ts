@@ -14,6 +14,11 @@ const { forms: zoneTerms } = esTerminology.zone;
 const { forms: entityTerms } = esTerminology.entity;
 
 export default {
+	AccessChanged: "Los permisos o los datos han cambiado. Actualiza y vuelve a intentarlo.",
+	AccessDenied: "No tienes permiso para realizar esta acción.",
+	AccessInputInvalid: "Revisa tu selección y vuelve a intentarlo.",
+	AccessRecordUnavailable: "Este elemento no está disponible.",
+	AccessUnavailable: "No se han podido verificar tus permisos. Vuelve a intentarlo.",
 	GovernanceDeliveryCapacityExceeded:
 		"La cola de envío de notificaciones está ocupada. Vuelve a intentar esta acción de gobernanza en breve.",
 	CatalogSourceRequestLimited:
