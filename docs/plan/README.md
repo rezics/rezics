@@ -6,14 +6,49 @@ Follow the [execution workflow](execution-workflow.md) for program authority, ph
 
 | Field | Current selection |
 | --- | --- |
-| Scope | Whole-documentation reconciliation with the selected Resource, Agent, Space, language, logical-model and same-database storage contracts, requested on 2026-09-19. |
-| Phase | `verification`: documentation reconciliation is complete, with focused regressions and strict source/link checks passing. No application implementation is activated. |
-| Owners | `docs`, repository documentation entry points, applicable package/service README contracts and the owning documentation/design checkers. |
-| Deliverables | Coherent terminology and contract ownership throughout maintained docs; updated navigation and plan; preserved dated evidence and operational commands; removal of obsolete target assumptions; reproducible generated-input and documentation checks. |
-| Exclusions | Runtime/API/schema/migration changes, source-pin updates, deployment, browser QA and new capacity qualification. Published legal obligations and released evidence are not redefined by terminology maintenance. |
-| Acceptance | [Documentation evidence](../testing/README.md#documentation-reconciliation-evidence): 207 Markdown files checked; 15 checker regressions pass; strict tracked-source and exact generated-input verification passes. Product gates and capacity qualification remain unchanged. |
+| Scope | First-stage program revision authorized on 2026-09-20: update the owning documentation, then autonomously implement and qualify dependency-ready scopes below with coherent local commits. The current checkpoint is documentation reconciliation. |
+| Phase | `verification`: documentation reconciliation passes the existing 15 regressions, maintained-document check and strict generated-input/design checks. Commit this checkpoint, then select live-source acquisition/validation implementation below. |
+| Owners | Architecture, module plans, acceptance specifications and affected package/service documentation; subsequent runtime owners are selected by the sequence below. |
+| Deliverables | One consistent first-stage scope and compatibility matrix; Semantic Web reference/adoption boundaries; live-published chapter semantics; dynamic external validation; preserved native capabilities and historical evidence. |
+| Exclusions | This documentation checkpoint changes no runtime, migration or source acquisition code. Full Semantic Web indexing, uploaded-package execution, deployment and full-application browser QA are not activated. Subsequent implementation does not require renewed approval. |
+| Acceptance | [Revised documentation evidence](../testing/README.md#first-stage-scope-revision-evidence) passes; source/native/runtime and capacity gates remain pending. The earlier documentation and compiler results retain their original scope. |
 
-## Selected model revision (documentation only)
+## First-stage product and indexing scope
+
+The maintainer selected MusicBrainz, VNDB, Bangumi, novels, Prompt/Skill,
+software/packages and recipes as the first-stage indexing and interoperability
+scope. The [catalog matrix](../architecture/database/catalog-model.md#first-stage-compatibility)
+owns their required grains and operations. Semantic Web is an important
+[modeling and exchange reference](../architecture/standards-adoption.md#semantic-web-reference),
+not a requirement to implement every vocabulary, syntax, query language or inference
+system before delivering these domains. Complete Schema.org/Wikidata indexing is
+a separately activated follow-on; selected domain mappings and existing vocabulary
+support remain useful now.
+
+This indexing list does not replace the native product. Preserve all selected
+M01-M10 contracts and their activation boundaries: identity/Agent/access and
+connected apps; native Work/content creation, translations and media; Posts,
+chapters, Threads and discussion; ratings, tags, follows, favorites and reading
+progress; collaboration, governance and communication; Realm/Collection/Space,
+addresses and presentation; discovery, operations and recovery; Hub cataloging;
+Subscribe/Pro and information verification under their existing elected scopes.
+Do not infer completion or defer a native requirement merely because no external
+provider describes it.
+
+Ordinary chapters reuse a Post and follow the context-eligible published selection.
+Content history remains exact, while ordinary chapter references and progress do
+not require fixed whole-book reading snapshots. Reviewed adoption, precise
+citations, fixed releases and exact artifacts retain their own version contracts;
+[composition](../architecture/database/content-composition.md) owns the distinction.
+
+External-site compatibility checks dynamically fetch current APIs and official
+contracts into ignored directories, validate them with scripts and expose drift
+for repair. Record each run's observations without freezing future runs to their
+versions or hashes. [Source conformance](../testing/source-conformance.md#live-acquisition-and-validation)
+owns coverage and failure semantics. Pinned normative vocabulary dependencies,
+released SQL and historical evidence are separate responsibilities.
+
+## Selected model revision
 
 On 2026-09-19 the maintainer selected the integrated
 [Resource/model contracts](../architecture/schema-modeling.md),
@@ -21,9 +56,10 @@ On 2026-09-19 the maintainer selected the integrated
 [physical fields and storage families](../architecture/database/resource-storage.md),
 [shared Space identity](../architecture/space-composition.md) and
 [Resource-targeting router/addresses](../architecture/resource-addressing.md).
-The current task completes the documentation rewrite for this selection. It does
-not reopen runtime implementation, advance a product gate, change source pins or
-qualify the new target using earlier compiler results. The completed compiler scope
+The 2026-09-20 program retains these contracts subject to the chapter and indexing
+scope revisions above, and authorizes their dependency-ready implementation after
+documentation reconciliation. It does not qualify the target using earlier
+compiler results. The completed compiler scope
 retains its [2026-09-18 evidence](../testing/schema.md), with broader failures visible
 in [known failures](../testing/known-failures.md).
 
@@ -36,13 +72,13 @@ Content languages are independent of UI locales. The deployment remains one
 database with separate physical tables; table/partition counts are unqualified
 configuration candidates, not capacity or throughput claims.
 
-Dependency order for a separately activated implementation scope:
+Dependency order within the authorized program:
 
-1. Reconcile current owners/fields/references and source pins against the seven
+1. Reconcile current owners/fields/references and source acquisition against the seven
    native contracts; record per-field writer, value/language, query and exchange
    dispositions without rewriting released SQL or the installation baseline.
 2. Complete shared values, names, references, assertions/acceptance and identified
-   relations, then generic Recipe and retained provider/grain round-trips.
+   relations, then native Recipe and retained provider/grain round-trips.
 3. Integrate shared Space, typed routing/scoped addresses, public Agent authority
    and affected API/SDK/navigation/SEO consumers through their operation contracts.
 4. Admit elected time/quantity/geometry/observation/dataset profiles with explicit
@@ -81,22 +117,32 @@ Include affected cross-module cases in each scope's verification when dependenci
 
 ## Contract-first implementation sequence
 
-1. Reconcile identity/owner/placement, cross-domain Work/releases and property applicability with the [dictionary](../architecture/database/data-dictionary.md); execute existing semantic matrices in verification.
-2. Complete shared references/capability adapters and mixed authority with affected consumers, including membership, Groups, Roles, representation and connected-app privacy contracts in [M01](modules/foundation.md).
-3. Implement exact content/adoption/published selections and staged [composition import/refresh](../architecture/database/content-composition.md), preserving source correspondence, local-edit conflicts and recovery; ordinary attachment remains reference-only.
-4. Replace whole-structure reads with revision-bound child pagination, coalesced metrics and bounded reverse impact/read models. Retain current 2,048/64 protections until that replacement passes tests; do not raise in-memory limits as a substitute.
-5. Qualify source-to-adoption/composition/publication/discovery and revocation/recovery journeys across domains, including freshness, workload limits and known failures before whole-program frontend acceptance.
+1. Reconcile the owning docs and acceptance matrices, verify them and commit. Preserve the earlier evidence and complete native scope.
+2. Implement current external-site acquisition and scripted contract/field validation in the existing adapters and source-contract owners. Move fetched inputs, generated inventories and run reports to ignored storage; keep authored mappings and scripts in Git. Qualify latest-fetch, drift, malformed/partial input and failed-fetch behavior before claiming live compatibility.
+3. Reconcile identity/owner/placement, cross-domain Work/releases, values and property applicability with the [dictionary](../architecture/database/data-dictionary.md). Complete shared references/capability adapters and mixed authority with required M01 consumers; resolve existing integrity failures in the affected scope.
+4. Implement native recipes and representative music structures through the shared contracts. Qualify source-free operations, repeated ingredients/tracks, names, exact quantities, source mappings and query/export fidelity. One successful domain does not qualify the others.
+5. Complete native creation/reading and chapter/Post interoperability, then VNDB/Bangumi domain coverage. Implement ordinary published-head reading and stable occurrence progress alongside explicitly fixed adoption/releases; preserve source correspondence, local edits and recovery during [composition import/refresh](../architecture/database/content-composition.md).
+6. Complete software/package and Prompt/Skill cataloging, versioned content, declared dependencies, publishing/download and exports. Dependency solving, installation and uploaded-package execution require a separately selected capability scope; native Hub catalog work can proceed independently.
+7. Integrate all retained native product consumers through their module gates, including community/Space, discovery and the existing separately activated scopes. Qualify cross-domain source/native authoring, publication, revocation, recovery and workload journeys before whole-program frontend acceptance.
+
+Each checkpoint selects a complete dependency-ready contract scope in Active
+execution, then follows implementation, test-authoring, verification and repair.
+Keep ordinary mutation/version preconditions and bounded work. Replace whole-tree
+reads with generation-bound pages, coalesced metrics and bounded reverse impact;
+retain the current 2,048/64 protections until the replacement is qualified.
 
 The [native Work](../architecture/database/native-work.md), [logical Resource](../architecture/database/README.md#34-resource-capabilities-across-owner-tables) and composition contracts govern all modules. Cross-database operation and unresolved Hub execution remain separate activations.
 
 [Schema.org and Wikidata interoperability](../architecture/semantic-interoperability.md)
-is required for the full-index target. Its dependency order is M02 value/identity
+is a follow-on full-index target, outside the first-stage acceptance denominator.
+When separately activated, its dependency order is M02 value/identity
 contracts -> M07 preserved source representations with M09 minimum queries -> M04
 native mappings and M09 exports -> combined update/recovery/capacity qualification.
-First inventory all required profiles, then implement JSON-LD and full Wikidata
+Within that follow-on, inventory all required profiles, then implement JSON-LD and full Wikidata
 statements as initial milestones; Microdata/RDFa and lexical/shape coverage remain
 required before full acceptance. Source indexing can precede native domain mapping.
-The complete source-instance sequence remains separate from the active vocabulary/schema package scope.
+Existing vocabulary compilation and selected first-stage JSON-LD mappings do not
+depend on completing that source-instance sequence.
 
 [Information indexing and verification](../architecture/information-indexing-and-verification.md)
 is a selected cross-module follow-on target: M02 owns claims, evidence assessments
@@ -125,11 +171,11 @@ This is the sole progress table. Module files detail remaining work; linked test
 | --- | --- | --- | --- | --- | --- |
 | M01 | [Foundation](modules/foundation.md) | None | Identity/access and adapter contracts selected | RoleBinding/representation/workload persistence, native subject/path evaluation, assignment ceilings, identity/default-context APIs, scope/Role/Binding/Ceiling management APIs and App declaration/lifecycle APIs implemented; OAuth client/consent/installation/context storage, live readers and bounded credential erasure implemented; private Group lifecycle/selection/roster/discovery/evaluation, independent approvals, original-path recovery and native Org/Realm enrollment APIs/consumers implemented; representation administration, Group-derived Org directory, all-scope representation policy, replacement recovery, remaining protocol integration and consumer/onboarding migration pending | G2 partial; new IAM/OAuth/default/ceiling/Group/Org/Realm/API work, migrations, generators and affected retained web consumers remain unqualified. Remaining [foundation](../testing/foundation.md) and [IAM/APP](../testing/identity-and-access.md) qualification pending. |
 | M02 | [Knowledge and graph](modules/knowledge-and-graph.md) | M01 | Graph, Tag classification, Event temporal facts, source interoperability and verification/acceptance semantics selected | Standard ontology IR, 28 reviewed native profiles, model/runtime validation, 55 generated Drizzle declarations and complete shared table ownership implemented | [Selected standards/model/schema evidence](../testing/schema.md) passed, including exact meaning bindings, actual native writes and cross-database/table-family relocation. Broader M02/G2 remains separate. |
-| M03 | [Content and media](modules/content-and-media.md) | M01, M02 contracts | Defined | Shared domain storage, indexed media grains, exact quantities and contextual sealed selections implemented; remaining product runtime pending | [Selected schema constraints](../testing/schema.md) passed; full M03 workflows/capacity pending |
-| M04 | [Catalog](modules/catalog.md) | M01-M03 contracts | Cross-domain Work/releases and event-time adapters selected; domain mappings/source-free cases required | Pending target completion | Pending |
-| M05 | [Creation and reading](modules/creation-and-reading.md) | M02-M04 | Composition selected; Book is the first journey | Pending target completion | Pending |
+| M03 | [Content and media](modules/content-and-media.md) | M01, M02 contracts | Ordinary chapter/Post published-head reuse and distinct fixed/reviewed selections selected | Shared domain storage, indexed media grains, exact quantities and contextual sealed selections implemented; remaining product runtime pending | [Selected schema constraints](../testing/schema.md) passed; full M03 workflows/capacity pending |
+| M04 | [Catalog](modules/catalog.md) | M01-M03 contracts | First-stage catalog matrix and native Recipe operations selected alongside cross-domain Work/releases and event-time adapters; mappings/source-free cases required | Pending target completion | Pending |
+| M05 | [Creation and reading](modules/creation-and-reading.md) | M02-M04 | Chapter/Post interoperability and stable occurrence progress selected; Book is the first complete native journey | Pending target completion | Pending |
 | M06 | [Community and governance](modules/community-and-governance.md) | M01-M03 | Membership, wiki composition and complete rating contexts selected; Dynamic Collections optional | Native Org/Realm enrollment uses shared admission generations with independent Realm enforcement, exact consent and current `Entity` projections; independent Wiki/page revision and message history storage implemented; remaining community contracts pending | G2 partial; new native enrollment work unqualified; [wiki evidence](../testing/wiki-composition.md), remaining content revisions, authority/history/capacity and community contracts pending. |
-| M07 | [Sources and converters](modules/sources-and-converters.md) | M01/M02 source contracts; M01-M04 native adoption | Schema.org/Wikidata full-index profiles and verification evidence/lineage intake selected alongside catalog sources; field conformance pending | `@rezics/schema-importer` compiles standards and reviewed native models; provider contracts and content readers live in `@rezics/content-adapters` with existing native catalog writers | [Compiler/adapter boundary, pinned conversions and CLI qualification](../testing/schema.md) passed. Full provider acquisition/adoption and field coverage remain separate; declaration counts do not establish native coverage. |
+| M07 | [Sources and converters](modules/sources-and-converters.md) | M01/M02 source contracts; M01-M04 native adoption | Current external-site validation and first-stage provider/domain profiles selected; full Schema.org/Wikidata indexing separately activated; field conformance pending | `@rezics/schema-importer` compiles standards and reviewed native models; provider contracts and content readers live in `@rezics/content-adapters` with existing native catalog writers | [Compiler/adapter boundary, pinned conversions and CLI qualification](../testing/schema.md) passed. Full provider acquisition/adoption and field coverage remain separate; declaration counts do not establish native coverage. |
 | M08 | [Skill, Prompt and MCP Hub](modules/ai-hub.md) | M01-M04 | Catalog defined; execution/hosting open | Package, release, file, dependency, installation and capability declaration schemas implemented; runtime pending | [Selected registry constraints](../testing/schema.md) passed; execution/hosting remains unqualified |
 | M09 | [Search and operations](modules/search-and-operations.md) | M01 and participating events | Rating distributions, event-date indexes, source-query/export profiles and verification execution/quality indexes/exchange selected | In progress; verification runtime not activated | G2 partial; [recommendation evidence](../testing/recommendations.md), [native diagnostics](../../services/main/performance/README.md#native-failure-artifacts) and [open failures](../testing/known-failures.md); source interoperability, information verification, disclosure, delivery, capacity and restoration pending. |
 | M10 | [Subscribe and Realm participation](modules/subscriptions-and-pro.md) | Selected M01, M03, M06, M09 contracts | Native multi-plan, independent paid/complimentary benefits, Realm policies, multi-context reply connections and fixed-site Pro delivery selected | Runtime implementation not activated | [SUB/PRO, SITE/RPLY, capacity and experience scenarios](../testing/subscriptions-and-pro.md) specified; no M10 gate qualified. |

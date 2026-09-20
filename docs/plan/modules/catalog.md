@@ -4,6 +4,8 @@ Dependencies: M01-M03 contracts. Owner: [catalog model](../../architecture/datab
 
 ## Remaining work
 
+- Qualify the complete [first-stage domain matrix](../../architecture/database/catalog-model.md#first-stage-compatibility), including native [Recipe operations](../../architecture/database/recipes.md) and RECIPE01-RECIPE10. The indexing list does not remove native product responsibilities.
+
 - Qualify publishing, music, program, software, entity, grouping, reference and distribution objects without source records.
 - Implement the [common native Work/release contract](../../architecture/database/native-work.md) across textual, composition/recording/album, audiovisual, visual, game/software and mixed-media scopes. Use domain-owned tables, shared protocols and applicable properties; qualify virtual and actual release forms without a universal Work parent.
 - Qualify [WORK01-WORK18](../../testing/native-work.md) before treating Book-only cases or a provider model as evidence for the whole target.
@@ -14,7 +16,7 @@ Dependencies: M01-M03 contracts. Owner: [catalog model](../../architecture/datab
 - Test repeated targets, incomplete contents, large staged structures, foreign-owner reuse and world/canon/series memberships.
 - Replace publication/target-pair content keys with parent/manifest/occurrence keys and update histories, source correspondence, exact references and consumers together. Account for changed key widths and repeated-use amplification using the existing 500M/3B capacity model before persistence acceptance.
 - Build APIs and semantic exports with their native commands; source adapters use the same commands.
-- Qualify [Schema.org/Wikidata mappings](../../architecture/semantic-interoperability.md) for elected native domains with SIO11/SIO15: multi-type descriptions, external editions, classification and identity correspondence retain exact evidence and source residuals. An unmapped external subject remains indexed without a fabricated native parent or new business service.
+- Qualify [Schema.org/Wikidata mappings](../../architecture/semantic-interoperability.md) for elected native domains using the applicable mapping cases from SIO11/SIO15 without requiring the whole follow-on full-index suite: multi-type descriptions, external editions, classification and identity correspondence retain exact evidence and source residuals. An unmapped external subject remains indexed without a fabricated native parent or new business service.
 
 ## Acceptance
 

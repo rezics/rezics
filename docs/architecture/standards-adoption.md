@@ -1,9 +1,34 @@
 # Standards adoption and model profiles
 
-Status: selected documentation target, 2026-09-19. Source admission, generators and
-runtime work are not activated by this document. [Schema modeling](schema-modeling.md)
+Status: selected model with first-stage scope revised on 2026-09-20. Runtime
+activation follows the [plan](../plan/README.md). [Schema modeling](schema-modeling.md)
 owns the native model; [semantic interoperability](semantic-interoperability.md)
-owns complete Schema.org/Wikidata source-instance preservation/query/export.
+owns the separately activated full Schema.org/Wikidata source-instance target.
+
+## Semantic Web reference
+
+The [Semantic Web](https://en.wikipedia.org/wiki/Semantic_Web) is an important
+conceptual reference: give data explicit machine-processable meaning and connect
+descriptions across sources using identifiers, vocabularies and relationships.
+Use primary specifications for technical decisions. [RDF](https://www.w3.org/TR/rdf11-concepts/)
+defines graph statements and typed/language-tagged values; RDFS/OWL describe
+vocabulary and entailment, and JSON-LD supplies one exchange syntax. These are
+distinct responsibilities, not a requirement to implement one universal platform.
+
+First-stage adoption is driven by the [elected domains](database/catalog-model.md#first-stage-compatibility):
+stable identity, multilingual names, explicit relations/occurrences, provenance,
+needed value semantics and reviewed exchanges. Preserve the existing vocabulary
+compiler and useful mappings. Complete Schema.org/Wikidata source indexing,
+all-syntax extraction, general SPARQL/OWL processing and unrelated specialty
+workflows do not gate first-stage product delivery. A Resource remains a native
+managed object; it is not coextensive with everything RDF can denote.
+
+The families below retain their modeling dispositions. Implement a family's
+operations when an elected product contract requires them; listing a family does
+not activate its entire standard. Recipe is a native first-stage domain, with
+[its own operations](database/recipes.md), rather than only a generic-model example.
+Provider contracts and live compatibility checks follow current upstream APIs in
+ignored run inputs; normative vocabulary pins remain compiler dependencies.
 
 ## Decision and evidence
 

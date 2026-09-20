@@ -3,7 +3,7 @@
 Status: required scenarios for the selected 2026-09-19 target; **not executed**.
 This document adds no passing gate. The [plan](../plan/README.md) selects runtime
 scope and the [workflow](../plan/execution-workflow.md) controls test-authoring and
-verification timing. Documentation maintenance does not start implementation.
+verification timing. The 2026-09-20 program authorizes dependency-ready implementation. Normative compiler cases remain separate from dynamically acquired provider inputs, and full source-index profiles are follow-on scope. Recipe also requires its native [workflow cases](recipes.md).
 
 Owners: [model contracts](../architecture/schema-modeling.md),
 [standards](../architecture/standards-adoption.md),
@@ -17,11 +17,11 @@ a second independent notion of acceptance.
 
 | ID | Scenario | Required result |
 | --- | --- | --- |
-| MODEL01 | Reimport identical pinned artifacts and compiler/profile inputs | Stable definitions and deterministic output; no runtime dependence on current upstream bytes. |
+| MODEL01 | Reimport identical pinned normative vocabulary artifacts and compiler/profile inputs | Stable definitions and deterministic output; no runtime dependence on current upstream bytes. |
 | MODEL02 | Resolve and cache a definition; update labels/compatible revisions, retire the term, then switch API origin or registry identity epoch | Stable UUID across compatible updates; exact historical interpretation retained; mutable metadata revalidated and stale writes rejected under current admission. Mappings cannot leak across registry boundaries or silently rebind to another meaning. |
 | MODEL03 | Unknown axiom/property/extension | Preserved or explicitly rejected under the profile; no silent loss or invented enforcement. |
 | MODEL04 | Same triple in two named graphs; changed blank-node serialization | Graph boundaries and observation-scoped identity survive; selected canonicalization is reproducible, not native identity or truth. |
-| MODEL05 | JSON-LD context unavailable, changed or outside admitted retrieval | Bounded pinned replay or explicit incomplete/rejected outcome; no uncontrolled context fetch. |
+| MODEL05 | JSON-LD context unavailable, changed or outside admitted retrieval | Bounded replay of captured context bytes or explicit incomplete/rejected outcome; no uncontrolled context fetch. |
 | MODEL06 | Qualified credit exported as a simple binary property | Concrete role/version/language/occurrence losses reported; preserved profile independently round-trips them. |
 | MODEL07 | Previously unmapped Schema.org class including Recipe | Generic create/read/edit/query/export within its profile without new DDL or fabricated unrelated classification; specialized workflow remains separately qualified. |
 | MODEL08 | Compare coverage before/after source or mapping update | Artifact, generic operation, native, query, validation, export and workflow evidence remain independent; unsupported fields are visible. |

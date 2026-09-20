@@ -8,9 +8,9 @@ This matrix defines G4 evidence. See the [plan's gates](README.md#acceptance-gat
 | Logical Resource separation | Qualified generic references, owner adapters and shared Tag/relation/participation capabilities; logical table changes do not require per-kind feature rewrites or a universal parent. |
 | APIs | Eager route compilation, OpenAPI/SDK parity, allowed/denied cases and producer-to-consumer requests. |
 | Sources | Elected provider/surface roundtrips, updates/withdrawal/reapply, partial coverage, cross-source and human-override tests. |
-| Semantic interoperability | [SIO01-SIO18](../testing/source-conformance.md#schemaorg-and-wikidata-acceptance): required Schema.org syntaxes and full Wikidata model, source-query coverage before native mapping, complete statements, export fidelity, pinned datasets, incremental gap recovery and additional capacity evidence. |
+| First-stage indexing/exchange | Every [elected domain](../architecture/database/catalog-model.md#first-stage-compatibility) has source/native dispositions, useful queries, native operations and explicit export fidelity. External-site validation uses fresh ignored inputs and visible scripted drift results. Complete SIO01-SIO18 remains a separately activated full-index gate. |
 | Native Work/release | Common cross-domain scope/continuity, applicable properties, virtual/actual releases and source mappings; Book is not a substitute for music, audiovisual, game/software and mixed-media cases. |
-| Composition | Complete local occurrences, exact published selections, staged import/refresh, source/local conflicts, child pagination, measurements and progress with retry/revocation/recovery. |
+| Composition | Complete local occurrences, ordinary chapter/Post published-head reading, explicitly fixed/reviewed selections, staged import/refresh, source/local conflicts, child pagination, measurements and progress with retry/revocation/recovery. |
 | Creation | Full Book journey plus cross-domain original/community contribution and consumption cases through shared capabilities. |
 | Graph | Scoped subgraphs, n-ary semantics, privacy/spoilers, cycles, cursors/budgets and Block descriptors. |
 | Ratings and event time | [RATE01-RATE33 and TIME01-TIME17](../testing/ratings-and-event-time.md): all selected rating cadences, explicit context/history, latest/history reduction, time-bucket drill-down, typed event dates, mixed semantic queries and privacy/recovery. A standing-only first increment does not satisfy this gate. |
@@ -24,7 +24,7 @@ This matrix defines G4 evidence. See the [plan's gates](README.md#acceptance-gat
 | Capacity | EXPLAIN/load/skew evidence, explicit limits, no ignored crashes, storage/WAL/recovery at 500M/3B. |
 | Recovery | Restorable database/objects, erasure frontier, reconciled projections/checkpoints and observed RPO/RTO. |
 
-Run applicable [integrated tests](../testing/backend-integration.md) during each scope's verification as dependencies become available; complete the combined matrix for G4. External-site availability belongs to live-source checks, not deterministic acceptance. Fixed fixtures and checksummed large datasets make offline and scale runs reproducible.
+Run applicable [integrated tests](../testing/backend-integration.md) during each scope's verification as dependencies become available; complete the combined matrix for G4. External-site availability belongs to live-source checks, not deterministic acceptance. Authored semantic regressions make offline checks deterministic; live acquisition receipts identify the actual inputs used by source and scale runs without pinning future external-site checks.
 
 The Subscribe row is a selected follow-on contract. It neither expands the current
 IAM implementation scope nor retroactively qualifies or invalidates its recorded

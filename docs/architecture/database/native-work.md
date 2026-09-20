@@ -38,7 +38,7 @@ A Work and each release have distinct identities. A release identifies a particu
 | Languages | May organize official and community contributions across languages | Describes the contributions actually included or declared for this release |
 | Identifiers | Native identity and evidenced identifiers appropriate to the Work's referent | Additional publisher/distribution identifiers where applicable |
 | Mutable metadata | Own revisions | Own revisions; correcting release metadata does not overwrite old content snapshots |
-| Published content | References exact adopted content/structure versions | References exact adopted content/structure versions; never an implicit follow-latest chain |
+| Published content | Declared selection policy; ordinary Post-backed chapters follow context-eligible publication heads | Fixed releases bind exact adopted content/structure versions; no implicit nested membership expansion |
 
 ISBN belongs to the corresponding publication specification, not to the primary native Work merely because both concern a book. Apply the same level-of-identification rule to musical, audiovisual and software identifiers instead of copying every source ID upward. Work is not a release with a few columns deleted: its content scope and update authority also differ.
 
@@ -67,7 +67,7 @@ The native Work may include community translations, lyrics, subtitles or softwar
 
 All-language contribution admission is a policy, not a preallocated matrix or proof that every language has readable content. Metadata localization, declared consumption languages, admitted contribution languages and actual usable content are separate. A subtitle must fit the selected cut and a language pack its build. Pure visual/nonlinguistic content is not assigned fictitious language support.
 
-Metadata-only Work publication requires no dummy body or external release event. A published reading/listening/viewing selection pins its composition and content versions through the [composition protocol](content-composition.md). Current disclosure remains independently enforced.
+Metadata-only Work publication requires no dummy body or external release event. The [composition protocol](content-composition.md) distinguishes ordinary Post-backed chapter reading from fixed releases and reviewed selections. Ordinary reading follows context-eligible publication heads; fixed selections retain exact composition/content versions. Current disclosure remains independently enforced.
 
 ## Cross-domain interpretation
 

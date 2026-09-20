@@ -13,7 +13,7 @@ An occurrence that only links to another object remains a reference-only navigat
 Example (the letters name distinct native identities, not storage keys):
 
 ```text
-Compilation C, structure revision c7
+Fixed compilation C, structure revision c7
   occurrence c1 -> Work/version A
     occurrence c2 -> chapter content revision a11
     occurrence c3 -> chapter content revision a12
@@ -33,9 +33,36 @@ Shared immutable blocks or subtree representations are possible later physical o
 
 ## Authoring and published versions
 
-Work metadata, contributed content, structure drafts, adoption decisions and published selections have independent heads and optimistic version preconditions. A published selection binds a sealed structure manifest to exact adopted content revisions and domain compatibility witnesses. Its logical contents are reproducible; this does not require copying unchanged media bytes or making every metadata revision a new release identity.
+Work metadata, contributed content, structure drafts, adoption decisions and published selections have independent heads and optimistic version preconditions. A structure declares its content-selection policy:
 
-Identity references are sufficient for related-object navigation. They are insufficient where reading, playback, metrics, progress or export promises an exact content version. In those cases use complete revision/occurrence references. Metadata-only entries may explicitly retain unresolved content; do not claim exactness until the target is qualified.
+| Policy | Behavior and intended use |
+| --- | --- |
+| Follow published | Ordinary chapters reference a Post identity and explicit language/content channel where needed. Resolve the currently eligible published selection in the requested context; never a private editor head or an unaccepted revision. |
+| Fixed selection | Reviewed adoption, fixed releases, precise citations and exact artifact compositions bind a sealed manifest to exact content/adoption revisions and compatibility witnesses. Later source edits cannot retarget that selection. |
+
+A chapter occurrence records its Post reference, local parent/order/title/number
+and coverage. The Post/Document retains the body, authorship, editing history and
+shared interaction identity; chapter eligibility is a capability, not an exclusive
+Post kind. Post is the user-facing social Publication with its selected content;
+chapter admission validates a readable body/representation rather than treating
+every poll, share or asset-only publication as chapter prose. One Post may stand
+alone and appear in several Works. Adding/removing a
+chapter use does not duplicate its body, create another social utterance, transfer
+control, or delete the Post and discussion. Local placement does not grant access.
+
+Ordinary Post publication updates its small published head. It does not create a
+new adoption or whole-book content snapshot in every following Work. Structure
+edits still have their own history/CAS and generation-bound pagination. Reusing a
+Post follows its eligible content, not the current descendants of another Work.
+An import's membership/order remains explicit until deliberately refreshed.
+
+Context resolution selects the author-published channel for an ordinary use and
+the accepted selection for a reviewed Realm/Pro use. Missing, withdrawn or denied
+content is unavailable; never fall back to a draft or general-scope content.
+Keep source revision history for audit and recovery independently of whether a
+consumer follows the current published head.
+
+Identity references with a declared published-channel policy are sufficient for ordinary chapter reading. Resolve and report the actual revision used by a response or measurement; do not claim a multi-request frozen edition. Where playback, precise selectors, review, a fixed release or export promises exact content, use complete revision/occurrence references. Metadata-only entries may explicitly retain unresolved content.
 
 Correcting metadata, producing a source revision, adopting a contribution and publishing a selection are distinct operations. An explicit subscription may propose or adopt newer content under current policy, but a pinned published selection changes only through a new authorized selection. The previous version remains resolvable subject to current disclosure and erasure rules.
 
@@ -46,7 +73,7 @@ Provide one shared import protocol with domain adapters, rather than implicit si
 | Phase | Contract |
 | --- | --- |
 | Plan | Resolve a stable source revision, validate domain compatibility, source access, destination mutation authority, completeness, cycle policy and budgets. Return a bounded preview/continuation and a plan bound to these inputs. |
-| Stage | Allocate destination-local occurrences and preserve source revision/occurrence correspondence. Remap parents/order; reuse exact content references. Commit bounded chunks with durable cursors and worker fencing. Staged rows are not public heads. |
+| Stage | Allocate destination-local occurrences and preserve source revision/occurrence correspondence. Remap parents/order; preserve the selected fixed-reference or published-channel policy and record the source observation. Commit bounded chunks with durable cursors and worker fencing. Staged rows are not public heads. |
 | Validate | Check complete membership, required references, counts/digest witnesses and applicable policies. Recheck current authority and destination preconditions; a stale destination produces conflict rather than overwriting intervening work. |
 | Activate | Under the destination lock, seal the result, advance its head and commit history, operation receipt and outbox atomically. Ordinary public events describe the completed operation, not each staging row. |
 | Resume/cancel | Reuse the operation receipt and cursor. A repeated request does not create more occurrences; cancellation retains the prior active result and gives staged data an explicit cleanup disposition. |
@@ -65,21 +92,30 @@ Plan and activation both use current authority; readers and exports check curren
 
 Do not silently omit unreadable/missing required members and publish the remainder as complete. Return an authorized unavailable/conflict outcome or explicitly declare partial contents without leaking hidden identities, counts or labels. Local title capture itself needs disclosure authority; imports cannot turn private metadata into a public local override.
 
-Progress records the account, consumption target, published selection and occurrence interpretation. Importing a subtree does not import another account's progress or aggregate completion. Refresh maps retained occurrences and compatible content explicitly; otherwise progress becomes unmapped/unknown. Container withdrawal does not draft every independently owned child unless a separately authorized bounded command requests it.
+Ordinary reading progress records account, Work/structure, stable chapter
+occurrence and status. A reorder retains that occurrence and does not reset read
+status; removing/replacing a target reports a missing/changed position rather than
+silently pointing to a different chapter. Completion calculated against current
+membership may change when new chapters are added, without erasing recorded reads.
+An optional last-read content revision supports an updated-content indicator.
+Precise in-body bookmarks/annotations retain the observed revision and selector;
+relocation must be validated or reported unresolved. Fixed-edition progress also
+identifies its selection. Importing a subtree imports no other account's progress.
+Container withdrawal does not draft independently owned children.
 
 ## Measurements and read models
 
 Each measurement identifies exact content revision, language/channel, coverage, algorithm and counting basis. Distinguish occurrence-weighted totals from distinct-content totals; avoid adding a container subtotal and its explicit child totals twice. Header/label/reference-only nodes do not acquire body weight merely because their target has a length. Unknown and inapplicable values are not zero.
 
-For published compositions, summarize the selected versions, not every child's current head. Batch changes schedule at most the necessary coalesced work per destination/generation; use validated deltas when available or resumable recomputation otherwise. Do not perform a complete aggregate delete/reinsert for every inserted node. Reverse impact planning pages over relevant active uses/subscriptions, rather than assuming a small permanent reuse limit or scanning all historical placements synchronously.
+For fixed compositions, summarize the pinned versions. For ordinary live chapters, summarize the context-eligible published versions actually observed by the projection and expose freshness; never count drafts. Batch changes schedule at most the necessary coalesced work per destination/generation; use validated deltas when available or resumable recomputation otherwise. Do not perform a complete aggregate delete/reinsert for every inserted node. Reverse impact planning pages over relevant active uses/subscriptions, rather than assuming a small permanent reuse limit or scanning all historical placements synchronously.
 
 Search indexes content with its native/version provenance. Composition membership supplies the context and occurrence of a hit. Do not concatenate all descendant bodies into every ancestor by default. Any elected container-level text projection budgets duplication, refresh and disclosure explicitly. Relationship discovery and inferred Tag summaries remain distinct from direct facts about the whole Work.
 
 ## Capacity and current implementation boundary
 
-Read children with keys such as structure/manifest/parent/position/occurrence and stable continuation. Large exports stream an exact manifest. Fetch metadata and authority in bounded owner batches. Retrieving an entire N-node structure necessarily processes its output; paging bounds one request rather than making that total work disappear.
+Read children with keys such as structure/generation/parent/position/occurrence and stable continuation. A resumable export of live contents captures a consistent structure generation and resolved eligible revisions in a bounded capture stage, then streams that fixed input manifest; conflicting capture or unavailable required content is explicit. This per-operation capture does not require permanent whole-book snapshots for ordinary reading. Fetch metadata and authority in bounded owner batches. Retrieving an entire N-node structure necessarily processes its output; paging bounds one request rather than making that total work disappear.
 
-Materializing n imported occurrences performs O(n) logical occurrence writes plus their indexes and bounded validation; body payloads are reused. Across publications, storage follows the sum of occurrences and retained changes, not just the number of distinct content objects. Count provenance maps, published manifests, revision references, reverse indexes, local overrides and job receipts at both 500,000,000 and 3,000,000,000 rows. The [capacity workbook](capacity.md) retains planning scenarios, not measurements for these revised key widths and reuse distributions.
+Materializing n imported occurrences performs O(n) logical occurrence writes plus their indexes and bounded validation; body payloads are reused. Across publications, storage follows the sum of occurrences and retained changes, not just the number of distinct content objects. Count provenance maps, fixed manifests where elected, published-head references, reverse indexes, local overrides and job receipts at both 500,000,000 and 3,000,000,000 rows. Budget ordinary Post edits without a mandatory write to every chapter use; invalidate/rebuild affected projections in bounded batches. Compare actual rows, WAL and refresh work before claiming a cost improvement. The [capacity workbook](capacity.md) retains planning scenarios, not measurements for these revised key widths and reuse distributions.
 
 Qualify large/deep/skewed structures, repeated content, widely reused source chapters/tracks, concurrent imports/refreshes, privacy changes and maintenance. A bounded algorithm can still miss latency or storage goals. Physical partitioning and future database placement must retain target uniqueness and reference meaning; no distributed deployment is required now.
 

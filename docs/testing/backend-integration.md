@@ -7,7 +7,7 @@ This specification closes [G4](../plan/backend-acceptance.md). Run cases increme
 | Journey | Required interaction |
 | --- | --- |
 | Cross-source catalog | Several providers and a human describe one native object; conflicting updates, same-value confirmation, withdrawal/reapply and export preserve every authority. |
-| Book and media | Create a metadata-only virtual Work, adopt official/community multilingual content, then publish/read/collect/comment; external editions, anthology/part identities, covers and structure changes preserve exact selection and progress. |
+| Book and media | Create a metadata-only virtual Work, adopt official/community multilingual content, then publish/read/collect/comment; external editions, anthology/part identities, covers and structure changes preserve ordinary Post/chapter reuse and stable progress alongside explicit fixed/reviewed selections. |
 | Common Resource capabilities | Use generic Tag, relationship, favorite, follow/discussion and access contracts across owners; the native target, feature scope and authorization survive an owner's logical table-layout change. |
 | Graph and Wiki | Native character relations plus story-specific alternatives feed a bounded Graph API and serialized Block query; context/privacy/provenance remain intact. |
 | Wiki subsite composition | Azur Lane/Minecraft wiki articles are organized into one or several Collections; separate mod/project Collections can share a Zone portal or have their own Zones. Realm membership/publication context, Collection curation and Zone page infrastructure retain separate authority and identities. |

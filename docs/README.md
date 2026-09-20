@@ -6,14 +6,15 @@ deployment claim, and an old passing fixture does not qualify a revised contract
 
 ## Start here
 
-1. [Architecture map](architecture/README.md): the selected model and domain owners.
-2. [Native model](architecture/schema-modeling.md): Resource/Agent/Entity, typed
+1. [First-stage scope](plan/README.md#first-stage-product-and-indexing-scope): elected indexing domains, retained native product and execution order.
+2. [Architecture map](architecture/README.md): the selected model and domain owners.
+3. [Native model](architecture/schema-modeling.md): Resource/Agent/Entity, typed
    values and relationships, exact references and the seven declarative contracts.
-3. [Storage](architecture/database/resource-storage.md): physical fields and table
+4. [Storage](architecture/database/resource-storage.md): physical fields and table
    families within one PostgreSQL database; concrete references and inverse reads.
-4. [Space](architecture/space-composition.md) and [addresses](architecture/resource-addressing.md):
+5. [Space](architecture/space-composition.md) and [addresses](architecture/resource-addressing.md):
    shared community/presentation identity, typed router, UUID/scoped slug and reverse links.
-5. [Standards adoption](architecture/standards-adoption.md): selected profiles,
+6. [Standards adoption](architecture/standards-adoption.md): selected profiles,
    conditional formats, coverage/loss and evidence limits.
 
 ## Document roles
@@ -34,8 +35,7 @@ deployment claim, and an old passing fixture does not qualify a revised contract
 Use [current implementation contracts](reference/current-implementation.md) before
 mapping target concepts to the checkout. Exact identifiers in commands, code blocks,
 schema inventories and dated evidence remain implementation-spelled. They do not
-create parallel semantic models. New runtime work follows its separately activated
-scope; documentation completion does not pass product or capacity gates.
+create parallel semantic models. Authorized runtime work advances through the plan's selected dependency-ready scopes; documentation completion does not pass product or capacity gates.
 
 Documentation checks verify local links, role boundaries, terminology and required
 ownership. Design checks reproduce inventory/dependency/capacity artifacts; they

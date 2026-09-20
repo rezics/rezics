@@ -1,5 +1,7 @@
 # Source declaration dispositions
 
+The selected [live validation contract](../../../../../../docs/testing/source-conformance.md#live-acquisition-and-validation) replaces fixed provider-version prerequisites with current acquired inputs and ignored run inventories. Authored dispositions remain versioned and new/changed fields need review. The commands and counts below describe the current tooling until that implementation checkpoint is qualified.
+
 `fields.jsonl` is a generated inventory of pinned source declarations. Its 8,412
 entries include schema wrappers, upstream account fields and repeated vocabulary
 shapes. This number is **not** the number of required native catalog facts.

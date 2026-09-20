@@ -22,6 +22,7 @@ the current checkout implements them. Actual names and installed shapes live in
 
 | Domain | Semantic owners |
 | --- | --- |
+| Native recipes | [Recipe structure/operations](database/recipes.md), [first-stage domain matrix](database/catalog-model.md#first-stage-compatibility). |
 | Creative catalog | [Catalog model](database/catalog-model.md), [Work/release](database/native-work.md), [creation](database/creation.md), [distribution](catalog-distribution.md), [names/authority](catalog-names-and-authority.md). |
 | Content and media | [Composition](database/content-composition.md), [structure history](content-structure-history.md), [metadata-only resources](resource-metadata-only.md), [avatar/media](avatar-media.md), [Block presentation](space-presentation.md). |
 | Knowledge and source data | [Semantic interoperability](semantic-interoperability.md), [source lifecycle](catalog-source-lifecycle.md), [verification](information-indexing-and-verification.md), [relationship graph](database/relationship-graph.md). |

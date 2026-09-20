@@ -21,19 +21,34 @@ Source preservation, generic native editing, specialized native mapping and prod
 operations have separate coverage. [Integrated acceptance](../testing/model-contracts.md)
 adds cross-language, occurrence, value, provenance and Space/address cases.
 
+## Activation boundary
+
+Complete Schema.org/Wikidata source-instance indexing is a separately activated
+follow-on to the [first-stage domains](database/catalog-model.md#first-stage-compatibility).
+It does not gate their native operations, selected JSON-LD mappings or retained
+REZICS product capabilities. Semantic Web remains an important
+[conceptual and technical reference](standards-adoption.md#semantic-web-reference).
+Requirements below define full compatibility when that scope is activated;
+existing compiler support and limited profiles do not claim that result.
+
+External-site qualification uses current dynamically acquired inputs under
+[live validation](../testing/source-conformance.md#live-acquisition-and-validation).
+An executed run records exact observations and contexts for diagnosis; future
+runs are not required to reuse that dataset or its digest. Normative vocabulary
+pins belong to the compiler, independently of current site-instance acquisition.
+
 ## Meaning of full compatibility
 
 REZICS must ingest, preserve, query and export the complete supported source
 model even when a described subject has no native domain mapping. Schema.org and
-Wikidata are required interoperability families, alongside existing catalog
-sources. Their classes do not dictate native ownership or product operations.
+Wikidata are required families within this separately activated full-index scope. Their classes do not dictate native ownership or product operations.
 
 Compatibility is qualified against a manifest, not an unversioned claim:
 
 | Dimension | Required declaration and acceptance |
 | --- | --- |
 | Vocabulary/model | Pinned vocabulary release, source entity/field/datatype inventory, syntax profiles and parser/mapping versions; every in-scope construct has a disposition. |
-| Dataset | Source artifacts, namespaces, document set, revisions, checksums, coverage and acquisition watermarks. A complete pinned dataset differs from a currently synchronized source. |
+| Dataset | Source artifacts, namespaces, document set, revisions, checksums, coverage and acquisition watermarks. A complete captured dataset differs from a currently synchronized source; its receipt identifies a run rather than pinning future checks. |
 | Preservation | Original delivered payloads where retention permits, plus source-model semantics including identity, value state, grouping, ordering and provenance. |
 | Query | Every supported source property has the minimum operations below, including data without a native mapping. Raw retention alone does not pass this requirement. |
 | Native mapping | Reviewed correspondence to existing owners, commands and exact revisions; mapped and unmapped coverage are reported separately. |

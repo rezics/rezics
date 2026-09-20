@@ -13,8 +13,8 @@ This is the whole-database design authority, including private and operational s
 
 Read [the dictionary](data-dictionary.md), [native Work](native-work.md), [catalog model](catalog-model.md), [composition](content-composition.md), [creation](creation.md), [Graph API](relationship-graph.md), [ratings](ratings.md), [event-time discovery](event-time.md), [Hub](ai-hub.md), [design evidence](design-evidence.md), [schema coverage](../../testing/database/current-schema-map.tsv), [API coverage](../../testing/database/api-coverage.tsv), [scenarios](../../testing/database/scenarios.tsv), and [capacity](capacity.md). The [design checker](../../testing/database/check_design.py) verifies coverage and arithmetic, not SQL behavior or source conformance.
 
-Dependency policy: Git contains authored decisions, generators and source pins;
-the [artifact preparation procedure](../../../libraries/schema-importer/README.md)
+Dependency policy: Git contains authored decisions, generators and normative vocabulary pins; external provider checks use current dynamically fetched inputs under [live conformance](../../testing/source-conformance.md#live-acquisition-and-validation).
+The [artifact preparation procedure](../../../libraries/schema-importer/README.md)
 restores ignored source artifacts and generates ignored derivatives. First preparation
 may require network; inventory/calculation checks run locally after it. Temporary
 directories and machine-local attachments are not dependencies. The
@@ -25,7 +25,7 @@ production emitter and requires their authored producers in Git. Those ignored
 outputs remain generated rather than force-committed; unknown dependencies fail.
 
 [Schema.org and Wikidata interoperability](../semantic-interoperability.md) is a
-required full-index contract. Source-model preservation and queryability cover
+separately activated full-index follow-on, not a first-stage dependency. Source-model preservation and queryability cover
 subjects before native domain mapping; its [additional capacity envelope](../semantic-interoperability-capacity.md)
 is not included in the generated native workbook.
 
@@ -54,7 +54,7 @@ Selected defaults:
 | Authored text | Document identity and immutable revisions for short comments, articles, chapters, rules and other content requiring content-level history. |
 | REZICS Work | Common native creative identity and continuity across domains; Work/release similarities and differences belong to the native Work contract. |
 | Publication | A persistent social utterance/distribution item with an exact published manifest and its own history. |
-| Content selection | A canonical slot, versioned adoption decisions, and an explicit current selection. |
+| Content selection | Ordinary chapter/Post uses follow an eligible published channel; reviewed adoption and fixed releases use explicit exact selections. |
 | Facts | Claim, evidence, scope-specific acceptance and effective read model are separate. |
 | Private state | Private account/persona control, messages, progress and credentials have dedicated tables and restricted access paths. |
 | Physical references | Direct domain FKs for structural relations; a validated reference-value bridge for genuinely generic endpoints. |
@@ -333,13 +333,13 @@ PostgreSQL stores identities, relations, versioned descriptors and bounded techn
 
 ## 9. Structure, curation, tags and presentation
 
-The [composition contract](content-composition.md) owns local membership, navigation/consumption distinctions, explicit subtree import/refresh, exact publication, progress and measurement. Work and release use the same protocol with domain-specific constraints. Complete logical contents are not a requirement for one request to load/write the whole tree. Family discovery never supplies unrecorded descendants during reading.
+The [composition contract](content-composition.md) owns local membership, navigation/consumption distinctions, explicit subtree import/refresh, ordinary published-head reading, fixed publication, progress and measurement. Work and release use the same protocol with domain-specific constraints. Complete logical contents are not a requirement for one request to load/write the whole tree. Family discovery never supplies unrecorded descendants during reading.
 
-Ordered structure uses owner -> immutable manifest -> occurrences. Repeated targets are legal. Occurrence identity, ordering, printed numbering, coverage, local title and local credit belong to the occurrence. A chapter text is not identical to its appearance in a book. Different structures may reuse one content revision. Snapshot completeness is declared; an unknown contents list is not an empty complete list.
+Ordered structure uses owner -> immutable manifest -> occurrences. Repeated targets are legal. Occurrence identity, ordering, printed numbering, coverage, local title and local credit belong to the occurrence. A chapter text is not identical to its appearance in a book. Different structures may reuse one Post/channel or an explicitly fixed content revision. Structure completeness is declared; an unknown contents list is not an empty complete list.
 
 Retain domain-specific structural tables for music TOCs, software participation contexts and mixed distribution members. Use the shared manifest protocol, not one permissive table for every invariant. Fractional positions have a storage byte ceiling; renumbering/rebalancing is staged and atomically activates a generation. Deep and large structures remain representable with bounded traversal budgets and continuation jobs.
 
-Collections own explicit curated membership and ordering, with public or private access. Personal favorites own account-private membership and optional notes. Following, notification subscriptions and membership are separate relations. Progress is account-private and pins both consumption target and the edition/structure generation used to interpret a position. A changed chapter order must not reinterpret old progress. Completion can be explicitly reported or computed against a known complete manifest; missing denominator returns unknown.
+Collections own explicit curated membership and ordering, with public or private access. Personal favorites own account-private membership and optional notes. Following, notification subscriptions and membership are separate relations. Progress is account-private. Ordinary chapter progress uses stable structure/occurrence identity, so reorder and body corrections retain read status; target replacement/removal is explicit. Precise in-body positions include observed revision/selector evidence, and fixed-edition progress names the selection. Completion can be explicitly reported or computed against known current membership; missing denominator returns unknown.
 
 Tags remain concepts; tag applications and judgments are contextual evidence. Tag paths, senses, expression ASTs and inference rules retain dedicated validity and governance. Inference projections pin rule generation and can be rebuilt; they do not overwrite direct applications. Hierarchical predicates declare whether cycles are allowed. Semantic spoiler judgments, whole-content labels, concealment marks, content rating and workplace display safety remain independent axes as required by current policy.
 
@@ -420,7 +420,7 @@ Personal favorites, progress, visits, preferences, blocks, notification preferen
 
 ## 13. Search, recommendation, export and derived state
 
-Published-content projections pin their content/adoption/structure revisions and generation. A source or draft update is not automatically a new public search document. Content indexing retains its native/version identity; occurrence membership supplies container context. Do not copy every descendant's full text into all ancestors by default. Any elected aggregation index accounts for duplication, refresh and authorized hit/snippet/count semantics.
+Published-content projections record the content/adoption/structure revisions and generation actually indexed. Ordinary chapter projections resolve eligible Post publication heads; fixed or reviewed projections retain their selected versions. A source or draft update is not automatically a new public search document. Content indexing retains its native/version identity; occurrence membership supplies container context. Do not copy every descendant's full text into all ancestors by default. Any elected aggregation index accounts for duplication, refresh and authorized hit/snippet/count semantics.
 
 Search candidates are generated from dedicated indexed projections carrying owner reference, scope/visibility generation, content revision, language, classification and semantic-document version. Current authority is checked before disclosure. A stale index may omit a newly allowed item but cannot expose a newly forbidden one. Counts/facets/snippets that cannot be safely filtered synchronously must use an audience-safe index generation or report pending/unavailable rather than leaking hidden data.
 

@@ -40,7 +40,7 @@ Publisher identifiers, languages, territories and dates belong to the release/co
 
 A translation has independent content and revision identity; hardcover/paperback is a catalog publication specification; a deluxe game with soundtrack/book is a distribution composition; a professional software edition may be a functional variant. Preserve those distinctions within the common model. An external staff-grouping key is a contribution context until evidence establishes another referent.
 
-All selected contents follow the [composition protocol](content-composition.md). Each Work/release owns its explicit occurrences and exact published selection. Repeated target uses have different occurrence identities, order and coverage; a parent/target pair is not their unique key. Importing a child structure creates local occurrences without copying its independently owned content. Family/series/derivation relations support discovery and do not dynamically supply a publication's missing contents or transfer grants, ratings or progress.
+All selected contents follow the [composition protocol](content-composition.md). Each Work/release owns explicit occurrences and a declared selection policy. Ordinary chapters reuse Posts and follow context-eligible published content; fixed releases and reviewed adoptions bind exact selections. Repeated target uses have different occurrence identities, order and coverage; a parent/target pair is not their unique key. Importing a child structure creates local occurrences without copying its independently owned content. Family/series/derivation relations support discovery and do not dynamically supply a publication's missing contents or transfer grants, ratings or progress.
 
 ## Bibliographic evidence and mapping limits
 
@@ -65,6 +65,31 @@ Each field has one writer. Source-managed fixed fields record the decision and u
 
 ## Current selected domain scope
 
+### First-stage compatibility
+
+This is the first-stage indexing/interop boundary selected on 2026-09-20. Native
+operations remain required without provider records. The complete native product
+scope remains in the [plan](../../plan/README.md#first-stage-product-and-indexing-scope).
+
+| Domain/source | Required native and exchange distinctions |
+| --- | --- |
+| MusicBrainz and artwork | Composition Work, recording, release group, release, medium, repeated track occurrences, local credits, supporting entities/relations, artwork and identifiers; no automatic equivalence between upstream and native Work. |
+| VNDB | VN/game scope, releases, platforms/languages, producers, staff/aliases, characters, contextual voice/contribution roles, tags/traits and relations; API/dump coverage is independently reported. |
+| Bangumi | Book, animation, music, game and real-world audiovisual subjects; episodes/installments, people/characters, contextual relations and reviewed infobox fields; source subject types do not allocate native owners automatically. |
+| Novels | Native Work, Post-backed chapters, Document/translation lineages, serialization, external publications, creation/publishing/reading and portable exchange; ordinary chapter uses follow published content. |
+| Prompt/Skill | Native content, parameters/examples, Skill directories/files and package releases through the [Hub contract](ai-hub.md); exact downloadable artifacts do not activate execution. |
+| Software/packages | Project/game, release/version, ecosystem-qualified coordinates, builds/artifacts, declared dependencies, publication/download and exchange; comparison follows ecosystem semantics. Installation/resolution/runtime workflows require their own selected scope. |
+| Recipes | Native [recipe operations](recipes.md), ingredient occurrences, quantities/units, grouped ordered steps, yield/time, media and Schema.org Recipe mapping. |
+
+Inventory each elected public source surface and give every field a native,
+structured-source-only, lossy, excluded or unsupported disposition, with queries
+and export fidelity. Raw payload retention alone does not qualify native coverage.
+Source-driven and source-free create/read/edit/query/export paths use the same
+native authority and commands. [Live conformance](../../testing/source-conformance.md)
+qualifies current observed inputs without a fixed upstream-version prerequisite.
+
+### Retained native responsibilities
+
 - Publishing: native textual Works, text/translation identities, virtual/actual catalog publications, release events, serialization, installments and Book creation/reading.
 - Music: native Work scopes over compositions, independently maintained recordings and albums where established; distinct recording, release-group/release, media/track, credit, event, TOC and artwork structures.
 - Program: native audiovisual Work scopes, seasons, cuts/versions, episodes, occurrences and distribution/broadcast context.
@@ -72,6 +97,7 @@ Each field has one writer. Source-managed fixed fields record the decision and u
 - Agent/generic Entity: described people/organizations and applicable agent subjects; generic resources without required specialized structure. Reconcile existing reference/description owners by grain for places/events/instruments/concepts/web resources; source descriptions retain independent source identity. Fictional status can contextualize people, organizations, buildings and objects.
 - Grouping: universe/world, canon/continuity, franchise, series, membership and order.
 - Distribution/media: cross-domain packages; assets/representations/locations/uses and scoped selection.
+- Recipes: generic Resource identity with admitted recipe structure and operations; specialization does not require changing its stable logical owner.
 
 AI company/model rating journeys are selected native catalog/discovery scope.
 A company uses its organization referent; an independently maintained model
@@ -93,8 +119,8 @@ UI locale, metadata localization, original/translation language and consumption 
 
 ## Conformance and growth
 
-[Schema.org and Wikidata interoperability](../semantic-interoperability.md) extends
-full indexing beyond currently implemented native domains. Queryable external
+[Schema.org and Wikidata interoperability](../semantic-interoperability.md) is a
+separately activated extension beyond first-stage domains. Queryable external
 descriptions may exist without native adoption; native owners retain their own
 identity, structural admission and commands. External classes, Q IDs and shared
 names do not create Work/release parents, account participation or automatic

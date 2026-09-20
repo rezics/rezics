@@ -5,7 +5,7 @@ Owners: M01-M05, M07 and M09. Contract: [content composition](../architecture/da
 | Case | Required behavior |
 | --- | --- |
 | COMP01 | Include a book/album/container reference without implicit descendant expansion; reference-only navigation remains distinct from composition import. |
-| COMP02 | Import a source structure's explicit descendants into destination-local occurrences; retain exact content references without cloning bodies or independent content identities. |
+| COMP02 | Import a source structure's explicit descendants into destination-local occurrences; retain explicit fixed-reference or published-channel policies and observed provenance without cloning bodies or independent content identities. |
 | COMP03 | Repeat the same content and source subtree intentionally; preserve different occurrence IDs, parentage, order, local labels and coverage. |
 | COMP04 | Preserve unknown/incomplete, known-empty and metadata-only states; a truncated or filtered source cannot be published as complete by accident. |
 | COMP05 | Reject invalid same-manifest parentage and structural cycles at activation; traversal of damaged/evidence input terminates, while permitted semantic-graph cycles remain independent. |
@@ -21,13 +21,16 @@ Owners: M01-M05, M07 and M09. Contract: [content composition](../architecture/da
 | COMP15 | Adopt a newer compatible revision through an authorized policy/command; create a new destination selection without retargeting historic citations. |
 | COMP16 | Represent membership, alternate navigation and consumption order separately where required; previous/next lookup is deterministic for repeated occurrences. |
 | COMP17 | Check current disclosure on reading/exporting old selections; a public container does not implicitly grant private child access or leak hidden counts/labels. |
-| COMP18 | Keep progress scoped to account/selection/occurrence; importing others' structure imports no progress. Refresh maps compatible positions or reports unmapped/unknown. |
+| COMP18 | Keep ordinary progress scoped to account/structure/stable occurrence and fixed-edition progress additionally scoped to selection; importing others' structure imports no progress. Refresh maps compatible positions or reports unmapped/unknown. |
 | COMP19 | Compare occurrence-weighted and distinct-content metrics; exclude label/reference-only weights and avoid parent-subtotal/leaf double counting. |
 | COMP20 | Import many nodes while measuring metric refresh calls/work; coalesced/delta or bounded job processing replaces per-node full-aggregate recomputation. |
 | COMP21 | Repeatedly create/remove uses across many owners, then update source content; reverse impact processing is paged and does not treat the live-placement limit as a bound on historical rows. |
 | COMP22 | Search a content hit in several authorized publication contexts; retain exact match/occurrence provenance, avoid artificial duplicate relevance and do not concatenate all descendant text into every ancestor by default. |
 | COMP23 | Emit canonical completion and downstream work only after activation; no partial-page public notifications or source-observation-as-publication events. |
 | COMP24 | Restore database/objects and job cursors, replay duplicate events and apply erasure/revocation frontiers before disclosure; no resurrected payload or duplicate activation. |
+| COMP25 | Update a Post used by ordinary chapters; resolve its eligible published head, retain independent occurrence IDs and avoid a new selection write per containing Work. |
+| COMP26 | Remove one chapter use without deleting its Post/discussion or another use; draft/private/withdrawn and unaccepted content cannot leak through the parent. |
+| COMP27 | Capture live chapter contents for export with a consistent membership generation and exact resolved inputs; concurrent changes cause explicit retry/conflict rather than mixed output. |
 
 ## Workload qualification
 

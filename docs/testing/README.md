@@ -11,9 +11,10 @@ This directory owns test scenarios and evidence. Follow the [active scope](../pl
 | [Identity, access and connected apps](identity-and-access.md) | Pending mixed-principal/Entity, groups/roles/representation, OAuth/MCP, privacy, revocation and layered-GUI acceptance; older Self fixtures are not qualification. |
 | [Subscribe and Realm participation](subscriptions-and-pro.md) | Selected M10 SUB/PRO, SITE/RPLY, capacity and experience scenarios: multi-plan commerce, independent gifts, local policies, fixed-site context and authorized multi-Realm reply delivery; runtime activation and qualification remain pending. |
 | [Native Work and release](native-work.md) | Cross-domain identity/continuity, virtual/actual releases, applicable properties and source mappings. |
-| [Content composition](content-composition.md) | Explicit local occurrences, exact selections, staged import/refresh, metrics, progress and recovery. |
+| [Content composition](content-composition.md) | Explicit local occurrences, ordinary Post/chapter reuse, fixed/reviewed selections, staged import/refresh, metrics, progress and recovery. |
 | [Source conformance](source-conformance.md) | Provider data -> source queries -> reviewed native writes -> API/export -> update/withdraw/replay; SIO01-SIO18 cover Schema.org/Wikidata preservation, indexing, mapping and recovery. |
 | [Information verification](information-verification.md) | FACT01-FACT36 and CAPFACT01-CAPFACT06: broad claims versus selected answers, evidence/AI assessments, calibration, independent evaluators, portable results, correction and optional Subscribe services; specified, not executed. |
+| [Native recipes](recipes.md) | First-stage recipe authoring, ingredient/step occurrences, quantities, Recipe exchange and recovery; pending. |
 | [Book and creation](book-and-creation.md) | Complete Book, original and AO3-derived native workflows. |
 | [Relationship Graph](relationship-graph.md) | Subgraph semantics, permissions, budgets and Block descriptor contracts. |
 | [Ratings and event time](ratings-and-event-time.md) | Context/observation/revision identity, latest/history aggregation, time histograms, event-date queries and explicit user actions. |
@@ -25,7 +26,7 @@ This directory owns test scenarios and evidence. Follow the [active scope](../pl
 
 ## Execution levels
 
-Pure tests verify parsing, typed contracts and deterministic algorithms. Real PostgreSQL verifies constraints, transactions, locks, triggers, permissions and persistence. Stateful API tests carry actual produced IDs through later requests. Captured source fixtures run offline; live drift/acquisition checks are separately reported. Representative load/recovery tests retain failures and explicit dataset/runtime evidence.
+Pure tests verify parsing, typed contracts and deterministic algorithms. Real PostgreSQL verifies constraints, transactions, locks, triggers, permissions and persistence. Stateful API tests carry actual produced IDs through later requests. Authored semantic regressions run offline; external-site compatibility uses current dynamically acquired inputs, with live acquisition/conversion failures separately reported. Representative load/recovery tests retain failures and explicit dataset/runtime evidence.
 
 Derive assertions from owning contracts and scenario matrices. Use normal authorized command paths for valid operations and deliberate direct SQL for rejected-state backstops; preserve admission, authorization and integrity checks. Identify disposable targets and isolate concurrent test lanes.
 
@@ -84,7 +85,22 @@ prospective. The earlier generated-input guard failure is repaired; other backen
 
 ## Reproducibility and retention
 
-Commit deterministic fixtures, acquisition manifests, mapping expectations, generators and checks. Large network datasets use pinned locations/digests and bounded streaming. Do not depend on a local working attachment or temporary reports. Record source/target contracts, data seed/digest, runtime/images/settings, tested commit, exact command, failures and limitations. Source-private data and credentials do not enter public fixtures.
+### First-stage scope revision evidence
+
+The 2026-09-20 documentation checkpoint selects the seven indexing domains,
+preserves native product scope, makes ordinary chapters reuse eligible published
+Post content, and selects current external-site validation. Recipe, BOOK31-BOOK35,
+COMP25-COMP27 and LIVE01-LIVE07 are prospective acceptance cases, not runtime passes.
+
+The existing 15 documentation/design regressions pass. The maintained-document
+check passes for 209 Markdown files and 1,226 local links. After regenerating the
+owning design artifacts, strict tracked-input and exact generated-output checks
+pass; the inventory remains 249 schema/SQL modules, 42 API owners and 132 existing
+cross-domain database scenarios. No product, live-source or capacity gate is
+qualified by this documentation checkpoint. Commands are the documentation and
+design entry points in [execution levels](#execution-levels).
+
+Commit authored deterministic semantic fixtures, acquisition definitions, mapping expectations, generators and checks. Current external-site responses, generated inventories and run reports live in ignored directories under [live source validation](source-conformance.md#live-acquisition-and-validation). Large network runs use bounded streaming and receipts of the actual captured inputs, not a frozen version prerequisite for future checks. Normative vocabulary pins remain compiler dependencies. Do not depend on a local working attachment or temporary reports. Record source/target contracts, data seed/digest, runtime/images/settings, tested commit, exact command, failures and limitations. Source-private data and credentials do not enter public fixtures.
 
 Multilingual source strings remain intact to test semantic preservation. Numeric scenario/capacity outputs are regenerated by [check_design.py](database/check_design.py); [check_docs.py](check_docs.py) checks links, language, policy-owner sections and entry-point references. These structural checks establish neither policy semantics nor backend behavior.
 

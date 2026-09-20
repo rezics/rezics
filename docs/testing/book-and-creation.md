@@ -9,7 +9,7 @@ The [cross-domain Work matrix](native-work.md) and [composition operation matrix
 | BOOK01 | Create an original work with no fabricated source Work/fandom; edit metadata and publish content through produced IDs. |
 | BOOK02 | Draft, publish r1, edit private r2, adopt r1 elsewhere, publish r2 and independently advance adoption. |
 | BOOK03 | Add/reorder/reuse chapters across structures with local titles/credits and complete versus planned chapter counts. |
-| BOOK04 | Read, resume and complete against an exact content/structure version; changed order produces mapped or unknown progress. |
+| BOOK04 | Read eligible published Post content and resume by stable chapter occurrence; reorder/body corrections retain read status, while removal/replacement is explicit. Fixed-edition progress remains selection-qualified. |
 | BOOK05 | Link one or several source works/fandoms for fanwork/crossover while preserving relationship type and context. |
 | BOOK06 | Add characters and appearances with explicit Work/expression/canon scope; ambiguous imported names remain unresolved. |
 | BOOK07 | Add romantic, platonic and multi-party relationship declarations in a story; do not promote them to universal canon facts. |
@@ -32,10 +32,15 @@ The [cross-domain Work matrix](native-work.md) and [composition operation matrix
 | BOOK24 | Link hardcover, paperback and ebook publications with their own identifiers/contents to one Work; no external edition becomes its primary flag and a provider language update cannot remove community adoptions. |
 | BOOK25 | Maintain anthology C and split/constituent Works A and B independently; aggregation, part coverage and ordered adoption remain distinct, with no family-wide primary uniqueness or inherited permissions/votes/progress. |
 | BOOK26 | Repeat the same text/Work target in one publication manifest with different occurrence IDs, order and coverage; preserve exact citations and source correspondence through reorder/removal/restore. |
-| BOOK27 | Correct Work metadata, revise a contributed Document and change an adoption independently; historical reading/export pins the earlier exact selection and progress maps or becomes unknown after changed structure. |
+| BOOK27 | Correct Work metadata, revise a contributed Document and change an adoption independently; ordinary chapter views follow a newly published eligible revision while reviewed/fixed selections retain the accepted version; exports capture exact inputs and progress retains stable occurrences. |
 | BOOK28 | Export a virtual Work with unknown text correspondence and a multi-work text container; preserve native identity and explicitly map bibliographic components without claiming the Work itself is an LRM abstract Work. |
 | BOOK29 | Build a complete anthology outline by importing a volume's exact structure into local occurrences; adding a volume reference alone does not expand it. Reuse chapter bodies and keep source correspondence. |
 | BOOK30 | Refresh the imported outline after source and local edits, retaining stable nodes or explicit conflicts; published contents, progress, tags/comments and metric counting retain their separate identities. |
+| BOOK31 | Reuse one standalone Post as a chapter in two Works; preserve body, author, editing history and shared discussion identity while local chapter titles/order differ. |
+| BOOK32 | Publish a Post correction used by many ordinary chapters; update its published head without allocating whole-book selections or new adoptions for every use. Drafts remain private. |
+| BOOK33 | Read an ordinary chapter and a reviewed Realm/Pro placement of the same Post; the former follows eligible publication and the latter retains accepted content until approval, without fallback. |
+| BOOK34 | Reorder/add/remove chapters after reading; retained occurrence status survives, new chapters change the current completion denominator and deleted/replaced positions are explicit. Revision-bound in-body bookmarks never silently relocate. |
+| BOOK35 | Capture an export while chapters change; emit one consistent input manifest or retry/report conflict, then resume from that capture without freezing ordinary future reading. |
 
 ## AO3 functional coverage
 

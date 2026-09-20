@@ -1,5 +1,7 @@
 # Content adapters and provider contracts
 
+The 2026-09-20 target uses [live external-site validation](../../docs/testing/source-conformance.md#live-acquisition-and-validation) for all providers: current API/contracts, ignored inputs/inventories/run reports and scripted drift detection. Normative vocabulary pins belong to schema-importer. The pinned-provider preparation described below is the current implementation pending the next authorized checkpoint, not the selected validation policy.
+
 These sources describe **external content**, not REZICS's schema design. This owner
 contains shared parsers, format contracts and exchange conversion. Standards/model
 compilation belongs to [`schema-importer`](../schema-importer/README.md).

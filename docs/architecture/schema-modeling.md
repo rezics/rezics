@@ -6,6 +6,14 @@ The 2026-09-18 compiler scope retains its [executed evidence](../testing/schema.
 that evidence does not qualify the new naming, model contracts, Space or addressing.
 The [plan](../plan/README.md) owns activation and verification timing.
 
+The 2026-09-20 first-stage revision selects concrete catalog/content domains and
+retains the complete native product scope. Semantic Web is a
+[reference and adoption framework](standards-adoption.md#semantic-web-reference);
+the whole-model dispositions below do not make full external-web indexing a
+prerequisite. Ordinary chapter/Post references follow context-eligible published
+content under [composition](database/content-composition.md), while exact
+revision contracts remain available for history, review, citations and releases.
+
 This owner defines the common native model and its compilation boundary.
 [Standards adoption](standards-adoption.md) owns external profiles and evidence;
 [physical storage](database/resource-storage.md) owns field and table-family choices;
