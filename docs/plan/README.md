@@ -7,7 +7,7 @@ Follow the [execution workflow](execution-workflow.md) for program authority, ph
 | Field | Current selection |
 | --- | --- |
 | Scope | Retained backend foundation and seed integrity after live-source tooling commit `437385f63`: close native IAM/Org/Realm/account consumer failures and the catalog report coverage blocker before dependent native workflows. |
-| Phase | `verification`: the private preference checkpoint passes native SQL/HTTP, credential/erasure races, main/web/SDK integrity, Realm regressions and scoped privacy-form screenshots. Finish documentation qualification and commit; next enter repair for selected exact-component catalog report evidence and empty-target seed coverage. |
+| Phase | `repair`: private preferences are committed as `c5e88437e`. Reconcile the current component-history owners and implement the selected exact catalog report evidence contract across persistence, API/SDK, reporter/reviewer consumers and seed; preserve native-content reports and qualify empty-target coverage. |
 | Owners | Main identity/access, Org/Realm/account authority, governance reports/seed and retained API/SDK/web consumers; shared access/revision-reference contracts where required by those repairs. |
 | Deliverables | Correct native authority and persistence ownership, typed failures and affected positive/denied/race regressions; exact reported-component evidence across native/catalog reports and consumers, with honest seed/backend qualification. |
 | Exclusions | Broad Resource/Space/address renaming, unrelated feature activation, UI redesign, full-application browser QA, deployment and full M01/product/capacity acceptance. |
