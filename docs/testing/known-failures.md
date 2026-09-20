@@ -41,22 +41,20 @@ The September 8 convergence qualification recorded a PostgreSQL SIGILL during At
 
 ## Main IAM qualification after schema extraction
 
-The 2026-09-20 [native capacity repair](database/membership-native-capacity-evidence.json),
-following [native roster](database/realm-native-roster-evidence.json),
-[account enforcement](database/account-native-participation-evidence.json),
-the [native account/Org](database/native-account-org-evidence.json),
-[Realm](database/realm-native-enrollment-evidence.json) and
-[foundation](database/foundation-integrity-repair-evidence.json) repairs,
-reduces the owning main TypeScript result from 160 to **31 errors**. Reproduce
-with `task services-main:typecheck`. The remaining failures are concentrated in
-the stale recovery fixture (28 errors) and
-three seed writes through read-only Realm presentation views.
+The 2026-09-20 [native recovery checkpoint](database/membership-native-recovery-evidence.json)
+reduces the owning main TypeScript result from 160 to **3 errors**, all in
+`src/services/seed/service.ts`. Reproduce with `task services-main:typecheck`.
+The seed still inserts into the read-only Realm membership and rule-acceptance
+presentation views. Replace those writes with native shared admission, explicit
+synthetic consent, independent enforcement and exact generation-bound rule history.
+Do not restore removed tables, cast old actor objects or make the views writable.
+Qualify the seed against a separate empty installed disposable target; the current
+qualification database intentionally retains fixture actors and is not an empty seed target.
 
-Reconcile the remaining fixture with the native Org/Realm enrollment commands, exact
-membership generations and branded `PrincipalRequestContext` credential proofs.
-Native account erasure now accepts a fresh direct session without a public Self;
-its worker and native Org/Realm cleanup pass their listed focused cases. Full
-account and mixed-controller lifecycle qualification remains separate.
+The native Org/Realm, account lifecycle/enforcement, roster, pending capacity and
+recovery checkpoints qualify their listed commands and HTTP paths. They do not
+qualify the seed, all private account consumers, mixed-controller recovery or full
+M01/API/retained-web acceptance.
 
 The Org fixture's attempted legacy `PATCH /account/me/preferences` on a native
 account returned 500: `resolveInteractiveSession` invokes `ensureSelfEntity`,
@@ -68,13 +66,8 @@ The native Org fixture checks direct `/account/main-identity` isolation and reje
 represented private-setting reads; that passing check does not close the legacy
 locale-preference failure.
 
-Seed must use native persistence owners and preserve consent/enforcement history;
-restoring removed membership tables, casting old authority objects or making
-presentation views writable does not repair the selected contract. Preserve the
-original denied, concurrent, revocation, privacy and recovery scenarios when
-updating the fixtures. Full main integrity and the broader Group/Org/Realm/API
-qualification remain open; the passing focused storage and unit cases do not
-qualify these remaining consumers.
+Full main integrity and private-account onboarding remain open until their owning
+checks pass; scoped native fixture success does not close these consumers.
 
 ## Online exact-count policy inventory
 

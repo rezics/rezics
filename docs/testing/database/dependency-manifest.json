@@ -138,6 +138,7 @@
     "docs/testing/database/membership-capacity-evidence.json",
     "docs/testing/database/membership-evidence.json",
     "docs/testing/database/membership-native-capacity-evidence.json",
+    "docs/testing/database/membership-native-recovery-evidence.json",
     "docs/testing/database/membership-recovery-evidence.json",
     "docs/testing/database/merge-phase-recovery-evidence.json",
     "docs/testing/database/merge-recovery-evidence.json",

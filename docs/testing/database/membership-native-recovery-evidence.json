@@ -1,0 +1,47 @@
+{
+  "baseCommit": "63303364cb1e9b0ba29da2ff5ea1238a139880e2",
+  "sourceDigests": {
+    "services/main/scripts/check-membership-recovery.ts": "b74dca4685e2281dac2fc98997de7e5d681ab29aef40b160fc029fd2d20d8323",
+    "services/main/scripts/native-enrollment-fixture.ts": "8ce36f80bd86701e684ea7f863c681155ebb3124292ba448ac8e92087636f3be",
+    "services/main/src/services/participation/organization-recovery.ts": "b8a58852a624a4a83119957a8f712346bbb5399ec821a69cfba58862f8ca8090",
+    "services/main/src/services/participation/organization-control.ts": "8126cc44b40ca42723a614caaa4e9ac7288f3f2160d96cc0f601c7c7af1bd140",
+    "services/main/src/services/participation/membership.ts": "1d9f041f8b9e424971f1497e7ffdf49f70c31366187d0daf80ae3bca1d92f363",
+    "services/main/src/services/participation/membership-worker.ts": "ea6ddb6ef15c64b780ae46cdbc240d865d531290916b6575b61ca5ab226cc31d",
+    "services/main/src/services/authorization/representations.ts": "4259536c2398ec4a7f29cae602539f9d083491f054d568c1a6b43c2f52c4f72c",
+    "services/main/src/services/authorization/management-authority.ts": "59d06720a4e270695adb34a6a8c81cbaf10a937104e07ba785bc49de4e82a2b1",
+    "services/main/src/services/api/participation/membership.ts": "7e9aa7a408d3418067470e688b37885c2c6e3b20f9f53453e8010a1ec98e15a6",
+    "services/main/src/services/database/migrations/atlas.sum": "15401ee9cffb9ba06fb6353c03e94e18a42afdeb7715b6824b751420cb52051c"
+  },
+  "node": "v26.8.2",
+  "checks": 36,
+  "httpChecks": 7,
+  "scope": "Native control replacement and exact request/default non-revival, governed recovery/receipt HTTP, source expiry in a retained transaction, and recovery authority expiry across an observed control lock. Private session and native grant setup is fixture-only; dummy rows remain on the disposable target.",
+  "date": "2026-09-20",
+  "command": "DATABASE_ADMIN_URL=<disposable loopback rezics_atlas target> task services-main:db:membership-recovery:check",
+  "installation": "Same retained PostgreSQL 18.6 / PGroonga 4.0.8 disposable 59-migration target as realm-native-enrollment-evidence.json; no schema changes.",
+  "typecheck": {
+    "fixtureAndImportedDependencies": "passed with repository tsconfig.base.json, noEmit and Node types",
+    "mainPassed": false,
+    "mainErrors": 3,
+    "remainingFiles": {
+      "src/services/seed/service.ts": 3
+    },
+    "command": "task services-main:typecheck"
+  },
+  "coveredCases": [
+    "Recipient representation revocation and explicit replacement; old selected grant and private main-identity default do not silently follow the replacement.",
+    "Recovery selector requires exact native platform permission and explicit recipient contact; output omits the stable private account ID.",
+    "A live controller blocks recovery. Loss of original control allows governed replacement with a new control revision, stable receipt retry and stale-version rejection.",
+    "Recovered control does not revive an old invitation. Current denial precedes bounded worker invalidation and credential-evidence scrubbing.",
+    "Fresh authority issues a new invitation; accepted institutional membership survives a later recovery and the recovered private controller is not enrolled automatically.",
+    "Replacing inviter grant A with B at the same Org revision cannot revive an invitation that captured A.",
+    "Narrowed controller/issuer terms expire according to current database time within an open transaction; recovery becomes available without reviving the expired grant.",
+    "A recovery RoleBinding expires while the request waits on the exact Org control fence; the failed transaction changes neither the control revision nor recovery evidence."
+  ],
+  "limits": [
+    "Private accounts/sessions and native representation/RoleBinding setup are fixture operations, not qualification of platform grant issuance or account onboarding.",
+    "The tested recovery roots have direct private-principal recipients. Mixed controller graphs, non-subject sources, independent approval and broader recovery continuity remain separate acceptance.",
+    "The fixture exercises native domain commands plus seven recovery HTTP requests. It does not qualify all management APIs, delivery, frontend or 500M/3B load.",
+    "Full main integrity still fails on three seed writes; the private-preference Self bootstrap failure also remains open."
+  ]
+}

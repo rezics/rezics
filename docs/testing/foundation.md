@@ -245,8 +245,8 @@ email or message is delivered.
 The fixture completes erasure for the two accounts whose cleanup it tests; other
 dummy actors remain only in the disposable database. The earlier
 [76-assertion run](database/membership-evidence.json) applies to the retired
-Self/roster contract. Recovery, suspension and pending-capacity fixtures below still
-require native reconciliation; their old results do not qualify this checkpoint.
+Self/roster contract. The native recovery and pending-capacity fixtures below qualify their listed
+paths separately; old evidence does not qualify the native replacement.
 The tested lifecycle protocols do not establish 500M/3B load acceptance.
 The [membership owner](../../services/main/src/services/participation/organization-membership.md)
 retains the 1,000-pending limits, storage estimates and workload assumptions.
@@ -267,26 +267,37 @@ This proves selected native and retained cleanup paths, not all private owners,
 external storage providers, recovery frontiers or capacity. The legacy locale
 preference route remains a [recorded failure](known-failures.md#main-iam-qualification-after-schema-extraction).
 
-## Membership generation, suspension and recovery expiry
+## Membership control replacement and recovery expiry
 
 `task services-main:db:membership-recovery:check` runs
 [check-membership-recovery.ts](../../services/main/scripts/check-membership-recovery.ts).
-It covers suspended/restored recipient and inviter bindings, stale Auth revisions,
-last-controller loss, platform-authorized recovery, old invitation rejection
-across organization generations and successful acceptance of a fresh invitation.
+The [native run](database/membership-native-recovery-evidence.json) passes 36
+assertions, including seven recovery HTTP requests. Public identities and Orgs
+use native domain commands with real session proofs; native representation and
+platform recovery RoleBinding issuance use explicit privileged fixture setup.
 
-Three pre-fix checks failed inside an open transaction: an expired controller
-still counted, an expired membership-manager grant left an invitation pending,
-and an expired platform grant still authorized recovery. These predicates now
-use current-statement time. Recovery also rechecks its locked platform grant's
-deadline after acquiring the control row. A two-connection case holds that row
-past expiry, proves the exact blocker and verifies that no recovery generation
-was appended; removing the recheck makes this regression fail.
+Revoking and replacing a recipient's representation leaves the old selected path
+invalid. A private main-identity preference still requires explicit replacement.
+Recovery selectors require native platform permission and recipient contact;
+responses expose no stable private account ID. Live eligible controllers block
+recovery. Governed replacement advances the Org control revision, returns stable
+operation receipts and rejects stale versions without enrolling the controller.
+Accepted institutional membership survives later recovery.
 
-The [pinned run](database/membership-recovery-evidence.json) passes 20 assertions using native PostgreSQL commands. Transaction-local scenarios
-roll back; the control-wait case leaves only dummy fixture actors/control records
-in the explicitly disposable target. This does not qualify account-enforcement
-suspension, restoration frontiers or load. Pending-admission saturation is covered below.
+A new Org revision or inviter grant B does not revive an invitation that captured
+old grant A. Current acceptance is denied before cleanup; due reconciliation then
+records terminal invalidation and scrubs private credential evidence. Fresh
+control must issue a new invitation. Expiring controller/issuer terms take effect
+inside the same open transaction, so expired control cannot block governed recovery.
+
+The two-connection case obtains the exact control-row blocker and holds it beyond
+the recovery RoleBinding deadline. The waiting request is denied with no control
+revision or recovery event committed. The earlier
+[20-assertion run](database/membership-recovery-evidence.json) describes the retired
+Self-binding/participation-grant model; it does not qualify the native replacement.
+Private account suspension/restoration is separately covered by the account
+fixture below. Mixed controller graphs, non-subject recovery sources, independent
+approval, full restoration continuity, frontend and load remain open.
 
 ## Pending membership admission limits
 

@@ -7,8 +7,12 @@ and invitation tables are replaced by forward migrations, without transfer or
 parallel writes. The completed installation baseline and released SQL remain
 unchanged. The [native command/HTTP checkpoint](../../../../../docs/testing/database/native-account-org-evidence.json)
 qualifies creation, selected manager authority, public/private consent, admission
-generations, source revocation and private erasure. Recovery, capacity and complete
-cross-module qualification remain open under the
+generations, source revocation and private erasure. The
+[native capacity run](../../../../../docs/testing/database/membership-native-capacity-evidence.json)
+adds exact pending bounds/reclamation and last-slot races; the
+[native recovery run](../../../../../docs/testing/database/membership-native-recovery-evidence.json)
+adds direct-controller replacement, source/default non-revival and authority expiry
+across a control lock. Complete recovery, load and cross-module qualification remain open under the
 [execution workflow](../../../../../docs/plan/execution-workflow.md).
 
 ## Authority and identity
@@ -195,9 +199,8 @@ bloat, index maintenance and erasure contention remain unmeasured.
 Growth direction is Org-hash admission/roster routing with subject-routed private
 inbox/erasure ownership, preserving concrete FK and atomic admission semantics.
 Forward replacement DDL is generated with the typed anchor workflow's explicit
-no-rename table replacement declaration. Required future qualification includes
-native SQL/API transitions and concurrency, exact source replacement, erasure,
-permission/credential expiry during lock waits, recovery continuity, retained web
-TypeScript/localization checks and scoped Storybook screenshots. No tests,
-test-authoring, fixtures, typecheck, lint validation, build, DB replay, benchmarks
-or browser QA ran during implementation.
+no-rename table replacement declaration. The linked checkpoints qualify only their
+listed native command/HTTP, capacity, source replacement and expiry paths. Remaining
+qualification includes mixed-controller and Group-derived recovery, private-contact
+capacity, complete erasure/restart and restoration continuity, native seed writers,
+retained web TypeScript/localization checks and scoped Storybook screenshots.
