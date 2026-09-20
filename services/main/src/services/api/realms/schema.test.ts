@@ -1,3 +1,4 @@
+import { PublicRealmRosterQuerySchema } from "../../realms/roster-contracts";
 import { createPortableTextDocument } from "@rezics/block";
 import { Check } from "typebox/value";
 import { describe, expect, it } from "vitest";
@@ -9,7 +10,6 @@ import {
 	CreateRealmPinBody,
 	CreateRealmTagContextBody,
 	CreateRealmWikiBody,
-	ListRealmMembersQuery,
 	ListRealmUnitsQuery,
 	ModerateRealmUnitBody,
 	MoveRealmPinsBody,
@@ -47,15 +47,21 @@ describe("Realm member API contract", () => {
 		).toBe(false);
 	});
 
-	it("accepts an exact Profile identity filter", () => {
+	it("accepts bounded opaque roster continuation without retired raw-identity controls", () => {
 		expect(
-			Check(ListRealmMembersQuery, {
-				profileId: "019f995d-7595-7c99-9183-250790bbfe2f",
+			PublicRealmRosterQuerySchema.safeParse({
+				afterId: "rzre1.example",
 				localizationLanguages: ["zh", "en"],
-				limit: 1,
-			}),
+			}).success,
 		).toBe(true);
-		expect(Check(ListRealmMembersQuery, { profileId: "not-a-profile-id" })).toBe(false);
+		for (const value of [
+			{ profileId: "019f995d-7595-7c99-9183-250790bbfe2f" },
+			{ afterProfileId: "019f995d-7595-7c99-9183-250790bbfe2f" },
+			{ limit: 1 },
+			{ afterId: "a".repeat(513) },
+			{ localizationLanguages: Array(17).fill("en") },
+		])
+			expect(PublicRealmRosterQuerySchema.safeParse(value).success).toBe(false);
 	});
 
 	it("uses the shared localization fallback query for Realm rules", () => {

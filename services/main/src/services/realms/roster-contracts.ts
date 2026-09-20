@@ -1,14 +1,7 @@
-import type { RealmMemberStateValues } from "@rezics/schema/postgres/shared/contract-values";
+import { z } from "zod";
 
-/** Roster output and candidate-work limits are independent bounds. @internal */
-export const RealmRosterPageLimit = 100;
-export const RealmRosterCandidateLimit = 512;
-
-/** Live keyset traversal of one authorized Realm roster. @internal */
-export interface RealmRosterQuery {
-	readonly profileId?: string;
-	readonly state?: (typeof RealmMemberStateValues)[number];
-	readonly afterProfileId?: string;
-	readonly localizationLanguages?: readonly string[];
-	readonly limit?: number;
-}
+/** Public Entity presentation shares the native roster's opaque continuation and fixed work bound. @alpha */
+export const PublicRealmRosterQuerySchema = z.strictObject({
+	afterId: z.string().max(512).optional(),
+	localizationLanguages: z.array(z.string().max(64)).max(16).optional(),
+});

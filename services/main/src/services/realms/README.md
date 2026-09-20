@@ -6,7 +6,7 @@ Realm enrollment owns policy inputs to the shared `access_membership` identity a
 representation and manager authority. The selected
 [identity/access contract](../../../../../docs/architecture/identity-and-access.md)
 and [execution phase](../../../../../docs/plan/execution-workflow.md) govern acceptance.
-The [native enrollment run](../../../../../docs/testing/database/realm-native-enrollment-evidence.json) qualifies the stated command/HTTP cases. Full module, roster, recovery, capacity and frontend acceptance remain separate.
+The [native enrollment run](../../../../../docs/testing/database/realm-native-enrollment-evidence.json) qualifies the stated command/HTTP cases. The [native roster run](../../../../../docs/testing/database/realm-native-roster-evidence.json) qualifies its listed read/paging paths. Full module, recovery, capacity and frontend acceptance remain separate.
 
 ## Identity and state
 
@@ -190,10 +190,16 @@ related unit tests pass. The older Self/writable-roster evidence does not qualif
 this replacement. Direct moderator role/binding setup remains SQL-admin fixture
 construction, not product grant-issuance acceptance.
 
-Remaining work includes the separate roster and projection fixtures, native seed
-writers, Org integration, generation-bound privilege non-revival, broader source
-replacement/last-clock expiry, physical-candidate skew, erasure restart and
-recovery continuity. Full main TypeScript remains unqualified. OpenAPI/Fetch/
+The native roster run adds 433 assertions/211 HTTP requests: strict public
+presentation/privacy, opaque cursor scope/view/session binding, 200 empty filtered
+continuations before the public tail, exact private dense-page ordering and an
+observed RoleBinding revocation race. Its 10,001/100,000 candidate samples use
+inactive policy heads for query skew, not fabricated admissions or load acceptance.
+The owning public query replaces the unused old raw-profile/limit schema.
+
+Remaining work includes broader projection fixtures, native seed writers,
+generation-bound privilege non-revival, broader source replacement/last-clock
+expiry, hot-scope workload, erasure restart and recovery continuity. Full main TypeScript remains unqualified. OpenAPI/Fetch/
 TanStack/public SDK and retained frontend acceptance remain separate.
 
 Existing web hooks mechanically capture native main Entity authority and explicit

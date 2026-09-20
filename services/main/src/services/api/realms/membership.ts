@@ -1,3 +1,4 @@
+import { PublicRealmRosterQuerySchema } from "../../realms/roster-contracts";
 import { readRealmEnrollmentRules } from "../../realms/enrollment-rules";
 import { RealmRulesQuery } from "./schema";
 import {
@@ -186,10 +187,7 @@ export default new Elysia({ name: "realm-native-membership" })
 		{
 			principalAccess: read,
 			params,
-			query: z.strictObject({
-				afterId: z.string().max(512).optional(),
-				localizationLanguages: z.array(z.string().max(64)).max(16).optional(),
-			}),
+			query: PublicRealmRosterQuerySchema,
 			response: { 200: RealmMemberListResponse, ...failures },
 			detail: { operationId: "listRealmMembers", tags: ["Realms"] },
 		},

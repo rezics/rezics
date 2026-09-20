@@ -400,41 +400,50 @@ state semantics are not acceptance for the current explicit consent and independ
 enforcement model. The earlier Realm projection fixture's 55 assertions and
 six-migration/15,618-statement installation likewise retain their historical scope.
 The current [Realm owner](../../services/main/src/services/realms/README.md) defines
-native presentation, paging, retention and workload requirements. Full roster,
-projection, recovery/erasure, 500M/3B and frontend qualification remain open.
+native presentation, paging, retention and workload requirements. The roster
+checkpoint below qualifies its listed read paths; broader projection, recovery/erasure,
+500M/3B and frontend qualification remain open.
 
 ## Native Realm rosters and bounded paging
 
-The evidence below describes the earlier roster implementation. Its fixture is
-still being reconciled with the native enrollment/generation model; it does not
-qualify the current private/public roster contract.
-
 `task services-main:db:realm-roster:check` runs
 [check-realm-roster.ts](../../services/main/scripts/check-realm-roster.ts).
-The [pinned run](database/realm-roster-evidence.json) passes 46 assertions,
-including 27 signed-session requests. The pre-fix endpoint returned HTTP 500
-because native Self identities had no retired Resource localization.
+The [2026-09-20 native checkpoint](database/realm-native-roster-evidence.json)
+passes 433 assertions, including 211 signed-session HTTP requests and repeated
+page bounds. The owning public query schema and 22 Realm schema tests agree with
+the actual opaque `afterId` contract; retired raw-profile filters/continuations
+and caller-supplied page limits are rejected. OpenAPI and all generated transports
+regenerate without a wire diff.
 
-The fixture checks native public names/avatars, private Auth-name exclusion,
-absent presentation, regional BCP 47 tags, withheld private Agent metadata,
-owner identity, ordinary denied reads and grant revocation at the exact resource
-fence. Presentation and canonical addresses use the read transaction. The
-shared Realm account checkpoint also retains current Self-revision validation.
+Native consent commands create the active/pending presentation cases. The fixture
+checks explicit public names/avatars, private account ID/name exclusion, absent
+presentation, regional BCP 47 tags, withheld private Entity metadata, ownership,
+denied reads and native RoleBinding revocation with the exact observed blocker.
+Strict response parsing rejects unexpected fields. Public presentation setup uses
+retained Self consumers; representation and manager issuance use privileged
+fixture primitives. These do not qualify native account creation or grant policy.
 
-A 10,001-member roster contains 10,000 nonmatching candidates before the single
-active member. Traversal advances through 19 empty filtered pages and returns
-the matching member once on page 20. Dense pages respect the requested limit
-and do not repeat their boundary. The fixture captures the actual service SQL
-through its database logger, then explains it before and after adding 100,000
-background memberships. The final selective plan uses `realm_member_pkey`,
-returns 513 candidate/lookahead rows, uses 12 shared buffers and has no Sort.
-No planner flags force an index. The sample and its prior attempts remain only
-in the disposable target; these timings are not 500M/3B load acceptance.
+The 10,001-candidate sample contains 10,000 private version-zero enrollment heads
+before one admitted public Entity. The inactive heads confer no membership and
+contain no fabricated consent. Public traversal advances through 200 empty pages
+and returns the tail once on page 201. Each request consumes at most 51 physical
+candidates and examines 50; two operational pages return exactly the first 100
+private subjects in order through opaque selectors. Cursor tampering and reuse
+across Realm, view or session proof fail.
 
-The recorded transports included nullable native presentation language,
-`afterProfileId` and `nextCursor`. Current native cursors and their frontend
-consumers require separate G3/G5 qualification. The [Realm owner](../../services/main/src/services/realms/README.md#disclosure-and-retained-consumers)
-records pagination and disclosure semantics, workload estimates and skew limits.
+The actual candidate SQL is captured through the database logger and explained
+before and after adding this run's 100,000 background heads. Both plans use
+`realm_enrollment_pkey`, return 51 candidate/lookahead rows and have no Sort; the
+final plan uses six shared buffer hits. No planner flags force an index. The
+reused disposable target retains prior attempts, so these observations are not
+clean-database latency comparisons. Inactive-head skew does not qualify heavy
+consent payloads, admission throughput, restoration or the 500M/3B workload.
+
+The earlier [46-assertion run](database/realm-roster-evidence.json) qualifies only
+its old writable-roster and raw-profile cursor implementation. Retained frontend
+G5, recovery and complete Realm acceptance remain open. The
+[Realm owner](../../services/main/src/services/realms/README.md#disclosure-and-retained-consumers)
+retains current disclosure, paging and workload requirements.
 
 ## Public reviewed merge reference fixture
 
